@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 
 <meta
@@ -9,10 +10,11 @@
 >
 
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daily.KRD">
 
-<title>Dailyz</title>
+<title>Daily.KRD</title>
 
 <style>
 
@@ -27,215 +29,169 @@ body {
     padding: 0;
     width: 100%;
     min-height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "Segoe UI",
+        Arial,
+        sans-serif;
 }
 
 body {
-    background: #f5f7fb;
-    color: #111827;
+    background: #f5f5f7;
+    color: #111;
+    padding:
+        env(safe-area-inset-top)
+        18px
+        env(safe-area-inset-bottom)
+        18px;
     overflow-x: hidden;
-    transition: background .3s ease, color .3s ease;
+    transition: background .3s, color .3s;
 }
 
-/* =========================
-   MOTION BACKGROUND
-========================= */
+body.dark {
+    background: #101010;
+    color: white;
+}
 
-.motion-background {
+/* MOTION BACKGROUND */
+
+.motion-bg {
     position: fixed;
     inset: 0;
+    z-index: -5;
     overflow: hidden;
     pointer-events: none;
-    z-index: -10;
 }
 
 .motion-orb {
     position: absolute;
+    width: 260px;
+    height: 260px;
     border-radius: 50%;
-    filter: blur(55px);
-    opacity: .22;
-    animation: floatOrb 12s ease-in-out infinite alternate;
+    filter: blur(70px);
+    opacity: .18;
+    animation: floatOrb 14s ease-in-out infinite alternate;
 }
 
-.orb-one {
-    width: 240px;
-    height: 240px;
-    background: #8b5cf6;
-    top: -80px;
-    left: -70px;
+.motion-orb.one {
+    background: #777;
+    top: 5%;
+    left: -80px;
 }
 
-.orb-two {
-    width: 280px;
-    height: 280px;
-    background: #38bdf8;
-    right: -100px;
-    top: 25%;
+.motion-orb.two {
+    background: #aaa;
+    right: -90px;
+    top: 45%;
     animation-delay: -4s;
 }
 
-.orb-three {
-    width: 220px;
-    height: 220px;
-    background: #34d399;
-    bottom: -80px;
-    left: 25%;
-    animation-delay: -7s;
-}
-
-@keyframes floatOrb {
-
-    from {
-        transform: translate3d(0, 0, 0) scale(1);
-    }
-
-    to {
-        transform: translate3d(35px, -30px, 0) scale(1.12);
-    }
-
-}
-
-
-/* =========================
-   FLOATING EMOJIS
-========================= */
-
-.emoji-layer {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: -5;
-}
-
-.floating-emoji {
-    position: absolute;
-    font-size: 24px;
-    opacity: .12;
-    animation: emojiFloat linear infinite;
-}
-
-.emoji-one {
-    left: 8%;
-    top: 20%;
-    animation-duration: 10s;
-}
-
-.emoji-two {
-    left: 82%;
-    top: 18%;
-    animation-duration: 13s;
-    animation-delay: -3s;
-}
-
-.emoji-three {
-    left: 15%;
-    top: 72%;
-    animation-duration: 12s;
-    animation-delay: -6s;
-}
-
-.emoji-four {
-    left: 76%;
-    top: 75%;
-    animation-duration: 15s;
+.motion-orb.three {
+    background: #555;
+    bottom: -100px;
+    left: 35%;
     animation-delay: -8s;
 }
 
-.emoji-five {
-    left: 48%;
-    top: 8%;
-    animation-duration: 14s;
-    animation-delay: -5s;
-}
-
-@keyframes emojiFloat {
-
+@keyframes floatOrb {
     0% {
-        transform: translateY(0) rotate(0deg);
+        transform: translate3d(0,0,0) scale(1);
     }
 
     50% {
-        transform: translateY(-28px) rotate(8deg);
+        transform: translate3d(50px,-30px,0) scale(1.15);
     }
 
     100% {
-        transform: translateY(0) rotate(-5deg);
+        transform: translate3d(-30px,40px,0) scale(.9);
+    }
+}
+
+.dark .motion-orb {
+    opacity: .22;
+}
+
+/* FLOATING EMOJIS */
+
+.emoji {
+    position: fixed;
+    z-index: -2;
+    pointer-events: none;
+    opacity: .12;
+    font-size: 35px;
+    animation: emojiFloat linear infinite;
+}
+
+.emoji.e1 {
+    left: 8%;
+    bottom: -50px;
+    animation-duration: 18s;
+}
+
+.emoji.e2 {
+    left: 70%;
+    bottom: -60px;
+    animation-duration: 23s;
+    animation-delay: -8s;
+}
+
+.emoji.e3 {
+    left: 42%;
+    bottom: -70px;
+    animation-duration: 20s;
+    animation-delay: -13s;
+}
+
+@keyframes emojiFloat {
+    from {
+        transform: translateY(0) rotate(0deg);
     }
 
+    to {
+        transform: translateY(-115vh) rotate(360deg);
+    }
 }
 
+/* GENERAL */
 
-/* =========================
-   DARK MODE
-========================= */
-
-body.dark {
-    background: #0b1020;
-    color: #f8fafc;
+button,
+input,
+select {
+    font: inherit;
 }
 
-body.dark .motion-orb {
-    opacity: .16;
+button {
+    cursor: pointer;
+    touch-action: manipulation;
 }
-
-body.dark .card,
-body.dark .settings-card,
-body.dark #authCard,
-body.dark .task,
-body.dark .next-prayer {
-    background: rgba(20, 27, 45, .86);
-    color: #f8fafc;
-}
-
-body.dark input {
-    background: #111827;
-    color: white;
-    border-color: #273449;
-}
-
-body.dark .tabs {
-    background: rgba(20, 27, 45, .85);
-}
-
-body.dark .tab {
-    color: #cbd5e1;
-}
-
-body.dark .tab.active {
-    background: #6366f1;
-    color: white;
-}
-
-body.dark .settings-description,
-body.dark .email,
-body.dark .date {
-    color: #94a3b8;
-}
-
-
-/* =========================
-   HEADER
-========================= */
 
 .header {
-    width: 100%;
-    padding: 22px 18px 12px;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 18px 0 12px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 .logo {
-    font-size: 29px;
-    font-weight: 800;
+    font-size: 30px;
+    font-weight: 850;
     letter-spacing: -1px;
 }
 
 .date {
     margin-top: 3px;
+    color: #777;
     font-size: 13px;
-    color: #6b7280;
+}
+
+.dark .date {
+    color: #999;
 }
 
 .header-actions {
@@ -246,206 +202,143 @@ body.dark .date {
 .icon-button {
     width: 42px;
     height: 42px;
-    border: none;
+    border: 0;
     border-radius: 14px;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(12px);
-    font-size: 19px;
-    cursor: pointer;
-    box-shadow: 0 5px 18px rgba(0,0,0,.06);
+    background: rgba(230,230,235,.9);
+    font-size: 20px;
 }
 
-body.dark .icon-button {
-    background: rgba(30,41,59,.8);
+.dark .icon-button {
+    background: #242424;
     color: white;
 }
 
-
-/* =========================
-   AUTH
-========================= */
-
-#authCard {
-    margin: 18px;
-    padding: 24px;
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(18px);
-    border-radius: 24px;
-    box-shadow: 0 15px 45px rgba(0,0,0,.08);
-}
-
-#authCard h2 {
-    margin: 0 0 8px;
-    font-size: 25px;
-}
-
-.auth-subtitle {
-    color: #6b7280;
-    margin-bottom: 18px;
-}
-
-.auth-error {
-    display: none;
-    background: #fee2e2;
-    color: #b91c1c;
-    padding: 11px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    font-size: 14px;
-}
-
-.auth-input {
-    width: 100%;
-    padding: 14px;
-    margin-bottom: 10px;
-    border-radius: 13px;
-    border: 1px solid #dbe1ea;
-    outline: none;
-    font-size: 15px;
-}
-
-.auth-input:focus,
-#taskInput:focus,
-#locationInput:focus {
-    border-color: #6366f1;
-}
-
-.auth-button {
-    width: 100%;
-    border: none;
-    border-radius: 13px;
-    padding: 14px;
-    background: #6366f1;
-    color: white;
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-.auth-switch {
-    text-align: center;
-    margin-top: 16px;
-    font-size: 14px;
-    color: #6b7280;
-}
-
-.auth-switch button {
-    border: none;
-    background: none;
-    color: #6366f1;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-
-/* =========================
-   USER BAR
-========================= */
-
-#userBar {
-    display: none;
-    margin: 4px 18px 12px;
-}
-
-.username {
-    font-size: 17px;
-    font-weight: 700;
-}
-
-.email {
-    color: #6b7280;
-    font-size: 13px;
-}
-
-
-/* =========================
-   TABS
-========================= */
+/* TABS */
 
 .tabs {
+    max-width: 700px;
+    margin: 10px auto 18px;
     display: flex;
-    margin: 12px 18px;
+    gap: 3px;
+    background: rgba(230,230,235,.9);
     padding: 4px;
-    border-radius: 15px;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(15px);
+    border-radius: 14px;
+}
+
+.dark .tabs {
+    background: #242424;
 }
 
 .tab {
     flex: 1;
-    border: none;
-    padding: 11px;
-    border-radius: 11px;
+    border: 0;
     background: transparent;
-    font-weight: 700;
-    color: #6b7280;
-    cursor: pointer;
+    padding: 11px 8px;
+    border-radius: 11px;
+    color: #666;
+    font-weight: 650;
 }
 
 .tab.active {
-    background: #6366f1;
+    background: white;
+    color: #111;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.dark .tab {
+    color: #aaa;
+}
+
+.dark .tab.active {
+    background: #3a3a3a;
     color: white;
 }
 
-
-/* =========================
-   SECTIONS
-========================= */
+/* SECTIONS */
 
 .section {
     display: none;
-    padding: 6px 18px 35px;
+    max-width: 700px;
+    margin: 0 auto;
+    padding-bottom: 40px;
 }
 
 .section.active {
     display: block;
 }
 
-
-/* =========================
-   TASKS
-========================= */
+/* TASKS */
 
 .task-input {
     display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
+    gap: 9px;
+    margin-bottom: 15px;
 }
 
-#taskInput {
-    flex: 1;
-    border: 1px solid #dbe1ea;
-    border-radius: 14px;
+.task-input input,
+.location-row input,
+.auth-input,
+.task-date-input,
+.repeat-select,
+.language-select {
+    width: 100%;
+    border: 1px solid #ddd;
+    background: rgba(255,255,255,.92);
+    color: #111;
     padding: 14px;
+    border-radius: 13px;
     outline: none;
-    font-size: 15px;
+}
+
+.dark .task-input input,
+.dark .location-row input,
+.dark .auth-input,
+.dark .task-date-input,
+.dark .repeat-select,
+.dark .language-select {
+    background: #222;
+    color: white;
+    border-color: #3a3a3a;
 }
 
 .add-button {
-    width: 48px;
-    border: none;
-    border-radius: 14px;
-    background: #6366f1;
+    width: 52px;
+    border: 0;
+    border-radius: 13px;
+    background: #111;
     color: white;
-    font-size: 25px;
-    cursor: pointer;
+    font-size: 27px;
 }
 
-#taskList {
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
+.dark .add-button {
+    background: white;
+    color: black;
+}
+
+.selected-day {
+    background: rgba(255,255,255,.85);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.dark .selected-day {
+    background: #222;
 }
 
 .task {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 11px;
+    background: rgba(255,255,255,.92);
+    border-radius: 14px;
     padding: 14px;
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(14px);
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,.04);
+    margin-bottom: 9px;
+}
+
+.dark .task {
+    background: #222;
 }
 
 .task-check {
@@ -458,229 +351,519 @@ body.dark .icon-button {
     word-break: break-word;
 }
 
+.task-meta {
+    color: #888;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
 .task.completed .task-text {
     text-decoration: line-through;
-    opacity: .5;
+    opacity: .45;
 }
 
 .delete-task {
-    border: none;
+    border: 0;
     background: transparent;
+    color: #999;
     font-size: 23px;
-    color: #ef4444;
-    cursor: pointer;
 }
 
 .empty {
     text-align: center;
+    color: #888;
     padding: 30px 10px;
-    color: #9ca3af;
 }
 
+/* TASK OPTIONS */
 
-/* =========================
-   PRAYERS
-========================= */
+.task-options {
+    background: rgba(255,255,255,.92);
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+}
+
+.dark .task-options {
+    background: #222;
+}
+
+.option-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.option-row label {
+    min-width: 90px;
+    padding-top: 12px;
+    color: #777;
+    font-size: 13px;
+}
+
+.repeat-days {
+    display: none;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.repeat-day {
+    border: 0;
+    border-radius: 9px;
+    padding: 9px 3px;
+    background: #eee;
+}
+
+.repeat-day.active {
+    background: #111;
+    color: white;
+}
+
+.dark .repeat-day {
+    background: #333;
+    color: white;
+}
+
+.dark .repeat-day.active {
+    background: white;
+    color: black;
+}
+
+/* CALENDAR */
+
+.calendar-card {
+    background: rgba(255,255,255,.92);
+    border-radius: 20px;
+    padding: 17px;
+    margin-bottom: 15px;
+}
+
+.dark .calendar-card {
+    background: #222;
+}
+
+.calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.calendar-month {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.calendar-nav {
+    display: flex;
+    gap: 6px;
+}
+
+.calendar-nav button {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 10px;
+    background: #eee;
+}
+
+.dark .calendar-nav button {
+    background: #333;
+    color: white;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendar-weekdays div {
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    padding: 5px 0;
+}
+
+.calendar-day {
+    min-height: 42px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: #eee;
+}
+
+.dark .calendar-day:hover {
+    background: #333;
+}
+
+.calendar-day.today {
+    font-weight: 900;
+    box-shadow: inset 0 0 0 2px #888;
+}
+
+.calendar-day.selected {
+    background: #111;
+    color: white;
+}
+
+.dark .calendar-day.selected {
+    background: white;
+    color: black;
+}
+
+.calendar-day.has-task::after {
+    content: "";
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* PRAYERS */
+
+.prayer-header {
+    margin-bottom: 15px;
+}
 
 .prayer-header h2 {
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .location {
-    color: #6b7280;
-    font-size: 14px;
+    color: #888;
+    font-size: 13px;
 }
 
 .next-prayer {
-    margin: 18px 0;
-    padding: 25px;
-    border-radius: 22px;
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(15px);
-    text-align: center;
+    background: #111;
+    color: white;
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 14px;
+}
+
+.dark .next-prayer {
+    background: white;
+    color: black;
 }
 
 .next-label {
     font-size: 11px;
-    letter-spacing: 1.5px;
-    color: #8b5cf6;
-    font-weight: 800;
+    opacity: .65;
+    letter-spacing: 1px;
 }
 
 .next-name {
-    font-size: 28px;
+    font-size: 25px;
     font-weight: 800;
-    margin-top: 8px;
+    margin-top: 7px;
 }
 
 .next-time {
-    font-size: 39px;
-    font-weight: 800;
-    margin-top: 4px;
-}
-
-#prayerList {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    font-size: 40px;
+    font-weight: 850;
+    margin-top: 3px;
 }
 
 .prayer {
     display: flex;
     justify-content: space-between;
-    padding: 16px;
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(12px);
+    align-items: center;
+    background: rgba(255,255,255,.92);
     border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 9px;
 }
 
-body.dark .prayer {
-    background: rgba(20,27,45,.86);
+.dark .prayer {
+    background: #222;
 }
 
-
-/* =========================
-   SETTINGS
-========================= */
-
-#settings {
-    padding-bottom: 50px;
-}
+/* SETTINGS */
 
 .settings-title {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: 27px;
+    font-weight: 850;
 }
 
 .settings-subtitle {
-    margin-top: 4px;
-    margin-bottom: 18px;
-    color: #6b7280;
+    color: #888;
+    margin: 4px 0 18px;
 }
 
 .settings-card {
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(18px);
-    border-radius: 20px;
+    background: rgba(255,255,255,.92);
+    border-radius: 18px;
     padding: 18px;
-    margin-bottom: 14px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.05);
+    margin-bottom: 13px;
+}
+
+.dark .settings-card {
+    background: #222;
 }
 
 .settings-card-title {
-    font-size: 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     font-weight: 800;
-    margin-bottom: 13px;
+    color: #888;
+    margin-bottom: 14px;
 }
 
 .setting-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(120,120,120,.12);
-}
-
-.setting-row:last-child {
-    border-bottom: none;
+    gap: 15px;
+    padding: 10px 0;
 }
 
 .setting-label {
-    font-weight: 700;
+    font-weight: 650;
 }
 
 .setting-description {
+    color: #888;
     font-size: 13px;
-    color: #6b7280;
     margin-top: 3px;
 }
 
 .setting-button {
-    border: none;
-    background: #6366f1;
-    color: white;
-    padding: 9px 15px;
+    border: 0;
+    background: #eee;
     border-radius: 10px;
-    font-weight: 700;
-    cursor: pointer;
+    padding: 9px 14px;
+    white-space: nowrap;
+}
+
+.dark .setting-button {
+    background: #3a3a3a;
+    color: white;
 }
 
 .setting-button.dark {
-    background: #111827;
-}
-
-body.dark .setting-button.dark {
-    background: #6366f1;
+    background: #111;
+    color: white;
 }
 
 .location-row {
     display: flex;
     gap: 8px;
-    margin-top: 12px;
 }
 
-#locationInput {
-    flex: 1;
-    min-width: 0;
-    border: 1px solid #dbe1ea;
-    padding: 12px;
-    border-radius: 12px;
-    outline: none;
-}
-
-.notification-button {
+.notification-button,
+.auth-button {
     width: 100%;
-    padding: 13px;
-    border: none;
-    border-radius: 12px;
-    background: #6366f1;
+    border: 0;
+    background: #111;
     color: white;
+    padding: 14px;
+    border-radius: 12px;
     font-weight: 700;
-    cursor: pointer;
+}
+
+.dark .notification-button,
+.dark .auth-button {
+    background: white;
+    color: black;
 }
 
 .status {
-    margin-top: 9px;
+    color: #888;
     font-size: 13px;
-    color: #6b7280;
+    margin-top: 9px;
 }
 
 .danger-button {
     width: 100%;
-    padding: 13px;
-    border: none;
+    border: 0;
     border-radius: 12px;
-    background: #ef4444;
-    color: white;
+    padding: 13px;
+    background: #eee;
+    color: #d00;
     font-weight: 700;
-    cursor: pointer;
 }
 
+.dark .danger-button {
+    background: #333;
+}
 
-/* =========================
-   LANGUAGE SCREEN
-========================= */
+/* WELCOME */
 
-#languageScreen {
+.welcome-screen {
     position: fixed;
     inset: 0;
-    z-index: 1000;
-    background: rgba(245,247,251,.97);
-    backdrop-filter: blur(20px);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background: rgba(245,245,247,.97);
+}
+
+.dark .welcome-screen {
+    background: rgba(16,16,16,.97);
+}
+
+.welcome-box {
+    width: min(440px, 100%);
+    text-align: center;
+}
+
+.welcome-logo {
+    font-size: 43px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.welcome-subtitle {
+    color: #888;
+    margin-bottom: 25px;
+}
+
+.welcome-button {
+    width: 100%;
+    border: 0;
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 9px;
+    background: #111;
+    color: white;
+    font-weight: 750;
+}
+
+.welcome-button.secondary {
+    background: #e9e9ed;
+    color: #111;
+}
+
+.dark .welcome-button.secondary {
+    background: #2c2c2c;
+    color: white;
+}
+
+.welcome-button.guest {
+    background: transparent;
+    color: #777;
+}
+
+/* AUTH MODAL */
+
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    background: rgba(0,0,0,.55);
     display: none;
     align-items: center;
     justify-content: center;
     padding: 20px;
 }
 
-.language-box {
-    width: 100%;
-    max-width: 380px;
+.auth-overlay.active {
+    display: flex;
+}
+
+#authCard {
+    width: min(500px, 100%);
     background: white;
-    padding: 28px;
-    border-radius: 25px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.12);
+    border-radius: 22px;
+    padding: 24px;
+}
+
+.dark #authCard {
+    background: #222;
+}
+
+#authCard h2 {
+    margin: 0 0 7px;
+    font-size: 25px;
+}
+
+.auth-subtitle {
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.auth-input {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.auth-button {
+    margin-top: 5px;
+}
+
+.auth-error {
+    display: none;
+    color: #d00;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.auth-switch {
     text-align: center;
+    margin-top: 17px;
+    font-size: 14px;
+    color: #888;
+}
+
+.auth-switch button {
+    border: 0;
+    background: transparent;
+    color: #111;
+    font-weight: 700;
+}
+
+.dark .auth-switch button {
+    color: white;
+}
+
+.close-auth {
+    float: right;
+    border: 0;
+    background: transparent;
+    font-size: 25px;
+    color: #888;
+}
+
+/* LANGUAGE */
+
+.language-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.language-box {
+    width: min(430px, 100%);
+    background: white;
+    border-radius: 24px;
+    padding: 27px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+.dark .language-box {
+    background: #222;
+    color: white;
 }
 
 .language-box h1 {
@@ -688,62 +871,42 @@ body.dark .setting-button.dark {
 }
 
 .language-box p {
-    color: #6b7280;
-    margin-bottom: 22px;
+    color: #888;
+    margin-bottom: 20px;
 }
 
-.language-choice {
+.language-option {
     width: 100%;
-    border: 1px solid #e1e5ec;
-    background: #f8fafc;
     padding: 15px;
-    margin: 7px 0;
+    margin-top: 9px;
+    border: 0;
     border-radius: 13px;
-    font-size: 16px;
+    background: #eee;
     font-weight: 700;
-    cursor: pointer;
 }
 
-.language-choice:active {
-    transform: scale(.98);
-}
-
-body.dark #languageScreen {
-    background: rgba(11,16,32,.97);
-}
-
-body.dark .language-box {
-    background: #141b2d;
+.dark .language-option {
+    background: #333;
     color: white;
 }
 
-body.dark .language-choice {
-    background: #1f2937;
-    color: white;
-    border-color: #334155;
+/* RTL */
+
+[dir="rtl"] {
+    text-align: right;
 }
 
+[dir="rtl"] .header,
+[dir="rtl"] .tabs,
+[dir="rtl"] .task-input,
+[dir="rtl"] .location-row,
+[dir="rtl"] .setting-row,
+[dir="rtl"] .calendar-head {
+    direction: rtl;
+}
 
-/* =========================
-   SMALL SCREEN
-========================= */
-
-@media (max-width: 380px) {
-
-    .logo {
-        font-size: 25px;
-    }
-
-    .header {
-        padding-left: 14px;
-        padding-right: 14px;
-    }
-
-    .section {
-        padding-left: 14px;
-        padding-right: 14px;
-    }
-
+[dir="rtl"] .task-text {
+    text-align: right;
 }
 
 </style>
@@ -751,66 +914,21 @@ body.dark .language-choice {
 
 <body>
 
-<!-- MOTION BACKGROUND -->
-
-<div class="motion-background">
-    <div class="motion-orb orb-one"></div>
-    <div class="motion-orb orb-two"></div>
-    <div class="motion-orb orb-three"></div>
+<div class="motion-bg">
+    <div class="motion-orb one"></div>
+    <div class="motion-orb two"></div>
+    <div class="motion-orb three"></div>
 </div>
 
-<div class="emoji-layer">
-    <div class="floating-emoji emoji-one">✨</div>
-    <div class="floating-emoji emoji-two">📚</div>
-    <div class="floating-emoji emoji-three">☀️</div>
-    <div class="floating-emoji emoji-four">⭐</div>
-    <div class="floating-emoji emoji-five">🕌</div>
-</div>
-
-
-<!-- LANGUAGE SELECTION -->
-
-<div id="languageScreen">
-
-    <div class="language-box">
-
-        <h1>Dailyz</h1>
-
-        <p>Select your language</p>
-
-        <button
-            class="language-choice"
-            data-language="en"
-            type="button"
-        >
-            🇬🇧 English
-        </button>
-
-        <button
-            class="language-choice"
-            data-language="ku"
-            type="button"
-        >
-            🟡 کوردی
-        </button>
-
-        <button
-            class="language-choice"
-            data-language="ar"
-            type="button"
-        >
-            🇸🇦 العربية
-        </button>
-
-    </div>
-
-</div>
+<div class="emoji e1">✨</div>
+<div class="emoji e2">📅</div>
+<div class="emoji e3">✓</div>
 
 
 <header class="header">
 
     <div>
-        <div class="logo">Dailyz</div>
+        <div class="logo">Daily.KRD</div>
         <div class="date" id="date"></div>
     </div>
 
@@ -833,105 +951,13 @@ body.dark .language-choice {
 </header>
 
 
-<!-- AUTH -->
-
-<div id="authCard">
-
-    <h2 id="authTitle">Create your account</h2>
-
-    <div
-        class="auth-subtitle"
-        id="authSubtitle"
-    >
-        Start organizing your day with Dailyz.
-    </div>
-
-    <div
-        class="auth-error"
-        id="authError"
-    ></div>
-
-    <input
-        class="auth-input"
-        id="usernameInput"
-        type="text"
-        placeholder="Username"
-        autocomplete="username"
-    >
-
-    <input
-        class="auth-input"
-        id="emailInput"
-        type="email"
-        placeholder="Email"
-        autocomplete="email"
-    >
-
-    <input
-        class="auth-input"
-        id="passwordInput"
-        type="password"
-        placeholder="Password"
-        autocomplete="new-password"
-    >
-
-    <input
-        class="auth-input"
-        id="confirmPasswordInput"
-        type="password"
-        placeholder="Confirm password"
-        autocomplete="new-password"
-    >
-
-    <button
-        class="auth-button"
-        id="authButton"
-        type="button"
-    >
-        Create Account
-    </button>
-
-    <div class="auth-switch">
-
-        <span id="switchText">
-            Already have an account?
-        </span>
-
-        <button
-            id="switchButton"
-            type="button"
-        >
-            Sign In
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- USER -->
-
-<div id="userBar">
-
-    <div
-        class="username"
-        id="usernameDisplay"
-    ></div>
-
-    <div
-        class="email"
-        id="emailDisplay"
-    ></div>
-
-</div>
-
-
-<!-- TABS -->
+<!-- MAIN NAV -->
 
 <div class="tabs">
 
     <button
         class="tab active"
+        id="tasksTab"
         data-tab="tasks"
         type="button"
     >
@@ -940,6 +966,16 @@ body.dark .language-choice {
 
     <button
         class="tab"
+        id="calendarTab"
+        data-tab="calendar"
+        type="button"
+    >
+        Calendar
+    </button>
+
+    <button
+        class="tab"
+        id="prayersTab"
         data-tab="prayers"
         type="button"
     >
@@ -956,12 +992,13 @@ body.dark .language-choice {
     id="tasks"
 >
 
+    <div class="selected-day" id="selectedDayText"></div>
+
     <div class="task-input">
 
         <input
             id="taskInput"
             type="text"
-            placeholder="Add a task..."
             autocomplete="off"
         >
 
@@ -969,13 +1006,118 @@ body.dark .language-choice {
             id="addTaskButton"
             class="add-button"
             type="button"
+        >+</button>
+
+    </div>
+
+    <div class="task-options">
+
+        <div class="option-row">
+
+            <label id="dateLabel">
+                Date
+            </label>
+
+            <input
+                class="task-date-input"
+                id="taskDateInput"
+                type="date"
+            >
+
+        </div>
+
+        <div class="option-row">
+
+            <label id="repeatLabel">
+                Repeat
+            </label>
+
+            <select
+                class="repeat-select"
+                id="repeatSelect"
+            >
+                <option value="once" id="repeatOnce">Once</option>
+                <option value="daily" id="repeatDaily">Every day</option>
+                <option value="weekly" id="repeatWeekly">Every week</option>
+                <option value="custom" id="repeatCustom">Custom days</option>
+            </select>
+
+        </div>
+
+        <div
+            class="repeat-days"
+            id="repeatDays"
         >
-            +
-        </button>
+
+            <button class="repeat-day" data-day="0">Sun</button>
+            <button class="repeat-day" data-day="1">Mon</button>
+            <button class="repeat-day" data-day="2">Tue</button>
+            <button class="repeat-day" data-day="3">Wed</button>
+            <button class="repeat-day" data-day="4">Thu</button>
+            <button class="repeat-day" data-day="5">Fri</button>
+            <button class="repeat-day" data-day="6">Sat</button>
+
+        </div>
 
     </div>
 
     <div id="taskList"></div>
+
+</section>
+
+
+<!-- CALENDAR -->
+
+<section
+    class="section"
+    id="calendar"
+>
+
+    <div class="calendar-card">
+
+        <div class="calendar-head">
+
+            <div
+                class="calendar-month"
+                id="calendarMonth"
+            ></div>
+
+            <div class="calendar-nav">
+
+                <button
+                    id="previousMonth"
+                    type="button"
+                >‹</button>
+
+                <button
+                    id="todayButton"
+                    type="button"
+                >●</button>
+
+                <button
+                    id="nextMonth"
+                    type="button"
+                >›</button>
+
+            </div>
+
+        </div>
+
+        <div
+            class="calendar-weekdays"
+            id="calendarWeekdays"
+        ></div>
+
+        <div
+            class="calendar-grid"
+            id="calendarGrid"
+        ></div>
+
+    </div>
+
+    <div class="selected-day" id="calendarSelectedDay"></div>
+
+    <div id="calendarTaskList"></div>
 
 </section>
 
@@ -1050,7 +1192,7 @@ body.dark .language-choice {
         class="settings-subtitle"
         id="settingsSubtitle"
     >
-        Customize your Dailyz experience.
+        Customize your Daily.KRD experience.
     </div>
 
 
@@ -1107,6 +1249,14 @@ body.dark .language-choice {
 
         </div>
 
+        <button
+            class="setting-button dark"
+            id="accountButton"
+            type="button"
+        >
+            Sign In
+        </button>
+
     </div>
 
 
@@ -1134,7 +1284,7 @@ body.dark .language-choice {
                     class="setting-description"
                     id="darkModeDescription"
                 >
-                    Change the appearance of Dailyz.
+                    Change appearance.
                 </div>
 
             </div>
@@ -1148,6 +1298,51 @@ body.dark .language-choice {
             </button>
 
         </div>
+
+    </div>
+
+
+    <div class="settings-card">
+
+        <div
+            class="settings-card-title"
+            id="languageTitle"
+        >
+            Language
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <div
+                    class="setting-label"
+                    id="languageLabel"
+                >
+                    Language
+                </div>
+
+                <div
+                    class="setting-description"
+                    id="languageDescription"
+                >
+                    Choose your language.
+                </div>
+
+            </div>
+
+        </div>
+
+        <select
+            class="language-select"
+            id="settingsLanguage"
+        >
+
+            <option value="en">English</option>
+            <option value="ku">کوردی</option>
+            <option value="ar">العربية</option>
+
+        </select>
 
     </div>
 
@@ -1176,7 +1371,7 @@ body.dark .language-choice {
                     class="setting-description"
                     id="locationDescription"
                 >
-                    Your prayer-time location.
+                    Your prayer location.
                 </div>
 
             </div>
@@ -1189,7 +1384,6 @@ body.dark .language-choice {
                 id="locationInput"
                 type="text"
                 value="Erbil, Iraq"
-                placeholder="City, Country"
             >
 
             <button
@@ -1229,7 +1423,7 @@ body.dark .language-choice {
                     class="setting-description"
                     id="notificationsDescription"
                 >
-                    Receive notifications for prayer times.
+                    Receive prayer notifications.
                 </div>
 
             </div>
@@ -1254,7 +1448,10 @@ body.dark .language-choice {
     </div>
 
 
-    <div class="settings-card">
+    <div
+        class="settings-card"
+        id="accountActionsCard"
+    >
 
         <div
             class="settings-card-title"
@@ -1274,6 +1471,178 @@ body.dark .language-choice {
     </div>
 
 </section>
+
+
+<!-- WELCOME -->
+
+<div
+    class="welcome-screen"
+    id="welcomeScreen"
+    style="display:none;"
+>
+
+    <div class="welcome-box">
+
+        <div class="welcome-logo">
+            Daily.KRD
+        </div>
+
+        <div
+            class="welcome-subtitle"
+            id="welcomeSubtitle"
+        >
+            Organize your day your way.
+        </div>
+
+        <button
+            class="welcome-button"
+            id="welcomeSignIn"
+            type="button"
+        >
+            Sign In
+        </button>
+
+        <button
+            class="welcome-button secondary"
+            id="welcomeCreate"
+            type="button"
+        >
+            Create Account
+        </button>
+
+        <button
+            class="welcome-button guest"
+            id="welcomeGuest"
+            type="button"
+        >
+            Continue without an account
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- AUTH -->
+
+<div
+    class="auth-overlay"
+    id="authOverlay"
+>
+
+    <div id="authCard">
+
+        <button
+            class="close-auth"
+            id="closeAuth"
+            type="button"
+        >×</button>
+
+        <h2 id="authTitle"></h2>
+
+        <div
+            class="auth-subtitle"
+            id="authSubtitle"
+        ></div>
+
+        <div
+            class="auth-error"
+            id="authError"
+        ></div>
+
+        <input
+            class="auth-input"
+            id="usernameInput"
+            type="text"
+            autocomplete="username"
+        >
+
+        <input
+            class="auth-input"
+            id="emailInput"
+            type="email"
+            autocomplete="email"
+        >
+
+        <input
+            class="auth-input"
+            id="passwordInput"
+            type="password"
+            autocomplete="new-password"
+        >
+
+        <input
+            class="auth-input"
+            id="confirmPasswordInput"
+            type="password"
+            autocomplete="new-password"
+        >
+
+        <button
+            class="auth-button"
+            id="authButton"
+            type="button"
+        ></button>
+
+        <div class="auth-switch">
+
+            <span id="switchText"></span>
+
+            <button
+                id="switchButton"
+                type="button"
+            ></button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- LANGUAGE -->
+
+<div
+    class="language-overlay"
+    id="languageOverlay"
+    style="display:none;"
+>
+
+    <div class="language-box">
+
+        <h1>Daily.KRD</h1>
+
+        <p id="chooseLanguageText">
+            Choose your language
+        </p>
+
+        <button
+            class="language-option"
+            data-language="en"
+            type="button"
+        >
+            🇬🇧 English
+        </button>
+
+        <button
+            class="language-option"
+            data-language="ku"
+            type="button"
+        >
+            کوردی
+        </button>
+
+        <button
+            class="language-option"
+            data-language="ar"
+            type="button"
+        >
+            🇮🇶 العربية
+        </button>
+
+    </div>
+
+</div>
 
 
 <script type="module">
@@ -1305,17 +1674,28 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 
-/* =========================
-   FIREBASE
-========================= */
+/* FIREBASE */
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8",
-    authDomain: "dailyz-web.firebaseapp.com",
-    projectId: "dailyz-web",
-    storageBucket: "dailyz-web.firebasestorage.app",
-    messagingSenderId: "1031947329415",
-    appId: "1:1031947329415:web:475f3f0d7449992fc73d22"
+
+    apiKey:
+        "AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8",
+
+    authDomain:
+        "dailyz-web.firebaseapp.com",
+
+    projectId:
+        "dailyz-web",
+
+    storageBucket:
+        "dailyz-web.firebasestorage.app",
+
+    messagingSenderId:
+        "1031947329415",
+
+    appId:
+        "1:1031947329415:web:475f3f0d7449992fc73d22"
+
 };
 
 const app = initializeApp(firebaseConfig);
@@ -1327,409 +1707,1131 @@ let currentUser = null;
 let unsubscribeTasks = null;
 let signUpMode = true;
 
+let selectedDate = getTodayKey();
 
-/* =========================
-   LANGUAGE
-========================= */
+let calendarDate = new Date();
+
+let guestTasks =
+    JSON.parse(
+        localStorage.getItem("dailykrd_guest_tasks") || "[]"
+    );
+
+
+/* TRANSLATIONS */
 
 const translations = {
 
     en: {
 
-        selectLanguage: "Select your language",
+        direction: "ltr",
 
-        createAccount: "Create your account",
-        welcomeBack: "Welcome back",
-        startDailyz: "Start organizing your day with Dailyz.",
-        signInContinue: "Sign in to continue.",
+        chooseLanguage:
+            "Choose your language",
 
-        username: "Username",
-        email: "Email",
-        password: "Password",
-        confirmPassword: "Confirm password",
+        welcomeSubtitle:
+            "Organize your day your way.",
 
-        create: "Create Account",
-        signIn: "Sign In",
-        signUp: "Sign Up",
+        signIn:
+            "Sign In",
 
-        alreadyAccount: "Already have an account?",
-        noAccount: "Don't have an account?",
+        createAccount:
+            "Create Account",
 
-        tasks: "Tasks",
-        prayers: "Prayer Times",
+        continueGuest:
+            "Continue without an account",
 
-        addTask: "Add a task...",
+        authCreate:
+            "Create your account",
 
-        nextPrayer: "NEXT PRAYER",
+        authWelcome:
+            "Welcome back",
 
-        settings: "Settings",
-        settingsSubtitle: "Customize your Dailyz experience.",
+        authCreateSubtitle:
+            "Start organizing your day with Daily.KRD.",
 
-        account: "Account",
-        appearance: "Appearance",
-        darkMode: "Dark Mode",
-        darkDescription: "Change the appearance of Dailyz.",
+        authLoginSubtitle:
+            "Sign in to continue.",
 
-        prayerSettings: "Prayer Settings",
-        location: "Location",
-        locationDescription: "Your prayer-time location.",
-        update: "Update",
+        username:
+            "Username",
 
-        notifications: "Notifications",
-        prayerNotifications: "Prayer Notifications",
-        notificationDescription: "Receive notifications for prayer times.",
-        enableNotifications: "🔔 Enable Prayer Notifications",
-        notificationsDisabled: "Notifications are disabled.",
+        email:
+            "Email",
 
-        accountActions: "Account Actions",
-        signOut: "Sign Out",
+        password:
+            "Password",
 
-        notSignedIn: "Not signed in",
-        noTasks: "No tasks yet. Add one above.",
-        signInTasks: "Sign in to save your tasks.",
-        loading: "Loading..."
+        confirmPassword:
+            "Confirm password",
+
+        alreadyAccount:
+            "Already have an account?",
+
+        noAccount:
+            "Don't have an account?",
+
+        signUp:
+            "Sign Up",
+
+        tasks:
+            "Tasks",
+
+        calendar:
+            "Calendar",
+
+        prayers:
+            "Prayer Times",
+
+        addTask:
+            "Add a task...",
+
+        date:
+            "Date",
+
+        repeat:
+            "Repeat",
+
+        once:
+            "Once",
+
+        daily:
+            "Every day",
+
+        weekly:
+            "Every week",
+
+        custom:
+            "Custom days",
+
+        today:
+            "Today",
+
+        noTasks:
+            "No tasks for this day.",
+
+        signInTasks:
+            "Sign in to sync your tasks.",
+
+        signInFirst:
+            "Please sign in first.",
+
+        prayerTimes:
+            "Prayer Times",
+
+        nextPrayer:
+            "NEXT PRAYER",
+
+        settings:
+            "Settings",
+
+        settingsSubtitle:
+            "Customize your Daily.KRD experience.",
+
+        account:
+            "Account",
+
+        appearance:
+            "Appearance",
+
+        prayerSettings:
+            "Prayer Settings",
+
+        notifications:
+            "Notifications",
+
+        accountActions:
+            "Account Actions",
+
+        darkMode:
+            "Dark Mode",
+
+        darkModeDescription:
+            "Change the appearance of Daily.KRD.",
+
+        language:
+            "Language",
+
+        languageDescription:
+            "Choose the language used throughout Daily.KRD.",
+
+        location:
+            "Location",
+
+        locationDescription:
+            "Your prayer-time location.",
+
+        update:
+            "Update",
+
+        prayerNotifications:
+            "Prayer Notifications",
+
+        prayerNotificationsDescription:
+            "Receive notifications for prayer times.",
+
+        enableNotifications:
+            "🔔 Enable Prayer Notifications",
+
+        notificationsDisabled:
+            "Notifications are disabled.",
+
+        notificationsEnabled:
+            "Notifications are enabled.",
+
+        notificationsUnsupported:
+            "Notifications are not supported by this browser.",
+
+        signOut:
+            "Sign Out",
+
+        notSignedIn:
+            "Not signed in",
+
+        guest:
+            "Guest",
+
+        usernameTooShort:
+            "Username must be at least 2 characters.",
+
+        enterEmail:
+            "Enter your email.",
+
+        passwordShort:
+            "Password must be at least 6 characters.",
+
+        passwordsMismatch:
+            "Passwords do not match.",
+
+        enterEmailPassword:
+            "Enter your email and password.",
+
+        incorrectLogin:
+            "Incorrect email or password.",
+
+        prayer: {
+
+            Fajr: "Fajr",
+            Dhuhr: "Dhuhr",
+            Asr: "Asr",
+            Maghrib: "Maghrib",
+            Isha: "Isha"
+
+        },
+
+        weekdays: [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+        ]
+
     },
+
 
     ku: {
 
-        selectLanguage: "زمانەکەت هەڵبژێرە",
+        direction: "rtl",
 
-        createAccount: "هەژمارەکەت دروست بکە",
-        welcomeBack: "بەخێربێیتەوە",
-        startDailyz: "دەست بکە بە ڕێکخستنی ڕۆژەکەت لە Dailyz.",
-        signInContinue: "بچۆ ژوورەوە بۆ بەردەوامبوون.",
+        chooseLanguage:
+            "زمانەکەت هەڵبژێرە",
 
-        username: "ناوی بەکارهێنەر",
-        email: "ئیمەیڵ",
-        password: "وشەی نهێنی",
-        confirmPassword: "دووبارە وشەی نهێنی",
+        welcomeSubtitle:
+            "ڕۆژەکەت بە شێوەی خۆت ڕێکبخە.",
 
-        create: "دروستکردنی هەژمار",
-        signIn: "چوونەژوورەوە",
-        signUp: "خۆتۆمارکردن",
+        signIn:
+            "چوونەژوورەوە",
 
-        alreadyAccount: "هەژمارت هەیە؟",
-        noAccount: "هەژمارت نییە؟",
+        createAccount:
+            "دروستکردنی هەژمار",
 
-        tasks: "ئەرکەکان",
-        prayers: "کاتەکانی نوێژ",
+        continueGuest:
+            "بەبێ هەژمار بەردەوام بە",
 
-        addTask: "ئەرکێک زیاد بکە...",
+        authCreate:
+            "هەژمارەکەت دروست بکە",
 
-        nextPrayer: "نوێژی داهاتوو",
+        authWelcome:
+            "بەخێربێیتەوە",
 
-        settings: "ڕێکخستنەکان",
-        settingsSubtitle: "ئەزموونی Dailyz ـەکەت ڕێکبخە.",
+        authCreateSubtitle:
+            "ڕۆژەکەت لەگەڵ Daily.KRD ڕێکبخە.",
 
-        account: "هەژمار",
-        appearance: "دیمەن",
-        darkMode: "دۆخی تاریک",
-        darkDescription: "دیمەنی Dailyz بگۆڕە.",
+        authLoginSubtitle:
+            "بۆ بەردەوامبوون بچۆ ژوورەوە.",
 
-        prayerSettings: "ڕێکخستنی نوێژ",
-        location: "شوێن",
-        locationDescription: "شوێنی کاتەکانی نوێژ.",
-        update: "نوێکردنەوە",
+        username:
+            "ناوی بەکارهێنەر",
 
-        notifications: "ئاگادارکردنەوەکان",
-        prayerNotifications: "ئاگادارکردنەوەی نوێژ",
-        notificationDescription: "ئاگادارکردنەوە وەربگرە بۆ کاتەکانی نوێژ.",
-        enableNotifications: "🔔 چالاککردنی ئاگادارکردنەوەی نوێژ",
-        notificationsDisabled: "ئاگادارکردنەوەکان ناچالاکن.",
+        email:
+            "ئیمەیڵ",
 
-        accountActions: "کردارەکانی هەژمار",
-        signOut: "چوونەدەرەوە",
+        password:
+            "وشەی نهێنی",
 
-        notSignedIn: "نەچوویتە ژوورەوە",
-        noTasks: "هێشتا هیچ ئەرکێک نییە. یەکێک زیاد بکە.",
-        signInTasks: "بچۆ ژوورەوە بۆ پاشەکەوتکردنی ئەرکەکان.",
-        loading: "چاوەڕێ بکە..."
+        confirmPassword:
+            "دووبارە وشەی نهێنی",
+
+        alreadyAccount:
+            "هەژمارت هەیە؟",
+
+        noAccount:
+            "هەژمارت نییە؟",
+
+        signUp:
+            "خۆت تۆمار بکە",
+
+        tasks:
+            "ئەرکەکان",
+
+        calendar:
+            "ڕۆژژمێر",
+
+        prayers:
+            "کاتی نوێژ",
+
+        addTask:
+            "ئەرکێک زیاد بکە...",
+
+        date:
+            "بەروار",
+
+        repeat:
+            "دووبارەکردنەوە",
+
+        once:
+            "تەنها ئەم ڕۆژە",
+
+        daily:
+            "هەموو ڕۆژێک",
+
+        weekly:
+            "هەفتانە",
+
+        custom:
+            "ڕۆژە دیاریکراوەکان",
+
+        today:
+            "ئەمڕۆ",
+
+        noTasks:
+            "هیچ ئەرکێک بۆ ئەم ڕۆژە نییە.",
+
+        signInTasks:
+            "بچۆ ژوورەوە بۆ هاوکاتکردنی ئەرکەکانت.",
+
+        signInFirst:
+            "تکایە سەرەتا بچۆ ژوورەوە.",
+
+        prayerTimes:
+            "کاتی نوێژ",
+
+        nextPrayer:
+            "نوێژی داهاتوو",
+
+        settings:
+            "ڕێکخستنەکان",
+
+        settingsSubtitle:
+            "ئەزموونی Daily.KRD ـەکەت بە دڵی خۆت ڕێکبخە.",
+
+        account:
+            "هەژمار",
+
+        appearance:
+            "ڕووکار",
+
+        prayerSettings:
+            "ڕێکخستنی نوێژ",
+
+        notifications:
+            "ئاگادارکردنەوەکان",
+
+        accountActions:
+            "کردارەکانی هەژمار",
+
+        darkMode:
+            "دۆخی تاریک",
+
+        darkModeDescription:
+            "ڕووکاری Daily.KRD بگۆڕە.",
+
+        language:
+            "زمان",
+
+        languageDescription:
+            "زمانی بەکارهێنراو لە هەموو Daily.KRD هەڵبژێرە.",
+
+        location:
+            "شوێن",
+
+        locationDescription:
+            "شوێنی کاتی نوێژەکانت.",
+
+        update:
+            "نوێکردنەوە",
+
+        prayerNotifications:
+            "ئاگادارکردنەوەی نوێژ",
+
+        prayerNotificationsDescription:
+            "ئاگادارکردنەوە وەربگرە بۆ کاتی نوێژەکان.",
+
+        enableNotifications:
+            "🔔 ئاگادارکردنەوەی نوێژ چالاک بکە",
+
+        notificationsDisabled:
+            "ئاگادارکردنەوەکان ناچالاکن.",
+
+        notificationsEnabled:
+            "ئاگادارکردنەوەکان چالاکن.",
+
+        notificationsUnsupported:
+            "ئەم وێبگەڕە پشتگیری ئاگادارکردنەوە ناکات.",
+
+        signOut:
+            "چوونەدەرەوە",
+
+        notSignedIn:
+            "نەچوویتە ژوورەوە",
+
+        guest:
+            "میوان",
+
+        usernameTooShort:
+            "ناوی بەکارهێنەر دەبێت لانیکەم ٢ پیت بێت.",
+
+        enterEmail:
+            "ئیمەیڵەکەت بنووسە.",
+
+        passwordShort:
+            "وشەی نهێنی دەبێت لانیکەم ٦ پیت بێت.",
+
+        passwordsMismatch:
+            "وشە نهێنییەکان یەکسان نین.",
+
+        enterEmailPassword:
+            "ئیمەیڵ و وشەی نهێنی بنووسە.",
+
+        incorrectLogin:
+            "ئیمەیڵ یان وشەی نهێنی هەڵەیە.",
+
+        prayer: {
+
+            Fajr: "بەیانی",
+            Dhuhr: "نیوەڕۆ",
+            Asr: "عەسر",
+            Maghrib: "مەغریب",
+            Isha: "عیشا"
+
+        },
+
+        weekdays: [
+            "یەک",
+            "دوو",
+            "سێ",
+            "چوار",
+            "پێنج",
+            "هەینی",
+            "شەم"
+        ]
+
     },
+
 
     ar: {
 
-        selectLanguage: "اختر لغتك",
+        direction: "rtl",
 
-        createAccount: "أنشئ حسابك",
-        welcomeBack: "مرحباً بعودتك",
-        startDailyz: "ابدأ بتنظيم يومك مع Dailyz.",
-        signInContinue: "سجّل الدخول للمتابعة.",
+        chooseLanguage:
+            "اختر لغتك",
 
-        username: "اسم المستخدم",
-        email: "البريد الإلكتروني",
-        password: "كلمة المرور",
-        confirmPassword: "تأكيد كلمة المرور",
+        welcomeSubtitle:
+            "نظّم يومك بطريقتك.",
 
-        create: "إنشاء حساب",
-        signIn: "تسجيل الدخول",
-        signUp: "إنشاء حساب",
+        signIn:
+            "تسجيل الدخول",
 
-        alreadyAccount: "لديك حساب بالفعل؟",
-        noAccount: "ليس لديك حساب؟",
+        createAccount:
+            "إنشاء حساب",
 
-        tasks: "المهام",
-        prayers: "أوقات الصلاة",
+        continueGuest:
+            "المتابعة بدون حساب",
 
-        addTask: "أضف مهمة...",
+        authCreate:
+            "أنشئ حسابك",
 
-        nextPrayer: "الصلاة القادمة",
+        authWelcome:
+            "مرحباً بعودتك",
 
-        settings: "الإعدادات",
-        settingsSubtitle: "خصص تجربة Dailyz الخاصة بك.",
+        authCreateSubtitle:
+            "نظّم يومك مع Daily.KRD.",
 
-        account: "الحساب",
-        appearance: "المظهر",
-        darkMode: "الوضع الداكن",
-        darkDescription: "غيّر مظهر Dailyz.",
+        authLoginSubtitle:
+            "سجّل الدخول للمتابعة.",
 
-        prayerSettings: "إعدادات الصلاة",
-        location: "الموقع",
-        locationDescription: "موقع أوقات الصلاة.",
-        update: "تحديث",
+        username:
+            "اسم المستخدم",
 
-        notifications: "الإشعارات",
-        prayerNotifications: "إشعارات الصلاة",
-        notificationDescription: "تلقي إشعارات لأوقات الصلاة.",
-        enableNotifications: "🔔 تفعيل إشعارات الصلاة",
-        notificationsDisabled: "الإشعارات غير مفعلة.",
+        email:
+            "البريد الإلكتروني",
 
-        accountActions: "إجراءات الحساب",
-        signOut: "تسجيل الخروج",
+        password:
+            "كلمة المرور",
 
-        notSignedIn: "لم يتم تسجيل الدخول",
-        noTasks: "لا توجد مهام بعد. أضف واحدة أعلاه.",
-        signInTasks: "سجل الدخول لحفظ مهامك.",
-        loading: "جار التحميل..."
+        confirmPassword:
+            "تأكيد كلمة المرور",
+
+        alreadyAccount:
+            "لديك حساب بالفعل؟",
+
+        noAccount:
+            "ليس لديك حساب؟",
+
+        signUp:
+            "إنشاء حساب",
+
+        tasks:
+            "المهام",
+
+        calendar:
+            "التقويم",
+
+        prayers:
+            "أوقات الصلاة",
+
+        addTask:
+            "أضف مهمة...",
+
+        date:
+            "التاريخ",
+
+        repeat:
+            "التكرار",
+
+        once:
+            "مرة واحدة",
+
+        daily:
+            "كل يوم",
+
+        weekly:
+            "كل أسبوع",
+
+        custom:
+            "أيام مخصصة",
+
+        today:
+            "اليوم",
+
+        noTasks:
+            "لا توجد مهام لهذا اليوم.",
+
+        signInTasks:
+            "سجّل الدخول لمزامنة مهامك.",
+
+        signInFirst:
+            "يرجى تسجيل الدخول أولاً.",
+
+        prayerTimes:
+            "أوقات الصلاة",
+
+        nextPrayer:
+            "الصلاة القادمة",
+
+        settings:
+            "الإعدادات",
+
+        settingsSubtitle:
+            "خصّص تجربة Daily.KRD الخاصة بك.",
+
+        account:
+            "الحساب",
+
+        appearance:
+            "المظهر",
+
+        prayerSettings:
+            "إعدادات الصلاة",
+
+        notifications:
+            "الإشعارات",
+
+        accountActions:
+            "إجراءات الحساب",
+
+        darkMode:
+            "الوضع الداكن",
+
+        darkModeDescription:
+            "غيّر مظهر Daily.KRD.",
+
+        language:
+            "اللغة",
+
+        languageDescription:
+            "اختر اللغة المستخدمة في جميع أنحاء Daily.KRD.",
+
+        location:
+            "الموقع",
+
+        locationDescription:
+            "موقع أوقات الصلاة الخاص بك.",
+
+        update:
+            "تحديث",
+
+        prayerNotifications:
+            "إشعارات الصلاة",
+
+        prayerNotificationsDescription:
+            "تلقي إشعارات بأوقات الصلاة.",
+
+        enableNotifications:
+            "🔔 تفعيل إشعارات الصلاة",
+
+        notificationsDisabled:
+            "الإشعارات غير مفعّلة.",
+
+        notificationsEnabled:
+            "الإشعارات مفعّلة.",
+
+        notificationsUnsupported:
+            "هذا المتصفح لا يدعم الإشعارات.",
+
+        signOut:
+            "تسجيل الخروج",
+
+        notSignedIn:
+            "لم يتم تسجيل الدخول",
+
+        guest:
+            "زائر",
+
+        usernameTooShort:
+            "يجب أن يكون اسم المستخدم حرفين على الأقل.",
+
+        enterEmail:
+            "أدخل بريدك الإلكتروني.",
+
+        passwordShort:
+            "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
+
+        passwordsMismatch:
+            "كلمتا المرور غير متطابقتين.",
+
+        enterEmailPassword:
+            "أدخل بريدك الإلكتروني وكلمة المرور.",
+
+        incorrectLogin:
+            "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+
+        prayer: {
+
+            Fajr: "الفجر",
+            Dhuhr: "الظهر",
+            Asr: "العصر",
+            Maghrib: "المغرب",
+            Isha: "العشاء"
+
+        },
+
+        weekdays: [
+            "أحد",
+            "إثنين",
+            "ثلاثاء",
+            "أربعاء",
+            "خميس",
+            "جمعة",
+            "سبت"
+        ]
+
     }
 
 };
 
 
-let language =
-    localStorage.getItem("dailyz_language") || null;
+let currentLanguage =
+    localStorage.getItem("dailykrd_language");
 
 
 function t(key) {
 
-    return translations[language || "en"][key]
-        || translations.en[key]
-        || key;
+    const language =
+        translations[currentLanguage] || translations.en;
+
+    const parts = key.split(".");
+
+    let value = language;
+
+    for (const part of parts) {
+        value = value?.[part];
+    }
+
+    return value ?? key;
+}
+
+
+/* DATE HELPERS */
+
+function getTodayKey() {
+
+    const d = new Date();
+
+    return [
+        d.getFullYear(),
+        String(d.getMonth() + 1).padStart(2, "0"),
+        String(d.getDate()).padStart(2, "0")
+    ].join("-");
 
 }
 
+
+function parseDateKey(key) {
+
+    const [y,m,d] =
+        key.split("-").map(Number);
+
+    return new Date(y,m-1,d);
+
+}
+
+
+function formatDateKey(key) {
+
+    const d = parseDateKey(key);
+
+    const localeMap = {
+
+        en: "en-US",
+        ku: "ku-Arab",
+        ar: "ar-IQ"
+
+    };
+
+    return d.toLocaleDateString(
+        localeMap[currentLanguage] || "en-US",
+        {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+function updateDate() {
+
+    document.getElementById("date")
+        .textContent =
+        formatDateKey(getTodayKey());
+
+}
+
+
+function getDateKeyFromDate(date) {
+
+    return [
+        date.getFullYear(),
+        String(date.getMonth()+1).padStart(2,"0"),
+        String(date.getDate()).padStart(2,"0")
+    ].join("-");
+
+}
+
+
+/* LANGUAGE */
 
 function applyLanguage() {
 
-    if (!language) return;
+    const language =
+        translations[currentLanguage] || translations.en;
 
-    document.documentElement.lang = language;
+    document.documentElement.lang =
+        currentLanguage;
 
     document.documentElement.dir =
-        language === "ar" || language === "ku"
-        ? "rtl"
-        : "ltr";
-
-    document.querySelector(
-        "#languageScreen p"
-    ).textContent = t("selectLanguage");
+        language.direction;
 
 
-    document.getElementById("authTitle").textContent =
-        signUpMode ? t("createAccount") : t("welcomeBack");
+    document.getElementById("chooseLanguageText")
+        .textContent =
+        t("chooseLanguage");
 
-    document.getElementById("authSubtitle").textContent =
-        signUpMode ? t("startDailyz") : t("signInContinue");
+    document.getElementById("welcomeSubtitle")
+        .textContent =
+        t("welcomeSubtitle");
 
-    document.getElementById("usernameInput").placeholder =
+    document.getElementById("welcomeSignIn")
+        .textContent =
+        t("signIn");
+
+    document.getElementById("welcomeCreate")
+        .textContent =
+        t("createAccount");
+
+    document.getElementById("welcomeGuest")
+        .textContent =
+        t("continueGuest");
+
+
+    document.getElementById("authTitle")
+        .textContent =
+        signUpMode
+        ? t("authCreate")
+        : t("authWelcome");
+
+    document.getElementById("authSubtitle")
+        .textContent =
+        signUpMode
+        ? t("authCreateSubtitle")
+        : t("authLoginSubtitle");
+
+
+    document.getElementById("usernameInput")
+        .placeholder =
         t("username");
 
-    document.getElementById("emailInput").placeholder =
+    document.getElementById("emailInput")
+        .placeholder =
         t("email");
 
-    document.getElementById("passwordInput").placeholder =
+    document.getElementById("passwordInput")
+        .placeholder =
         t("password");
 
-    document.getElementById("confirmPasswordInput").placeholder =
+    document.getElementById("confirmPasswordInput")
+        .placeholder =
         t("confirmPassword");
 
-    document.getElementById("authButton").textContent =
-        signUpMode ? t("create") : t("signIn");
 
-    document.getElementById("switchText").textContent =
-        signUpMode ? t("alreadyAccount") : t("noAccount");
+    document.getElementById("authButton")
+        .textContent =
+        signUpMode
+        ? t("createAccount")
+        : t("signIn");
 
-    document.getElementById("switchButton").textContent =
-        signUpMode ? t("signIn") : t("signUp");
 
-    document.querySelector(
-        '[data-tab="tasks"]'
-    ).textContent = t("tasks");
+    document.getElementById("switchText")
+        .textContent =
+        signUpMode
+        ? t("alreadyAccount")
+        : t("noAccount");
 
-    document.querySelector(
-        '[data-tab="prayers"]'
-    ).textContent = t("prayers");
 
-    document.getElementById("taskInput").placeholder =
-        t("addTask");
+    document.getElementById("switchButton")
+        .textContent =
+        signUpMode
+        ? t("signIn")
+        : t("signUp");
 
-    document.getElementById("prayerTitle").textContent =
+
+    document.getElementById("tasksTab")
+        .textContent =
+        t("tasks");
+
+    document.getElementById("calendarTab")
+        .textContent =
+        t("calendar");
+
+    document.getElementById("prayersTab")
+        .textContent =
         t("prayers");
 
-    document.getElementById("nextLabel").textContent =
+
+    document.getElementById("taskInput")
+        .placeholder =
+        t("addTask");
+
+    document.getElementById("dateLabel")
+        .textContent =
+        t("date");
+
+    document.getElementById("repeatLabel")
+        .textContent =
+        t("repeat");
+
+    document.getElementById("repeatOnce")
+        .textContent =
+        t("once");
+
+    document.getElementById("repeatDaily")
+        .textContent =
+        t("daily");
+
+    document.getElementById("repeatWeekly")
+        .textContent =
+        t("weekly");
+
+    document.getElementById("repeatCustom")
+        .textContent =
+        t("custom");
+
+
+    document.getElementById("prayerTitle")
+        .textContent =
+        t("prayerTimes");
+
+    document.getElementById("nextLabel")
+        .textContent =
         t("nextPrayer");
 
-    document.getElementById("settingsTitle").textContent =
+
+    document.getElementById("settingsTitle")
+        .textContent =
         t("settings");
 
-    document.getElementById("settingsSubtitle").textContent =
+    document.getElementById("settingsSubtitle")
+        .textContent =
         t("settingsSubtitle");
 
-    document.getElementById("accountTitle").textContent =
+    document.getElementById("accountTitle")
+        .textContent =
         t("account");
 
-    document.getElementById("usernameLabel").textContent =
-        t("username");
-
-    document.getElementById("emailLabel").textContent =
-        t("email");
-
-    document.getElementById("appearanceTitle").textContent =
+    document.getElementById("appearanceTitle")
+        .textContent =
         t("appearance");
 
-    document.getElementById("darkModeLabel").textContent =
+    document.getElementById("darkModeLabel")
+        .textContent =
         t("darkMode");
 
-    document.getElementById("darkModeDescription").textContent =
-        t("darkDescription");
+    document.getElementById("darkModeDescription")
+        .textContent =
+        t("darkModeDescription");
 
-    document.getElementById("prayerSettingsTitle").textContent =
+    document.getElementById("languageTitle")
+        .textContent =
+        t("language");
+
+    document.getElementById("languageLabel")
+        .textContent =
+        t("language");
+
+    document.getElementById("languageDescription")
+        .textContent =
+        t("languageDescription");
+
+    document.getElementById("prayerSettingsTitle")
+        .textContent =
         t("prayerSettings");
 
-    document.getElementById("locationLabel").textContent =
+    document.getElementById("locationLabel")
+        .textContent =
         t("location");
 
-    document.getElementById("locationDescription").textContent =
+    document.getElementById("locationDescription")
+        .textContent =
         t("locationDescription");
 
-    document.getElementById("updateLocationButton").textContent =
+    document.getElementById("updateLocationButton")
+        .textContent =
         t("update");
 
-    document.getElementById("notificationsTitle").textContent =
+    document.getElementById("notificationsTitle")
+        .textContent =
         t("notifications");
 
-    document.getElementById("notificationsLabel").textContent =
+    document.getElementById("notificationsLabel")
+        .textContent =
         t("prayerNotifications");
 
-    document.getElementById("notificationsDescription").textContent =
-        t("notificationDescription");
+    document.getElementById("notificationsDescription")
+        .textContent =
+        t("prayerNotificationsDescription");
 
-    document.getElementById("notificationButton").textContent =
+    document.getElementById("notificationButton")
+        .textContent =
         t("enableNotifications");
 
-    document.getElementById("notificationStatus").textContent =
-        t("notificationsDisabled");
-
-    document.getElementById("accountActionsTitle").textContent =
+    document.getElementById("accountActionsTitle")
+        .textContent =
         t("accountActions");
 
-    document.getElementById("logoutButton").textContent =
+    document.getElementById("logoutButton")
+        .textContent =
         t("signOut");
 
-    document.getElementById("settingsUsername").textContent =
-        currentUser
-        ? document.getElementById("settingsUsername").textContent
-        : t("notSignedIn");
 
-    renderTasksFromCurrentSnapshot();
+    document.getElementById("settingsLanguage")
+        .value =
+        currentLanguage;
+
+
+    document.getElementById("selectedDayText")
+        .textContent =
+        formatDateKey(selectedDate);
+
+    document.getElementById("calendarSelectedDay")
+        .textContent =
+        formatDateKey(selectedDate);
+
+
+    updateDate();
+    renderCalendar();
+    loadPrayerTimes();
+
+    if (currentUser) {
+        startTaskListener();
+    } else {
+        renderTasks([]);
+    }
+
 }
 
 
-document.querySelectorAll(".language-choice")
+function chooseLanguage(language) {
+
+    currentLanguage =
+        language;
+
+    localStorage.setItem(
+        "dailykrd_language",
+        language
+    );
+
+    document.getElementById("languageOverlay")
+        .style.display =
+        "none";
+
+    applyLanguage();
+
+    if (!localStorage.getItem("dailykrd_welcomed")) {
+
+        document.getElementById("welcomeScreen")
+            .style.display =
+            "flex";
+
+    }
+
+}
+
+
+document
+    .querySelectorAll(".language-option")
     .forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            language = button.dataset.language;
+                chooseLanguage(
+                    button.dataset.language
+                );
 
-            localStorage.setItem(
-                "dailyz_language",
-                language
-            );
-
-            document.getElementById(
-                "languageScreen"
-            ).style.display = "none";
-
-            applyLanguage();
-
-        });
+            }
+        );
 
     });
 
 
-if (!language) {
+document
+    .getElementById("settingsLanguage")
+    .addEventListener(
+        "change",
+        event => {
 
-    document.getElementById(
-        "languageScreen"
-    ).style.display = "flex";
+            chooseLanguage(
+                event.target.value
+            );
 
-}
+        }
+    );
 
 
-/* =========================
-   DATE
-========================= */
+/* WELCOME */
 
-function updateDate() {
+function finishWelcome() {
 
-    document.getElementById("date").textContent =
-        new Date().toLocaleDateString(
-            language === "ku"
-                ? "ku"
-                : language === "ar"
-                ? "ar"
-                : "en-US",
-            {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-                year: "numeric"
-            }
-        );
+    localStorage.setItem(
+        "dailykrd_welcomed",
+        "true"
+    );
+
+    document.getElementById("welcomeScreen")
+        .style.display =
+        "none";
 
 }
 
-updateDate();
+
+document
+    .getElementById("welcomeSignIn")
+    .addEventListener(
+        "click",
+        () => {
+
+            finishWelcome();
+
+            signUpMode = false;
+
+            setAuthMode();
+
+            document.getElementById("authOverlay")
+                .classList.add("active");
+
+        }
+    );
 
 
-/* =========================
-   AUTH
-========================= */
+document
+    .getElementById("welcomeCreate")
+    .addEventListener(
+        "click",
+        () => {
+
+            finishWelcome();
+
+            signUpMode = true;
+
+            setAuthMode();
+
+            document.getElementById("authOverlay")
+                .classList.add("active");
+
+        }
+    );
+
+
+document
+    .getElementById("welcomeGuest")
+    .addEventListener(
+        "click",
+        () => {
+
+            finishWelcome();
+
+            currentUser = null;
+
+            renderTasks([]);
+
+        }
+    );
+
+
+/* AUTH */
 
 function setAuthMode() {
 
-    document.getElementById("authTitle").textContent =
-        signUpMode ? t("createAccount") : t("welcomeBack");
+    document.getElementById("usernameInput")
+        .style.display =
+        signUpMode
+        ? "block"
+        : "none";
 
-    document.getElementById("authSubtitle").textContent =
-        signUpMode ? t("startDailyz") : t("signInContinue");
+    document.getElementById("confirmPasswordInput")
+        .style.display =
+        signUpMode
+        ? "block"
+        : "none";
 
-    document.getElementById("usernameInput").style.display =
-        signUpMode ? "block" : "none";
+    applyLanguage();
 
-    document.getElementById("confirmPasswordInput").style.display =
-        signUpMode ? "block" : "none";
-
-    document.getElementById("authButton").textContent =
-        signUpMode ? t("create") : t("signIn");
-
-    document.getElementById("switchText").textContent =
-        signUpMode ? t("alreadyAccount") : t("noAccount");
-
-    document.getElementById("switchButton").textContent =
-        signUpMode ? t("signIn") : t("signUp");
-
-    clearError();
 }
 
 
@@ -1739,7 +2841,9 @@ function clearError() {
         document.getElementById("authError");
 
     error.textContent = "";
-    error.style.display = "none";
+
+    error.style.display =
+        "none";
 
 }
 
@@ -1749,8 +2853,11 @@ function showError(message) {
     const error =
         document.getElementById("authError");
 
-    error.textContent = message;
-    error.style.display = "block";
+    error.textContent =
+        message;
+
+    error.style.display =
+        "block";
 
 }
 
@@ -1760,42 +2867,58 @@ async function createAccount() {
     clearError();
 
     const username =
-        document.getElementById("usernameInput").value.trim();
+        document.getElementById("usernameInput")
+            .value.trim();
 
     const email =
-        document.getElementById("emailInput").value.trim();
+        document.getElementById("emailInput")
+            .value.trim();
 
     const password =
-        document.getElementById("passwordInput").value;
+        document.getElementById("passwordInput")
+            .value;
 
     const confirm =
-        document.getElementById("confirmPasswordInput").value;
+        document.getElementById("confirmPasswordInput")
+            .value;
 
 
     if (username.length < 2) {
 
-        showError("Username must be at least 2 characters.");
+        showError(
+            t("usernameTooShort")
+        );
+
         return;
 
     }
 
     if (!email) {
 
-        showError("Enter your email.");
+        showError(
+            t("enterEmail")
+        );
+
         return;
 
     }
 
     if (password.length < 6) {
 
-        showError("Password must be at least 6 characters.");
+        showError(
+            t("passwordShort")
+        );
+
         return;
 
     }
 
     if (password !== confirm) {
 
-        showError("Passwords do not match.");
+        showError(
+            t("passwordsMismatch")
+        );
+
         return;
 
     }
@@ -1810,18 +2933,30 @@ async function createAccount() {
                 password
             );
 
+
         await setDoc(
-            doc(db, "users", result.user.uid),
+            doc(
+                db,
+                "users",
+                result.user.uid
+            ),
             {
                 username,
                 email,
+                language: currentLanguage,
                 createdAt: Date.now()
             }
         );
 
-    } catch (error) {
 
-        showError(error.message);
+        document.getElementById("authOverlay")
+            .classList.remove("active");
+
+    } catch(error) {
+
+        showError(
+            error.message
+        );
 
     }
 
@@ -1833,15 +2968,20 @@ async function login() {
     clearError();
 
     const email =
-        document.getElementById("emailInput").value.trim();
+        document.getElementById("emailInput")
+            .value.trim();
 
     const password =
-        document.getElementById("passwordInput").value;
+        document.getElementById("passwordInput")
+            .value;
 
 
     if (!email || !password) {
 
-        showError("Enter your email and password.");
+        showError(
+            t("enterEmailPassword")
+        );
+
         return;
 
     }
@@ -1855,9 +2995,14 @@ async function login() {
             password
         );
 
-    } catch (error) {
+        document.getElementById("authOverlay")
+            .classList.remove("active");
 
-        showError("Incorrect email or password.");
+    } catch(error) {
+
+        showError(
+            t("incorrectLogin")
+        );
 
     }
 
@@ -1866,135 +3011,190 @@ async function login() {
 
 document
     .getElementById("authButton")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        signUpMode
-            ? createAccount()
-            : login();
+            if (signUpMode) {
+                createAccount();
+            } else {
+                login();
+            }
 
-    });
+        }
+    );
 
 
 document
     .getElementById("switchButton")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        signUpMode = !signUpMode;
+            signUpMode =
+                !signUpMode;
 
-        setAuthMode();
+            setAuthMode();
 
-    });
-
-
-/* =========================
-   AUTH STATE
-========================= */
-
-onAuthStateChanged(auth, async user => {
-
-    currentUser = user;
-
-    const authCard =
-        document.getElementById("authCard");
-
-    const userBar =
-        document.getElementById("userBar");
+        }
+    );
 
 
-    if (user) {
+document
+    .getElementById("closeAuth")
+    .addEventListener(
+        "click",
+        () => {
 
-        authCard.style.display = "none";
-        userBar.style.display = "block";
+            document.getElementById("authOverlay")
+                .classList.remove("active");
 
-        document.getElementById("emailDisplay")
-            .textContent = user.email;
-
-        document.getElementById("settingsEmail")
-            .textContent = user.email;
-
-
-        const profile =
-            await getDoc(
-                doc(db, "users", user.uid)
-            );
+        }
+    );
 
 
-        const username =
-            profile.exists()
+document
+    .getElementById("accountButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            if (currentUser) return;
+
+            signUpMode = false;
+
+            setAuthMode();
+
+            document.getElementById("authOverlay")
+                .classList.add("active");
+
+        }
+    );
+
+
+/* AUTH STATE */
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        currentUser =
+            user;
+
+        if (user) {
+
+            const profile =
+                await getDoc(
+                    doc(
+                        db,
+                        "users",
+                        user.uid
+                    )
+                );
+
+
+            const username =
+                profile.exists()
                 ? profile.data().username
-                : "User";
+                : t("guest");
 
 
-        document.getElementById("usernameDisplay")
-            .textContent = username;
+            document.getElementById("settingsUsername")
+                .textContent =
+                username;
 
-        document.getElementById("settingsUsername")
-            .textContent = username;
+            document.getElementById("settingsEmail")
+                .textContent =
+                user.email || "";
 
 
-        startTaskListener();
+            document.getElementById("accountButton")
+                .style.display =
+                "none";
 
-    } else {
 
-        authCard.style.display = "block";
-        userBar.style.display = "none";
+            startTaskListener();
 
-        stopTaskListener();
+        } else {
 
-        renderTasks([]);
+            document.getElementById("settingsUsername")
+                .textContent =
+                t("notSignedIn");
+
+            document.getElementById("settingsEmail")
+                .textContent =
+                t("notSignedIn");
+
+            document.getElementById("accountButton")
+                .style.display =
+                "block";
+
+            stopTaskListener();
+
+            renderTasks([]);
+
+        }
 
     }
+);
 
-});
 
-
-/* =========================
-   SIGN OUT
-========================= */
+/* SIGN OUT */
 
 document
     .getElementById("logoutButton")
-    .addEventListener("click", async () => {
+    .addEventListener(
+        "click",
+        async () => {
 
-        await signOut(auth);
+            if (currentUser) {
 
-        closeSettings();
+                await signOut(auth);
 
-    });
+            }
 
-
-/* =========================
-   NAVIGATION
-========================= */
-
-let previousTab = "tasks";
-let settingsOpen = false;
+        }
+    );
 
 
-function openSection(tabName) {
+/* NAVIGATION */
 
-    document
-        .querySelectorAll(".tab")
-        .forEach(tab => {
-
-            tab.classList.toggle(
-                "active",
-                tab.dataset.tab === tabName
-            );
-
-        });
-
+function showSection(id) {
 
     document
         .querySelectorAll(".section")
         .forEach(section => {
 
-            section.classList.toggle(
-                "active",
-                section.id === tabName
-            );
+            section.classList.remove("active");
 
         });
+
+
+    document
+        .querySelectorAll(".tab")
+        .forEach(tab => {
+
+            tab.classList.remove("active");
+
+        });
+
+
+    const section =
+        document.getElementById(id);
+
+    if (section) {
+        section.classList.add("active");
+    }
+
+
+    const tab =
+        document.querySelector(
+            `.tab[data-tab="${id}"]`
+        );
+
+    if (tab) {
+        tab.classList.add("active");
+    }
 
 }
 
@@ -2003,79 +3203,48 @@ document
     .querySelectorAll(".tab")
     .forEach(tab => {
 
-        tab.addEventListener("click", () => {
+        tab.addEventListener(
+            "click",
+            () => {
 
-            if (settingsOpen) {
-
-                settingsOpen = false;
+                showSection(
+                    tab.dataset.tab
+                );
 
             }
-
-            previousTab = tab.dataset.tab;
-
-            openSection(previousTab);
-
-        });
+        );
 
     });
 
 
-/* =========================
-   FIXED SETTINGS BUTTON
-========================= */
-
-function openSettings() {
-
-    settingsOpen = true;
-
-    document
-        .querySelectorAll(".tab")
-        .forEach(tab =>
-            tab.classList.remove("active")
-        );
-
-    document
-        .querySelectorAll(".section")
-        .forEach(section =>
-            section.classList.remove("active")
-        );
-
-    document
-        .getElementById("settings")
-        .classList.add("active");
-
-}
-
-
-function closeSettings() {
-
-    settingsOpen = false;
-
-    openSection(previousTab);
-
-}
-
+/* SETTINGS TOGGLE */
 
 document
     .getElementById("settingsButton")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        if (settingsOpen) {
+            const settings =
+                document.getElementById("settings");
 
-            closeSettings();
+            if (
+                settings.classList.contains("active")
+            ) {
 
-        } else {
+                showSection("tasks");
 
-            openSettings();
+            } else {
+
+                showSection("settings");
+
+            }
 
         }
+    );
 
-    });
 
-
-/* =========================
-   TASKS
-========================= */
+/* TASK COLLECTION */
 
 function getTasksCollection() {
 
@@ -2102,20 +3271,6 @@ function stopTaskListener() {
 }
 
 
-let latestTasks = [];
-
-
-function renderTasksFromCurrentSnapshot() {
-
-    if (currentUser) {
-
-        renderTasks(latestTasks);
-
-    }
-
-}
-
-
 function startTaskListener() {
 
     stopTaskListener();
@@ -2131,24 +3286,100 @@ function startTaskListener() {
 
 
     unsubscribeTasks =
-        onSnapshot(taskQuery, snapshot => {
+        onSnapshot(
+            taskQuery,
+            snapshot => {
 
-            const tasks = [];
+                const tasks = [];
 
-            snapshot.forEach(item => {
+                snapshot.forEach(item => {
 
-                tasks.push({
-                    id: item.id,
-                    ...item.data()
+                    tasks.push({
+                        id: item.id,
+                        ...item.data()
+                    });
+
                 });
 
-            });
+                renderTasks(tasks);
+                renderCalendar();
 
-            latestTasks = tasks;
+            }
+        );
 
-            renderTasks(tasks);
+}
 
-        });
+
+/* TASK DATE MATCHING */
+
+function taskOccursOnDate(task, dateKey) {
+
+    const start =
+        task.date ||
+        getTodayKey();
+
+    const target =
+        parseDateKey(dateKey);
+
+    const startDate =
+        parseDateKey(start);
+
+
+    if (target < startDate) {
+        return false;
+    }
+
+
+    if (!task.repeat || task.repeat === "once") {
+
+        return dateKey === start;
+
+    }
+
+
+    if (task.repeat === "daily") {
+        return true;
+    }
+
+
+    if (task.repeat === "weekly") {
+
+        return (
+            target.getDay() ===
+            startDate.getDay()
+        );
+
+    }
+
+
+    if (
+        task.repeat === "custom" &&
+        Array.isArray(task.days)
+    ) {
+
+        return task.days.includes(
+            target.getDay()
+        );
+
+    }
+
+
+    return false;
+
+}
+
+
+/* TASKS */
+
+function getTasksForDate(tasks, dateKey) {
+
+    return tasks.filter(
+        task =>
+            taskOccursOnDate(
+                task,
+                dateKey
+            )
+    );
 
 }
 
@@ -2161,17 +3392,50 @@ function renderTasks(tasks) {
     list.innerHTML = "";
 
 
+    document.getElementById("selectedDayText")
+        .textContent =
+        formatDateKey(selectedDate);
+
+
     if (!currentUser) {
 
-        list.innerHTML =
-            `<div class="empty">${t("signInTasks")}</div>`;
+        const localTasks =
+            guestTasks.filter(
+                task =>
+                    taskOccursOnDate(
+                        task,
+                        selectedDate
+                    )
+            );
+
+        renderTaskArray(
+            localTasks,
+            list
+        );
 
         return;
 
     }
 
 
-    if (tasks.length === 0) {
+    const todayTasks =
+        getTasksForDate(
+            tasks,
+            selectedDate
+        );
+
+
+    renderTaskArray(
+        todayTasks,
+        list
+    );
+
+}
+
+
+function renderTaskArray(tasks, list) {
+
+    if (!tasks.length) {
 
         list.innerHTML =
             `<div class="empty">${t("noTasks")}</div>`;
@@ -2186,12 +3450,15 @@ function renderTasks(tasks) {
         const row =
             document.createElement("div");
 
-        row.className = "task";
+        row.className =
+            "task";
 
 
-        if (task.completed) {
+        if (task.completedDates?.includes(selectedDate)) {
 
-            row.classList.add("completed");
+            row.classList.add(
+                "completed"
+            );
 
         }
 
@@ -2199,87 +3466,278 @@ function renderTasks(tasks) {
         const checkbox =
             document.createElement("input");
 
-        checkbox.type = "checkbox";
-        checkbox.className = "task-check";
-        checkbox.checked = !!task.completed;
+        checkbox.type =
+            "checkbox";
+
+        checkbox.className =
+            "task-check";
+
+
+        checkbox.checked =
+            task.repeat &&
+            task.repeat !== "once"
+            ? (
+                task.completedDates?.includes(
+                    selectedDate
+                ) || false
+            )
+            : !!task.completed;
 
 
         checkbox.addEventListener(
             "change",
             async () => {
 
-                await updateDoc(
-                    doc(
-                        db,
-                        "users",
-                        currentUser.uid,
-                        "tasks",
-                        task.id
-                    ),
-                    {
-                        completed: checkbox.checked
-                    }
+                await toggleTaskCompletion(
+                    task,
+                    checkbox.checked
                 );
 
             }
         );
 
 
-        const text =
+        const content =
             document.createElement("div");
 
-        text.className = "task-text";
-        text.textContent = task.text;
+        content.className =
+            "task-text";
+
+
+        const title =
+            document.createElement("div");
+
+        title.textContent =
+            task.text;
+
+
+        content.appendChild(title);
+
+
+        if (
+            task.repeat &&
+            task.repeat !== "once"
+        ) {
+
+            const meta =
+                document.createElement("div");
+
+            meta.className =
+                "task-meta";
+
+            meta.textContent =
+                task.repeat === "daily"
+                ? t("daily")
+                : task.repeat === "weekly"
+                ? t("weekly")
+                : t("custom");
+
+            content.appendChild(
+                meta
+            );
+
+        }
 
 
         const deleteButton =
             document.createElement("button");
 
-        deleteButton.className = "delete-task";
-        deleteButton.textContent = "×";
+        deleteButton.className =
+            "delete-task";
+
+        deleteButton.textContent =
+            "×";
 
 
         deleteButton.addEventListener(
             "click",
             async () => {
 
-                await deleteDoc(
-                    doc(
-                        db,
-                        "users",
-                        currentUser.uid,
-                        "tasks",
-                        task.id
-                    )
+                await deleteTask(
+                    task
                 );
 
             }
         );
 
 
-        row.appendChild(checkbox);
-        row.appendChild(text);
-        row.appendChild(deleteButton);
+        row.appendChild(
+            checkbox
+        );
 
-        list.appendChild(row);
+        row.appendChild(
+            content
+        );
+
+        row.appendChild(
+            deleteButton
+        );
+
+        list.appendChild(
+            row
+        );
 
     });
 
 }
 
 
-async function addTask() {
+async function toggleTaskCompletion(
+    task,
+    checked
+) {
 
     if (!currentUser) {
 
-        alert(t("signInTasks"));
+        const found =
+            guestTasks.find(
+                item =>
+                    item.id === task.id
+            );
+
+        if (!found) return;
+
+        found.completedDates =
+            found.completedDates || [];
+
+        if (checked) {
+
+            if (
+                !found.completedDates
+                    .includes(selectedDate)
+            ) {
+
+                found.completedDates.push(
+                    selectedDate
+                );
+
+            }
+
+        } else {
+
+            found.completedDates =
+                found.completedDates.filter(
+                    d =>
+                        d !== selectedDate
+                );
+
+        }
+
+        localStorage.setItem(
+            "dailykrd_guest_tasks",
+            JSON.stringify(guestTasks)
+        );
+
+        renderTasks([]);
+
         return;
 
     }
 
 
+    if (
+        task.repeat &&
+        task.repeat !== "once"
+    ) {
+
+        let dates =
+            task.completedDates || [];
+
+        if (checked) {
+
+            if (!dates.includes(selectedDate)) {
+                dates.push(selectedDate);
+            }
+
+        } else {
+
+            dates =
+                dates.filter(
+                    d =>
+                        d !== selectedDate
+                );
+
+        }
+
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks",
+                task.id
+            ),
+            {
+                completedDates:
+                    dates
+            }
+        );
+
+    } else {
+
+        await updateDoc(
+            doc(
+                db,
+                "users",
+                currentUser.uid,
+                "tasks",
+                task.id
+            ),
+            {
+                completed:
+                    checked
+            }
+        );
+
+    }
+
+}
+
+
+async function deleteTask(task) {
+
+    if (!currentUser) {
+
+        guestTasks =
+            guestTasks.filter(
+                item =>
+                    item.id !== task.id
+            );
+
+        localStorage.setItem(
+            "dailykrd_guest_tasks",
+            JSON.stringify(guestTasks)
+        );
+
+        renderTasks([]);
+
+        return;
+
+    }
+
+
+    await deleteDoc(
+        doc(
+            db,
+            "users",
+            currentUser.uid,
+            "tasks",
+            task.id
+        )
+    );
+
+}
+
+
+/* ADD TASK */
+
+async function addTask() {
+
     const input =
-        document.getElementById("taskInput");
+        document.getElementById(
+            "taskInput"
+        );
 
     const text =
         input.value.trim();
@@ -2288,25 +3746,133 @@ async function addTask() {
     if (!text) return;
 
 
-    await addDoc(
-        getTasksCollection(),
-        {
-            text,
-            completed: false,
-            createdAt: Date.now()
-        }
-    );
+    const repeat =
+        document.getElementById(
+            "repeatSelect"
+        ).value;
+
+
+    const days =
+        [...document.querySelectorAll(
+            ".repeat-day.active"
+        )]
+        .map(
+            button =>
+                Number(button.dataset.day)
+        );
+
+
+    const task = {
+
+        id:
+            crypto.randomUUID
+            ? crypto.randomUUID()
+            : String(Date.now()),
+
+        text,
+
+        date:
+            document.getElementById(
+                "taskDateInput"
+            ).value ||
+            selectedDate,
+
+        repeat,
+
+        days:
+
+            repeat === "custom"
+            ? days
+            : [],
+
+        completed:
+            false,
+
+        completedDates:
+            [],
+
+        createdAt:
+            Date.now()
+
+    };
+
+
+    if (
+        repeat === "custom" &&
+        days.length === 0
+    ) {
+
+        alert(
+            currentLanguage === "ku"
+            ? "لانیکەم یەک ڕۆژ هەڵبژێرە."
+            : currentLanguage === "ar"
+            ? "اختر يوماً واحداً على الأقل."
+            : "Choose at least one day."
+        );
+
+        return;
+
+    }
+
+
+    if (!currentUser) {
+
+        guestTasks.push(
+            task
+        );
+
+        localStorage.setItem(
+            "dailykrd_guest_tasks",
+            JSON.stringify(guestTasks)
+        );
+
+    } else {
+
+        delete task.id;
+
+        await addDoc(
+            getTasksCollection(),
+            task
+        );
+
+    }
 
 
     input.value = "";
-    input.focus();
+
+    document.getElementById(
+        "repeatSelect"
+    ).value =
+        "once";
+
+    document.getElementById(
+        "repeatDays"
+    ).style.display =
+        "none";
+
+    document
+        .querySelectorAll(".repeat-day")
+        .forEach(
+            button =>
+                button.classList.remove(
+                    "active"
+                )
+        );
+
+
+    renderTasks([]);
+
+    renderCalendar();
 
 }
 
 
 document
     .getElementById("addTaskButton")
-    .addEventListener("click", addTask);
+    .addEventListener(
+        "click",
+        addTask
+    );
 
 
 document
@@ -2315,9 +3881,12 @@ document
         "keydown",
         event => {
 
-            if (event.key === "Enter") {
+            if (
+                event.key === "Enter"
+            ) {
 
                 event.preventDefault();
+
                 addTask();
 
             }
@@ -2326,22 +3895,382 @@ document
     );
 
 
-/* =========================
-   DARK MODE
-========================= */
+/* REPEAT */
+
+document
+    .getElementById("repeatSelect")
+    .addEventListener(
+        "change",
+        event => {
+
+            document.getElementById(
+                "repeatDays"
+            ).style.display =
+                event.target.value === "custom"
+                ? "grid"
+                : "none";
+
+        }
+    );
+
+
+document
+    .querySelectorAll(".repeat-day")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                button.classList.toggle(
+                    "active"
+                );
+
+            }
+        );
+
+    });
+
+
+/* CALENDAR */
+
+function renderCalendar() {
+
+    const grid =
+        document.getElementById(
+            "calendarGrid"
+        );
+
+    const weekdays =
+        document.getElementById(
+            "calendarWeekdays"
+        );
+
+    grid.innerHTML = "";
+    weekdays.innerHTML = "";
+
+
+    t("weekdays").forEach(
+        day => {
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+            element.textContent =
+                day;
+
+            weekdays.appendChild(
+                element
+            );
+
+        }
+    );
+
+
+    const localeMap = {
+
+        en: "en-US",
+        ku: "ku-Arab",
+        ar: "ar-IQ"
+
+    };
+
+
+    document.getElementById(
+        "calendarMonth"
+    ).textContent =
+        calendarDate.toLocaleDateString(
+            localeMap[currentLanguage] ||
+            "en-US",
+            {
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+
+    const year =
+        calendarDate.getFullYear();
+
+    const month =
+        calendarDate.getMonth();
+
+    const firstDay =
+        new Date(
+            year,
+            month,
+            1
+        ).getDay();
+
+    const daysInMonth =
+        new Date(
+            year,
+            month + 1,
+            0
+        ).getDate();
+
+
+    for (
+        let i = 0;
+        i < firstDay;
+        i++
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+        grid.appendChild(
+            empty
+        );
+
+    }
+
+
+    const allTasks =
+        currentUser
+        ? []
+        : guestTasks;
+
+
+    for (
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ) {
+
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+        const key =
+            getDateKeyFromDate(
+                date
+            );
+
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+        button.className =
+            "calendar-day";
+
+        button.textContent =
+            day;
+
+
+        if (
+            key ===
+            getTodayKey()
+        ) {
+
+            button.classList.add(
+                "today"
+            );
+
+        }
+
+
+        if (
+            key ===
+            selectedDate
+        ) {
+
+            button.classList.add(
+                "selected"
+            );
+
+        }
+
+
+        let hasTask =
+            false;
+
+
+        if (!currentUser) {
+
+            hasTask =
+                guestTasks.some(
+                    task =>
+                        taskOccursOnDate(
+                            task,
+                            key
+                        )
+                );
+
+        }
+
+
+        if (hasTask) {
+
+            button.classList.add(
+                "has-task"
+            );
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                selectedDate =
+                    key;
+
+                document.getElementById(
+                    "taskDateInput"
+                ).value =
+                    selectedDate;
+
+                document.getElementById(
+                    "calendarSelectedDay"
+                ).textContent =
+                    formatDateKey(
+                        selectedDate
+                    );
+
+                renderCalendar();
+
+                renderTasks([]);
+
+            }
+        );
+
+
+        grid.appendChild(
+            button
+        );
+
+    }
+
+}
+
+
+document
+    .getElementById("previousMonth")
+    .addEventListener(
+        "click",
+        () => {
+
+            calendarDate.setMonth(
+                calendarDate.getMonth() - 1
+            );
+
+            renderCalendar();
+
+        }
+    );
+
+
+document
+    .getElementById("nextMonth")
+    .addEventListener(
+        "click",
+        () => {
+
+            calendarDate.setMonth(
+                calendarDate.getMonth() + 1
+            );
+
+            renderCalendar();
+
+        }
+    );
+
+
+document
+    .getElementById("todayButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            const today =
+                new Date();
+
+            calendarDate =
+                new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    1
+                );
+
+            selectedDate =
+                getTodayKey();
+
+            document.getElementById(
+                "taskDateInput"
+            ).value =
+                selectedDate;
+
+            renderCalendar();
+            renderTasks([]);
+
+        }
+    );
+
+
+document
+    .getElementById("taskDateInput")
+    .addEventListener(
+        "change",
+        event => {
+
+            selectedDate =
+                event.target.value;
+
+            const date =
+                parseDateKey(
+                    selectedDate
+                );
+
+            calendarDate =
+                new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    1
+                );
+
+            renderCalendar();
+            renderTasks([]);
+
+        }
+    );
+
+
+/* DARK MODE */
 
 function applyTheme() {
 
     const dark =
-        localStorage.getItem("dailyz_dark") === "true";
+        localStorage.getItem(
+            "dailykrd_dark"
+        ) === "true";
 
-    document.body.classList.toggle("dark", dark);
 
-    document.getElementById("themeButton")
-        .textContent = dark ? "☀" : "☾";
+    document.body.classList.toggle(
+        "dark",
+        dark
+    );
 
-    document.getElementById("settingsThemeButton")
-        .textContent = dark ? "On" : "Off";
+
+    document.getElementById(
+        "themeButton"
+    ).textContent =
+        dark ? "☀" : "☾";
+
+
+    document.getElementById(
+        "settingsThemeButton"
+    ).textContent =
+        dark ? "On" : "Off";
 
 }
 
@@ -2349,12 +4278,16 @@ function applyTheme() {
 function toggleTheme() {
 
     const dark =
-        !document.body.classList.contains("dark");
+        !document.body.classList.contains(
+            "dark"
+        );
+
 
     localStorage.setItem(
-        "dailyz_dark",
+        "dailykrd_dark",
         dark
     );
+
 
     applyTheme();
 
@@ -2363,17 +4296,21 @@ function toggleTheme() {
 
 document
     .getElementById("themeButton")
-    .addEventListener("click", toggleTheme);
+    .addEventListener(
+        "click",
+        toggleTheme
+    );
 
 
 document
     .getElementById("settingsThemeButton")
-    .addEventListener("click", toggleTheme);
+    .addEventListener(
+        "click",
+        toggleTheme
+    );
 
 
-/* =========================
-   PRAYER TIMES
-========================= */
+/* PRAYER TIMES */
 
 const prayerTimes = {
 
@@ -2389,38 +4326,62 @@ const prayerTimes = {
 function loadPrayerTimes() {
 
     const list =
-        document.getElementById("prayerList");
+        document.getElementById(
+            "prayerList"
+        );
 
     list.innerHTML = "";
 
 
-    Object.entries(prayerTimes)
-        .forEach(([name, time]) => {
+    Object.entries(
+        prayerTimes
+    ).forEach(
+        ([name,time]) => {
 
             const row =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            row.className = "prayer";
+            row.className =
+                "prayer";
 
 
             const nameElement =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
-            nameElement.textContent = name;
+            nameElement.textContent =
+                t(
+                    "prayer." +
+                    name
+                );
 
 
             const timeElement =
-                document.createElement("strong");
+                document.createElement(
+                    "strong"
+                );
 
-            timeElement.textContent = time;
+            timeElement.textContent =
+                time;
 
 
-            row.appendChild(nameElement);
-            row.appendChild(timeElement);
+            row.appendChild(
+                nameElement
+            );
 
-            list.appendChild(row);
+            row.appendChild(
+                timeElement
+            );
 
-        });
+            list.appendChild(
+                row
+            );
+
+        }
+    );
 
 
     updateNextPrayer();
@@ -2430,7 +4391,8 @@ function loadPrayerTimes() {
 
 function updateNextPrayer() {
 
-    const now = new Date();
+    const now =
+        new Date();
 
     const currentMinutes =
         now.getHours() * 60 +
@@ -2441,20 +4403,30 @@ function updateNextPrayer() {
 
 
     for (
-        const [name, time]
-        of Object.entries(prayerTimes)
+        const [name,time]
+        of Object.entries(
+            prayerTimes
+        )
     ) {
 
-        const [hours, minutes] =
-            time.split(":").map(Number);
+        const [hours,minutes] =
+            time
+                .split(":")
+                .map(Number);
+
 
         const prayerMinutes =
-            hours * 60 + minutes;
+            hours * 60 +
+            minutes;
 
 
-        if (prayerMinutes > currentMinutes) {
+        if (
+            prayerMinutes >
+            currentMinutes
+        ) {
 
-            next = [name, time];
+            next =
+                [name,time];
 
             break;
 
@@ -2465,29 +4437,39 @@ function updateNextPrayer() {
 
     if (!next) {
 
-        next = [
-            "Fajr",
-            prayerTimes.Fajr
-        ];
+        next =
+            [
+                "Fajr",
+                prayerTimes.Fajr
+            ];
 
     }
 
 
-    document.getElementById("nextName")
-        .textContent = next[0];
+    document.getElementById(
+        "nextName"
+    ).textContent =
+        t(
+            "prayer." +
+            next[0]
+        );
 
-    document.getElementById("nextTime")
-        .textContent = next[1];
+
+    document.getElementById(
+        "nextTime"
+    ).textContent =
+        next[1];
 
 }
 
 
-setInterval(updateNextPrayer, 30000);
+setInterval(
+    updateNextPrayer,
+    30000
+);
 
 
-/* =========================
-   LOCATION
-========================= */
+/* LOCATION */
 
 document
     .getElementById("updateLocationButton")
@@ -2496,20 +4478,24 @@ document
         () => {
 
             const input =
-                document.getElementById("locationInput");
+                document.getElementById(
+                    "locationInput"
+                );
 
             const location =
                 input.value.trim();
 
-
             if (!location) return;
 
 
-            document.getElementById("locationText")
-                .textContent = location;
+            document.getElementById(
+                "locationText"
+            ).textContent =
+                location;
+
 
             localStorage.setItem(
-                "dailyz_location",
+                "dailykrd_location",
                 location
             );
 
@@ -2518,22 +4504,26 @@ document
 
 
 const savedLocation =
-    localStorage.getItem("dailyz_location");
+    localStorage.getItem(
+        "dailykrd_location"
+    );
 
 if (savedLocation) {
 
-    document.getElementById("locationInput")
-        .value = savedLocation;
+    document.getElementById(
+        "locationInput"
+    ).value =
+        savedLocation;
 
-    document.getElementById("locationText")
-        .textContent = savedLocation;
+    document.getElementById(
+        "locationText"
+    ).textContent =
+        savedLocation;
 
 }
 
 
-/* =========================
-   NOTIFICATIONS
-========================= */
+/* NOTIFICATIONS */
 
 document
     .getElementById("notificationButton")
@@ -2547,10 +4537,14 @@ document
                 );
 
 
-            if (!("Notification" in window)) {
+            if (
+                !("Notification" in window)
+            ) {
 
                 status.textContent =
-                    "Notifications are not supported by this browser.";
+                    t(
+                        "notificationsUnsupported"
+                    );
 
                 return;
 
@@ -2558,22 +4552,26 @@ document
 
 
             const permission =
-                await Notification.requestPermission();
+                await Notification
+                    .requestPermission();
 
 
-            if (permission === "granted") {
+            if (
+                permission ===
+                "granted"
+            ) {
 
                 status.textContent =
-                    language === "ku"
-                    ? "ئاگادارکردنەوەکان چالاکن."
-                    : language === "ar"
-                    ? "تم تفعيل الإشعارات."
-                    : "Notifications are enabled.";
+                    t(
+                        "notificationsEnabled"
+                    );
 
             } else {
 
                 status.textContent =
-                    t("notificationsDisabled");
+                    t(
+                        "notificationsDisabled"
+                    );
 
             }
 
@@ -2581,13 +4579,69 @@ document
     );
 
 
-/* =========================
-   START
-========================= */
+/* START */
 
-setAuthMode();
 applyTheme();
+
+
+if (!currentLanguage) {
+
+    currentLanguage =
+        "en";
+
+    document.getElementById(
+        "languageOverlay"
+    ).style.display =
+        "flex";
+
+}
+
+
+applyLanguage();
+
+
+document.getElementById(
+    "taskDateInput"
+).value =
+    selectedDate;
+
+
+if (
+    !localStorage.getItem(
+        "dailykrd_welcomed"
+    )
+) {
+
+    document.getElementById(
+        "welcomeScreen"
+    ).style.display =
+        "flex";
+
+}
+
+
+renderCalendar();
 loadPrayerTimes();
+
+
+/* SERVICE WORKER */
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            navigator.serviceWorker
+                .register("./sw.js")
+                .catch(
+                    () => {}
+                );
+
+        }
+    );
+
+}
 
 </script>
 
