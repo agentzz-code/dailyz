@@ -2,8 +2,10 @@
 
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
 <title>Dailyz</title>
 
 <style>
@@ -14,21 +16,32 @@
     body {
         margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-        background: #f4f5f7;
-        color: #171717;
-        transition: background 0.25s, color 0.25s;
+        background: #f5f5f7;
+        color: #111;
+        transition: background 0.25s ease, color 0.25s ease;
     }
 
     body.dark {
-        background: #101114;
+        background: #111214;
         color: #f5f5f5;
+    }
+
+    button,
+    input {
+        font: inherit;
+    }
+
+    button {
+        cursor: pointer;
     }
 
     .app {
         width: min(720px, 100%);
-        margin: auto;
+        margin: 0 auto;
         padding: 24px 18px 50px;
     }
+
+    /* HEADER */
 
     .header {
         display: flex;
@@ -44,9 +57,9 @@
     }
 
     .date {
-        margin-top: 4px;
-        color: #777;
+        margin-top: 5px;
         font-size: 14px;
+        color: #777;
     }
 
     body.dark .date {
@@ -54,49 +67,48 @@
     }
 
     .icon-button {
-        width: 44px;
-        height: 44px;
-        border: 0;
+        width: 45px;
+        height: 45px;
+        border: none;
         border-radius: 50%;
-        background: #e6e7e9;
-        cursor: pointer;
+        background: #e6e6e8;
         font-size: 21px;
     }
 
     body.dark .icon-button {
-        background: #292b30;
+        background: #292a2f;
         color: white;
     }
+
+    /* TABS */
 
     .tabs {
         display: flex;
         gap: 6px;
         padding: 5px;
-        background: #e5e6e8;
-        border-radius: 13px;
         margin-bottom: 22px;
+        border-radius: 13px;
+        background: #e6e6e8;
     }
 
     .tab {
         flex: 1;
-        border: 0;
-        background: transparent;
         padding: 12px;
+        border: none;
         border-radius: 9px;
-        font-size: 15px;
+        background: transparent;
+        color: #666;
         font-weight: 600;
-        cursor: pointer;
-        color: #555;
     }
 
     .tab.active {
         background: white;
         color: #111;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
     body.dark .tabs {
-        background: #222429;
+        background: #242529;
     }
 
     body.dark .tab {
@@ -104,9 +116,11 @@
     }
 
     body.dark .tab.active {
-        background: #36383e;
+        background: #383a40;
         color: white;
     }
+
+    /* SECTIONS */
 
     .section {
         display: none;
@@ -115,6 +129,8 @@
     .section.active {
         display: block;
     }
+
+    /* TASK INPUT */
 
     .task-input {
         display: flex;
@@ -126,12 +142,12 @@
         flex: 1;
         min-width: 0;
         padding: 15px;
-        border: 1px solid #dcdde0;
+        border: 1px solid #ddd;
         border-radius: 12px;
         outline: none;
-        font-size: 16px;
         background: white;
         color: #111;
+        font-size: 16px;
     }
 
     .task-input input:focus {
@@ -141,32 +157,34 @@
     body.dark .task-input input {
         background: #1d1f23;
         color: white;
-        border-color: #383a40;
+        border-color: #393b40;
     }
 
     .add-button {
         width: 52px;
-        border: 0;
+        border: none;
         border-radius: 12px;
         background: #111;
         color: white;
-        font-size: 26px;
-        cursor: pointer;
+        font-size: 27px;
+        font-weight: 400;
     }
 
     .add-button:active {
-        transform: scale(0.96);
+        transform: scale(0.95);
     }
+
+    /* TASKS */
 
     .task {
         display: flex;
         align-items: center;
         gap: 12px;
-        background: white;
+        margin-bottom: 9px;
         padding: 15px;
         border-radius: 13px;
-        margin-bottom: 9px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
     body.dark .task {
@@ -176,8 +194,8 @@
     .task-checkbox {
         width: 19px;
         height: 19px;
-        cursor: pointer;
         flex-shrink: 0;
+        cursor: pointer;
     }
 
     .task-text {
@@ -192,12 +210,11 @@
     }
 
     .delete-button {
-        border: 0;
-        background: transparent;
-        cursor: pointer;
-        font-size: 17px;
-        opacity: 0.65;
         padding: 5px;
+        border: none;
+        background: transparent;
+        font-size: 17px;
+        opacity: 0.6;
     }
 
     .delete-button:hover {
@@ -205,10 +222,12 @@
     }
 
     .empty {
-        text-align: center;
         padding: 35px 10px;
+        text-align: center;
         color: #888;
     }
+
+    /* PRAYERS */
 
     .prayer-header {
         margin-bottom: 18px;
@@ -224,15 +243,15 @@
     }
 
     .next-prayer {
+        margin-bottom: 18px;
+        padding: 23px;
+        border-radius: 18px;
         background: #111;
         color: white;
-        border-radius: 18px;
-        padding: 23px;
-        margin-bottom: 18px;
     }
 
     body.dark .next-prayer {
-        background: #25272c;
+        background: #292b30;
     }
 
     .next-label {
@@ -242,35 +261,37 @@
     }
 
     .next-name {
+        margin-top: 5px;
         font-size: 28px;
         font-weight: 700;
-        margin-top: 5px;
     }
 
     .next-time {
+        margin-top: 2px;
         font-size: 38px;
         font-weight: 700;
-        margin-top: 2px;
     }
 
     .prayer-item {
         display: flex;
         justify-content: space-between;
         padding: 15px 16px;
-        background: white;
-        border-radius: 12px;
         margin-bottom: 8px;
+        border-radius: 12px;
+        background: white;
     }
 
     body.dark .prayer-item {
         background: #1d1f23;
     }
 
+    /* SETTINGS */
+
     .settings-card {
         margin-top: 20px;
         padding: 19px;
-        background: white;
         border-radius: 16px;
+        background: white;
     }
 
     body.dark .settings-card {
@@ -278,8 +299,8 @@
     }
 
     .settings-title {
-        font-weight: 700;
         margin-bottom: 13px;
+        font-weight: 700;
     }
 
     .location-row {
@@ -301,16 +322,15 @@
     body.dark .location-row input {
         background: #292b30;
         color: white;
-        border-color: #3b3d43;
+        border-color: #3a3c42;
     }
 
     .small-button,
     .notification-button {
-        border: 0;
+        border: none;
+        border-radius: 10px;
         background: #111;
         color: white;
-        border-radius: 10px;
-        cursor: pointer;
         font-weight: 600;
     }
 
@@ -320,8 +340,8 @@
 
     .notification-button {
         width: 100%;
-        padding: 13px;
         margin-top: 11px;
+        padding: 13px;
     }
 
     .status {
@@ -330,6 +350,7 @@
         font-size: 13px;
     }
 </style>
+```
 
 </head>
 
@@ -339,24 +360,41 @@
 
 ```
 <header class="header">
+
     <div>
         <div class="logo">Dailyz</div>
         <div class="date" id="date"></div>
     </div>
 
-    <button class="icon-button" id="themeButton" type="button">
+    <button
+        class="icon-button"
+        id="themeButton"
+        type="button"
+        aria-label="Toggle dark mode"
+    >
         ☾
     </button>
+
 </header>
 
 
+<!-- TABS -->
+
 <div class="tabs">
 
-    <button class="tab active" data-tab="tasks" type="button">
+    <button
+        class="tab active"
+        type="button"
+        data-tab="tasks"
+    >
         Tasks
     </button>
 
-    <button class="tab" data-tab="prayers" type="button">
+    <button
+        class="tab"
+        type="button"
+        data-tab="prayers"
+    >
         Prayer Times
     </button>
 
@@ -365,7 +403,10 @@
 
 <!-- TASKS -->
 
-<section class="section active" id="tasks">
+<section
+    class="section active"
+    id="tasks"
+>
 
     <div class="task-input">
 
@@ -386,20 +427,29 @@
 
     </div>
 
-    <div class="task-list" id="taskList"></div>
+    <div
+        class="task-list"
+        id="taskList"
+    ></div>
 
 </section>
 
 
-<!-- PRAYERS -->
+<!-- PRAYER TIMES -->
 
-<section class="section" id="prayers">
+<section
+    class="section"
+    id="prayers"
+>
 
     <div class="prayer-header">
 
         <h2>Prayer Times</h2>
 
-        <div class="location" id="locationText">
+        <div
+            class="location"
+            id="locationText"
+        >
             Loading location...
         </div>
 
@@ -412,18 +462,27 @@
             NEXT PRAYER
         </div>
 
-        <div class="next-name" id="nextName">
+        <div
+            class="next-name"
+            id="nextName"
+        >
             Loading...
         </div>
 
-        <div class="next-time" id="nextTime">
+        <div
+            class="next-time"
+            id="nextTime"
+        >
             --:--
         </div>
 
     </div>
 
 
-    <div class="prayer-list" id="prayerList">
+    <div
+        class="prayer-list"
+        id="prayerList"
+    >
         <div class="empty">
             Loading prayer times...
         </div>
@@ -464,7 +523,10 @@
             🔔 Enable Prayer Notifications
         </button>
 
-        <div class="status" id="notificationStatus">
+        <div
+            class="status"
+            id="notificationStatus"
+        >
             Notifications are disabled.
         </div>
 
@@ -477,54 +539,69 @@
 
 <script>
 
-/* =========================
-   DAILYZ APP
-   ========================= */
+/* ==========================================
+   DAILYZ JAVASCRIPT
+   ========================================== */
 
 
-/* ---------- DATE ---------- */
+/* DATE */
 
 function updateDate() {
 
-    const dateElement = document.getElementById("date");
+    const date = new Date();
 
-    const today = new Date();
-
-    dateElement.textContent = today.toLocaleDateString(
-        undefined,
-        {
+    document.getElementById("date").textContent =
+        date.toLocaleDateString(undefined, {
             weekday: "long",
             month: "long",
             day: "numeric",
             year: "numeric"
-        }
-    );
+        });
 }
 
 
-/* ---------- TASKS ---------- */
+/* ==========================================
+   TASK SYSTEM
+   ========================================== */
 
 let tasks = [];
 
-try {
 
-    const savedTasks =
-        localStorage.getItem("dailyz_tasks");
+/* Load saved tasks */
 
-    if (savedTasks) {
-        tasks = JSON.parse(savedTasks);
-    }
+function loadTasks() {
 
-    if (!Array.isArray(tasks)) {
+    try {
+
+        const saved =
+            localStorage.getItem("dailyz_tasks");
+
+        if (saved) {
+
+            const parsed =
+                JSON.parse(saved);
+
+            if (Array.isArray(parsed)) {
+
+                tasks = parsed;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Error loading tasks:",
+            error
+        );
+
         tasks = [];
     }
-
-} catch (error) {
-
-    tasks = [];
-
 }
 
+
+/* Save tasks */
 
 function saveTasks() {
 
@@ -537,24 +614,36 @@ function saveTasks() {
 
     } catch (error) {
 
-        console.error("Could not save tasks:", error);
+        console.error(
+            "Error saving tasks:",
+            error
+        );
 
     }
 }
 
 
+/* Display tasks */
+
 function renderTasks() {
 
-    const taskList =
+    const list =
         document.getElementById("taskList");
 
-    taskList.innerHTML = "";
+    list.innerHTML = "";
 
 
     if (tasks.length === 0) {
 
-        taskList.innerHTML =
-            '<div class="empty">No tasks yet. Add one above.</div>';
+        const empty =
+            document.createElement("div");
+
+        empty.className = "empty";
+
+        empty.textContent =
+            "No tasks yet. Add one above.";
+
+        list.appendChild(empty);
 
         return;
     }
@@ -565,10 +654,19 @@ function renderTasks() {
         const taskElement =
             document.createElement("div");
 
-        taskElement.className =
-            "task" +
-            (task.completed ? " completed" : "");
+        taskElement.className = "task";
 
+
+        if (task.completed) {
+
+            taskElement.classList.add(
+                "completed"
+            );
+
+        }
+
+
+        /* Checkbox */
 
         const checkbox =
             document.createElement("input");
@@ -592,19 +690,23 @@ function renderTasks() {
                 saveTasks();
 
                 renderTasks();
+
             }
         );
 
 
+        /* Text */
+
         const text =
             document.createElement("div");
 
-        text.className =
-            "task-text";
+        text.className = "task-text";
 
         text.textContent =
             task.text;
 
+
+        /* Delete */
 
         const deleteButton =
             document.createElement("button");
@@ -614,8 +716,12 @@ function renderTasks() {
         deleteButton.className =
             "delete-button";
 
-        deleteButton.textContent =
-            "🗑️";
+        deleteButton.textContent = "🗑️";
+
+        deleteButton.setAttribute(
+            "aria-label",
+            "Delete task"
+        );
 
 
         deleteButton.addEventListener(
@@ -627,19 +733,33 @@ function renderTasks() {
                 saveTasks();
 
                 renderTasks();
+
             }
         );
 
 
-        taskElement.appendChild(checkbox);
-        taskElement.appendChild(text);
-        taskElement.appendChild(deleteButton);
+        taskElement.appendChild(
+            checkbox
+        );
 
-        taskList.appendChild(taskElement);
+        taskElement.appendChild(
+            text
+        );
+
+        taskElement.appendChild(
+            deleteButton
+        );
+
+
+        list.appendChild(
+            taskElement
+        );
 
     });
 }
 
+
+/* Add a task */
 
 function addTask() {
 
@@ -650,7 +770,9 @@ function addTask() {
         input.value.trim();
 
 
-    if (text.length === 0) {
+    /* Don't add empty tasks */
+
+    if (text === "") {
 
         input.focus();
 
@@ -659,8 +781,11 @@ function addTask() {
 
 
     tasks.push({
+
         text: text,
+
         completed: false
+
     });
 
 
@@ -668,112 +793,160 @@ function addTask() {
 
     renderTasks();
 
+
+    /* Clear input */
+
     input.value = "";
 
     input.focus();
 }
 
 
-/* ---------- TABS ---------- */
+/* ==========================================
+   TABS
+   ========================================== */
 
 function switchTab(tabName) {
 
-    const sections =
-        document.querySelectorAll(".section");
+    document
+        .querySelectorAll(".section")
+        .forEach(function(section) {
 
-    sections.forEach(function(section) {
+            section.classList.remove(
+                "active"
+            );
 
-        section.classList.remove("active");
-
-    });
+        });
 
 
-    const selectedSection =
+    const section =
         document.getElementById(tabName);
 
-    if (selectedSection) {
 
-        selectedSection.classList.add("active");
+    if (section) {
+
+        section.classList.add(
+            "active"
+        );
 
     }
 
 
-    const tabs =
-        document.querySelectorAll(".tab");
+    document
+        .querySelectorAll(".tab")
+        .forEach(function(tab) {
 
-    tabs.forEach(function(tab) {
+            tab.classList.remove(
+                "active"
+            );
 
-        tab.classList.remove("active");
-
-    });
+        });
 
 
     const selectedTab =
         document.querySelector(
-            '.tab[data-tab="' + tabName + '"]'
+            '.tab[data-tab="' +
+            tabName +
+            '"]'
         );
+
 
     if (selectedTab) {
 
-        selectedTab.classList.add("active");
+        selectedTab.classList.add(
+            "active"
+        );
 
     }
 }
 
 
-/* ---------- DARK MODE ---------- */
+/* ==========================================
+   DARK MODE
+   ========================================== */
 
-function applyDarkMode() {
+function loadDarkMode() {
 
-    const darkMode =
-        localStorage.getItem("dailyz_dark") === "true";
+    const saved =
+        localStorage.getItem(
+            "dailyz_dark_mode"
+        );
 
-    document.body.classList.toggle(
-        "dark",
-        darkMode
-    );
 
-    document.getElementById("themeButton")
-        .textContent = darkMode ? "☀" : "☾";
+    if (saved === "true") {
+
+        document.body.classList.add(
+            "dark"
+        );
+
+        document.getElementById(
+            "themeButton"
+        ).textContent = "☀";
+
+    } else {
+
+        document.body.classList.remove(
+            "dark"
+        );
+
+        document.getElementById(
+            "themeButton"
+        ).textContent = "☾";
+    }
 }
 
 
 function toggleDarkMode() {
 
-    const isDark =
-        !document.body.classList.contains("dark");
+    const dark =
+        document.body.classList.toggle(
+            "dark"
+        );
+
 
     localStorage.setItem(
-        "dailyz_dark",
-        String(isDark)
+        "dailyz_dark_mode",
+        String(dark)
     );
 
-    applyDarkMode();
+
+    document.getElementById(
+        "themeButton"
+    ).textContent =
+        dark ? "☀" : "☾";
 }
 
 
-/* ---------- PRAYER TIMES ---------- */
+/* ==========================================
+   PRAYER TIMES
+   ========================================== */
 
 async function loadPrayerTimes() {
 
-    const locationInput =
-        document.getElementById("locationInput");
+    const input =
+        document.getElementById(
+            "locationInput"
+        );
+
 
     const location =
-        locationInput.value.trim();
+        input.value.trim();
 
 
     if (!location) {
+
         return;
     }
 
 
-    document.getElementById("locationText")
-        .textContent = location;
+    document.getElementById(
+        "locationText"
+    ).textContent = location;
 
 
-    document.getElementById("prayerList")
-        .innerHTML =
+    document.getElementById(
+        "prayerList"
+    ).innerHTML =
         '<div class="empty">Loading prayer times...</div>';
 
 
@@ -782,17 +955,25 @@ async function loadPrayerTimes() {
         const parts =
             location.split(",");
 
+
         const city =
             parts[0].trim();
 
+
         const country =
-            parts.slice(1).join(",").trim() || "Iraq";
+            parts.slice(1).join(",").trim();
+
+
+        const finalCountry =
+            country || "Iraq";
 
 
         const url =
             "https://api.aladhan.com/v1/timingsByCity" +
-            "?city=" + encodeURIComponent(city) +
-            "&country=" + encodeURIComponent(country) +
+            "?city=" +
+            encodeURIComponent(city) +
+            "&country=" +
+            encodeURIComponent(finalCountry) +
             "&method=3";
 
 
@@ -801,7 +982,11 @@ async function loadPrayerTimes() {
 
 
         if (!response.ok) {
-            throw new Error("Request failed");
+
+            throw new Error(
+                "Prayer API request failed"
+            );
+
         }
 
 
@@ -813,7 +998,11 @@ async function loadPrayerTimes() {
             !result.data ||
             !result.data.timings
         ) {
-            throw new Error("No prayer data");
+
+            throw new Error(
+                "Prayer data unavailable"
+            );
+
         }
 
 
@@ -830,136 +1019,190 @@ async function loadPrayerTimes() {
         );
 
 
-        document.getElementById("prayerList")
-            .innerHTML =
-            '<div class="empty">Unable to load prayer times. Check the city and country.</div>';
+        document.getElementById(
+            "prayerList"
+        ).innerHTML =
+            '<div class="empty">Could not load prayer times.</div>';
 
 
-        document.getElementById("nextName")
-            .textContent = "Unavailable";
+        document.getElementById(
+            "nextName"
+        ).textContent =
+            "Unavailable";
 
-        document.getElementById("nextTime")
-            .textContent = "--:--";
+
+        document.getElementById(
+            "nextTime"
+        ).textContent =
+            "--:--";
     }
 }
 
 
-function displayPrayerTimes(timings) {
+function displayPrayerTimes(
+    timings
+) {
 
     const prayers = [
+
         ["Fajr", timings.Fajr],
+
         ["Dhuhr", timings.Dhuhr],
+
         ["Asr", timings.Asr],
+
         ["Maghrib", timings.Maghrib],
+
         ["Isha", timings.Isha]
+
     ];
 
 
     const list =
-        document.getElementById("prayerList");
+        document.getElementById(
+            "prayerList"
+        );
+
 
     list.innerHTML = "";
 
 
-    prayers.forEach(function(prayer) {
+    prayers.forEach(
+        function(prayer) {
 
-        const item =
-            document.createElement("div");
+            const item =
+                document.createElement(
+                    "div"
+                );
 
-        item.className =
-            "prayer-item";
-
-
-        const name =
-            document.createElement("span");
-
-        name.textContent =
-            prayer[0];
+            item.className =
+                "prayer-item";
 
 
-        const time =
-            document.createElement("strong");
+            const name =
+                document.createElement(
+                    "span"
+                );
 
-        time.textContent =
-            prayer[1];
-
-
-        item.appendChild(name);
-        item.appendChild(time);
-
-        list.appendChild(item);
-
-    });
+            name.textContent =
+                prayer[0];
 
 
-    updateNextPrayer(prayers);
+            const time =
+                document.createElement(
+                    "strong"
+                );
+
+            time.textContent =
+                prayer[1];
+
+
+            item.appendChild(name);
+
+            item.appendChild(time);
+
+            list.appendChild(item);
+
+        }
+    );
+
+
+    updateNextPrayer(
+        prayers
+    );
 }
 
 
-function updateNextPrayer(prayers) {
+function updateNextPrayer(
+    prayers
+) {
 
-    const now = new Date();
+    const now =
+        new Date();
+
 
     const currentMinutes =
         now.getHours() * 60 +
         now.getMinutes();
 
 
-    let nextPrayer = null;
+    let next = null;
 
 
-    for (const prayer of prayers) {
+    for (
+        let i = 0;
+        i < prayers.length;
+        i++
+    ) {
 
-        const timeParts =
-            prayer[1].split(":");
+        const time =
+            prayers[i][1];
 
-        const hour =
-            Number(timeParts[0]);
 
-        const minute =
-            Number(timeParts[1]);
+        const parts =
+            time.split(":");
+
+
+        const hours =
+            Number(parts[0]);
+
+
+        const minutes =
+            Number(parts[1]);
 
 
         const prayerMinutes =
-            hour * 60 + minute;
+            hours * 60 + minutes;
 
 
-        if (prayerMinutes > currentMinutes) {
+        if (
+            prayerMinutes >
+            currentMinutes
+        ) {
 
-            nextPrayer = prayer;
+            next = prayers[i];
 
             break;
         }
     }
 
 
-    if (!nextPrayer) {
+    if (!next) {
 
-        nextPrayer = prayers[0];
+        next = prayers[0];
 
     }
 
 
-    document.getElementById("nextName")
-        .textContent = nextPrayer[0];
+    document.getElementById(
+        "nextName"
+    ).textContent =
+        next[0];
 
-    document.getElementById("nextTime")
-        .textContent = nextPrayer[1];
+
+    document.getElementById(
+        "nextTime"
+    ).textContent =
+        next[1];
 }
 
 
-/* ---------- NOTIFICATIONS ---------- */
+/* ==========================================
+   NOTIFICATIONS
+   ========================================== */
 
 async function enableNotifications() {
 
     const status =
-        document.getElementById("notificationStatus");
+        document.getElementById(
+            "notificationStatus"
+        );
 
 
     if (!("Notification" in window)) {
 
         status.textContent =
-            "Notifications aren't supported in this browser.";
+            "Notifications are not supported by this browser.";
 
         return;
     }
@@ -979,29 +1222,43 @@ async function enableNotifications() {
         } else {
 
             status.textContent =
-                "Notifications were not enabled.";
+                "Notifications are disabled.";
 
         }
 
     } catch (error) {
 
+        console.error(
+            "Notification error:",
+            error
+        );
+
+
         status.textContent =
             "Could not enable notifications.";
-
     }
 }
 
 
-/* ---------- BUTTON EVENTS ---------- */
+/* ==========================================
+   EVENT LISTENERS
+   ========================================== */
 
-document.getElementById("addTaskButton")
+
+/* Add task button */
+
+document
+    .getElementById("addTaskButton")
     .addEventListener(
         "click",
         addTask
     );
 
 
-document.getElementById("taskInput")
+/* Enter key */
+
+document
+    .getElementById("taskInput")
     .addEventListener(
         "keydown",
         function(event) {
@@ -1018,43 +1275,63 @@ document.getElementById("taskInput")
     );
 
 
-document.getElementById("themeButton")
+/* Dark mode */
+
+document
+    .getElementById("themeButton")
     .addEventListener(
         "click",
         toggleDarkMode
     );
 
 
-document.querySelectorAll(".tab")
-    .forEach(function(tab) {
+/* Tabs */
 
-        tab.addEventListener(
-            "click",
-            function() {
+document
+    .querySelectorAll(".tab")
+    .forEach(
+        function(tab) {
 
-                switchTab(
-                    tab.dataset.tab
-                );
+            tab.addEventListener(
+                "click",
+                function() {
 
-            }
-        );
+                    switchTab(
+                        tab.dataset.tab
+                    );
 
-    });
+                }
+            );
+
+        }
+    );
 
 
-document.getElementById("updateLocationButton")
+/* Prayer location */
+
+document
+    .getElementById(
+        "updateLocationButton"
+    )
     .addEventListener(
         "click",
         loadPrayerTimes
     );
 
 
-document.getElementById("locationInput")
+/* Enter location */
+
+document
+    .getElementById(
+        "locationInput"
+    )
     .addEventListener(
         "keydown",
         function(event) {
 
             if (event.key === "Enter") {
+
+                event.preventDefault();
 
                 loadPrayerTimes();
 
@@ -1064,21 +1341,34 @@ document.getElementById("locationInput")
     );
 
 
-document.getElementById("notificationButton")
+/* Notifications */
+
+document
+    .getElementById(
+        "notificationButton"
+    )
     .addEventListener(
         "click",
         enableNotifications
     );
 
 
-/* ---------- START ---------- */
+/* ==========================================
+   START APP
+   ========================================== */
 
 updateDate();
 
-applyDarkMode();
+loadDarkMode();
+
+loadTasks();
 
 renderTasks();
 
+/*
+   Prayer loading is intentionally
+   independent from the task system.
+*/
 loadPrayerTimes();
 
 </script>
