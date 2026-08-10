@@ -4,378 +4,423 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Dailyz</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
 
-    html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        min-height: 100%;
-    }
+/* =========================
+   RESET
+========================= */
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-        background: #f5f5f7;
-        color: #111;
-        transition: background .25s ease, color .25s ease;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    button,
-    input {
-        font-family: inherit;
-    }
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+}
 
-    button {
-        cursor: pointer;
-    }
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f5f7;
+    color: #111;
+}
 
-    .app {
-        width: min(720px, calc(100% - 32px));
-        margin: 0 auto;
-        padding: 24px 0 50px;
-    }
+button,
+input {
+    font-family: inherit;
+}
 
-    /* HEADER */
+/* =========================
+   APP
+========================= */
 
-    .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 24px;
-    }
+.app {
+    width: min(700px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 25px 0 50px;
+}
 
-    .logo {
-        font-size: 32px;
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
+/* =========================
+   HEADER
+========================= */
 
-    .date {
-        margin-top: 5px;
-        color: #777;
-        font-size: 14px;
-    }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
 
-    .icon-button {
-        width: 45px;
-        height: 45px;
-        border: 0;
-        border-radius: 50%;
-        background: #e7e7e9;
-        color: #111;
-        font-size: 21px;
-        line-height: 45px;
-        padding: 0;
-    }
+.logo {
+    font-size: 32px;
+    font-weight: 800;
+}
 
-    body.dark {
-        background: #111214;
-        color: #f5f5f5;
-    }
+.date {
+    margin-top: 5px;
+    color: #777;
+    font-size: 14px;
+}
 
-    body.dark .date {
-        color: #999;
-    }
+.icon-button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #e5e5e7;
+    color: #111;
+    font-size: 20px;
+}
 
-    body.dark .icon-button {
-        background: #292a2f;
-        color: #fff;
-    }
+/* =========================
+   TABS
+========================= */
 
-    /* TABS */
+.tabs {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    margin-bottom: 22px;
+    border-radius: 13px;
+    background: #e5e5e7;
+}
 
-    .tabs {
-        display: flex;
-        gap: 6px;
-        padding: 5px;
-        margin-bottom: 22px;
-        border-radius: 13px;
-        background: #e6e6e8;
-    }
+.tab {
+    flex: 1;
+    border: 0;
+    border-radius: 9px;
+    padding: 12px;
+    background: transparent;
+    color: #666;
+    font-weight: 600;
+}
 
-    .tab {
-        flex: 1;
-        border: 0;
-        border-radius: 9px;
-        padding: 12px;
-        background: transparent;
-        color: #666;
-        font-size: 15px;
-        font-weight: 600;
-    }
+.tab.active {
+    background: white;
+    color: #111;
+}
 
-    .tab.active {
-        background: #fff;
-        color: #111;
-        box-shadow: 0 1px 4px rgba(0,0,0,.08);
-    }
+/* =========================
+   SECTIONS
+========================= */
 
-    body.dark .tabs {
-        background: #242529;
-    }
+.section {
+    display: none;
+}
 
-    body.dark .tab {
-        color: #aaa;
-    }
+.section.active {
+    display: block;
+}
 
-    body.dark .tab.active {
-        background: #383a40;
-        color: #fff;
-    }
+/* =========================
+   TASK INPUT
+========================= */
 
-    /* SECTIONS */
+.task-input {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 18px;
+}
 
-    .section {
-        display: none;
-    }
+#taskInput {
+    flex: 1;
+    min-width: 0;
+    height: 52px;
+    padding: 0 15px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    outline: none;
+    background: white;
+    color: #111;
+    font-size: 16px;
+}
 
-    .section.active {
-        display: block;
-    }
+.add-button {
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: #111;
+    color: white;
+    font-size: 28px;
+}
 
-    /* TASK INPUT */
+/* =========================
+   TASK LIST
+========================= */
 
-    .task-input {
-        display: flex;
-        gap: 9px;
-        margin-bottom: 18px;
-    }
+/*
+   IMPORTANT:
+   This is NOT a list.
+   It uses plain DIV elements only.
+*/
 
-    .task-input input {
-        flex: 1;
-        min-width: 0;
-        height: 52px;
-        padding: 0 15px;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        outline: none;
-        background: #fff;
-        color: #111;
-        font-size: 16px;
-    }
+#taskList {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 9px;
+}
 
-    .task-input input:focus {
-        border-color: #999;
-    }
+.task-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 54px;
+    padding: 12px 14px;
+    border-radius: 13px;
+    background: white;
+}
 
-    body.dark .task-input input {
-        background: #1d1f23;
-        border-color: #393b40;
-        color: #fff;
-    }
+/* Absolutely no generated content */
+#taskList::before,
+#taskList::after,
+.task-row::before,
+.task-row::after {
+    content: none !important;
+    display: none !important;
+}
 
-    .add-button {
-        width: 52px;
-        height: 52px;
-        flex-shrink: 0;
-        border: 0;
-        border-radius: 12px;
-        background: #111;
-        color: #fff;
-        font-size: 28px;
-        line-height: 52px;
-        padding: 0;
-    }
+.task-check {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+    margin: 0 12px 0 0;
+}
 
-    .add-button:active {
-        transform: scale(.95);
-    }
+.task-label {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
 
-    /* TASK LIST */
+.task-row.done .task-label {
+    text-decoration: line-through;
+    opacity: .45;
+}
 
-    .task-list {
-        width: 100%;
-    }
+.delete-task {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin-left: 8px;
+    border: 0;
+    background: transparent;
+    font-size: 16px;
+    opacity: .6;
+}
 
-    .task {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        min-height: 52px;
-        gap: 12px;
-        margin-bottom: 9px;
-        padding: 15px;
-        border-radius: 13px;
-        background: #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    }
+.no-tasks {
+    padding: 35px 10px;
+    text-align: center;
+    color: #888;
+}
 
-    body.dark .task {
-        background: #1d1f23;
-    }
+/* =========================
+   PRAYER HEADER
+========================= */
 
-    .task-checkbox {
-        width: 19px;
-        height: 19px;
-        flex-shrink: 0;
-        margin: 0;
-    }
+.prayer-header {
+    margin-bottom: 18px;
+}
 
-    .task-text {
-        flex: 1;
-        min-width: 0;
-        overflow-wrap: anywhere;
-    }
+.prayer-header h2 {
+    margin: 0 0 5px;
+}
 
-    .task.completed .task-text {
-        text-decoration: line-through;
-        opacity: .45;
-    }
+.location {
+    color: #777;
+    font-size: 14px;
+}
 
-    .delete-button {
-        width: 32px;
-        height: 32px;
-        flex-shrink: 0;
-        border: 0;
-        background: transparent;
-        padding: 0;
-        font-size: 16px;
-        opacity: .65;
-    }
+/* =========================
+   NEXT PRAYER
+========================= */
 
-    .empty {
-        padding: 35px 10px;
-        text-align: center;
-        color: #888;
-    }
+.next-prayer {
+    padding: 23px;
+    margin-bottom: 18px;
+    border-radius: 18px;
+    background: #111;
+    color: white;
+}
 
-    /* PRAYER */
+.next-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: .6;
+}
 
-    .prayer-header {
-        margin-bottom: 18px;
-    }
+.next-name {
+    margin-top: 5px;
+    font-size: 28px;
+    font-weight: 700;
+}
 
-    .prayer-header h2 {
-        margin: 0 0 5px;
-    }
+.next-time {
+    margin-top: 2px;
+    font-size: 38px;
+    font-weight: 700;
+}
 
-    .location {
-        color: #777;
-        font-size: 14px;
-    }
+/* =========================
+   PRAYER LIST
+========================= */
 
-    .next-prayer {
-        margin-bottom: 18px;
-        padding: 23px;
-        border-radius: 18px;
-        background: #111;
-        color: #fff;
-    }
+#prayerList {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+}
 
-    body.dark .next-prayer {
-        background: #292b30;
-    }
+.prayer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 15px 16px;
+    border-radius: 12px;
+    background: white;
+}
 
-    .next-label {
-        font-size: 11px;
-        letter-spacing: 1px;
-        opacity: .6;
-    }
+#prayerList::before,
+#prayerList::after,
+.prayer-row::before,
+.prayer-row::after {
+    content: none !important;
+    display: none !important;
+}
 
-    .next-name {
-        margin-top: 5px;
-        font-size: 28px;
-        font-weight: 700;
-    }
+/* =========================
+   SETTINGS
+========================= */
 
-    .next-time {
-        margin-top: 2px;
-        font-size: 38px;
-        font-weight: 700;
-    }
+.settings-card {
+    margin-top: 20px;
+    padding: 19px;
+    border-radius: 16px;
+    background: white;
+}
 
-    .prayer-list {
-        width: 100%;
-    }
+.settings-title {
+    margin-bottom: 13px;
+    font-weight: 700;
+}
 
-    .prayer-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        min-height: 52px;
-        margin-bottom: 8px;
-        padding: 15px 16px;
-        border-radius: 12px;
-        background: #fff;
-    }
+.location-row {
+    display: flex;
+    gap: 8px;
+}
 
-    body.dark .prayer-item {
-        background: #1d1f23;
-    }
+#locationInput {
+    flex: 1;
+    min-width: 0;
+    height: 45px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    outline: none;
+}
 
-    /* SETTINGS */
+.small-button {
+    height: 45px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 10px;
+    background: #111;
+    color: white;
+    font-weight: 600;
+}
 
-    .settings-card {
-        margin-top: 20px;
-        padding: 19px;
-        border-radius: 16px;
-        background: #fff;
-    }
+.notification-button {
+    width: 100%;
+    height: 45px;
+    margin-top: 11px;
+    border: 0;
+    border-radius: 10px;
+    background: #111;
+    color: white;
+    font-weight: 600;
+}
 
-    body.dark .settings-card {
-        background: #1d1f23;
-    }
+.status {
+    margin-top: 9px;
+    color: #777;
+    font-size: 13px;
+}
 
-    .settings-title {
-        margin-bottom: 13px;
-        font-weight: 700;
-    }
+/* =========================
+   DARK MODE
+========================= */
 
-    .location-row {
-        display: flex;
-        gap: 8px;
-    }
+body.dark {
+    background: #111214;
+    color: white;
+}
 
-    .location-row input {
-        flex: 1;
-        min-width: 0;
-        height: 45px;
-        padding: 0 12px;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        outline: none;
-        background: #fff;
-        color: #111;
-    }
+body.dark .date,
+body.dark .location,
+body.dark .status {
+    color: #999;
+}
 
-    body.dark .location-row input {
-        background: #292b30;
-        border-color: #3a3c42;
-        color: #fff;
-    }
+body.dark .icon-button {
+    background: #292a2f;
+    color: white;
+}
 
-    .small-button {
-        height: 45px;
-        padding: 0 16px;
-        border: 0;
-        border-radius: 10px;
-        background: #111;
-        color: #fff;
-        font-weight: 600;
-    }
+body.dark .tabs {
+    background: #242529;
+}
 
-    .notification-button {
-        width: 100%;
-        height: 45px;
-        margin-top: 11px;
-        border: 0;
-        border-radius: 10px;
-        background: #111;
-        color: #fff;
-        font-weight: 600;
-    }
+body.dark .tab {
+    color: #aaa;
+}
 
-    .status {
-        margin-top: 9px;
-        color: #777;
-        font-size: 13px;
-    }
+body.dark .tab.active {
+    background: #383a40;
+    color: white;
+}
+
+body.dark #taskInput {
+    background: #1d1f23;
+    color: white;
+    border-color: #393b40;
+}
+
+body.dark .task-row {
+    background: #1d1f23;
+}
+
+body.dark .prayer-row {
+    background: #1d1f23;
+}
+
+body.dark .settings-card {
+    background: #1d1f23;
+}
+
+body.dark #locationInput {
+    background: #292b30;
+    color: white;
+    border-color: #393b40;
+}
+
+body.dark .next-prayer {
+    background: #292b30;
+}
+
 </style>
 
 </head>
@@ -385,6 +430,8 @@
 <div class="app">
 
 ```
+<!-- HEADER -->
+
 <div class="header">
 
     <div>
@@ -401,19 +448,25 @@
 </div>
 
 
+<!-- TABS -->
+
 <div class="tabs">
 
     <button
         class="tab active"
         type="button"
-        data-tab="tasks"
-    >Tasks</button>
+        data-page="tasks"
+    >
+        Tasks
+    </button>
 
     <button
         class="tab"
         type="button"
-        data-tab="prayers"
-    >Prayer Times</button>
+        data-page="prayers"
+    >
+        Prayer Times
+    </button>
 
 </div>
 
@@ -438,19 +491,19 @@
             id="addTaskButton"
             class="add-button"
             type="button"
-        >+</button>
+        >
+            +
+        </button>
 
     </div>
 
-    <div
-        id="taskList"
-        class="task-list"
-    ></div>
+
+    <div id="taskList"></div>
 
 </div>
 
 
-<!-- PRAYER TIMES -->
+<!-- PRAYERS -->
 
 <div
     class="section"
@@ -464,7 +517,9 @@
         <div
             class="location"
             id="locationText"
-        >Erbil, Iraq</div>
+        >
+            Erbil, Iraq
+        </div>
 
     </div>
 
@@ -478,20 +533,21 @@
         <div
             class="next-name"
             id="nextName"
-        >Loading...</div>
+        >
+            Loading...
+        </div>
 
         <div
             class="next-time"
             id="nextTime"
-        >--:--</div>
+        >
+            --:--
+        </div>
 
     </div>
 
 
-    <div
-        class="prayer-list"
-        id="prayerList"
-    ></div>
+    <div id="prayerList"></div>
 
 
     <div class="settings-card">
@@ -499,6 +555,7 @@
         <div class="settings-title">
             Prayer settings
         </div>
+
 
         <div class="location-row">
 
@@ -513,7 +570,9 @@
                 id="updateLocationButton"
                 class="small-button"
                 type="button"
-            >Update</button>
+            >
+                Update
+            </button>
 
         </div>
 
@@ -523,8 +582,9 @@
             class="notification-button"
             type="button"
         >
-            🔔 Enable Prayer Notifications
+            Enable Prayer Notifications
         </button>
+
 
         <div
             id="notificationStatus"
@@ -542,9 +602,9 @@
 
 <script>
 
-/* ================================
+/* =========================
    DATE
-================================ */
+========================= */
 
 function updateDate() {
 
@@ -560,32 +620,35 @@ function updateDate() {
 }
 
 
-/* ================================
-   TASKS
-================================ */
+/* =========================
+   TASK DATA
+========================= */
 
 let tasks = [];
 
 
 function loadTasks() {
 
+    const saved =
+        localStorage.getItem("dailyz_tasks");
+
+    if (!saved) {
+        tasks = [];
+        return;
+    }
+
     try {
 
-        const saved =
-            localStorage.getItem("dailyz_tasks");
+        const parsed =
+            JSON.parse(saved);
 
-        if (saved) {
-
-            const parsed =
-                JSON.parse(saved);
-
-            if (Array.isArray(parsed)) {
-                tasks = parsed;
-            }
-
+        if (Array.isArray(parsed)) {
+            tasks = parsed;
+        } else {
+            tasks = [];
         }
 
-    } catch (error) {
+    } catch {
 
         tasks = [];
 
@@ -595,55 +658,61 @@ function loadTasks() {
 
 function saveTasks() {
 
-    try {
-
-        localStorage.setItem(
-            "dailyz_tasks",
-            JSON.stringify(tasks)
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-    }
+    localStorage.setItem(
+        "dailyz_tasks",
+        JSON.stringify(tasks)
+    );
 }
 
 
+/* =========================
+   TASK RENDERING
+========================= */
+
 function renderTasks() {
 
-    const list =
+    const container =
         document.getElementById("taskList");
 
-    list.innerHTML = "";
+    container.innerHTML = "";
 
 
     if (tasks.length === 0) {
 
-        const empty =
+        const message =
             document.createElement("div");
 
-        empty.className = "empty";
+        message.className = "no-tasks";
 
-        empty.textContent =
+        message.textContent =
             "No tasks yet. Add one above.";
 
-        list.appendChild(empty);
+        container.appendChild(message);
 
         return;
     }
 
 
-    tasks.forEach(function(task, index) {
+    for (
+        let index = 0;
+        index < tasks.length;
+        index++
+    ) {
+
+        const task =
+            tasks[index];
+
+
+        /* Plain DIV. No LI. No UL. No marker. */
 
         const row =
             document.createElement("div");
 
-        row.className = "task";
+        row.className = "task-row";
 
 
-        if (task.completed) {
-            row.classList.add("completed");
+        if (task.completed === true) {
+            row.classList.add("done");
         }
 
 
@@ -653,10 +722,10 @@ function renderTasks() {
         checkbox.type = "checkbox";
 
         checkbox.className =
-            "task-checkbox";
+            "task-check";
 
         checkbox.checked =
-            Boolean(task.completed);
+            task.completed === true;
 
 
         checkbox.addEventListener(
@@ -674,13 +743,13 @@ function renderTasks() {
         );
 
 
-        const text =
+        const label =
             document.createElement("div");
 
-        text.className =
-            "task-text";
+        label.className =
+            "task-label";
 
-        text.textContent =
+        label.textContent =
             task.text;
 
 
@@ -690,9 +759,10 @@ function renderTasks() {
         deleteButton.type = "button";
 
         deleteButton.className =
-            "delete-button";
+            "delete-task";
 
-        deleteButton.textContent = "🗑️";
+        deleteButton.textContent =
+            "×";
 
 
         deleteButton.addEventListener(
@@ -710,25 +780,32 @@ function renderTasks() {
 
 
         row.appendChild(checkbox);
-        row.appendChild(text);
+
+        row.appendChild(label);
+
         row.appendChild(deleteButton);
 
-        list.appendChild(row);
+        container.appendChild(row);
 
-    });
+    }
 }
 
+
+/* =========================
+   ADD TASK
+========================= */
 
 function addTask() {
 
     const input =
         document.getElementById("taskInput");
 
-    const text =
+
+    const value =
         input.value.trim();
 
 
-    if (text.length === 0) {
+    if (value === "") {
 
         input.focus();
 
@@ -737,7 +814,7 @@ function addTask() {
 
 
     tasks.push({
-        text: text,
+        text: value,
         completed: false
     });
 
@@ -752,38 +829,54 @@ function addTask() {
 }
 
 
-/* ================================
+/* =========================
    TABS
-================================ */
+========================= */
 
-const tabs =
+const allTabs =
     document.querySelectorAll(".tab");
 
 
-tabs.forEach(function(tab) {
+allTabs.forEach(function(tab) {
 
     tab.addEventListener(
         "click",
         function() {
 
-            tabs.forEach(function(t) {
-                t.classList.remove("active");
-            });
+            allTabs.forEach(
+                function(otherTab) {
+
+                    otherTab.classList.remove(
+                        "active"
+                    );
+
+                }
+            );
 
 
             document
                 .querySelectorAll(".section")
-                .forEach(function(section) {
-                    section.classList.remove("active");
-                });
+                .forEach(
+                    function(section) {
+
+                        section.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
 
 
             tab.classList.add("active");
 
 
-            document
-                .getElementById(tab.dataset.tab)
-                .classList.add("active");
+            const page =
+                document.getElementById(
+                    tab.dataset.page
+                );
+
+
+            page.classList.add("active");
 
         }
     );
@@ -791,13 +884,13 @@ tabs.forEach(function(tab) {
 });
 
 
-/* ================================
+/* =========================
    DARK MODE
-================================ */
+========================= */
 
-function loadTheme() {
+function loadDarkMode() {
 
-    const dark =
+    const enabled =
         localStorage.getItem(
             "dailyz_dark"
         ) === "true";
@@ -805,77 +898,90 @@ function loadTheme() {
 
     document.body.classList.toggle(
         "dark",
-        dark
+        enabled
     );
 
 
     document.getElementById(
         "themeButton"
     ).textContent =
-        dark ? "☀" : "☾";
+        enabled ? "☀" : "☾";
 }
 
 
-function toggleTheme() {
+function toggleDarkMode() {
 
-    const dark =
-        !document.body.classList.contains("dark");
+    const enabled =
+        !document.body.classList.contains(
+            "dark"
+        );
 
 
     document.body.classList.toggle(
         "dark",
-        dark
+        enabled
     );
 
 
     localStorage.setItem(
         "dailyz_dark",
-        String(dark)
+        enabled
     );
 
 
     document.getElementById(
         "themeButton"
     ).textContent =
-        dark ? "☀" : "☾";
+        enabled ? "☀" : "☾";
 }
 
 
-/* ================================
-   ERBIL PRAYER DATA
-================================ */
+/* =========================
+   PRAYER DATA
+========================= */
 
 /*
-   Verified from the times you provided
-   from Katakani Bang for August 10, 2026.
+   Verified times you provided
+   from Katakani Bang:
 
-   We do NOT invent other dates.
+   August 10, 2026
+   Erbil, Iraq
 */
 
 const prayerData = {
 
     "2026-08-10": {
+
         Fajr: "03:46",
+
         Dhuhr: "12:20",
+
         Asr: "16:01",
+
         Maghrib: "19:04",
+
         Isha: "20:19"
+
     }
 
 };
 
 
-function getDateKey() {
+function getTodayKey() {
 
-    const now = new Date();
+    const now =
+        new Date();
+
 
     const year =
         now.getFullYear();
+
 
     const month =
         String(
             now.getMonth() + 1
         ).padStart(2, "0");
+
 
     const day =
         String(
@@ -893,36 +999,41 @@ function getDateKey() {
 }
 
 
+/* =========================
+   PRAYER RENDER
+========================= */
+
 function loadPrayerTimes() {
 
     const key =
-        getDateKey();
+        getTodayKey();
 
 
     const data =
         prayerData[key];
 
 
-    const list =
+    const container =
         document.getElementById(
             "prayerList"
         );
 
 
-    list.innerHTML = "";
+    container.innerHTML = "";
 
 
     if (!data) {
 
-        const empty =
+        const message =
             document.createElement("div");
 
-        empty.className = "empty";
+        message.className =
+            "no-tasks";
 
-        empty.textContent =
+        message.textContent =
             "Prayer times are not available for this date yet.";
 
-        list.appendChild(empty);
+        container.appendChild(message);
 
 
         document.getElementById(
@@ -936,53 +1047,91 @@ function loadPrayerTimes() {
         ).textContent =
             "--:--";
 
+
         return;
     }
 
 
     const prayers = [
-        ["Fajr", data.Fajr],
-        ["Dhuhr", data.Dhuhr],
-        ["Asr", data.Asr],
-        ["Maghrib", data.Maghrib],
-        ["Isha", data.Isha]
+
+        {
+            name: "Fajr",
+            time: data.Fajr
+        },
+
+        {
+            name: "Dhuhr",
+            time: data.Dhuhr
+        },
+
+        {
+            name: "Asr",
+            time: data.Asr
+        },
+
+        {
+            name: "Maghrib",
+            time: data.Maghrib
+        },
+
+        {
+            name: "Isha",
+            time: data.Isha
+        }
+
     ];
 
 
-    prayers.forEach(function(prayer) {
+    prayers.forEach(
+        function(prayer) {
 
-        const item =
-            document.createElement("div");
-
-        item.className =
-            "prayer-item";
-
-
-        const name =
-            document.createElement("span");
-
-        name.textContent =
-            prayer[0];
+            const row =
+                document.createElement(
+                    "div"
+                );
 
 
-        const time =
-            document.createElement("strong");
-
-        time.textContent =
-            prayer[1];
+            row.className =
+                "prayer-row";
 
 
-        item.appendChild(name);
-        item.appendChild(time);
+            const name =
+                document.createElement(
+                    "span"
+                );
 
-        list.appendChild(item);
 
-    });
+            name.textContent =
+                prayer.name;
+
+
+            const time =
+                document.createElement(
+                    "strong"
+                );
+
+
+            time.textContent =
+                prayer.time;
+
+
+            row.appendChild(name);
+
+            row.appendChild(time);
+
+            container.appendChild(row);
+
+        }
+    );
 
 
     updateNextPrayer(prayers);
 }
 
+
+/* =========================
+   NEXT PRAYER
+========================= */
 
 function updateNextPrayer(prayers) {
 
@@ -990,12 +1139,13 @@ function updateNextPrayer(prayers) {
         new Date();
 
 
-    const currentMinutes =
+    const current =
         now.getHours() * 60 +
         now.getMinutes();
 
 
-    let next = null;
+    let next =
+        null;
 
 
     for (
@@ -1005,7 +1155,7 @@ function updateNextPrayer(prayers) {
     ) {
 
         const parts =
-            prayers[i][1].split(":");
+            prayers[i].time.split(":");
 
 
         const minutes =
@@ -1013,36 +1163,40 @@ function updateNextPrayer(prayers) {
             Number(parts[1]);
 
 
-        if (minutes > currentMinutes) {
+        if (minutes > current) {
 
-            next = prayers[i];
+            next =
+                prayers[i];
 
             break;
         }
     }
 
 
-    if (!next) {
-        next = prayers[0];
+    if (next === null) {
+
+        next =
+            prayers[0];
+
     }
 
 
     document.getElementById(
         "nextName"
     ).textContent =
-        next[0];
+        next.name;
 
 
     document.getElementById(
         "nextTime"
     ).textContent =
-        next[1];
+        next.time;
 }
 
 
-/* ================================
+/* =========================
    NOTIFICATIONS
-================================ */
+========================= */
 
 async function enableNotifications() {
 
@@ -1079,18 +1233,18 @@ async function enableNotifications() {
 
         }
 
-    } catch (error) {
+    } catch {
 
         status.textContent =
-            "Could not enable notifications.";
+            "Notifications could not be enabled.";
 
     }
 }
 
 
-/* ================================
-   EVENT LISTENERS
-================================ */
+/* =========================
+   BUTTONS
+========================= */
 
 document
     .getElementById("addTaskButton")
@@ -1122,7 +1276,7 @@ document
     .getElementById("themeButton")
     .addEventListener(
         "click",
-        toggleTheme
+        toggleDarkMode
     );
 
 
@@ -1132,9 +1286,11 @@ document
         "click",
         function() {
 
-            const value =
+            const location =
                 document
-                    .getElementById("locationInput")
+                    .getElementById(
+                        "locationInput"
+                    )
                     .value
                     .trim();
 
@@ -1142,7 +1298,8 @@ document
             document.getElementById(
                 "locationText"
             ).textContent =
-                value || "Erbil, Iraq";
+                location ||
+                "Erbil, Iraq";
 
 
             loadPrayerTimes();
@@ -1159,13 +1316,13 @@ document
     );
 
 
-/* ================================
-   START
-================================ */
+/* =========================
+   START APP
+========================= */
 
 updateDate();
 
-loadTheme();
+loadDarkMode();
 
 loadTasks();
 
