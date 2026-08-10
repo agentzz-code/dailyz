@@ -1,9 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Dailyz</title>
 
 <style>
@@ -60,12 +60,6 @@ button {
     font-size: 14px;
 }
 
-.header-buttons {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
 .icon-button {
     width: 44px;
     height: 44px;
@@ -78,47 +72,81 @@ button {
 /* AUTH */
 
 .auth-card {
-    width: 100%;
-    padding: 24px;
+    padding: 25px;
     margin-bottom: 22px;
     border-radius: 18px;
     background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,.05);
 }
 
 .auth-card h2 {
-    margin: 0 0 7px;
+    margin: 0;
+    font-size: 26px;
 }
 
 .auth-subtitle {
-    margin-bottom: 18px;
+    margin-top: 7px;
+    margin-bottom: 21px;
     color: #777;
     font-size: 14px;
 }
 
+.auth-input-wrapper {
+    position: relative;
+    margin-bottom: 11px;
+}
+
 .auth-input {
     width: 100%;
-    height: 48px;
-    padding: 0 13px;
-    margin-bottom: 9px;
+    height: 50px;
+    padding: 0 14px;
     border: 1px solid #ddd;
-    border-radius: 10px;
+    border-radius: 11px;
     outline: none;
+    background: white;
     font-size: 15px;
+}
+
+.auth-input:focus {
+    border-color: #888;
+}
+
+.password-input {
+    padding-right: 50px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    width: 40px;
+    height: 40px;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #777;
 }
 
 .auth-button {
     width: 100%;
-    height: 48px;
-    margin-top: 4px;
+    height: 50px;
+    margin-top: 5px;
     border: 0;
-    border-radius: 10px;
+    border-radius: 11px;
     background: #111;
     color: white;
+    font-size: 15px;
     font-weight: 700;
 }
 
+.auth-button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
 .auth-switch {
-    margin-top: 13px;
+    margin-top: 15px;
     text-align: center;
     color: #777;
     font-size: 14px;
@@ -126,41 +154,58 @@ button {
 
 .auth-switch button {
     border: 0;
-    background: none;
+    background: transparent;
     color: #111;
     font-weight: 700;
 }
 
 .auth-error {
     display: none;
-    margin-bottom: 10px;
-    color: #d00;
+    padding: 10px 12px;
+    margin-bottom: 11px;
+    border-radius: 9px;
+    background: #fff0f0;
+    color: #c00;
     font-size: 13px;
 }
+
+.password-help {
+    display: none;
+    margin: -3px 0 11px;
+    color: #888;
+    font-size: 12px;
+}
+
+/* USER BAR */
 
 .user-bar {
     display: none;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 14px;
+    padding: 13px 15px;
     margin-bottom: 18px;
-    border-radius: 12px;
+    border-radius: 13px;
     background: white;
 }
 
-.user-email {
-    max-width: 70%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #666;
-    font-size: 13px;
+.user-info {
+    min-width: 0;
+}
+
+.username-display {
+    font-weight: 700;
+}
+
+.email-display {
+    margin-top: 2px;
+    color: #777;
+    font-size: 12px;
 }
 
 .logout-button {
     border: 0;
-    border-radius: 8px;
-    padding: 8px 12px;
+    border-radius: 9px;
+    padding: 9px 13px;
     background: #eee;
     font-weight: 600;
 }
@@ -201,7 +246,7 @@ button {
     display: block;
 }
 
-/* TASK INPUT */
+/* TASKS */
 
 .task-input {
     display: flex;
@@ -232,19 +277,15 @@ button {
     font-size: 28px;
 }
 
-/* TASKS */
-
 #taskList {
     display: flex;
     flex-direction: column;
     gap: 9px;
-    width: 100%;
 }
 
 .task-row {
     display: flex;
     align-items: center;
-    width: 100%;
     min-height: 54px;
     padding: 12px 14px;
     border-radius: 13px;
@@ -255,7 +296,7 @@ button {
     width: 19px;
     height: 19px;
     flex-shrink: 0;
-    margin: 0 12px 0 0;
+    margin-right: 12px;
 }
 
 .task-label {
@@ -341,8 +382,6 @@ button {
     background: white;
 }
 
-/* SETTINGS */
-
 .settings-card {
     margin-top: 20px;
     padding: 19px;
@@ -396,25 +435,15 @@ button {
     font-size: 13px;
 }
 
-/* DARK */
+/* DARK MODE */
 
 body.dark {
     background: #111214;
     color: white;
 }
 
-body.dark .icon-button,
-body.dark .tabs {
+body.dark .icon-button {
     background: #292a2f;
-    color: white;
-}
-
-body.dark .tab {
-    color: #aaa;
-}
-
-body.dark .tab.active {
-    background: #383a40;
     color: white;
 }
 
@@ -434,11 +463,25 @@ body.dark #locationInput {
     border-color: #3b3d43;
 }
 
-body.dark .user-email,
 body.dark .auth-subtitle,
+body.dark .email-display,
+body.dark .date,
 body.dark .location,
 body.dark .status {
     color: #999;
+}
+
+body.dark .tabs {
+    background: #242529;
+}
+
+body.dark .tab {
+    color: #aaa;
+}
+
+body.dark .tab.active {
+    background: #383a40;
+    color: white;
 }
 
 body.dark .logout-button {
@@ -450,271 +493,346 @@ body.dark .next-prayer {
     background: #292b30;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="app">
 
-    <!-- HEADER -->
+```
+<!-- HEADER -->
 
-    <div class="header">
+<div class="header">
 
-        <div>
-            <div class="logo">Dailyz</div>
-            <div class="date" id="date"></div>
-        </div>
+    <div>
+        <div class="logo">Dailyz</div>
+        <div class="date" id="date"></div>
+    </div>
 
-        <div class="header-buttons">
+    <button
+        class="icon-button"
+        id="themeButton"
+        type="button"
+    >☾</button>
 
-            <button
-                class="icon-button"
-                id="themeButton"
-                type="button"
-            >☾</button>
+</div>
 
-        </div>
+
+<!-- AUTH -->
+
+<div
+    class="auth-card"
+    id="authCard"
+>
+
+    <h2 id="authTitle">
+        Create your account
+    </h2>
+
+    <div
+        class="auth-subtitle"
+        id="authSubtitle"
+    >
+        Start organizing your day with Dailyz.
+    </div>
+
+
+    <div
+        class="auth-error"
+        id="authError"
+    ></div>
+
+
+    <!-- USERNAME -->
+
+    <div id="usernameWrapper">
+
+        <input
+            class="auth-input"
+            id="usernameInput"
+            type="text"
+            placeholder="Username"
+            autocomplete="username"
+            maxlength="30"
+        >
 
     </div>
 
 
-    <!-- AUTH -->
+    <!-- EMAIL -->
 
-    <div
-        class="auth-card"
-        id="authCard"
+    <input
+        class="auth-input"
+        id="emailInput"
+        type="email"
+        placeholder="Email"
+        autocomplete="email"
     >
 
-        <h2 id="authTitle">Sign in</h2>
 
-        <div class="auth-subtitle">
-            Sign in to save your Dailyz tasks to your account.
-        </div>
+    <!-- PASSWORD -->
 
-        <div
-            class="auth-error"
-            id="authError"
-        ></div>
+    <div class="auth-input-wrapper">
 
         <input
-            class="auth-input"
-            id="emailInput"
-            type="email"
-            placeholder="Email"
-            autocomplete="email"
-        >
-
-        <input
-            class="auth-input"
+            class="auth-input password-input"
             id="passwordInput"
             type="password"
             placeholder="Password"
-            autocomplete="current-password"
+            autocomplete="new-password"
         >
 
         <button
-            class="auth-button"
-            id="authButton"
+            class="password-toggle"
+            id="passwordToggle"
+            type="button"
+        >
+            Show
+        </button>
+
+    </div>
+
+
+    <div
+        class="password-help"
+        id="passwordHelp"
+    >
+        Password must be at least 6 characters.
+    </div>
+
+
+    <!-- CONFIRM PASSWORD -->
+
+    <div
+        class="auth-input-wrapper"
+        id="confirmWrapper"
+    >
+
+        <input
+            class="auth-input password-input"
+            id="confirmPasswordInput"
+            type="password"
+            placeholder="Confirm password"
+            autocomplete="new-password"
+        >
+
+    </div>
+
+
+    <button
+        class="auth-button"
+        id="authButton"
+        type="button"
+    >
+        Create Account
+    </button>
+
+
+    <div class="auth-switch">
+
+        <span id="switchText">
+            Already have an account?
+        </span>
+
+        <button
+            id="switchAuthButton"
             type="button"
         >
             Sign In
         </button>
-
-        <div class="auth-switch">
-
-            <span id="switchText">
-                Don't have an account?
-            </span>
-
-            <button
-                id="switchAuthButton"
-                type="button"
-            >
-                Sign Up
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- USER BAR -->
-
-    <div
-        class="user-bar"
-        id="userBar"
-    >
-
-        <div
-            class="user-email"
-            id="userEmail"
-        ></div>
-
-        <button
-            class="logout-button"
-            id="logoutButton"
-            type="button"
-        >
-            Log Out
-        </button>
-
-    </div>
-
-
-    <!-- TABS -->
-
-    <div class="tabs">
-
-        <button
-            class="tab active"
-            type="button"
-            data-page="tasks"
-        >
-            Tasks
-        </button>
-
-        <button
-            class="tab"
-            type="button"
-            data-page="prayers"
-        >
-            Prayer Times
-        </button>
-
-    </div>
-
-
-    <!-- TASKS -->
-
-    <div
-        class="section active"
-        id="tasks"
-    >
-
-        <div class="task-input">
-
-            <input
-                id="taskInput"
-                type="text"
-                placeholder="Add a task..."
-                autocomplete="off"
-            >
-
-            <button
-                id="addTaskButton"
-                class="add-button"
-                type="button"
-            >
-                +
-            </button>
-
-        </div>
-
-        <div id="taskList"></div>
-
-    </div>
-
-
-    <!-- PRAYERS -->
-
-    <div
-        class="section"
-        id="prayers"
-    >
-
-        <div class="prayer-header">
-
-            <h2>Prayer Times</h2>
-
-            <div
-                class="location"
-                id="locationText"
-            >
-                Erbil, Iraq
-            </div>
-
-        </div>
-
-
-        <div class="next-prayer">
-
-            <div class="next-label">
-                NEXT PRAYER
-            </div>
-
-            <div
-                class="next-name"
-                id="nextName"
-            >
-                Loading...
-            </div>
-
-            <div
-                class="next-time"
-                id="nextTime"
-            >
-                --:--
-            </div>
-
-        </div>
-
-
-        <div id="prayerList"></div>
-
-
-        <div class="settings-card">
-
-            <div class="settings-title">
-                Prayer settings
-            </div>
-
-            <div class="location-row">
-
-                <input
-                    id="locationInput"
-                    type="text"
-                    value="Erbil, Iraq"
-                    placeholder="City, Country"
-                >
-
-                <button
-                    id="updateLocationButton"
-                    class="small-button"
-                    type="button"
-                >
-                    Update
-                </button>
-
-            </div>
-
-
-            <button
-                id="notificationButton"
-                class="notification-button"
-                type="button"
-            >
-                🔔 Enable Prayer Notifications
-            </button>
-
-            <div
-                id="notificationStatus"
-                class="status"
-            >
-                Notifications are disabled.
-            </div>
-
-        </div>
 
     </div>
 
 </div>
 
 
+<!-- USER -->
+
+<div
+    class="user-bar"
+    id="userBar"
+>
+
+    <div class="user-info">
+
+        <div
+            class="username-display"
+            id="usernameDisplay"
+        ></div>
+
+        <div
+            class="email-display"
+            id="emailDisplay"
+        ></div>
+
+    </div>
+
+    <button
+        class="logout-button"
+        id="logoutButton"
+        type="button"
+    >
+        Log Out
+    </button>
+
+</div>
+
+
+<!-- TABS -->
+
+<div class="tabs">
+
+    <button
+        class="tab active"
+        type="button"
+        data-page="tasks"
+    >
+        Tasks
+    </button>
+
+    <button
+        class="tab"
+        type="button"
+        data-page="prayers"
+    >
+        Prayer Times
+    </button>
+
+</div>
+
+
+<!-- TASKS -->
+
+<div
+    class="section active"
+    id="tasks"
+>
+
+    <div class="task-input">
+
+        <input
+            id="taskInput"
+            type="text"
+            placeholder="Add a task..."
+            autocomplete="off"
+        >
+
+        <button
+            id="addTaskButton"
+            class="add-button"
+            type="button"
+        >
+            +
+        </button>
+
+    </div>
+
+    <div id="taskList"></div>
+
+</div>
+
+
+<!-- PRAYERS -->
+
+<div
+    class="section"
+    id="prayers"
+>
+
+    <div class="prayer-header">
+
+        <h2>Prayer Times</h2>
+
+        <div
+            class="location"
+            id="locationText"
+        >
+            Erbil, Iraq
+        </div>
+
+    </div>
+
+
+    <div class="next-prayer">
+
+        <div class="next-label">
+            NEXT PRAYER
+        </div>
+
+        <div
+            class="next-name"
+            id="nextName"
+        >
+            Loading...
+        </div>
+
+        <div
+            class="next-time"
+            id="nextTime"
+        >
+            --:--
+        </div>
+
+    </div>
+
+
+    <div id="prayerList"></div>
+
+
+    <div class="settings-card">
+
+        <div class="settings-title">
+            Prayer settings
+        </div>
+
+        <div class="location-row">
+
+            <input
+                id="locationInput"
+                type="text"
+                value="Erbil, Iraq"
+                placeholder="City, Country"
+            >
+
+            <button
+                id="updateLocationButton"
+                class="small-button"
+                type="button"
+            >
+                Update
+            </button>
+
+        </div>
+
+
+        <button
+            id="notificationButton"
+            class="notification-button"
+            type="button"
+        >
+            🔔 Enable Prayer Notifications
+        </button>
+
+        <div
+            id="notificationStatus"
+            class="status"
+        >
+            Notifications are disabled.
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
 <script type="module">
 
-/* ============================================
+/* =========================================
    FIREBASE
-============================================ */
+========================================= */
 
 import {
     initializeApp
@@ -735,6 +853,8 @@ import {
     deleteDoc,
     updateDoc,
     doc,
+    setDoc,
+    getDoc,
     onSnapshot,
     query,
     orderBy
@@ -760,7 +880,6 @@ const firebaseConfig = {
 
     appId:
         "1:1031947329415:web:475f3f0d7449992fc73d22"
-
 };
 
 
@@ -776,20 +895,16 @@ const db =
     getFirestore(app);
 
 
-/* ============================================
-   VARIABLES
-============================================ */
-
 let currentUser = null;
 
 let unsubscribeTasks = null;
 
-let signUpMode = false;
+let signUpMode = true;
 
 
-/* ============================================
+/* =========================================
    DATE
-============================================ */
+========================================= */
 
 function updateDate() {
 
@@ -806,42 +921,76 @@ function updateDate() {
 }
 
 
-/* ============================================
-   AUTH UI
-============================================ */
+/* =========================================
+   AUTH ERROR
+========================================= */
 
-function showAuthError(message) {
+function showError(message) {
 
-    const error =
+    const box =
         document.getElementById("authError");
 
-    error.textContent = message;
+    box.textContent =
+        message;
 
-    error.style.display = "block";
+    box.style.display =
+        "block";
 }
 
 
-function clearAuthError() {
+function clearError() {
 
-    const error =
+    const box =
         document.getElementById("authError");
 
-    error.textContent = "";
+    box.textContent =
+        "";
 
-    error.style.display = "none";
+    box.style.display =
+        "none";
 }
 
 
-function updateAuthUI() {
+/* =========================================
+   AUTH MODE
+========================================= */
+
+function updateAuthMode() {
 
     const title =
-        document.getElementById("authTitle");
+        document.getElementById(
+            "authTitle"
+        );
+
+    const subtitle =
+        document.getElementById(
+            "authSubtitle"
+        );
+
+    const usernameWrapper =
+        document.getElementById(
+            "usernameWrapper"
+        );
+
+    const confirmWrapper =
+        document.getElementById(
+            "confirmWrapper"
+        );
+
+    const passwordHelp =
+        document.getElementById(
+            "passwordHelp"
+        );
 
     const button =
-        document.getElementById("authButton");
+        document.getElementById(
+            "authButton"
+        );
 
     const switchText =
-        document.getElementById("switchText");
+        document.getElementById(
+            "switchText"
+        );
 
     const switchButton =
         document.getElementById(
@@ -852,10 +1001,22 @@ function updateAuthUI() {
     if (signUpMode) {
 
         title.textContent =
-            "Create account";
+            "Create your account";
+
+        subtitle.textContent =
+            "Start organizing your day with Dailyz.";
+
+        usernameWrapper.style.display =
+            "block";
+
+        confirmWrapper.style.display =
+            "block";
+
+        passwordHelp.style.display =
+            "block";
 
         button.textContent =
-            "Sign Up";
+            "Create Account";
 
         switchText.textContent =
             "Already have an account?";
@@ -866,7 +1027,19 @@ function updateAuthUI() {
     } else {
 
         title.textContent =
-            "Sign in";
+            "Welcome back";
+
+        subtitle.textContent =
+            "Sign in to continue using Dailyz.";
+
+        usernameWrapper.style.display =
+            "none";
+
+        confirmWrapper.style.display =
+            "none";
+
+        passwordHelp.style.display =
+            "none";
 
         button.textContent =
             "Sign In";
@@ -876,37 +1049,80 @@ function updateAuthUI() {
 
         switchButton.textContent =
             "Sign Up";
-
     }
+
+
+    clearError();
 }
 
 
-/* ============================================
-   SIGN UP / SIGN IN
-============================================ */
+/* =========================================
+   SIGN UP
+========================================= */
 
-async function handleAuth() {
+async function signUp() {
 
-    clearAuthError();
+    clearError();
+
+
+    const username =
+        document
+            .getElementById(
+                "usernameInput"
+            )
+            .value
+            .trim();
 
 
     const email =
         document
-            .getElementById("emailInput")
+            .getElementById(
+                "emailInput"
+            )
             .value
             .trim();
 
 
     const password =
         document
-            .getElementById("passwordInput")
+            .getElementById(
+                "passwordInput"
+            )
             .value;
 
 
-    if (!email || !password) {
+    const confirmPassword =
+        document
+            .getElementById(
+                "confirmPasswordInput"
+            )
+            .value;
 
-        showAuthError(
-            "Enter your email and password."
+
+    if (!username) {
+
+        showError(
+            "Please enter a username."
+        );
+
+        return;
+    }
+
+
+    if (username.length < 2) {
+
+        showError(
+            "Username must be at least 2 characters."
+        );
+
+        return;
+    }
+
+
+    if (!email) {
+
+        showError(
+            "Please enter your email."
         );
 
         return;
@@ -915,8 +1131,18 @@ async function handleAuth() {
 
     if (password.length < 6) {
 
-        showAuthError(
+        showError(
             "Password must be at least 6 characters."
+        );
+
+        return;
+    }
+
+
+    if (password !== confirmPassword) {
+
+        showError(
+            "Passwords do not match."
         );
 
         return;
@@ -929,36 +1155,42 @@ async function handleAuth() {
         );
 
 
-    button.disabled = true;
+    button.disabled =
+        true;
 
 
     try {
 
-        if (signUpMode) {
-
+        const credentials =
             await createUserWithEmailAndPassword(
                 auth,
                 email,
                 password
             );
 
-        } else {
 
-            await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
+        await setDoc(
+            doc(
+                db,
+                "users",
+                credentials.user.uid
+            ),
+            {
+                username:
+                    username,
 
-        }
+                email:
+                    email,
+
+                createdAt:
+                    Date.now()
+            }
+        );
+
 
     } catch (error) {
 
         console.error(error);
-
-
-        let message =
-            "Something went wrong.";
 
 
         if (
@@ -966,62 +1198,215 @@ async function handleAuth() {
             "auth/email-already-in-use"
         ) {
 
-            message =
-                "That email already has an account.";
+            showError(
+                "That email is already registered."
+            );
 
         } else if (
             error.code ===
             "auth/invalid-email"
         ) {
 
-            message =
-                "Enter a valid email.";
+            showError(
+                "Please enter a valid email."
+            );
 
-        } else if (
-            error.code ===
-            "auth/invalid-credential"
-        ) {
+        } else {
 
-            message =
-                "Incorrect email or password.";
-
-        } else if (
-            error.code ===
-            "auth/user-not-found"
-        ) {
-
-            message =
-                "No account exists with that email.";
-
-        } else if (
-            error.code ===
-            "auth/wrong-password"
-        ) {
-
-            message =
-                "Incorrect password.";
+            showError(
+                error.message
+            );
 
         }
-
-
-        showAuthError(message);
 
     }
 
 
-    button.disabled = false;
+    button.disabled =
+        false;
 }
 
 
-/* ============================================
+/* =========================================
+   SIGN IN
+========================================= */
+
+async function signIn() {
+
+    clearError();
+
+
+    const email =
+        document
+            .getElementById(
+                "emailInput"
+            )
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById(
+                "passwordInput"
+            )
+            .value;
+
+
+    if (!email || !password) {
+
+        showError(
+            "Enter your email and password."
+        );
+
+        return;
+    }
+
+
+    const button =
+        document.getElementById(
+            "authButton"
+        );
+
+
+    button.disabled =
+        true;
+
+
+    try {
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        if (
+            error.code ===
+            "auth/invalid-credential"
+        ) {
+
+            showError(
+                "Incorrect email or password."
+            );
+
+        } else {
+
+            showError(
+                error.message
+            );
+
+        }
+
+    }
+
+
+    button.disabled =
+        false;
+}
+
+
+/* =========================================
+   AUTH BUTTON
+========================================= */
+
+document
+    .getElementById(
+        "authButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            if (signUpMode) {
+
+                signUp();
+
+            } else {
+
+                signIn();
+
+            }
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "switchAuthButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            signUpMode =
+                !signUpMode;
+
+            updateAuthMode();
+
+        }
+    );
+
+
+/* =========================================
+   PASSWORD VISIBILITY
+========================================= */
+
+document
+    .getElementById(
+        "passwordToggle"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            const password =
+                document.getElementById(
+                    "passwordInput"
+                );
+
+
+            if (
+                password.type ===
+                "password"
+            ) {
+
+                password.type =
+                    "text";
+
+                this.textContent =
+                    "Hide";
+
+            } else {
+
+                password.type =
+                    "password";
+
+                this.textContent =
+                    "Show";
+
+            }
+
+        }
+    );
+
+
+/* =========================================
    AUTH STATE
-============================================ */
+========================================= */
 
 onAuthStateChanged(
     auth,
-    function(user) {
+    async function(user) {
 
-        currentUser = user;
+        currentUser =
+            user;
 
 
         const authCard =
@@ -1034,11 +1419,6 @@ onAuthStateChanged(
                 "userBar"
             );
 
-        const userEmail =
-            document.getElementById(
-                "userEmail"
-            );
-
 
         if (user) {
 
@@ -1048,8 +1428,51 @@ onAuthStateChanged(
             userBar.style.display =
                 "flex";
 
-            userEmail.textContent =
+
+            document.getElementById(
+                "emailDisplay"
+            ).textContent =
                 user.email;
+
+
+            try {
+
+                const profile =
+                    await getDoc(
+                        doc(
+                            db,
+                            "users",
+                            user.uid
+                        )
+                    );
+
+
+                if (
+                    profile.exists()
+                ) {
+
+                    document.getElementById(
+                        "usernameDisplay"
+                    ).textContent =
+                        profile.data().username;
+
+                } else {
+
+                    document.getElementById(
+                        "usernameDisplay"
+                    ).textContent =
+                        "User";
+
+                }
+
+            } catch {
+
+                document.getElementById(
+                    "usernameDisplay"
+                ).textContent =
+                    "User";
+
+            }
 
 
             startTaskListener();
@@ -1072,11 +1495,29 @@ onAuthStateChanged(
 );
 
 
-/* ============================================
-   FIRESTORE TASKS
-============================================ */
+/* =========================================
+   LOG OUT
+========================================= */
 
-function taskCollection() {
+document
+    .getElementById(
+        "logoutButton"
+    )
+    .addEventListener(
+        "click",
+        async function() {
+
+            await signOut(auth);
+
+        }
+    );
+
+
+/* =========================================
+   FIRESTORE TASKS
+========================================= */
+
+function getTaskCollection() {
 
     return collection(
         db,
@@ -1089,24 +1530,27 @@ function taskCollection() {
 
 function startTaskListener() {
 
+    stopTaskListener();
+
+
     if (!currentUser) {
         return;
     }
 
 
-    stopTaskListener();
-
-
-    const tasksQuery =
+    const taskQuery =
         query(
-            taskCollection(),
-            orderBy("createdAt", "asc")
+            getTaskCollection(),
+            orderBy(
+                "createdAt",
+                "asc"
+            )
         );
 
 
     unsubscribeTasks =
         onSnapshot(
-            tasksQuery,
+            taskQuery,
             function(snapshot) {
 
                 const tasks = [];
@@ -1116,7 +1560,9 @@ function startTaskListener() {
                     function(taskDoc) {
 
                         tasks.push({
-                            id: taskDoc.id,
+                            id:
+                                taskDoc.id,
+
                             ...taskDoc.data()
                         });
 
@@ -1125,16 +1571,6 @@ function startTaskListener() {
 
 
                 renderTasks(tasks);
-
-            },
-            function(error) {
-
-                console.error(
-                    "Firestore error:",
-                    error
-                );
-
-                renderTasks([]);
 
             }
         );
@@ -1147,15 +1583,15 @@ function stopTaskListener() {
 
         unsubscribeTasks();
 
-        unsubscribeTasks = null;
-
+        unsubscribeTasks =
+            null;
     }
 }
 
 
-/* ============================================
+/* =========================================
    RENDER TASKS
-============================================ */
+========================================= */
 
 function renderTasks(tasks) {
 
@@ -1165,7 +1601,8 @@ function renderTasks(tasks) {
         );
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     if (!currentUser) {
@@ -1181,7 +1618,9 @@ function renderTasks(tasks) {
         message.textContent =
             "Sign in to save your tasks.";
 
-        container.appendChild(message);
+        container.appendChild(
+            message
+        );
 
         return;
     }
@@ -1200,7 +1639,9 @@ function renderTasks(tasks) {
         message.textContent =
             "No tasks yet. Add one above.";
 
-        container.appendChild(message);
+        container.appendChild(
+            message
+        );
 
         return;
     }
@@ -1246,29 +1687,19 @@ function renderTasks(tasks) {
                 "change",
                 async function() {
 
-                    try {
-
-                        await updateDoc(
-                            doc(
-                                db,
-                                "users",
-                                currentUser.uid,
-                                "tasks",
-                                task.id
-                            ),
-                            {
-                                completed:
-                                    checkbox.checked
-                            }
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            error
-                        );
-
-                    }
+                    await updateDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            task.id
+                        ),
+                        {
+                            completed:
+                                checkbox.checked
+                        }
+                    );
 
                 }
             );
@@ -1305,25 +1736,15 @@ function renderTasks(tasks) {
                 "click",
                 async function() {
 
-                    try {
-
-                        await deleteDoc(
-                            doc(
-                                db,
-                                "users",
-                                currentUser.uid,
-                                "tasks",
-                                task.id
-                            )
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            error
-                        );
-
-                    }
+                    await deleteDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            task.id
+                        )
+                    );
 
                 }
             );
@@ -1351,23 +1772,17 @@ function renderTasks(tasks) {
 }
 
 
-/* ============================================
+/* =========================================
    ADD TASK
-============================================ */
+========================================= */
 
 async function addTask() {
 
     if (!currentUser) {
 
-        showAuthError(
+        showError(
             "Sign in first to save tasks."
         );
-
-        document
-            .getElementById("authCard")
-            .scrollIntoView({
-                behavior: "smooth"
-            });
 
         return;
     }
@@ -1391,43 +1806,84 @@ async function addTask() {
     }
 
 
-    input.disabled = true;
+    input.disabled =
+        true;
 
 
     try {
 
         await addDoc(
-            taskCollection(),
+            getTaskCollection(),
             {
-                text: text,
-                completed: false,
-                createdAt: Date.now()
+                text:
+                    text,
+
+                completed:
+                    false,
+
+                createdAt:
+                    Date.now()
             }
         );
 
 
-        input.value = "";
+        input.value =
+            "";
 
     } catch (error) {
 
         console.error(error);
 
         alert(
-            "Could not save the task. Check your Firestore setup."
+            "Could not save the task."
         );
 
     }
 
 
-    input.disabled = false;
+    input.disabled =
+        false;
 
     input.focus();
 }
 
 
-/* ============================================
+document
+    .getElementById(
+        "addTaskButton"
+    )
+    .addEventListener(
+        "click",
+        addTask
+    );
+
+
+document
+    .getElementById(
+        "taskInput"
+    )
+    .addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+                addTask();
+
+            }
+
+        }
+    );
+
+
+/* =========================================
    DARK MODE
-============================================ */
+========================================= */
 
 function loadDarkMode() {
 
@@ -1477,9 +1933,19 @@ function toggleDarkMode() {
 }
 
 
-/* ============================================
+document
+    .getElementById(
+        "themeButton"
+    )
+    .addEventListener(
+        "click",
+        toggleDarkMode
+    );
+
+
+/* =========================================
    TABS
-============================================ */
+========================================= */
 
 document
     .querySelectorAll(".tab")
@@ -1536,9 +2002,9 @@ document
     );
 
 
-/* ============================================
+/* =========================================
    PRAYER TIMES
-============================================ */
+========================================= */
 
 const prayerTimes = {
 
@@ -1563,7 +2029,8 @@ function loadPrayerTimes() {
         );
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     Object.entries(
@@ -1616,14 +2083,14 @@ function loadPrayerTimes() {
 
 
     updateNextPrayer();
-
 }
 
 
-function convertTime(time) {
+function timeToMinutes(time) {
 
     const parts =
         time.split(":");
+
 
     return (
         Number(parts[0]) * 60 +
@@ -1652,11 +2119,13 @@ function updateNextPrayer() {
 
     for (
         const [name, time]
-        of Object.entries(prayerTimes)
+        of Object.entries(
+            prayerTimes
+        )
     ) {
 
         if (
-            convertTime(time) >
+            timeToMinutes(time) >
             currentMinutes
         ) {
 
@@ -1686,9 +2155,9 @@ function updateNextPrayer() {
 }
 
 
-/* ============================================
+/* =========================================
    LOCATION
-============================================ */
+========================================= */
 
 document
     .getElementById(
@@ -1718,9 +2187,9 @@ document
     );
 
 
-/* ============================================
+/* =========================================
    NOTIFICATIONS
-============================================ */
+========================================= */
 
 document
     .getElementById(
@@ -1748,31 +2217,22 @@ document
             }
 
 
-            try {
-
-                const permission =
-                    await Notification.requestPermission();
+            const permission =
+                await Notification.requestPermission();
 
 
-                if (
-                    permission ===
-                    "granted"
-                ) {
-
-                    status.textContent =
-                        "Notifications are enabled.";
-
-                } else {
-
-                    status.textContent =
-                        "Notifications are disabled.";
-
-                }
-
-            } catch {
+            if (
+                permission ===
+                "granted"
+            ) {
 
                 status.textContent =
-                    "Could not enable notifications.";
+                    "Notifications are enabled.";
+
+            } else {
+
+                status.textContent =
+                    "Notifications are disabled.";
 
             }
 
@@ -1780,127 +2240,15 @@ document
     );
 
 
-/* ============================================
-   AUTH BUTTONS
-============================================ */
-
-document
-    .getElementById(
-        "authButton"
-    )
-    .addEventListener(
-        "click",
-        handleAuth
-    );
-
-
-document
-    .getElementById(
-        "switchAuthButton"
-    )
-    .addEventListener(
-        "click",
-        function() {
-
-            signUpMode =
-                !signUpMode;
-
-
-            clearAuthError();
-
-            updateAuthUI();
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "passwordInput"
-    )
-    .addEventListener(
-        "keydown",
-        function(event) {
-
-            if (
-                event.key ===
-                "Enter"
-            ) {
-
-                handleAuth();
-
-            }
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "logoutButton"
-    )
-    .addEventListener(
-        "click",
-        async function() {
-
-            await signOut(auth);
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "themeButton"
-    )
-    .addEventListener(
-        "click",
-        toggleDarkMode
-    );
-
-
-document
-    .getElementById(
-        "addTaskButton"
-    )
-    .addEventListener(
-        "click",
-        addTask
-    );
-
-
-document
-    .getElementById(
-        "taskInput"
-    )
-    .addEventListener(
-        "keydown",
-        function(event) {
-
-            if (
-                event.key ===
-                "Enter"
-            ) {
-
-                event.preventDefault();
-
-                addTask();
-
-            }
-
-        }
-    );
-
-
-/* ============================================
+/* =========================================
    START
-============================================ */
+========================================= */
 
 updateDate();
 
 loadDarkMode();
 
-updateAuthUI();
+updateAuthMode();
 
 loadPrayerTimes();
 
@@ -1908,3 +2256,18 @@ loadPrayerTimes();
 
 </body>
 </html>
+```
+
+### After you paste it
+
+Don't change anything else yet.
+
+1. Save `index.html`.
+2. Refresh the page.
+3. You should see **Create your account**.
+4. Enter a username.
+5. Enter your email.
+6. Enter a password.
+7. Confirm the password.
+8. Click **Create Account**.
+
