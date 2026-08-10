@@ -10,11 +10,12 @@
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Dailyz">
+<meta name="mobile-web-app-capable" content="yes">
 
 <title>Dailyz</title>
 
 <style>
+
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -26,59 +27,215 @@ body {
     padding: 0;
     width: 100%;
     min-height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-        "Segoe UI", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
-    background: #f5f5f7;
-    color: #111;
-    padding:
-        env(safe-area-inset-top)
-        18px
-        env(safe-area-inset-bottom)
-        18px;
-    transition: background .2s, color .2s;
+    background: #f5f7fb;
+    color: #111827;
     overflow-x: hidden;
+    transition: background .3s ease, color .3s ease;
 }
+
+/* =========================
+   MOTION BACKGROUND
+========================= */
+
+.motion-background {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -10;
+}
+
+.motion-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(55px);
+    opacity: .22;
+    animation: floatOrb 12s ease-in-out infinite alternate;
+}
+
+.orb-one {
+    width: 240px;
+    height: 240px;
+    background: #8b5cf6;
+    top: -80px;
+    left: -70px;
+}
+
+.orb-two {
+    width: 280px;
+    height: 280px;
+    background: #38bdf8;
+    right: -100px;
+    top: 25%;
+    animation-delay: -4s;
+}
+
+.orb-three {
+    width: 220px;
+    height: 220px;
+    background: #34d399;
+    bottom: -80px;
+    left: 25%;
+    animation-delay: -7s;
+}
+
+@keyframes floatOrb {
+
+    from {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    to {
+        transform: translate3d(35px, -30px, 0) scale(1.12);
+    }
+
+}
+
+
+/* =========================
+   FLOATING EMOJIS
+========================= */
+
+.emoji-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -5;
+}
+
+.floating-emoji {
+    position: absolute;
+    font-size: 24px;
+    opacity: .12;
+    animation: emojiFloat linear infinite;
+}
+
+.emoji-one {
+    left: 8%;
+    top: 20%;
+    animation-duration: 10s;
+}
+
+.emoji-two {
+    left: 82%;
+    top: 18%;
+    animation-duration: 13s;
+    animation-delay: -3s;
+}
+
+.emoji-three {
+    left: 15%;
+    top: 72%;
+    animation-duration: 12s;
+    animation-delay: -6s;
+}
+
+.emoji-four {
+    left: 76%;
+    top: 75%;
+    animation-duration: 15s;
+    animation-delay: -8s;
+}
+
+.emoji-five {
+    left: 48%;
+    top: 8%;
+    animation-duration: 14s;
+    animation-delay: -5s;
+}
+
+@keyframes emojiFloat {
+
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-28px) rotate(8deg);
+    }
+
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+}
+
+
+/* =========================
+   DARK MODE
+========================= */
 
 body.dark {
-    background: #111;
-    color: #fff;
+    background: #0b1020;
+    color: #f8fafc;
 }
 
-button,
-input {
-    font: inherit;
+body.dark .motion-orb {
+    opacity: .16;
 }
 
-button {
-    cursor: pointer;
+body.dark .card,
+body.dark .settings-card,
+body.dark #authCard,
+body.dark .task,
+body.dark .next-prayer {
+    background: rgba(20, 27, 45, .86);
+    color: #f8fafc;
 }
+
+body.dark input {
+    background: #111827;
+    color: white;
+    border-color: #273449;
+}
+
+body.dark .tabs {
+    background: rgba(20, 27, 45, .85);
+}
+
+body.dark .tab {
+    color: #cbd5e1;
+}
+
+body.dark .tab.active {
+    background: #6366f1;
+    color: white;
+}
+
+body.dark .settings-description,
+body.dark .email,
+body.dark .date {
+    color: #94a3b8;
+}
+
+
+/* =========================
+   HEADER
+========================= */
 
 .header {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 18px 0 12px;
+    width: 100%;
+    padding: 22px 18px 12px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
 }
 
 .logo {
-    font-size: 30px;
+    font-size: 29px;
     font-weight: 800;
     letter-spacing: -1px;
 }
 
 .date {
     margin-top: 3px;
-    color: #777;
     font-size: 13px;
-}
-
-.dark .date {
-    color: #999;
+    color: #6b7280;
 }
 
 .header-actions {
@@ -89,120 +246,206 @@ button {
 .icon-button {
     width: 42px;
     height: 42px;
-    border: 0;
+    border: none;
     border-radius: 14px;
-    background: #e9e9ed;
-    font-size: 20px;
+    background: rgba(255,255,255,.75);
+    backdrop-filter: blur(12px);
+    font-size: 19px;
+    cursor: pointer;
+    box-shadow: 0 5px 18px rgba(0,0,0,.06);
 }
 
-.dark .icon-button {
-    background: #242424;
+body.dark .icon-button {
+    background: rgba(30,41,59,.8);
     color: white;
 }
 
-.tabs {
-    max-width: 700px;
-    margin: 10px auto 18px;
-    display: flex;
-    background: #e6e6eb;
-    padding: 4px;
-    border-radius: 14px;
+
+/* =========================
+   AUTH
+========================= */
+
+#authCard {
+    margin: 18px;
+    padding: 24px;
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(18px);
+    border-radius: 24px;
+    box-shadow: 0 15px 45px rgba(0,0,0,.08);
 }
 
-.dark .tabs {
-    background: #242424;
+#authCard h2 {
+    margin: 0 0 8px;
+    font-size: 25px;
+}
+
+.auth-subtitle {
+    color: #6b7280;
+    margin-bottom: 18px;
+}
+
+.auth-error {
+    display: none;
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 11px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 13px;
+    border: 1px solid #dbe1ea;
+    outline: none;
+    font-size: 15px;
+}
+
+.auth-input:focus,
+#taskInput:focus,
+#locationInput:focus {
+    border-color: #6366f1;
+}
+
+.auth-button {
+    width: 100%;
+    border: none;
+    border-radius: 13px;
+    padding: 14px;
+    background: #6366f1;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.auth-switch button {
+    border: none;
+    background: none;
+    color: #6366f1;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+
+/* =========================
+   USER BAR
+========================= */
+
+#userBar {
+    display: none;
+    margin: 4px 18px 12px;
+}
+
+.username {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.email {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+
+/* =========================
+   TABS
+========================= */
+
+.tabs {
+    display: flex;
+    margin: 12px 18px;
+    padding: 4px;
+    border-radius: 15px;
+    background: rgba(255,255,255,.75);
+    backdrop-filter: blur(15px);
 }
 
 .tab {
     flex: 1;
-    border: 0;
-    background: transparent;
-    padding: 11px 8px;
+    border: none;
+    padding: 11px;
     border-radius: 11px;
-    color: #666;
-    font-weight: 600;
+    background: transparent;
+    font-weight: 700;
+    color: #6b7280;
+    cursor: pointer;
 }
 
 .tab.active {
-    background: white;
-    color: #111;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-.dark .tab {
-    color: #aaa;
-}
-
-.dark .tab.active {
-    background: #3a3a3a;
+    background: #6366f1;
     color: white;
 }
 
+
+/* =========================
+   SECTIONS
+========================= */
+
 .section {
     display: none;
-    max-width: 700px;
-    margin: 0 auto;
-    padding-bottom: 30px;
+    padding: 6px 18px 35px;
 }
 
 .section.active {
     display: block;
 }
 
+
+/* =========================
+   TASKS
+========================= */
+
 .task-input {
     display: flex;
-    gap: 9px;
-    margin-bottom: 15px;
+    gap: 8px;
+    margin-bottom: 14px;
 }
 
-.task-input input,
-.location-row input,
-.auth-input,
-.language-select {
-    width: 100%;
-    border: 1px solid #ddd;
-    background: white;
-    color: #111;
+#taskInput {
+    flex: 1;
+    border: 1px solid #dbe1ea;
+    border-radius: 14px;
     padding: 14px;
-    border-radius: 13px;
     outline: none;
-}
-
-.dark .task-input input,
-.dark .location-row input,
-.dark .auth-input,
-.dark .language-select {
-    background: #222;
-    color: white;
-    border-color: #3a3a3a;
+    font-size: 15px;
 }
 
 .add-button {
-    width: 50px;
-    border: 0;
-    border-radius: 13px;
-    background: #111;
+    width: 48px;
+    border: none;
+    border-radius: 14px;
+    background: #6366f1;
     color: white;
-    font-size: 27px;
+    font-size: 25px;
+    cursor: pointer;
 }
 
-.dark .add-button {
-    background: white;
-    color: black;
+#taskList {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
 }
 
 .task {
     display: flex;
     align-items: center;
-    gap: 11px;
-    background: white;
-    border-radius: 14px;
+    gap: 10px;
     padding: 14px;
-    margin-bottom: 9px;
-}
-
-.dark .task {
-    background: #222;
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(14px);
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.04);
 }
 
 .task-check {
@@ -217,83 +460,91 @@ button {
 
 .task.completed .task-text {
     text-decoration: line-through;
-    opacity: .45;
+    opacity: .5;
 }
 
 .delete-task {
-    border: 0;
+    border: none;
     background: transparent;
-    color: #999;
     font-size: 23px;
+    color: #ef4444;
+    cursor: pointer;
 }
 
 .empty {
     text-align: center;
-    color: #888;
-    padding: 25px 10px;
+    padding: 30px 10px;
+    color: #9ca3af;
 }
 
-.prayer-header {
-    margin-bottom: 18px;
-}
+
+/* =========================
+   PRAYERS
+========================= */
 
 .prayer-header h2 {
-    margin: 0 0 5px;
-    font-size: 25px;
+    margin-bottom: 5px;
 }
 
 .location {
-    color: #777;
+    color: #6b7280;
     font-size: 14px;
 }
 
 .next-prayer {
-    background: #111;
-    color: white;
-    border-radius: 20px;
+    margin: 18px 0;
     padding: 25px;
-    margin-bottom: 15px;
-}
-
-.dark .next-prayer {
-    background: #242424;
+    border-radius: 22px;
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(15px);
+    text-align: center;
 }
 
 .next-label {
     font-size: 11px;
-    opacity: .65;
     letter-spacing: 1.5px;
-    font-weight: 700;
+    color: #8b5cf6;
+    font-weight: 800;
 }
 
 .next-name {
-    font-size: 29px;
+    font-size: 28px;
     font-weight: 800;
-    margin-top: 7px;
+    margin-top: 8px;
 }
 
 .next-time {
-    font-size: 18px;
-    margin-top: 2px;
-    opacity: .8;
+    font-size: 39px;
+    font-weight: 800;
+    margin-top: 4px;
+}
+
+#prayerList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .prayer {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    background: white;
-    padding: 17px;
+    padding: 16px;
+    background: rgba(255,255,255,.82);
+    backdrop-filter: blur(12px);
     border-radius: 14px;
-    margin-bottom: 9px;
 }
 
-.dark .prayer {
-    background: #222;
+body.dark .prayer {
+    background: rgba(20,27,45,.86);
 }
 
-.prayer strong {
-    font-size: 17px;
+
+/* =========================
+   SETTINGS
+========================= */
+
+#settings {
+    padding-bottom: 50px;
 }
 
 .settings-title {
@@ -302,203 +553,134 @@ button {
 }
 
 .settings-subtitle {
-    color: #777;
-    margin: 4px 0 20px;
+    margin-top: 4px;
+    margin-bottom: 18px;
+    color: #6b7280;
 }
 
 .settings-card {
-    background: white;
-    border-radius: 17px;
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(18px);
+    border-radius: 20px;
     padding: 18px;
-    margin-bottom: 13px;
-}
-
-.dark .settings-card {
-    background: #222;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.05);
 }
 
 .settings-card-title {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 16px;
     font-weight: 800;
-    color: #888;
-    margin-bottom: 14px;
+    margin-bottom: 13px;
 }
 
 .setting-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
-    padding: 10px 0;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(120,120,120,.12);
+}
+
+.setting-row:last-child {
+    border-bottom: none;
 }
 
 .setting-label {
-    font-weight: 650;
+    font-weight: 700;
 }
 
 .setting-description {
-    color: #888;
     font-size: 13px;
+    color: #6b7280;
     margin-top: 3px;
 }
 
 .setting-button {
-    border: 0;
-    background: #eee;
-    border-radius: 10px;
-    padding: 9px 14px;
-    white-space: nowrap;
-}
-
-.dark .setting-button {
-    background: #3a3a3a;
+    border: none;
+    background: #6366f1;
     color: white;
+    padding: 9px 15px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .setting-button.dark {
-    background: #111;
-    color: white;
+    background: #111827;
+}
+
+body.dark .setting-button.dark {
+    background: #6366f1;
 }
 
 .location-row {
     display: flex;
     gap: 8px;
+    margin-top: 12px;
 }
 
-.notification-button,
-.auth-button {
-    width: 100%;
-    border: 0;
-    background: #111;
-    color: white;
-    padding: 14px;
+#locationInput {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #dbe1ea;
+    padding: 12px;
     border-radius: 12px;
-    font-weight: 700;
+    outline: none;
 }
 
-.dark .notification-button,
-.dark .auth-button {
-    background: white;
-    color: black;
+.notification-button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    background: #6366f1;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .status {
-    color: #888;
-    font-size: 13px;
     margin-top: 9px;
+    font-size: 13px;
+    color: #6b7280;
 }
 
 .danger-button {
     width: 100%;
-    border: 0;
-    border-radius: 12px;
     padding: 13px;
-    background: #eee;
-    color: #d00;
-    font-weight: 700;
-}
-
-.dark .danger-button {
-    background: #333;
-}
-
-#authCard {
-    max-width: 500px;
-    margin: 35px auto 20px;
-    background: white;
-    border-radius: 20px;
-    padding: 24px;
-}
-
-.dark #authCard {
-    background: #222;
-}
-
-#authCard h2 {
-    margin: 0 0 7px;
-    font-size: 25px;
-}
-
-.auth-subtitle {
-    color: #888;
-    margin-bottom: 20px;
-}
-
-.auth-input {
-    display: block;
-    margin-bottom: 10px;
-}
-
-.auth-button {
-    margin-top: 5px;
-}
-
-.auth-error {
-    display: none;
-    color: #d00;
-    font-size: 13px;
-    margin-bottom: 10px;
-}
-
-.auth-switch {
-    text-align: center;
-    margin-top: 17px;
-    font-size: 14px;
-    color: #888;
-}
-
-.auth-switch button {
-    border: 0;
-    background: transparent;
-    color: #111;
-    font-weight: 700;
-}
-
-.dark .auth-switch button {
+    border: none;
+    border-radius: 12px;
+    background: #ef4444;
     color: white;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-#userBar {
-    max-width: 700px;
-    margin: 0 auto 12px;
-    display: none;
-    padding: 10px 2px;
-}
 
-.username {
-    font-weight: 750;
-}
+/* =========================
+   LANGUAGE SCREEN
+========================= */
 
-.email {
-    color: #888;
-    font-size: 13px;
-}
-
-.language-overlay {
+#languageScreen {
     position: fixed;
     inset: 0;
-    z-index: 9999;
-    background: rgba(0,0,0,.55);
-    display: flex;
+    z-index: 1000;
+    background: rgba(245,247,251,.97);
+    backdrop-filter: blur(20px);
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 20px;
 }
 
 .language-box {
-    width: min(430px, 100%);
+    width: 100%;
+    max-width: 380px;
     background: white;
-    border-radius: 24px;
-    padding: 27px;
+    padding: 28px;
+    border-radius: 25px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.12);
     text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,.25);
-}
-
-.dark .language-box {
-    background: #222;
-    color: white;
 }
 
 .language-box h1 {
@@ -506,48 +688,124 @@ button {
 }
 
 .language-box p {
-    color: #888;
-    margin-bottom: 20px;
+    color: #6b7280;
+    margin-bottom: 22px;
 }
 
-.language-option {
+.language-choice {
     width: 100%;
+    border: 1px solid #e1e5ec;
+    background: #f8fafc;
     padding: 15px;
-    margin-top: 9px;
-    border: 0;
+    margin: 7px 0;
     border-radius: 13px;
-    background: #eee;
+    font-size: 16px;
     font-weight: 700;
+    cursor: pointer;
 }
 
-.dark .language-option {
-    background: #333;
-    color: white;
-}
-
-.language-option:active {
+.language-choice:active {
     transform: scale(.98);
 }
 
-[dir="rtl"] {
-    text-align: right;
+body.dark #languageScreen {
+    background: rgba(11,16,32,.97);
 }
 
-[dir="rtl"] .header,
-[dir="rtl"] .tabs,
-[dir="rtl"] .task-input,
-[dir="rtl"] .location-row,
-[dir="rtl"] .setting-row {
-    direction: rtl;
+body.dark .language-box {
+    background: #141b2d;
+    color: white;
 }
 
-[dir="rtl"] .task-text {
-    text-align: right;
+body.dark .language-choice {
+    background: #1f2937;
+    color: white;
+    border-color: #334155;
 }
+
+
+/* =========================
+   SMALL SCREEN
+========================= */
+
+@media (max-width: 380px) {
+
+    .logo {
+        font-size: 25px;
+    }
+
+    .header {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .section {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+}
+
 </style>
 </head>
 
 <body>
+
+<!-- MOTION BACKGROUND -->
+
+<div class="motion-background">
+    <div class="motion-orb orb-one"></div>
+    <div class="motion-orb orb-two"></div>
+    <div class="motion-orb orb-three"></div>
+</div>
+
+<div class="emoji-layer">
+    <div class="floating-emoji emoji-one">✨</div>
+    <div class="floating-emoji emoji-two">📚</div>
+    <div class="floating-emoji emoji-three">☀️</div>
+    <div class="floating-emoji emoji-four">⭐</div>
+    <div class="floating-emoji emoji-five">🕌</div>
+</div>
+
+
+<!-- LANGUAGE SELECTION -->
+
+<div id="languageScreen">
+
+    <div class="language-box">
+
+        <h1>Dailyz</h1>
+
+        <p>Select your language</p>
+
+        <button
+            class="language-choice"
+            data-language="en"
+            type="button"
+        >
+            🇬🇧 English
+        </button>
+
+        <button
+            class="language-choice"
+            data-language="ku"
+            type="button"
+        >
+            🟡 کوردی
+        </button>
+
+        <button
+            class="language-choice"
+            data-language="ar"
+            type="button"
+        >
+            🇸🇦 العربية
+        </button>
+
+    </div>
+
+</div>
+
 
 <header class="header">
 
@@ -579,16 +837,25 @@ button {
 
 <div id="authCard">
 
-    <h2 id="authTitle"></h2>
+    <h2 id="authTitle">Create your account</h2>
 
-    <div class="auth-subtitle" id="authSubtitle"></div>
+    <div
+        class="auth-subtitle"
+        id="authSubtitle"
+    >
+        Start organizing your day with Dailyz.
+    </div>
 
-    <div class="auth-error" id="authError"></div>
+    <div
+        class="auth-error"
+        id="authError"
+    ></div>
 
     <input
         class="auth-input"
         id="usernameInput"
         type="text"
+        placeholder="Username"
         autocomplete="username"
     >
 
@@ -596,6 +863,7 @@ button {
         class="auth-input"
         id="emailInput"
         type="email"
+        placeholder="Email"
         autocomplete="email"
     >
 
@@ -603,6 +871,7 @@ button {
         class="auth-input"
         id="passwordInput"
         type="password"
+        placeholder="Password"
         autocomplete="new-password"
     >
 
@@ -610,6 +879,7 @@ button {
         class="auth-input"
         id="confirmPasswordInput"
         type="password"
+        placeholder="Confirm password"
         autocomplete="new-password"
     >
 
@@ -617,12 +887,23 @@ button {
         class="auth-button"
         id="authButton"
         type="button"
-    ></button>
+    >
+        Create Account
+    </button>
 
     <div class="auth-switch">
-        <span id="switchText"></span>
 
-        <button id="switchButton" type="button"></button>
+        <span id="switchText">
+            Already have an account?
+        </span>
+
+        <button
+            id="switchButton"
+            type="button"
+        >
+            Sign In
+        </button>
+
     </div>
 
 </div>
@@ -632,13 +913,20 @@ button {
 
 <div id="userBar">
 
-    <div class="username" id="usernameDisplay"></div>
-    <div class="email" id="emailDisplay"></div>
+    <div
+        class="username"
+        id="usernameDisplay"
+    ></div>
+
+    <div
+        class="email"
+        id="emailDisplay"
+    ></div>
 
 </div>
 
 
-<!-- NAV -->
+<!-- TABS -->
 
 <div class="tabs">
 
@@ -646,28 +934,34 @@ button {
         class="tab active"
         data-tab="tasks"
         type="button"
-        id="tasksTab"
-    ></button>
+    >
+        Tasks
+    </button>
 
     <button
         class="tab"
         data-tab="prayers"
         type="button"
-        id="prayersTab"
-    ></button>
+    >
+        Prayer Times
+    </button>
 
 </div>
 
 
 <!-- TASKS -->
 
-<section class="section active" id="tasks">
+<section
+    class="section active"
+    id="tasks"
+>
 
     <div class="task-input">
 
         <input
             id="taskInput"
             type="text"
+            placeholder="Add a task..."
             autocomplete="off"
         >
 
@@ -675,7 +969,9 @@ button {
             id="addTaskButton"
             class="add-button"
             type="button"
-        >+</button>
+        >
+            +
+        </button>
 
     </div>
 
@@ -686,11 +982,16 @@ button {
 
 <!-- PRAYERS -->
 
-<section class="section" id="prayers">
+<section
+    class="section"
+    id="prayers"
+>
 
     <div class="prayer-header">
 
-        <h2 id="prayerTitle"></h2>
+        <h2 id="prayerTitle">
+            Prayer Times
+        </h2>
 
         <div
             class="location"
@@ -706,17 +1007,23 @@ button {
         <div
             class="next-label"
             id="nextLabel"
-        ></div>
+        >
+            NEXT PRAYER
+        </div>
 
         <div
             class="next-name"
             id="nextName"
-        ></div>
+        >
+            Loading...
+        </div>
 
         <div
             class="next-time"
             id="nextTime"
-        ></div>
+        >
+            --:--
+        </div>
 
     </div>
 
@@ -727,17 +1034,24 @@ button {
 
 <!-- SETTINGS -->
 
-<section class="section" id="settings">
+<section
+    class="section"
+    id="settings"
+>
 
     <div
         class="settings-title"
         id="settingsTitle"
-    ></div>
+    >
+        Settings
+    </div>
 
     <div
         class="settings-subtitle"
         id="settingsSubtitle"
-    ></div>
+    >
+        Customize your Dailyz experience.
+    </div>
 
 
     <div class="settings-card">
@@ -745,15 +1059,20 @@ button {
         <div
             class="settings-card-title"
             id="accountTitle"
-        ></div>
+        >
+            Account
+        </div>
 
         <div class="setting-row">
 
             <div>
+
                 <div
                     class="setting-label"
                     id="usernameLabel"
-                ></div>
+                >
+                    Username
+                </div>
 
                 <div
                     class="setting-description"
@@ -761,6 +1080,7 @@ button {
                 >
                     Not signed in
                 </div>
+
             </div>
 
         </div>
@@ -768,10 +1088,13 @@ button {
         <div class="setting-row">
 
             <div>
+
                 <div
                     class="setting-label"
                     id="emailLabel"
-                ></div>
+                >
+                    Email
+                </div>
 
                 <div
                     class="setting-description"
@@ -779,6 +1102,7 @@ button {
                 >
                     Not signed in
                 </div>
+
             </div>
 
         </div>
@@ -791,7 +1115,9 @@ button {
         <div
             class="settings-card-title"
             id="appearanceTitle"
-        ></div>
+        >
+            Appearance
+        </div>
 
         <div class="setting-row">
 
@@ -800,12 +1126,16 @@ button {
                 <div
                     class="setting-label"
                     id="darkModeLabel"
-                ></div>
+                >
+                    Dark Mode
+                </div>
 
                 <div
                     class="setting-description"
                     id="darkModeDescription"
-                ></div>
+                >
+                    Change the appearance of Dailyz.
+                </div>
 
             </div>
 
@@ -813,48 +1143,11 @@ button {
                 class="setting-button"
                 id="settingsThemeButton"
                 type="button"
-            ></button>
+            >
+                Off
+            </button>
 
         </div>
-
-    </div>
-
-
-    <!-- LANGUAGE -->
-
-    <div class="settings-card">
-
-        <div
-            class="settings-card-title"
-            id="languageTitle"
-        ></div>
-
-        <div class="setting-row">
-
-            <div>
-
-                <div
-                    class="setting-label"
-                    id="languageLabel"
-                ></div>
-
-                <div
-                    class="setting-description"
-                    id="languageDescription"
-                ></div>
-
-            </div>
-
-        </div>
-
-        <select
-            class="language-select"
-            id="settingsLanguage"
-        >
-            <option value="en">English</option>
-            <option value="ku">کوردی</option>
-            <option value="ar">العربية</option>
-        </select>
 
     </div>
 
@@ -864,7 +1157,9 @@ button {
         <div
             class="settings-card-title"
             id="prayerSettingsTitle"
-        ></div>
+        >
+            Prayer Settings
+        </div>
 
         <div class="setting-row">
 
@@ -873,12 +1168,16 @@ button {
                 <div
                     class="setting-label"
                     id="locationLabel"
-                ></div>
+                >
+                    Location
+                </div>
 
                 <div
                     class="setting-description"
                     id="locationDescription"
-                ></div>
+                >
+                    Your prayer-time location.
+                </div>
 
             </div>
 
@@ -890,13 +1189,16 @@ button {
                 id="locationInput"
                 type="text"
                 value="Erbil, Iraq"
+                placeholder="City, Country"
             >
 
             <button
                 class="setting-button dark"
                 id="updateLocationButton"
                 type="button"
-            ></button>
+            >
+                Update
+            </button>
 
         </div>
 
@@ -908,7 +1210,9 @@ button {
         <div
             class="settings-card-title"
             id="notificationsTitle"
-        ></div>
+        >
+            Notifications
+        </div>
 
         <div class="setting-row">
 
@@ -917,12 +1221,16 @@ button {
                 <div
                     class="setting-label"
                     id="notificationsLabel"
-                ></div>
+                >
+                    Prayer Notifications
+                </div>
 
                 <div
                     class="setting-description"
                     id="notificationsDescription"
-                ></div>
+                >
+                    Receive notifications for prayer times.
+                </div>
 
             </div>
 
@@ -932,12 +1240,16 @@ button {
             class="notification-button"
             id="notificationButton"
             type="button"
-        ></button>
+        >
+            🔔 Enable Prayer Notifications
+        </button>
 
         <div
             class="status"
             id="notificationStatus"
-        ></div>
+        >
+            Notifications are disabled.
+        </div>
 
     </div>
 
@@ -947,62 +1259,21 @@ button {
         <div
             class="settings-card-title"
             id="accountActionsTitle"
-        ></div>
+        >
+            Account Actions
+        </div>
 
         <button
             class="danger-button"
             id="logoutButton"
             type="button"
-        ></button>
+        >
+            Sign Out
+        </button>
 
     </div>
 
 </section>
-
-
-<!-- LANGUAGE FIRST-LAUNCH -->
-
-<div
-    class="language-overlay"
-    id="languageOverlay"
-    style="display:none;"
->
-
-    <div class="language-box">
-
-        <h1>Dailyz</h1>
-
-        <p id="chooseLanguageText">
-            Choose your language
-        </p>
-
-        <button
-            class="language-option"
-            data-language="en"
-            type="button"
-        >
-            🇬🇧 English
-        </button>
-
-        <button
-            class="language-option"
-            data-language="ku"
-            type="button"
-        >
-            کوردی 🇹🇯
-        </button>
-
-        <button
-            class="language-option"
-            data-language="ar"
-            type="button"
-        >
-            العربية 🇮🇶
-        </button>
-
-    </div>
-
-</div>
 
 
 <script type="module">
@@ -1034,7 +1305,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 
-/* FIREBASE */
+/* =========================
+   FIREBASE
+========================= */
 
 const firebaseConfig = {
     apiKey: "AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8",
@@ -1055,27 +1328,27 @@ let unsubscribeTasks = null;
 let signUpMode = true;
 
 
-/* LANGUAGE SYSTEM */
+/* =========================
+   LANGUAGE
+========================= */
 
 const translations = {
 
     en: {
 
-        direction: "ltr",
+        selectLanguage: "Select your language",
 
-        chooseLanguage: "Choose your language",
-
-        authCreate: "Create your account",
-        authWelcome: "Welcome back",
-        authCreateSubtitle: "Start organizing your day with Dailyz.",
-        authLoginSubtitle: "Sign in to continue.",
+        createAccount: "Create your account",
+        welcomeBack: "Welcome back",
+        startDailyz: "Start organizing your day with Dailyz.",
+        signInContinue: "Sign in to continue.",
 
         username: "Username",
         email: "Email",
         password: "Password",
         confirmPassword: "Confirm password",
 
-        createAccount: "Create Account",
+        create: "Create Account",
         signIn: "Sign In",
         signUp: "Sign Up",
 
@@ -1086,11 +1359,7 @@ const translations = {
         prayers: "Prayer Times",
 
         addTask: "Add a task...",
-        noTasks: "No tasks yet. Add one above.",
-        signInTasks: "Sign in to save your tasks.",
-        signInFirst: "Please sign in first.",
 
-        prayerTimes: "Prayer Times",
         nextPrayer: "NEXT PRAYER",
 
         settings: "Settings",
@@ -1098,193 +1367,100 @@ const translations = {
 
         account: "Account",
         appearance: "Appearance",
-        prayerSettings: "Prayer Settings",
-        notifications: "Notifications",
-        accountActions: "Account Actions",
-
         darkMode: "Dark Mode",
-        darkModeDescription: "Change the appearance of Dailyz.",
+        darkDescription: "Change the appearance of Dailyz.",
 
-        language: "Language",
-        languageDescription: "Choose the language used throughout Dailyz.",
-
+        prayerSettings: "Prayer Settings",
         location: "Location",
         locationDescription: "Your prayer-time location.",
         update: "Update",
 
+        notifications: "Notifications",
         prayerNotifications: "Prayer Notifications",
-        prayerNotificationsDescription:
-            "Receive notifications for prayer times.",
-
+        notificationDescription: "Receive notifications for prayer times.",
         enableNotifications: "🔔 Enable Prayer Notifications",
         notificationsDisabled: "Notifications are disabled.",
-        notificationsEnabled: "Notifications are enabled.",
-        notificationsUnsupported:
-            "Notifications are not supported by this browser.",
 
+        accountActions: "Account Actions",
         signOut: "Sign Out",
 
         notSignedIn: "Not signed in",
-
-        usernameTooShort:
-            "Username must be at least 2 characters.",
-
-        enterEmail:
-            "Enter your email.",
-
-        passwordShort:
-            "Password must be at least 6 characters.",
-
-        passwordsMismatch:
-            "Passwords do not match.",
-
-        enterEmailPassword:
-            "Enter your email and password.",
-
-        incorrectLogin:
-            "Incorrect email or password.",
-
-        prayer: {
-            Fajr: "Fajr",
-            Dhuhr: "Dhuhr",
-            Asr: "Asr",
-            Maghrib: "Maghrib",
-            Isha: "Isha"
-        }
-
+        noTasks: "No tasks yet. Add one above.",
+        signInTasks: "Sign in to save your tasks.",
+        loading: "Loading..."
     },
-
 
     ku: {
 
-        direction: "rtl",
+        selectLanguage: "زمانەکەت هەڵبژێرە",
 
-        chooseLanguage: "زمانەکەت هەڵبژێرە",
-
-        authCreate: "هەژمارەکەت دروست بکە",
-        authWelcome: "بەخێربێیتەوە",
-        authCreateSubtitle:
-            "ڕۆژەکەت لەگەڵ Dailyz ڕێکبخە.",
-        authLoginSubtitle:
-            "بۆ بەردەوامبوون بچۆ ژوورەوە.",
+        createAccount: "هەژمارەکەت دروست بکە",
+        welcomeBack: "بەخێربێیتەوە",
+        startDailyz: "دەست بکە بە ڕێکخستنی ڕۆژەکەت لە Dailyz.",
+        signInContinue: "بچۆ ژوورەوە بۆ بەردەوامبوون.",
 
         username: "ناوی بەکارهێنەر",
         email: "ئیمەیڵ",
         password: "وشەی نهێنی",
         confirmPassword: "دووبارە وشەی نهێنی",
 
-        createAccount: "دروستکردنی هەژمار",
+        create: "دروستکردنی هەژمار",
         signIn: "چوونەژوورەوە",
-        signUp: "خۆت تۆمار بکە",
+        signUp: "خۆتۆمارکردن",
 
         alreadyAccount: "هەژمارت هەیە؟",
         noAccount: "هەژمارت نییە؟",
 
         tasks: "ئەرکەکان",
-        prayers: "کاتی نوێژ",
+        prayers: "کاتەکانی نوێژ",
 
         addTask: "ئەرکێک زیاد بکە...",
-        noTasks: "هێشتا هیچ ئەرکێک نییە. یەکێک زیاد بکە.",
-        signInTasks:
-            "بچۆ ژوورەوە بۆ هەڵگرتنی ئەرکەکانت.",
-        signInFirst:
-            "تکایە سەرەتا بچۆ ژوورەوە.",
 
-        prayerTimes: "کاتی نوێژ",
         nextPrayer: "نوێژی داهاتوو",
 
         settings: "ڕێکخستنەکان",
-        settingsSubtitle:
-            "ئەزموونی Dailyz ـەکەت بە دڵی خۆت ڕێکبخە.",
+        settingsSubtitle: "ئەزموونی Dailyz ـەکەت ڕێکبخە.",
 
         account: "هەژمار",
-        appearance: "ڕووکار",
-        prayerSettings: "ڕێکخستنی نوێژ",
-        notifications: "ئاگادارکردنەوەکان",
-        accountActions: "کردارەکانی هەژمار",
-
+        appearance: "دیمەن",
         darkMode: "دۆخی تاریک",
-        darkModeDescription:
-            "ڕووکاری Dailyz بگۆڕە.",
+        darkDescription: "دیمەنی Dailyz بگۆڕە.",
 
-        language: "زمان",
-        languageDescription:
-            "زمانی بەکارهێنراو لە هەموو Dailyz هەڵبژێرە.",
-
+        prayerSettings: "ڕێکخستنی نوێژ",
         location: "شوێن",
-        locationDescription:
-            "شوێنی کاتی نوێژەکانت.",
-
+        locationDescription: "شوێنی کاتەکانی نوێژ.",
         update: "نوێکردنەوە",
 
+        notifications: "ئاگادارکردنەوەکان",
         prayerNotifications: "ئاگادارکردنەوەی نوێژ",
-        prayerNotificationsDescription:
-            "ئاگادارکردنەوە وەربگرە بۆ کاتی نوێژەکان.",
+        notificationDescription: "ئاگادارکردنەوە وەربگرە بۆ کاتەکانی نوێژ.",
+        enableNotifications: "🔔 چالاککردنی ئاگادارکردنەوەی نوێژ",
+        notificationsDisabled: "ئاگادارکردنەوەکان ناچالاکن.",
 
-        enableNotifications:
-            "🔔 ئاگادارکردنەوەی نوێژ چالاک بکە",
-
-        notificationsDisabled:
-            "ئاگادارکردنەوەکان ناچالاکن.",
-
-        notificationsEnabled:
-            "ئاگادارکردنەوەکان چالاکن.",
-
-        notificationsUnsupported:
-            "ئەم وێبگەڕە پشتگیری ئاگادارکردنەوە ناکات.",
-
+        accountActions: "کردارەکانی هەژمار",
         signOut: "چوونەدەرەوە",
 
         notSignedIn: "نەچوویتە ژوورەوە",
-
-        usernameTooShort:
-            "ناوی بەکارهێنەر دەبێت لانیکەم ٢ پیت بێت.",
-
-        enterEmail:
-            "ئیمەیڵەکەت بنووسە.",
-
-        passwordShort:
-            "وشەی نهێنی دەبێت لانیکەم ٦ پیت بێت.",
-
-        passwordsMismatch:
-            "وشە نهێنییەکان یەکسان نین.",
-
-        enterEmailPassword:
-            "ئیمەیڵ و وشەی نهێنی بنووسە.",
-
-        incorrectLogin:
-            "ئیمەیڵ یان وشەی نهێنی هەڵەیە.",
-
-        prayer: {
-            Fajr: "بەیانی",
-            Dhuhr: "نیوەڕۆ",
-            Asr: "عەسر",
-            Maghrib: "مەغریب",
-            Isha: "عیشا"
-        }
-
+        noTasks: "هێشتا هیچ ئەرکێک نییە. یەکێک زیاد بکە.",
+        signInTasks: "بچۆ ژوورەوە بۆ پاشەکەوتکردنی ئەرکەکان.",
+        loading: "چاوەڕێ بکە..."
     },
-
 
     ar: {
 
-        direction: "rtl",
+        selectLanguage: "اختر لغتك",
 
-        chooseLanguage: "اختر لغتك",
-
-        authCreate: "أنشئ حسابك",
-        authWelcome: "مرحباً بعودتك",
-        authCreateSubtitle:
-            "نظّم يومك مع Dailyz.",
-        authLoginSubtitle:
-            "سجّل الدخول للمتابعة.",
+        createAccount: "أنشئ حسابك",
+        welcomeBack: "مرحباً بعودتك",
+        startDailyz: "ابدأ بتنظيم يومك مع Dailyz.",
+        signInContinue: "سجّل الدخول للمتابعة.",
 
         username: "اسم المستخدم",
         email: "البريد الإلكتروني",
         password: "كلمة المرور",
         confirmPassword: "تأكيد كلمة المرور",
 
-        createAccount: "إنشاء حساب",
+        create: "إنشاء حساب",
         signIn: "تسجيل الدخول",
         signUp: "إنشاء حساب",
 
@@ -1295,377 +1471,224 @@ const translations = {
         prayers: "أوقات الصلاة",
 
         addTask: "أضف مهمة...",
-        noTasks: "لا توجد مهام بعد. أضف واحدة أعلاه.",
-        signInTasks:
-            "سجّل الدخول لحفظ مهامك.",
-        signInFirst:
-            "يرجى تسجيل الدخول أولاً.",
 
-        prayerTimes: "أوقات الصلاة",
         nextPrayer: "الصلاة القادمة",
 
         settings: "الإعدادات",
-        settingsSubtitle:
-            "خصّص تجربة Dailyz الخاصة بك.",
+        settingsSubtitle: "خصص تجربة Dailyz الخاصة بك.",
 
         account: "الحساب",
         appearance: "المظهر",
-        prayerSettings: "إعدادات الصلاة",
-        notifications: "الإشعارات",
-        accountActions: "إجراءات الحساب",
-
         darkMode: "الوضع الداكن",
-        darkModeDescription:
-            "غيّر مظهر Dailyz.",
+        darkDescription: "غيّر مظهر Dailyz.",
 
-        language: "اللغة",
-        languageDescription:
-            "اختر اللغة المستخدمة في جميع أنحاء Dailyz.",
-
+        prayerSettings: "إعدادات الصلاة",
         location: "الموقع",
-        locationDescription:
-            "موقع أوقات الصلاة الخاص بك.",
-
+        locationDescription: "موقع أوقات الصلاة.",
         update: "تحديث",
 
+        notifications: "الإشعارات",
         prayerNotifications: "إشعارات الصلاة",
-        prayerNotificationsDescription:
-            "تلقي إشعارات بأوقات الصلاة.",
+        notificationDescription: "تلقي إشعارات لأوقات الصلاة.",
+        enableNotifications: "🔔 تفعيل إشعارات الصلاة",
+        notificationsDisabled: "الإشعارات غير مفعلة.",
 
-        enableNotifications:
-            "🔔 تفعيل إشعارات الصلاة",
-
-        notificationsDisabled:
-            "الإشعارات غير مفعّلة.",
-
-        notificationsEnabled:
-            "الإشعارات مفعّلة.",
-
-        notificationsUnsupported:
-            "هذا المتصفح لا يدعم الإشعارات.",
-
+        accountActions: "إجراءات الحساب",
         signOut: "تسجيل الخروج",
 
         notSignedIn: "لم يتم تسجيل الدخول",
-
-        usernameTooShort:
-            "يجب أن يكون اسم المستخدم حرفين على الأقل.",
-
-        enterEmail:
-            "أدخل بريدك الإلكتروني.",
-
-        passwordShort:
-            "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
-
-        passwordsMismatch:
-            "كلمتا المرور غير متطابقتين.",
-
-        enterEmailPassword:
-            "أدخل بريدك الإلكتروني وكلمة المرور.",
-
-        incorrectLogin:
-            "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
-
-        prayer: {
-            Fajr: "الفجر",
-            Dhuhr: "الظهر",
-            Asr: "العصر",
-            Maghrib: "المغرب",
-            Isha: "العشاء"
-        }
-
+        noTasks: "لا توجد مهام بعد. أضف واحدة أعلاه.",
+        signInTasks: "سجل الدخول لحفظ مهامك.",
+        loading: "جار التحميل..."
     }
 
 };
 
 
-let currentLanguage =
-    localStorage.getItem("dailyz_language");
+let language =
+    localStorage.getItem("dailyz_language") || null;
 
 
 function t(key) {
 
-    const language =
-        translations[currentLanguage] || translations.en;
-
-    const parts = key.split(".");
-
-    let value = language;
-
-    for (const part of parts) {
-
-        value = value?.[part];
-
-    }
-
-    return value ?? key;
+    return translations[language || "en"][key]
+        || translations.en[key]
+        || key;
 
 }
 
 
 function applyLanguage() {
 
-    const language =
-        translations[currentLanguage] || translations.en;
+    if (!language) return;
 
-    document.documentElement.lang = currentLanguage;
+    document.documentElement.lang = language;
 
     document.documentElement.dir =
-        language.direction;
+        language === "ar" || language === "ku"
+        ? "rtl"
+        : "ltr";
+
+    document.querySelector(
+        "#languageScreen p"
+    ).textContent = t("selectLanguage");
 
 
-    document.getElementById("chooseLanguageText")
-        .textContent = t("chooseLanguage");
+    document.getElementById("authTitle").textContent =
+        signUpMode ? t("createAccount") : t("welcomeBack");
 
+    document.getElementById("authSubtitle").textContent =
+        signUpMode ? t("startDailyz") : t("signInContinue");
 
-    document.getElementById("authTitle")
-        .textContent =
-        signUpMode
-        ? t("authCreate")
-        : t("authWelcome");
+    document.getElementById("usernameInput").placeholder =
+        t("username");
 
+    document.getElementById("emailInput").placeholder =
+        t("email");
 
-    document.getElementById("authSubtitle")
-        .textContent =
-        signUpMode
-        ? t("authCreateSubtitle")
-        : t("authLoginSubtitle");
+    document.getElementById("passwordInput").placeholder =
+        t("password");
 
+    document.getElementById("confirmPasswordInput").placeholder =
+        t("confirmPassword");
 
-    document.getElementById("usernameInput")
-        .placeholder = t("username");
+    document.getElementById("authButton").textContent =
+        signUpMode ? t("create") : t("signIn");
 
-    document.getElementById("emailInput")
-        .placeholder = t("email");
+    document.getElementById("switchText").textContent =
+        signUpMode ? t("alreadyAccount") : t("noAccount");
 
-    document.getElementById("passwordInput")
-        .placeholder = t("password");
+    document.getElementById("switchButton").textContent =
+        signUpMode ? t("signIn") : t("signUp");
 
-    document.getElementById("confirmPasswordInput")
-        .placeholder = t("confirmPassword");
+    document.querySelector(
+        '[data-tab="tasks"]'
+    ).textContent = t("tasks");
 
+    document.querySelector(
+        '[data-tab="prayers"]'
+    ).textContent = t("prayers");
 
-    document.getElementById("authButton")
-        .textContent =
-        signUpMode
-        ? t("createAccount")
-        : t("signIn");
+    document.getElementById("taskInput").placeholder =
+        t("addTask");
 
+    document.getElementById("prayerTitle").textContent =
+        t("prayers");
 
-    document.getElementById("switchText")
-        .textContent =
-        signUpMode
-        ? t("alreadyAccount")
-        : t("noAccount");
+    document.getElementById("nextLabel").textContent =
+        t("nextPrayer");
 
+    document.getElementById("settingsTitle").textContent =
+        t("settings");
 
-    document.getElementById("switchButton")
-        .textContent =
-        signUpMode
-        ? t("signIn")
-        : t("signUp");
+    document.getElementById("settingsSubtitle").textContent =
+        t("settingsSubtitle");
 
+    document.getElementById("accountTitle").textContent =
+        t("account");
 
-    document.getElementById("tasksTab")
-        .textContent = t("tasks");
+    document.getElementById("usernameLabel").textContent =
+        t("username");
 
-    document.getElementById("prayersTab")
-        .textContent = t("prayers");
+    document.getElementById("emailLabel").textContent =
+        t("email");
 
+    document.getElementById("appearanceTitle").textContent =
+        t("appearance");
 
-    document.getElementById("taskInput")
-        .placeholder = t("addTask");
+    document.getElementById("darkModeLabel").textContent =
+        t("darkMode");
 
+    document.getElementById("darkModeDescription").textContent =
+        t("darkDescription");
 
-    document.getElementById("prayerTitle")
-        .textContent = t("prayerTimes");
+    document.getElementById("prayerSettingsTitle").textContent =
+        t("prayerSettings");
 
-    document.getElementById("nextLabel")
-        .textContent = t("nextPrayer");
+    document.getElementById("locationLabel").textContent =
+        t("location");
 
+    document.getElementById("locationDescription").textContent =
+        t("locationDescription");
 
-    document.getElementById("settingsTitle")
-        .textContent = t("settings");
+    document.getElementById("updateLocationButton").textContent =
+        t("update");
 
-    document.getElementById("settingsSubtitle")
-        .textContent = t("settingsSubtitle");
+    document.getElementById("notificationsTitle").textContent =
+        t("notifications");
 
+    document.getElementById("notificationsLabel").textContent =
+        t("prayerNotifications");
 
-    document.getElementById("accountTitle")
-        .textContent = t("account");
+    document.getElementById("notificationsDescription").textContent =
+        t("notificationDescription");
 
-    document.getElementById("usernameLabel")
-        .textContent = t("username");
-
-    document.getElementById("emailLabel")
-        .textContent = t("email");
-
-
-    document.getElementById("appearanceTitle")
-        .textContent = t("appearance");
-
-    document.getElementById("darkModeLabel")
-        .textContent = t("darkMode");
-
-    document.getElementById("darkModeDescription")
-        .textContent = t("darkModeDescription");
-
-
-    document.getElementById("languageTitle")
-        .textContent = t("language");
-
-    document.getElementById("languageLabel")
-        .textContent = t("language");
-
-    document.getElementById("languageDescription")
-        .textContent = t("languageDescription");
-
-
-    document.getElementById("prayerSettingsTitle")
-        .textContent = t("prayerSettings");
-
-    document.getElementById("locationLabel")
-        .textContent = t("location");
-
-    document.getElementById("locationDescription")
-        .textContent = t("locationDescription");
-
-
-    document.getElementById("locationInput")
-        .placeholder = t("location");
-
-
-    document.getElementById("updateLocationButton")
-        .textContent = t("update");
-
-
-    document.getElementById("notificationsTitle")
-        .textContent = t("notifications");
-
-    document.getElementById("notificationsLabel")
-        .textContent = t("prayerNotifications");
-
-    document.getElementById("notificationsDescription")
-        .textContent =
-        t("prayerNotificationsDescription");
-
-
-    document.getElementById("notificationButton")
-        .textContent =
+    document.getElementById("notificationButton").textContent =
         t("enableNotifications");
 
+    document.getElementById("notificationStatus").textContent =
+        t("notificationsDisabled");
 
-    document.getElementById("accountActionsTitle")
-        .textContent = t("accountActions");
+    document.getElementById("accountActionsTitle").textContent =
+        t("accountActions");
 
-    document.getElementById("logoutButton")
-        .textContent = t("signOut");
+    document.getElementById("logoutButton").textContent =
+        t("signOut");
 
+    document.getElementById("settingsUsername").textContent =
+        currentUser
+        ? document.getElementById("settingsUsername").textContent
+        : t("notSignedIn");
 
-    document.getElementById("settingsThemeButton")
-        .textContent =
-        document.body.classList.contains("dark")
-        ? "On"
-        : "Off";
-
-
-    document.getElementById("settingsLanguage")
-        .value = currentLanguage;
-
-
-    if (!currentUser) {
-
-        document.getElementById("settingsUsername")
-            .textContent = t("notSignedIn");
-
-        document.getElementById("settingsEmail")
-            .textContent = t("notSignedIn");
-
-    }
-
-
-    loadPrayerTimes();
-
-    if (currentUser) {
-
-        startTaskListener();
-
-    } else {
-
-        renderTasks([]);
-
-    }
-
+    renderTasksFromCurrentSnapshot();
 }
 
 
-function chooseLanguage(language) {
-
-    currentLanguage = language;
-
-    localStorage.setItem(
-        "dailyz_language",
-        language
-    );
-
-    document.getElementById("languageOverlay")
-        .style.display = "none";
-
-    applyLanguage();
-
-}
-
-
-document
-    .querySelectorAll(".language-option")
+document.querySelectorAll(".language-choice")
     .forEach(button => {
 
         button.addEventListener("click", () => {
 
-            chooseLanguage(
-                button.dataset.language
+            language = button.dataset.language;
+
+            localStorage.setItem(
+                "dailyz_language",
+                language
             );
+
+            document.getElementById(
+                "languageScreen"
+            ).style.display = "none";
+
+            applyLanguage();
 
         });
 
     });
 
 
-document
-    .getElementById("settingsLanguage")
-    .addEventListener("change", event => {
+if (!language) {
 
-        chooseLanguage(event.target.value);
-
-    });
-
-
-/* FIRST LAUNCH LANGUAGE */
-
-if (!currentLanguage) {
-
-    currentLanguage = "en";
-
-    document.getElementById("languageOverlay")
-        .style.display = "flex";
+    document.getElementById(
+        "languageScreen"
+    ).style.display = "flex";
 
 }
 
 
-/* DATE */
+/* =========================
+   DATE
+========================= */
 
 function updateDate() {
 
-    const localeMap = {
-        en: "en-US",
-        ku: "ku-Arab",
-        ar: "ar-IQ"
-    };
-
-    document.getElementById("date")
-        .textContent =
+    document.getElementById("date").textContent =
         new Date().toLocaleDateString(
-            localeMap[currentLanguage] || "en-US",
+            language === "ku"
+                ? "ku"
+                : language === "ar"
+                ? "ar"
+                : "en-US",
             {
                 weekday: "long",
                 month: "long",
@@ -1676,21 +1699,37 @@ function updateDate() {
 
 }
 
+updateDate();
 
-/* AUTH */
+
+/* =========================
+   AUTH
+========================= */
 
 function setAuthMode() {
 
-    document.getElementById("usernameInput")
-        .style.display =
+    document.getElementById("authTitle").textContent =
+        signUpMode ? t("createAccount") : t("welcomeBack");
+
+    document.getElementById("authSubtitle").textContent =
+        signUpMode ? t("startDailyz") : t("signInContinue");
+
+    document.getElementById("usernameInput").style.display =
         signUpMode ? "block" : "none";
 
-    document.getElementById("confirmPasswordInput")
-        .style.display =
+    document.getElementById("confirmPasswordInput").style.display =
         signUpMode ? "block" : "none";
 
-    applyLanguage();
+    document.getElementById("authButton").textContent =
+        signUpMode ? t("create") : t("signIn");
 
+    document.getElementById("switchText").textContent =
+        signUpMode ? t("alreadyAccount") : t("noAccount");
+
+    document.getElementById("switchButton").textContent =
+        signUpMode ? t("signIn") : t("signUp");
+
+    clearError();
 }
 
 
@@ -1721,49 +1760,42 @@ async function createAccount() {
     clearError();
 
     const username =
-        document.getElementById("usernameInput")
-            .value.trim();
+        document.getElementById("usernameInput").value.trim();
 
     const email =
-        document.getElementById("emailInput")
-            .value.trim();
+        document.getElementById("emailInput").value.trim();
 
     const password =
-        document.getElementById("passwordInput")
-            .value;
+        document.getElementById("passwordInput").value;
 
     const confirm =
-        document.getElementById("confirmPasswordInput")
-            .value;
+        document.getElementById("confirmPasswordInput").value;
 
 
     if (username.length < 2) {
 
-        showError(t("usernameTooShort"));
+        showError("Username must be at least 2 characters.");
         return;
 
     }
-
 
     if (!email) {
 
-        showError(t("enterEmail"));
+        showError("Enter your email.");
         return;
 
     }
-
 
     if (password.length < 6) {
 
-        showError(t("passwordShort"));
+        showError("Password must be at least 6 characters.");
         return;
 
     }
 
-
     if (password !== confirm) {
 
-        showError(t("passwordsMismatch"));
+        showError("Passwords do not match.");
         return;
 
     }
@@ -1777,7 +1809,6 @@ async function createAccount() {
                 email,
                 password
             );
-
 
         await setDoc(
             doc(db, "users", result.user.uid),
@@ -1802,17 +1833,15 @@ async function login() {
     clearError();
 
     const email =
-        document.getElementById("emailInput")
-            .value.trim();
+        document.getElementById("emailInput").value.trim();
 
     const password =
-        document.getElementById("passwordInput")
-            .value;
+        document.getElementById("passwordInput").value;
 
 
     if (!email || !password) {
 
-        showError(t("enterEmailPassword"));
+        showError("Enter your email and password.");
         return;
 
     }
@@ -1828,7 +1857,7 @@ async function login() {
 
     } catch (error) {
 
-        showError(t("incorrectLogin"));
+        showError("Incorrect email or password.");
 
     }
 
@@ -1839,15 +1868,9 @@ document
     .getElementById("authButton")
     .addEventListener("click", () => {
 
-        if (signUpMode) {
-
-            createAccount();
-
-        } else {
-
-            login();
-
-        }
+        signUpMode
+            ? createAccount()
+            : login();
 
     });
 
@@ -1858,14 +1881,14 @@ document
 
         signUpMode = !signUpMode;
 
-        clearError();
-
         setAuthMode();
 
     });
 
 
-/* AUTH STATE */
+/* =========================
+   AUTH STATE
+========================= */
 
 onAuthStateChanged(auth, async user => {
 
@@ -1883,7 +1906,6 @@ onAuthStateChanged(auth, async user => {
         authCard.style.display = "none";
         userBar.style.display = "block";
 
-
         document.getElementById("emailDisplay")
             .textContent = user.email;
 
@@ -1899,8 +1921,8 @@ onAuthStateChanged(auth, async user => {
 
         const username =
             profile.exists()
-            ? profile.data().username
-            : "User";
+                ? profile.data().username
+                : "User";
 
 
         document.getElementById("usernameDisplay")
@@ -1926,7 +1948,9 @@ onAuthStateChanged(auth, async user => {
 });
 
 
-/* SIGN OUT */
+/* =========================
+   SIGN OUT
+========================= */
 
 document
     .getElementById("logoutButton")
@@ -1934,10 +1958,46 @@ document
 
         await signOut(auth);
 
+        closeSettings();
+
     });
 
 
-/* NAVIGATION */
+/* =========================
+   NAVIGATION
+========================= */
+
+let previousTab = "tasks";
+let settingsOpen = false;
+
+
+function openSection(tabName) {
+
+    document
+        .querySelectorAll(".tab")
+        .forEach(tab => {
+
+            tab.classList.toggle(
+                "active",
+                tab.dataset.tab === tabName
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".section")
+        .forEach(section => {
+
+            section.classList.toggle(
+                "active",
+                section.id === tabName
+            );
+
+        });
+
+}
+
 
 document
     .querySelectorAll(".tab")
@@ -1945,56 +2005,77 @@ document
 
         tab.addEventListener("click", () => {
 
-            document
-                .querySelectorAll(".tab")
-                .forEach(t =>
-                    t.classList.remove("active")
-                );
+            if (settingsOpen) {
 
-            document
-                .querySelectorAll(".section")
-                .forEach(s =>
-                    s.classList.remove("active")
-                );
+                settingsOpen = false;
 
+            }
 
-            tab.classList.add("active");
+            previousTab = tab.dataset.tab;
 
-            document
-                .getElementById(tab.dataset.tab)
-                .classList.add("active");
+            openSection(previousTab);
 
         });
 
     });
 
 
-/* SETTINGS */
+/* =========================
+   FIXED SETTINGS BUTTON
+========================= */
+
+function openSettings() {
+
+    settingsOpen = true;
+
+    document
+        .querySelectorAll(".tab")
+        .forEach(tab =>
+            tab.classList.remove("active")
+        );
+
+    document
+        .querySelectorAll(".section")
+        .forEach(section =>
+            section.classList.remove("active")
+        );
+
+    document
+        .getElementById("settings")
+        .classList.add("active");
+
+}
+
+
+function closeSettings() {
+
+    settingsOpen = false;
+
+    openSection(previousTab);
+
+}
+
 
 document
     .getElementById("settingsButton")
     .addEventListener("click", () => {
 
-        document
-            .querySelectorAll(".tab")
-            .forEach(t =>
-                t.classList.remove("active")
-            );
+        if (settingsOpen) {
 
-        document
-            .querySelectorAll(".section")
-            .forEach(s =>
-                s.classList.remove("active")
-            );
+            closeSettings();
 
-        document
-            .getElementById("settings")
-            .classList.add("active");
+        } else {
+
+            openSettings();
+
+        }
 
     });
 
 
-/* TASKS */
+/* =========================
+   TASKS
+========================= */
 
 function getTasksCollection() {
 
@@ -2015,6 +2096,20 @@ function stopTaskListener() {
         unsubscribeTasks();
 
         unsubscribeTasks = null;
+
+    }
+
+}
+
+
+let latestTasks = [];
+
+
+function renderTasksFromCurrentSnapshot() {
+
+    if (currentUser) {
+
+        renderTasks(latestTasks);
 
     }
 
@@ -2048,6 +2143,8 @@ function startTaskListener() {
                 });
 
             });
+
+            latestTasks = tasks;
 
             renderTasks(tasks);
 
@@ -2120,8 +2217,7 @@ function renderTasks(tasks) {
                         task.id
                     ),
                     {
-                        completed:
-                            checkbox.checked
+                        completed: checkbox.checked
                     }
                 );
 
@@ -2176,7 +2272,7 @@ async function addTask() {
 
     if (!currentUser) {
 
-        alert(t("signInFirst"));
+        alert(t("signInTasks"));
         return;
 
     }
@@ -2210,10 +2306,7 @@ async function addTask() {
 
 document
     .getElementById("addTaskButton")
-    .addEventListener(
-        "click",
-        addTask
-    );
+    .addEventListener("click", addTask);
 
 
 document
@@ -2225,7 +2318,6 @@ document
             if (event.key === "Enter") {
 
                 event.preventDefault();
-
                 addTask();
 
             }
@@ -2234,29 +2326,22 @@ document
     );
 
 
-/* DARK MODE */
+/* =========================
+   DARK MODE
+========================= */
 
 function applyTheme() {
 
     const dark =
-        localStorage.getItem("dailyz_dark")
-        === "true";
+        localStorage.getItem("dailyz_dark") === "true";
 
-
-    document.body.classList.toggle(
-        "dark",
-        dark
-    );
-
+    document.body.classList.toggle("dark", dark);
 
     document.getElementById("themeButton")
-        .textContent =
-        dark ? "☀" : "☾";
-
+        .textContent = dark ? "☀" : "☾";
 
     document.getElementById("settingsThemeButton")
-        .textContent =
-        dark ? "On" : "Off";
+        .textContent = dark ? "On" : "Off";
 
 }
 
@@ -2266,12 +2351,10 @@ function toggleTheme() {
     const dark =
         !document.body.classList.contains("dark");
 
-
     localStorage.setItem(
         "dailyz_dark",
         dark
     );
-
 
     applyTheme();
 
@@ -2280,21 +2363,17 @@ function toggleTheme() {
 
 document
     .getElementById("themeButton")
-    .addEventListener(
-        "click",
-        toggleTheme
-    );
+    .addEventListener("click", toggleTheme);
 
 
 document
     .getElementById("settingsThemeButton")
-    .addEventListener(
-        "click",
-        toggleTheme
-    );
+    .addEventListener("click", toggleTheme);
 
 
-/* PRAYER TIMES */
+/* =========================
+   PRAYER TIMES
+========================= */
 
 const prayerTimes = {
 
@@ -2327,8 +2406,7 @@ function loadPrayerTimes() {
             const nameElement =
                 document.createElement("span");
 
-            nameElement.textContent =
-                t("prayer." + name);
+            nameElement.textContent = name;
 
 
             const timeElement =
@@ -2370,7 +2448,6 @@ function updateNextPrayer() {
         const [hours, minutes] =
             time.split(":").map(Number);
 
-
         const prayerMinutes =
             hours * 60 + minutes;
 
@@ -2378,6 +2455,7 @@ function updateNextPrayer() {
         if (prayerMinutes > currentMinutes) {
 
             next = [name, time];
+
             break;
 
         }
@@ -2396,9 +2474,7 @@ function updateNextPrayer() {
 
 
     document.getElementById("nextName")
-        .textContent =
-        t("prayer." + next[0]);
-
+        .textContent = next[0];
 
     document.getElementById("nextTime")
         .textContent = next[1];
@@ -2406,13 +2482,12 @@ function updateNextPrayer() {
 }
 
 
-setInterval(
-    updateNextPrayer,
-    30000
-);
+setInterval(updateNextPrayer, 30000);
 
 
-/* LOCATION */
+/* =========================
+   LOCATION
+========================= */
 
 document
     .getElementById("updateLocationButton")
@@ -2421,10 +2496,7 @@ document
         () => {
 
             const input =
-                document.getElementById(
-                    "locationInput"
-                );
-
+                document.getElementById("locationInput");
 
             const location =
                 input.value.trim();
@@ -2433,15 +2505,35 @@ document
             if (!location) return;
 
 
-            document.getElementById(
-                "locationText"
-            ).textContent = location;
+            document.getElementById("locationText")
+                .textContent = location;
+
+            localStorage.setItem(
+                "dailyz_location",
+                location
+            );
 
         }
     );
 
 
-/* NOTIFICATIONS */
+const savedLocation =
+    localStorage.getItem("dailyz_location");
+
+if (savedLocation) {
+
+    document.getElementById("locationInput")
+        .value = savedLocation;
+
+    document.getElementById("locationText")
+        .textContent = savedLocation;
+
+}
+
+
+/* =========================
+   NOTIFICATIONS
+========================= */
 
 document
     .getElementById("notificationButton")
@@ -2458,7 +2550,7 @@ document
             if (!("Notification" in window)) {
 
                 status.textContent =
-                    t("notificationsUnsupported");
+                    "Notifications are not supported by this browser.";
 
                 return;
 
@@ -2472,7 +2564,11 @@ document
             if (permission === "granted") {
 
                 status.textContent =
-                    t("notificationsEnabled");
+                    language === "ku"
+                    ? "ئاگادارکردنەوەکان چالاکن."
+                    : language === "ar"
+                    ? "تم تفعيل الإشعارات."
+                    : "Notifications are enabled.";
 
             } else {
 
@@ -2485,41 +2581,13 @@ document
     );
 
 
-/* START */
-
-applyTheme();
-
-applyLanguage();
-
-updateDate();
+/* =========================
+   START
+========================= */
 
 setAuthMode();
-
-
-if (!localStorage.getItem("dailyz_language")) {
-
-    document.getElementById("languageOverlay")
-        .style.display = "flex";
-
-}
-
-
-/* SERVICE WORKER */
-
-if ("serviceWorker" in navigator) {
-
-    window.addEventListener(
-        "load",
-        () => {
-
-            navigator.serviceWorker
-                .register("./sw.js")
-                .catch(() => {});
-
-        }
-    );
-
-}
+applyTheme();
+loadPrayerTimes();
 
 </script>
 
