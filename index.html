@@ -1,8 +1,430 @@
 <!DOCTYPE html>
 
-<html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Dailyz</title>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dailyz</title>
 
-<style> * { box-sizing: border-box; } html, body { margin: 0; padding: 0; min-height: 100%; } body { font-family: Arial, Helvetica, sans-serif; background: #f5f5f7; color: #111; transition: .2s; } button, input { font-family: inherit; } button { cursor: pointer; } .app { width: min(700px, calc(100% - 32px)); margin: auto; padding: 25px 0 50px; } /* HEADER */ .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; } .logo { font-size: 32px; font-weight: 800; } .date { margin-top: 5px; color: #777; font-size: 14px; } .icon-button { width: 44px; height: 44px; border: 0; border-radius: 50%; background: #e5e5e7; font-size: 20px; } /* AUTH */ .auth-card { padding: 25px; margin-bottom: 22px; border-radius: 18px; background: white; box-shadow: 0 4px 20px rgba(0,0,0,.05); } .auth-card h2 { margin: 0; font-size: 26px; } .auth-subtitle { margin-top: 7px; margin-bottom: 21px; color: #777; font-size: 14px; } .auth-input-wrapper { position: relative; margin-bottom: 11px; } .auth-input { width: 100%; height: 50px; padding: 0 14px; border: 1px solid #ddd; border-radius: 11px; outline: none; background: white; font-size: 15px; } .auth-input:focus { border-color: #888; } .password-input { padding-right: 50px; } .password-toggle { position: absolute; top: 50%; right: 5px; width: 40px; height: 40px; transform: translateY(-50%); border: 0; border-radius: 8px; background: transparent; color: #777; } .auth-button { width: 100%; height: 50px; margin-top: 5px; border: 0; border-radius: 11px; background: #111; color: white; font-size: 15px; font-weight: 700; } .auth-button:disabled { opacity: .5; cursor: not-allowed; } .auth-switch { margin-top: 15px; text-align: center; color: #777; font-size: 14px; } .auth-switch button { border: 0; background: transparent; color: #111; font-weight: 700; } .auth-error { display: none; padding: 10px 12px; margin-bottom: 11px; border-radius: 9px; background: #fff0f0; color: #c00; font-size: 13px; } .password-help { display: none; margin: -3px 0 11px; color: #888; font-size: 12px; } /* USER BAR */ .user-bar { display: none; align-items: center; justify-content: space-between; padding: 13px 15px; margin-bottom: 18px; border-radius: 13px; background: white; } .user-info { min-width: 0; } .username-display { font-weight: 700; } .email-display { margin-top: 2px; color: #777; font-size: 12px; } .logout-button { border: 0; border-radius: 9px; padding: 9px 13px; background: #eee; font-weight: 600; } /* TABS */ .tabs { display: flex; gap: 5px; padding: 5px; margin-bottom: 22px; border-radius: 13px; background: #e5e5e7; } .tab { flex: 1; border: 0; border-radius: 9px; padding: 12px; background: transparent; color: #666; font-weight: 600; } .tab.active { background: white; color: #111; } /* SECTIONS */ .section { display: none; } .section.active { display: block; } /* TASKS */ .task-input { display: flex; gap: 8px; margin-bottom: 18px; } #taskInput { flex: 1; min-width: 0; height: 52px; padding: 0 15px; border: 1px solid #ddd; border-radius: 12px; outline: none; background: white; font-size: 16px; } .add-button { width: 52px; height: 52px; padding: 0; border: 0; border-radius: 12px; background: #111; color: white; font-size: 28px; } #taskList { display: flex; flex-direction: column; gap: 9px; } .task-row { display: flex; align-items: center; min-height: 54px; padding: 12px 14px; border-radius: 13px; background: white; } .task-check { width: 19px; height: 19px; flex-shrink: 0; margin-right: 12px; } .task-label { flex: 1; min-width: 0; overflow-wrap: anywhere; } .task-row.done .task-label { text-decoration: line-through; opacity: .45; } .delete-task { width: 30px; height: 30px; margin-left: 8px; border: 0; background: transparent; font-size: 20px; } .no-tasks { padding: 35px 10px; text-align: center; color: #888; } /* PRAYERS */ .prayer-header { margin-bottom: 18px; } .prayer-header h2 { margin: 0 0 5px; } .location { color: #777; font-size: 14px; } .next-prayer { padding: 23px; margin-bottom: 18px; border-radius: 18px; background: #111; color: white; } .next-label { font-size: 11px; letter-spacing: 1px; opacity: .6; } .next-name { margin-top: 5px; font-size: 28px; font-weight: 700; } .next-time { margin-top: 2px; font-size: 38px; font-weight: 700; } #prayerList { display: flex; flex-direction: column; gap: 8px; } .prayer-row { display: flex; justify-content: space-between; align-items: center; min-height: 52px; padding: 15px 16px; border-radius: 12px; background: white; } .settings-card { margin-top: 20px; padding: 19px; border-radius: 16px; background: white; } .settings-title { margin-bottom: 13px; font-weight: 700; } .location-row { display: flex; gap: 8px; } #locationInput { flex: 1; min-width: 0; height: 45px; padding: 0 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; } .small-button, .notification-button { border: 0; border-radius: 10px; background: #111; color: white; font-weight: 600; } .small-button { height: 45px; padding: 0 16px; } .notification-button { width: 100%; height: 45px; margin-top: 11px; } .status { margin-top: 9px; color: #777; font-size: 13px; } /* DARK MODE */ body.dark { background: #111214; color: white; } body.dark .icon-button { background: #292a2f; color: white; } body.dark .auth-card, body.dark .user-bar, body.dark .task-row, body.dark .prayer-row, body.dark .settings-card { background: #1d1f23; } body.dark .auth-input, body.dark #taskInput, body.dark #locationInput { background: #292b30; color: white; border-color: #3b3d43; } body.dark .auth-subtitle, body.dark .email-display, body.dark .date, body.dark .location, body.dark .status { color: #999; } body.dark .tabs { background: #242529; } body.dark .tab { color: #aaa; } body.dark .tab.active { background: #383a40; color: white; } body.dark .logout-button { background: #383a40; color: white; } body.dark .next-prayer { background: #292b30; } </style>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #f5f5f7;
+    color: #111;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+.app {
+    width: min(700px, calc(100% - 30px));
+    margin: auto;
+    padding: 25px 0 50px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.date {
+    margin-top: 5px;
+    color: #777;
+    font-size: 14px;
+}
+
+.icon-button {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: #e5e5e7;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* AUTH */
+
+.auth-card {
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 18px;
+    background: white;
+    box-shadow: 0 5px 20px rgba(0,0,0,.06);
+}
+
+.auth-card h2 {
+    margin: 0;
+    font-size: 25px;
+}
+
+.auth-subtitle {
+    margin: 7px 0 20px;
+    color: #777;
+}
+
+.auth-input {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 11px;
+    padding: 0 14px;
+    border: 1px solid #ddd;
+    border-radius: 11px;
+    outline: none;
+}
+
+.auth-input:focus {
+    border-color: #111;
+}
+
+.password-box {
+    position: relative;
+}
+
+.password-box .auth-input {
+    padding-right: 65px;
+}
+
+.show-password {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    height: 40px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+}
+
+.auth-button {
+    width: 100%;
+    height: 50px;
+    border: 0;
+    border-radius: 11px;
+    background: #111;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-button:disabled {
+    opacity: .5;
+}
+
+.auth-switch {
+    margin-top: 15px;
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+}
+
+.auth-switch button {
+    border: 0;
+    background: transparent;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-error {
+    display: none;
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 9px;
+    background: #ffecec;
+    color: #c00;
+    font-size: 13px;
+}
+
+/* USER */
+
+.user-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 15px;
+    margin-bottom: 18px;
+    border-radius: 13px;
+    background: white;
+}
+
+.username {
+    font-weight: 700;
+}
+
+.email {
+    margin-top: 3px;
+    color: #777;
+    font-size: 12px;
+}
+
+.logout {
+    border: 0;
+    border-radius: 9px;
+    padding: 9px 13px;
+    background: #eee;
+    cursor: pointer;
+}
+
+/* TABS */
+
+.tabs {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    margin-bottom: 20px;
+    border-radius: 13px;
+    background: #e5e5e7;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+}
+
+.tab.active {
+    background: white;
+    color: #111;
+}
+
+/* SECTIONS */
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+/* TASKS */
+
+.task-input {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+#taskInput {
+    flex: 1;
+    min-width: 0;
+    height: 52px;
+    padding: 0 15px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    outline: none;
+    background: white;
+}
+
+.add-button {
+    width: 52px;
+    height: 52px;
+    border: 0;
+    border-radius: 12px;
+    background: #111;
+    color: white;
+    font-size: 27px;
+    cursor: pointer;
+}
+
+.task {
+    display: flex;
+    align-items: center;
+    min-height: 54px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: white;
+}
+
+.task input {
+    width: 19px;
+    height: 19px;
+    margin-right: 12px;
+}
+
+.task-text {
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+.task.completed .task-text {
+    text-decoration: line-through;
+    opacity: .45;
+}
+
+.delete-task {
+    border: 0;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.empty {
+    padding: 30px;
+    text-align: center;
+    color: #888;
+}
+
+/* PRAYERS */
+
+.prayer-header h2 {
+    margin-bottom: 5px;
+}
+
+.location {
+    color: #777;
+    font-size: 14px;
+}
+
+.next-prayer {
+    padding: 22px;
+    margin: 18px 0;
+    border-radius: 18px;
+    background: #111;
+    color: white;
+}
+
+.next-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: .6;
+}
+
+.next-name {
+    margin-top: 5px;
+    font-size: 27px;
+    font-weight: 700;
+}
+
+.next-time {
+    margin-top: 2px;
+    font-size: 38px;
+    font-weight: 700;
+}
+
+.prayer {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: white;
+}
+
+.settings {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 16px;
+    background: white;
+}
+
+.settings-title {
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.location-row {
+    display: flex;
+    gap: 8px;
+}
+
+#locationInput {
+    flex: 1;
+    min-width: 0;
+    height: 45px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.small-button,
+.notification-button {
+    border: 0;
+    border-radius: 10px;
+    background: #111;
+    color: white;
+    cursor: pointer;
+}
+
+.small-button {
+    padding: 0 15px;
+}
+
+.notification-button {
+    width: 100%;
+    height: 45px;
+    margin-top: 10px;
+}
+
+.status {
+    margin-top: 8px;
+    color: #777;
+    font-size: 13px;
+}
+
+/* DARK */
+
+body.dark {
+    background: #111214;
+    color: white;
+}
+
+body.dark .auth-card,
+body.dark .user-bar,
+body.dark .task,
+body.dark .prayer,
+body.dark .settings {
+    background: #1d1f23;
+}
+
+body.dark .auth-input,
+body.dark #taskInput,
+body.dark #locationInput {
+    background: #292b30;
+    color: white;
+    border-color: #444;
+}
+
+body.dark .tabs {
+    background: #242529;
+}
+
+body.dark .tab {
+    color: #aaa;
+}
+
+body.dark .tab.active {
+    background: #383a40;
+    color: white;
+}
+
+body.dark .logout {
+    background: #383a40;
+    color: white;
+}
+</style>
 
 </head>
 
@@ -10,332 +432,1037 @@
 
 <div class="app">
 
-<!-- HEADER -->
-
-<div class="header">
-
+<header class="header">
     <div>
         <div class="logo">Dailyz</div>
         <div class="date" id="date"></div>
     </div>
 
-    <button
-        class="icon-button"
-        id="themeButton"
-        type="button"
-    >☾</button>
+```
+<button class="icon-button" id="themeButton" type="button">☾</button>
+```
 
-</div>
-
+</header>
 
 <!-- AUTH -->
 
-<div
-    class="auth-card"
-    id="authCard"
+<div class="auth-card" id="authCard">
+
+```
+<h2 id="authTitle">Create your account</h2>
+
+<div class="auth-subtitle" id="authSubtitle">
+    Start organizing your day with Dailyz.
+</div>
+
+<div class="auth-error" id="authError"></div>
+
+<input
+    class="auth-input"
+    id="usernameInput"
+    type="text"
+    placeholder="Username"
+    autocomplete="username"
 >
 
-    <h2 id="authTitle">
-        Create your account
-    </h2>
+<input
+    class="auth-input"
+    id="emailInput"
+    type="email"
+    placeholder="Email"
+    autocomplete="email"
+>
 
-    <div
-        class="auth-subtitle"
-        id="authSubtitle"
-    >
-        Start organizing your day with Dailyz.
-    </div>
-
-
-    <div
-        class="auth-error"
-        id="authError"
-    ></div>
-
-
-    <!-- USERNAME -->
-
-    <div id="usernameWrapper">
-
-        <input
-            class="auth-input"
-            id="usernameInput"
-            type="text"
-            placeholder="Username"
-            autocomplete="username"
-            maxlength="30"
-        >
-
-    </div>
-
-
-    <!-- EMAIL -->
+<div class="password-box">
 
     <input
         class="auth-input"
-        id="emailInput"
-        type="email"
-        placeholder="Email"
-        autocomplete="email"
+        id="passwordInput"
+        type="password"
+        placeholder="Password"
+        autocomplete="new-password"
     >
-
-
-    <!-- PASSWORD -->
-
-    <div class="auth-input-wrapper">
-
-        <input
-            class="auth-input password-input"
-            id="passwordInput"
-            type="password"
-            placeholder="Password"
-            autocomplete="new-password"
-        >
-
-        <button
-            class="password-toggle"
-            id="passwordToggle"
-            type="button"
-        >
-            Show
-        </button>
-
-    </div>
-
-
-    <div
-        class="password-help"
-        id="passwordHelp"
-    >
-        Password must be at least 6 characters.
-    </div>
-
-
-    <!-- CONFIRM PASSWORD -->
-
-    <div
-        class="auth-input-wrapper"
-        id="confirmWrapper"
-    >
-
-        <input
-            class="auth-input password-input"
-            id="confirmPasswordInput"
-            type="password"
-            placeholder="Confirm password"
-            autocomplete="new-password"
-        >
-
-    </div>
-
 
     <button
-        class="auth-button"
-        id="authButton"
+        class="show-password"
+        id="showPassword"
         type="button"
-    >
-        Create Account
-    </button>
-
-
-    <div class="auth-switch">
-
-        <span id="switchText">
-            Already have an account?
-        </span>
-
-        <button
-            id="switchAuthButton"
-            type="button"
-        >
-            Sign In
-        </button>
-
-    </div>
+    >Show</button>
 
 </div>
 
+<div class="password-box" id="confirmBox">
+
+    <input
+        class="auth-input"
+        id="confirmPasswordInput"
+        type="password"
+        placeholder="Confirm password"
+        autocomplete="new-password"
+    >
+
+</div>
+
+<button class="auth-button" id="authButton" type="button">
+    Create Account
+</button>
+
+<div class="auth-switch">
+
+    <span id="switchText">
+        Already have an account?
+    </span>
+
+    <button id="switchButton" type="button">
+        Sign In
+    </button>
+
+</div>
+```
+
+</div>
 
 <!-- USER -->
 
-<div
-    class="user-bar"
-    id="userBar"
->
+<div class="user-bar" id="userBar">
 
-    <div class="user-info">
-
-        <div
-            class="username-display"
-            id="usernameDisplay"
-        ></div>
-
-        <div
-            class="email-display"
-            id="emailDisplay"
-        ></div>
-
-    </div>
-
-    <button
-        class="logout-button"
-        id="logoutButton"
-        type="button"
-    >
-        Log Out
-    </button>
-
+```
+<div>
+    <div class="username" id="usernameDisplay"></div>
+    <div class="email" id="emailDisplay"></div>
 </div>
 
+<button class="logout" id="logoutButton" type="button">
+    Log Out
+</button>
+```
+
+</div>
 
 <!-- TABS -->
 
 <div class="tabs">
 
-    <button
-        class="tab active"
-        type="button"
-        data-page="tasks"
-    >
-        Tasks
-    </button>
+```
+<button class="tab active" data-tab="tasks" type="button">
+    Tasks
+</button>
 
-    <button
-        class="tab"
-        type="button"
-        data-page="prayers"
-    >
-        Prayer Times
-    </button>
+<button class="tab" data-tab="prayers" type="button">
+    Prayer Times
+</button>
+```
 
 </div>
-
 
 <!-- TASKS -->
 
-<div
-    class="section active"
-    id="tasks"
->
+<section class="section active" id="tasks">
 
-    <div class="task-input">
+```
+<div class="task-input">
 
-        <input
-            id="taskInput"
-            type="text"
-            placeholder="Add a task..."
-            autocomplete="off"
-        >
+    <input
+        id="taskInput"
+        type="text"
+        placeholder="Add a task..."
+        autocomplete="off"
+    >
 
-        <button
-            id="addTaskButton"
-            class="add-button"
-            type="button"
-        >
-            +
-        </button>
-
-    </div>
-
-    <div id="taskList"></div>
+    <button
+        class="add-button"
+        id="addTaskButton"
+        type="button"
+    >+</button>
 
 </div>
 
+<div id="taskList"></div>
+```
+
+</section>
 
 <!-- PRAYERS -->
 
-<div
-    class="section"
-    id="prayers"
->
+<section class="section" id="prayers">
 
-    <div class="prayer-header">
+```
+<div class="prayer-header">
 
-        <h2>Prayer Times</h2>
+    <h2>Prayer Times</h2>
 
-        <div
-            class="location"
-            id="locationText"
-        >
-            Erbil, Iraq
-        </div>
-
+    <div class="location" id="locationText">
+        Erbil, Iraq
     </div>
 
+</div>
 
-    <div class="next-prayer">
+<div class="next-prayer">
 
-        <div class="next-label">
-            NEXT PRAYER
-        </div>
+    <div class="next-label">NEXT PRAYER</div>
 
-        <div
-            class="next-name"
-            id="nextName"
-        >
-            Loading...
-        </div>
-
-        <div
-            class="next-time"
-            id="nextTime"
-        >
-            --:--
-        </div>
-
+    <div class="next-name" id="nextName">
+        Loading...
     </div>
 
+    <div class="next-time" id="nextTime">
+        --:--
+    </div>
 
-    <div id="prayerList"></div>
+</div>
 
+<div id="prayerList"></div>
 
-    <div class="settings-card">
+<div class="settings">
 
-        <div class="settings-title">
-            Prayer settings
-        </div>
+    <div class="settings-title">
+        Prayer settings
+    </div>
 
-        <div class="location-row">
+    <div class="location-row">
 
-            <input
-                id="locationInput"
-                type="text"
-                value="Erbil, Iraq"
-                placeholder="City, Country"
-            >
-
-            <button
-                id="updateLocationButton"
-                class="small-button"
-                type="button"
-            >
-                Update
-            </button>
-
-        </div>
-
+        <input
+            id="locationInput"
+            type="text"
+            value="Erbil, Iraq"
+            placeholder="City, Country"
+        >
 
         <button
-            id="notificationButton"
-            class="notification-button"
+            class="small-button"
+            id="updateLocationButton"
             type="button"
         >
-            🔔 Enable Prayer Notifications
+            Update
         </button>
-
-        <div
-            id="notificationStatus"
-            class="status"
-        >
-            Notifications are disabled.
-        </div>
 
     </div>
 
-</div>
+    <button
+        class="notification-button"
+        id="notificationButton"
+        type="button"
+    >
+        🔔 Enable Prayer Notifications
+    </button>
+
+    <div class="status" id="notificationStatus">
+        Notifications are disabled.
+    </div>
 
 </div>
+```
 
-<script type="module"> /* ========================================= FIREBASE ========================================= */ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js"; import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js"; import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, setDoc, getDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js"; const firebaseConfig = { apiKey: "AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8", authDomain: "dailyz-web.firebaseapp.com", projectId: "dailyz-web", storageBucket: "dailyz-web.firebasestorage.app", messagingSenderId: "1031947329415", appId: "1:1031947329415:web:475f3f0d7449992fc73d22" }; const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); let currentUser = null; let unsubscribeTasks = null; let signUpMode = true; /* ========================================= DATE ========================================= */ function updateDate() { document.getElementById("date").textContent = new Date().toLocaleDateString( undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" } ); } /* ========================================= AUTH ERROR ========================================= */ function showError(message) { const box = document.getElementById("authError"); box.textContent = message; box.style.display = "block"; } function clearError() { const box = document.getElementById("authError"); box.textContent = ""; box.style.display = "none"; } /* ========================================= AUTH MODE ========================================= */ function updateAuthMode() { const title = document.getElementById( "authTitle" ); const subtitle = document.getElementById( "authSubtitle" ); const usernameWrapper = document.getElementById( "usernameWrapper" ); const confirmWrapper = document.getElementById( "confirmWrapper" ); const passwordHelp = document.getElementById( "passwordHelp" ); const button = document.getElementById( "authButton" ); const switchText = document.getElementById( "switchText" ); const switchButton = document.getElementById( "switchAuthButton" ); if (signUpMode) { title.textContent = "Create your account"; subtitle.textContent = "Start organizing your day with Dailyz."; usernameWrapper.style.display = "block"; confirmWrapper.style.display = "block"; passwordHelp.style.display = "block"; button.textContent = "Create Account"; switchText.textContent = "Already have an account?"; switchButton.textContent = "Sign In"; } else { title.textContent = "Welcome back"; subtitle.textContent = "Sign in to continue using Dailyz."; usernameWrapper.style.display = "none"; confirmWrapper.style.display = "none"; passwordHelp.style.display = "none"; button.textContent = "Sign In"; switchText.textContent = "Don't have an account?"; switchButton.textContent = "Sign Up"; } clearError(); } /* ========================================= SIGN UP ========================================= */ async function signUp() { clearError(); const username = document .getElementById( "usernameInput" ) .value .trim(); const email = document .getElementById( "emailInput" ) .value .trim(); const password = document .getElementById( "passwordInput" ) .value; const confirmPassword = document .getElementById( "confirmPasswordInput" ) .value; if (!username) { showError( "Please enter a username." ); return; } if (username.length < 2) { showError( "Username must be at least 2 characters." ); return; } if (!email) { showError( "Please enter your email." ); return; } if (password.length < 6) { showError( "Password must be at least 6 characters." ); return; } if (password !== confirmPassword) { showError( "Passwords do not match." ); return; } const button = document.getElementById( "authButton" ); button.disabled = true; try { const credentials = await createUserWithEmailAndPassword( auth, email, password ); await setDoc( doc( db, "users", credentials.user.uid ), { username: username, email: email, createdAt: Date.now() } ); } catch (error) { console.error(error); if ( error.code === "auth/email-already-in-use" ) { showError( "That email is already registered." ); } else if ( error.code === "auth/invalid-email" ) { showError( "Please enter a valid email." ); } else { showError( error.message ); } } button.disabled = false; } /* ========================================= SIGN IN ========================================= */ async function signIn() { clearError(); const email = document .getElementById( "emailInput" ) .value .trim(); const password = document .getElementById( "passwordInput" ) .value; if (!email || !password) { showError( "Enter your email and password." ); return; } const button = document.getElementById( "authButton" ); button.disabled = true; try { await signInWithEmailAndPassword( auth, email, password ); } catch (error) { console.error(error); if ( error.code === "auth/invalid-credential" ) { showError( "Incorrect email or password." ); } else { showError( error.message ); } } button.disabled = false; } /* ========================================= AUTH BUTTON ========================================= */ document .getElementById( "authButton" ) .addEventListener( "click", function() { if (signUpMode) { signUp(); } else { signIn(); } } ); document .getElementById( "switchAuthButton" ) .addEventListener( "click", function() { signUpMode = !signUpMode; updateAuthMode(); } ); /* ========================================= PASSWORD VISIBILITY ========================================= */ document .getElementById( "passwordToggle" ) .addEventListener( "click", function() { const password = document.getElementById( "passwordInput" ); if ( password.type === "password" ) { password.type = "text"; this.textContent = "Hide"; } else { password.type = "password"; this.textContent = "Show"; } } ); /* ========================================= AUTH STATE ========================================= */ onAuthStateChanged( auth, async function(user) { currentUser = user; const authCard = document.getElementById( "authCard" ); const userBar = document.getElementById( "userBar" ); if (user) { authCard.style.display = "none"; userBar.style.display = "flex"; document.getElementById( "emailDisplay" ).textContent = user.email; try { const profile = await getDoc( doc( db, "users", user.uid ) ); if ( profile.exists() ) { document.getElementById( "usernameDisplay" ).textContent = profile.data().username; } else { document.getElementById( "usernameDisplay" ).textContent = "User"; } } catch { document.getElementById( "usernameDisplay" ).textContent = "User"; } startTaskListener(); } else { authCard.style.display = "block"; userBar.style.display = "none"; stopTaskListener(); renderTasks([]); } } ); /* ========================================= LOG OUT ========================================= */ document .getElementById( "logoutButton" ) .addEventListener( "click", async function() { await signOut(auth); } ); /* ========================================= FIRESTORE TASKS ========================================= */ function getTaskCollection() { return collection( db, "users", currentUser.uid, "tasks" ); } function startTaskListener() { stopTaskListener(); if (!currentUser) { return; } const taskQuery = query( getTaskCollection(), orderBy( "createdAt", "asc" ) ); unsubscribeTasks = onSnapshot( taskQuery, function(snapshot) { const tasks = []; snapshot.forEach( function(taskDoc) { tasks.push({ id: taskDoc.id, ...taskDoc.data() }); } ); renderTasks(tasks); } ); } function stopTaskListener() { if (unsubscribeTasks) { unsubscribeTasks(); unsubscribeTasks = null; } } /* ========================================= RENDER TASKS ========================================= */ function renderTasks(tasks) { const container = document.getElementById( "taskList" ); container.innerHTML = ""; if (!currentUser) { const message = document.createElement( "div" ); message.className = "no-tasks"; message.textContent = "Sign in to save your tasks."; container.appendChild( message ); return; } if (tasks.length === 0) { const message = document.createElement( "div" ); message.className = "no-tasks"; message.textContent = "No tasks yet. Add one above."; container.appendChild( message ); return; } tasks.forEach( function(task) { const row = document.createElement( "div" ); row.className = "task-row"; if (task.completed) { row.classList.add( "done" ); } const checkbox = document.createElement( "input" ); checkbox.type = "checkbox"; checkbox.className = "task-check"; checkbox.checked = task.completed === true; checkbox.addEventListener( "change", async function() { await updateDoc( doc( db, "users", currentUser.uid, "tasks", task.id ), { completed: checkbox.checked } ); } ); const label = document.createElement( "div" ); label.className = "task-label"; label.textContent = task.text; const deleteButton = document.createElement( "button" ); deleteButton.type = "button"; deleteButton.className = "delete-task"; deleteButton.textContent = "×"; deleteButton.addEventListener( "click", async function() { await deleteDoc( doc( db, "users", currentUser.uid, "tasks", task.id ) ); } ); row.appendChild( checkbox ); row.appendChild( label ); row.appendChild( deleteButton ); container.appendChild( row ); } ); } /* ========================================= ADD TASK ========================================= */ async function addTask() { if (!currentUser) { showError( "Sign in first to save tasks." ); return; } const input = document.getElementById( "taskInput" ); const text = input.value.trim(); if (!text) { input.focus(); return; } input.disabled = true; try { await addDoc( getTaskCollection(), { text: text, completed: false, createdAt: Date.now() } ); input.value = ""; } catch (error) { console.error(error); alert( "Could not save the task." ); } input.disabled = false; input.focus(); } document .getElementById( "addTaskButton" ) .addEventListener( "click", addTask ); document .getElementById( "taskInput" ) .addEventListener( "keydown", function(event) { if ( event.key === "Enter" ) { event.preventDefault(); addTask(); } } ); /* ========================================= DARK MODE ========================================= */ function loadDarkMode() { const dark = localStorage.getItem( "dailyz_dark" ) === "true"; document.body.classList.toggle( "dark", dark ); document.getElementById( "themeButton" ).textContent = dark ? "☀" : "☾"; } function toggleDarkMode() { const dark = !document.body.classList.contains( "dark" ); document.body.classList.toggle( "dark", dark ); localStorage.setItem( "dailyz_dark", String(dark) ); document.getElementById( "themeButton" ).textContent = dark ? "☀" : "☾"; } document .getElementById( "themeButton" ) .addEventListener( "click", toggleDarkMode ); /* ========================================= TABS ========================================= */ document .querySelectorAll(".tab") .forEach( function(tab) { tab.addEventListener( "click", function() { document .querySelectorAll(".tab") .forEach( function(other) { other.classList.remove( "active" ); } ); document .querySelectorAll(".section") .forEach( function(section) { section.classList.remove( "active" ); } ); tab.classList.add( "active" ); document .getElementById( tab.dataset.page ) .classList.add( "active" ); } ); } ); /* ========================================= PRAYER TIMES ========================================= */ const prayerTimes = { Fajr: "03:46", Dhuhr: "12:20", Asr: "16:01", Maghrib: "19:04", Isha: "20:19" }; function loadPrayerTimes() { const container = document.getElementById( "prayerList" ); container.innerHTML = ""; Object.entries( prayerTimes ).forEach( function([name, time]) { const row = document.createElement( "div" ); row.className = "prayer-row"; const nameElement = document.createElement( "span" ); nameElement.textContent = name; const timeElement = document.createElement( "strong" ); timeElement.textContent = time; row.appendChild( nameElement ); row.appendChild( timeElement ); container.appendChild( row ); } ); updateNextPrayer(); } function timeToMinutes(time) { const parts = time.split(":"); return ( Number(parts[0]) * 60 + Number(parts[1]) ); } function updateNextPrayer() { const now = new Date(); const currentMinutes = now.getHours() * 60 + now.getMinutes(); let nextName = "Fajr"; let nextTime = prayerTimes.Fajr; for ( const [name, time] of Object.entries( prayerTimes ) ) { if ( timeToMinutes(time) > currentMinutes ) { nextName = name; nextTime = time; break; } } document.getElementById( "nextName" ).textContent = nextName; document.getElementById( "nextTime" ).textContent = nextTime; } /* ========================================= LOCATION ========================================= */ document .getElementById( "updateLocationButton" ) .addEventListener( "click", function() { const input = document.getElementById( "locationInput" ); const value = input.value.trim(); document.getElementById( "locationText" ).textContent = value || "Erbil, Iraq"; } ); /* ========================================= NOTIFICATIONS ========================================= */ document .getElementById( "notificationButton" ) .addEventListener( "click", async function() { const status = document.getElementById( "notificationStatus" ); if ( !("Notification" in window) ) { status.textContent = "Notifications are not supported."; return; } const permission = await Notification.requestPermission(); if ( permission === "granted" ) { status.textContent = "Notifications are enabled."; } else { status.textContent = "Notifications are disabled."; } } ); /* ========================================= START ========================================= */ updateDate(); loadDarkMode(); updateAuthMode(); loadPrayerTimes(); </script>
+</section>
 
-</body> </html> ```
+</div>
+
+<script type="module">
+
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    collection,
+    addDoc,
+    deleteDoc,
+    updateDoc,
+    onSnapshot,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8",
+    authDomain: "dailyz-web.firebaseapp.com",
+    projectId: "dailyz-web",
+    storageBucket: "dailyz-web.firebasestorage.app",
+    messagingSenderId: "1031947329415",
+    appId: "1:1031947329415:web:475f3f0d7449992fc73d22"
+};
+
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let unsubscribeTasks = null;
+let signUpMode = true;
+
+
+/* DATE */
+
+document.getElementById("date").textContent =
+    new Date().toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+    });
+
+
+/* AUTH MODE */
+
+function setAuthMode() {
+
+    document.getElementById("authTitle").textContent =
+        signUpMode
+        ? "Create your account"
+        : "Welcome back";
+
+    document.getElementById("authSubtitle").textContent =
+        signUpMode
+        ? "Start organizing your day with Dailyz."
+        : "Sign in to continue using Dailyz.";
+
+    document.getElementById("usernameInput").style.display =
+        signUpMode ? "block" : "none";
+
+    document.getElementById("confirmBox").style.display =
+        signUpMode ? "block" : "none";
+
+    document.getElementById("authButton").textContent =
+        signUpMode ? "Create Account" : "Sign In";
+
+    document.getElementById("switchText").textContent =
+        signUpMode
+        ? "Already have an account?"
+        : "Don't have an account?";
+
+    document.getElementById("switchButton").textContent =
+        signUpMode ? "Sign In" : "Sign Up";
+
+    clearError();
+}
+
+
+function showError(message) {
+
+    const error = document.getElementById("authError");
+
+    error.textContent = message;
+    error.style.display = "block";
+}
+
+
+function clearError() {
+
+    const error = document.getElementById("authError");
+
+    error.textContent = "";
+    error.style.display = "none";
+}
+
+
+/* SIGN UP */
+
+async function createAccount() {
+
+    clearError();
+
+    const username =
+        document.getElementById("usernameInput").value.trim();
+
+    const email =
+        document.getElementById("emailInput").value.trim();
+
+    const password =
+        document.getElementById("passwordInput").value;
+
+    const confirm =
+        document.getElementById("confirmPasswordInput").value;
+
+
+    if (username.length < 2) {
+        showError("Username must be at least 2 characters.");
+        return;
+    }
+
+    if (!email) {
+        showError("Enter your email.");
+        return;
+    }
+
+    if (password.length < 6) {
+        showError("Password must be at least 6 characters.");
+        return;
+    }
+
+    if (password !== confirm) {
+        showError("Passwords do not match.");
+        return;
+    }
+
+
+    const button =
+        document.getElementById("authButton");
+
+    button.disabled = true;
+
+
+    try {
+
+        const result =
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+
+        await setDoc(
+            doc(db, "users", result.user.uid),
+            {
+                username: username,
+                email: email,
+                createdAt: Date.now()
+            }
+        );
+
+
+    } catch (error) {
+
+        if (error.code === "auth/email-already-in-use") {
+            showError("That email is already registered.");
+        }
+        else if (error.code === "auth/invalid-email") {
+            showError("Enter a valid email.");
+        }
+        else if (error.code === "auth/weak-password") {
+            showError("Password is too weak.");
+        }
+        else {
+            showError(error.message);
+        }
+
+    }
+
+
+    button.disabled = false;
+}
+
+
+/* SIGN IN */
+
+async function login() {
+
+    clearError();
+
+    const email =
+        document.getElementById("emailInput").value.trim();
+
+    const password =
+        document.getElementById("passwordInput").value;
+
+
+    if (!email || !password) {
+        showError("Enter your email and password.");
+        return;
+    }
+
+
+    const button =
+        document.getElementById("authButton");
+
+    button.disabled = true;
+
+
+    try {
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+    } catch (error) {
+
+        if (error.code === "auth/invalid-credential") {
+            showError("Incorrect email or password.");
+        }
+        else {
+            showError(error.message);
+        }
+
+    }
+
+
+    button.disabled = false;
+}
+
+
+/* AUTH BUTTON */
+
+document
+    .getElementById("authButton")
+    .addEventListener("click", () => {
+
+        if (signUpMode) {
+            createAccount();
+        } else {
+            login();
+        }
+
+    });
+
+
+/* SWITCH */
+
+document
+    .getElementById("switchButton")
+    .addEventListener("click", () => {
+
+        signUpMode = !signUpMode;
+
+        setAuthMode();
+
+    });
+
+
+/* PASSWORD */
+
+document
+    .getElementById("showPassword")
+    .addEventListener("click", () => {
+
+        const input =
+            document.getElementById("passwordInput");
+
+        if (input.type === "password") {
+
+            input.type = "text";
+
+            document.getElementById("showPassword")
+                .textContent = "Hide";
+
+        } else {
+
+            input.type = "password";
+
+            document.getElementById("showPassword")
+                .textContent = "Show";
+        }
+
+    });
+
+
+/* AUTH STATE */
+
+onAuthStateChanged(auth, async user => {
+
+    currentUser = user;
+
+    const authCard =
+        document.getElementById("authCard");
+
+    const userBar =
+        document.getElementById("userBar");
+
+
+    if (user) {
+
+        authCard.style.display = "none";
+        userBar.style.display = "flex";
+
+        document.getElementById("emailDisplay")
+            .textContent = user.email;
+
+
+        const profile =
+            await getDoc(
+                doc(db, "users", user.uid)
+            );
+
+
+        if (profile.exists()) {
+
+            document.getElementById("usernameDisplay")
+                .textContent =
+                profile.data().username;
+
+        } else {
+
+            document.getElementById("usernameDisplay")
+                .textContent = "User";
+        }
+
+
+        startTaskListener();
+
+    } else {
+
+        authCard.style.display = "block";
+        userBar.style.display = "none";
+
+        stopTaskListener();
+
+        renderTasks([]);
+
+    }
+
+});
+
+
+/* LOG OUT */
+
+document
+    .getElementById("logoutButton")
+    .addEventListener("click", () => {
+
+        signOut(auth);
+
+    });
+
+
+/* TASKS */
+
+function taskCollection() {
+
+    return collection(
+        db,
+        "users",
+        currentUser.uid,
+        "tasks"
+    );
+}
+
+
+function startTaskListener() {
+
+    stopTaskListener();
+
+    if (!currentUser) return;
+
+
+    const taskQuery =
+        query(
+            taskCollection(),
+            orderBy("createdAt", "asc")
+        );
+
+
+    unsubscribeTasks =
+        onSnapshot(taskQuery, snapshot => {
+
+            const tasks = [];
+
+            snapshot.forEach(item => {
+
+                tasks.push({
+                    id: item.id,
+                    ...item.data()
+                });
+
+            });
+
+            renderTasks(tasks);
+
+        });
+}
+
+
+function stopTaskListener() {
+
+    if (unsubscribeTasks) {
+
+        unsubscribeTasks();
+
+        unsubscribeTasks = null;
+    }
+}
+
+
+function renderTasks(tasks) {
+
+    const list =
+        document.getElementById("taskList");
+
+    list.innerHTML = "";
+
+
+    if (!currentUser) {
+
+        const empty =
+            document.createElement("div");
+
+        empty.className = "empty";
+        empty.textContent =
+            "Sign in to save your tasks.";
+
+        list.appendChild(empty);
+
+        return;
+    }
+
+
+    if (tasks.length === 0) {
+
+        const empty =
+            document.createElement("div");
+
+        empty.className = "empty";
+        empty.textContent =
+            "No tasks yet. Add one above.";
+
+        list.appendChild(empty);
+
+        return;
+    }
+
+
+    tasks.forEach(task => {
+
+        const row =
+            document.createElement("div");
+
+        row.className = "task";
+
+
+        if (task.completed) {
+            row.classList.add("completed");
+        }
+
+
+        const checkbox =
+            document.createElement("input");
+
+        checkbox.type = "checkbox";
+        checkbox.checked = !!task.completed;
+
+
+        checkbox.addEventListener("change", async () => {
+
+            await updateDoc(
+                doc(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "tasks",
+                    task.id
+                ),
+                {
+                    completed: checkbox.checked
+                }
+            );
+
+        });
+
+
+        const text =
+            document.createElement("div");
+
+        text.className = "task-text";
+        text.textContent = task.text;
+
+
+        const remove =
+            document.createElement("button");
+
+        remove.className = "delete-task";
+        remove.type = "button";
+        remove.textContent = "×";
+
+
+        remove.addEventListener("click", async () => {
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "tasks",
+                    task.id
+                )
+            );
+
+        });
+
+
+        row.appendChild(checkbox);
+        row.appendChild(text);
+        row.appendChild(remove);
+
+        list.appendChild(row);
+
+    });
+
+}
+
+
+/* ADD TASK */
+
+async function addTask() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    const input =
+        document.getElementById("taskInput");
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) return;
+
+
+    await addDoc(
+        taskCollection(),
+        {
+            text: text,
+            completed: false,
+            createdAt: Date.now()
+        }
+    );
+
+
+    input.value = "";
+
+    input.focus();
+}
+
+
+document
+    .getElementById("addTaskButton")
+    .addEventListener("click", addTask);
+
+
+document
+    .getElementById("taskInput")
+    .addEventListener("keydown", event => {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            addTask();
+
+        }
+
+    });
+
+
+/* TABS */
+
+document
+    .querySelectorAll(".tab")
+    .forEach(tab => {
+
+        tab.addEventListener("click", () => {
+
+            document
+                .querySelectorAll(".tab")
+                .forEach(item =>
+                    item.classList.remove("active")
+                );
+
+
+            document
+                .querySelectorAll(".section")
+                .forEach(section =>
+                    section.classList.remove("active")
+                );
+
+
+            tab.classList.add("active");
+
+            document
+                .getElementById(tab.dataset.tab)
+                .classList.add("active");
+
+        });
+
+    });
+
+
+/* DARK MODE */
+
+function updateTheme() {
+
+    const dark =
+        localStorage.getItem("dailyz_dark") === "true";
+
+    document.body.classList.toggle("dark", dark);
+
+    document.getElementById("themeButton")
+        .textContent = dark ? "☀" : "☾";
+}
+
+
+document
+    .getElementById("themeButton")
+    .addEventListener("click", () => {
+
+        const dark =
+            !document.body.classList.contains("dark");
+
+        document.body.classList.toggle("dark", dark);
+
+        localStorage.setItem(
+            "dailyz_dark",
+            dark
+        );
+
+        document.getElementById("themeButton")
+            .textContent = dark ? "☀" : "☾";
+
+    });
+
+
+/* PRAYER TIMES */
+
+const prayers = {
+    Fajr: "03:46",
+    Dhuhr: "12:20",
+    Asr: "16:01",
+    Maghrib: "19:04",
+    Isha: "20:19"
+};
+
+
+function loadPrayers() {
+
+    const list =
+        document.getElementById("prayerList");
+
+    list.innerHTML = "";
+
+
+    Object.entries(prayers).forEach(
+        ([name, time]) => {
+
+            const row =
+                document.createElement("div");
+
+            row.className = "prayer";
+
+            row.innerHTML =
+                `<span>${name}</span><strong>${time}</strong>`;
+
+            list.appendChild(row);
+
+        }
+    );
+
+
+    updateNextPrayer();
+}
+
+
+function updateNextPrayer() {
+
+    const now = new Date();
+
+    const current =
+        now.getHours() * 60 +
+        now.getMinutes();
+
+
+    let next = null;
+
+
+    for (const [name, time] of Object.entries(prayers)) {
+
+        const [hours, minutes] =
+            time.split(":").map(Number);
+
+        const value =
+            hours * 60 + minutes;
+
+
+        if (value > current) {
+
+            next = [name, time];
+
+            break;
+        }
+
+    }
+
+
+    if (!next) {
+        next = ["Fajr", prayers.Fajr];
+    }
+
+
+    document.getElementById("nextName")
+        .textContent = next[0];
+
+    document.getElementById("nextTime")
+        .textContent = next[1];
+
+}
+
+
+document
+    .getElementById("updateLocationButton")
+    .addEventListener("click", () => {
+
+        const value =
+            document.getElementById("locationInput")
+                .value.trim();
+
+        document.getElementById("locationText")
+            .textContent = value || "Erbil, Iraq";
+
+    });
+
+
+/* NOTIFICATIONS */
+
+document
+    .getElementById("notificationButton")
+    .addEventListener("click", async () => {
+
+        const status =
+            document.getElementById("notificationStatus");
+
+
+        if (!("Notification" in window)) {
+
+            status.textContent =
+                "Notifications are not supported.";
+
+            return;
+        }
+
+
+        const permission =
+            await Notification.requestPermission();
+
+
+        status.textContent =
+            permission === "granted"
+            ? "Notifications are enabled."
+            : "Notifications are disabled.";
+
+    });
+
+
+/* START */
+
+setAuthMode();
+updateTheme();
+loadPrayers();
+
+</script>
+
+</body>
+</html>
