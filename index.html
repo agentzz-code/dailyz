@@ -14,14 +14,19 @@
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: #f5f5f7;
     color: #111;
+    transition: background .2s, color .2s;
 }
 
 button,
 input {
     font: inherit;
+}
+
+button {
+    cursor: pointer;
 }
 
 .app {
@@ -30,10 +35,12 @@ input {
     padding: 25px 0 50px;
 }
 
+/* HEADER */
+
 .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 20px;
 }
 
@@ -48,13 +55,17 @@ input {
     font-size: 14px;
 }
 
+.header-buttons {
+    display: flex;
+    gap: 8px;
+}
+
 .icon-button {
     width: 44px;
     height: 44px;
     border: 0;
     border-radius: 50%;
-    background: #e5e5e7;
-    cursor: pointer;
+    background: #e6e6e8;
     font-size: 20px;
 }
 
@@ -70,7 +81,6 @@ input {
 
 .auth-card h2 {
     margin: 0;
-    font-size: 25px;
 }
 
 .auth-subtitle {
@@ -86,31 +96,8 @@ input {
     border: 1px solid #ddd;
     border-radius: 11px;
     outline: none;
-}
-
-.auth-input:focus {
-    border-color: #111;
-}
-
-.password-box {
-    position: relative;
-}
-
-.password-box .auth-input {
-    padding-right: 65px;
-}
-
-.show-password {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    height: 40px;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: #666;
-    cursor: pointer;
+    background: white;
+    color: #111;
 }
 
 .auth-button {
@@ -121,11 +108,16 @@ input {
     background: #111;
     color: white;
     font-weight: 700;
-    cursor: pointer;
 }
 
-.auth-button:disabled {
-    opacity: .5;
+.auth-error {
+    display: none;
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 9px;
+    background: #ffe8e8;
+    color: #c00;
+    font-size: 13px;
 }
 
 .auth-switch {
@@ -139,28 +131,17 @@ input {
     border: 0;
     background: transparent;
     font-weight: 700;
-    cursor: pointer;
 }
 
-.auth-error {
-    display: none;
-    margin-bottom: 12px;
-    padding: 10px;
-    border-radius: 9px;
-    background: #ffecec;
-    color: #c00;
-    font-size: 13px;
-}
-
-/* USER */
+/* USER BAR */
 
 .user-bar {
     display: none;
     align-items: center;
     justify-content: space-between;
-    padding: 13px 15px;
+    padding: 14px;
     margin-bottom: 18px;
-    border-radius: 13px;
+    border-radius: 14px;
     background: white;
 }
 
@@ -172,14 +153,6 @@ input {
     margin-top: 3px;
     color: #777;
     font-size: 12px;
-}
-
-.logout {
-    border: 0;
-    border-radius: 9px;
-    padding: 9px 13px;
-    background: #eee;
-    cursor: pointer;
 }
 
 /* TABS */
@@ -200,7 +173,6 @@ input {
     border-radius: 9px;
     background: transparent;
     color: #666;
-    cursor: pointer;
 }
 
 .tab.active {
@@ -235,6 +207,7 @@ input {
     border-radius: 12px;
     outline: none;
     background: white;
+    color: #111;
 }
 
 .add-button {
@@ -245,7 +218,6 @@ input {
     background: #111;
     color: white;
     font-size: 27px;
-    cursor: pointer;
 }
 
 .task {
@@ -277,8 +249,7 @@ input {
 .delete-task {
     border: 0;
     background: transparent;
-    font-size: 20px;
-    cursor: pointer;
+    font-size: 21px;
 }
 
 .empty {
@@ -287,7 +258,7 @@ input {
     color: #888;
 }
 
-/* PRAYERS */
+/* PRAYER */
 
 .prayer-header h2 {
     margin-bottom: 5px;
@@ -333,15 +304,82 @@ input {
     background: white;
 }
 
-.settings {
-    margin-top: 18px;
+/* SETTINGS */
+
+.settings-section {
+    display: none;
+}
+
+.settings-section.active {
+    display: block;
+}
+
+.settings-title-large {
+    margin-bottom: 5px;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.settings-subtitle {
+    margin-bottom: 20px;
+    color: #777;
+}
+
+.settings-card {
+    margin-bottom: 14px;
     padding: 18px;
     border-radius: 16px;
     background: white;
 }
 
-.settings-title {
-    margin-bottom: 12px;
+.settings-card-title {
+    margin-bottom: 14px;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.setting-row:last-child {
+    border-bottom: 0;
+}
+
+.setting-label {
+    font-weight: 600;
+}
+
+.setting-description {
+    margin-top: 3px;
+    color: #888;
+    font-size: 12px;
+}
+
+.setting-button {
+    padding: 9px 13px;
+    border: 0;
+    border-radius: 9px;
+    background: #eee;
+}
+
+.setting-button.dark {
+    background: #111;
+    color: white;
+}
+
+.danger-button {
+    width: 100%;
+    height: 45px;
+    border: 0;
+    border-radius: 10px;
+    background: #ffe5e5;
+    color: #c00;
     font-weight: 700;
 }
 
@@ -357,25 +395,18 @@ input {
     padding: 0 12px;
     border: 1px solid #ddd;
     border-radius: 10px;
-}
-
-.small-button,
-.notification-button {
-    border: 0;
-    border-radius: 10px;
-    background: #111;
-    color: white;
-    cursor: pointer;
-}
-
-.small-button {
-    padding: 0 15px;
+    background: white;
+    color: #111;
 }
 
 .notification-button {
     width: 100%;
     height: 45px;
     margin-top: 10px;
+    border: 0;
+    border-radius: 10px;
+    background: #111;
+    color: white;
 }
 
 .status {
@@ -384,7 +415,7 @@ input {
     font-size: 13px;
 }
 
-/* DARK */
+/* DARK MODE */
 
 body.dark {
     background: #111214;
@@ -395,16 +426,8 @@ body.dark .auth-card,
 body.dark .user-bar,
 body.dark .task,
 body.dark .prayer,
-body.dark .settings {
+body.dark .settings-card {
     background: #1d1f23;
-}
-
-body.dark .auth-input,
-body.dark #taskInput,
-body.dark #locationInput {
-    background: #292b30;
-    color: white;
-    border-color: #444;
 }
 
 body.dark .tabs {
@@ -420,9 +443,35 @@ body.dark .tab.active {
     color: white;
 }
 
-body.dark .logout {
+body.dark .icon-button,
+body.dark .setting-button {
     background: #383a40;
     color: white;
+}
+
+body.dark #taskInput,
+body.dark #locationInput,
+body.dark .auth-input {
+    background: #292b30;
+    color: white;
+    border-color: #444;
+}
+
+body.dark .setting-row {
+    border-color: #333;
+}
+
+body.dark .setting-button.dark {
+    background: white;
+    color: #111;
+}
+
+body.dark .danger-button {
+    background: #3b2020;
+}
+
+body.dark .empty {
+    color: #aaa;
 }
 </style>
 
@@ -433,13 +482,28 @@ body.dark .logout {
 <div class="app">
 
 <header class="header">
-    <div>
-        <div class="logo">Dailyz</div>
-        <div class="date" id="date"></div>
-    </div>
 
 ```
-<button class="icon-button" id="themeButton" type="button">☾</button>
+<div>
+    <div class="logo">Dailyz</div>
+    <div class="date" id="date"></div>
+</div>
+
+<div class="header-buttons">
+
+    <button
+        class="icon-button"
+        id="themeButton"
+        type="button"
+    >☾</button>
+
+    <button
+        class="icon-button"
+        id="settingsButton"
+        type="button"
+    >⚙️</button>
+
+</div>
 ```
 
 </header>
@@ -462,7 +526,6 @@ body.dark .logout {
     id="usernameInput"
     type="text"
     placeholder="Username"
-    autocomplete="username"
 >
 
 <input
@@ -470,40 +533,27 @@ body.dark .logout {
     id="emailInput"
     type="email"
     placeholder="Email"
-    autocomplete="email"
 >
 
-<div class="password-box">
+<input
+    class="auth-input"
+    id="passwordInput"
+    type="password"
+    placeholder="Password"
+>
 
-    <input
-        class="auth-input"
-        id="passwordInput"
-        type="password"
-        placeholder="Password"
-        autocomplete="new-password"
-    >
+<input
+    class="auth-input"
+    id="confirmPasswordInput"
+    type="password"
+    placeholder="Confirm password"
+>
 
-    <button
-        class="show-password"
-        id="showPassword"
-        type="button"
-    >Show</button>
-
-</div>
-
-<div class="password-box" id="confirmBox">
-
-    <input
-        class="auth-input"
-        id="confirmPasswordInput"
-        type="password"
-        placeholder="Confirm password"
-        autocomplete="new-password"
-    >
-
-</div>
-
-<button class="auth-button" id="authButton" type="button">
+<button
+    class="auth-button"
+    id="authButton"
+    type="button"
+>
     Create Account
 </button>
 
@@ -513,7 +563,10 @@ body.dark .logout {
         Already have an account?
     </span>
 
-    <button id="switchButton" type="button">
+    <button
+        id="switchButton"
+        type="button"
+    >
         Sign In
     </button>
 
@@ -528,27 +581,38 @@ body.dark .logout {
 
 ```
 <div>
-    <div class="username" id="usernameDisplay"></div>
-    <div class="email" id="emailDisplay"></div>
-</div>
+    <div
+        class="username"
+        id="usernameDisplay"
+    ></div>
 
-<button class="logout" id="logoutButton" type="button">
-    Log Out
-</button>
+    <div
+        class="email"
+        id="emailDisplay"
+    ></div>
+</div>
 ```
 
 </div>
 
-<!-- TABS -->
+<!-- MAIN TABS -->
 
-<div class="tabs">
+<div class="tabs" id="mainTabs">
 
 ```
-<button class="tab active" data-tab="tasks" type="button">
+<button
+    class="tab active"
+    data-tab="tasks"
+    type="button"
+>
     Tasks
 </button>
 
-<button class="tab" data-tab="prayers" type="button">
+<button
+    class="tab"
+    data-tab="prayers"
+    type="button"
+>
     Prayer Times
 </button>
 ```
@@ -557,7 +621,10 @@ body.dark .logout {
 
 <!-- TASKS -->
 
-<section class="section active" id="tasks">
+<section
+    class="section active"
+    id="tasks"
+>
 
 ```
 <div class="task-input">
@@ -570,10 +637,12 @@ body.dark .logout {
     >
 
     <button
-        class="add-button"
         id="addTaskButton"
+        class="add-button"
         type="button"
-    >+</button>
+    >
+        +
+    </button>
 
 </div>
 
@@ -582,16 +651,22 @@ body.dark .logout {
 
 </section>
 
-<!-- PRAYERS -->
+<!-- PRAYER TIMES -->
 
-<section class="section" id="prayers">
+<section
+    class="section"
+    id="prayers"
+>
 
 ```
 <div class="prayer-header">
 
     <h2>Prayer Times</h2>
 
-    <div class="location" id="locationText">
+    <div
+        class="location"
+        id="locationText"
+    >
         Erbil, Iraq
     </div>
 
@@ -599,24 +674,148 @@ body.dark .logout {
 
 <div class="next-prayer">
 
-    <div class="next-label">NEXT PRAYER</div>
+    <div class="next-label">
+        NEXT PRAYER
+    </div>
 
-    <div class="next-name" id="nextName">
+    <div
+        class="next-name"
+        id="nextName"
+    >
         Loading...
     </div>
 
-    <div class="next-time" id="nextTime">
+    <div
+        class="next-time"
+        id="nextTime"
+    >
         --:--
     </div>
 
 </div>
 
 <div id="prayerList"></div>
+```
 
-<div class="settings">
+</section>
 
-    <div class="settings-title">
-        Prayer settings
+<!-- SETTINGS -->
+
+<section
+    class="settings-section"
+    id="settings"
+>
+
+```
+<div class="settings-title-large">
+    Settings
+</div>
+
+<div class="settings-subtitle">
+    Customize your Dailyz experience.
+</div>
+
+
+<!-- ACCOUNT -->
+
+<div class="settings-card">
+
+    <div class="settings-card-title">
+        Account
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+            <div class="setting-label">
+                Username
+            </div>
+
+            <div
+                class="setting-description"
+                id="settingsUsername"
+            >
+                Not signed in
+            </div>
+        </div>
+
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+            <div class="setting-label">
+                Email
+            </div>
+
+            <div
+                class="setting-description"
+                id="settingsEmail"
+            >
+                Not signed in
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- APPEARANCE -->
+
+<div class="settings-card">
+
+    <div class="settings-card-title">
+        Appearance
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+
+            <div class="setting-label">
+                Dark Mode
+            </div>
+
+            <div class="setting-description">
+                Change the appearance of Dailyz.
+            </div>
+
+        </div>
+
+        <button
+            class="setting-button"
+            id="settingsThemeButton"
+            type="button"
+        >
+            Off
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- PRAYER -->
+
+<div class="settings-card">
+
+    <div class="settings-card-title">
+        Prayer Settings
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+            <div class="setting-label">
+                Location
+            </div>
+
+            <div class="setting-description">
+                Choose your prayer-time location.
+            </div>
+        </div>
+
     </div>
 
     <div class="location-row">
@@ -629,12 +828,39 @@ body.dark .logout {
         >
 
         <button
-            class="small-button"
+            class="setting-button dark"
             id="updateLocationButton"
             type="button"
         >
             Update
         </button>
+
+    </div>
+
+</div>
+
+
+<!-- NOTIFICATIONS -->
+
+<div class="settings-card">
+
+    <div class="settings-card-title">
+        Notifications
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+
+            <div class="setting-label">
+                Prayer Notifications
+            </div>
+
+            <div class="setting-description">
+                Get notifications for prayer times.
+            </div>
+
+        </div>
 
     </div>
 
@@ -646,9 +872,31 @@ body.dark .logout {
         🔔 Enable Prayer Notifications
     </button>
 
-    <div class="status" id="notificationStatus">
+    <div
+        class="status"
+        id="notificationStatus"
+    >
         Notifications are disabled.
     </div>
+
+</div>
+
+
+<!-- SIGN OUT -->
+
+<div class="settings-card">
+
+    <div class="settings-card-title">
+        Account Actions
+    </div>
+
+    <button
+        class="danger-button"
+        id="logoutButton"
+        type="button"
+    >
+        Sign Out
+    </button>
 
 </div>
 ```
@@ -686,6 +934,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 
+/* FIREBASE */
+
 const firebaseConfig = {
     apiKey: "AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8",
     authDomain: "dailyz-web.firebaseapp.com",
@@ -694,7 +944,6 @@ const firebaseConfig = {
     messagingSenderId: "1031947329415",
     appId: "1:1031947329415:web:475f3f0d7449992fc73d22"
 };
-
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -716,7 +965,7 @@ document.getElementById("date").textContent =
     });
 
 
-/* AUTH MODE */
+/* AUTH */
 
 function setAuthMode() {
 
@@ -728,12 +977,12 @@ function setAuthMode() {
     document.getElementById("authSubtitle").textContent =
         signUpMode
         ? "Start organizing your day with Dailyz."
-        : "Sign in to continue using Dailyz.";
+        : "Sign in to continue.";
 
     document.getElementById("usernameInput").style.display =
         signUpMode ? "block" : "none";
 
-    document.getElementById("confirmBox").style.display =
+    document.getElementById("confirmPasswordInput").style.display =
         signUpMode ? "block" : "none";
 
     document.getElementById("authButton").textContent =
@@ -753,7 +1002,8 @@ function setAuthMode() {
 
 function showError(message) {
 
-    const error = document.getElementById("authError");
+    const error =
+        document.getElementById("authError");
 
     error.textContent = message;
     error.style.display = "block";
@@ -762,14 +1012,13 @@ function showError(message) {
 
 function clearError() {
 
-    const error = document.getElementById("authError");
+    const error =
+        document.getElementById("authError");
 
     error.textContent = "";
     error.style.display = "none";
 }
 
-
-/* SIGN UP */
 
 async function createAccount() {
 
@@ -809,12 +1058,6 @@ async function createAccount() {
     }
 
 
-    const button =
-        document.getElementById("authButton");
-
-    button.disabled = true;
-
-
     try {
 
         const result =
@@ -828,36 +1071,20 @@ async function createAccount() {
         await setDoc(
             doc(db, "users", result.user.uid),
             {
-                username: username,
-                email: email,
+                username,
+                email,
                 createdAt: Date.now()
             }
         );
 
-
     } catch (error) {
 
-        if (error.code === "auth/email-already-in-use") {
-            showError("That email is already registered.");
-        }
-        else if (error.code === "auth/invalid-email") {
-            showError("Enter a valid email.");
-        }
-        else if (error.code === "auth/weak-password") {
-            showError("Password is too weak.");
-        }
-        else {
-            showError(error.message);
-        }
+        showError(error.message);
 
     }
 
-
-    button.disabled = false;
 }
 
-
-/* SIGN IN */
 
 async function login() {
 
@@ -876,12 +1103,6 @@ async function login() {
     }
 
 
-    const button =
-        document.getElementById("authButton");
-
-    button.disabled = true;
-
-
     try {
 
         await signInWithEmailAndPassword(
@@ -892,36 +1113,23 @@ async function login() {
 
     } catch (error) {
 
-        if (error.code === "auth/invalid-credential") {
-            showError("Incorrect email or password.");
-        }
-        else {
-            showError(error.message);
-        }
+        showError("Incorrect email or password.");
 
     }
 
-
-    button.disabled = false;
 }
 
-
-/* AUTH BUTTON */
 
 document
     .getElementById("authButton")
     .addEventListener("click", () => {
 
-        if (signUpMode) {
-            createAccount();
-        } else {
-            login();
-        }
+        signUpMode
+            ? createAccount()
+            : login();
 
     });
 
-
-/* SWITCH */
 
 document
     .getElementById("switchButton")
@@ -930,33 +1138,6 @@ document
         signUpMode = !signUpMode;
 
         setAuthMode();
-
-    });
-
-
-/* PASSWORD */
-
-document
-    .getElementById("showPassword")
-    .addEventListener("click", () => {
-
-        const input =
-            document.getElementById("passwordInput");
-
-        if (input.type === "password") {
-
-            input.type = "text";
-
-            document.getElementById("showPassword")
-                .textContent = "Hide";
-
-        } else {
-
-            input.type = "password";
-
-            document.getElementById("showPassword")
-                .textContent = "Show";
-        }
 
     });
 
@@ -982,6 +1163,9 @@ onAuthStateChanged(auth, async user => {
         document.getElementById("emailDisplay")
             .textContent = user.email;
 
+        document.getElementById("settingsEmail")
+            .textContent = user.email;
+
 
         const profile =
             await getDoc(
@@ -989,17 +1173,17 @@ onAuthStateChanged(auth, async user => {
             );
 
 
-        if (profile.exists()) {
+        const username =
+            profile.exists()
+            ? profile.data().username
+            : "User";
 
-            document.getElementById("usernameDisplay")
-                .textContent =
-                profile.data().username;
 
-        } else {
+        document.getElementById("usernameDisplay")
+            .textContent = username;
 
-            document.getElementById("usernameDisplay")
-                .textContent = "User";
-        }
+        document.getElementById("settingsUsername")
+            .textContent = username;
 
 
         startTaskListener();
@@ -1008,6 +1192,12 @@ onAuthStateChanged(auth, async user => {
 
         authCard.style.display = "block";
         userBar.style.display = "none";
+
+        document.getElementById("settingsUsername")
+            .textContent = "Not signed in";
+
+        document.getElementById("settingsEmail")
+            .textContent = "Not signed in";
 
         stopTaskListener();
 
@@ -1018,13 +1208,75 @@ onAuthStateChanged(auth, async user => {
 });
 
 
-/* LOG OUT */
+/* LOGOUT */
 
 document
     .getElementById("logoutButton")
     .addEventListener("click", () => {
 
         signOut(auth);
+
+    });
+
+
+/* TABS */
+
+document
+    .querySelectorAll(".tab")
+    .forEach(tab => {
+
+        tab.addEventListener("click", () => {
+
+            document
+                .querySelectorAll(".tab")
+                .forEach(item =>
+                    item.classList.remove("active")
+                );
+
+            document
+                .querySelectorAll(".section")
+                .forEach(section =>
+                    section.classList.remove("active")
+                );
+
+            document
+                .querySelectorAll(".settings-section")
+                .forEach(section =>
+                    section.classList.remove("active")
+                );
+
+            tab.classList.add("active");
+
+            document
+                .getElementById(tab.dataset.tab)
+                .classList.add("active");
+
+        });
+
+    });
+
+
+/* SETTINGS BUTTON */
+
+document
+    .getElementById("settingsButton")
+    .addEventListener("click", () => {
+
+        document
+            .querySelectorAll(".tab")
+            .forEach(tab =>
+                tab.classList.remove("active")
+            );
+
+        document
+            .querySelectorAll(".section")
+            .forEach(section =>
+                section.classList.remove("active")
+            );
+
+        document
+            .getElementById("settings")
+            .classList.add("active");
 
     });
 
@@ -1039,6 +1291,7 @@ function taskCollection() {
         currentUser.uid,
         "tasks"
     );
+
 }
 
 
@@ -1073,6 +1326,7 @@ function startTaskListener() {
             renderTasks(tasks);
 
         });
+
 }
 
 
@@ -1083,7 +1337,9 @@ function stopTaskListener() {
         unsubscribeTasks();
 
         unsubscribeTasks = null;
+
     }
+
 }
 
 
@@ -1097,14 +1353,8 @@ function renderTasks(tasks) {
 
     if (!currentUser) {
 
-        const empty =
-            document.createElement("div");
-
-        empty.className = "empty";
-        empty.textContent =
-            "Sign in to save your tasks.";
-
-        list.appendChild(empty);
+        list.innerHTML =
+            '<div class="empty">Sign in to save your tasks.</div>';
 
         return;
     }
@@ -1112,14 +1362,8 @@ function renderTasks(tasks) {
 
     if (tasks.length === 0) {
 
-        const empty =
-            document.createElement("div");
-
-        empty.className = "empty";
-        empty.textContent =
-            "No tasks yet. Add one above.";
-
-        list.appendChild(empty);
+        list.innerHTML =
+            '<div class="empty">No tasks yet. Add one above.</div>';
 
         return;
     }
@@ -1174,7 +1418,6 @@ function renderTasks(tasks) {
             document.createElement("button");
 
         remove.className = "delete-task";
-        remove.type = "button";
         remove.textContent = "×";
 
 
@@ -1204,11 +1447,12 @@ function renderTasks(tasks) {
 }
 
 
-/* ADD TASK */
-
 async function addTask() {
 
     if (!currentUser) {
+
+        alert("Please sign in first.");
+
         return;
     }
 
@@ -1226,7 +1470,7 @@ async function addTask() {
     await addDoc(
         taskCollection(),
         {
-            text: text,
+            text,
             completed: false,
             createdAt: Date.now()
         }
@@ -1234,8 +1478,8 @@ async function addTask() {
 
 
     input.value = "";
-
     input.focus();
+
 }
 
 
@@ -1259,42 +1503,9 @@ document
     });
 
 
-/* TABS */
-
-document
-    .querySelectorAll(".tab")
-    .forEach(tab => {
-
-        tab.addEventListener("click", () => {
-
-            document
-                .querySelectorAll(".tab")
-                .forEach(item =>
-                    item.classList.remove("active")
-                );
-
-
-            document
-                .querySelectorAll(".section")
-                .forEach(section =>
-                    section.classList.remove("active")
-                );
-
-
-            tab.classList.add("active");
-
-            document
-                .getElementById(tab.dataset.tab)
-                .classList.add("active");
-
-        });
-
-    });
-
-
 /* DARK MODE */
 
-function updateTheme() {
+function applyTheme() {
 
     const dark =
         localStorage.getItem("dailyz_dark") === "true";
@@ -1303,27 +1514,36 @@ function updateTheme() {
 
     document.getElementById("themeButton")
         .textContent = dark ? "☀" : "☾";
+
+    document.getElementById("settingsThemeButton")
+        .textContent = dark ? "On" : "Off";
+
+}
+
+
+function toggleTheme() {
+
+    const dark =
+        !document.body.classList.contains("dark");
+
+    localStorage.setItem(
+        "dailyz_dark",
+        dark
+    );
+
+    applyTheme();
+
 }
 
 
 document
     .getElementById("themeButton")
-    .addEventListener("click", () => {
+    .addEventListener("click", toggleTheme);
 
-        const dark =
-            !document.body.classList.contains("dark");
 
-        document.body.classList.toggle("dark", dark);
-
-        localStorage.setItem(
-            "dailyz_dark",
-            dark
-        );
-
-        document.getElementById("themeButton")
-            .textContent = dark ? "☀" : "☾";
-
-    });
+document
+    .getElementById("settingsThemeButton")
+    .addEventListener("click", toggleTheme);
 
 
 /* PRAYER TIMES */
@@ -1345,24 +1565,34 @@ function loadPrayers() {
     list.innerHTML = "";
 
 
-    Object.entries(prayers).forEach(
-        ([name, time]) => {
+    Object.entries(prayers)
+        .forEach(([name, time]) => {
 
             const row =
                 document.createElement("div");
 
             row.className = "prayer";
 
-            row.innerHTML =
-                `<span>${name}</span><strong>${time}</strong>`;
+            const prayerName =
+                document.createElement("span");
+
+            prayerName.textContent = name;
+
+            const prayerTime =
+                document.createElement("strong");
+
+            prayerTime.textContent = time;
+
+            row.appendChild(prayerName);
+            row.appendChild(prayerTime);
 
             list.appendChild(row);
 
-        }
-    );
+        });
 
 
     updateNextPrayer();
+
 }
 
 
@@ -1380,11 +1610,11 @@ function updateNextPrayer() {
 
     for (const [name, time] of Object.entries(prayers)) {
 
-        const [hours, minutes] =
+        const parts =
             time.split(":").map(Number);
 
         const value =
-            hours * 60 + minutes;
+            parts[0] * 60 + parts[1];
 
 
         if (value > current) {
@@ -1392,6 +1622,7 @@ function updateNextPrayer() {
             next = [name, time];
 
             break;
+
         }
 
     }
@@ -1411,16 +1642,24 @@ function updateNextPrayer() {
 }
 
 
+/* LOCATION */
+
 document
     .getElementById("updateLocationButton")
     .addEventListener("click", () => {
 
+        const input =
+            document.getElementById("locationInput");
+
         const value =
-            document.getElementById("locationInput")
-                .value.trim();
+            input.value.trim();
+
+
+        if (!value) return;
+
 
         document.getElementById("locationText")
-            .textContent = value || "Erbil, Iraq";
+            .textContent = value;
 
     });
 
@@ -1438,9 +1677,10 @@ document
         if (!("Notification" in window)) {
 
             status.textContent =
-                "Notifications are not supported.";
+                "Notifications are not supported by this browser.";
 
             return;
+
         }
 
 
@@ -1448,10 +1688,17 @@ document
             await Notification.requestPermission();
 
 
-        status.textContent =
-            permission === "granted"
-            ? "Notifications are enabled."
-            : "Notifications are disabled.";
+        if (permission === "granted") {
+
+            status.textContent =
+                "Notifications are enabled.";
+
+        } else {
+
+            status.textContent =
+                "Notifications are disabled.";
+
+        }
 
     });
 
@@ -1459,7 +1706,7 @@ document
 /* START */
 
 setAuthMode();
-updateTheme();
+applyTheme();
 loadPrayers();
 
 </script>
