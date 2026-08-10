@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<link rel="manifest" href="manifest.json">
+<title>Dailyz</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--text:#111;--muted:#777;--accent:#007aff;--line:#e5e5ea}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif}
+.app{max-width:680px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 18px calc(100px + env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}h1{font-size:34px;margin:0;font-weight:750;letter-spacing:-1.5px}.sub{color:var(--muted);font-size:14px;margin-top:4px}
+button{font:inherit;border:0;cursor:pointer}.icon{width:42px;height:42px;border-radius:50%;background:var(--card);font-size:20px;box-shadow:0 2px 12px #0000000d}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:15px;padding:11px 14px;margin-bottom:20px;box-shadow:0 2px 12px #00000008}.search input{border:0;outline:0;background:none;width:100%;font-size:16px;color:var(--text)}
+.section-title{font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:22px 4px 9px}
+.task{display:flex;align-items:center;gap:12px;background:var(--card);padding:14px;border-radius:17px;margin:8px 0;box-shadow:0 2px 12px #00000008;animation:in .18s ease}.check{width:25px;height:25px;border:2px solid #c7c7cc;border-radius:50%;background:transparent;flex:none}.task.done .check{background:var(--accent);border-color:var(--accent);color:white}.task.done .check:after{content:"✓";font-size:15px;display:block;line-height:21px;text-align:center}.task-text{flex:1;font-size:16px}.task.done .task-text{text-decoration:line-through;color:var(--muted)}.del{color:#ff3b30;background:none;font-size:20px;padding:4px 7px}
+.empty{text-align:center;color:var(--muted);padding:45px 15px}.empty strong{display:block;color:var(--text);font-size:18px;margin-bottom:5px}
+.fab{position:fixed;right:22px;bottom:28px;width:58px;height:58px;border-radius:50%;background:var(--accent);color:white;font-size:30px;box-shadow:0 8px 25px #007aff55}
+dialog{border:0;border-radius:24px;padding:22px;width:min(92%,420px);box-shadow:0 20px 70px #0003;background:var(--card);color:var(--text)}dialog::backdrop{background:#0005}.modal-title{font-size:22px;font-weight:750;margin-bottom:15px}dialog input{width:100%;padding:14px;border:1px solid var(--line);border-radius:13px;font-size:16px;outline:0;background:var(--bg);color:var(--text)}.actions{display:flex;gap:9px;margin-top:14px}.actions button{flex:1;padding:12px;border-radius:13px}.cancel{background:var(--bg)}.add{background:var(--accent);color:#fff}
+.dark{--bg:#000;--card:#1c1c1e;--text:#fff;--muted:#98989d;--line:#38383a}.dark .icon{box-shadow:none}.dark .search{box-shadow:none}
+@keyframes in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div><h1>Dailyz</h1><div class="sub" id="date"></div></div><button class="icon" id="theme" aria-label="Toggle theme">☾</button></header>
+<div class="search">⌕ <input id="search" placeholder="Search tasks"></div>
+<div class="section-title">Tasks</div>
+<section id="list"></section>
+</main>
+<button class="fab" id="addBtn" aria-label="Add task">+</button>
+<dialog id="dialog"><div class="modal-title">New task</div><input id="taskInput" maxlength="100" placeholder="What do you need to do?"><div class="actions"><button class="cancel" id="cancel">Cancel</button><button class="add" id="save">Add task</button></div></dialog>
+<script>
+const $=s=>document.querySelector(s), key="dailyz_tasks_v1";
+let tasks=JSON.parse(localStorage.getItem(key)||"[]");
+const date=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+$("#date").textContent=date;
+function save(){localStorage.setItem(key,JSON.stringify(tasks));render()}
+function render(){
+ const q=$("#search").value.toLowerCase().trim(), list=$("#list");
+ const shown=tasks.filter(t=>t.text.toLowerCase().includes(q));
+ list.innerHTML="";
+ if(!shown.length){list.innerHTML='<div class="empty"><strong>No tasks yet</strong>Tap + to add your first task.</div>';return}
+ shown.forEach(t=>{
+  const el=document.createElement("div");el.className="task"+(t.done?" done":"");
+  el.innerHTML=`<button class="check" aria-label="Complete"></button><div class="task-text"></div><button class="del" aria-label="Delete">×</button>`;
+  el.querySelector(".task-text").textContent=t.text;
+  el.querySelector(".check").onclick=()=>{t.done=!t.done;save()};
+  el.querySelector(".del").onclick=()=>{tasks=tasks.filter(x=>x.id!==t.id);save()};
+  list.appendChild(el);
+ });
+}
+$("#addBtn").onclick=()=>{$("#taskInput").value="";$("#dialog").showModal();setTimeout(()=>$("#taskInput").focus(),50)}
+$("#cancel").onclick=()=>$("#dialog").close();
+$("#save").onclick=()=>{let text=$("#taskInput").value.trim();if(text){tasks.unshift({id:Date.now(),text,done:false});save();$("#dialog").close()}};
+$("#taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("#save").click()});
+$("#search").oninput=render;
+let dark=localStorage.getItem("dailyz_dark")==="1";document.body.classList.toggle("dark",dark);
+$("#theme").onclick=()=>{dark=!dark;document.body.classList.toggle("dark",dark);localStorage.setItem("dailyz_dark",dark?"1":"0")};
+render();
+</script>
+</body>
+</html>
