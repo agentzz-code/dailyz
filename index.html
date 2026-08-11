@@ -36,7 +36,14 @@
                 Arial,
                 sans-serif;
         }
+   html {
+    background: #f5f5f7;
+    transition: background .3s ease;
+}
 
+html.dark {
+    background: #101010;
+}     
         body {
             background: #f5f5f7;
             color: #111;
@@ -4818,7 +4825,11 @@
                 "dark",
                 dark
             );
-
+            
+document.documentElement.classList.toggle(
+    "dark",
+    dark
+);
 
             const themeButton =
                 document.getElementById(
