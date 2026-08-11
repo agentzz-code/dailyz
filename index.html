@@ -282,6 +282,105 @@
             display: block;
         }
 
+        /* STREAK + PROGRESS RING */
+
+        .stats-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .streak-card {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,.92);
+            border-radius: 16px;
+            padding: 14px 16px;
+        }
+
+        .dark .streak-card {
+            background: #222;
+        }
+
+        .streak-emoji {
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        .streak-count {
+            font-size: 19px;
+            font-weight: 850;
+        }
+
+        .streak-label {
+            color: #888;
+            font-size: 12px;
+            margin-top: 1px;
+        }
+
+        .progress-ring-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,.92);
+            border-radius: 16px;
+            padding: 10px;
+            width: 78px;
+            height: 78px;
+            flex-shrink: 0;
+        }
+
+        .dark .progress-ring-card {
+            background: #222;
+        }
+
+        .progress-ring-wrap {
+            position: relative;
+            width: 58px;
+            height: 58px;
+        }
+
+        .progress-ring-wrap svg {
+            transform: rotate(-90deg);
+            width: 58px;
+            height: 58px;
+        }
+
+        .progress-ring-track {
+            fill: none;
+            stroke: #eee;
+            stroke-width: 6;
+        }
+
+        .dark .progress-ring-track {
+            stroke: #3a3a3a;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke: #111;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset .35s ease;
+        }
+
+        .dark .progress-ring-fill {
+            stroke: white;
+        }
+
+        .progress-ring-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
         /* TASKS */
 
         .task-input {
@@ -1038,6 +1137,28 @@
             class="section active"
             id="tasks"
         >
+
+            <div class="stats-row">
+
+                <div class="streak-card">
+                    <div class="streak-emoji">🔥</div>
+                    <div>
+                        <div class="streak-count" id="streakCount">0</div>
+                        <div class="streak-label" id="streakLabel">day streak</div>
+                    </div>
+                </div>
+
+                <div class="progress-ring-card">
+                    <div class="progress-ring-wrap">
+                        <svg viewBox="0 0 58 58">
+                            <circle class="progress-ring-track" cx="29" cy="29" r="24"></circle>
+                            <circle class="progress-ring-fill" id="progressRingFill" cx="29" cy="29" r="24"></circle>
+                        </svg>
+                        <div class="progress-ring-text" id="progressRingText">0/0</div>
+                    </div>
+                </div>
+
+            </div>
 
             <div class="task-input">
 
@@ -2072,6 +2193,9 @@
                 incorrectLogin:
                     "Incorrect email or password.",
 
+                streakLabel:
+                    "day streak",
+
                 prayer: {
 
                     Fajr: "Fajr",
@@ -2282,6 +2406,9 @@
                 incorrectLogin:
                     "ئیمەیڵ یان وشەی نهێنی هەڵەیە.",
 
+                streakLabel:
+                    "ڕۆژی بەردەوام",
+
                 prayer: {
 
                     Fajr: "بەیانی",
@@ -2491,6 +2618,9 @@
 
                 incorrectLogin:
                     "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+
+                streakLabel:
+                    "يوم متتالي",
 
                 prayer: {
 
@@ -3035,6 +3165,12 @@
                 formatDateKey(
                     selectedDate
                 );
+
+
+            document.getElementById(
+                "streakLabel"
+            ).textContent =
+                t("streakLabel");
 
 
             updateDate();
@@ -3911,6 +4047,207 @@
         }
 
 
+        function isTaskCompletedOnDate(
+            task,
+            dateKey
+        ) {
+
+            if (
+                task.repeat &&
+                task.repeat !== "once"
+            ) {
+
+                return !!(
+                    task.completedDates &&
+                    task.completedDates.includes(
+                        dateKey
+                    )
+                );
+            }
+
+            return !!task.completed;
+        }
+
+
+        /* STATS: STREAK + PROGRESS RING */
+
+        function getActiveTasksSource() {
+
+            return currentUser
+                ? currentTasksCache
+                : guestTasks;
+        }
+
+
+        function updateProgressRing() {
+
+            const tasks =
+                getTasksForDate(
+                    getActiveTasksSource(),
+                    selectedDate
+                );
+
+
+            const total =
+                tasks.length;
+
+
+            const done =
+                tasks.filter(
+                    task =>
+                        isTaskCompletedOnDate(
+                            task,
+                            selectedDate
+                        )
+                ).length;
+
+
+            const text =
+                document.getElementById(
+                    "progressRingText"
+                );
+
+
+            const fill =
+                document.getElementById(
+                    "progressRingFill"
+                );
+
+
+            text.textContent =
+                `${done}/${total}`;
+
+
+            const radius = 24;
+
+            const circumference =
+                2 * Math.PI * radius;
+
+            const ratio =
+                total > 0
+                    ? done / total
+                    : 0;
+
+
+            fill.style.strokeDasharray =
+                `${circumference}`;
+
+            fill.style.strokeDashoffset =
+                `${circumference * (1 - ratio)}`;
+        }
+
+
+        function computeStreak() {
+
+            const tasks =
+                getActiveTasksSource();
+
+
+            let streak = 0;
+
+            let cursor =
+                new Date();
+
+
+            for (
+                let i = 0;
+                i < 3650;
+                i++
+            ) {
+
+                const key =
+                    getDateKeyFromDate(
+                        cursor
+                    );
+
+
+                const dayTasks =
+                    getTasksForDate(
+                        tasks,
+                        key
+                    );
+
+
+                if (!dayTasks.length) {
+
+                    if (
+                        key ===
+                        getTodayKey()
+                    ) {
+
+                        cursor.setDate(
+                            cursor.getDate() - 1
+                        );
+
+                        continue;
+                    }
+
+                    break;
+                }
+
+
+                const allDone =
+                    dayTasks.every(
+                        task =>
+                            isTaskCompletedOnDate(
+                                task,
+                                key
+                            )
+                    );
+
+
+                if (!allDone) {
+
+                    if (
+                        key ===
+                        getTodayKey()
+                    ) {
+
+                        cursor.setDate(
+                            cursor.getDate() - 1
+                        );
+
+                        continue;
+                    }
+
+                    break;
+                }
+
+
+                streak++;
+
+
+                cursor.setDate(
+                    cursor.getDate() - 1
+                );
+            }
+
+
+            return streak;
+        }
+
+
+        function updateStreak() {
+
+            const streak =
+                computeStreak();
+
+
+            document.getElementById(
+                "streakCount"
+            ).textContent =
+                String(streak);
+        }
+
+
+        function updateStats() {
+
+            updateStreak();
+
+            updateProgressRing();
+        }
+
+
         /* TASKS */
 
         function refreshTasks() {
@@ -3959,6 +4296,8 @@
                     list
                 );
 
+                updateStats();
+
                 return;
             }
 
@@ -3974,6 +4313,8 @@
                 todayTasks,
                 list
             );
+
+            updateStats();
         }
 
 
@@ -4199,6 +4540,16 @@
                             d =>
                                 d !== selectedDate
                         );
+                }
+
+
+                if (
+                    !found.repeat ||
+                    found.repeat === "once"
+                ) {
+
+                    found.completed =
+                        checked;
                 }
 
 
@@ -5305,6 +5656,8 @@ document.documentElement.classList.toggle(
         renderCalendar();
 
         loadPrayerTimes();
+
+        updateStats();
 
 
         /* SERVICE WORKER */
