@@ -1617,6 +1617,8 @@ button {
 
 <script type="module">
 
+<script type="module">
+
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
@@ -2337,10 +2339,10 @@ function getTodayKey() {
 
 function parseDateKey(key) {
 
-    const [y,m,d] =
+    const [y, m, d] =
         key.split("-").map(Number);
 
-    return new Date(y,m-1,d);
+    return new Date(y, m - 1, d);
 
 }
 
@@ -2380,899 +2382,1070 @@ function getDateKeyFromDate(date) {
 
     return [
         date.getFullYear(),
-        String(date.getMonth()+1).padStart(2,"0"),
-        String(date.getDate()).padStart(2,"0")
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
     ].join("-");
 
 }
 
-/* KURDISH CALENDAR */
+/* TRANSLATION HELPER */
 
-const kurdishMonths = [
-    "کانوونی دووەم",
-    "شوبات",
-    "ئادار",
-    "نیسان",
-    "ئایار",
-    "حوزەیران",
-    "تەممووز",
-    "ئاب",
-    "ئەیلول",
-    "تشرینی یەکەم",
-    "تشرینی دووەم",
-    "کانوونی یەکەم"
-];
+function t(key) {
 
-function getCalendarMonthName(date) {
+    const parts = key.split(".");
 
-    const month =
-        date.getMonth();
+    let value =
+        translations[currentLanguage] ||
+        translations.en;
 
-    const year =
-        date.getFullYear();
+    for (const part of parts) {
 
-    if (currentLanguage === "ku") {
+        if (
+            value &&
+            Object.prototype.hasOwnProperty.call(
+                value,
+                part
+            )
+        ) {
 
-        return (
-            kurdishMonths[month] +
-            " " +
-            year
-        );
+            value = value[part];
+
+        } else {
+
+            return key;
+
+        }
 
     }
 
-    const localeMap = {
+    return value;
 
-        en: "en-US",
-        ar: "ar-IQ"
+}
+/* SETTINGS */
 
-    };
+.settings-title {
+    font-size: 27px;
+    font-weight: 850;
+}
 
-    return date.toLocaleDateString(
-        localeMap[currentLanguage] || "en-US",
-        {
-            month: "long",
-            year: "numeric"
-        }
-    );
+.settings-subtitle {
+    color: #888;
+    margin: 4px 0 18px;
+}
 
+.settings-card {
+    background: rgba(255,255,255,.92);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 13px;
+}
+
+.dark .settings-card {
+    background: #222;
+}
+
+.settings-card-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 800;
+    color: #888;
+    margin-bottom: 14px;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.setting-label {
+    font-weight: 650;
+}
+
+.setting-description {
+    color: #888;
+    font-size: 13px;
+    margin-top: 3px;
+}
+
+.setting-button {
+    border: 0;
+    background: #eee;
+    color: #111;
+    border-radius: 10px;
+    padding: 9px 14px;
+    white-space: nowrap;
+}
+
+.dark .setting-button {
+    background: #3a3a3a;
+    color: white;
+}
+
+.setting-button.dark {
+    background: #111;
+    color: white;
+}
+
+.dark .setting-button.dark {
+    background: white;
+    color: black;
+}
+
+.location-row {
+    display: flex;
+    gap: 8px;
+}
+
+.notification-button,
+.auth-button {
+    width: 100%;
+    border: 0;
+    background: #111;
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.dark .notification-button,
+.dark .auth-button {
+    background: white;
+    color: black;
+}
+
+.status {
+    color: #888;
+    font-size: 13px;
+    margin-top: 9px;
+}
+
+.danger-button {
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+    padding: 13px;
+    background: #eee;
+    color: #d00;
+    font-weight: 700;
+}
+
+.dark .danger-button {
+    background: #333;
+}
+
+/* WELCOME */
+
+.welcome-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background: rgba(245,245,247,.97);
+}
+
+.dark .welcome-screen {
+    background: rgba(16,16,16,.97);
+}
+
+.welcome-box {
+    width: min(440px, 100%);
+    text-align: center;
+}
+
+.welcome-logo {
+    font-size: 43px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.welcome-subtitle {
+    color: #888;
+    margin-bottom: 25px;
+}
+
+.welcome-button {
+    width: 100%;
+    border: 0;
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 9px;
+    background: #111;
+    color: white;
+    font-weight: 750;
+}
+
+.welcome-button.secondary {
+    background: #e9e9ed;
+    color: #111;
+}
+
+.dark .welcome-button.secondary {
+    background: #2c2c2c;
+    color: white;
+}
+
+.welcome-button.guest {
+    background: transparent;
+    color: #777;
+}
+
+/* AUTH MODAL */
+
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-overlay.active {
+    display: flex;
+}
+
+#authCard {
+    width: min(500px, 100%);
+    background: white;
+    border-radius: 22px;
+    padding: 24px;
+}
+
+.dark #authCard {
+    background: #222;
+}
+
+#authCard h2 {
+    margin: 0 0 7px;
+    font-size: 25px;
+}
+
+.auth-subtitle {
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.auth-input {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.auth-button {
+    margin-top: 5px;
+}
+
+.auth-error {
+    display: none;
+    color: #d00;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 17px;
+    font-size: 14px;
+    color: #888;
+}
+
+.auth-switch button {
+    border: 0;
+    background: transparent;
+    color: #111;
+    font-weight: 700;
+}
+
+.dark .auth-switch button {
+    color: white;
+}
+
+.close-auth {
+    float: right;
+    border: 0;
+    background: transparent;
+    font-size: 25px;
+    color: #888;
 }
 
 /* LANGUAGE */
 
-function applyLanguage() {
-
-    const language =
-        translations[currentLanguage] || translations.en;
-
-    document.documentElement.lang =
-        currentLanguage;
-
-    document.documentElement.dir =
-        language.direction;
-
-    document.getElementById("chooseLanguageText")
-        .textContent =
-        t("chooseLanguage");
-
-    document.getElementById("welcomeSubtitle")
-        .textContent =
-        t("welcomeSubtitle");
-
-    document.getElementById("welcomeSignIn")
-        .textContent =
-        t("signIn");
-
-    document.getElementById("welcomeCreate")
-        .textContent =
-        t("createAccount");
-
-    document.getElementById("welcomeGuest")
-        .textContent =
-        t("continueGuest");
-
-    document.getElementById("authTitle")
-        .textContent =
-        signUpMode
-        ? t("authCreate")
-        : t("authWelcome");
-
-    document.getElementById("authSubtitle")
-        .textContent =
-        signUpMode
-        ? t("authCreateSubtitle")
-        : t("authLoginSubtitle");
-
-    document.getElementById("usernameInput")
-        .placeholder =
-        t("username");
-
-    document.getElementById("emailInput")
-        .placeholder =
-        t("email");
-
-    document.getElementById("passwordInput")
-        .placeholder =
-        t("password");
-
-    document.getElementById("confirmPasswordInput")
-        .placeholder =
-        t("confirmPassword");
-
-    document.getElementById("authButton")
-        .textContent =
-        signUpMode
-        ? t("createAccount")
-        : t("signIn");
-
-    document.getElementById("switchText")
-        .textContent =
-        signUpMode
-        ? t("alreadyAccount")
-        : t("noAccount");
-
-    document.getElementById("switchButton")
-        .textContent =
-        signUpMode
-        ? t("signIn")
-        : t("signUp");
-
-    document.getElementById("tasksTab")
-        .textContent =
-        t("tasks");
-
-    document.getElementById("calendarTab")
-        .textContent =
-        t("calendar");
-
-    document.getElementById("prayersTab")
-        .textContent =
-        t("prayers");
-
-    document.getElementById("taskInput")
-        .placeholder =
-        t("addTask");
-
-    document.getElementById("dateLabel")
-        .textContent =
-        t("date");
-
-    document.getElementById("repeatLabel")
-        .textContent =
-        t("repeat");
-
-    document.getElementById("repeatOnce")
-        .textContent =
-        t("once");
-
-    document.getElementById("repeatDaily")
-        .textContent =
-        t("daily");
-
-    document.getElementById("repeatWeekly")
-        .textContent =
-        t("weekly");
-
-    document.getElementById("repeatCustom")
-        .textContent =
-        t("custom");
-
-    document.getElementById("prayerTitle")
-        .textContent =
-        t("prayerTimes");
-
-    document.getElementById("nextLabel")
-        .textContent =
-        t("nextPrayer");
-
-    document.getElementById("settingsTitle")
-        .textContent =
-        t("settings");
-
-    document.getElementById("settingsSubtitle")
-        .textContent =
-        t("settingsSubtitle");
-
-    document.getElementById("accountTitle")
-        .textContent =
-        t("account");
-
-    document.getElementById("appearanceTitle")
-        .textContent =
-        t("appearance");
-
-    document.getElementById("darkModeLabel")
-        .textContent =
-        t("darkMode");
-
-    document.getElementById("darkModeDescription")
-        .textContent =
-        t("darkModeDescription");
-
-    document.getElementById("languageTitle")
-        .textContent =
-        t("language");
-
-    document.getElementById("languageLabel")
-        .textContent =
-        t("language");
-
-    document.getElementById("languageDescription")
-        .textContent =
-        t("languageDescription");
-
-    document.getElementById("prayerSettingsTitle")
-        .textContent =
-        t("prayerSettings");
-
-    document.getElementById("locationLabel")
-        .textContent =
-        t("location");
-
-    document.getElementById("locationDescription")
-        .textContent =
-        t("locationDescription");
-
-    document.getElementById("updateLocationButton")
-        .textContent =
-        t("update");
-
-    document.getElementById("notificationsTitle")
-        .textContent =
-        t("notifications");
-
-    document.getElementById("notificationsLabel")
-        .textContent =
-        t("prayerNotifications");
-
-    document.getElementById("notificationsDescription")
-        .textContent =
-        t("prayerNotificationsDescription");
-
-    document.getElementById("notificationButton")
-        .textContent =
-        t("enableNotifications");
-
-    document.getElementById("accountActionsTitle")
-        .textContent =
-        t("accountActions");
-
-    document.getElementById("logoutButton")
-        .textContent =
-        t("signOut");
-
-    document.getElementById("settingsLanguage")
-        .value =
-        currentLanguage;
-
-    document.getElementById("selectedDayText")
-        .textContent =
-        formatDateKey(selectedDate);
-
-    document.getElementById("calendarSelectedDay")
-        .textContent =
-        formatDateKey(selectedDate);
-
-    updateDate();
-    renderCalendar();
-    loadPrayerTimes();
-
-    if (currentUser) {
-        startTaskListener();
-    } else {
-        renderTasks([]);
-    }
-
+.language-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-function chooseLanguage(language) {
-
-    currentLanguage =
-        language;
-
-    localStorage.setItem(
-        "dailykrd_language",
-        language
-    );
-
-    document.getElementById("languageOverlay")
-        .style.display =
-        "none";
-
-    applyLanguage();
-
-    if (!localStorage.getItem("dailykrd_welcomed")) {
-
-        document.getElementById("welcomeScreen")
-            .style.display =
-            "flex";
-
-    }
-
+.language-box {
+    width: min(430px, 100%);
+    background: white;
+    border-radius: 24px;
+    padding: 27px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
 }
 
-document
-    .querySelectorAll(".language-option")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                chooseLanguage(
-                    button.dataset.language
-                );
-
-            }
-        );
-
-    });
-
-document
-    .getElementById("settingsLanguage")
-    .addEventListener(
-        "change",
-        event => {
-
-            chooseLanguage(
-                event.target.value
-            );
-
-        }
-    );
-
-/* WELCOME */
-
-function finishWelcome() {
-
-    localStorage.setItem(
-        "dailykrd_welcomed",
-        "true"
-    );
-
-    document.getElementById("welcomeScreen")
-        .style.display =
-        "none";
-
+.dark .language-box {
+    background: #222;
+    color: white;
 }
 
-document
-    .getElementById("welcomeSignIn")
-    .addEventListener(
-        "click",
-        () => {
-
-            finishWelcome();
-
-            signUpMode = false;
-
-            setAuthMode();
-
-            document.getElementById("authOverlay")
-                .classList.add("active");
-
-        }
-    );
-
-document
-    .getElementById("welcomeCreate")
-    .addEventListener(
-        "click",
-        () => {
-
-            finishWelcome();
-
-            signUpMode = true;
-
-            setAuthMode();
-
-            document.getElementById("authOverlay")
-                .classList.add("active");
-
-        }
-    );
-
-document
-    .getElementById("welcomeGuest")
-    .addEventListener(
-        "click",
-        () => {
-
-            finishWelcome();
-
-            currentUser = null;
-
-            renderTasks([]);
-
-        }
-    );
-
-/* AUTH */
-
-function setAuthMode() {
-
-    document.getElementById("usernameInput")
-        .style.display =
-        signUpMode
-        ? "block"
-        : "none";
-
-    document.getElementById("confirmPasswordInput")
-        .style.display =
-        signUpMode
-        ? "block"
-        : "none";
-
-    applyLanguage();
-
+.language-box h1 {
+    margin: 0 0 8px;
 }
 
-function clearError() {
-
-    const error =
-        document.getElementById("authError");
-
-    error.textContent = "";
-
-    error.style.display =
-        "none";
-
+.language-box p {
+    color: #888;
+    margin-bottom: 20px;
 }
 
-function showError(message) {
-
-    const error =
-        document.getElementById("authError");
-
-    error.textContent =
-        message;
-
-    error.style.display =
-        "block";
-
+.language-option {
+    width: 100%;
+    padding: 15px;
+    margin-top: 9px;
+    border: 0;
+    border-radius: 13px;
+    background: #eee;
+    font-weight: 700;
 }
 
-async function createAccount() {
-
-    clearError();
-
-    const username =
-        document.getElementById("usernameInput")
-            .value.trim();
-
-    const email =
-        document.getElementById("emailInput")
-            .value.trim();
-
-    const password =
-        document.getElementById("passwordInput")
-            .value;
-
-    const confirm =
-        document.getElementById("confirmPasswordInput")
-            .value;
-
-    if (username.length < 2) {
-
-        showError(
-            t("usernameTooShort")
-        );
-
-        return;
-
-    }
-
-    if (!email) {
-
-        showError(
-            t("enterEmail")
-        );
-
-        return;
-
-    }
-
-    if (password.length < 6) {
-
-        showError(
-            t("passwordShort")
-        );
-
-        return;
-
-    }
-
-    if (password !== confirm) {
-
-        showError(
-            t("passwordsMismatch")
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const result =
-            await createUserWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
-
-        await setDoc(
-            doc(
-                db,
-                "users",
-                result.user.uid
-            ),
-            {
-                username,
-                email,
-                language: currentLanguage,
-                createdAt: Date.now()
-            }
-        );
-
-        document.getElementById("authOverlay")
-            .classList.remove("active");
-
-    } catch(error) {
-
-        showError(
-            error.message
-        );
-
-    }
-
+.dark .language-option {
+    background: #333;
+    color: white;
 }
 
-async function login() {
+/* RTL */
 
-    clearError();
-
-    const email =
-        document.getElementById("emailInput")
-            .value.trim();
-
-    const password =
-        document.getElementById("passwordInput")
-            .value;
-
-    if (!email || !password) {
-
-        showError(
-            t("enterEmailPassword")
-        );
-
-        return;
-
-    }
-
-    try {
-
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        document.getElementById("authOverlay")
-            .classList.remove("active");
-
-    } catch(error) {
-
-        showError(
-            t("incorrectLogin")
-        );
-
-    }
-
+[dir="rtl"] {
+    text-align: right;
 }
 
-document
-    .getElementById("authButton")
-    .addEventListener(
-        "click",
-        () => {
-
-            if (signUpMode) {
-                createAccount();
-            } else {
-                login();
-            }
-
-        }
-    );
-
-document
-    .getElementById("switchButton")
-    .addEventListener(
-        "click",
-        () => {
-
-            signUpMode =
-                !signUpMode;
-
-            setAuthMode();
-
-        }
-    );
-
-document
-    .getElementById("closeAuth")
-    .addEventListener(
-        "click",
-        () => {
-
-            document.getElementById("authOverlay")
-                .classList.remove("active");
-
-        }
-    );
-
-document
-    .getElementById("accountButton")
-    .addEventListener(
-        "click",
-        () => {
-
-            if (currentUser) return;
-
-            signUpMode = false;
-
-            setAuthMode();
-
-            document.getElementById("authOverlay")
-                .classList.add("active");
-
-        }
-    );
-
-/* AUTH STATE */
-
-onAuthStateChanged(
-    auth,
-    async user => {
-
-        currentUser =
-            user;
-
-        if (user) {
-
-            const profile =
-                await getDoc(
-                    doc(
-                        db,
-                        "users",
-                        user.uid
-                    )
-                );
-
-            const username =
-                profile.exists()
-                ? profile.data().username
-                : t("guest");
-
-            document.getElementById("settingsUsername")
-                .textContent =
-                username;
-
-            document.getElementById("settingsEmail")
-                .textContent =
-                user.email || "";
-
-            document.getElementById("accountButton")
-                .style.display =
-                "none";
-
-            startTaskListener();
-
-        } else {
-
-            document.getElementById("settingsUsername")
-                .textContent =
-                t("notSignedIn");
-
-            document.getElementById("settingsEmail")
-                .textContent =
-                t("notSignedIn");
-
-            document.getElementById("accountButton")
-                .style.display =
-                "block";
-
-            stopTaskListener();
-
-            renderTasks([]);
-
-        }
-
-    }
-);
-
-/* SIGN OUT */
-
-document
-    .getElementById("logoutButton")
-    .addEventListener(
-        "click",
-        async () => {
-
-            if (currentUser) {
-
-                await signOut(auth);
-
-            }
-
-        }
-    );
-
-/* NAVIGATION */
-
-function showSection(id) {
-
-    document
-        .querySelectorAll(".section")
-        .forEach(section => {
-
-            section.classList.remove("active");
-
-        });
-
-    document
-        .querySelectorAll(".tab")
-        .forEach(tab => {
-
-            tab.classList.remove("active");
-
-        });
-
-    const section =
-        document.getElementById(id);
-
-    if (section) {
-        section.classList.add("active");
-    }
-
-    const tab =
-        document.querySelector(
-            `.tab[data-tab="${id}"]`
-        );
-
-    if (tab) {
-        tab.classList.add("active");
-    }
-
+[dir="rtl"] .header,
+[dir="rtl"] .tabs,
+[dir="rtl"] .task-input,
+[dir="rtl"] .location-row,
+[dir="rtl"] .setting-row,
+[dir="rtl"] .calendar-head {
+    direction: rtl;
 }
 
-document
-    .querySelectorAll(".tab")
-    .forEach(tab => {
+[dir="rtl"] .task-text {
+    text-align: right;
+}
 
-        tab.addEventListener(
-            "click",
-            () => {
+</style>
+</head>
 
-                showSection(
-                    tab.dataset.tab
-                );
+<body>
 
-            }
-        );
+<!-- MOTION BACKGROUND -->
 
-    });
+<div class="motion-bg">
 
-/* SETTINGS TOGGLE */
+    <div class="motion-orb one"></div>
+    <div class="motion-orb two"></div>
+    <div class="motion-orb three"></div>
 
-document
-    .getElementById("settingsButton")
-    .addEventListener(
-        "click",
-        () => {
+</div>
 
-            const settings =
-                document.getElementById("settings");
+<div class="emoji e1">✓</div>
+<div class="emoji e2">★</div>
+<div class="emoji e3">☀</div>
 
-            if (
-                settings.classList.contains("active")
-            ) {
+<!-- HEADER -->
 
-                showSection("tasks");
+<header class="header">
 
-            } else {
+    <div>
+        <div class="logo">Daily.KRD</div>
+        <div class="date" id="date"></div>
+    </div>
 
-                showSection("settings");
+    <div class="header-actions">
 
-            }
+        <button
+            class="icon-button"
+            id="themeButton"
+            type="button"
+            aria-label="Dark Mode"
+        >
+            ☾
+        </button>
 
-        }
-    );
+        <button
+            class="icon-button"
+            id="accountButton"
+            type="button"
+            aria-label="Account"
+        >
+            👤
+        </button>
 
-/* TASK COLLECTION */
+        <button
+            class="icon-button"
+            id="settingsButton"
+            type="button"
+            aria-label="Settings"
+        >
+            ⚙
+        </button>
+
+    </div>
+
+</header>
+
+<!-- TABS -->
+
+<nav class="tabs">
+
+    <button
+        class="tab active"
+        id="tasksTab"
+        data-tab="tasks"
+        type="button"
+    >
+        Tasks
+    </button>
+
+    <button
+        class="tab"
+        id="calendarTab"
+        data-tab="calendar"
+        type="button"
+    >
+        Calendar
+    </button>
+
+    <button
+        class="tab"
+        id="prayersTab"
+        data-tab="prayers"
+        type="button"
+    >
+        Prayer Times
+    </button>
+
+</nav>
+
+<!-- TASKS -->
+
+<section
+    class="section active"
+    id="tasks"
+>
+
+    <div class="task-input">
+
+        <input
+            id="taskInput"
+            type="text"
+            placeholder="Add a task..."
+            autocomplete="off"
+        >
+
+        <button
+            class="add-button"
+            id="addTaskButton"
+            type="button"
+        >
+            +
+        </button>
+
+    </div>
+
+    <div class="task-options">
+
+        <div class="option-row">
+
+            <label id="dateLabel">
+                Date
+            </label>
+
+            <input
+                class="task-date-input"
+                id="taskDateInput"
+                type="date"
+            >
+
+        </div>
+
+        <div class="option-row">
+
+            <label id="repeatLabel">
+                Repeat
+            </label>
+
+            <select
+                class="repeat-select"
+                id="repeatSelect"
+            >
+
+                <option
+                    id="repeatOnce"
+                    value="once"
+                >
+                    Once
+                </option>
+
+                <option
+                    id="repeatDaily"
+                    value="daily"
+                >
+                    Every day
+                </option>
+
+                <option
+                    id="repeatWeekly"
+                    value="weekly"
+                >
+                    Every week
+                </option>
+
+                <option
+                    id="repeatCustom"
+                    value="custom"
+                >
+                    Custom days
+                </option>
+
+            </select>
+
+        </div>
+
+        <div
+            class="repeat-days"
+            id="repeatDays"
+        >
+
+            <button
+                class="repeat-day"
+                type="button"
+                data-day="0"
+            >
+                Sun
+            </button>
+
+            <button
+                class="repeat-day"
+                type="button"
+                data-day="1"
+            >
+                Mon
+            </button>
+
+            <button
+                class="repeat-day"
+                type="button"
+                data-day="2"
+            >
+                Tue
+            </button>
+
+            <button
+                class="repeat-day"
+                type="button"
+                data-day="3"
+            >
+                Wed
+            </button>
+
+            <button
+                class="repeat-day"
+                type="button"
+                data-day="4"
+            >
+                Thu
+            </button>
+
+            <button
+                class="repeat-day"
+                type="button"
+                data-day="5"
+            >
+                Fri
+            </button>
+
+            <button
+                class="repeat-day"
+                type="button"
+                data-day="6"
+            >
+                Sat
+            </button>
+
+        </div>
+
+    </div>
+
+    <div
+        class="selected-day"
+        id="selectedDayText"
+    >
+    </div>
+
+    <div id="taskList"></div>
+
+</section>
+
+<!-- CALENDAR -->
+
+<section
+    class="section"
+    id="calendar"
+>
+
+    <div class="calendar-card">
+
+        <div class="calendar-head">
+
+            <div
+                class="calendar-month"
+                id="calendarMonth"
+            >
+            </div>
+
+            <div class="calendar-nav">
+
+                <button
+                    id="previousMonth"
+                    type="button"
+                >
+                    ‹
+                </button>
+
+                <button
+                    id="todayButton"
+                    type="button"
+                >
+                    Today
+                </button>
+
+                <button
+                    id="nextMonth"
+                    type="button"
+                >
+                    ›
+                </button>
+
+            </div>
+
+        </div>
+
+        <div
+            class="calendar-weekdays"
+            id="calendarWeekdays"
+        >
+        </div>
+
+        <div
+            class="calendar-grid"
+            id="calendarGrid"
+        >
+        </div>
+
+    </div>
+
+    <div
+        class="selected-day"
+        id="calendarSelectedDay"
+    >
+    </div>
+
+</section>
+
+<!-- PRAYERS -->
+
+<section
+    class="section"
+    id="prayers"
+>
+
+    <div class="prayer-header">
+
+        <h2 id="prayerTitle">
+            Prayer Times
+        </h2>
+
+        <div
+            class="location"
+            id="locationText"
+        >
+            Erbil
+        </div>
+
+    </div>
+
+    <div class="next-prayer">
+
+        <div
+            class="next-label"
+            id="nextLabel"
+        >
+            NEXT PRAYER
+        </div>
+
+        <div
+            class="next-name"
+            id="nextName"
+        >
+            Fajr
+        </div>
+
+        <div
+            class="next-time"
+            id="nextTime"
+        >
+            03:46
+        </div>
+
+    </div>
+
+    <div id="prayerList"></div>
+
+</section>
+
+<!-- SETTINGS -->
+
+<section
+    class="section"
+    id="settings"
+>
+
+    <div class="settings-title" id="settingsTitle">
+        Settings
+    </div>
+
+    <div
+        class="settings-subtitle"
+        id="settingsSubtitle"
+    >
+        Customize your Daily.KRD experience.
+    </div>
+
+    <div class="settings-card">
+
+        <div
+            class="settings-card-title"
+            id="accountTitle"
+        >
+            Account
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <div
+                    class="setting-label"
+                    id="settingsUsername"
+                >
+                    Not signed in
+                </div>
+
+                <div
+                    class="setting-description"
+                    id="settingsEmail"
+                >
+                    Not signed in
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="settings-card">
+
+        <div
+            class="settings-card-title"
+            id="appearanceTitle"
+        >
+            Appearance
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <div
+                    class="setting-label"
+                    id="darkModeLabel"
+                >
+                    Dark Mode
+                </div>
+
+                <div
+                    class="setting-description"
+                    id="darkModeDescription"
+                >
+                    Change the appearance of Daily.KRD.
+                </div>
+
+            </div>
+
+            <button
+                class="setting-button"
+                id="settingsThemeButton"
+                type="button"
+            >
+                Off
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="settings-card">
+
+        <div
+            class="settings-card-title"
+            id="languageTitle"
+        >
+            Language
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <div
+                    class="setting-label"
+                    id="languageLabel"
+                >
+                    Language
+                </div>
+
+                <div
+                    class="setting-description"
+                    id="languageDescription"
+                >
+                    Choose the language used throughout Daily.KRD.
+                </div>
+
+            </div>
+
+            <select
+                class="language-select"
+                id="settingsLanguage"
+            >
+
+                <option value="en">
+                    English
+                </option>
+
+                <option value="ku">
+                    کوردی
+                </option>
+
+                <option value="ar">
+                    العربية
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <div class="settings-card">
+
+        <div
+            class="settings-card-title"
+            id="prayerSettingsTitle"
+        >
+            Prayer Settings
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <div
+                    class="setting-label"
+                    id="locationLabel"
+                >
+                    Location
+                </div>
+
+                <div
+                    class="setting-description"
+                    id="locationDescription"
+                >
+                    Your prayer-time location.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="location-row">
+
+            <input
+                id="locationInput"
+                type="text"
+                placeholder="Erbil"
+            >
+
+            <button
+                class="setting-button"
+                id="updateLocationButton"
+                type="button"
+            >
+                Update
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="settings-card">
+
+        <div
+            class="settings-card-title"
+            id="notificationsTitle"
+        >
+            Notifications
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <div
+                    class="setting-label"
+                    id="notificationsLabel"
+                >
+                    Prayer Notifications
+                </div>
+
+                <div
+                    class="setting-description"
+                    id="notificationsDescription"
+                >
+                    Receive notifications for prayer times.
+                </div>
+
+            </div>
+
+        </div>
+
+        <button
+            class="notification-button"
+            id="notificationButton"
+            type="button"
+        >
+            🔔 Enable Prayer Notifications
+        </button>
+
+        <div
+            class="status"
+            id="notificationStatus"
+        >
+        </div>
+
+    </div>
+
+    <div class="settings-card">
+
+        <div
+            class="settings-card-title"
+            id="accountActionsTitle"
+        >
+            Account Actions
+        </div>
+
+        <button
+            class="danger-button"
+            id="logoutButton"
+            type="button"
+        >
+            Sign Out
+        </button>
+
+    </div>
+
+</section>
+<script type="module">
+
+/* =========================
+   TASK COLLECTION
+========================= */
 
 function getTasksCollection() {
-
     return collection(
         db,
         "users",
         currentUser.uid,
         "tasks"
     );
-
 }
 
 function stopTaskListener() {
-
     if (unsubscribeTasks) {
-
         unsubscribeTasks();
-
         unsubscribeTasks = null;
-
     }
-
 }
 
 function startTaskListener() {
-
     stopTaskListener();
 
     if (!currentUser) return;
 
-    const taskQuery =
-        query(
-            getTasksCollection(),
-            orderBy("createdAt", "asc")
-        );
+    const taskQuery = query(
+        getTasksCollection(),
+        orderBy("createdAt", "asc")
+    );
 
-    unsubscribeTasks =
-        onSnapshot(
-            taskQuery,
-            snapshot => {
+    unsubscribeTasks = onSnapshot(
+        taskQuery,
+        snapshot => {
+            const tasks = [];
 
-                const tasks = [];
-
-                snapshot.forEach(item => {
-
-                    tasks.push({
-                        id: item.id,
-                        ...item.data()
-                    });
-
+            snapshot.forEach(item => {
+                tasks.push({
+                    id: item.id,
+                    ...item.data()
                 });
+            });
 
-                renderTasks(tasks);
-                renderCalendar();
-
-            }
-        );
-
+            renderTasks(tasks);
+            renderCalendar();
+        }
+    );
 }
 
-/* TASK DATE MATCHING */
+/* =========================
+   TASK DATE MATCHING
+========================= */
 
 function taskOccursOnDate(task, dateKey) {
 
-    const start =
-        task.date ||
-        getTodayKey();
+    const start = task.date || getTodayKey();
 
-    const target =
-        parseDateKey(dateKey);
-
-    const startDate =
-        parseDateKey(start);
+    const target = parseDateKey(dateKey);
+    const startDate = parseDateKey(start);
 
     if (target < startDate) {
         return false;
     }
 
     if (!task.repeat || task.repeat === "once") {
-
         return dateKey === start;
-
     }
 
     if (task.repeat === "daily") {
@@ -3280,85 +3453,54 @@ function taskOccursOnDate(task, dateKey) {
     }
 
     if (task.repeat === "weekly") {
-
-        return (
-            target.getDay() ===
-            startDate.getDay()
-        );
-
+        return target.getDay() === startDate.getDay();
     }
 
     if (
         task.repeat === "custom" &&
         Array.isArray(task.days)
     ) {
-
-        return task.days.includes(
-            target.getDay()
-        );
-
+        return task.days.includes(target.getDay());
     }
 
     return false;
-
 }
-
-/* TASKS */
 
 function getTasksForDate(tasks, dateKey) {
-
-    return tasks.filter(
-        task =>
-            taskOccursOnDate(
-                task,
-                dateKey
-            )
+    return tasks.filter(task =>
+        taskOccursOnDate(task, dateKey)
     );
-
 }
+
+/* =========================
+   RENDER TASKS
+========================= */
 
 function renderTasks(tasks) {
 
-    const list =
-        document.getElementById("taskList");
+    const list = document.getElementById("taskList");
 
     list.innerHTML = "";
 
     document.getElementById("selectedDayText")
-        .textContent =
-        formatDateKey(selectedDate);
+        .textContent = formatDateKey(selectedDate);
 
     if (!currentUser) {
 
-        const localTasks =
-            guestTasks.filter(
-                task =>
-                    taskOccursOnDate(
-                        task,
-                        selectedDate
-                    )
-            );
-
-        renderTaskArray(
-            localTasks,
-            list
+        const localTasks = guestTasks.filter(task =>
+            taskOccursOnDate(task, selectedDate)
         );
 
+        renderTaskArray(localTasks, list);
         return;
-
     }
 
-    const todayTasks =
-        getTasksForDate(
-            tasks,
-            selectedDate
-        );
-
-    renderTaskArray(
-        todayTasks,
-        list
+    const todayTasks = getTasksForDate(
+        tasks,
+        selectedDate
     );
 
+    renderTaskArray(todayTasks, list);
 }
 
 function renderTaskArray(tasks, list) {
@@ -3369,67 +3511,49 @@ function renderTaskArray(tasks, list) {
             `<div class="empty">${t("noTasks")}</div>`;
 
         return;
-
     }
 
     tasks.forEach(task => {
 
-        const row =
-            document.createElement("div");
+        const row = document.createElement("div");
+        row.className = "task";
 
-        row.className =
-            "task";
-
-        if (task.completedDates?.includes(selectedDate)) {
-
-            row.classList.add(
-                "completed"
-            );
-
+        if (
+            task.completedDates?.includes(selectedDate)
+        ) {
+            row.classList.add("completed");
         }
 
-        const checkbox =
-            document.createElement("input");
+        const checkbox = document.createElement("input");
 
-        checkbox.type =
-            "checkbox";
-
-        checkbox.className =
-            "task-check";
+        checkbox.type = "checkbox";
+        checkbox.className = "task-check";
 
         checkbox.checked =
             task.repeat &&
             task.repeat !== "once"
-            ? (
-                task.completedDates?.includes(
-                    selectedDate
-                ) || false
-            )
-            : !!task.completed;
+                ? (
+                    task.completedDates?.includes(
+                        selectedDate
+                    ) || false
+                )
+                : !!task.completed;
 
         checkbox.addEventListener(
             "change",
             async () => {
-
                 await toggleTaskCompletion(
                     task,
                     checkbox.checked
                 );
-
             }
         );
 
-        const content =
-            document.createElement("div");
+        const content = document.createElement("div");
+        content.className = "task-text";
 
-        content.className =
-            "task-text";
-
-        const title =
-            document.createElement("div");
-
-        title.textContent =
-            task.text;
+        const title = document.createElement("div");
+        title.textContent = task.text;
 
         content.appendChild(title);
 
@@ -3438,77 +3562,51 @@ function renderTaskArray(tasks, list) {
             task.repeat !== "once"
         ) {
 
-            const meta =
-                document.createElement("div");
-
-            meta.className =
-                "task-meta";
+            const meta = document.createElement("div");
+            meta.className = "task-meta";
 
             meta.textContent =
                 task.repeat === "daily"
-                ? t("daily")
-                : task.repeat === "weekly"
-                ? t("weekly")
-                : t("custom");
+                    ? t("daily")
+                    : task.repeat === "weekly"
+                        ? t("weekly")
+                        : t("custom");
 
-            content.appendChild(
-                meta
-            );
-
+            content.appendChild(meta);
         }
 
         const deleteButton =
             document.createElement("button");
 
-        deleteButton.className =
-            "delete-task";
-
-        deleteButton.textContent =
-            "×";
+        deleteButton.className = "delete-task";
+        deleteButton.textContent = "×";
 
         deleteButton.addEventListener(
             "click",
             async () => {
-
-                await deleteTask(
-                    task
-                );
-
+                await deleteTask(task);
             }
         );
 
-        row.appendChild(
-            checkbox
-        );
+        row.appendChild(checkbox);
+        row.appendChild(content);
+        row.appendChild(deleteButton);
 
-        row.appendChild(
-            content
-        );
-
-        row.appendChild(
-            deleteButton
-        );
-
-        list.appendChild(
-            row
-        );
-
+        list.appendChild(row);
     });
-
 }
 
-async function toggleTaskCompletion(
-    task,
-    checked
-) {
+/* =========================
+   COMPLETE TASK
+========================= */
+
+async function toggleTaskCompletion(task, checked) {
 
     if (!currentUser) {
 
-        const found =
-            guestTasks.find(
-                item =>
-                    item.id === task.id
-            );
+        const found = guestTasks.find(
+            item => item.id === task.id
+        );
 
         if (!found) return;
 
@@ -3518,24 +3616,21 @@ async function toggleTaskCompletion(
         if (checked) {
 
             if (
-                !found.completedDates
-                    .includes(selectedDate)
+                !found.completedDates.includes(
+                    selectedDate
+                )
             ) {
-
                 found.completedDates.push(
                     selectedDate
                 );
-
             }
 
         } else {
 
             found.completedDates =
                 found.completedDates.filter(
-                    d =>
-                        d !== selectedDate
+                    d => d !== selectedDate
                 );
-
         }
 
         localStorage.setItem(
@@ -3546,7 +3641,6 @@ async function toggleTaskCompletion(
         renderTasks([]);
 
         return;
-
     }
 
     if (
@@ -3554,8 +3648,7 @@ async function toggleTaskCompletion(
         task.repeat !== "once"
     ) {
 
-        let dates =
-            task.completedDates || [];
+        let dates = task.completedDates || [];
 
         if (checked) {
 
@@ -3565,12 +3658,9 @@ async function toggleTaskCompletion(
 
         } else {
 
-            dates =
-                dates.filter(
-                    d =>
-                        d !== selectedDate
-                );
-
+            dates = dates.filter(
+                d => d !== selectedDate
+            );
         }
 
         await updateDoc(
@@ -3582,8 +3672,7 @@ async function toggleTaskCompletion(
                 task.id
             ),
             {
-                completedDates:
-                    dates
+                completedDates: dates
             }
         );
 
@@ -3598,24 +3687,23 @@ async function toggleTaskCompletion(
                 task.id
             ),
             {
-                completed:
-                    checked
+                completed: checked
             }
         );
-
     }
-
 }
+
+/* =========================
+   DELETE TASK
+========================= */
 
 async function deleteTask(task) {
 
     if (!currentUser) {
 
-        guestTasks =
-            guestTasks.filter(
-                item =>
-                    item.id !== task.id
-            );
+        guestTasks = guestTasks.filter(
+            item => item.id !== task.id
+        );
 
         localStorage.setItem(
             "dailykrd_guest_tasks",
@@ -3625,7 +3713,6 @@ async function deleteTask(task) {
         renderTasks([]);
 
         return;
-
     }
 
     await deleteDoc(
@@ -3637,68 +3724,58 @@ async function deleteTask(task) {
             task.id
         )
     );
-
 }
 
-/* ADD TASK */
+/* =========================
+   ADD TASK
+========================= */
 
 async function addTask() {
 
     const input =
-        document.getElementById(
-            "taskInput"
-        );
+        document.getElementById("taskInput");
 
-    const text =
-        input.value.trim();
+    const text = input.value.trim();
 
     if (!text) return;
 
     const repeat =
-        document.getElementById(
-            "repeatSelect"
-        ).value;
+        document.getElementById("repeatSelect").value;
 
-    const days =
-        [...document.querySelectorAll(
+    const days = [
+        ...document.querySelectorAll(
             ".repeat-day.active"
-        )]
-        .map(
-            button =>
-                Number(button.dataset.day)
-        );
+        )
+    ].map(
+        button => Number(button.dataset.day)
+    );
 
     const task = {
 
         id:
             crypto.randomUUID
-            ? crypto.randomUUID()
-            : String(Date.now()),
+                ? crypto.randomUUID()
+                : String(Date.now()),
 
         text,
 
         date:
             document.getElementById(
                 "taskDateInput"
-            ).value ||
-            selectedDate,
+            ).value || selectedDate,
 
         repeat,
 
         days:
             repeat === "custom"
-            ? days
-            : [],
+                ? days
+                : [],
 
-        completed:
-            false,
+        completed: false,
 
-        completedDates:
-            [],
+        completedDates: [],
 
-        createdAt:
-            Date.now()
-
+        createdAt: Date.now()
     };
 
     if (
@@ -3708,21 +3785,18 @@ async function addTask() {
 
         alert(
             currentLanguage === "ku"
-            ? "لانیکەم یەک ڕۆژ هەڵبژێرە."
-            : currentLanguage === "ar"
-            ? "اختر يوماً واحداً على الأقل."
-            : "Choose at least one day."
+                ? "لانیکەم یەک ڕۆژ هەڵبژێرە."
+                : currentLanguage === "ar"
+                    ? "اختر يوماً واحداً على الأقل."
+                    : "Choose at least one day."
         );
 
         return;
-
     }
 
     if (!currentUser) {
 
-        guestTasks.push(
-            task
-        );
+        guestTasks.push(task);
 
         localStorage.setItem(
             "dailykrd_guest_tasks",
@@ -3737,34 +3811,26 @@ async function addTask() {
             getTasksCollection(),
             task
         );
-
     }
 
     input.value = "";
 
     document.getElementById(
         "repeatSelect"
-    ).value =
-        "once";
+    ).value = "once";
 
     document.getElementById(
         "repeatDays"
-    ).style.display =
-        "none";
+    ).style.display = "none";
 
     document
         .querySelectorAll(".repeat-day")
-        .forEach(
-            button =>
-                button.classList.remove(
-                    "active"
-                )
-        );
+        .forEach(button => {
+            button.classList.remove("active");
+        });
 
     renderTasks([]);
-
     renderCalendar();
-
 }
 
 document
@@ -3780,20 +3846,18 @@ document
         "keydown",
         event => {
 
-            if (
-                event.key === "Enter"
-            ) {
+            if (event.key === "Enter") {
 
                 event.preventDefault();
 
                 addTask();
-
             }
-
         }
     );
 
-/* REPEAT */
+/* =========================
+   REPEAT OPTIONS
+========================= */
 
 document
     .getElementById("repeatSelect")
@@ -3805,9 +3869,8 @@ document
                 "repeatDays"
             ).style.display =
                 event.target.value === "custom"
-                ? "grid"
-                : "none";
-
+                    ? "grid"
+                    : "none";
         }
     );
 
@@ -3819,23 +3882,19 @@ document
             "click",
             () => {
 
-                button.classList.toggle(
-                    "active"
-                );
-
+                button.classList.toggle("active");
             }
         );
-
     });
 
-/* CALENDAR */
+/* =========================
+   CALENDAR
+========================= */
 
 function renderCalendar() {
 
     const grid =
-        document.getElementById(
-            "calendarGrid"
-        );
+        document.getElementById("calendarGrid");
 
     const weekdays =
         document.getElementById(
@@ -3845,34 +3904,23 @@ function renderCalendar() {
     grid.innerHTML = "";
     weekdays.innerHTML = "";
 
-    t("weekdays").forEach(
-        day => {
+    t("weekdays").forEach(day => {
 
-            const element =
-                document.createElement(
-                    "div"
-                );
+        const element =
+            document.createElement("div");
 
-            element.textContent =
-                day;
+        element.textContent = day;
 
-            weekdays.appendChild(
-                element
-            );
-
-        }
-    );
+        weekdays.appendChild(element);
+    });
 
     document.getElementById(
         "calendarMonth"
     ).textContent =
         getCalendarMonthName(calendarDate);
 
-    const year =
-        calendarDate.getFullYear();
-
-    const month =
-        calendarDate.getMonth();
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
 
     const firstDay =
         new Date(
@@ -3895,14 +3943,9 @@ function renderCalendar() {
     ) {
 
         const empty =
-            document.createElement(
-                "div"
-            );
+            document.createElement("div");
 
-        grid.appendChild(
-            empty
-        );
-
+        grid.appendChild(empty);
     }
 
     for (
@@ -3919,99 +3962,61 @@ function renderCalendar() {
             );
 
         const key =
-            getDateKeyFromDate(
-                date
-            );
+            getDateKeyFromDate(date);
 
         const button =
-            document.createElement(
-                "button"
-            );
+            document.createElement("button");
 
-        button.className =
-            "calendar-day";
+        button.className = "calendar-day";
+        button.textContent = day;
 
-        button.textContent =
-            day;
-
-        if (
-            key ===
-            getTodayKey()
-        ) {
-
-            button.classList.add(
-                "today"
-            );
-
+        if (key === getTodayKey()) {
+            button.classList.add("today");
         }
 
-        if (
-            key ===
-            selectedDate
-        ) {
-
-            button.classList.add(
-                "selected"
-            );
-
+        if (key === selectedDate) {
+            button.classList.add("selected");
         }
 
-        let hasTask =
-            false;
+        let hasTask = false;
 
         if (!currentUser) {
 
-            hasTask =
-                guestTasks.some(
-                    task =>
-                        taskOccursOnDate(
-                            task,
-                            key
-                        )
-                );
-
+            hasTask = guestTasks.some(
+                task =>
+                    taskOccursOnDate(
+                        task,
+                        key
+                    )
+            );
         }
 
         if (hasTask) {
-
-            button.classList.add(
-                "has-task"
-            );
-
+            button.classList.add("has-task");
         }
 
         button.addEventListener(
             "click",
             () => {
 
-                selectedDate =
-                    key;
+                selectedDate = key;
 
                 document.getElementById(
                     "taskDateInput"
-                ).value =
-                    selectedDate;
+                ).value = selectedDate;
 
                 document.getElementById(
                     "calendarSelectedDay"
                 ).textContent =
-                    formatDateKey(
-                        selectedDate
-                    );
+                    formatDateKey(selectedDate);
 
                 renderCalendar();
-
                 renderTasks([]);
-
             }
         );
 
-        grid.appendChild(
-            button
-        );
-
+        grid.appendChild(button);
     }
-
 }
 
 document
@@ -4025,7 +4030,6 @@ document
             );
 
             renderCalendar();
-
         }
     );
 
@@ -4040,7 +4044,6 @@ document
             );
 
             renderCalendar();
-
         }
     );
 
@@ -4050,8 +4053,7 @@ document
         "click",
         () => {
 
-            const today =
-                new Date();
+            const today = new Date();
 
             calendarDate =
                 new Date(
@@ -4060,17 +4062,14 @@ document
                     1
                 );
 
-            selectedDate =
-                getTodayKey();
+            selectedDate = getTodayKey();
 
             document.getElementById(
                 "taskDateInput"
-            ).value =
-                selectedDate;
+            ).value = selectedDate;
 
             renderCalendar();
             renderTasks([]);
-
         }
     );
 
@@ -4080,13 +4079,10 @@ document
         "change",
         event => {
 
-            selectedDate =
-                event.target.value;
+            selectedDate = event.target.value;
 
             const date =
-                parseDateKey(
-                    selectedDate
-                );
+                parseDateKey(selectedDate);
 
             calendarDate =
                 new Date(
@@ -4097,11 +4093,11 @@ document
 
             renderCalendar();
             renderTasks([]);
-
         }
     );
-
-/* DARK / LIGHT MODE */
+    /* =========================
+   DARK / LIGHT MODE
+========================= */
 
 function applyTheme() {
 
@@ -4136,7 +4132,6 @@ function applyTheme() {
                 ? "Light Mode"
                 : "Dark Mode"
         );
-
     }
 
     if (settingsThemeButton) {
@@ -4145,9 +4140,7 @@ function applyTheme() {
             dark
                 ? "On"
                 : "Off";
-
     }
-
 }
 
 function toggleTheme() {
@@ -4163,7 +4156,6 @@ function toggleTheme() {
     );
 
     applyTheme();
-
 }
 
 document
@@ -4180,14 +4172,21 @@ document
         toggleTheme
     );
 
-/* PRAYER TIMES */
+
+/* =========================
+   PRAYER TIMES
+========================= */
 
 const prayerTimes = {
 
     Fajr: "03:46",
+
     Dhuhr: "12:20",
+
     Asr: "16:01",
+
     Maghrib: "19:04",
+
     Isha: "20:19"
 
 };
@@ -4204,7 +4203,7 @@ function loadPrayerTimes() {
     Object.entries(
         prayerTimes
     ).forEach(
-        ([name,time]) => {
+        ([name, time]) => {
 
             const row =
                 document.createElement(
@@ -4221,8 +4220,7 @@ function loadPrayerTimes() {
 
             nameElement.textContent =
                 t(
-                    "prayer." +
-                    name
+                    "prayer." + name
                 );
 
             const timeElement =
@@ -4244,12 +4242,10 @@ function loadPrayerTimes() {
             list.appendChild(
                 row
             );
-
         }
     );
 
     updateNextPrayer();
-
 }
 
 function updateNextPrayer() {
@@ -4264,13 +4260,13 @@ function updateNextPrayer() {
     let next = null;
 
     for (
-        const [name,time]
+        const [name, time]
         of Object.entries(
             prayerTimes
         )
     ) {
 
-        const [hours,minutes] =
+        const [hours, minutes] =
             time
                 .split(":")
                 .map(Number);
@@ -4284,38 +4280,34 @@ function updateNextPrayer() {
             currentMinutes
         ) {
 
-            next =
-                [name,time];
+            next = [
+                name,
+                time
+            ];
 
             break;
-
         }
-
     }
 
     if (!next) {
 
-        next =
-            [
-                "Fajr",
-                prayerTimes.Fajr
-            ];
-
+        next = [
+            "Fajr",
+            prayerTimes.Fajr
+        ];
     }
 
     document.getElementById(
         "nextName"
     ).textContent =
         t(
-            "prayer." +
-            next[0]
+            "prayer." + next[0]
         );
 
     document.getElementById(
         "nextTime"
     ).textContent =
         next[1];
-
 }
 
 setInterval(
@@ -4323,10 +4315,15 @@ setInterval(
     30000
 );
 
-/* LOCATION */
+
+/* =========================
+   LOCATION
+========================= */
 
 document
-    .getElementById("updateLocationButton")
+    .getElementById(
+        "updateLocationButton"
+    )
     .addEventListener(
         "click",
         () => {
@@ -4350,7 +4347,6 @@ document
                 "dailykrd_location",
                 location
             );
-
         }
     );
 
@@ -4370,13 +4366,17 @@ if (savedLocation) {
         "locationText"
     ).textContent =
         savedLocation;
-
 }
 
-/* NOTIFICATIONS */
+
+/* =========================
+   NOTIFICATIONS
+========================= */
 
 document
-    .getElementById("notificationButton")
+    .getElementById(
+        "notificationButton"
+    )
     .addEventListener(
         "click",
         async () => {
@@ -4396,12 +4396,10 @@ document
                     );
 
                 return;
-
             }
 
             const permission =
-                await Notification
-                    .requestPermission();
+                await Notification.requestPermission();
 
             if (
                 permission ===
@@ -4419,32 +4417,30 @@ document
                     t(
                         "notificationsDisabled"
                     );
-
             }
-
         }
     );
 
-/* START */
+
+/* =========================
+   START
+========================= */
 
 /*
-    Apply theme BEFORE displaying the rest
-    of the interface so the saved theme is
-    restored correctly.
+    Apply theme before displaying
+    the rest of the interface.
 */
 
 applyTheme();
 
 if (!currentLanguage) {
 
-    currentLanguage =
-        "en";
+    currentLanguage = "en";
 
     document.getElementById(
         "languageOverlay"
     ).style.display =
         "flex";
-
 }
 
 applyLanguage();
@@ -4464,13 +4460,16 @@ if (
         "welcomeScreen"
     ).style.display =
         "flex";
-
 }
 
 renderCalendar();
+
 loadPrayerTimes();
 
-/* SERVICE WORKER */
+
+/* =========================
+   SERVICE WORKER
+========================= */
 
 if ("serviceWorker" in navigator) {
 
@@ -4483,13 +4482,8 @@ if ("serviceWorker" in navigator) {
                 .catch(
                     () => {}
                 );
-
         }
     );
-
 }
 
 </script>
-
-</body>
-</html>
