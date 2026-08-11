@@ -14,18 +14,14 @@
     <title>Daily.KRD</title>
 
     <style>
-html,
-body {
-    background: #f5f5f7;
-}
-
-html.dark,
-body.dark {
-    background: #101010;
-}
-
 .motion-bg {
     z-index: 0;
+    background: #f5f5f7;
+    transition: background .3s ease;
+}
+
+.dark .motion-bg {
+    background: #101010;
 }
 
 .header,
@@ -55,16 +51,7 @@ body.dark {
                 Arial,
                 sans-serif;
         }
-   html {
-    background: #f5f5f7;
-    transition: background .3s ease;
-}
-
-html.dark {
-    background: #101010;
-}     
         body {
-            background: #f5f5f7;
             color: #111;
             padding:
                 env(safe-area-inset-top)
@@ -78,7 +65,6 @@ html.dark {
         }
 
         body.dark {
-            background: #101010;
             color: white;
         }
 
