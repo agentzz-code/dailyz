@@ -17,11 +17,42 @@
 .motion-bg {
     z-index: 0;
     background: #f5f5f7;
-    transition: background .3s ease;
+    transition: background 1.2s ease;
 }
 
 .dark .motion-bg {
     background: #101010;
+}
+
+/* TIME OF DAY VARIANTS */
+
+.time-morning .motion-bg {
+    background: linear-gradient(160deg, #fff3e0 0%, #f5f5f7 55%);
+}
+
+.time-morning .motion-orb.one { background: #ffb37a; }
+.time-morning .motion-orb.two { background: #ffd28a; }
+.time-morning .motion-orb.three { background: #ff9d6c; }
+
+.time-day .motion-bg {
+    background: linear-gradient(160deg, #eaf4ff 0%, #f5f5f7 55%);
+}
+
+.time-day .motion-orb.one { background: #7ec8ff; }
+.time-day .motion-orb.two { background: #a9d9ff; }
+.time-day .motion-orb.three { background: #5fb3f0; }
+
+.time-night .motion-bg {
+    background: linear-gradient(160deg, #14151f 0%, #101010 55%);
+}
+
+.time-night .motion-orb.one { background: #5b5b9c; }
+.time-night .motion-orb.two { background: #3f3f72; }
+.time-night .motion-orb.three { background: #6d6dae; }
+
+.time-night.dark .motion-bg,
+.dark.time-night .motion-bg {
+    background: linear-gradient(160deg, #14151f 0%, #0b0b12 55%);
 }
 
 .header,
@@ -379,6 +410,116 @@
             justify-content: center;
             font-size: 11px;
             font-weight: 800;
+        }
+
+        .score-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,.92);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 15px;
+        }
+
+        .dark .score-card {
+            background: #222;
+        }
+
+        .score-label {
+            font-weight: 650;
+        }
+
+        .score-value {
+            font-size: 17px;
+            font-weight: 850;
+        }
+
+        .quote-card {
+            background: rgba(255,255,255,.92);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 15px;
+            font-style: italic;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .dark .quote-card {
+            background: #222;
+            color: #ccc;
+        }
+
+        /* TASK COMPLETE ANIMATION */
+
+        .task {
+            transition: opacity .35s ease, transform .35s ease, background .35s ease;
+        }
+
+        .task-check {
+            transition: transform .25s ease;
+        }
+
+        .task.just-completed .task-check {
+            animation: checkPop .4s ease;
+        }
+
+        .task.just-completed .task-text {
+            animation: taskFade .4s ease;
+        }
+
+        @keyframes checkPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes taskFade {
+            0% { opacity: 1; }
+            35% { opacity: .35; }
+            100% { opacity: .45; }
+        }
+
+        /* PRIORITY */
+
+        .priority-select {
+            border: 1px solid #ddd;
+            background: rgba(255,255,255,.92);
+            color: #111;
+            padding: 14px;
+            border-radius: 13px;
+            outline: none;
+            width: 100%;
+        }
+
+        .dark .priority-select {
+            background: #222;
+            color: white;
+            border-color: #3a3a3a;
+        }
+
+        .priority-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .priority-dot.low {
+            background: #8bc98b;
+        }
+
+        .priority-dot.medium {
+            background: #f0b64c;
+        }
+
+        .priority-dot.high {
+            background: #e05c5c;
+        }
+
+        .task.priority-high {
+            box-shadow: inset 3px 0 0 #e05c5c;
         }
 
         /* TASKS */
@@ -1160,6 +1301,13 @@
 
             </div>
 
+            <div class="score-card">
+                <div class="score-label" id="scoreLabel">Today's Score</div>
+                <div class="score-value" id="scoreValue">🟢 0%</div>
+            </div>
+
+            <div class="quote-card" id="quoteCard"></div>
+
             <div class="task-input">
 
                 <input
@@ -1240,6 +1388,25 @@
 
                 </div>
 
+
+                <div class="option-row">
+
+                    <label id="priorityLabel">
+                        Priority
+                    </label>
+
+                    <select
+                        class="priority-select"
+                        id="prioritySelect"
+                    >
+
+                        <option value="low" id="priorityLow">Low</option>
+                        <option value="medium" id="priorityMedium" selected>Medium</option>
+                        <option value="high" id="priorityHigh">High</option>
+
+                    </select>
+
+                </div>
 
                 <div
                     class="repeat-days"
@@ -2196,6 +2363,21 @@
                 streakLabel:
                     "day streak",
 
+                todaysScore:
+                    "Today's Score",
+
+                priority:
+                    "Priority",
+
+                low:
+                    "Low",
+
+                medium:
+                    "Medium",
+
+                high:
+                    "High",
+
                 prayer: {
 
                     Fajr: "Fajr",
@@ -2408,6 +2590,21 @@
 
                 streakLabel:
                     "ڕۆژی بەردەوام",
+
+                todaysScore:
+                    "خاڵی ئەمڕۆ",
+
+                priority:
+                    "گرنگی",
+
+                low:
+                    "کەم",
+
+                medium:
+                    "مامناوەند",
+
+                high:
+                    "زۆر",
 
                 prayer: {
 
@@ -2622,6 +2819,21 @@
                 streakLabel:
                     "يوم متتالي",
 
+                todaysScore:
+                    "نتيجة اليوم",
+
+                priority:
+                    "الأولوية",
+
+                low:
+                    "منخفضة",
+
+                medium:
+                    "متوسطة",
+
+                high:
+                    "عالية",
+
                 prayer: {
 
                     Fajr: "الفجر",
@@ -2651,6 +2863,135 @@
             localStorage.getItem(
                 "dailykrd_language"
             );
+
+
+        /* DAILY QUOTES */
+
+        const dailyQuotes = {
+
+            en: [
+                "Small steps every day lead to big changes.",
+                "Discipline is choosing what you want most over what you want now.",
+                "You don't have to be great to start, but you have to start to be great.",
+                "Progress, not perfection.",
+                "Focus on today — tomorrow will thank you.",
+                "The secret of getting ahead is getting started.",
+                "Consistency turns small efforts into big results.",
+                "Do something today that your future self will thank you for.",
+                "One task at a time builds a whole life.",
+                "A little progress each day adds up to big results."
+            ],
+
+            ku: [
+                "هەنگاوی بچووک ڕۆژانە دەبنە گۆڕانکاری گەورە.",
+                "بەردەوامی ئەوەیە کە ئەوە هەڵدەبژێریت کە زۆرترین پێویستت پێیەتی.",
+                "پێویست ناکات مەزن بیت بۆ دەستپێکردن، بەڵام پێویستە دەستپێبکەیت بۆ ئەوەی مەزن بیت.",
+                "پێشکەوتن، نەک تەواوی.",
+                "سەرنج بدە بە ئەمڕۆ — سبەی سوپاست دەکات.",
+                "نهێنی پێشکەوتن دەستپێکردنە.",
+                "بەردەوامی هەوڵی بچووک دەکاتە ئەنجامی گەورە.",
+                "شتێک بکە ئەمڕۆ کە خۆی داهاتووت سوپاست بکات.",
+                "یەک ئەرک لە یەک کاتدا ژیانێکی تەواو دروست دەکات.",
+                "پێشکەوتنێکی بچووک هەموو ڕۆژێک کۆدەبێتەوە بۆ ئەنجامی گەورە."
+            ],
+
+            ar: [
+                "خطوات صغيرة كل يوم تؤدي إلى تغييرات كبيرة.",
+                "الانضباط هو اختيار ما تريده أكثر بدلاً مما تريده الآن.",
+                "لست بحاجة لأن تكون عظيماً لتبدأ، لكن عليك أن تبدأ لتكون عظيماً.",
+                "التقدم لا الكمال.",
+                "ركّز على اليوم — الغد سيشكرك.",
+                "سر التقدم هو البدء.",
+                "الاستمرارية تحوّل الجهود الصغيرة إلى نتائج كبيرة.",
+                "افعل اليوم شيئاً سيشكرك عليه مستقبلك.",
+                "مهمة واحدة في كل مرة تبني حياة كاملة.",
+                "تقدم بسيط كل يوم يتراكم ليصبح نتائج كبيرة."
+            ]
+
+        };
+
+
+        function getDayOfYear(date) {
+
+            const start =
+                new Date(
+                    date.getFullYear(),
+                    0,
+                    0
+                );
+
+            const diff =
+                date - start;
+
+            return Math.floor(
+                diff / 86400000
+            );
+        }
+
+
+        function renderDailyQuote() {
+
+            const quotes =
+                dailyQuotes[
+                    currentLanguage
+                ] || dailyQuotes.en;
+
+
+            const index =
+                getDayOfYear(
+                    new Date()
+                ) % quotes.length;
+
+
+            const card =
+                document.getElementById(
+                    "quoteCard"
+                );
+
+
+            if (card) {
+
+                card.textContent =
+                    "“" +
+                    quotes[index] +
+                    "”";
+            }
+        }
+
+
+        /* TIME OF DAY BACKGROUND */
+
+        function applyTimeOfDay() {
+
+            const hour =
+                new Date().getHours();
+
+
+            let phase =
+                "day";
+
+
+            if (hour < 6 || hour >= 20) {
+
+                phase = "night";
+
+            } else if (hour < 11) {
+
+                phase = "morning";
+            }
+
+
+            document.documentElement.classList.remove(
+                "time-morning",
+                "time-day",
+                "time-night"
+            );
+
+
+            document.documentElement.classList.add(
+                "time-" + phase
+            );
+        }
 
 
         /* TRANSLATION HELPER */
@@ -3171,6 +3512,39 @@
                 "streakLabel"
             ).textContent =
                 t("streakLabel");
+
+
+            document.getElementById(
+                "scoreLabel"
+            ).textContent =
+                t("todaysScore");
+
+
+            document.getElementById(
+                "priorityLabel"
+            ).textContent =
+                t("priority");
+
+
+            document.getElementById(
+                "priorityLow"
+            ).textContent =
+                t("low");
+
+
+            document.getElementById(
+                "priorityMedium"
+            ).textContent =
+                t("medium");
+
+
+            document.getElementById(
+                "priorityHigh"
+            ).textContent =
+                t("high");
+
+
+            renderDailyQuote();
 
 
             updateDate();
@@ -4032,18 +4406,32 @@
         }
 
 
+        const priorityOrder = {
+            high: 0,
+            medium: 1,
+            low: 2
+        };
+
+
         function getTasksForDate(
             tasks,
             dateKey
         ) {
 
-            return tasks.filter(
-                task =>
-                    taskOccursOnDate(
-                        task,
-                        dateKey
-                    )
-            );
+            return tasks
+                .filter(
+                    task =>
+                        taskOccursOnDate(
+                            task,
+                            dateKey
+                        )
+                )
+                .slice()
+                .sort(
+                    (a, b) =>
+                        (priorityOrder[a.priority] ?? 1) -
+                        (priorityOrder[b.priority] ?? 1)
+                );
         }
 
 
@@ -4240,11 +4628,66 @@
         }
 
 
+        function updateTodayScore() {
+
+            const tasks =
+                getTasksForDate(
+                    getActiveTasksSource(),
+                    getTodayKey()
+                );
+
+
+            const total =
+                tasks.length;
+
+
+            const done =
+                tasks.filter(
+                    task =>
+                        isTaskCompletedOnDate(
+                            task,
+                            getTodayKey()
+                        )
+                ).length;
+
+
+            const percent =
+                total > 0
+                    ? Math.round(
+                        (done / total) * 100
+                    )
+                    : 0;
+
+
+            const emoji =
+                percent >= 70
+                    ? "🟢"
+                    : percent >= 40
+                        ? "🟡"
+                        : "🔴";
+
+
+            const valueElement =
+                document.getElementById(
+                    "scoreValue"
+                );
+
+
+            if (valueElement) {
+
+                valueElement.textContent =
+                    `${emoji} ${percent}%`;
+            }
+        }
+
+
         function updateStats() {
 
             updateStreak();
 
             updateProgressRing();
+
+            updateTodayScore();
         }
 
 
@@ -4345,6 +4788,16 @@
 
 
                 if (
+                    task.priority === "high"
+                ) {
+
+                    row.classList.add(
+                        "priority-high"
+                    );
+                }
+
+
+                if (
                     task.completedDates?.includes(
                         selectedDate
                     )
@@ -4385,6 +4838,26 @@
                     "change",
                     async () => {
 
+                        if (checkbox.checked) {
+
+                            row.classList.add(
+                                "just-completed"
+                            );
+
+
+                            setTimeout(
+                                () => {
+
+                                    row.classList.remove(
+                                        "just-completed"
+                                    );
+
+                                },
+                                450
+                            );
+                        }
+
+
                         await toggleTaskCompletion(
                             task,
                             checkbox.checked
@@ -4392,6 +4865,17 @@
 
                     }
                 );
+
+
+                const dot =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                dot.className =
+                    "priority-dot " +
+                    (task.priority || "medium");
 
 
                 const content =
@@ -4476,6 +4960,11 @@
 
                 row.appendChild(
                     checkbox
+                );
+
+
+                row.appendChild(
+                    dot
                 );
 
 
@@ -4711,7 +5200,15 @@
                 );
 
 
+            const priority =
+                document.getElementById(
+                    "prioritySelect"
+                ).value;
+
+
             const task = {
+
+                priority,
 
                 id:
                     crypto.randomUUID
@@ -4797,6 +5294,12 @@
                 "repeatSelect"
             ).value =
                 "once";
+
+
+            document.getElementById(
+                "prioritySelect"
+            ).value =
+                "medium";
 
 
             document.getElementById(
@@ -5651,6 +6154,14 @@ document.documentElement.classList.toggle(
             ).style.display =
                 "flex";
         }
+
+
+        applyTimeOfDay();
+
+        setInterval(
+            applyTimeOfDay,
+            10 * 60 * 1000
+        );
 
 
         renderCalendar();
