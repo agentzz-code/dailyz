@@ -49,7 +49,9 @@ body {
         env(safe-area-inset-bottom)
         18px;
     overflow-x: hidden;
-    transition: background .3s, color .3s;
+    transition:
+        background .3s ease,
+        color .3s ease;
 }
 
 body.dark {
@@ -205,7 +207,11 @@ button {
     border: 0;
     border-radius: 14px;
     background: rgba(230,230,235,.9);
+    color: #111;
     font-size: 20px;
+    transition:
+        background .25s ease,
+        color .25s ease;
 }
 
 .dark .icon-button {
@@ -288,6 +294,10 @@ button {
     padding: 14px;
     border-radius: 13px;
     outline: none;
+    transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease;
 }
 
 .dark .task-input input,
@@ -493,6 +503,7 @@ button {
     border-radius: 10px;
     background: transparent;
     position: relative;
+    color: inherit;
 }
 
 .calendar-day:hover {
@@ -643,6 +654,7 @@ button {
 .setting-button {
     border: 0;
     background: #eee;
+    color: #111;
     border-radius: 10px;
     padding: 9px 14px;
     white-space: nowrap;
@@ -656,6 +668,11 @@ button {
 .setting-button.dark {
     background: #111;
     color: white;
+}
+
+.dark .setting-button.dark {
+    background: white;
+    color: black;
 }
 
 .location-row {
@@ -924,7 +941,6 @@ button {
 <div class="emoji e2">📅</div>
 <div class="emoji e3">✓</div>
 
-
 <header class="header">
 
     <div>
@@ -949,9 +965,6 @@ button {
     </div>
 
 </header>
-
-
-<!-- MAIN NAV -->
 
 <div class="tabs">
 
@@ -984,13 +997,7 @@ button {
 
 </div>
 
-
-<!-- TASKS -->
-
-<section
-    class="section active"
-    id="tasks"
->
+<section class="section active" id="tasks">
 
     <div class="selected-day" id="selectedDayText"></div>
 
@@ -1044,10 +1051,7 @@ button {
 
         </div>
 
-        <div
-            class="repeat-days"
-            id="repeatDays"
-        >
+        <div class="repeat-days" id="repeatDays">
 
             <button class="repeat-day" data-day="0">Sun</button>
             <button class="repeat-day" data-day="1">Mon</button>
@@ -1065,13 +1069,7 @@ button {
 
 </section>
 
-
-<!-- CALENDAR -->
-
-<section
-    class="section"
-    id="calendar"
->
+<section class="section" id="calendar">
 
     <div class="calendar-card">
 
@@ -1121,13 +1119,7 @@ button {
 
 </section>
 
-
-<!-- PRAYERS -->
-
-<section
-    class="section"
-    id="prayers"
->
+<section class="section" id="prayers">
 
     <div class="prayer-header">
 
@@ -1173,13 +1165,7 @@ button {
 
 </section>
 
-
-<!-- SETTINGS -->
-
-<section
-    class="section"
-    id="settings"
->
+<section class="section" id="settings">
 
     <div
         class="settings-title"
@@ -1194,7 +1180,6 @@ button {
     >
         Customize your Daily.KRD experience.
     </div>
-
 
     <div class="settings-card">
 
@@ -1259,7 +1244,6 @@ button {
 
     </div>
 
-
     <div class="settings-card">
 
         <div
@@ -1300,7 +1284,6 @@ button {
         </div>
 
     </div>
-
 
     <div class="settings-card">
 
@@ -1345,7 +1328,6 @@ button {
         </select>
 
     </div>
-
 
     <div class="settings-card">
 
@@ -1398,7 +1380,6 @@ button {
 
     </div>
 
-
     <div class="settings-card">
 
         <div
@@ -1447,7 +1428,6 @@ button {
 
     </div>
 
-
     <div
         class="settings-card"
         id="accountActionsCard"
@@ -1471,9 +1451,6 @@ button {
     </div>
 
 </section>
-
-
-<!-- WELCOME -->
 
 <div
     class="welcome-screen"
@@ -1521,9 +1498,6 @@ button {
     </div>
 
 </div>
-
-
-<!-- AUTH -->
 
 <div
     class="auth-overlay"
@@ -1599,9 +1573,6 @@ button {
 
 </div>
 
-
-<!-- LANGUAGE -->
-
 <div
     class="language-overlay"
     id="languageOverlay"
@@ -1644,7 +1615,6 @@ button {
 
 </div>
 
-
 <script type="module">
 
 import {
@@ -1672,7 +1642,6 @@ import {
     query,
     orderBy
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-
 
 /* FIREBASE */
 
@@ -1715,7 +1684,6 @@ let guestTasks =
     JSON.parse(
         localStorage.getItem("dailykrd_guest_tasks") || "[]"
     );
-
 
 /* TRANSLATIONS */
 
@@ -1930,7 +1898,6 @@ const translations = {
 
     },
 
-
     ku: {
 
         direction: "rtl",
@@ -2139,7 +2106,6 @@ const translations = {
         ]
 
     },
-
 
     ar: {
 
@@ -2352,27 +2318,8 @@ const translations = {
 
 };
 
-
 let currentLanguage =
     localStorage.getItem("dailykrd_language");
-
-
-function t(key) {
-
-    const language =
-        translations[currentLanguage] || translations.en;
-
-    const parts = key.split(".");
-
-    let value = language;
-
-    for (const part of parts) {
-        value = value?.[part];
-    }
-
-    return value ?? key;
-}
-
 
 /* DATE HELPERS */
 
@@ -2388,7 +2335,6 @@ function getTodayKey() {
 
 }
 
-
 function parseDateKey(key) {
 
     const [y,m,d] =
@@ -2397,7 +2343,6 @@ function parseDateKey(key) {
     return new Date(y,m-1,d);
 
 }
-
 
 function formatDateKey(key) {
 
@@ -2423,7 +2368,6 @@ function formatDateKey(key) {
 
 }
 
-
 function updateDate() {
 
     document.getElementById("date")
@@ -2431,7 +2375,6 @@ function updateDate() {
         formatDateKey(getTodayKey());
 
 }
-
 
 function getDateKeyFromDate(date) {
 
@@ -2443,6 +2386,57 @@ function getDateKeyFromDate(date) {
 
 }
 
+/* KURDISH CALENDAR */
+
+const kurdishMonths = [
+    "کانوونی دووەم",
+    "شوبات",
+    "ئادار",
+    "نیسان",
+    "ئایار",
+    "حوزەیران",
+    "تەممووز",
+    "ئاب",
+    "ئەیلول",
+    "تشرینی یەکەم",
+    "تشرینی دووەم",
+    "کانوونی یەکەم"
+];
+
+function getCalendarMonthName(date) {
+
+    const month =
+        date.getMonth();
+
+    const year =
+        date.getFullYear();
+
+    if (currentLanguage === "ku") {
+
+        return (
+            kurdishMonths[month] +
+            " " +
+            year
+        );
+
+    }
+
+    const localeMap = {
+
+        en: "en-US",
+        ar: "ar-IQ"
+
+    };
+
+    return date.toLocaleDateString(
+        localeMap[currentLanguage] || "en-US",
+        {
+            month: "long",
+            year: "numeric"
+        }
+    );
+
+}
 
 /* LANGUAGE */
 
@@ -2456,7 +2450,6 @@ function applyLanguage() {
 
     document.documentElement.dir =
         language.direction;
-
 
     document.getElementById("chooseLanguageText")
         .textContent =
@@ -2478,7 +2471,6 @@ function applyLanguage() {
         .textContent =
         t("continueGuest");
 
-
     document.getElementById("authTitle")
         .textContent =
         signUpMode
@@ -2490,7 +2482,6 @@ function applyLanguage() {
         signUpMode
         ? t("authCreateSubtitle")
         : t("authLoginSubtitle");
-
 
     document.getElementById("usernameInput")
         .placeholder =
@@ -2508,13 +2499,11 @@ function applyLanguage() {
         .placeholder =
         t("confirmPassword");
 
-
     document.getElementById("authButton")
         .textContent =
         signUpMode
         ? t("createAccount")
         : t("signIn");
-
 
     document.getElementById("switchText")
         .textContent =
@@ -2522,13 +2511,11 @@ function applyLanguage() {
         ? t("alreadyAccount")
         : t("noAccount");
 
-
     document.getElementById("switchButton")
         .textContent =
         signUpMode
         ? t("signIn")
         : t("signUp");
-
 
     document.getElementById("tasksTab")
         .textContent =
@@ -2541,7 +2528,6 @@ function applyLanguage() {
     document.getElementById("prayersTab")
         .textContent =
         t("prayers");
-
 
     document.getElementById("taskInput")
         .placeholder =
@@ -2571,7 +2557,6 @@ function applyLanguage() {
         .textContent =
         t("custom");
 
-
     document.getElementById("prayerTitle")
         .textContent =
         t("prayerTimes");
@@ -2579,7 +2564,6 @@ function applyLanguage() {
     document.getElementById("nextLabel")
         .textContent =
         t("nextPrayer");
-
 
     document.getElementById("settingsTitle")
         .textContent =
@@ -2657,11 +2641,9 @@ function applyLanguage() {
         .textContent =
         t("signOut");
 
-
     document.getElementById("settingsLanguage")
         .value =
         currentLanguage;
-
 
     document.getElementById("selectedDayText")
         .textContent =
@@ -2670,7 +2652,6 @@ function applyLanguage() {
     document.getElementById("calendarSelectedDay")
         .textContent =
         formatDateKey(selectedDate);
-
 
     updateDate();
     renderCalendar();
@@ -2683,7 +2664,6 @@ function applyLanguage() {
     }
 
 }
-
 
 function chooseLanguage(language) {
 
@@ -2711,7 +2691,6 @@ function chooseLanguage(language) {
 
 }
 
-
 document
     .querySelectorAll(".language-option")
     .forEach(button => {
@@ -2729,7 +2708,6 @@ document
 
     });
 
-
 document
     .getElementById("settingsLanguage")
     .addEventListener(
@@ -2742,7 +2720,6 @@ document
 
         }
     );
-
 
 /* WELCOME */
 
@@ -2758,7 +2735,6 @@ function finishWelcome() {
         "none";
 
 }
-
 
 document
     .getElementById("welcomeSignIn")
@@ -2778,7 +2754,6 @@ document
         }
     );
 
-
 document
     .getElementById("welcomeCreate")
     .addEventListener(
@@ -2797,7 +2772,6 @@ document
         }
     );
 
-
 document
     .getElementById("welcomeGuest")
     .addEventListener(
@@ -2812,7 +2786,6 @@ document
 
         }
     );
-
 
 /* AUTH */
 
@@ -2834,7 +2807,6 @@ function setAuthMode() {
 
 }
 
-
 function clearError() {
 
     const error =
@@ -2846,7 +2818,6 @@ function clearError() {
         "none";
 
 }
-
 
 function showError(message) {
 
@@ -2860,7 +2831,6 @@ function showError(message) {
         "block";
 
 }
-
 
 async function createAccount() {
 
@@ -2881,7 +2851,6 @@ async function createAccount() {
     const confirm =
         document.getElementById("confirmPasswordInput")
             .value;
-
 
     if (username.length < 2) {
 
@@ -2923,7 +2892,6 @@ async function createAccount() {
 
     }
 
-
     try {
 
         const result =
@@ -2932,7 +2900,6 @@ async function createAccount() {
                 email,
                 password
             );
-
 
         await setDoc(
             doc(
@@ -2948,7 +2915,6 @@ async function createAccount() {
             }
         );
 
-
         document.getElementById("authOverlay")
             .classList.remove("active");
 
@@ -2962,7 +2928,6 @@ async function createAccount() {
 
 }
 
-
 async function login() {
 
     clearError();
@@ -2975,7 +2940,6 @@ async function login() {
         document.getElementById("passwordInput")
             .value;
 
-
     if (!email || !password) {
 
         showError(
@@ -2985,7 +2949,6 @@ async function login() {
         return;
 
     }
-
 
     try {
 
@@ -3008,7 +2971,6 @@ async function login() {
 
 }
 
-
 document
     .getElementById("authButton")
     .addEventListener(
@@ -3024,7 +2986,6 @@ document
         }
     );
 
-
 document
     .getElementById("switchButton")
     .addEventListener(
@@ -3039,7 +3000,6 @@ document
         }
     );
 
-
 document
     .getElementById("closeAuth")
     .addEventListener(
@@ -3051,7 +3011,6 @@ document
 
         }
     );
-
 
 document
     .getElementById("accountButton")
@@ -3070,7 +3029,6 @@ document
 
         }
     );
-
 
 /* AUTH STATE */
 
@@ -3092,12 +3050,10 @@ onAuthStateChanged(
                     )
                 );
 
-
             const username =
                 profile.exists()
                 ? profile.data().username
                 : t("guest");
-
 
             document.getElementById("settingsUsername")
                 .textContent =
@@ -3107,11 +3063,9 @@ onAuthStateChanged(
                 .textContent =
                 user.email || "";
 
-
             document.getElementById("accountButton")
                 .style.display =
                 "none";
-
 
             startTaskListener();
 
@@ -3138,7 +3092,6 @@ onAuthStateChanged(
     }
 );
 
-
 /* SIGN OUT */
 
 document
@@ -3156,7 +3109,6 @@ document
         }
     );
 
-
 /* NAVIGATION */
 
 function showSection(id) {
@@ -3169,7 +3121,6 @@ function showSection(id) {
 
         });
 
-
     document
         .querySelectorAll(".tab")
         .forEach(tab => {
@@ -3178,14 +3129,12 @@ function showSection(id) {
 
         });
 
-
     const section =
         document.getElementById(id);
 
     if (section) {
         section.classList.add("active");
     }
-
 
     const tab =
         document.querySelector(
@@ -3197,7 +3146,6 @@ function showSection(id) {
     }
 
 }
-
 
 document
     .querySelectorAll(".tab")
@@ -3215,7 +3163,6 @@ document
         );
 
     });
-
 
 /* SETTINGS TOGGLE */
 
@@ -3243,7 +3190,6 @@ document
         }
     );
 
-
 /* TASK COLLECTION */
 
 function getTasksCollection() {
@@ -3257,7 +3203,6 @@ function getTasksCollection() {
 
 }
 
-
 function stopTaskListener() {
 
     if (unsubscribeTasks) {
@@ -3270,20 +3215,17 @@ function stopTaskListener() {
 
 }
 
-
 function startTaskListener() {
 
     stopTaskListener();
 
     if (!currentUser) return;
 
-
     const taskQuery =
         query(
             getTasksCollection(),
             orderBy("createdAt", "asc")
         );
-
 
     unsubscribeTasks =
         onSnapshot(
@@ -3309,7 +3251,6 @@ function startTaskListener() {
 
 }
 
-
 /* TASK DATE MATCHING */
 
 function taskOccursOnDate(task, dateKey) {
@@ -3324,11 +3265,9 @@ function taskOccursOnDate(task, dateKey) {
     const startDate =
         parseDateKey(start);
 
-
     if (target < startDate) {
         return false;
     }
-
 
     if (!task.repeat || task.repeat === "once") {
 
@@ -3336,11 +3275,9 @@ function taskOccursOnDate(task, dateKey) {
 
     }
 
-
     if (task.repeat === "daily") {
         return true;
     }
-
 
     if (task.repeat === "weekly") {
 
@@ -3350,7 +3287,6 @@ function taskOccursOnDate(task, dateKey) {
         );
 
     }
-
 
     if (
         task.repeat === "custom" &&
@@ -3363,11 +3299,9 @@ function taskOccursOnDate(task, dateKey) {
 
     }
 
-
     return false;
 
 }
-
 
 /* TASKS */
 
@@ -3383,7 +3317,6 @@ function getTasksForDate(tasks, dateKey) {
 
 }
 
-
 function renderTasks(tasks) {
 
     const list =
@@ -3391,11 +3324,9 @@ function renderTasks(tasks) {
 
     list.innerHTML = "";
 
-
     document.getElementById("selectedDayText")
         .textContent =
         formatDateKey(selectedDate);
-
 
     if (!currentUser) {
 
@@ -3417,13 +3348,11 @@ function renderTasks(tasks) {
 
     }
 
-
     const todayTasks =
         getTasksForDate(
             tasks,
             selectedDate
         );
-
 
     renderTaskArray(
         todayTasks,
@@ -3431,7 +3360,6 @@ function renderTasks(tasks) {
     );
 
 }
-
 
 function renderTaskArray(tasks, list) {
 
@@ -3444,7 +3372,6 @@ function renderTaskArray(tasks, list) {
 
     }
 
-
     tasks.forEach(task => {
 
         const row =
@@ -3453,7 +3380,6 @@ function renderTaskArray(tasks, list) {
         row.className =
             "task";
 
-
         if (task.completedDates?.includes(selectedDate)) {
 
             row.classList.add(
@@ -3461,7 +3387,6 @@ function renderTaskArray(tasks, list) {
             );
 
         }
-
 
         const checkbox =
             document.createElement("input");
@@ -3472,7 +3397,6 @@ function renderTaskArray(tasks, list) {
         checkbox.className =
             "task-check";
 
-
         checkbox.checked =
             task.repeat &&
             task.repeat !== "once"
@@ -3482,7 +3406,6 @@ function renderTaskArray(tasks, list) {
                 ) || false
             )
             : !!task.completed;
-
 
         checkbox.addEventListener(
             "change",
@@ -3496,13 +3419,11 @@ function renderTaskArray(tasks, list) {
             }
         );
 
-
         const content =
             document.createElement("div");
 
         content.className =
             "task-text";
-
 
         const title =
             document.createElement("div");
@@ -3510,9 +3431,7 @@ function renderTaskArray(tasks, list) {
         title.textContent =
             task.text;
 
-
         content.appendChild(title);
-
 
         if (
             task.repeat &&
@@ -3538,7 +3457,6 @@ function renderTaskArray(tasks, list) {
 
         }
 
-
         const deleteButton =
             document.createElement("button");
 
@@ -3547,7 +3465,6 @@ function renderTaskArray(tasks, list) {
 
         deleteButton.textContent =
             "×";
-
 
         deleteButton.addEventListener(
             "click",
@@ -3559,7 +3476,6 @@ function renderTaskArray(tasks, list) {
 
             }
         );
-
 
         row.appendChild(
             checkbox
@@ -3580,7 +3496,6 @@ function renderTaskArray(tasks, list) {
     });
 
 }
-
 
 async function toggleTaskCompletion(
     task,
@@ -3634,7 +3549,6 @@ async function toggleTaskCompletion(
 
     }
 
-
     if (
         task.repeat &&
         task.repeat !== "once"
@@ -3658,7 +3572,6 @@ async function toggleTaskCompletion(
                 );
 
         }
-
 
         await updateDoc(
             doc(
@@ -3694,7 +3607,6 @@ async function toggleTaskCompletion(
 
 }
 
-
 async function deleteTask(task) {
 
     if (!currentUser) {
@@ -3716,7 +3628,6 @@ async function deleteTask(task) {
 
     }
 
-
     await deleteDoc(
         doc(
             db,
@@ -3728,7 +3639,6 @@ async function deleteTask(task) {
     );
 
 }
-
 
 /* ADD TASK */
 
@@ -3742,15 +3652,12 @@ async function addTask() {
     const text =
         input.value.trim();
 
-
     if (!text) return;
-
 
     const repeat =
         document.getElementById(
             "repeatSelect"
         ).value;
-
 
     const days =
         [...document.querySelectorAll(
@@ -3760,7 +3667,6 @@ async function addTask() {
             button =>
                 Number(button.dataset.day)
         );
-
 
     const task = {
 
@@ -3780,7 +3686,6 @@ async function addTask() {
         repeat,
 
         days:
-
             repeat === "custom"
             ? days
             : [],
@@ -3795,7 +3700,6 @@ async function addTask() {
             Date.now()
 
     };
-
 
     if (
         repeat === "custom" &&
@@ -3813,7 +3717,6 @@ async function addTask() {
         return;
 
     }
-
 
     if (!currentUser) {
 
@@ -3837,7 +3740,6 @@ async function addTask() {
 
     }
 
-
     input.value = "";
 
     document.getElementById(
@@ -3859,13 +3761,11 @@ async function addTask() {
                 )
         );
 
-
     renderTasks([]);
 
     renderCalendar();
 
 }
-
 
 document
     .getElementById("addTaskButton")
@@ -3873,7 +3773,6 @@ document
         "click",
         addTask
     );
-
 
 document
     .getElementById("taskInput")
@@ -3894,7 +3793,6 @@ document
         }
     );
 
-
 /* REPEAT */
 
 document
@@ -3913,7 +3811,6 @@ document
         }
     );
 
-
 document
     .querySelectorAll(".repeat-day")
     .forEach(button => {
@@ -3931,7 +3828,6 @@ document
 
     });
 
-
 /* CALENDAR */
 
 function renderCalendar() {
@@ -3948,7 +3844,6 @@ function renderCalendar() {
 
     grid.innerHTML = "";
     weekdays.innerHTML = "";
-
 
     t("weekdays").forEach(
         day => {
@@ -3968,28 +3863,10 @@ function renderCalendar() {
         }
     );
 
-
-    const localeMap = {
-
-        en: "en-US",
-        ku: "ku-Arab",
-        ar: "ar-IQ"
-
-    };
-
-
     document.getElementById(
         "calendarMonth"
     ).textContent =
-        calendarDate.toLocaleDateString(
-            localeMap[currentLanguage] ||
-            "en-US",
-            {
-                month: "long",
-                year: "numeric"
-            }
-        );
-
+        getCalendarMonthName(calendarDate);
 
     const year =
         calendarDate.getFullYear();
@@ -4011,7 +3888,6 @@ function renderCalendar() {
             0
         ).getDate();
 
-
     for (
         let i = 0;
         i < firstDay;
@@ -4028,13 +3904,6 @@ function renderCalendar() {
         );
 
     }
-
-
-    const allTasks =
-        currentUser
-        ? []
-        : guestTasks;
-
 
     for (
         let day = 1;
@@ -4054,7 +3923,6 @@ function renderCalendar() {
                 date
             );
 
-
         const button =
             document.createElement(
                 "button"
@@ -4065,7 +3933,6 @@ function renderCalendar() {
 
         button.textContent =
             day;
-
 
         if (
             key ===
@@ -4078,7 +3945,6 @@ function renderCalendar() {
 
         }
 
-
         if (
             key ===
             selectedDate
@@ -4090,10 +3956,8 @@ function renderCalendar() {
 
         }
 
-
         let hasTask =
             false;
-
 
         if (!currentUser) {
 
@@ -4108,7 +3972,6 @@ function renderCalendar() {
 
         }
 
-
         if (hasTask) {
 
             button.classList.add(
@@ -4116,7 +3979,6 @@ function renderCalendar() {
             );
 
         }
-
 
         button.addEventListener(
             "click",
@@ -4144,7 +4006,6 @@ function renderCalendar() {
             }
         );
 
-
         grid.appendChild(
             button
         );
@@ -4152,7 +4013,6 @@ function renderCalendar() {
     }
 
 }
-
 
 document
     .getElementById("previousMonth")
@@ -4169,7 +4029,6 @@ document
         }
     );
 
-
 document
     .getElementById("nextMonth")
     .addEventListener(
@@ -4184,7 +4043,6 @@ document
 
         }
     );
-
 
 document
     .getElementById("todayButton")
@@ -4216,7 +4074,6 @@ document
         }
     );
 
-
 document
     .getElementById("taskDateInput")
     .addEventListener(
@@ -4244,8 +4101,7 @@ document
         }
     );
 
-
-/* DARK MODE */
+/* DARK / LIGHT MODE */
 
 function applyTheme() {
 
@@ -4254,45 +4110,61 @@ function applyTheme() {
             "dailykrd_dark"
         ) === "true";
 
-
     document.body.classList.toggle(
         "dark",
         dark
     );
 
+    const themeButton =
+        document.getElementById(
+            "themeButton"
+        );
 
-    document.getElementById(
-        "themeButton"
-    ).textContent =
-        dark ? "☀" : "☾";
+    const settingsThemeButton =
+        document.getElementById(
+            "settingsThemeButton"
+        );
 
+    if (themeButton) {
 
-    document.getElementById(
-        "settingsThemeButton"
-    ).textContent =
-        dark ? "On" : "Off";
+        themeButton.textContent =
+            dark ? "☀" : "☾";
+
+        themeButton.setAttribute(
+            "aria-label",
+            dark
+                ? "Light Mode"
+                : "Dark Mode"
+        );
+
+    }
+
+    if (settingsThemeButton) {
+
+        settingsThemeButton.textContent =
+            dark
+                ? "On"
+                : "Off";
+
+    }
 
 }
 
-
 function toggleTheme() {
 
-    const dark =
-        !document.body.classList.contains(
+    const isDark =
+        document.body.classList.contains(
             "dark"
         );
 
-
     localStorage.setItem(
         "dailykrd_dark",
-        dark
+        String(!isDark)
     );
-
 
     applyTheme();
 
 }
-
 
 document
     .getElementById("themeButton")
@@ -4301,14 +4173,12 @@ document
         toggleTheme
     );
 
-
 document
     .getElementById("settingsThemeButton")
     .addEventListener(
         "click",
         toggleTheme
     );
-
 
 /* PRAYER TIMES */
 
@@ -4322,7 +4192,6 @@ const prayerTimes = {
 
 };
 
-
 function loadPrayerTimes() {
 
     const list =
@@ -4331,7 +4200,6 @@ function loadPrayerTimes() {
         );
 
     list.innerHTML = "";
-
 
     Object.entries(
         prayerTimes
@@ -4346,7 +4214,6 @@ function loadPrayerTimes() {
             row.className =
                 "prayer";
 
-
             const nameElement =
                 document.createElement(
                     "span"
@@ -4358,7 +4225,6 @@ function loadPrayerTimes() {
                     name
                 );
 
-
             const timeElement =
                 document.createElement(
                     "strong"
@@ -4366,7 +4232,6 @@ function loadPrayerTimes() {
 
             timeElement.textContent =
                 time;
-
 
             row.appendChild(
                 nameElement
@@ -4383,11 +4248,9 @@ function loadPrayerTimes() {
         }
     );
 
-
     updateNextPrayer();
 
 }
-
 
 function updateNextPrayer() {
 
@@ -4398,9 +4261,7 @@ function updateNextPrayer() {
         now.getHours() * 60 +
         now.getMinutes();
 
-
     let next = null;
-
 
     for (
         const [name,time]
@@ -4414,11 +4275,9 @@ function updateNextPrayer() {
                 .split(":")
                 .map(Number);
 
-
         const prayerMinutes =
             hours * 60 +
             minutes;
-
 
         if (
             prayerMinutes >
@@ -4434,7 +4293,6 @@ function updateNextPrayer() {
 
     }
 
-
     if (!next) {
 
         next =
@@ -4445,7 +4303,6 @@ function updateNextPrayer() {
 
     }
 
-
     document.getElementById(
         "nextName"
     ).textContent =
@@ -4454,7 +4311,6 @@ function updateNextPrayer() {
             next[0]
         );
 
-
     document.getElementById(
         "nextTime"
     ).textContent =
@@ -4462,12 +4318,10 @@ function updateNextPrayer() {
 
 }
 
-
 setInterval(
     updateNextPrayer,
     30000
 );
-
 
 /* LOCATION */
 
@@ -4487,12 +4341,10 @@ document
 
             if (!location) return;
 
-
             document.getElementById(
                 "locationText"
             ).textContent =
                 location;
-
 
             localStorage.setItem(
                 "dailykrd_location",
@@ -4501,7 +4353,6 @@ document
 
         }
     );
-
 
 const savedLocation =
     localStorage.getItem(
@@ -4522,7 +4373,6 @@ if (savedLocation) {
 
 }
 
-
 /* NOTIFICATIONS */
 
 document
@@ -4535,7 +4385,6 @@ document
                 document.getElementById(
                     "notificationStatus"
                 );
-
 
             if (
                 !("Notification" in window)
@@ -4550,11 +4399,9 @@ document
 
             }
 
-
             const permission =
                 await Notification
                     .requestPermission();
-
 
             if (
                 permission ===
@@ -4578,11 +4425,15 @@ document
         }
     );
 
-
 /* START */
 
-applyTheme();
+/*
+    Apply theme BEFORE displaying the rest
+    of the interface so the saved theme is
+    restored correctly.
+*/
 
+applyTheme();
 
 if (!currentLanguage) {
 
@@ -4596,15 +4447,12 @@ if (!currentLanguage) {
 
 }
 
-
 applyLanguage();
-
 
 document.getElementById(
     "taskDateInput"
 ).value =
     selectedDate;
-
 
 if (
     !localStorage.getItem(
@@ -4619,10 +4467,8 @@ if (
 
 }
 
-
 renderCalendar();
 loadPrayerTimes();
-
 
 /* SERVICE WORKER */
 
