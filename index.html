@@ -5999,7 +5999,7 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                () => {
+                async () => {
 
                     const input =
                         document.getElementById(
@@ -6024,6 +6024,25 @@ document.documentElement.classList.toggle(
                         "dailykrd_location",
                         location
                     );
+
+
+                    if (currentUser) {
+
+                        try {
+
+                            await updateDoc(
+                                doc(db, "users", currentUser.uid),
+                                { location }
+                            );
+
+                        } catch (error) {
+
+                            console.error(
+                                "Location save error:",
+                                error
+                            );
+                        }
+                    }
 
                 }
             );
@@ -6050,7 +6069,131 @@ document.documentElement.classList.toggle(
         }
 
 
-        /* NOTIFICATIONS */
+        /* NOTIFICATIONS (PUSH) */
+
+        const VAPID_PUBLIC_KEY =
+            "BGqV3eJuJ6q426AfN4sxx2bJA8IYagZCVSHJEZQ9tIlyG5Ckxu-TkrHdGqqFLIYDF5Ym70cgX3ewMG2cpxUuApA";
+
+
+        function urlBase64ToUint8Array(base64String) {
+
+            const padding =
+                "=".repeat(
+                    (4 - (base64String.length % 4)) % 4
+                );
+
+            const base64 =
+                (base64String + padding)
+                    .replace(/-/g, "+")
+                    .replace(/_/g, "/");
+
+            const rawData =
+                window.atob(base64);
+
+            const outputArray =
+                new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+
+            return outputArray;
+        }
+
+
+        async function subscribeToPush() {
+
+            const status =
+                document.getElementById(
+                    "notificationStatus"
+                );
+
+
+            if (
+                !("serviceWorker" in navigator) ||
+                !("PushManager" in window)
+            ) {
+
+                status.textContent =
+                    t("notificationsUnsupported");
+
+                return;
+            }
+
+
+            try {
+
+                const permission =
+                    await Notification.requestPermission();
+
+
+                if (permission !== "granted") {
+
+                    status.textContent =
+                        t("notificationsDisabled");
+
+                    return;
+                }
+
+
+                const registration =
+                    await navigator.serviceWorker.ready;
+
+
+                let subscription =
+                    await registration.pushManager.getSubscription();
+
+
+                if (!subscription) {
+
+                    subscription =
+                        await registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey:
+                                urlBase64ToUint8Array(
+                                    VAPID_PUBLIC_KEY
+                                )
+                        });
+                }
+
+
+                if (currentUser) {
+
+                    await updateDoc(
+                        doc(db, "users", currentUser.uid),
+                        {
+                            pushSubscription:
+                                subscription.toJSON(),
+                            notificationsEnabled: true
+                        }
+                    );
+
+                } else {
+
+                    localStorage.setItem(
+                        "dailykrd_push_subscription",
+                        JSON.stringify(
+                            subscription.toJSON()
+                        )
+                    );
+                }
+
+
+                status.textContent =
+                    t("notificationsEnabled");
+
+            } catch (error) {
+
+                console.error(
+                    "Push subscription error:",
+                    error
+                );
+
+                status.textContent =
+                    t("notificationsDisabled");
+            }
+        }
+
 
         document
             .getElementById(
@@ -6058,66 +6201,7 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                async () => {
-
-                    const status =
-                        document.getElementById(
-                            "notificationStatus"
-                        );
-
-
-                    if (
-                        !("Notification" in window)
-                    ) {
-
-                        status.textContent =
-                            t(
-                                "notificationsUnsupported"
-                            );
-
-                        return;
-                    }
-
-
-                    try {
-
-                        const permission =
-                            await Notification
-                                .requestPermission();
-
-
-                        if (
-                            permission ===
-                            "granted"
-                        ) {
-
-                            status.textContent =
-                                t(
-                                    "notificationsEnabled"
-                                );
-
-                        } else {
-
-                            status.textContent =
-                                t(
-                                    "notificationsDisabled"
-                                );
-                        }
-
-                    } catch (error) {
-
-                        console.error(
-                            "Notification error:",
-                            error
-                        );
-
-                        status.textContent =
-                            t(
-                                "notificationsDisabled"
-                            );
-                    }
-
-                }
+                subscribeToPush
             );
 
 
