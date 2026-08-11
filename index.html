@@ -3996,13 +3996,19 @@
 
                     signUpMode = false;
 
-                    setAuthMode();
+                    /* Open auth first so a UI refresh error cannot stop Sign In. */
+                    const authOverlay =
+                        document.getElementById("authOverlay");
 
-                    document.getElementById(
-                        "authOverlay"
-                    ).classList.add(
-                        "active"
-                    );
+                    if (authOverlay) {
+                        authOverlay.classList.add("active");
+                    }
+
+                    try {
+                        setAuthMode();
+                    } catch (error) {
+                        console.error("Auth mode setup error:", error);
+                    }
 
                 }
             );
