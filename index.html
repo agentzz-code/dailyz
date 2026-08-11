@@ -4109,7 +4109,12 @@
         }
 
 
+        let authOperationInProgress = false;
+
+
         async function createAccount() {
+
+            if (authOperationInProgress) return;
 
             clearError();
 
@@ -4177,15 +4182,64 @@
                 return;
             }
 
+            authOperationInProgress = true;
+
+            const authButton =
+                document.getElementById("authButton");
+
+            authButton.disabled = true;
+
 
             try {
 
-                const result =
-                    await createUserWithEmailAndPassword(
-                        auth,
-                        email,
-                        password
-                    );
+                let result;
+
+                try {
+
+                    result =
+                        await createUserWithEmailAndPassword(
+                            auth,
+                            email,
+                            password
+                        );
+
+                } catch (error) {
+
+                    /*
+                     * Firebase may have already created this account from
+                     * an earlier signup attempt. In that case, don't leave
+                     * the user stuck on the signup form: immediately sign
+                     * them in with the credentials they just entered.
+                     */
+                    if (
+                        error &&
+                        (error.code === "auth/email-already-in-use" ||
+                         error.code === "auth/account-exists-with-different-credential")
+                    ) {
+
+                        try {
+
+                            result =
+                                await signInWithEmailAndPassword(
+                                    auth,
+                                    email,
+                                    password
+                                );
+
+                        } catch (signInError) {
+
+                            if (signInError && signInError.code === "auth/invalid-credential") {
+                                throw new Error("ACCOUNT_EXISTS_WRONG_PASSWORD");
+                            }
+
+                            throw signInError;
+                        }
+
+                    } else {
+
+                        throw error;
+                    }
+                }
 
 
                 await setDoc(
@@ -4213,9 +4267,49 @@
 
             } catch (error) {
 
-                showError(
-                    error.message
-                );
+                console.error("Signup error:", error);
+
+                if (
+                    error &&
+                    error.message === "ACCOUNT_EXISTS_WRONG_PASSWORD"
+                ) {
+
+                    signUpMode = false;
+                    setAuthMode();
+                    showError(
+                        currentLanguage === "ku"
+                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە، بەڵام وشەی نهێنی هەڵەیە."
+                            : currentLanguage === "ar"
+                            ? "هذا البريد الإلكتروني لديه حساب بالفعل، لكن كلمة المرور غير صحيحة."
+                            : "This email already has an account, but the password is incorrect."
+                    );
+
+                } else if (
+                    error &&
+                    error.code === "auth/email-already-in-use"
+                ) {
+
+                    signUpMode = false;
+                    setAuthMode();
+                    showError(
+                        currentLanguage === "ku"
+                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە. ئێستا بچۆ ژوورەوە."
+                            : currentLanguage === "ar"
+                            ? "هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل. سجّل الدخول للمتابعة."
+                            : "This email already has an account. Sign in to continue."
+                    );
+
+                } else {
+
+                    showError(
+                        error.message || "Unable to create the account."
+                    );
+                }
+
+            } finally {
+
+                authOperationInProgress = false;
+                authButton.disabled = false;
             }
         }
 
