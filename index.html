@@ -888,14 +888,55 @@
             border-color: #3a3a3a;
         }
 
-        .qibla-needle {
+        .qibla-north-label {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 800;
+            color: #999;
+        }
+
+        .qibla-center-dot {
             position: absolute;
             top: 50%;
             left: 50%;
-            font-size: 30px;
-            transform-origin: center 65px;
-            transform: translate(-50%, -100%) rotate(0deg);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #111;
+            transform: translate(-50%, -50%);
+        }
+
+        .dark .qibla-center-dot {
+            background: white;
+        }
+
+        .qibla-needle {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            width: 5px;
+            height: 52px;
+            background: linear-gradient(to top, #e05c5c, #ff8a65);
+            border-radius: 4px 4px 1px 1px;
+            transform-origin: 50% 100%;
+            transform: translateX(-50%) rotate(0deg);
             transition: transform .3s ease;
+        }
+
+        .qibla-needle::before {
+            content: "";
+            position: absolute;
+            top: -9px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-bottom: 12px solid #e05c5c;
         }
 
         .qibla-degrees {
@@ -1699,12 +1740,14 @@
 
                     <div class="qibla-compass-ring"></div>
 
+                    <div class="qibla-north-label">N</div>
+
                     <div
                         class="qibla-needle"
                         id="qiblaNeedle"
-                    >
-                        🧭
-                    </div>
+                    ></div>
+
+                    <div class="qibla-center-dot"></div>
 
                 </div>
 
@@ -6249,7 +6292,7 @@ document.documentElement.classList.toggle(
 
             if (needle) {
                 needle.style.transform =
-                    `translate(-50%, -100%) rotate(${bearing}deg)`;
+                    `translateX(-50%) rotate(${bearing}deg)`;
             }
 
             if (degreeText) {
