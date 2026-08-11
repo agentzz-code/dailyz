@@ -841,6 +841,75 @@
             margin-top: 3px;
         }
 
+        .next-countdown {
+            margin-top: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            opacity: .8;
+            letter-spacing: .5px;
+        }
+
+        .qibla-card {
+            background: rgba(255,255,255,.92);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .dark .qibla-card {
+            background: #222;
+        }
+
+        .qibla-title {
+            font-weight: 800;
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        .qibla-compass {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto;
+        }
+
+        .qibla-compass-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            background:
+                radial-gradient(circle, rgba(0,0,0,.02) 0%, transparent 70%);
+        }
+
+        .dark .qibla-compass-ring {
+            border-color: #3a3a3a;
+        }
+
+        .qibla-needle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 30px;
+            transform-origin: center 65px;
+            transform: translate(-50%, -100%) rotate(0deg);
+            transition: transform .3s ease;
+        }
+
+        .qibla-degrees {
+            margin-top: 12px;
+            font-size: 22px;
+            font-weight: 850;
+        }
+
+        .qibla-hint {
+            margin-top: 6px;
+            color: #888;
+            font-size: 12px;
+        }
+
         .prayer {
             display: flex;
             justify-content: space-between;
@@ -1605,10 +1674,55 @@
                     03:46
                 </div>
 
+                <div
+                    class="next-countdown"
+                    id="nextCountdown"
+                >
+                    00:00:00
+                </div>
+
             </div>
 
 
             <div id="prayerList"></div>
+
+            <div class="qibla-card">
+
+                <div
+                    class="qibla-title"
+                    id="qiblaTitle"
+                >
+                    Qibla Direction
+                </div>
+
+                <div class="qibla-compass">
+
+                    <div class="qibla-compass-ring"></div>
+
+                    <div
+                        class="qibla-needle"
+                        id="qiblaNeedle"
+                    >
+                        🧭
+                    </div>
+
+                </div>
+
+                <div
+                    class="qibla-degrees"
+                    id="qiblaDegrees"
+                >
+                    0°
+                </div>
+
+                <div
+                    class="qibla-hint"
+                    id="qiblaHint"
+                >
+                    Direction from your location toward the Kaaba, Mecca.
+                </div>
+
+            </div>
 
         </section>
 
@@ -1810,6 +1924,28 @@
                                 type="button"
                             >
                                 Update
+                            </button>
+
+                        </div>
+
+                        <div class="location-row" style="margin-top:8px;">
+
+                            <button
+                                class="setting-button"
+                                id="locateMeButton"
+                                type="button"
+                                style="width:100%;"
+                            >
+                                📍 <span id="locateMeLabel">Use My Location</span>
+                            </button>
+
+                            <button
+                                class="setting-button"
+                                id="useErbilButton"
+                                type="button"
+                                style="width:100%;"
+                            >
+                                🕌 <span id="useErbilLabel">Use Erbil</span>
                             </button>
 
                         </div>
@@ -2383,6 +2519,18 @@
                 high:
                     "High",
 
+                qiblaTitle:
+                    "Qibla Direction",
+
+                qiblaHint:
+                    "Direction from your location toward the Kaaba, Mecca.",
+
+                locateMe:
+                    "Use My Location",
+
+                useErbil:
+                    "Use Erbil",
+
                 prayer: {
 
                     Fajr: "Fajr",
@@ -2611,6 +2759,18 @@
                 high:
                     "زۆر",
 
+                qiblaTitle:
+                    "ئاراستەی قیبلە",
+
+                qiblaHint:
+                    "ئاراستە لە شوێنەکەت بەرەو کەعبە، مەککە.",
+
+                locateMe:
+                    "شوێنی من بەکاربێنە",
+
+                useErbil:
+                    "هەولێر بەکاربێنە",
+
                 prayer: {
 
                     Fajr: "بەیانی",
@@ -2838,6 +2998,18 @@
 
                 high:
                     "عالية",
+
+                qiblaTitle:
+                    "اتجاه القبلة",
+
+                qiblaHint:
+                    "الاتجاه من موقعك نحو الكعبة، مكة المكرمة.",
+
+                locateMe:
+                    "استخدم موقعي",
+
+                useErbil:
+                    "استخدم أربيل",
 
                 prayer: {
 
@@ -3547,6 +3719,30 @@
                 "priorityHigh"
             ).textContent =
                 t("high");
+
+
+            document.getElementById(
+                "qiblaTitle"
+            ).textContent =
+                t("qiblaTitle");
+
+
+            document.getElementById(
+                "qiblaHint"
+            ).textContent =
+                t("qiblaHint");
+
+
+            document.getElementById(
+                "locateMeLabel"
+            ).textContent =
+                t("locateMe");
+
+
+            document.getElementById(
+                "useErbilLabel"
+            ).textContent =
+                t("useErbil");
 
 
             renderDailyQuote();
@@ -5823,24 +6019,260 @@ document.documentElement.classList.toggle(
             );
 
 
-        /* PRAYER TIMES */
+        /* PRAYER TIMES — ASTRONOMICAL CALCULATION (precise, to the second) */
 
-        const prayerTimes = {
+        // Default coordinates: Erbil, Kurdistan Region (Asia/Baghdad, UTC+3, no DST)
+        const ERBIL_LAT = 36.191113;
+        const ERBIL_LNG = 44.009167;
+        const ERBIL_TIMEZONE = 3;
 
-            Fajr: "03:46",
+        // Kaaba coordinates, for Qibla bearing calculation
+        const KAABA_LAT = 21.422487;
+        const KAABA_LNG = 39.826206;
 
-            Dhuhr: "12:20",
-
-            Asr: "16:01",
-
-            Maghrib: "19:04",
-
-            Isha: "20:19"
-
+        const PRAYER_ANGLES = {
+            fajr: 18,
+            isha: 17,
+            twilightAngle: 0.833,
+            asrFactor: 1
         };
 
 
+        function dtr(d) { return (d * Math.PI) / 180; }
+        function rtd(r) { return (r * 180) / Math.PI; }
+        function dsin(d) { return Math.sin(dtr(d)); }
+        function dcos(d) { return Math.cos(dtr(d)); }
+        function dtan(d) { return Math.tan(dtr(d)); }
+        function darcsin(x) { return rtd(Math.asin(x)); }
+        function darccos(x) { return rtd(Math.acos(x)); }
+        function darctan2(y, x) { return rtd(Math.atan2(y, x)); }
+        function darccot(x) { return rtd(Math.atan2(1, x)); }
+        function fixHour(h) { h = h - 24 * Math.floor(h / 24); return h < 0 ? h + 24 : h; }
+
+
+        function julianDate(year, month, day) {
+
+            if (month <= 2) {
+                year -= 1;
+                month += 12;
+            }
+
+            const A = Math.floor(year / 100);
+            const B = 2 - A + Math.floor(A / 4);
+
+            return (
+                Math.floor(365.25 * (year + 4716)) +
+                Math.floor(30.6001 * (month + 1)) +
+                day + B - 1524.5
+            );
+        }
+
+
+        function sunPosition(jd) {
+
+            const D = jd - 2451545.0;
+
+            const g = fixHour(357.529 + 0.98560028 * D);
+            const q = fixHour(280.459 + 0.98564736 * D);
+            const L = fixHour(q + 1.915 * dsin(g) + 0.02 * dsin(2 * g));
+
+            const e = 23.439 - 0.00000036 * D;
+
+            const RA = darctan2(dcos(e) * dsin(L), dcos(L)) / 15;
+
+            const eqt = q / 15 - fixHour(RA);
+            const decl = darcsin(dsin(e) * dsin(L));
+
+            return { declination: decl, equation: eqt };
+        }
+
+
+        function computeSunAngleTime(jDate, angle, lat, noon, ccw) {
+
+            const sun = sunPosition(jDate);
+
+            const numerator =
+                -dsin(angle) - dsin(sun.declination) * dsin(lat);
+
+            const denominator =
+                dcos(sun.declination) * dcos(lat);
+
+            const ratio =
+                Math.max(-1, Math.min(1, numerator / denominator));
+
+            const t = darccos(ratio) / 15;
+
+            return noon + (ccw ? -t : t);
+        }
+
+
+        function computeAsrTime(jDate, lat, noon, factor) {
+
+            const sun = sunPosition(jDate);
+
+            const G =
+                -darccot(
+                    factor + dtan(Math.abs(lat - sun.declination))
+                );
+
+            const numerator =
+                -dsin(G) - dsin(sun.declination) * dsin(lat);
+
+            const denominator =
+                dcos(sun.declination) * dcos(lat);
+
+            const ratio =
+                Math.max(-1, Math.min(1, numerator / denominator));
+
+            const t = darccos(ratio) / 15;
+
+            return noon + t;
+        }
+
+
+        function hoursToHms(hours) {
+
+            hours = fixHour(hours);
+
+            const totalSeconds =
+                Math.round(hours * 3600);
+
+            const h = Math.floor(totalSeconds / 3600) % 24;
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+
+            return (
+                String(h).padStart(2, "0") + ":" +
+                String(m).padStart(2, "0") + ":" +
+                String(s).padStart(2, "0")
+            );
+        }
+
+
+        function getUserCoords() {
+
+            const lat = parseFloat(
+                localStorage.getItem("dailykrd_lat")
+            );
+
+            const lng = parseFloat(
+                localStorage.getItem("dailykrd_lng")
+            );
+
+            const timezone = parseFloat(
+                localStorage.getItem("dailykrd_tz")
+            );
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                return {
+                    lat,
+                    lng,
+                    timezone: isNaN(timezone) ? ERBIL_TIMEZONE : timezone
+                };
+            }
+
+            return { lat: ERBIL_LAT, lng: ERBIL_LNG, timezone: ERBIL_TIMEZONE };
+        }
+
+
+        function computePrayerTimesForDate(date, lat, lng, timezone) {
+
+            const jDate =
+                julianDate(
+                    date.getFullYear(),
+                    date.getMonth() + 1,
+                    date.getDate()
+                );
+
+            const eqtHours =
+                sunPosition(jDate).equation;
+
+            // Solar (Dhuhr) noon, shifted into the local civil timezone
+            const noon =
+                fixHour(12 - eqtHours + (timezone - lng / 15));
+
+            const fajr =
+                computeSunAngleTime(jDate, PRAYER_ANGLES.fajr, lat, noon, true);
+
+            const asr =
+                computeAsrTime(jDate, lat, noon, PRAYER_ANGLES.asrFactor);
+
+            const maghrib =
+                computeSunAngleTime(jDate, PRAYER_ANGLES.twilightAngle, lat, noon, false);
+
+            const isha =
+                computeSunAngleTime(jDate, PRAYER_ANGLES.isha, lat, noon, false);
+
+            return {
+                Fajr: hoursToHms(fajr),
+                Dhuhr: hoursToHms(noon),
+                Asr: hoursToHms(asr),
+                Maghrib: hoursToHms(maghrib),
+                Isha: hoursToHms(isha)
+            };
+        }
+
+
+        /* QIBLA DIRECTION */
+
+        function computeQiblaBearing(lat, lng) {
+
+            const phiK = dtr(KAABA_LAT);
+            const lambdaK = dtr(KAABA_LNG);
+            const phi = dtr(lat);
+            const lambda = dtr(lng);
+
+            const y = Math.sin(lambdaK - lambda);
+
+            const x =
+                Math.cos(phi) * Math.tan(phiK) -
+                Math.sin(phi) * Math.cos(lambdaK - lambda);
+
+            let bearing = rtd(Math.atan2(y, x));
+
+            return (bearing + 360) % 360;
+        }
+
+
+        function updateQiblaDisplay() {
+
+            const { lat, lng } = getUserCoords();
+
+            const bearing = computeQiblaBearing(lat, lng);
+
+            const needle =
+                document.getElementById("qiblaNeedle");
+
+            const degreeText =
+                document.getElementById("qiblaDegrees");
+
+            if (needle) {
+                needle.style.transform =
+                    `translate(-50%, -100%) rotate(${bearing}deg)`;
+            }
+
+            if (degreeText) {
+                degreeText.textContent =
+                    Math.round(bearing) + "°";
+            }
+        }
+
+
+        let prayerTimes = {};
+
+
+        function recomputePrayerTimes() {
+
+            const { lat, lng, timezone } = getUserCoords();
+
+            prayerTimes =
+                computePrayerTimesForDate(new Date(), lat, lng, timezone);
+        }
+
+
         function loadPrayerTimes() {
+
+            recomputePrayerTimes();
 
             const list =
                 document.getElementById(
@@ -5907,19 +6339,29 @@ document.documentElement.classList.toggle(
             );
 
 
+            updateQiblaDisplay();
+
             updateNextPrayer();
+        }
+
+
+        function timeStrToSeconds(time) {
+
+            const [hours, minutes, seconds] =
+                time.split(":").map(Number);
+
+            return hours * 3600 + minutes * 60 + (seconds || 0);
         }
 
 
         function updateNextPrayer() {
 
-            const now =
-                new Date();
+            const now = new Date();
 
-
-            const currentMinutes =
-                now.getHours() * 60 +
-                now.getMinutes();
+            const currentSeconds =
+                now.getHours() * 3600 +
+                now.getMinutes() * 60 +
+                now.getSeconds();
 
 
             let next = null;
@@ -5932,26 +6374,20 @@ document.documentElement.classList.toggle(
                 )
             ) {
 
-                const [hours, minutes] =
-                    time
-                        .split(":")
-                        .map(Number);
-
-
-                const prayerMinutes =
-                    hours * 60 +
-                    minutes;
+                const prayerSeconds =
+                    timeStrToSeconds(time);
 
 
                 if (
-                    prayerMinutes >
-                    currentMinutes
+                    prayerSeconds >
+                    currentSeconds
                 ) {
 
                     next =
                         [
                             name,
-                            time
+                            time,
+                            prayerSeconds - currentSeconds
                         ];
 
                     break;
@@ -5964,7 +6400,9 @@ document.documentElement.classList.toggle(
                 next =
                     [
                         "Fajr",
-                        prayerTimes.Fajr
+                        prayerTimes.Fajr,
+                        (24 * 3600 - currentSeconds) +
+                            timeStrToSeconds(prayerTimes.Fajr)
                     ];
             }
 
@@ -5982,16 +6420,161 @@ document.documentElement.classList.toggle(
                 "nextTime"
             ).textContent =
                 next[1];
+
+
+            const countdownElement =
+                document.getElementById(
+                    "nextCountdown"
+                );
+
+
+            if (countdownElement) {
+
+                const remaining = next[2];
+
+                const rh = Math.floor(remaining / 3600);
+                const rm = Math.floor((remaining % 3600) / 60);
+                const rs = remaining % 60;
+
+                countdownElement.textContent =
+                    String(rh).padStart(2, "0") + ":" +
+                    String(rm).padStart(2, "0") + ":" +
+                    String(rs).padStart(2, "0");
+            }
         }
 
 
         setInterval(
-            updateNextPrayer,
-            30000
+            () => {
+
+                const now = new Date();
+
+                if (
+                    now.getHours() === 0 &&
+                    now.getMinutes() === 0 &&
+                    now.getSeconds() === 0
+                ) {
+
+                    loadPrayerTimes();
+
+                } else {
+
+                    updateNextPrayer();
+                }
+
+            },
+            1000
         );
 
 
         /* LOCATION */
+
+        function saveCoords(lat, lng, timezone) {
+
+            localStorage.setItem("dailykrd_lat", lat);
+            localStorage.setItem("dailykrd_lng", lng);
+
+            if (timezone !== undefined) {
+                localStorage.setItem("dailykrd_tz", timezone);
+            }
+
+            loadPrayerTimes();
+
+            if (currentUser) {
+
+                updateDoc(
+                    doc(db, "users", currentUser.uid),
+                    { lat, lng, timezone }
+                ).catch(error =>
+                    console.error("Coords save error:", error)
+                );
+            }
+        }
+
+
+        const locateButton =
+            document.getElementById("locateMeButton");
+
+
+        if (locateButton) {
+
+            locateButton.addEventListener(
+                "click",
+                () => {
+
+                    if (!("geolocation" in navigator)) {
+
+                        alert(
+                            currentLanguage === "ku"
+                                ? "وێبگەڕەکەت پشتگیری شوێن ناکات."
+                                : currentLanguage === "ar"
+                                    ? "متصفحك لا يدعم تحديد الموقع."
+                                    : "Your browser doesn't support geolocation."
+                        );
+
+                        return;
+                    }
+
+
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+
+                            const localTimezone =
+                                -new Date().getTimezoneOffset() / 60;
+
+                            saveCoords(
+                                position.coords.latitude,
+                                position.coords.longitude,
+                                localTimezone
+                            );
+
+                        },
+                        error => {
+
+                            console.error(
+                                "Geolocation error:",
+                                error
+                            );
+
+                        },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                    );
+
+                }
+            );
+        }
+
+
+        document
+            .getElementById(
+                "useErbilButton"
+            )
+            ?.addEventListener(
+                "click",
+                () => {
+
+                    document.getElementById(
+                        "locationInput"
+                    ).value = "Erbil";
+
+                    document.getElementById(
+                        "locationText"
+                    ).textContent = "Erbil";
+
+                    localStorage.setItem(
+                        "dailykrd_location",
+                        "Erbil"
+                    );
+
+                    saveCoords(
+                        ERBIL_LAT,
+                        ERBIL_LNG,
+                        ERBIL_TIMEZONE
+                    );
+
+                }
+            );
+
 
         document
             .getElementById(
