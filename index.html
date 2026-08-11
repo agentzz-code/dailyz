@@ -1292,6 +1292,35 @@
             text-align: right;
         }
 
+        /* BUG FIX: keep the page base layer synchronized with the motion layer.
+           This prevents the iPhone from showing a separate light/dark strip when
+           the theme changes from the home header button. */
+        html,
+        body {
+            background: #f5f5f7;
+        }
+
+        html.dark,
+        html.dark body,
+        body.dark {
+            background: #101010;
+        }
+
+        .motion-bg {
+            z-index: 0;
+        }
+
+        .motion-bg,
+        .emoji {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        .add-button:disabled {
+            opacity: .55;
+            cursor: wait;
+        }
+
     </style>
 </head>
 
@@ -2360,6 +2389,9 @@
             new Date();
 
         let currentTasksCache = [];
+
+        // Prevent accidental duplicate writes from rapid taps/presses.
+        let taskWriteInProgress = false;
 
         let guestTasks =
             JSON.parse(
@@ -4584,14 +4616,12 @@
             if (!currentUser) return;
 
 
+            // Read the collection without requiring a Firestore composite/indexed
+            // query. Older tasks may not have every indexed field, and this keeps
+            // the app working even if the database was created before createdAt
+            // was added. Sorting is done locally instead.
             const taskQuery =
-                query(
-                    getTasksCollection(),
-                    orderBy(
-                        "createdAt",
-                        "asc"
-                    )
-                );
+                getTasksCollection();
 
 
             unsubscribeTasks =
@@ -4613,6 +4643,12 @@
                             }
                         );
 
+
+                        tasks.sort(
+                            (a, b) =>
+                                (Number(a.createdAt) || 0) -
+                                (Number(b.createdAt) || 0)
+                        );
 
                         currentTasksCache =
                             tasks;
@@ -5160,10 +5196,25 @@
                         }
 
 
-                        await toggleTaskCompletion(
-                            task,
-                            checkbox.checked
-                        );
+                        const desiredState = checkbox.checked;
+
+                        try {
+
+                            await toggleTaskCompletion(
+                                task,
+                                desiredState
+                            );
+
+                        } catch (error) {
+
+                            console.error("Task update error:", error);
+                            checkbox.checked = !desiredState;
+                            row.classList.toggle(
+                                "completed",
+                                !desiredState
+                            );
+
+                        }
 
                     }
                 );
@@ -5252,9 +5303,17 @@
                     "click",
                     async () => {
 
-                        await deleteTask(
-                            task
-                        );
+                        try {
+
+                            await deleteTask(
+                                task
+                            );
+
+                        } catch (error) {
+
+                            console.error("Task delete error:", error);
+
+                        }
 
                     }
                 );
@@ -5480,7 +5539,16 @@
                 input.value.trim();
 
 
-            if (!text) return;
+            if (!text || taskWriteInProgress) return;
+
+            taskWriteInProgress = true;
+
+            const addButton =
+                document.getElementById("addTaskButton");
+
+            if (addButton) {
+                addButton.disabled = true;
+            }
 
 
             const repeat =
@@ -5563,29 +5631,52 @@
             }
 
 
-            if (!currentUser) {
+            try {
 
-                guestTasks.push(
-                    task
-                );
+                if (!currentUser) {
 
+                    guestTasks.push(
+                        task
+                    );
 
-                localStorage.setItem(
-                    "dailykrd_guest_tasks",
-                    JSON.stringify(
-                        guestTasks
-                    )
-                );
+                    localStorage.setItem(
+                        "dailykrd_guest_tasks",
+                        JSON.stringify(
+                            guestTasks
+                        )
+                    );
 
-            } else {
+                } else {
 
-                delete task.id;
+                    delete task.id;
 
+                    await addDoc(
+                        getTasksCollection(),
+                        task
+                    );
+                }
 
-                await addDoc(
-                    getTasksCollection(),
-                    task
-                );
+            } catch (error) {
+
+                console.error("Task add error:", error);
+
+                if (currentLanguage === "ku") {
+                    alert("ئەرکەکە زیاد نەکرا. تکایە دووبارە هەوڵ بدەرەوە.");
+                } else if (currentLanguage === "ar") {
+                    alert("تعذر إضافة المهمة. حاول مرة أخرى.");
+                } else {
+                    alert("The task could not be added. Please try again.");
+                }
+
+                return;
+
+            } finally {
+
+                taskWriteInProgress = false;
+
+                if (addButton) {
+                    addButton.disabled = false;
+                }
             }
 
 
@@ -6040,6 +6131,16 @@ document.documentElement.classList.toggle(
     "dark",
     dark
 );
+
+            const themeMeta =
+                document.querySelector('meta[name="theme-color"]');
+
+            if (themeMeta) {
+                themeMeta.setAttribute(
+                    "content",
+                    dark ? "#101010" : "#f5f5f7"
+                );
+            }
 
             const themeButton =
                 document.getElementById(
