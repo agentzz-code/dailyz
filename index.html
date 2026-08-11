@@ -6048,6 +6048,7 @@ document.documentElement.classList.toggle(
         function darctan2(y, x) { return rtd(Math.atan2(y, x)); }
         function darccot(x) { return rtd(Math.atan2(1, x)); }
         function fixHour(h) { h = h - 24 * Math.floor(h / 24); return h < 0 ? h + 24 : h; }
+        function fixAngle(a) { a = a - 360 * Math.floor(a / 360); return a < 0 ? a + 360 : a; }
 
 
         function julianDate(year, month, day) {
@@ -6072,9 +6073,9 @@ document.documentElement.classList.toggle(
 
             const D = jd - 2451545.0;
 
-            const g = fixHour(357.529 + 0.98560028 * D);
-            const q = fixHour(280.459 + 0.98564736 * D);
-            const L = fixHour(q + 1.915 * dsin(g) + 0.02 * dsin(2 * g));
+            const g = fixAngle(357.529 + 0.98560028 * D);
+            const q = fixAngle(280.459 + 0.98564736 * D);
+            const L = fixAngle(q + 1.915 * dsin(g) + 0.02 * dsin(2 * g));
 
             const e = 23.439 - 0.00000036 * D;
 
