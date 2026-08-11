@@ -4109,12 +4109,7 @@
         }
 
 
-        let authOperationInProgress = false;
-
-
         async function createAccount() {
-
-            if (authOperationInProgress) return;
 
             clearError();
 
@@ -4182,53 +4177,15 @@
                 return;
             }
 
-            authOperationInProgress = true;
-
-            const authButton =
-                document.getElementById("authButton");
-
-            authButton.disabled = true;
-
 
             try {
 
-                let result;
-
-                try {
-
-                    result =
-                        await createUserWithEmailAndPassword(
-                            auth,
-                            email,
-                            password
-                        );
-
-                } catch (error) {
-
-                    /*
-                     * If the first signup request already created the
-                     * Firebase Authentication account but a second click
-                     * reached Firebase, Firebase returns
-                     * auth/email-already-in-use. Sign in with the same
-                     * credentials so the profile can still be completed.
-                     */
-                    if (
-                        error &&
-                        error.code === "auth/email-already-in-use"
-                    ) {
-
-                        result =
-                            await signInWithEmailAndPassword(
-                                auth,
-                                email,
-                                password
-                            );
-
-                    } else {
-
-                        throw error;
-                    }
-                }
+                const result =
+                    await createUserWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
 
 
                 await setDoc(
@@ -4256,32 +4213,9 @@
 
             } catch (error) {
 
-                console.error("Signup error:", error);
-
-                if (
-                    error &&
-                    error.code === "auth/email-already-in-use"
-                ) {
-
-                    showError(
-                        currentLanguage === "ku"
-                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە. تکایە بچۆ ژوورەوە."
-                            : currentLanguage === "ar"
-                            ? "هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل. يرجى تسجيل الدخول."
-                            : "This email already has an account. Please sign in."
-                    );
-
-                } else {
-
-                    showError(
-                        error.message || "Unable to create the account."
-                    );
-                }
-
-            } finally {
-
-                authOperationInProgress = false;
-                authButton.disabled = false;
+                showError(
+                    error.message
+                );
             }
         }
 
