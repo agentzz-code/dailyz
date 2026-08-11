@@ -896,6 +896,8 @@
             font-size: 11px;
             font-weight: 800;
             color: #999;
+            transform-origin: 50% 59px;
+            transition: transform .2s linear;
         }
 
         .qibla-center-dot {
@@ -1765,6 +1767,20 @@
                     Direction from your location toward the Kaaba, Mecca.
                 </div>
 
+                <button
+                    class="setting-button"
+                    id="enableCompassButton"
+                    type="button"
+                    style="margin-top:12px;"
+                >
+                    🧭 <span id="enableCompassLabel">Enable Live Compass</span>
+                </button>
+
+                <div
+                    class="status"
+                    id="compassStatus"
+                ></div>
+
             </div>
 
         </section>
@@ -2574,6 +2590,18 @@
                 useErbil:
                     "Use Erbil",
 
+                enableCompass:
+                    "Enable Live Compass",
+
+                compassEnabled:
+                    "Live compass active — rotate your device.",
+
+                compassUnsupported:
+                    "Your device doesn't support a live compass.",
+
+                compassDenied:
+                    "Compass permission was denied.",
+
                 prayer: {
 
                     Fajr: "Fajr",
@@ -2814,6 +2842,18 @@
                 useErbil:
                     "هەولێر بەکاربێنە",
 
+                enableCompass:
+                    "قوتوپاڵی زیندوو چالاک بکە",
+
+                compassEnabled:
+                    "قوتوپاڵی زیندوو چالاکە — ئامێرەکەت بسوڕێنە.",
+
+                compassUnsupported:
+                    "ئامێرەکەت پشتگیری قوتوپاڵی زیندوو ناکات.",
+
+                compassDenied:
+                    "مۆڵەتی قوتوپاڵ ڕەتکرایەوە.",
+
                 prayer: {
 
                     Fajr: "بەیانی",
@@ -3053,6 +3093,18 @@
 
                 useErbil:
                     "استخدم أربيل",
+
+                enableCompass:
+                    "تفعيل البوصلة المباشرة",
+
+                compassEnabled:
+                    "البوصلة المباشرة مفعّلة — قم بتدوير جهازك.",
+
+                compassUnsupported:
+                    "جهازك لا يدعم البوصلة المباشرة.",
+
+                compassDenied:
+                    "تم رفض إذن البوصلة.",
 
                 prayer: {
 
@@ -3786,6 +3838,12 @@
                 "useErbilLabel"
             ).textContent =
                 t("useErbil");
+
+
+            document.getElementById(
+                "enableCompassLabel"
+            ).textContent =
+                t("enableCompass");
 
 
             renderDailyQuote();
@@ -6278,28 +6336,159 @@ document.documentElement.classList.toggle(
         }
 
 
-        function updateQiblaDisplay() {
+        let qiblaBearingDeg = 0;
 
-            const { lat, lng } = getUserCoords();
+        let liveDeviceHeading = null;
 
-            const bearing = computeQiblaBearing(lat, lng);
+
+        function renderCompassNeedle() {
 
             const needle =
                 document.getElementById("qiblaNeedle");
 
-            const degreeText =
-                document.getElementById("qiblaDegrees");
+            const northLabel =
+                document.querySelector(".qibla-north-label");
+
+            const heading =
+                liveDeviceHeading || 0;
+
+            const needleRotation =
+                qiblaBearingDeg - heading;
 
             if (needle) {
                 needle.style.transform =
-                    `translateX(-50%) rotate(${bearing}deg)`;
+                    `translateX(-50%) rotate(${needleRotation}deg)`;
             }
+
+            if (northLabel) {
+                northLabel.style.transform =
+                    `translateX(-50%) rotate(${-heading}deg)`;
+            }
+        }
+
+
+        function updateQiblaDisplay() {
+
+            const { lat, lng } = getUserCoords();
+
+            qiblaBearingDeg =
+                computeQiblaBearing(lat, lng);
+
+            const degreeText =
+                document.getElementById("qiblaDegrees");
 
             if (degreeText) {
                 degreeText.textContent =
-                    Math.round(bearing) + "°";
+                    Math.round(qiblaBearingDeg) + "°";
+            }
+
+            renderCompassNeedle();
+        }
+
+
+        function handleOrientationEvent(event) {
+
+            let heading = null;
+
+            if (typeof event.webkitCompassHeading === "number") {
+
+                // iOS Safari gives compass heading directly (0 = north)
+                heading = event.webkitCompassHeading;
+
+            } else if (event.absolute && event.alpha !== null) {
+
+                // Standard DeviceOrientation alpha: counter-clockwise from north
+                heading = 360 - event.alpha;
+
+            } else if (event.alpha !== null) {
+
+                heading = 360 - event.alpha;
+            }
+
+            if (heading !== null && !isNaN(heading)) {
+
+                liveDeviceHeading = heading;
+
+                renderCompassNeedle();
             }
         }
+
+
+        async function enableLiveCompass() {
+
+            const status =
+                document.getElementById("compassStatus");
+
+
+            if (
+                typeof DeviceOrientationEvent !== "undefined" &&
+                typeof DeviceOrientationEvent.requestPermission === "function"
+            ) {
+
+                try {
+
+                    const permission =
+                        await DeviceOrientationEvent.requestPermission();
+
+                    if (permission !== "granted") {
+
+                        status.textContent =
+                            t("compassDenied");
+
+                        return;
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Compass permission error:",
+                        error
+                    );
+
+                    status.textContent =
+                        t("compassDenied");
+
+                    return;
+                }
+            }
+
+
+            if (
+                !("DeviceOrientationEvent" in window) &&
+                !("ondeviceorientationabsolute" in window)
+            ) {
+
+                status.textContent =
+                    t("compassUnsupported");
+
+                return;
+            }
+
+
+            window.addEventListener(
+                "deviceorientationabsolute",
+                handleOrientationEvent,
+                true
+            );
+
+            window.addEventListener(
+                "deviceorientation",
+                handleOrientationEvent,
+                true
+            );
+
+
+            status.textContent =
+                t("compassEnabled");
+        }
+
+
+        document
+            .getElementById("enableCompassButton")
+            ?.addEventListener(
+                "click",
+                enableLiveCompass
+            );
 
 
         let prayerTimes = {};
