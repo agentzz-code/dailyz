@@ -1885,6 +1885,8 @@ html.dark {
         let calendarDate =
             new Date();
 
+        let currentTasksCache = [];
+
         let guestTasks =
             JSON.parse(
                 localStorage.getItem(
@@ -3037,7 +3039,7 @@ html.dark {
 
             } else {
 
-                renderTasks([]);
+                refreshTasks();
 
             }
         }
@@ -3187,7 +3189,7 @@ html.dark {
 
                     currentUser = null;
 
-                    renderTasks([]);
+                    refreshTasks();
 
                 }
             );
@@ -3581,7 +3583,11 @@ html.dark {
 
                     stopTaskListener();
 
-                    renderTasks([]);
+                    currentTasksCache = [];
+
+                    refreshTasks();
+
+                    renderCalendar();
 
                 }
 
@@ -3785,6 +3791,10 @@ html.dark {
                         );
 
 
+                        currentTasksCache =
+                            tasks;
+
+
                         renderTasks(tasks);
 
                         renderCalendar();
@@ -3891,6 +3901,16 @@ html.dark {
 
 
         /* TASKS */
+
+        function refreshTasks() {
+
+            renderTasks(
+                currentUser
+                    ? currentTasksCache
+                    : []
+            );
+        }
+
 
         function renderTasks(tasks) {
 
@@ -4179,7 +4199,9 @@ html.dark {
                 );
 
 
-                renderTasks([]);
+                refreshTasks();
+
+                renderCalendar();
 
                 return;
             }
@@ -4271,7 +4293,9 @@ html.dark {
                 );
 
 
-                renderTasks([]);
+                refreshTasks();
+
+                renderCalendar();
 
                 return;
             }
@@ -4431,7 +4455,7 @@ html.dark {
                 );
 
 
-            renderTasks([]);
+            refreshTasks();
 
             renderCalendar();
         }
@@ -4661,20 +4685,20 @@ html.dark {
                 }
 
 
-                let hasTask = false;
+                const relevantTasks =
+                    currentUser
+                        ? currentTasksCache
+                        : guestTasks;
 
 
-                if (!currentUser) {
-
-                    hasTask =
-                        guestTasks.some(
-                            task =>
-                                taskOccursOnDate(
-                                    task,
-                                    key
-                                )
-                        );
-                }
+                const hasTask =
+                    relevantTasks.some(
+                        task =>
+                            taskOccursOnDate(
+                                task,
+                                key
+                            )
+                    );
 
 
                 if (hasTask) {
@@ -4709,7 +4733,7 @@ html.dark {
 
                         renderCalendar();
 
-                        renderTasks([]);
+                        refreshTasks();
 
                     }
                 );
@@ -4790,7 +4814,7 @@ html.dark {
 
                     renderCalendar();
 
-                    renderTasks([]);
+                    refreshTasks();
 
                 }
             );
@@ -4824,7 +4848,7 @@ html.dark {
 
                     renderCalendar();
 
-                    renderTasks([]);
+                    refreshTasks();
 
                 }
             );
