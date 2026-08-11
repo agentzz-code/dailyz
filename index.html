@@ -1,2466 +1,659 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-
-<meta
+\<meta
 name="viewport"
 content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+
 >
 
-<title>Daily.KRD</title>
-
-<style>
-:root {
-    --bg: #f5f5f7;
-    --card: #ffffff;
-    --text: #171717;
-    --secondary: #777;
-    --border: #e5e5e5;
-    --button: #171717;
-    --button-text: #ffffff;
-    --input: #f1f1f1;
-    --accent: #007aff;
-    --danger: #ff3b30;
-    --shadow: 0 4px 20px rgba(0,0,0,.06);
-}
-
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    transition: background .25s, color .25s;
-}
-
-body.dark {
-    --bg: #101010;
-    --card: #1c1c1e;
-    --text: #f5f5f7;
-    --secondary: #a1a1a6;
-    --border: #333336;
-    --button: #f5f5f7;
-    --button-text: #111;
-    --input: #29292c;
-    --shadow: 0 4px 20px rgba(0,0,0,.3);
-}
-
-button,
-input,
-select {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
-}
-
-.app {
-    width: 100%;
-    max-width: 700px;
-    margin: auto;
-    padding: 18px;
-    padding-bottom: 50px;
-}
-
-/* HEADER */
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.logo {
-    font-size: 25px;
-    font-weight: 800;
-    letter-spacing: -.7px;
-}
-
-.date {
-    margin-top: 4px;
-    color: var(--secondary);
-    font-size: 14px;
-}
-
-.header-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.icon-button {
-    width: 42px;
-    height: 42px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    border-radius: 13px;
-    box-shadow: var(--shadow);
-    font-size: 19px;
-}
-
-/* TABS */
-
-.tabs {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    background: var(--input);
-    padding: 5px;
-    border-radius: 14px;
-    margin-bottom: 18px;
-}
-
-.tab {
-    border: none;
-    background: transparent;
-    color: var(--secondary);
-    padding: 11px 5px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.tab.active {
-    background: var(--card);
-    color: var(--text);
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-/* SECTIONS */
-
-.section {
-    display: none;
-}
-
-.section.active {
-    display: block;
-}
-
-/* TASKS */
-
-.selected-day {
-    font-weight: 700;
-    font-size: 18px;
-    margin: 10px 2px 14px;
-}
-
-.task-input {
-    display: flex;
-    gap: 8px;
-}
-
-.task-input input {
-    flex: 1;
-    min-width: 0;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    border-radius: 13px;
-    padding: 13px;
-    outline: none;
-}
-
-.add-button {
-    width: 48px;
-    border: none;
-    border-radius: 13px;
-    background: var(--button);
-    color: var(--button-text);
-    font-size: 27px;
-}
-
-.task-options {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 12px;
-    margin-top: 12px;
-}
-
-.option-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    padding: 8px 0;
-}
-
-.option-row label {
-    color: var(--secondary);
-}
-
-.task-date-input,
-.repeat-select {
-    background: var(--input);
-    color: var(--text);
-    border: none;
-    border-radius: 9px;
-    padding: 8px;
-}
-
-.repeat-days {
-    display: none;
-    gap: 5px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-
-.repeat-day {
-    border: none;
-    background: var(--input);
-    color: var(--text);
-    padding: 8px 10px;
-    border-radius: 8px;
-}
-
-.repeat-day.selected {
-    background: var(--button);
-    color: var(--button-text);
-}
-
-.task-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 13px;
-    margin-top: 9px;
-    box-shadow: var(--shadow);
-}
-
-.task-check {
-    width: 23px;
-    height: 23px;
-    border: 2px solid var(--secondary);
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.task-card.completed .task-check {
-    background: var(--button);
-    border-color: var(--button);
-}
-
-.task-card.completed .task-text {
-    text-decoration: line-through;
-    color: var(--secondary);
-}
-
-.task-text {
-    flex: 1;
-    word-break: break-word;
-}
-
-.delete-task {
-    border: none;
-    background: transparent;
-    color: var(--danger);
-    font-size: 20px;
-}
-
-/* CALENDAR */
-
-.calendar-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 15px;
-    box-shadow: var(--shadow);
-}
-
-.calendar-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.calendar-month {
-    font-weight: 800;
-    font-size: 18px;
-}
-
-.calendar-nav {
-    display: flex;
-    gap: 5px;
-}
-
-.calendar-nav button {
-    width: 35px;
-    height: 35px;
-    border: none;
-    background: var(--input);
-    color: var(--text);
-    border-radius: 9px;
-}
-
-.calendar-weekdays,
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-}
-
-.calendar-weekdays div {
-    text-align: center;
-    color: var(--secondary);
-    font-size: 11px;
-    padding-bottom: 7px;
-}
-
-.calendar-day {
-    min-height: 45px;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--text);
-    position: relative;
-}
-
-.calendar-day:hover {
-    background: var(--input);
-}
-
-.calendar-day.today {
-    border: 2px solid var(--accent);
-}
-
-.calendar-day.selected {
-    background: var(--button);
-    color: var(--button-text);
-}
-
-.calendar-day.has-task::after {
-    content: "";
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.calendar-day.selected.has-task::after {
-    background: var(--button-text);
-}
-
-/* PRAYERS */
-
-.prayer-header {
-    margin-bottom: 15px;
-}
-
-.prayer-header h2 {
-    margin: 0 0 5px;
-}
-
-.location {
-    color: var(--secondary);
-}
-
-.next-prayer {
-    background: var(--button);
-    color: var(--button-text);
-    border-radius: 18px;
-    padding: 20px;
-    margin-bottom: 12px;
-}
-
-.next-label {
-    font-size: 11px;
-    opacity: .65;
-    font-weight: 700;
-}
-
-.next-name {
-    font-size: 22px;
-    font-weight: 800;
-    margin-top: 5px;
-}
-
-.next-time {
-    font-size: 32px;
-    font-weight: 800;
-    margin-top: 4px;
-}
-
-.prayer-card {
-    display: flex;
-    justify-content: space-between;
-    background: var(--card);
-    border: 1px solid var(--border);
-    padding: 15px;
-    border-radius: 14px;
-    margin-bottom: 8px;
-}
-
-.prayer-card.next {
-    border-color: var(--accent);
-}
-
-.prayer-name {
-    font-weight: 700;
-}
-
-.prayer-time {
-    font-weight: 700;
-}
-
-/* SETTINGS */
-
-.settings-title {
-    font-size: 27px;
-    font-weight: 800;
-}
-
-.settings-subtitle {
-    color: var(--secondary);
-    margin-top: 5px;
-    margin-bottom: 20px;
-}
-
-.settings-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 17px;
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: var(--shadow);
-}
-
-.settings-card-title {
-    font-weight: 800;
-    margin-bottom: 12px;
-}
-
-.setting-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    padding: 11px 0;
-}
-
-.setting-label {
-    font-weight: 600;
-}
-
-.setting-description {
-    color: var(--secondary);
-    font-size: 13px;
-    margin-top: 3px;
-}
-
-.setting-button,
-.notification-button,
-.danger-button,
-.welcome-button,
-.auth-button {
-    border: none;
-    border-radius: 11px;
-    padding: 11px 15px;
-    font-weight: 700;
-}
-
-.setting-button {
-    background: var(--input);
-    color: var(--text);
-}
-
-.setting-button.dark,
-.auth-button {
-    background: var(--button);
-    color: var(--button-text);
-}
-
-.language-select,
-.location-row input {
-    width: 100%;
-    background: var(--input);
-    color: var(--text);
-    border: none;
-    border-radius: 11px;
-    padding: 12px;
-}
-
-.location-row {
-    display: flex;
-    gap: 8px;
-}
-
-.location-row input {
-    min-width: 0;
-}
-
-.notification-button {
-    width: 100%;
-    background: var(--input);
-    color: var(--text);
-}
-
-.status {
-    color: var(--secondary);
-    font-size: 13px;
-    margin-top: 10px;
-}
-
-.danger-button {
-    background: rgba(255,59,48,.12);
-    color: var(--danger);
-}
-
-/* WELCOME */
-
-#welcomeScreen,
-#authScreen,
-#languageScreen {
-    min-height: 100vh;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 25px;
-}
-
-.welcome-box,
-#authCard,
-.language-box {
-    width: 100%;
-    max-width: 430px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 25px;
-    box-shadow: var(--shadow);
-    text-align: center;
-}
-
-.welcome-logo {
-    font-size: 32px;
-    font-weight: 900;
-}
-
-.welcome-subtitle {
-    color: var(--secondary);
-    margin: 10px 0 25px;
-}
-
-.welcome-button {
-    width: 100%;
-    margin-top: 9px;
-    background: var(--button);
-    color: var(--button-text);
-}
-
-.welcome-button.secondary,
-.welcome-button.guest {
-    background: var(--input);
-    color: var(--text);
-}
-
-/* AUTH */
-
-#authScreen {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 20;
-}
-
-.close-auth {
-    position: absolute;
-    right: 15px;
-    top: 12px;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    font-size: 28px;
-}
-
-.auth-input {
-    width: 100%;
-    padding: 13px;
-    margin-top: 9px;
-    border: none;
-    border-radius: 11px;
-    background: var(--input);
-    color: var(--text);
-    outline: none;
-}
-
-.auth-button {
-    width: 100%;
-    margin-top: 12px;
-}
-
-.auth-subtitle,
-.auth-switch {
-    color: var(--secondary);
-    margin-top: 8px;
-}
-
-.auth-error {
-    color: var(--danger);
-    font-size: 13px;
-    margin-top: 8px;
-}
-
-.auth-switch button {
-    border: none;
-    background: transparent;
-    color: var(--accent);
-    font-weight: 700;
-}
-
-/* LANGUAGE */
-
-#languageScreen {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 30;
-}
-
-.language-box h1 {
-    margin-top: 0;
-}
-
-.language-box p {
-    color: var(--secondary);
-}
-
-.language-option {
-    width: 100%;
-    border: none;
-    background: var(--input);
-    color: var(--text);
-    padding: 14px;
-    border-radius: 12px;
-    margin-top: 8px;
-    font-weight: 700;
-}
-
-/* RTL */
-
-body.rtl {
-    direction: rtl;
-}
-
-body.rtl .header,
-body.rtl .calendar-head,
-body.rtl .prayer-card,
-body.rtl .setting-row {
-    direction: rtl;
-}
-
-body.rtl .header-actions {
-    direction: ltr;
-}
-
-@media (max-width: 500px) {
-    .app {
-        padding: 14px;
-    }
-}
-</style>
-</head>
-
-<body>
-
-<div id="languageScreen">
-    <div class="language-box">
-        <h1>Daily.KRD</h1>
-        <p id="chooseLanguageText">Choose your language</p>
-
-        <button class="language-option" data-language="en" type="button">
-            🇬🇧 English
-        </button>
-
-        <button class="language-option" data-language="ku" type="button">
-            کوردی
-        </button>
-
-        <button class="language-option" data-language="ar" type="button">
-            🇮🇶 العربية
-        </button>
-    </div>
+```
+<div>
+    <div class="logo">Daily.KRD</div>
+    <div class="date" id="date"></div>
 </div>
 
-<div id="welcomeScreen">
-    <div class="welcome-box">
+<div class="header-actions">
 
-        <div class="welcome-logo">Daily.KRD</div>
+    <button
+        class="icon-button"
+        id="themeButton"
+        type="button"
+    >☾</button>
 
-        <div class="welcome-subtitle" id="welcomeSubtitle">
-            Organize your day your way.
-        </div>
+    <button
+        class="icon-button"
+        id="settingsButton"
+        type="button"
+    >⚙️</button>
 
-        <button class="welcome-button" id="welcomeSignIn" type="button">
-            Sign In
-        </button>
+</div>
+```
 
-        <button class="welcome-button secondary" id="welcomeCreate" type="button">
-            Create Account
-        </button>
+```
+<button
+    class="tab active"
+    id="tasksTab"
+    data-tab="tasks"
+    type="button"
+>
+    Tasks
+</button>
 
-        <button class="welcome-button guest" id="welcomeGuest" type="button">
-            Continue without an account
-        </button>
+<button
+    class="tab"
+    id="calendarTab"
+    data-tab="calendar"
+    type="button"
+>
+    Calendar
+</button>
 
-    </div>
+<button
+    class="tab"
+    id="prayersTab"
+    data-tab="prayers"
+    type="button"
+>
+    Prayer Times
+</button>
+```
+
+```
+<div class="selected-day" id="selectedDayText"></div>
+
+<div class="task-input">
+
+    <input
+        id="taskInput"
+        type="text"
+        autocomplete="off"
+    >
+
+    <button
+        id="addTaskButton"
+        class="add-button"
+        type="button"
+    >+</button>
+
 </div>
 
-<div id="authScreen">
+<div class="task-options">
 
-    <div id="authCard">
+    <div class="option-row">
 
-        <button class="close-auth" id="closeAuth" type="button">×</button>
+        <label id="dateLabel">
+            Date
+        </label>
 
-        <h2 id="authTitle"></h2>
+        <input
+            class="task-date-input"
+            id="taskDateInput"
+            type="date"
+        >
 
-        <div class="auth-subtitle" id="authSubtitle"></div>
+    </div>
 
-        <div class="auth-error" id="authError"></div>
+    <div class="option-row">
 
-        <input class="auth-input" id="usernameInput" type="text" autocomplete="username">
-        <input class="auth-input" id="emailInput" type="email" autocomplete="email">
-        <input class="auth-input" id="passwordInput" type="password" autocomplete="new-password">
-        <input class="auth-input" id="confirmPasswordInput" type="password" autocomplete="new-password">
+        <label id="repeatLabel">
+            Repeat
+        </label>
 
-        <button class="auth-button" id="authButton" type="button"></button>
+        <select
+            class="repeat-select"
+            id="repeatSelect"
+        >
+            <option value="once" id="repeatOnce">Once</option>
+            <option value="daily" id="repeatDaily">Every day</option>
+            <option value="weekly" id="repeatWeekly">Every week</option>
+            <option value="custom" id="repeatCustom">Custom days</option>
+        </select>
 
-        <div class="auth-switch">
-            <span id="switchText"></span>
-            <button id="switchButton" type="button"></button>
+    </div>
+
+    <div
+        class="repeat-days"
+        id="repeatDays"
+    >
+
+        <button class="repeat-day" data-day="0">Sun</button>
+        <button class="repeat-day" data-day="1">Mon</button>
+        <button class="repeat-day" data-day="2">Tue</button>
+        <button class="repeat-day" data-day="3">Wed</button>
+        <button class="repeat-day" data-day="4">Thu</button>
+        <button class="repeat-day" data-day="5">Fri</button>
+        <button class="repeat-day" data-day="6">Sat</button>
+
+    </div>
+
+</div>
+
+<div id="taskList"></div>
+```
+
+```
+<div class="calendar-card">
+
+    <div class="calendar-head">
+
+        <div
+            class="calendar-month"
+            id="calendarMonth"
+        ></div>
+
+        <div class="calendar-nav">
+
+            <button
+                id="previousMonth"
+                type="button"
+            >‹</button>
+
+            <button
+                id="todayButton"
+                type="button"
+            >●</button>
+
+            <button
+                id="nextMonth"
+                type="button"
+            >›</button>
+
         </div>
 
     </div>
+
+    <div
+        class="calendar-weekdays"
+        id="calendarWeekdays"
+    ></div>
+
+    <div
+        class="calendar-grid"
+        id="calendarGrid"
+    ></div>
+
 </div>
 
-<div class="app" id="mainApp">
+<div class="selected-day" id="calendarSelectedDay"></div>
 
-    <div class="header">
+<div id="calendarTaskList"></div>
+```
+
+```
+<div class="prayer-header">
+
+    <h2 id="prayerTitle">
+        Prayer Times
+    </h2>
+
+    <div
+        class="location"
+        id="locationText"
+    >
+        Erbil, Iraq
+    </div>
+
+</div>
+
+<div class="next-prayer">
+
+    <div
+        class="next-label"
+        id="nextLabel"
+    >
+        NEXT PRAYER
+    </div>
+
+    <div
+        class="next-name"
+        id="nextName"
+    >
+        Loading...
+    </div>
+
+    <div
+        class="next-time"
+        id="nextTime"
+    >
+        --:--
+    </div>
+
+</div>
+
+<div id="prayerList"></div>
+```
+
+```
+<div
+    class="settings-title"
+    id="settingsTitle"
+>
+    Settings
+</div>
+
+<div
+    class="settings-subtitle"
+    id="settingsSubtitle"
+>
+    Customize your Daily.KRD experience.
+</div>
+
+
+<div class="settings-card">
+
+    <div
+        class="settings-card-title"
+        id="accountTitle"
+    >
+        Account
+    </div>
+
+    <div class="setting-row">
 
         <div>
-            <div class="logo">Daily.KRD</div>
-            <div class="date" id="date"></div>
-        </div>
 
-        <div class="header-actions">
-
-            <button
-                class="icon-button"
-                id="themeButton"
-                type="button"
-            >☾</button>
-
-            <button
-                class="icon-button"
-                id="settingsButton"
-                type="button"
-            >⚙️</button>
-
-        </div>
-
-    </div>
-
-    <div class="tabs">
-
-        <button class="tab active" id="tasksTab" data-tab="tasks" type="button">
-            Tasks
-        </button>
-
-        <button class="tab" id="calendarTab" data-tab="calendar" type="button">
-            Calendar
-        </button>
-
-        <button class="tab" id="prayersTab" data-tab="prayers" type="button">
-            Prayer Times
-        </button>
-
-    </div>
-
-    <!-- TASKS -->
-
-    <div class="section active" id="tasksSection">
-
-        <div class="selected-day" id="selectedDayText"></div>
-
-        <div class="task-input">
-
-            <input
-                id="taskInput"
-                type="text"
-                autocomplete="off"
+            <div
+                class="setting-label"
+                id="usernameLabel"
             >
-
-            <button
-                id="addTaskButton"
-                class="add-button"
-                type="button"
-            >+</button>
-
-        </div>
-
-        <div class="task-options">
-
-            <div class="option-row">
-
-                <label id="dateLabel">
-                    Date
-                </label>
-
-                <input
-                    class="task-date-input"
-                    id="taskDateInput"
-                    type="date"
-                >
-
+                Username
             </div>
 
-            <div class="option-row">
-
-                <label id="repeatLabel">
-                    Repeat
-                </label>
-
-                <select class="repeat-select" id="repeatSelect">
-
-                    <option value="once" id="repeatOnce">
-                        Once
-                    </option>
-
-                    <option value="daily" id="repeatDaily">
-                        Every day
-                    </option>
-
-                    <option value="weekly" id="repeatWeekly">
-                        Every week
-                    </option>
-
-                    <option value="custom" id="repeatCustom">
-                        Custom days
-                    </option>
-
-                </select>
-
-            </div>
-
-            <div class="repeat-days" id="repeatDays">
-
-                <button class="repeat-day" data-day="0">Sun</button>
-                <button class="repeat-day" data-day="1">Mon</button>
-                <button class="repeat-day" data-day="2">Tue</button>
-                <button class="repeat-day" data-day="3">Wed</button>
-                <button class="repeat-day" data-day="4">Thu</button>
-                <button class="repeat-day" data-day="5">Fri</button>
-                <button class="repeat-day" data-day="6">Sat</button>
-
-            </div>
-
-        </div>
-
-        <div id="taskList"></div>
-
-    </div>
-
-    <!-- CALENDAR -->
-
-    <div class="section" id="calendarSection">
-
-        <div class="calendar-card">
-
-            <div class="calendar-head">
-
-                <div class="calendar-month" id="calendarMonth"></div>
-
-                <div class="calendar-nav">
-
-                    <button id="previousMonth" type="button">‹</button>
-                    <button id="todayButton" type="button">●</button>
-                    <button id="nextMonth" type="button">›</button>
-
-                </div>
-
-            </div>
-
-            <div class="calendar-weekdays" id="calendarWeekdays"></div>
-
-            <div class="calendar-grid" id="calendarGrid"></div>
-
-        </div>
-
-        <div class="selected-day" id="calendarSelectedDay"></div>
-
-        <div id="calendarTaskList"></div>
-
-    </div>
-
-    <!-- PRAYERS -->
-
-    <div class="section" id="prayersSection">
-
-        <div class="prayer-header">
-
-            <h2 id="prayerTitle">
-                Prayer Times
-            </h2>
-
-            <div class="location" id="locationText">
-                Erbil, Iraq
-            </div>
-
-        </div>
-
-        <div class="next-prayer">
-
-            <div class="next-label" id="nextLabel">
-                NEXT PRAYER
-            </div>
-
-            <div class="next-name" id="nextName">
-                Loading...
-            </div>
-
-            <div class="next-time" id="nextTime">
-                --:--
-            </div>
-
-        </div>
-
-        <div id="prayerList"></div>
-
-    </div>
-
-    <!-- SETTINGS -->
-
-    <div class="section" id="settingsSection">
-
-        <div class="settings-title" id="settingsTitle">
-            Settings
-        </div>
-
-        <div class="settings-subtitle" id="settingsSubtitle">
-            Customize your Daily.KRD experience.
-        </div>
-
-        <div class="settings-card">
-
-            <div class="settings-card-title" id="accountTitle">
-                Account
-            </div>
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-label" id="usernameLabel">
-                        Username
-                    </div>
-
-                    <div class="setting-description" id="settingsUsername">
-                        Not signed in
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-label" id="emailLabel">
-                        Email
-                    </div>
-
-                    <div class="setting-description" id="settingsEmail">
-                        Not signed in
-                    </div>
-                </div>
-
-            </div>
-
-            <button
-                class="setting-button dark"
-                id="accountButton"
-                type="button"
+            <div
+                class="setting-description"
+                id="settingsUsername"
             >
-                Sign In
-            </button>
-
-        </div>
-
-        <div class="settings-card">
-
-            <div class="settings-card-title" id="appearanceTitle">
-                Appearance
-            </div>
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-label" id="darkModeLabel">
-                        Dark Mode
-                    </div>
-
-                    <div class="setting-description" id="darkModeDescription">
-                        Change appearance.
-                    </div>
-                </div>
-
-                <button
-                    class="setting-button"
-                    id="settingsThemeButton"
-                    type="button"
-                >
-                    Off
-                </button>
-
+                Not signed in
             </div>
 
         </div>
 
-        <div class="settings-card">
+    </div>
 
-            <div class="settings-card-title" id="languageTitle">
+    <div class="setting-row">
+
+        <div>
+
+            <div
+                class="setting-label"
+                id="emailLabel"
+            >
+                Email
+            </div>
+
+            <div
+                class="setting-description"
+                id="settingsEmail"
+            >
+                Not signed in
+            </div>
+
+        </div>
+
+    </div>
+
+    <button
+        class="setting-button dark"
+        id="accountButton"
+        type="button"
+    >
+        Sign In
+    </button>
+
+</div>
+
+
+<div class="settings-card">
+
+    <div
+        class="settings-card-title"
+        id="appearanceTitle"
+    >
+        Appearance
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+
+            <div
+                class="setting-label"
+                id="darkModeLabel"
+            >
+                Dark Mode
+            </div>
+
+            <div
+                class="setting-description"
+                id="darkModeDescription"
+            >
+                Change appearance.
+            </div>
+
+        </div>
+
+        <button
+            class="setting-button"
+            id="settingsThemeButton"
+            type="button"
+        >
+            Off
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="settings-card">
+
+    <div
+        class="settings-card-title"
+        id="languageTitle"
+    >
+        Language
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+
+            <div
+                class="setting-label"
+                id="languageLabel"
+            >
                 Language
             </div>
 
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-label" id="languageLabel">
-                        Language
-                    </div>
-
-                    <div class="setting-description" id="languageDescription">
-                        Choose your language.
-                    </div>
-                </div>
-
-            </div>
-
-            <select class="language-select" id="settingsLanguage">
-
-                <option value="en">English</option>
-                <option value="ku">کوردی</option>
-                <option value="ar">العربية</option>
-
-            </select>
-
-        </div>
-
-        <div class="settings-card">
-
-            <div class="settings-card-title" id="prayerSettingsTitle">
-                Prayer Settings
-            </div>
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-label" id="locationLabel">
-                        Location
-                    </div>
-
-                    <div class="setting-description" id="locationDescription">
-                        Your prayer location.
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="location-row">
-
-                <input
-                    id="locationInput"
-                    type="text"
-                    value="Erbil, Iraq"
-                >
-
-                <button
-                    class="setting-button dark"
-                    id="updateLocationButton"
-                    type="button"
-                >
-                    Update
-                </button>
-
-            </div>
-
-        </div>
-
-        <div class="settings-card">
-
-            <div class="settings-card-title" id="notificationsTitle">
-                Notifications
-            </div>
-
-            <div class="setting-row">
-
-                <div>
-                    <div class="setting-label" id="notificationsLabel">
-                        Prayer Notifications
-                    </div>
-
-                    <div class="setting-description" id="notificationsDescription">
-                        Receive prayer notifications.
-                    </div>
-                </div>
-
-            </div>
-
-            <button
-                class="notification-button"
-                id="notificationButton"
-                type="button"
+            <div
+                class="setting-description"
+                id="languageDescription"
             >
-                🔔 Enable Prayer Notifications
-            </button>
-
-            <div class="status" id="notificationStatus">
-                Notifications are disabled.
+                Choose your language.
             </div>
-
-        </div>
-
-        <div class="settings-card" id="accountActionsCard">
-
-            <div class="settings-card-title" id="accountActionsTitle">
-                Account Actions
-            </div>
-
-            <button
-                class="danger-button"
-                id="logoutButton"
-                type="button"
-            >
-                Sign Out
-            </button>
 
         </div>
 
     </div>
 
+    <select
+        class="language-select"
+        id="settingsLanguage"
+    >
+
+        <option value="en">English</option>
+        <option value="ku">کوردی</option>
+        <option value="ar">العربية</option>
+
+    </select>
+
 </div>
 
-<script>
-/* =========================================================
-   DAILY.KRD
-   MASTER CHECKPOINT
-========================================================= */
-
-/* ---------- LANGUAGE ---------- */
-
-const translations = {
-
-    en: {
-        tasks: "Tasks",
-        calendar: "Calendar",
-        prayers: "Prayer Times",
-        date: "Date",
-        repeat: "Repeat",
-        once: "Once",
-        daily: "Every day",
-        weekly: "Every week",
-        custom: "Custom days",
-        settings: "Settings",
-        settingsSubtitle: "Customize your Daily.KRD experience.",
-        account: "Account",
-        username: "Username",
-        email: "Email",
-        notSigned: "Not signed in",
-        signIn: "Sign In",
-        appearance: "Appearance",
-        darkMode: "Dark Mode",
-        changeAppearance: "Change appearance.",
-        language: "Language",
-        chooseLanguage: "Choose your language",
-        chooseLanguageDescription: "Choose your language.",
-        prayerSettings: "Prayer Settings",
-        location: "Location",
-        prayerLocation: "Your prayer location.",
-        update: "Update",
-        notifications: "Notifications",
-        prayerNotifications: "Prayer Notifications",
-        receiveNotifications: "Receive prayer notifications.",
-        enableNotifications: "🔔 Enable Prayer Notifications",
-        notificationsDisabled: "Notifications are disabled.",
-        accountActions: "Account Actions",
-        signOut: "Sign Out",
-        nextPrayer: "NEXT PRAYER",
-        loading: "Loading...",
-        noTasks: "No tasks for this day.",
-        taskPlaceholder: "What do you need to do?",
-        welcome: "Organize your day your way.",
-        continueGuest: "Continue without an account"
-    },
-
-    ku: {
-        tasks: "ئەرکەکان",
-        calendar: "ڕۆژژمێر",
-        prayers: "کاتی نوێژ",
-        date: "بەروار",
-        repeat: "دووبارەکردنەوە",
-        once: "یەکجار",
-        daily: "هەموو ڕۆژێک",
-        weekly: "هەموو هەفتەیەک",
-        custom: "ڕۆژە دیاریکراوەکان",
-        settings: "ڕێکخستنەکان",
-        settingsSubtitle: "ئەزموونی Daily.KRD ـەکەت بە شێوەی خۆت ڕێکبخە.",
-        account: "هەژمار",
-        username: "ناوی بەکارهێنەر",
-        email: "ئیمەیڵ",
-        notSigned: "چوونەژوورەوە نەکراوە",
-        signIn: "چوونەژوورەوە",
-        appearance: "دیمەن",
-        darkMode: "دۆخی تاریک",
-        changeAppearance: "دیمەنی ئەپ بگۆڕە.",
-        language: "زمان",
-        chooseLanguage: "زمانەکەت هەڵبژێرە",
-        chooseLanguageDescription: "زمانەکەت هەڵبژێرە.",
-        prayerSettings: "ڕێکخستنی نوێژ",
-        location: "شوێن",
-        prayerLocation: "شوێنی نوێژەکانت.",
-        update: "نوێکردنەوە",
-        notifications: "ئاگادارکردنەوەکان",
-        prayerNotifications: "ئاگادارکردنەوەی نوێژ",
-        receiveNotifications: "ئاگادارکردنەوەی نوێژ وەربگرە.",
-        enableNotifications: "🔔 ئاگادارکردنەوەی نوێژ چالاک بکە",
-        notificationsDisabled: "ئاگادارکردنەوەکان ناچالاکن.",
-        accountActions: "کردارەکانی هەژمار",
-        signOut: "چوونەدەرەوە",
-        nextPrayer: "نوێژی داهاتوو",
-        loading: "چاوەڕێ بکە...",
-        noTasks: "هیچ ئەرکێک بۆ ئەم ڕۆژە نییە.",
-        taskPlaceholder: "چی دەبێت بکەیت؟",
-        welcome: "ڕۆژەکەت بە شێوەی خۆت ڕێکبخە.",
-        continueGuest: "بەبێ هەژمار بەردەوام بە"
-    },
-
-    ar: {
-        tasks: "المهام",
-        calendar: "التقويم",
-        prayers: "أوقات الصلاة",
-        date: "التاريخ",
-        repeat: "التكرار",
-        once: "مرة واحدة",
-        daily: "كل يوم",
-        weekly: "كل أسبوع",
-        custom: "أيام مخصصة",
-        settings: "الإعدادات",
-        settingsSubtitle: "خصص تجربة Daily.KRD الخاصة بك.",
-        account: "الحساب",
-        username: "اسم المستخدم",
-        email: "البريد الإلكتروني",
-        notSigned: "لم يتم تسجيل الدخول",
-        signIn: "تسجيل الدخول",
-        appearance: "المظهر",
-        darkMode: "الوضع الداكن",
-        changeAppearance: "تغيير المظهر.",
-        language: "اللغة",
-        chooseLanguage: "اختر لغتك",
-        chooseLanguageDescription: "اختر لغتك.",
-        prayerSettings: "إعدادات الصلاة",
-        location: "الموقع",
-        prayerLocation: "موقع الصلاة الخاص بك.",
-        update: "تحديث",
-        notifications: "الإشعارات",
-        prayerNotifications: "إشعارات الصلاة",
-        receiveNotifications: "تلقي إشعارات الصلاة.",
-        enableNotifications: "🔔 تفعيل إشعارات الصلاة",
-        notificationsDisabled: "الإشعارات معطلة.",
-        accountActions: "إجراءات الحساب",
-        signOut: "تسجيل الخروج",
-        nextPrayer: "الصلاة القادمة",
-        loading: "جار التحميل...",
-        noTasks: "لا توجد مهام لهذا اليوم.",
-        taskPlaceholder: "ماذا تريد أن تفعل؟",
-        welcome: "نظم يومك بطريقتك.",
-        continueGuest: "المتابعة بدون حساب"
-    }
-
-};
-
-
-/* ---------- KURDISH CALENDAR ---------- */
-
-/*
-   Kurdish month names used in Kurdistan.
-   These correspond to the Gregorian months.
-*/
-
-const kurdishMonths = [
-    "بەفرانبار",
-    "ڕێبەندان",
-    "ڕەشەمە",
-    "گوڵان",
-    "بانەمەڕ",
-    "جۆزەردان",
-    "پووشپەڕ",
-    "گەلاوێژ",
-    "خەرمانان",
-    "ڕەزبەر",
-    "گەڵاڕێزان",
-    "سەرماوەر"
-];
-
-const kurdishWeekdays = [
-    "یەکشەممە",
-    "دووشەممە",
-    "سێشەممە",
-    "چوارشەممە",
-    "پێنجشەممە",
-    "هەینی",
-    "شەممە"
-];
-
-const kurdishShortWeekdays = [
-    "یەک",
-    "دوو",
-    "سێ",
-    "چوار",
-    "پێنج",
-    "هەین",
-    "شەم"
-];
-
-const arabicWeekdays = [
-    "الأحد",
-    "الإثنين",
-    "الثلاثاء",
-    "الأربعاء",
-    "الخميس",
-    "الجمعة",
-    "السبت"
-];
-
-const arabicMonths = [
-    "يناير",
-    "فبراير",
-    "مارس",
-    "أبريل",
-    "مايو",
-    "يونيو",
-    "يوليو",
-    "أغسطس",
-    "سبتمبر",
-    "أكتوبر",
-    "نوفمبر",
-    "ديسمبر"
-];
-
-
-/* ---------- DATE HELPERS ---------- */
-
-function toKurdishNumbers(value) {
-
-    return String(value)
-        .replace(/0/g, "٠")
-        .replace(/1/g, "١")
-        .replace(/2/g, "٢")
-        .replace(/3/g, "٣")
-        .replace(/4/g, "٤")
-        .replace(/5/g, "٥")
-        .replace(/6/g, "٦")
-        .replace(/7/g, "٧")
-        .replace(/8/g, "٨")
-        .replace(/9/g, "٩");
-}
-
-function toArabicNumbers(value) {
-
-    return String(value)
-        .replace(/0/g, "٠")
-        .replace(/1/g, "١")
-        .replace(/2/g, "٢")
-        .replace(/3/g, "٣")
-        .replace(/4/g, "٤")
-        .replace(/5/g, "٥")
-        .replace(/6/g, "٦")
-        .replace(/7/g, "٧")
-        .replace(/8/g, "٨")
-        .replace(/9/g, "٩");
-}
-
-function pad(n) {
-    return String(n).padStart(2, "0");
-}
-
-function dateKey(date) {
-
-    return (
-        date.getFullYear() +
-        "-" +
-        pad(date.getMonth() + 1) +
-        "-" +
-        pad(date.getDate())
-    );
-}
-
-
-/* ---------- LOCALIZED DATE ---------- */
-
-function formatDate(date) {
-
-    const lang = localStorage.getItem("dailyLanguage") || "en";
-
-    const day = date.getDate();
-    const month = date.getMonth();
-    const year = date.getFullYear();
-    const weekday = date.getDay();
-
-    if (lang === "ku") {
-
-        return (
-            kurdishWeekdays[weekday] +
-            "، " +
-            toKurdishNumbers(day) +
-            "ی " +
-            kurdishMonths[month] +
-            " " +
-            toKurdishNumbers(year)
-        );
-    }
-
-    if (lang === "ar") {
-
-        return (
-            arabicWeekdays[weekday] +
-            "، " +
-            toArabicNumbers(day) +
-            " " +
-            arabicMonths[month] +
-            " " +
-            toArabicNumbers(year)
-        );
-    }
-
-    return date.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-    });
-}
-
-
-/* ---------- THEME ---------- */
-
-function applyTheme() {
-
-    const dark = localStorage.getItem("dailyDarkMode") === "true";
-
-    document.body.classList.toggle("dark", dark);
-
-    const themeButton =
-        document.getElementById("themeButton");
-
-    const settingsThemeButton =
-        document.getElementById("settingsThemeButton");
-
-    if (themeButton) {
-        themeButton.textContent = dark ? "☀" : "☾";
-        themeButton.setAttribute(
-            "aria-label",
-            dark ? "Light mode" : "Dark mode"
-        );
-    }
-
-    if (settingsThemeButton) {
-        settingsThemeButton.textContent = dark
-            ? "On"
-            : "Off";
-    }
-}
-
-function toggleTheme() {
-
-    const current =
-        localStorage.getItem("dailyDarkMode") === "true";
-
-    localStorage.setItem(
-        "dailyDarkMode",
-        String(!current)
-    );
-
-    applyTheme();
-}
-
-
-/* ---------- LANGUAGE ---------- */
-
-let currentLanguage =
-    localStorage.getItem("dailyLanguage") || "en";
-
-function setLanguage(language) {
-
-    currentLanguage = language;
-
-    localStorage.setItem(
-        "dailyLanguage",
-        language
-    );
-
-    document.documentElement.lang = language;
-
-    document.body.classList.toggle(
-        "rtl",
-        language === "ku" || language === "ar"
-    );
-
-    const t = translations[language];
-
-    const map = {
-
-        tasksTab: t.tasks,
-        calendarTab: t.calendar,
-        prayersTab: t.prayers,
-
-        dateLabel: t.date,
-        repeatLabel: t.repeat,
-
-        repeatOnce: t.once,
-        repeatDaily: t.daily,
-        repeatWeekly: t.weekly,
-        repeatCustom: t.custom,
-
-        settingsTitle: t.settings,
-        settingsSubtitle: t.settingsSubtitle,
-        accountTitle: t.account,
-        usernameLabel: t.username,
-        emailLabel: t.email,
-
-        settingsUsername: t.notSigned,
-        settingsEmail: t.notSigned,
-
-        accountButton: t.signIn,
-
-        appearanceTitle: t.appearance,
-        darkModeLabel: t.darkMode,
-        darkModeDescription: t.changeAppearance,
-
-        languageTitle: t.language,
-        languageLabel: t.language,
-        languageDescription: t.chooseLanguageDescription,
-
-        prayerSettingsTitle: t.prayerSettings,
-        locationLabel: t.location,
-        locationDescription: t.prayerLocation,
-        updateLocationButton: t.update,
-
-        notificationsTitle: t.notifications,
-        notificationsLabel: t.prayerNotifications,
-        notificationsDescription: t.receiveNotifications,
-
-        notificationButton: t.enableNotifications,
-        notificationStatus: t.notificationsDisabled,
-
-        accountActionsTitle: t.accountActions,
-        logoutButton: t.signOut,
-
-        prayerTitle: t.prayers,
-        nextLabel: t.nextPrayer,
-
-        welcomeSubtitle: t.welcome,
-        welcomeSignIn: t.signIn,
-        welcomeGuest: t.continueGuest
-
-    };
-
-    Object.entries(map).forEach(([id, text]) => {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-            element.textContent = text;
-        }
-
-    });
-
-    document.getElementById("taskInput").placeholder =
-        t.taskPlaceholder;
-
-    document.getElementById("settingsLanguage").value =
-        language;
-
-    updateHeaderDate();
-
-    renderCalendar();
-
-    renderTasks();
-
-    updateSelectedDay();
-
-    updatePrayerTimes();
-}
-
-
-/* ---------- TASKS ---------- */
-
-let tasks =
-    JSON.parse(
-        localStorage.getItem("dailyTasks") || "[]"
-    );
-
-let selectedDate =
-    localStorage.getItem("dailySelectedDate") ||
-    dateKey(new Date());
-
-function saveTasks() {
-
-    localStorage.setItem(
-        "dailyTasks",
-        JSON.stringify(tasks)
-    );
-}
-
-function updateSelectedDay() {
-
-    const date =
-        new Date(selectedDate + "T00:00:00");
-
-    document.getElementById(
-        "selectedDayText"
-    ).textContent = formatDate(date);
-
-    document.getElementById(
-        "calendarSelectedDay"
-    ).textContent = formatDate(date);
-
-    document.getElementById(
-        "taskDateInput"
-    ).value = selectedDate;
-}
-
-function renderTasks() {
-
-    const list =
-        document.getElementById("taskList");
-
-    const selectedTasks =
-        tasks.filter(task => {
-
-            if (task.date === selectedDate) {
-                return true;
-            }
-
-            if (task.repeat === "daily") {
-                return true;
-            }
-
-            if (
-                task.repeat === "weekly" &&
-                task.dayOfWeek ===
-                new Date(selectedDate + "T00:00:00").getDay()
-            ) {
-                return true;
-            }
-
-            if (
-                task.repeat === "custom" &&
-                task.days &&
-                task.days.includes(
-                    new Date(selectedDate + "T00:00:00").getDay()
-                )
-            ) {
-                return true;
-            }
-
-            return false;
-        });
-
-    list.innerHTML = "";
-
-    if (!selectedTasks.length) {
-
-        const empty =
-            document.createElement("div");
-
-        empty.style.color = "var(--secondary)";
-        empty.style.padding = "20px 2px";
-
-        empty.textContent =
-            translations[currentLanguage].noTasks;
 
-        list.appendChild(empty);
-
-        return;
-    }
+<div class="settings-card">
 
-    selectedTasks.forEach(task => {
+    <div
+        class="settings-card-title"
+        id="prayerSettingsTitle"
+    >
+        Prayer Settings
+    </div>
 
-        const card =
-            document.createElement("div");
+    <div class="setting-row">
 
-        card.className =
-            "task-card" +
-            (task.completed ? " completed" : "");
+        <div>
+
+            <div
+                class="setting-label"
+                id="locationLabel"
+            >
+                Location
+            </div>
+
+            <div
+                class="setting-description"
+                id="locationDescription"
+            >
+                Your prayer location.
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="location-row">
+
+        <input
+            id="locationInput"
+            type="text"
+            value="Erbil, Iraq"
+        >
+
+        <button
+            class="setting-button dark"
+            id="updateLocationButton"
+            type="button"
+        >
+            Update
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="settings-card">
+
+    <div
+        class="settings-card-title"
+        id="notificationsTitle"
+    >
+        Notifications
+    </div>
+
+    <div class="setting-row">
+
+        <div>
+
+            <div
+                class="setting-label"
+                id="notificationsLabel"
+            >
+                Prayer Notifications
+            </div>
+
+            <div
+                class="setting-description"
+                id="notificationsDescription"
+            >
+                Receive prayer notifications.
+            </div>
+
+        </div>
+
+    </div>
+
+    <button
+        class="notification-button"
+        id="notificationButton"
+        type="button"
+    >
+        🔔 Enable Prayer Notifications
+    </button>
+
+    <div
+        class="status"
+        id="notificationStatus"
+    >
+        Notifications are disabled.
+    </div>
+
+</div>
+
 
-        const check =
-            document.createElement("button");
-
-        check.className = "task-check";
-        check.type = "button";
-
-        check.onclick = () => {
-
-            task.completed =
-                !task.completed;
-
-            saveTasks();
-            renderTasks();
-            renderCalendar();
-        };
-
-        const text =
-            document.createElement("div");
-
-        text.className = "task-text";
-        text.textContent = task.text;
-
-        const deleteButton =
-            document.createElement("button");
-
-        deleteButton.className =
-            "delete-task";
-
-        deleteButton.textContent = "×";
-
-        deleteButton.onclick = () => {
-
-            tasks =
-                tasks.filter(
-                    item => item.id !== task.id
-                );
-
-            saveTasks();
-            renderTasks();
-            renderCalendar();
-        };
-
-        card.appendChild(check);
-        card.appendChild(text);
-        card.appendChild(deleteButton);
-
-        list.appendChild(card);
-
-    });
-}
-
-function addTask() {
-
-    const input =
-        document.getElementById("taskInput");
-
-    const text =
-        input.value.trim();
-
-    if (!text) return;
-
-    const repeat =
-        document.getElementById(
-            "repeatSelect"
-        ).value;
-
-    const days =
-        [...document.querySelectorAll(
-            ".repeat-day.selected"
-        )].map(button =>
-            Number(button.dataset.day)
-        );
-
-    tasks.push({
-
-        id: Date.now(),
-
-        text,
-
-        date: selectedDate,
-
-        completed: false,
-
-        repeat,
-
-        dayOfWeek:
-            new Date(
-                selectedDate + "T00:00:00"
-            ).getDay(),
-
-        days
-
-    });
-
-    saveTasks();
-
-    input.value = "";
-
-    renderTasks();
-    renderCalendar();
-}
-
-
-/* ---------- CALENDAR ---------- */
-
-let calendarDate =
-    new Date();
-
-function renderCalendar() {
-
-    const year =
-        calendarDate.getFullYear();
-
-    const month =
-        calendarDate.getMonth();
-
-    const monthElement =
-        document.getElementById(
-            "calendarMonth"
-        );
-
-    if (currentLanguage === "ku") {
-
-        monthElement.textContent =
-            kurdishMonths[month] +
-            " " +
-            toKurdishNumbers(year);
-
-    } else if (currentLanguage === "ar") {
-
-        monthElement.textContent =
-            arabicMonths[month] +
-            " " +
-            toArabicNumbers(year);
-
-    } else {
-
-        monthElement.textContent =
-            new Date(year, month, 1)
-                .toLocaleDateString(
-                    "en-US",
-                    {
-                        month: "long",
-                        year: "numeric"
-                    }
-                );
-
-    }
-
-    renderWeekdays();
-
-    const grid =
-        document.getElementById(
-            "calendarGrid"
-        );
-
-    grid.innerHTML = "";
-
-    const firstDay =
-        new Date(
-            year,
-            month,
-            1
-        ).getDay();
-
-    const daysInMonth =
-        new Date(
-            year,
-            month + 1,
-            0
-        ).getDate();
-
-    for (
-        let i = 0;
-        i < firstDay;
-        i++
-    ) {
-
-        const empty =
-            document.createElement("div");
-
-        grid.appendChild(empty);
-    }
-
-    const todayKey =
-        dateKey(new Date());
-
-    for (
-        let day = 1;
-        day <= daysInMonth;
-        day++
-    ) {
-
-        const date =
-            new Date(
-                year,
-                month,
-                day
-            );
-
-        const key =
-            dateKey(date);
-
-        const button =
-            document.createElement("button");
-
-        button.type = "button";
-        button.className = "calendar-day";
-
-        if (key === todayKey) {
-            button.classList.add("today");
-        }
-
-        if (key === selectedDate) {
-            button.classList.add("selected");
-        }
-
-        const hasTask =
-            tasks.some(task =>
-                task.date === key
-            );
-
-        if (hasTask) {
-            button.classList.add("has-task");
-        }
-
-        button.textContent =
-            currentLanguage === "ku"
-                ? toKurdishNumbers(day)
-                : currentLanguage === "ar"
-                    ? toArabicNumbers(day)
-                    : day;
-
-        button.onclick = () => {
-
-            selectedDate = key;
-
-            localStorage.setItem(
-                "dailySelectedDate",
-                selectedDate
-            );
-
-            updateSelectedDay();
-            renderCalendar();
-            renderTasks();
-            renderCalendarTasks();
-        };
-
-        grid.appendChild(button);
-    }
-
-    renderCalendarTasks();
-}
-
-function renderWeekdays() {
-
-    const container =
-        document.getElementById(
-            "calendarWeekdays"
-        );
-
-    container.innerHTML = "";
-
-    let names;
-
-    if (currentLanguage === "ku") {
-        names = kurdishShortWeekdays;
-    } else if (currentLanguage === "ar") {
-        names = arabicWeekdays;
-    } else {
-        names = [
-            "Sun",
-            "Mon",
-            "Tue",
-            "Wed",
-            "Thu",
-            "Fri",
-            "Sat"
-        ];
-    }
-
-    names.forEach(name => {
-
-        const div =
-            document.createElement("div");
-
-        div.textContent = name;
-
-        container.appendChild(div);
-    });
-}
-
-function renderCalendarTasks() {
-
-    const list =
-        document.getElementById(
-            "calendarTaskList"
-        );
-
-    list.innerHTML = "";
-
-    const selectedTasks =
-        tasks.filter(task =>
-            task.date === selectedDate
-        );
-
-    selectedTasks.forEach(task => {
-
-        const card =
-            document.createElement("div");
-
-        card.className =
-            "task-card" +
-            (task.completed ? " completed" : "");
-
-        const text =
-            document.createElement("div");
-
-        text.className = "task-text";
-        text.textContent = task.text;
-
-        card.appendChild(text);
-
-        list.appendChild(card);
-    });
-}
-
-
-/* ---------- PRAYER TIMES ---------- */
-
-/*
-   Simple local placeholder times.
-   This keeps the interface working until
-   a real prayer-time API is connected.
-*/
-
-const prayerTimes = [
-    ["Fajr", "04:10"],
-    ["Sunrise", "05:35"],
-    ["Dhuhr", "12:15"],
-    ["Asr", "15:50"],
-    ["Maghrib", "19:05"],
-    ["Isha", "20:30"]
-];
-
-function updatePrayerTimes() {
-
-    const list =
-        document.getElementById(
-            "prayerList"
-        );
-
-    list.innerHTML = "";
-
-    const now =
-        new Date();
-
-    const currentMinutes =
-        now.getHours() * 60 +
-        now.getMinutes();
-
-    let next = null;
-
-    prayerTimes.forEach(
-        ([name, time]) => {
-
-            const [
-                hour,
-                minute
-            ] = time
-                .split(":")
-                .map(Number);
-
-            const minutes =
-                hour * 60 + minute;
-
-            if (
-                !next &&
-                minutes > currentMinutes
-            ) {
-                next = {
-                    name,
-                    time
-                };
-            }
-
-            const card =
-                document.createElement("div");
-
-            card.className =
-                "prayer-card";
-
-            if (
-                next &&
-                next.name === name
-            ) {
-                card.classList.add("next");
-            }
-
-            const nameElement =
-                document.createElement("div");
-
-            nameElement.className =
-                "prayer-name";
-
-            nameElement.textContent =
-                name;
-
-            const timeElement =
-                document.createElement("div");
-
-            timeElement.className =
-                "prayer-time";
-
-            timeElement.textContent =
-                time;
-
-            card.appendChild(nameElement);
-            card.appendChild(timeElement);
-
-            list.appendChild(card);
-        }
-    );
-
-    if (!next) {
-        next = prayerTimes[0];
-    }
-
-    document.getElementById(
-        "nextName"
-    ).textContent = next[0];
-
-    document.getElementById(
-        "nextTime"
-    ).textContent = next[1];
-
-    document.getElementById(
-        "locationText"
-    ).textContent =
-        document.getElementById(
-            "locationInput"
-        ).value || "Erbil, Iraq";
-}
-
-
-/* ---------- HEADER DATE ---------- */
-
-function updateHeaderDate() {
-
-    document.getElementById(
-        "date"
-    ).textContent =
-        formatDate(new Date());
-}
-
-
-/* ---------- TABS ---------- */
-
-function openTab(tab) {
-
-    document.querySelectorAll(
-        ".tab"
-    ).forEach(button => {
-
-        button.classList.toggle(
-            "active",
-            button.dataset.tab === tab
-        );
-    });
-
-    document.querySelectorAll(
-        ".section"
-    ).forEach(section => {
-
-        section.classList.remove("active");
-    });
-
-    const section =
-        document.getElementById(
-            tab + "Section"
-        );
-
-    if (section) {
-        section.classList.add("active");
-    }
-}
-
-
-/* ---------- EVENT LISTENERS ---------- */
-
-document.getElementById(
-    "themeButton"
-).onclick = toggleTheme;
-
-document.getElementById(
-    "settingsThemeButton"
-).onclick = toggleTheme;
-
-document.querySelectorAll(
-    ".tab"
-).forEach(button => {
-
-    button.onclick = () =>
-        openTab(button.dataset.tab);
-});
-
-document.getElementById(
-    "settingsButton"
-).onclick = () =>
-    openTab("settings");
-
-document.getElementById(
-    "addTaskButton"
-).onclick = addTask;
-
-document.getElementById(
-    "taskInput"
-).addEventListener(
-    "keydown",
-    event => {
-
-        if (event.key === "Enter") {
-            addTask();
-        }
-    }
-);
-
-document.getElementById(
-    "taskDateInput"
-).onchange = event => {
-
-    selectedDate =
-        event.target.value;
-
-    localStorage.setItem(
-        "dailySelectedDate",
-        selectedDate
-    );
-
-    updateSelectedDay();
-    renderTasks();
-    renderCalendar();
-};
-
-document.getElementById(
-    "repeatSelect"
-).onchange = event => {
-
-    document.getElementById(
-        "repeatDays"
-    ).style.display =
-        event.target.value === "custom"
-            ? "flex"
-            : "none";
-};
-
-document.querySelectorAll(
-    ".repeat-day"
-).forEach(button => {
-
-    button.onclick = () => {
-
-        button.classList.toggle(
-            "selected"
-        );
-    };
-});
-
-
-/* ---------- CALENDAR NAVIGATION ---------- */
-
-document.getElementById(
-    "previousMonth"
-).onclick = () => {
-
-    calendarDate.setMonth(
-        calendarDate.getMonth() - 1
-    );
-
-    renderCalendar();
-};
-
-document.getElementById(
-    "nextMonth"
-).onclick = () => {
-
-    calendarDate.setMonth(
-        calendarDate.getMonth() + 1
-    );
-
-    renderCalendar();
-};
-
-document.getElementById(
-    "todayButton"
-).onclick = () => {
-
-    calendarDate = new Date();
-
-    selectedDate =
-        dateKey(new Date());
-
-    localStorage.setItem(
-        "dailySelectedDate",
-        selectedDate
-    );
-
-    updateSelectedDay();
-    renderCalendar();
-    renderTasks();
-};
-
-
-/* ---------- LANGUAGE ---------- */
-
-document.querySelectorAll(
-    ".language-option"
-).forEach(button => {
-
-    button.onclick = () => {
-
-        setLanguage(
-            button.dataset.language
-        );
-
-        document.getElementById(
-            "languageScreen"
-        ).style.display = "none";
-    };
-});
-
-document.getElementById(
-    "settingsLanguage"
-).onchange = event => {
-
-    setLanguage(
-        event.target.value
-    );
-};
-
-
-/* ---------- LOCATION ---------- */
-
-document.getElementById(
-    "updateLocationButton"
-).onclick = () => {
-
-    const location =
-        document.getElementById(
-            "locationInput"
-        ).value.trim();
-
-    localStorage.setItem(
-        "dailyLocation",
-        location
-    );
-
-    document.getElementById(
-        "locationText"
-    ).textContent =
-        location || "Erbil, Iraq";
-};
-
-
-/* ---------- NOTIFICATIONS ---------- */
-
-document.getElementById(
-    "notificationButton"
-).onclick = async () => {
-
-    if (!("Notification" in window)) {
-
-        document.getElementById(
-            "notificationStatus"
-        ).textContent =
-            "Notifications are not supported.";
-
-        return;
-    }
-
-    const permission =
-        await Notification.requestPermission();
-
-    if (permission === "granted") {
-
-        document.getElementById(
-            "notificationStatus"
-        ).textContent =
-            "Notifications are enabled.";
-
-    } else {
-
-        document.getElementById(
-            "notificationStatus"
-        ).textContent =
-            "Notifications are disabled.";
-    }
-};
-
-
-/* ---------- INITIALIZATION ---------- */
-
-const savedLocation =
-    localStorage.getItem(
-        "dailyLocation"
-    );
-
-if (savedLocation) {
-
-    document.getElementById(
-        "locationInput"
-    ).value = savedLocation;
-}
-
-applyTheme();
-
-setLanguage(currentLanguage);
-
-updateSelectedDay();
-
-renderTasks();
-
-renderCalendar();
-
-updatePrayerTimes();
-
-updateHeaderDate();
-
-setInterval(
-    updatePrayerTimes,
-    30000
-);
-
-setInterval(
-    updateHeaderDate,
-    30000
-);
-
-
-/* ---------- INITIAL LANGUAGE SCREEN ---------- */
-
-if (
-    !localStorage.getItem(
-        "dailyLanguage"
-    )
-) {
-
-    document.getElementById(
-        "languageScreen"
-    ).style.display = "flex";
-}
-
-</script>
-
-</body>
-</html>
+<div
+    class="settings-card"
+    id="accountActionsCard"
+>
+
+    <div
+        class="settings-card-title"
+        id="accountActionsTitle"
+    >
+        Account Actions
+    </div>
+
+    <button
+        class="danger-button"
+        id="logoutButton"
+        type="button"
+    >
+        Sign Out
+    </button>
+
+</div>
+```
+
+```
+<div class="welcome-box">
+
+    <div class="welcome-logo">
+        Daily.KRD
+    </div>
+
+    <div
+        class="welcome-subtitle"
+        id="welcomeSubtitle"
+    >
+        Organize your day your way.
+    </div>
+
+    <button
+        class="welcome-button"
+        id="welcomeSignIn"
+        type="button"
+    >
+        Sign In
+    </button>
+
+    <button
+        class="welcome-button secondary"
+        id="welcomeCreate"
+        type="button"
+    >
+        Create Account
+    </button>
+
+    <button
+        class="welcome-button guest"
+        id="welcomeGuest"
+        type="button"
+    >
+        Continue without an account
+    </button>
+
+</div>
+```
+
+```
+<div id="authCard">
+
+    <button
+        class="close-auth"
+        id="closeAuth"
+        type="button"
+    >×</button>
+
+    <h2 id="authTitle"></h2>
+
+    <div
+        class="auth-subtitle"
+        id="authSubtitle"
+    ></div>
+
+    <div
+        class="auth-error"
+        id="authError"
+    ></div>
+
+    <input
+        class="auth-input"
+        id="usernameInput"
+        type="text"
+        autocomplete="username"
+    >
+
+    <input
+        class="auth-input"
+        id="emailInput"
+        type="email"
+        autocomplete="email"
+    >
+
+    <input
+        class="auth-input"
+        id="passwordInput"
+        type="password"
+        autocomplete="new-password"
+    >
+
+    <input
+        class="auth-input"
+        id="confirmPasswordInput"
+        type="password"
+        autocomplete="new-password"
+    >
+
+    <button
+        class="auth-button"
+        id="authButton"
+        type="button"
+    ></button>
+
+    <div class="auth-switch">
+
+        <span id="switchText"></span>
+
+        <button
+            id="switchButton"
+            type="button"
+        ></button>
+
+    </div>
+
+</div>
+```
+
+```
+<div class="language-box">
+
+    <h1>Daily.KRD</h1>
+
+    <p id="chooseLanguageText">
+        Choose your language
+    </p>
+
+    <button
+        class="language-option"
+        data-language="en"
+        type="button"
+    >
+        🇬🇧 English
+    </button>
+
+    <button
+        class="language-option"
+        data-language="ku"
+        type="button"
+    >
+        کوردی
+    </button>
+
+    <button
+        class="language-option"
+        data-language="ar"
+        type="button"
+    >
+        🇮🇶 العربية
+    </button>
+
+</div>
+```
