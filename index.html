@@ -2583,15 +2583,40 @@
         }
 
 
+        const kurdishWeekdaysFull = [
+
+            "یەکشەممە",
+            "دووشەممە",
+            "سێشەممە",
+            "چوارشەممە",
+            "پێنجشەممە",
+            "هەینی",
+            "شەممە"
+
+        ];
+
+
         function formatDateKey(key) {
 
             const d =
                 parseDateKey(key);
 
+            if (currentLanguage === "ku") {
+
+                return (
+                    kurdishWeekdaysFull[d.getDay()] +
+                    "، " +
+                    d.getDate() +
+                    " ی " +
+                    kurdishMonths[d.getMonth()] +
+                    "ی " +
+                    d.getFullYear()
+                );
+            }
+
             const localeMap = {
 
                 en: "en-US",
-                ku: "ku-Arab",
                 ar: "ar-IQ"
 
             };
