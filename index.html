@@ -2226,7 +2226,7 @@
                 id="passwordInput"
                 type="password"
                 placeholder="Password"
-                autocomplete="new-password"
+                autocomplete="current-password"
             >
 
             <input
@@ -2323,7 +2323,6 @@
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
-            updateProfile,
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
@@ -2336,7 +2335,9 @@
             addDoc,
             deleteDoc,
             updateDoc,
-            onSnapshot
+            onSnapshot,
+            query,
+            orderBy
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 
@@ -4055,182 +4056,7 @@
             );
 
 
-        /* AUTH + FIREBASE ACCOUNT DATA */
-
-        /*
-         * Account data lives in one predictable document:
-         *
-         * users/{uid}
-         *   uid
-         *   username
-         *   email
-         *   language
-         *   theme
-         *   location
-         *   lat / lng / timezone
-         *   notificationsEnabled
-         *   pushSubscription (when enabled)
-         *   createdAt
-         *   updatedAt
-         *   schemaVersion
-         *
-         * Tasks remain in the existing location:
-         * users/{uid}/tasks/{taskId}
-         *
-         * Existing documents are updated with merge:true, so old task/data
-         * records are not deleted or replaced.
-         */
-
-        function getUserProfileRef(uid) {
-
-            return doc(
-                db,
-                "users",
-                uid
-            );
-        }
-
-
-        function getSafeTheme() {
-
-            return localStorage.getItem(
-                "dailykrd_dark"
-            ) === "true"
-                ? "dark"
-                : "light";
-        }
-
-
-        async function ensureUserProfile(user, overrides = {}) {
-
-            if (!user) return null;
-
-            const ref =
-                getUserProfileRef(user.uid);
-
-            const snapshot =
-                await getDoc(ref);
-
-            const existing =
-                snapshot.exists()
-                    ? snapshot.data()
-                    : {};
-
-            const now = Date.now();
-
-            const username =
-                (overrides.username ||
-                 existing.username ||
-                 user.displayName ||
-                 "").trim();
-
-            const data = {
-                uid: user.uid,
-                username,
-                email: user.email || existing.email || "",
-                language:
-                    overrides.language ||
-                    existing.language ||
-                    currentLanguage ||
-                    "en",
-                theme:
-                    overrides.theme ||
-                    existing.theme ||
-                    getSafeTheme(),
-                location:
-                    overrides.location ??
-                    existing.location ??
-                    localStorage.getItem("dailykrd_location") ||
-                    "",
-                lat:
-                    overrides.lat ??
-                    existing.lat ??
-                    Number(localStorage.getItem("dailykrd_lat")) ||
-                    null,
-                lng:
-                    overrides.lng ??
-                    existing.lng ??
-                    Number(localStorage.getItem("dailykrd_lng")) ||
-                    null,
-                timezone:
-                    overrides.timezone ??
-                    existing.timezone ??
-                    Number(localStorage.getItem("dailykrd_tz")) ||
-                    null,
-                notificationsEnabled:
-                    overrides.notificationsEnabled ??
-                    existing.notificationsEnabled ??
-                    false,
-                createdAt:
-                    existing.createdAt ||
-                    now,
-                updatedAt: now,
-                schemaVersion: 2
-            };
-
-            /* Never overwrite a real existing push subscription. */
-            if (existing.pushSubscription) {
-                data.pushSubscription =
-                    existing.pushSubscription;
-            }
-
-            await setDoc(
-                ref,
-                data,
-                { merge: true }
-            );
-
-            return {
-                ...existing,
-                ...data
-            };
-        }
-
-
-        function getFirebaseAuthMessage(error) {
-
-            const code =
-                error && error.code
-                    ? error.code
-                    : "";
-
-            if (code === "auth/email-already-in-use") {
-
-                return currentLanguage === "ku"
-                    ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە. تکایە بچۆ ژوورەوە."
-                    : currentLanguage === "ar"
-                        ? "هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل. سجّل الدخول."
-                        : "This email already has an account. Sign in instead.";
-            }
-
-            if (code === "auth/invalid-email") {
-
-                return currentLanguage === "ku"
-                    ? "ئیمەیڵەکە دروست نییە."
-                    : currentLanguage === "ar"
-                        ? "البريد الإلكتروني غير صالح."
-                        : "Please enter a valid email address.";
-            }
-
-            if (code === "auth/weak-password") {
-
-                return t("passwordShort");
-            }
-
-            if (code === "auth/too-many-requests") {
-
-                return currentLanguage === "ku"
-                    ? "هەوڵی زۆر دراوە. تکایە کەمێک چاوەڕێ بکە و دووبارە هەوڵ بدە."
-                    : currentLanguage === "ar"
-                        ? "تم إجراء محاولات كثيرة. انتظر قليلاً ثم حاول مرة أخرى."
-                        : "Too many attempts. Please wait a moment and try again.";
-            }
-
-            return error && error.message
-                ? error.message
-                : "Something went wrong. Please try again.";
-        }
-
+        /* AUTH */
 
         function setAuthMode() {
 
@@ -4241,6 +4067,7 @@
                     ? "block"
                     : "none";
 
+
             document.getElementById(
                 "confirmPasswordInput"
             ).style.display =
@@ -4248,7 +4075,7 @@
                     ? "block"
                     : "none";
 
-            clearError();
+
             applyLanguage();
         }
 
@@ -4261,7 +4088,9 @@
                 );
 
             error.textContent = "";
-            error.style.display = "none";
+
+            error.style.display =
+                "none";
         }
 
 
@@ -4272,28 +4101,11 @@
                     "authError"
                 );
 
-            error.textContent = message;
-            error.style.display = "block";
-        }
+            error.textContent =
+                message;
 
-
-        function clearAuthForm() {
-
-            document.getElementById(
-                "usernameInput"
-            ).value = "";
-
-            document.getElementById(
-                "emailInput"
-            ).value = "";
-
-            document.getElementById(
-                "passwordInput"
-            ).value = "";
-
-            document.getElementById(
-                "confirmPasswordInput"
-            ).value = "";
+            error.style.display =
+                "block";
         }
 
 
@@ -4306,124 +4118,146 @@
 
             clearError();
 
+
             const username =
                 document.getElementById(
                     "usernameInput"
                 ).value.trim();
 
+
             const email =
                 document.getElementById(
                     "emailInput"
-                ).value.trim().toLowerCase();
+                ).value.trim();
+
 
             const password =
                 document.getElementById(
                     "passwordInput"
                 ).value;
+
 
             const confirm =
                 document.getElementById(
                     "confirmPasswordInput"
                 ).value;
 
+
             if (username.length < 2) {
 
-                showError(t("usernameTooShort"));
-                return;
-            }
-
-            if (username.length > 40) {
-
                 showError(
-                    currentLanguage === "ku"
-                        ? "ناوی بەکارهێنەر زۆر درێژە."
-                        : currentLanguage === "ar"
-                            ? "اسم المستخدم طويل جداً."
-                            : "Username is too long."
+                    t("usernameTooShort")
                 );
+
                 return;
             }
+
 
             if (!email) {
 
-                showError(t("enterEmail"));
+                showError(
+                    t("enterEmail")
+                );
+
                 return;
             }
+
 
             if (password.length < 6) {
 
-                showError(t("passwordShort"));
+                showError(
+                    t("passwordShort")
+                );
+
                 return;
             }
 
+
             if (password !== confirm) {
 
-                showError(t("passwordsMismatch"));
+                showError(
+                    t("passwordsMismatch")
+                );
+
                 return;
             }
 
             authOperationInProgress = true;
 
             const authButton =
-                document.getElementById(
-                    "authButton"
-                );
-
-            const originalText =
-                authButton.textContent;
+                document.getElementById("authButton");
 
             authButton.disabled = true;
-            authButton.textContent =
-                currentLanguage === "ku"
-                    ? "چاوەڕێ بە..."
-                    : currentLanguage === "ar"
-                        ? "جارٍ الإنشاء..."
-                        : "Creating...";
+
 
             try {
 
-                /*
-                 * Signup is intentionally a real signup now.
-                 * Existing emails are not silently treated as a new account.
-                 */
-                const credential =
-                    await createUserWithEmailAndPassword(
-                        auth,
-                        email,
-                        password
-                    );
+                let result;
 
-                const user = credential.user;
-
-                /* Keep Firebase Authentication's profile in sync. */
                 try {
 
-                    await updateProfile(
-                        user,
-                        { displayName: username }
-                    );
+                    result =
+                        await createUserWithEmailAndPassword(
+                            auth,
+                            email,
+                            password
+                        );
 
-                } catch (profileError) {
+                } catch (error) {
 
-                    console.warn(
-                        "Firebase display name update failed:",
-                        profileError
-                    );
+                    /*
+                     * Firebase may have already created this account from
+                     * an earlier signup attempt. In that case, don't leave
+                     * the user stuck on the signup form: immediately sign
+                     * them in with the credentials they just entered.
+                     */
+                    if (
+                        error &&
+                        (error.code === "auth/email-already-in-use" ||
+                         error.code === "auth/account-exists-with-different-credential")
+                    ) {
+
+                        try {
+
+                            result =
+                                await signInWithEmailAndPassword(
+                                    auth,
+                                    email,
+                                    password
+                                );
+
+                        } catch (signInError) {
+
+                            if (signInError && signInError.code === "auth/invalid-credential") {
+                                throw new Error("ACCOUNT_EXISTS_WRONG_PASSWORD");
+                            }
+
+                            throw signInError;
+                        }
+
+                    } else {
+
+                        throw error;
+                    }
                 }
 
-                /* Create the Firestore profile exactly once, without
-                 * deleting any existing fields. */
-                await ensureUserProfile(
-                    user,
+
+                await setDoc(
+                    doc(
+                        db,
+                        "users",
+                        result.user.uid
+                    ),
                     {
                         username,
                         email,
-                        language: currentLanguage,
-                        theme: getSafeTheme()
+                        language:
+                            currentLanguage,
+                        createdAt:
+                            Date.now()
                     }
                 );
 
-                currentUser = user;
 
                 document.getElementById(
                     "authOverlay"
@@ -4431,45 +4265,44 @@
                     "active"
                 );
 
-                clearAuthForm();
-
             } catch (error) {
 
-                console.error(
-                    "Account creation error:",
-                    error
-                );
+                console.error("Signup error:", error);
 
                 if (
+                    error &&
+                    error.message === "ACCOUNT_EXISTS_WRONG_PASSWORD"
+                ) {
+
+                    signUpMode = false;
+                    setAuthMode();
+                    showError(
+                        currentLanguage === "ku"
+                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە، بەڵام وشەی نهێنی هەڵەیە."
+                            : currentLanguage === "ar"
+                            ? "هذا البريد الإلكتروني لديه حساب بالفعل، لكن كلمة المرور غير صحيحة."
+                            : "This email already has an account, but the password is incorrect."
+                    );
+
+                } else if (
                     error &&
                     error.code === "auth/email-already-in-use"
                 ) {
 
-                    /* Existing account: move the user to login instead
-                     * of pretending another account was created. */
                     signUpMode = false;
                     setAuthMode();
-
-                    document.getElementById(
-                        "emailInput"
-                    ).value = email;
-
-                    document.getElementById(
-                        "passwordInput"
-                    ).value = password;
-
                     showError(
                         currentLanguage === "ku"
-                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە. وشەی نهێنییەکەت بنووسە و بچۆ ژوورەوە."
+                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە. ئێستا بچۆ ژوورەوە."
                             : currentLanguage === "ar"
-                                ? "هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل. أدخل كلمة المرور وسجّل الدخول."
-                                : "This email already has an account. Sign in with your password."
+                            ? "هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل. سجّل الدخول للمتابعة."
+                            : "This email already has an account. Sign in to continue."
                     );
 
                 } else {
 
                     showError(
-                        getFirebaseAuthMessage(error)
+                        error.message || "Unable to create the account."
                     );
                 }
 
@@ -4477,69 +4310,45 @@
 
                 authOperationInProgress = false;
                 authButton.disabled = false;
-                authButton.textContent = originalText;
             }
         }
 
 
         async function login() {
 
-            if (authOperationInProgress) return;
-
             clearError();
+
 
             const email =
                 document.getElementById(
                     "emailInput"
-                ).value.trim().toLowerCase();
+                ).value.trim();
+
 
             const password =
                 document.getElementById(
                     "passwordInput"
                 ).value;
 
+
             if (!email || !password) {
 
-                showError(t("enterEmailPassword"));
+                showError(
+                    t("enterEmailPassword")
+                );
+
                 return;
             }
 
-            authOperationInProgress = true;
-
-            const authButton =
-                document.getElementById(
-                    "authButton"
-                );
-
-            const originalText =
-                authButton.textContent;
-
-            authButton.disabled = true;
-            authButton.textContent =
-                currentLanguage === "ku"
-                    ? "چاوەڕێ بە..."
-                    : currentLanguage === "ar"
-                        ? "جارٍ الدخول..."
-                        : "Signing in...";
 
             try {
 
-                const credential =
-                    await signInWithEmailAndPassword(
-                        auth,
-                        email,
-                        password
-                    );
-
-                /* Repair/migrate older accounts automatically. */
-                await ensureUserProfile(
-                    credential.user,
-                    {
-                        email: credential.user.email || email
-                    }
+                await signInWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
                 );
 
-                currentUser = credential.user;
 
                 document.getElementById(
                     "authOverlay"
@@ -4549,25 +4358,9 @@
 
             } catch (error) {
 
-                console.error(
-                    "Login error:",
-                    error
-                );
-
                 showError(
-                    error &&
-                    (error.code === "auth/invalid-credential" ||
-                     error.code === "auth/wrong-password" ||
-                     error.code === "auth/user-not-found")
-                        ? t("incorrectLogin")
-                        : getFirebaseAuthMessage(error)
+                    t("incorrectLogin")
                 );
-
-            } finally {
-
-                authOperationInProgress = false;
-                authButton.disabled = false;
-                authButton.textContent = originalText;
             }
         }
 
@@ -4581,40 +4374,16 @@
                 () => {
 
                     if (signUpMode) {
+
                         createAccount();
+
                     } else {
+
                         login();
+
                     }
                 }
             );
-
-
-        [
-            "usernameInput",
-            "emailInput",
-            "passwordInput",
-            "confirmPasswordInput"
-        ].forEach(id => {
-
-            document
-                .getElementById(id)
-                .addEventListener(
-                    "keydown",
-                    event => {
-
-                        if (event.key === "Enter") {
-
-                            event.preventDefault();
-
-                            if (signUpMode) {
-                                createAccount();
-                            } else {
-                                login();
-                            }
-                        }
-                    }
-                );
-        });
 
 
         document
@@ -4625,22 +4394,10 @@
                 "click",
                 () => {
 
-                    if (authOperationInProgress) return;
+                    signUpMode =
+                        !signUpMode;
 
-                    signUpMode = !signUpMode;
                     setAuthMode();
-
-                    /* Keep the email when switching between modes,
-                     * because it is the one piece of information common
-                     * to both flows. */
-                    const email =
-                        document.getElementById(
-                            "emailInput"
-                        ).value;
-
-                    document.getElementById(
-                        "emailInput"
-                    ).value = email;
 
                 }
             );
@@ -4654,13 +4411,12 @@
                 "click",
                 () => {
 
-                    if (authOperationInProgress) return;
-
                     document.getElementById(
                         "authOverlay"
                     ).classList.remove(
                         "active"
                     );
+
                 }
             );
 
@@ -4676,6 +4432,7 @@
                     if (currentUser) return;
 
                     signUpMode = false;
+
                     setAuthMode();
 
                     document.getElementById(
@@ -4683,6 +4440,7 @@
                     ).classList.add(
                         "active"
                     );
+
                 }
             );
 
@@ -4693,92 +4451,70 @@
             auth,
             async user => {
 
-                currentUser = user;
+                currentUser =
+                    user;
+
 
                 if (user) {
 
                     try {
 
-                        /*
-                         * This is also the migration/repair path for users
-                         * created by an older version of Daily.KRD. If their
-                         * Firestore profile is missing, it is recreated from
-                         * Firebase Authentication without touching tasks.
-                         */
                         const profile =
-                            await ensureUserProfile(user);
+                            await getDoc(
+                                doc(
+                                    db,
+                                    "users",
+                                    user.uid
+                                )
+                            );
+
+
+                        const username =
+                            profile.exists()
+                                ? profile.data().username
+                                : t("guest");
+
 
                         document.getElementById(
                             "settingsUsername"
                         ).textContent =
-                            profile.username ||
-                            user.displayName ||
-                            t("guest");
+                            username;
+
 
                         document.getElementById(
                             "settingsEmail"
                         ).textContent =
-                            user.email ||
-                            profile.email ||
-                            "";
+                            user.email || "";
+
 
                         document.getElementById(
                             "accountButton"
                         ).style.display =
                             "none";
 
-                        /* Restore account-owned language if one exists. */
-                        if (
-                            profile.language &&
-                            translations[profile.language] &&
-                            !localStorage.getItem("dailykrd_language")
-                        ) {
-
-                            currentLanguage =
-                                profile.language;
-
-                            localStorage.setItem(
-                                "dailykrd_language",
-                                currentLanguage
-                            );
-
-                            applyLanguage();
-                        }
 
                         startTaskListener();
 
                     } catch (error) {
 
-                        /*
-                         * Authentication is still valid even if Firestore is
-                         * temporarily unavailable. Keep the user signed in
-                         * and keep the app usable; the next auth-state event
-                         * will retry profile synchronization.
-                         */
                         console.error(
-                            "User profile sync error:",
+                            "Profile error:",
                             error
                         );
 
                         document.getElementById(
                             "settingsUsername"
                         ).textContent =
-                            user.displayName ||
                             t("guest");
 
                         document.getElementById(
                             "settingsEmail"
                         ).textContent =
-                            user.email ||
-                            "";
-
-                        document.getElementById(
-                            "accountButton"
-                        ).style.display =
-                            "none";
+                            user.email || "";
 
                         startTaskListener();
                     }
+
 
                 } else {
 
@@ -4787,21 +4523,29 @@
                     ).textContent =
                         t("notSignedIn");
 
+
                     document.getElementById(
                         "settingsEmail"
                     ).textContent =
                         t("notSignedIn");
+
 
                     document.getElementById(
                         "accountButton"
                     ).style.display =
                         "block";
 
+
                     stopTaskListener();
+
                     currentTasksCache = [];
+
                     refreshTasks();
+
                     renderCalendar();
+
                 }
+
             }
         );
 
