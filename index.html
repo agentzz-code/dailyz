@@ -4429,7 +4429,24 @@
                 "click",
                 () => {
 
-                    if (currentUser) return;
+                    if (currentUser) {
+
+                        const settings =
+                            document.getElementById(
+                                "settings"
+                            );
+
+
+                        showSection(
+                            settings.classList.contains(
+                                "active"
+                            )
+                                ? "tasks"
+                                : "settings"
+                        );
+
+                        return;
+                    }
 
                     signUpMode = false;
 
@@ -4485,12 +4502,6 @@
                             "settingsEmail"
                         ).textContent =
                             user.email || "";
-
-
-                        document.getElementById(
-                            "accountButton"
-                        ).style.display =
-                            "none";
 
 
                         startTaskListener();
