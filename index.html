@@ -1815,6 +1815,66 @@
         </section>
 
 
+        <!-- PROFILE -->
+
+        <section
+            class="section"
+            id="profile"
+        >
+
+            <div class="settings-title">
+                Profile
+            </div>
+
+            <div class="settings-subtitle">
+                Your account details.
+            </div>
+
+            <div class="settings-card">
+
+                <div class="settings-card-title">
+                    Account
+                </div>
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <div
+                            class="setting-label"
+                            id="profileUsername"
+                        >
+                            Not signed in
+                        </div>
+
+                        <div
+                            class="setting-description"
+                            id="profileEmail"
+                        >
+                            Not signed in
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="settings-card">
+
+                <button
+                    class="danger-button"
+                    id="profileLogoutButton"
+                    type="button"
+                >
+                    Sign Out
+                </button>
+
+            </div>
+
+        </section>
+
+
         <!-- SETTINGS -->
 
         <section
@@ -4431,18 +4491,18 @@
 
                     if (currentUser) {
 
-                        const settings =
+                        const profile =
                             document.getElementById(
-                                "settings"
+                                "profile"
                             );
 
 
                         showSection(
-                            settings.classList.contains(
+                            profile.classList.contains(
                                 "active"
                             )
                                 ? "tasks"
-                                : "settings"
+                                : "profile"
                         );
 
                         return;
@@ -4504,6 +4564,18 @@
                             user.email || "";
 
 
+                        document.getElementById(
+                            "profileUsername"
+                        ).textContent =
+                            username;
+
+
+                        document.getElementById(
+                            "profileEmail"
+                        ).textContent =
+                            user.email || "";
+
+
                         startTaskListener();
 
                     } catch (error) {
@@ -4523,6 +4595,19 @@
                         ).textContent =
                             user.email || "";
 
+
+                        document.getElementById(
+                            "profileUsername"
+                        ).textContent =
+                            t("guest");
+
+
+                        document.getElementById(
+                            "profileEmail"
+                        ).textContent =
+                            user.email || "";
+
+
                         startTaskListener();
                     }
 
@@ -4537,6 +4622,18 @@
 
                     document.getElementById(
                         "settingsEmail"
+                    ).textContent =
+                        t("notSignedIn");
+
+
+                    document.getElementById(
+                        "profileUsername"
+                    ).textContent =
+                        t("notSignedIn");
+
+
+                    document.getElementById(
+                        "profileEmail"
                     ).textContent =
                         t("notSignedIn");
 
@@ -4566,6 +4663,24 @@
         document
             .getElementById(
                 "logoutButton"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+
+                    if (currentUser) {
+
+                        await signOut(auth);
+
+                    }
+
+                }
+            );
+
+
+        document
+            .getElementById(
+                "profileLogoutButton"
             )
             .addEventListener(
                 "click",
