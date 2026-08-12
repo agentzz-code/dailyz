@@ -2380,6 +2380,8 @@
 
         import {
             getAuth,
+            setPersistence,
+            browserLocalPersistence,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
@@ -2431,6 +2433,22 @@
 
         const auth =
             getAuth(app);
+
+        try {
+
+            await setPersistence(
+                auth,
+                browserLocalPersistence
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Account persistence error:",
+                error
+            );
+
+        }
 
         const db =
             getFirestore(app);
