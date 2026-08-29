@@ -11,53 +11,17 @@
 
     <meta name="theme-color" content="#f5f5f7">
 
-    <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
-    <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
-
     <title>Daily.KRD</title>
 
     <style>
 .motion-bg {
     z-index: 0;
     background: #f5f5f7;
-    transition: background 1.2s ease;
+    transition: background .3s ease;
 }
 
 .dark .motion-bg {
     background: #101010;
-}
-
-/* TIME OF DAY VARIANTS */
-
-.time-morning .motion-bg {
-    background: linear-gradient(160deg, #fff3e0 0%, #f5f5f7 55%);
-}
-
-.time-morning .motion-orb.one { background: #ffb37a; }
-.time-morning .motion-orb.two { background: #ffd28a; }
-.time-morning .motion-orb.three { background: #ff9d6c; }
-
-.time-day .motion-bg {
-    background: linear-gradient(160deg, #eaf4ff 0%, #f5f5f7 55%);
-}
-
-.time-day .motion-orb.one { background: #7ec8ff; }
-.time-day .motion-orb.two { background: #a9d9ff; }
-.time-day .motion-orb.three { background: #5fb3f0; }
-
-.time-night .motion-bg {
-    background: linear-gradient(160deg, #14151f 0%, #101010 55%);
-}
-
-.time-night .motion-orb.one { background: #5b5b9c; }
-.time-night .motion-orb.two { background: #3f3f72; }
-.time-night .motion-orb.three { background: #6d6dae; }
-
-.time-night.dark .motion-bg,
-.dark.time-night .motion-bg {
-    background: linear-gradient(160deg, #14151f 0%, #0b0b12 55%);
 }
 
 .header,
@@ -316,215 +280,6 @@
 
         .section.active {
             display: block;
-        }
-
-        /* STREAK + PROGRESS RING */
-
-        .stats-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-
-        .streak-card {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 14px 16px;
-        }
-
-        .dark .streak-card {
-            background: #222;
-        }
-
-        .streak-emoji {
-            font-size: 26px;
-            line-height: 1;
-        }
-
-        .streak-count {
-            font-size: 19px;
-            font-weight: 850;
-        }
-
-        .streak-label {
-            color: #888;
-            font-size: 12px;
-            margin-top: 1px;
-        }
-
-        .progress-ring-card {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 10px;
-            width: 78px;
-            height: 78px;
-            flex-shrink: 0;
-        }
-
-        .dark .progress-ring-card {
-            background: #222;
-        }
-
-        .progress-ring-wrap {
-            position: relative;
-            width: 58px;
-            height: 58px;
-        }
-
-        .progress-ring-wrap svg {
-            transform: rotate(-90deg);
-            width: 58px;
-            height: 58px;
-        }
-
-        .progress-ring-track {
-            fill: none;
-            stroke: #eee;
-            stroke-width: 6;
-        }
-
-        .dark .progress-ring-track {
-            stroke: #3a3a3a;
-        }
-
-        .progress-ring-fill {
-            fill: none;
-            stroke: #111;
-            stroke-width: 6;
-            stroke-linecap: round;
-            transition: stroke-dashoffset .35s ease;
-        }
-
-        .dark .progress-ring-fill {
-            stroke: white;
-        }
-
-        .progress-ring-text {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .score-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 15px;
-        }
-
-        .dark .score-card {
-            background: #222;
-        }
-
-        .score-label {
-            font-weight: 650;
-        }
-
-        .score-value {
-            font-size: 17px;
-            font-weight: 850;
-        }
-
-        .quote-card {
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 15px;
-            font-style: italic;
-            color: #555;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .dark .quote-card {
-            background: #222;
-            color: #ccc;
-        }
-
-        /* TASK COMPLETE ANIMATION */
-
-        .task {
-            transition: opacity .35s ease, transform .35s ease, background .35s ease;
-        }
-
-        .task-check {
-            transition: transform .25s ease;
-        }
-
-        .task.just-completed .task-check {
-            animation: checkPop .4s ease;
-        }
-
-        .task.just-completed .task-text {
-            animation: taskFade .4s ease;
-        }
-
-        @keyframes checkPop {
-            0% { transform: scale(1); }
-            40% { transform: scale(1.35); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes taskFade {
-            0% { opacity: 1; }
-            35% { opacity: .35; }
-            100% { opacity: .45; }
-        }
-
-        /* PRIORITY */
-
-        .priority-select {
-            border: 1px solid #ddd;
-            background: rgba(255,255,255,.92);
-            color: #111;
-            padding: 14px;
-            border-radius: 13px;
-            outline: none;
-            width: 100%;
-        }
-
-        .dark .priority-select {
-            background: #222;
-            color: white;
-            border-color: #3a3a3a;
-        }
-
-        .priority-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .priority-dot.low {
-            background: #8bc98b;
-        }
-
-        .priority-dot.medium {
-            background: #f0b64c;
-        }
-
-        .priority-dot.high {
-            background: #e05c5c;
-        }
-
-        .task.priority-high {
-            box-shadow: inset 3px 0 0 #e05c5c;
         }
 
         /* TASKS */
@@ -839,118 +594,6 @@
             font-size: 40px;
             font-weight: 850;
             margin-top: 3px;
-        }
-
-        .next-countdown {
-            margin-top: 10px;
-            font-size: 15px;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-            opacity: .8;
-            letter-spacing: .5px;
-        }
-
-        .qibla-card {
-            background: rgba(255,255,255,.92);
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 6px;
-            text-align: center;
-        }
-
-        .dark .qibla-card {
-            background: #222;
-        }
-
-        .qibla-title {
-            font-weight: 800;
-            font-size: 15px;
-            margin-bottom: 14px;
-        }
-
-        .qibla-compass {
-            position: relative;
-            width: 130px;
-            height: 130px;
-            margin: 0 auto;
-        }
-
-        .qibla-compass-ring {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            background:
-                radial-gradient(circle, rgba(0,0,0,.02) 0%, transparent 70%);
-        }
-
-        .dark .qibla-compass-ring {
-            border-color: #3a3a3a;
-        }
-
-        .qibla-north-label {
-            position: absolute;
-            top: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            font-weight: 800;
-            color: #999;
-            transform-origin: 50% 59px;
-            transition: transform .2s linear;
-        }
-
-        .qibla-center-dot {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #111;
-            transform: translate(-50%, -50%);
-        }
-
-        .dark .qibla-center-dot {
-            background: white;
-        }
-
-        .qibla-needle {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            width: 5px;
-            height: 52px;
-            background: linear-gradient(to top, #e05c5c, #ff8a65);
-            border-radius: 4px 4px 1px 1px;
-            transform-origin: 50% 100%;
-            transform: translateX(-50%) rotate(0deg);
-            transition: transform .3s ease;
-        }
-
-        .qibla-needle::before {
-            content: "";
-            position: absolute;
-            top: -9px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-bottom: 12px solid #e05c5c;
-        }
-
-        .qibla-degrees {
-            margin-top: 12px;
-            font-size: 22px;
-            font-weight: 850;
-        }
-
-        .qibla-hint {
-            margin-top: 6px;
-            color: #888;
-            font-size: 12px;
         }
 
         .prayer {
@@ -1292,35 +935,6 @@
             text-align: right;
         }
 
-        /* BUG FIX: keep the page base layer synchronized with the motion layer.
-           This prevents the iPhone from showing a separate light/dark strip when
-           the theme changes from the home header button. */
-        html,
-        body {
-            background: #f5f5f7;
-        }
-
-        html.dark,
-        html.dark body,
-        body.dark {
-            background: #101010;
-        }
-
-        .motion-bg {
-            z-index: 0;
-        }
-
-        .motion-bg,
-        .emoji {
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-        }
-
-        .add-button:disabled {
-            opacity: .55;
-            cursor: wait;
-        }
-
     </style>
 </head>
 
@@ -1425,35 +1039,6 @@
             id="tasks"
         >
 
-            <div class="stats-row">
-
-                <div class="streak-card">
-                    <div class="streak-emoji">🔥</div>
-                    <div>
-                        <div class="streak-count" id="streakCount">0</div>
-                        <div class="streak-label" id="streakLabel">day streak</div>
-                    </div>
-                </div>
-
-                <div class="progress-ring-card">
-                    <div class="progress-ring-wrap">
-                        <svg viewBox="0 0 58 58">
-                            <circle class="progress-ring-track" cx="29" cy="29" r="24"></circle>
-                            <circle class="progress-ring-fill" id="progressRingFill" cx="29" cy="29" r="24"></circle>
-                        </svg>
-                        <div class="progress-ring-text" id="progressRingText">0/0</div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="score-card">
-                <div class="score-label" id="scoreLabel">Today's Score</div>
-                <div class="score-value" id="scoreValue">🟢 0%</div>
-            </div>
-
-            <div class="quote-card" id="quoteCard"></div>
-
             <div class="task-input">
 
                 <input
@@ -1534,25 +1119,6 @@
 
                 </div>
 
-
-                <div class="option-row">
-
-                    <label id="priorityLabel">
-                        Priority
-                    </label>
-
-                    <select
-                        class="priority-select"
-                        id="prioritySelect"
-                    >
-
-                        <option value="low" id="priorityLow">Low</option>
-                        <option value="medium" id="priorityMedium" selected>Medium</option>
-                        <option value="high" id="priorityHigh">High</option>
-
-                    </select>
-
-                </div>
 
                 <div
                     class="repeat-days"
@@ -1746,131 +1312,10 @@
                     03:46
                 </div>
 
-                <div
-                    class="next-countdown"
-                    id="nextCountdown"
-                >
-                    00:00:00
-                </div>
-
             </div>
 
 
             <div id="prayerList"></div>
-
-            <div class="qibla-card">
-
-                <div
-                    class="qibla-title"
-                    id="qiblaTitle"
-                >
-                    Qibla Direction
-                </div>
-
-                <div class="qibla-compass">
-
-                    <div class="qibla-compass-ring"></div>
-
-                    <div class="qibla-north-label">N</div>
-
-                    <div
-                        class="qibla-needle"
-                        id="qiblaNeedle"
-                    ></div>
-
-                    <div class="qibla-center-dot"></div>
-
-                </div>
-
-                <div
-                    class="qibla-degrees"
-                    id="qiblaDegrees"
-                >
-                    0°
-                </div>
-
-                <div
-                    class="qibla-hint"
-                    id="qiblaHint"
-                >
-                    Direction from your location toward the Kaaba, Mecca.
-                </div>
-
-                <button
-                    class="setting-button"
-                    id="enableCompassButton"
-                    type="button"
-                    style="margin-top:12px;"
-                >
-                    🧭 <span id="enableCompassLabel">Enable Live Compass</span>
-                </button>
-
-                <div
-                    class="status"
-                    id="compassStatus"
-                ></div>
-
-            </div>
-
-        </section>
-
-
-        <!-- PROFILE -->
-
-        <section
-            class="section"
-            id="profile"
-        >
-
-            <div class="settings-title">
-                Profile
-            </div>
-
-            <div class="settings-subtitle">
-                Your account details.
-            </div>
-
-            <div class="settings-card">
-
-                <div class="settings-card-title">
-                    Account
-                </div>
-
-                <div class="setting-row">
-
-                    <div>
-
-                        <div
-                            class="setting-label"
-                            id="profileUsername"
-                        >
-                            Not signed in
-                        </div>
-
-                        <div
-                            class="setting-description"
-                            id="profileEmail"
-                        >
-                            Not signed in
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="settings-card">
-
-                <button
-                    class="danger-button"
-                    id="profileLogoutButton"
-                    type="button"
-                >
-                    Sign Out
-                </button>
-
-            </div>
 
         </section>
 
@@ -2072,28 +1517,6 @@
                                 type="button"
                             >
                                 Update
-                            </button>
-
-                        </div>
-
-                        <div class="location-row" style="margin-top:8px;">
-
-                            <button
-                                class="setting-button"
-                                id="locateMeButton"
-                                type="button"
-                                style="width:100%;"
-                            >
-                                📍 <span id="locateMeLabel">Use My Location</span>
-                            </button>
-
-                            <button
-                                class="setting-button"
-                                id="useErbilButton"
-                                type="button"
-                                style="width:100%;"
-                            >
-                                🕌 <span id="useErbilLabel">Use Erbil</span>
                             </button>
 
                         </div>
@@ -2380,8 +1803,6 @@
 
         import {
             getAuth,
-            setPersistence,
-            browserLocalPersistence,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
@@ -2434,22 +1855,6 @@
         const auth =
             getAuth(app);
 
-        try {
-
-            await setPersistence(
-                auth,
-                browserLocalPersistence
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Account persistence error:",
-                error
-            );
-
-        }
-
         const db =
             getFirestore(app);
 
@@ -2467,9 +1872,6 @@
             new Date();
 
         let currentTasksCache = [];
-
-        // Prevent accidental duplicate writes from rapid taps/presses.
-        let taskWriteInProgress = false;
 
         let guestTasks =
             JSON.parse(
@@ -2669,48 +2071,6 @@
 
                 incorrectLogin:
                     "Incorrect email or password.",
-
-                streakLabel:
-                    "day streak",
-
-                todaysScore:
-                    "Today's Score",
-
-                priority:
-                    "Priority",
-
-                low:
-                    "Low",
-
-                medium:
-                    "Medium",
-
-                high:
-                    "High",
-
-                qiblaTitle:
-                    "Qibla Direction",
-
-                qiblaHint:
-                    "Direction from your location toward the Kaaba, Mecca.",
-
-                locateMe:
-                    "Use My Location",
-
-                useErbil:
-                    "Use Erbil",
-
-                enableCompass:
-                    "Enable Live Compass",
-
-                compassEnabled:
-                    "Live compass active — rotate your device.",
-
-                compassUnsupported:
-                    "Your device doesn't support a live compass.",
-
-                compassDenied:
-                    "Compass permission was denied.",
 
                 prayer: {
 
@@ -2922,48 +2282,6 @@
                 incorrectLogin:
                     "ئیمەیڵ یان وشەی نهێنی هەڵەیە.",
 
-                streakLabel:
-                    "ڕۆژی بەردەوام",
-
-                todaysScore:
-                    "خاڵی ئەمڕۆ",
-
-                priority:
-                    "گرنگی",
-
-                low:
-                    "کەم",
-
-                medium:
-                    "مامناوەند",
-
-                high:
-                    "زۆر",
-
-                qiblaTitle:
-                    "ئاراستەی قیبلە",
-
-                qiblaHint:
-                    "ئاراستە لە شوێنەکەت بەرەو کەعبە، مەککە.",
-
-                locateMe:
-                    "شوێنی من بەکاربێنە",
-
-                useErbil:
-                    "هەولێر بەکاربێنە",
-
-                enableCompass:
-                    "قوتوپاڵی زیندوو چالاک بکە",
-
-                compassEnabled:
-                    "قوتوپاڵی زیندوو چالاکە — ئامێرەکەت بسوڕێنە.",
-
-                compassUnsupported:
-                    "ئامێرەکەت پشتگیری قوتوپاڵی زیندوو ناکات.",
-
-                compassDenied:
-                    "مۆڵەتی قوتوپاڵ ڕەتکرایەوە.",
-
                 prayer: {
 
                     Fajr: "بەیانی",
@@ -3174,48 +2492,6 @@
                 incorrectLogin:
                     "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
 
-                streakLabel:
-                    "يوم متتالي",
-
-                todaysScore:
-                    "نتيجة اليوم",
-
-                priority:
-                    "الأولوية",
-
-                low:
-                    "منخفضة",
-
-                medium:
-                    "متوسطة",
-
-                high:
-                    "عالية",
-
-                qiblaTitle:
-                    "اتجاه القبلة",
-
-                qiblaHint:
-                    "الاتجاه من موقعك نحو الكعبة، مكة المكرمة.",
-
-                locateMe:
-                    "استخدم موقعي",
-
-                useErbil:
-                    "استخدم أربيل",
-
-                enableCompass:
-                    "تفعيل البوصلة المباشرة",
-
-                compassEnabled:
-                    "البوصلة المباشرة مفعّلة — قم بتدوير جهازك.",
-
-                compassUnsupported:
-                    "جهازك لا يدعم البوصلة المباشرة.",
-
-                compassDenied:
-                    "تم رفض إذن البوصلة.",
-
                 prayer: {
 
                     Fajr: "الفجر",
@@ -3245,135 +2521,6 @@
             localStorage.getItem(
                 "dailykrd_language"
             );
-
-
-        /* DAILY QUOTES */
-
-        const dailyQuotes = {
-
-            en: [
-                "Small steps every day lead to big changes.",
-                "Discipline is choosing what you want most over what you want now.",
-                "You don't have to be great to start, but you have to start to be great.",
-                "Progress, not perfection.",
-                "Focus on today — tomorrow will thank you.",
-                "The secret of getting ahead is getting started.",
-                "Consistency turns small efforts into big results.",
-                "Do something today that your future self will thank you for.",
-                "One task at a time builds a whole life.",
-                "A little progress each day adds up to big results."
-            ],
-
-            ku: [
-                "هەنگاوی بچووک ڕۆژانە دەبنە گۆڕانکاری گەورە.",
-                "بەردەوامی ئەوەیە کە ئەوە هەڵدەبژێریت کە زۆرترین پێویستت پێیەتی.",
-                "پێویست ناکات مەزن بیت بۆ دەستپێکردن، بەڵام پێویستە دەستپێبکەیت بۆ ئەوەی مەزن بیت.",
-                "پێشکەوتن، نەک تەواوی.",
-                "سەرنج بدە بە ئەمڕۆ — سبەی سوپاست دەکات.",
-                "نهێنی پێشکەوتن دەستپێکردنە.",
-                "بەردەوامی هەوڵی بچووک دەکاتە ئەنجامی گەورە.",
-                "شتێک بکە ئەمڕۆ کە خۆی داهاتووت سوپاست بکات.",
-                "یەک ئەرک لە یەک کاتدا ژیانێکی تەواو دروست دەکات.",
-                "پێشکەوتنێکی بچووک هەموو ڕۆژێک کۆدەبێتەوە بۆ ئەنجامی گەورە."
-            ],
-
-            ar: [
-                "خطوات صغيرة كل يوم تؤدي إلى تغييرات كبيرة.",
-                "الانضباط هو اختيار ما تريده أكثر بدلاً مما تريده الآن.",
-                "لست بحاجة لأن تكون عظيماً لتبدأ، لكن عليك أن تبدأ لتكون عظيماً.",
-                "التقدم لا الكمال.",
-                "ركّز على اليوم — الغد سيشكرك.",
-                "سر التقدم هو البدء.",
-                "الاستمرارية تحوّل الجهود الصغيرة إلى نتائج كبيرة.",
-                "افعل اليوم شيئاً سيشكرك عليه مستقبلك.",
-                "مهمة واحدة في كل مرة تبني حياة كاملة.",
-                "تقدم بسيط كل يوم يتراكم ليصبح نتائج كبيرة."
-            ]
-
-        };
-
-
-        function getDayOfYear(date) {
-
-            const start =
-                new Date(
-                    date.getFullYear(),
-                    0,
-                    0
-                );
-
-            const diff =
-                date - start;
-
-            return Math.floor(
-                diff / 86400000
-            );
-        }
-
-
-        function renderDailyQuote() {
-
-            const quotes =
-                dailyQuotes[
-                    currentLanguage
-                ] || dailyQuotes.en;
-
-
-            const index =
-                getDayOfYear(
-                    new Date()
-                ) % quotes.length;
-
-
-            const card =
-                document.getElementById(
-                    "quoteCard"
-                );
-
-
-            if (card) {
-
-                card.textContent =
-                    "“" +
-                    quotes[index] +
-                    "”";
-            }
-        }
-
-
-        /* TIME OF DAY BACKGROUND */
-
-        function applyTimeOfDay() {
-
-            const hour =
-                new Date().getHours();
-
-
-            let phase =
-                "day";
-
-
-            if (hour < 6 || hour >= 20) {
-
-                phase = "night";
-
-            } else if (hour < 11) {
-
-                phase = "morning";
-            }
-
-
-            document.documentElement.classList.remove(
-                "time-morning",
-                "time-day",
-                "time-night"
-            );
-
-
-            document.documentElement.classList.add(
-                "time-" + phase
-            );
-        }
 
 
         /* TRANSLATION HELPER */
@@ -3890,75 +3037,6 @@
                 );
 
 
-            document.getElementById(
-                "streakLabel"
-            ).textContent =
-                t("streakLabel");
-
-
-            document.getElementById(
-                "scoreLabel"
-            ).textContent =
-                t("todaysScore");
-
-
-            document.getElementById(
-                "priorityLabel"
-            ).textContent =
-                t("priority");
-
-
-            document.getElementById(
-                "priorityLow"
-            ).textContent =
-                t("low");
-
-
-            document.getElementById(
-                "priorityMedium"
-            ).textContent =
-                t("medium");
-
-
-            document.getElementById(
-                "priorityHigh"
-            ).textContent =
-                t("high");
-
-
-            document.getElementById(
-                "qiblaTitle"
-            ).textContent =
-                t("qiblaTitle");
-
-
-            document.getElementById(
-                "qiblaHint"
-            ).textContent =
-                t("qiblaHint");
-
-
-            document.getElementById(
-                "locateMeLabel"
-            ).textContent =
-                t("locateMe");
-
-
-            document.getElementById(
-                "useErbilLabel"
-            ).textContent =
-                t("useErbil");
-
-
-            document.getElementById(
-                "enableCompassLabel"
-            ).textContent =
-                t("enableCompass");
-
-
-            renderDailyQuote();
-
-
             updateDate();
 
             renderCalendar();
@@ -4074,19 +3152,13 @@
 
                     signUpMode = false;
 
-                    /* Open auth first so a UI refresh error cannot stop Sign In. */
-                    const authOverlay =
-                        document.getElementById("authOverlay");
+                    setAuthMode();
 
-                    if (authOverlay) {
-                        authOverlay.classList.add("active");
-                    }
-
-                    try {
-                        setAuthMode();
-                    } catch (error) {
-                        console.error("Auth mode setup error:", error);
-                    }
+                    document.getElementById(
+                        "authOverlay"
+                    ).classList.add(
+                        "active"
+                    );
 
                 }
             );
@@ -4187,12 +3259,7 @@
         }
 
 
-        let authOperationInProgress = false;
-
-
         async function createAccount() {
-
-            if (authOperationInProgress) return;
 
             clearError();
 
@@ -4260,64 +3327,15 @@
                 return;
             }
 
-            authOperationInProgress = true;
-
-            const authButton =
-                document.getElementById("authButton");
-
-            authButton.disabled = true;
-
 
             try {
 
-                let result;
-
-                try {
-
-                    result =
-                        await createUserWithEmailAndPassword(
-                            auth,
-                            email,
-                            password
-                        );
-
-                } catch (error) {
-
-                    /*
-                     * Firebase may have already created this account from
-                     * an earlier signup attempt. In that case, don't leave
-                     * the user stuck on the signup form: immediately sign
-                     * them in with the credentials they just entered.
-                     */
-                    if (
-                        error &&
-                        (error.code === "auth/email-already-in-use" ||
-                         error.code === "auth/account-exists-with-different-credential")
-                    ) {
-
-                        try {
-
-                            result =
-                                await signInWithEmailAndPassword(
-                                    auth,
-                                    email,
-                                    password
-                                );
-
-                        } catch (signInError) {
-
-                            if (signInError && signInError.code === "auth/invalid-credential") {
-                                throw new Error("ACCOUNT_EXISTS_WRONG_PASSWORD");
-                            }
-
-                            throw signInError;
-                        }
-
-                    } else {
-
-                        throw error;
-                    }
-                }
+                const result =
+                    await createUserWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
 
 
                 await setDoc(
@@ -4345,49 +3363,9 @@
 
             } catch (error) {
 
-                console.error("Signup error:", error);
-
-                if (
-                    error &&
-                    error.message === "ACCOUNT_EXISTS_WRONG_PASSWORD"
-                ) {
-
-                    signUpMode = false;
-                    setAuthMode();
-                    showError(
-                        currentLanguage === "ku"
-                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە، بەڵام وشەی نهێنی هەڵەیە."
-                            : currentLanguage === "ar"
-                            ? "هذا البريد الإلكتروني لديه حساب بالفعل، لكن كلمة المرور غير صحيحة."
-                            : "This email already has an account, but the password is incorrect."
-                    );
-
-                } else if (
-                    error &&
-                    error.code === "auth/email-already-in-use"
-                ) {
-
-                    signUpMode = false;
-                    setAuthMode();
-                    showError(
-                        currentLanguage === "ku"
-                            ? "ئەم ئیمەیڵە پێشتر هەژماری هەیە. ئێستا بچۆ ژوورەوە."
-                            : currentLanguage === "ar"
-                            ? "هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل. سجّل الدخول للمتابعة."
-                            : "This email already has an account. Sign in to continue."
-                    );
-
-                } else {
-
-                    showError(
-                        error.message || "Unable to create the account."
-                    );
-                }
-
-            } finally {
-
-                authOperationInProgress = false;
-                authButton.disabled = false;
+                showError(
+                    error.message
+                );
             }
         }
 
@@ -4507,24 +3485,7 @@
                 "click",
                 () => {
 
-                    if (currentUser) {
-
-                        const profile =
-                            document.getElementById(
-                                "profile"
-                            );
-
-
-                        showSection(
-                            profile.classList.contains(
-                                "active"
-                            )
-                                ? "tasks"
-                                : "profile"
-                        );
-
-                        return;
-                    }
+                    if (currentUser) return;
 
                     signUpMode = false;
 
@@ -4583,15 +3544,9 @@
 
 
                         document.getElementById(
-                            "profileUsername"
-                        ).textContent =
-                            username;
-
-
-                        document.getElementById(
-                            "profileEmail"
-                        ).textContent =
-                            user.email || "";
+                            "accountButton"
+                        ).style.display =
+                            "none";
 
 
                         startTaskListener();
@@ -4613,19 +3568,6 @@
                         ).textContent =
                             user.email || "";
 
-
-                        document.getElementById(
-                            "profileUsername"
-                        ).textContent =
-                            t("guest");
-
-
-                        document.getElementById(
-                            "profileEmail"
-                        ).textContent =
-                            user.email || "";
-
-
                         startTaskListener();
                     }
 
@@ -4640,18 +3582,6 @@
 
                     document.getElementById(
                         "settingsEmail"
-                    ).textContent =
-                        t("notSignedIn");
-
-
-                    document.getElementById(
-                        "profileUsername"
-                    ).textContent =
-                        t("notSignedIn");
-
-
-                    document.getElementById(
-                        "profileEmail"
                     ).textContent =
                         t("notSignedIn");
 
@@ -4681,24 +3611,6 @@
         document
             .getElementById(
                 "logoutButton"
-            )
-            .addEventListener(
-                "click",
-                async () => {
-
-                    if (currentUser) {
-
-                        await signOut(auth);
-
-                    }
-
-                }
-            );
-
-
-        document
-            .getElementById(
-                "profileLogoutButton"
             )
             .addEventListener(
                 "click",
@@ -4860,12 +3772,14 @@
             if (!currentUser) return;
 
 
-            // Read the collection without requiring a Firestore composite/indexed
-            // query. Older tasks may not have every indexed field, and this keeps
-            // the app working even if the database was created before createdAt
-            // was added. Sorting is done locally instead.
             const taskQuery =
-                getTasksCollection();
+                query(
+                    getTasksCollection(),
+                    orderBy(
+                        "createdAt",
+                        "asc"
+                    )
+                );
 
 
             unsubscribeTasks =
@@ -4887,12 +3801,6 @@
                             }
                         );
 
-
-                        tasks.sort(
-                            (a, b) =>
-                                (Number(a.createdAt) || 0) -
-                                (Number(b.createdAt) || 0)
-                        );
 
                         currentTasksCache =
                             tasks;
@@ -4988,288 +3896,18 @@
         }
 
 
-        const priorityOrder = {
-            high: 0,
-            medium: 1,
-            low: 2
-        };
-
-
         function getTasksForDate(
             tasks,
             dateKey
         ) {
 
-            return tasks
-                .filter(
-                    task =>
-                        taskOccursOnDate(
-                            task,
-                            dateKey
-                        )
-                )
-                .slice()
-                .sort(
-                    (a, b) =>
-                        (priorityOrder[a.priority] ?? 1) -
-                        (priorityOrder[b.priority] ?? 1)
-                );
-        }
-
-
-        function isTaskCompletedOnDate(
-            task,
-            dateKey
-        ) {
-
-            if (
-                task.repeat &&
-                task.repeat !== "once"
-            ) {
-
-                return !!(
-                    task.completedDates &&
-                    task.completedDates.includes(
+            return tasks.filter(
+                task =>
+                    taskOccursOnDate(
+                        task,
                         dateKey
                     )
-                );
-            }
-
-            return !!task.completed;
-        }
-
-
-        /* STATS: STREAK + PROGRESS RING */
-
-        function getActiveTasksSource() {
-
-            return currentUser
-                ? currentTasksCache
-                : guestTasks;
-        }
-
-
-        function updateProgressRing() {
-
-            const tasks =
-                getTasksForDate(
-                    getActiveTasksSource(),
-                    selectedDate
-                );
-
-
-            const total =
-                tasks.length;
-
-
-            const done =
-                tasks.filter(
-                    task =>
-                        isTaskCompletedOnDate(
-                            task,
-                            selectedDate
-                        )
-                ).length;
-
-
-            const text =
-                document.getElementById(
-                    "progressRingText"
-                );
-
-
-            const fill =
-                document.getElementById(
-                    "progressRingFill"
-                );
-
-
-            text.textContent =
-                `${done}/${total}`;
-
-
-            const radius = 24;
-
-            const circumference =
-                2 * Math.PI * radius;
-
-            const ratio =
-                total > 0
-                    ? done / total
-                    : 0;
-
-
-            fill.style.strokeDasharray =
-                `${circumference}`;
-
-            fill.style.strokeDashoffset =
-                `${circumference * (1 - ratio)}`;
-        }
-
-
-        function computeStreak() {
-
-            const tasks =
-                getActiveTasksSource();
-
-
-            let streak = 0;
-
-            let cursor =
-                new Date();
-
-
-            for (
-                let i = 0;
-                i < 3650;
-                i++
-            ) {
-
-                const key =
-                    getDateKeyFromDate(
-                        cursor
-                    );
-
-
-                const dayTasks =
-                    getTasksForDate(
-                        tasks,
-                        key
-                    );
-
-
-                if (!dayTasks.length) {
-
-                    if (
-                        key ===
-                        getTodayKey()
-                    ) {
-
-                        cursor.setDate(
-                            cursor.getDate() - 1
-                        );
-
-                        continue;
-                    }
-
-                    break;
-                }
-
-
-                const allDone =
-                    dayTasks.every(
-                        task =>
-                            isTaskCompletedOnDate(
-                                task,
-                                key
-                            )
-                    );
-
-
-                if (!allDone) {
-
-                    if (
-                        key ===
-                        getTodayKey()
-                    ) {
-
-                        cursor.setDate(
-                            cursor.getDate() - 1
-                        );
-
-                        continue;
-                    }
-
-                    break;
-                }
-
-
-                streak++;
-
-
-                cursor.setDate(
-                    cursor.getDate() - 1
-                );
-            }
-
-
-            return streak;
-        }
-
-
-        function updateStreak() {
-
-            const streak =
-                computeStreak();
-
-
-            document.getElementById(
-                "streakCount"
-            ).textContent =
-                String(streak);
-        }
-
-
-        function updateTodayScore() {
-
-            const tasks =
-                getTasksForDate(
-                    getActiveTasksSource(),
-                    getTodayKey()
-                );
-
-
-            const total =
-                tasks.length;
-
-
-            const done =
-                tasks.filter(
-                    task =>
-                        isTaskCompletedOnDate(
-                            task,
-                            getTodayKey()
-                        )
-                ).length;
-
-
-            const percent =
-                total > 0
-                    ? Math.round(
-                        (done / total) * 100
-                    )
-                    : 0;
-
-
-            const emoji =
-                percent >= 70
-                    ? "🟢"
-                    : percent >= 40
-                        ? "🟡"
-                        : "🔴";
-
-
-            const valueElement =
-                document.getElementById(
-                    "scoreValue"
-                );
-
-
-            if (valueElement) {
-
-                valueElement.textContent =
-                    `${emoji} ${percent}%`;
-            }
-        }
-
-
-        function updateStats() {
-
-            updateStreak();
-
-            updateProgressRing();
-
-            updateTodayScore();
+            );
         }
 
 
@@ -5321,8 +3959,6 @@
                     list
                 );
 
-                updateStats();
-
                 return;
             }
 
@@ -5338,8 +3974,6 @@
                 todayTasks,
                 list
             );
-
-            updateStats();
         }
 
 
@@ -5367,16 +4001,6 @@
 
                 row.className =
                     "task";
-
-
-                if (
-                    task.priority === "high"
-                ) {
-
-                    row.classList.add(
-                        "priority-high"
-                    );
-                }
 
 
                 if (
@@ -5420,59 +4044,13 @@
                     "change",
                     async () => {
 
-                        if (checkbox.checked) {
-
-                            row.classList.add(
-                                "just-completed"
-                            );
-
-
-                            setTimeout(
-                                () => {
-
-                                    row.classList.remove(
-                                        "just-completed"
-                                    );
-
-                                },
-                                450
-                            );
-                        }
-
-
-                        const desiredState = checkbox.checked;
-
-                        try {
-
-                            await toggleTaskCompletion(
-                                task,
-                                desiredState
-                            );
-
-                        } catch (error) {
-
-                            console.error("Task update error:", error);
-                            checkbox.checked = !desiredState;
-                            row.classList.toggle(
-                                "completed",
-                                !desiredState
-                            );
-
-                        }
+                        await toggleTaskCompletion(
+                            task,
+                            checkbox.checked
+                        );
 
                     }
                 );
-
-
-                const dot =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                dot.className =
-                    "priority-dot " +
-                    (task.priority || "medium");
 
 
                 const content =
@@ -5547,17 +4125,9 @@
                     "click",
                     async () => {
 
-                        try {
-
-                            await deleteTask(
-                                task
-                            );
-
-                        } catch (error) {
-
-                            console.error("Task delete error:", error);
-
-                        }
+                        await deleteTask(
+                            task
+                        );
 
                     }
                 );
@@ -5565,11 +4135,6 @@
 
                 row.appendChild(
                     checkbox
-                );
-
-
-                row.appendChild(
-                    dot
                 );
 
 
@@ -5634,16 +4199,6 @@
                             d =>
                                 d !== selectedDate
                         );
-                }
-
-
-                if (
-                    !found.repeat ||
-                    found.repeat === "once"
-                ) {
-
-                    found.completed =
-                        checked;
                 }
 
 
@@ -5783,16 +4338,7 @@
                 input.value.trim();
 
 
-            if (!text || taskWriteInProgress) return;
-
-            taskWriteInProgress = true;
-
-            const addButton =
-                document.getElementById("addTaskButton");
-
-            if (addButton) {
-                addButton.disabled = true;
-            }
+            if (!text) return;
 
 
             const repeat =
@@ -5814,15 +4360,7 @@
                 );
 
 
-            const priority =
-                document.getElementById(
-                    "prioritySelect"
-                ).value;
-
-
             const task = {
-
-                priority,
 
                 id:
                     crypto.randomUUID
@@ -5875,52 +4413,29 @@
             }
 
 
-            try {
+            if (!currentUser) {
 
-                if (!currentUser) {
+                guestTasks.push(
+                    task
+                );
 
-                    guestTasks.push(
-                        task
-                    );
 
-                    localStorage.setItem(
-                        "dailykrd_guest_tasks",
-                        JSON.stringify(
-                            guestTasks
-                        )
-                    );
+                localStorage.setItem(
+                    "dailykrd_guest_tasks",
+                    JSON.stringify(
+                        guestTasks
+                    )
+                );
 
-                } else {
+            } else {
 
-                    delete task.id;
+                delete task.id;
 
-                    await addDoc(
-                        getTasksCollection(),
-                        task
-                    );
-                }
 
-            } catch (error) {
-
-                console.error("Task add error:", error);
-
-                if (currentLanguage === "ku") {
-                    alert("ئەرکەکە زیاد نەکرا. تکایە دووبارە هەوڵ بدەرەوە.");
-                } else if (currentLanguage === "ar") {
-                    alert("تعذر إضافة المهمة. حاول مرة أخرى.");
-                } else {
-                    alert("The task could not be added. Please try again.");
-                }
-
-                return;
-
-            } finally {
-
-                taskWriteInProgress = false;
-
-                if (addButton) {
-                    addButton.disabled = false;
-                }
+                await addDoc(
+                    getTasksCollection(),
+                    task
+                );
             }
 
 
@@ -5931,12 +4446,6 @@
                 "repeatSelect"
             ).value =
                 "once";
-
-
-            document.getElementById(
-                "prioritySelect"
-            ).value =
-                "medium";
 
 
             document.getElementById(
@@ -6376,16 +4885,6 @@ document.documentElement.classList.toggle(
     dark
 );
 
-            const themeMeta =
-                document.querySelector('meta[name="theme-color"]');
-
-            if (themeMeta) {
-                themeMeta.setAttribute(
-                    "content",
-                    dark ? "#101010" : "#f5f5f7"
-                );
-            }
-
             const themeButton =
                 document.getElementById(
                     "themeButton"
@@ -6465,392 +4964,24 @@ document.documentElement.classList.toggle(
             );
 
 
-        /* PRAYER TIMES — ASTRONOMICAL CALCULATION (precise, to the second) */
+        /* PRAYER TIMES */
 
-        // Default coordinates: Erbil, Kurdistan Region (Asia/Baghdad, UTC+3, no DST)
-        const ERBIL_LAT = 36.191113;
-        const ERBIL_LNG = 44.009167;
-        const ERBIL_TIMEZONE = 3;
+        const prayerTimes = {
 
-        // Kaaba coordinates, for Qibla bearing calculation
-        const KAABA_LAT = 21.422487;
-        const KAABA_LNG = 39.826206;
+            Fajr: "03:46",
 
-        const PRAYER_ANGLES = {
-            fajr: 18,
-            isha: 17,
-            twilightAngle: 0.833,
-            asrFactor: 1
+            Dhuhr: "12:20",
+
+            Asr: "16:01",
+
+            Maghrib: "19:04",
+
+            Isha: "20:19"
+
         };
 
 
-        function dtr(d) { return (d * Math.PI) / 180; }
-        function rtd(r) { return (r * 180) / Math.PI; }
-        function dsin(d) { return Math.sin(dtr(d)); }
-        function dcos(d) { return Math.cos(dtr(d)); }
-        function dtan(d) { return Math.tan(dtr(d)); }
-        function darcsin(x) { return rtd(Math.asin(x)); }
-        function darccos(x) { return rtd(Math.acos(x)); }
-        function darctan2(y, x) { return rtd(Math.atan2(y, x)); }
-        function darccot(x) { return rtd(Math.atan2(1, x)); }
-        function fixHour(h) { h = h - 24 * Math.floor(h / 24); return h < 0 ? h + 24 : h; }
-        function fixAngle(a) { a = a - 360 * Math.floor(a / 360); return a < 0 ? a + 360 : a; }
-
-
-        function julianDate(year, month, day) {
-
-            if (month <= 2) {
-                year -= 1;
-                month += 12;
-            }
-
-            const A = Math.floor(year / 100);
-            const B = 2 - A + Math.floor(A / 4);
-
-            return (
-                Math.floor(365.25 * (year + 4716)) +
-                Math.floor(30.6001 * (month + 1)) +
-                day + B - 1524.5
-            );
-        }
-
-
-        function sunPosition(jd) {
-
-            const D = jd - 2451545.0;
-
-            const g = fixAngle(357.529 + 0.98560028 * D);
-            const q = fixAngle(280.459 + 0.98564736 * D);
-            const L = fixAngle(q + 1.915 * dsin(g) + 0.02 * dsin(2 * g));
-
-            const e = 23.439 - 0.00000036 * D;
-
-            const RA = darctan2(dcos(e) * dsin(L), dcos(L)) / 15;
-
-            const eqt = q / 15 - fixHour(RA);
-            const decl = darcsin(dsin(e) * dsin(L));
-
-            return { declination: decl, equation: eqt };
-        }
-
-
-        function computeSunAngleTime(jDate, angle, lat, noon, ccw) {
-
-            const sun = sunPosition(jDate);
-
-            const numerator =
-                -dsin(angle) - dsin(sun.declination) * dsin(lat);
-
-            const denominator =
-                dcos(sun.declination) * dcos(lat);
-
-            const ratio =
-                Math.max(-1, Math.min(1, numerator / denominator));
-
-            const t = darccos(ratio) / 15;
-
-            return noon + (ccw ? -t : t);
-        }
-
-
-        function computeAsrTime(jDate, lat, noon, factor) {
-
-            const sun = sunPosition(jDate);
-
-            const G =
-                -darccot(
-                    factor + dtan(Math.abs(lat - sun.declination))
-                );
-
-            const numerator =
-                -dsin(G) - dsin(sun.declination) * dsin(lat);
-
-            const denominator =
-                dcos(sun.declination) * dcos(lat);
-
-            const ratio =
-                Math.max(-1, Math.min(1, numerator / denominator));
-
-            const t = darccos(ratio) / 15;
-
-            return noon + t;
-        }
-
-
-        function hoursToHms(hours) {
-
-            hours = fixHour(hours);
-
-            const totalSeconds =
-                Math.round(hours * 3600);
-
-            const h = Math.floor(totalSeconds / 3600) % 24;
-            const m = Math.floor((totalSeconds % 3600) / 60);
-            const s = totalSeconds % 60;
-
-            return (
-                String(h).padStart(2, "0") + ":" +
-                String(m).padStart(2, "0") + ":" +
-                String(s).padStart(2, "0")
-            );
-        }
-
-
-        function getUserCoords() {
-
-            const lat = parseFloat(
-                localStorage.getItem("dailykrd_lat")
-            );
-
-            const lng = parseFloat(
-                localStorage.getItem("dailykrd_lng")
-            );
-
-            const timezone = parseFloat(
-                localStorage.getItem("dailykrd_tz")
-            );
-
-            if (!isNaN(lat) && !isNaN(lng)) {
-                return {
-                    lat,
-                    lng,
-                    timezone: isNaN(timezone) ? ERBIL_TIMEZONE : timezone
-                };
-            }
-
-            return { lat: ERBIL_LAT, lng: ERBIL_LNG, timezone: ERBIL_TIMEZONE };
-        }
-
-
-        function computePrayerTimesForDate(date, lat, lng, timezone) {
-
-            const jDate =
-                julianDate(
-                    date.getFullYear(),
-                    date.getMonth() + 1,
-                    date.getDate()
-                );
-
-            const eqtHours =
-                sunPosition(jDate).equation;
-
-            // Solar (Dhuhr) noon, shifted into the local civil timezone
-            const noon =
-                fixHour(12 - eqtHours + (timezone - lng / 15));
-
-            const fajr =
-                computeSunAngleTime(jDate, PRAYER_ANGLES.fajr, lat, noon, true);
-
-            const asr =
-                computeAsrTime(jDate, lat, noon, PRAYER_ANGLES.asrFactor);
-
-            const maghrib =
-                computeSunAngleTime(jDate, PRAYER_ANGLES.twilightAngle, lat, noon, false);
-
-            const isha =
-                computeSunAngleTime(jDate, PRAYER_ANGLES.isha, lat, noon, false);
-
-            return {
-                Fajr: hoursToHms(fajr),
-                Dhuhr: hoursToHms(noon),
-                Asr: hoursToHms(asr),
-                Maghrib: hoursToHms(maghrib),
-                Isha: hoursToHms(isha)
-            };
-        }
-
-
-        /* QIBLA DIRECTION */
-
-        function computeQiblaBearing(lat, lng) {
-
-            const phiK = dtr(KAABA_LAT);
-            const lambdaK = dtr(KAABA_LNG);
-            const phi = dtr(lat);
-            const lambda = dtr(lng);
-
-            const y = Math.sin(lambdaK - lambda);
-
-            const x =
-                Math.cos(phi) * Math.tan(phiK) -
-                Math.sin(phi) * Math.cos(lambdaK - lambda);
-
-            let bearing = rtd(Math.atan2(y, x));
-
-            return (bearing + 360) % 360;
-        }
-
-
-        let qiblaBearingDeg = 0;
-
-        let liveDeviceHeading = null;
-
-
-        function renderCompassNeedle() {
-
-            const needle =
-                document.getElementById("qiblaNeedle");
-
-            const northLabel =
-                document.querySelector(".qibla-north-label");
-
-            const heading =
-                liveDeviceHeading || 0;
-
-            const needleRotation =
-                qiblaBearingDeg - heading;
-
-            if (needle) {
-                needle.style.transform =
-                    `translateX(-50%) rotate(${needleRotation}deg)`;
-            }
-
-            if (northLabel) {
-                northLabel.style.transform =
-                    `translateX(-50%) rotate(${-heading}deg)`;
-            }
-        }
-
-
-        function updateQiblaDisplay() {
-
-            const { lat, lng } = getUserCoords();
-
-            qiblaBearingDeg =
-                computeQiblaBearing(lat, lng);
-
-            const degreeText =
-                document.getElementById("qiblaDegrees");
-
-            if (degreeText) {
-                degreeText.textContent =
-                    Math.round(qiblaBearingDeg) + "°";
-            }
-
-            renderCompassNeedle();
-        }
-
-
-        function handleOrientationEvent(event) {
-
-            let heading = null;
-
-            if (typeof event.webkitCompassHeading === "number") {
-
-                // iOS Safari gives compass heading directly (0 = north)
-                heading = event.webkitCompassHeading;
-
-            } else if (event.absolute && event.alpha !== null) {
-
-                // Standard DeviceOrientation alpha: counter-clockwise from north
-                heading = 360 - event.alpha;
-
-            } else if (event.alpha !== null) {
-
-                heading = 360 - event.alpha;
-            }
-
-            if (heading !== null && !isNaN(heading)) {
-
-                liveDeviceHeading = heading;
-
-                renderCompassNeedle();
-            }
-        }
-
-
-        async function enableLiveCompass() {
-
-            const status =
-                document.getElementById("compassStatus");
-
-
-            if (
-                typeof DeviceOrientationEvent !== "undefined" &&
-                typeof DeviceOrientationEvent.requestPermission === "function"
-            ) {
-
-                try {
-
-                    const permission =
-                        await DeviceOrientationEvent.requestPermission();
-
-                    if (permission !== "granted") {
-
-                        status.textContent =
-                            t("compassDenied");
-
-                        return;
-                    }
-
-                } catch (error) {
-
-                    console.error(
-                        "Compass permission error:",
-                        error
-                    );
-
-                    status.textContent =
-                        t("compassDenied");
-
-                    return;
-                }
-            }
-
-
-            if (
-                !("DeviceOrientationEvent" in window) &&
-                !("ondeviceorientationabsolute" in window)
-            ) {
-
-                status.textContent =
-                    t("compassUnsupported");
-
-                return;
-            }
-
-
-            window.addEventListener(
-                "deviceorientationabsolute",
-                handleOrientationEvent,
-                true
-            );
-
-            window.addEventListener(
-                "deviceorientation",
-                handleOrientationEvent,
-                true
-            );
-
-
-            status.textContent =
-                t("compassEnabled");
-        }
-
-
-        document
-            .getElementById("enableCompassButton")
-            ?.addEventListener(
-                "click",
-                enableLiveCompass
-            );
-
-
-        let prayerTimes = {};
-
-
-        function recomputePrayerTimes() {
-
-            const { lat, lng, timezone } = getUserCoords();
-
-            prayerTimes =
-                computePrayerTimesForDate(new Date(), lat, lng, timezone);
-        }
-
-
         function loadPrayerTimes() {
-
-            recomputePrayerTimes();
 
             const list =
                 document.getElementById(
@@ -6917,29 +5048,19 @@ document.documentElement.classList.toggle(
             );
 
 
-            updateQiblaDisplay();
-
             updateNextPrayer();
-        }
-
-
-        function timeStrToSeconds(time) {
-
-            const [hours, minutes, seconds] =
-                time.split(":").map(Number);
-
-            return hours * 3600 + minutes * 60 + (seconds || 0);
         }
 
 
         function updateNextPrayer() {
 
-            const now = new Date();
+            const now =
+                new Date();
 
-            const currentSeconds =
-                now.getHours() * 3600 +
-                now.getMinutes() * 60 +
-                now.getSeconds();
+
+            const currentMinutes =
+                now.getHours() * 60 +
+                now.getMinutes();
 
 
             let next = null;
@@ -6952,20 +5073,26 @@ document.documentElement.classList.toggle(
                 )
             ) {
 
-                const prayerSeconds =
-                    timeStrToSeconds(time);
+                const [hours, minutes] =
+                    time
+                        .split(":")
+                        .map(Number);
+
+
+                const prayerMinutes =
+                    hours * 60 +
+                    minutes;
 
 
                 if (
-                    prayerSeconds >
-                    currentSeconds
+                    prayerMinutes >
+                    currentMinutes
                 ) {
 
                     next =
                         [
                             name,
-                            time,
-                            prayerSeconds - currentSeconds
+                            time
                         ];
 
                     break;
@@ -6978,9 +5105,7 @@ document.documentElement.classList.toggle(
                 next =
                     [
                         "Fajr",
-                        prayerTimes.Fajr,
-                        (24 * 3600 - currentSeconds) +
-                            timeStrToSeconds(prayerTimes.Fajr)
+                        prayerTimes.Fajr
                     ];
             }
 
@@ -6998,161 +5123,16 @@ document.documentElement.classList.toggle(
                 "nextTime"
             ).textContent =
                 next[1];
-
-
-            const countdownElement =
-                document.getElementById(
-                    "nextCountdown"
-                );
-
-
-            if (countdownElement) {
-
-                const remaining = next[2];
-
-                const rh = Math.floor(remaining / 3600);
-                const rm = Math.floor((remaining % 3600) / 60);
-                const rs = remaining % 60;
-
-                countdownElement.textContent =
-                    String(rh).padStart(2, "0") + ":" +
-                    String(rm).padStart(2, "0") + ":" +
-                    String(rs).padStart(2, "0");
-            }
         }
 
 
         setInterval(
-            () => {
-
-                const now = new Date();
-
-                if (
-                    now.getHours() === 0 &&
-                    now.getMinutes() === 0 &&
-                    now.getSeconds() === 0
-                ) {
-
-                    loadPrayerTimes();
-
-                } else {
-
-                    updateNextPrayer();
-                }
-
-            },
-            1000
+            updateNextPrayer,
+            30000
         );
 
 
         /* LOCATION */
-
-        function saveCoords(lat, lng, timezone) {
-
-            localStorage.setItem("dailykrd_lat", lat);
-            localStorage.setItem("dailykrd_lng", lng);
-
-            if (timezone !== undefined) {
-                localStorage.setItem("dailykrd_tz", timezone);
-            }
-
-            loadPrayerTimes();
-
-            if (currentUser) {
-
-                updateDoc(
-                    doc(db, "users", currentUser.uid),
-                    { lat, lng, timezone }
-                ).catch(error =>
-                    console.error("Coords save error:", error)
-                );
-            }
-        }
-
-
-        const locateButton =
-            document.getElementById("locateMeButton");
-
-
-        if (locateButton) {
-
-            locateButton.addEventListener(
-                "click",
-                () => {
-
-                    if (!("geolocation" in navigator)) {
-
-                        alert(
-                            currentLanguage === "ku"
-                                ? "وێبگەڕەکەت پشتگیری شوێن ناکات."
-                                : currentLanguage === "ar"
-                                    ? "متصفحك لا يدعم تحديد الموقع."
-                                    : "Your browser doesn't support geolocation."
-                        );
-
-                        return;
-                    }
-
-
-                    navigator.geolocation.getCurrentPosition(
-                        position => {
-
-                            const localTimezone =
-                                -new Date().getTimezoneOffset() / 60;
-
-                            saveCoords(
-                                position.coords.latitude,
-                                position.coords.longitude,
-                                localTimezone
-                            );
-
-                        },
-                        error => {
-
-                            console.error(
-                                "Geolocation error:",
-                                error
-                            );
-
-                        },
-                        { enableHighAccuracy: true, timeout: 10000 }
-                    );
-
-                }
-            );
-        }
-
-
-        document
-            .getElementById(
-                "useErbilButton"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    document.getElementById(
-                        "locationInput"
-                    ).value = "Erbil";
-
-                    document.getElementById(
-                        "locationText"
-                    ).textContent = "Erbil";
-
-                    localStorage.setItem(
-                        "dailykrd_location",
-                        "Erbil"
-                    );
-
-                    saveCoords(
-                        ERBIL_LAT,
-                        ERBIL_LNG,
-                        ERBIL_TIMEZONE
-                    );
-
-                }
-            );
-
 
         document
             .getElementById(
@@ -7160,7 +5140,7 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                async () => {
+                () => {
 
                     const input =
                         document.getElementById(
@@ -7185,25 +5165,6 @@ document.documentElement.classList.toggle(
                         "dailykrd_location",
                         location
                     );
-
-
-                    if (currentUser) {
-
-                        try {
-
-                            await updateDoc(
-                                doc(db, "users", currentUser.uid),
-                                { location }
-                            );
-
-                        } catch (error) {
-
-                            console.error(
-                                "Location save error:",
-                                error
-                            );
-                        }
-                    }
 
                 }
             );
@@ -7230,131 +5191,7 @@ document.documentElement.classList.toggle(
         }
 
 
-        /* NOTIFICATIONS (PUSH) */
-
-        const VAPID_PUBLIC_KEY =
-            "BGqV3eJuJ6q426AfN4sxx2bJA8IYagZCVSHJEZQ9tIlyG5Ckxu-TkrHdGqqFLIYDF5Ym70cgX3ewMG2cpxUuApA";
-
-
-        function urlBase64ToUint8Array(base64String) {
-
-            const padding =
-                "=".repeat(
-                    (4 - (base64String.length % 4)) % 4
-                );
-
-            const base64 =
-                (base64String + padding)
-                    .replace(/-/g, "+")
-                    .replace(/_/g, "/");
-
-            const rawData =
-                window.atob(base64);
-
-            const outputArray =
-                new Uint8Array(rawData.length);
-
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-
-            return outputArray;
-        }
-
-
-        async function subscribeToPush() {
-
-            const status =
-                document.getElementById(
-                    "notificationStatus"
-                );
-
-
-            if (
-                !("serviceWorker" in navigator) ||
-                !("PushManager" in window)
-            ) {
-
-                status.textContent =
-                    t("notificationsUnsupported");
-
-                return;
-            }
-
-
-            try {
-
-                const permission =
-                    await Notification.requestPermission();
-
-
-                if (permission !== "granted") {
-
-                    status.textContent =
-                        t("notificationsDisabled");
-
-                    return;
-                }
-
-
-                const registration =
-                    await navigator.serviceWorker.ready;
-
-
-                let subscription =
-                    await registration.pushManager.getSubscription();
-
-
-                if (!subscription) {
-
-                    subscription =
-                        await registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey:
-                                urlBase64ToUint8Array(
-                                    VAPID_PUBLIC_KEY
-                                )
-                        });
-                }
-
-
-                if (currentUser) {
-
-                    await updateDoc(
-                        doc(db, "users", currentUser.uid),
-                        {
-                            pushSubscription:
-                                subscription.toJSON(),
-                            notificationsEnabled: true
-                        }
-                    );
-
-                } else {
-
-                    localStorage.setItem(
-                        "dailykrd_push_subscription",
-                        JSON.stringify(
-                            subscription.toJSON()
-                        )
-                    );
-                }
-
-
-                status.textContent =
-                    t("notificationsEnabled");
-
-            } catch (error) {
-
-                console.error(
-                    "Push subscription error:",
-                    error
-                );
-
-                status.textContent =
-                    t("notificationsDisabled");
-            }
-        }
-
+        /* NOTIFICATIONS */
 
         document
             .getElementById(
@@ -7362,7 +5199,66 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                subscribeToPush
+                async () => {
+
+                    const status =
+                        document.getElementById(
+                            "notificationStatus"
+                        );
+
+
+                    if (
+                        !("Notification" in window)
+                    ) {
+
+                        status.textContent =
+                            t(
+                                "notificationsUnsupported"
+                            );
+
+                        return;
+                    }
+
+
+                    try {
+
+                        const permission =
+                            await Notification
+                                .requestPermission();
+
+
+                        if (
+                            permission ===
+                            "granted"
+                        ) {
+
+                            status.textContent =
+                                t(
+                                    "notificationsEnabled"
+                                );
+
+                        } else {
+
+                            status.textContent =
+                                t(
+                                    "notificationsDisabled"
+                                );
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "Notification error:",
+                            error
+                        );
+
+                        status.textContent =
+                            t(
+                                "notificationsDisabled"
+                            );
+                    }
+
+                }
             );
 
 
@@ -7406,19 +5302,9 @@ document.documentElement.classList.toggle(
         }
 
 
-        applyTimeOfDay();
-
-        setInterval(
-            applyTimeOfDay,
-            10 * 60 * 1000
-        );
-
-
         renderCalendar();
 
         loadPrayerTimes();
-
-        updateStats();
 
 
         /* SERVICE WORKER */
