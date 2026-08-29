@@ -39,9 +39,43 @@
             font-weight: 850;
             letter-spacing: -1px;
             color: #111;
-            opacity: .85;
+            opacity: 0;
+            background: linear-gradient(90deg, #111 0%, #666 45%, #111 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation:
+                bootLogoIn .9s cubic-bezier(.2, .8, .2, 1) forwards,
+                bootLogoShimmer 2.2s linear .9s infinite;
         }
-        html.dark #bootLoader .boot-logo { color: #fff; }
+        html.dark #bootLoader .boot-logo {
+            background: linear-gradient(90deg, #fff 0%, #999 45%, #fff 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        @keyframes bootLogoIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px) scale(.96);
+                filter: blur(4px);
+            }
+            60% {
+                opacity: 1;
+                filter: blur(0);
+            }
+            100% {
+                opacity: .85;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+        @keyframes bootLogoShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
         html.app-ready #bootLoader { opacity: 0; pointer-events: none; }
         html:not(.app-ready) body > *:not(#bootLoader) { visibility: hidden; }
 
@@ -387,6 +421,17 @@
             font-size: 30px;
             font-weight: 850;
             letter-spacing: -1px;
+            opacity: 0;
+            transform: translateY(6px);
+            animation: headerLogoIn .6s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: .05s;
+        }
+
+        @keyframes headerLogoIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .date {
