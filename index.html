@@ -321,11 +321,21 @@
                 color .3s ease;
         }
 
+        html.dark body,
         body.dark {
             color: white;
         }
 
-        /* MOTION BACKGROUND */
+        /* Belt-and-suspenders: the pre-paint script in <head> sets the
+           dark class on <html> immediately (before <body> exists), so
+           any text color relying only on body.dark can render out of
+           sync with the background for a moment (or longer, if body's
+           class ever fails to update). Scoping directly by ".dark" as
+           an ancestor guarantees the logo follows whichever element
+           actually carries the class. */
+        .dark .logo {
+            color: #fff;
+        }
 
         .motion-bg {
             position: fixed;
