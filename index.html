@@ -252,6 +252,35 @@
     background: linear-gradient(160deg, #14151f 0%, #0b0b12 55%);
 }
 
+/* Dark mode must always win over time-of-day gradients, regardless of
+   which phase (morning/day/night) is currently active. Without these,
+   time-morning/time-day were overriding the dark background because
+   they had equal CSS specificity and came later in source order. */
+
+.dark.time-morning .motion-bg,
+.time-morning.dark .motion-bg {
+    background: linear-gradient(160deg, #241a10 0%, #101010 55%);
+}
+
+.dark.time-day .motion-bg,
+.time-day.dark .motion-bg {
+    background: linear-gradient(160deg, #10151f 0%, #101010 55%);
+}
+
+.dark.time-morning .motion-orb.one,
+.time-morning.dark .motion-orb.one { background: #7a4a2a; }
+.dark.time-morning .motion-orb.two,
+.time-morning.dark .motion-orb.two { background: #8a5a2a; }
+.dark.time-morning .motion-orb.three,
+.time-morning.dark .motion-orb.three { background: #6a3a1a; }
+
+.dark.time-day .motion-orb.one,
+.time-day.dark .motion-orb.one { background: #2a4a6a; }
+.dark.time-day .motion-orb.two,
+.time-day.dark .motion-orb.two { background: #3a5a7a; }
+.dark.time-day .motion-orb.three,
+.time-day.dark .motion-orb.three { background: #1a3a5a; }
+
 .header,
 .tabs,
 .section {
