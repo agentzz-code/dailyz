@@ -321,11 +321,6 @@
     background: linear-gradient(160deg, #14151f 0%, #0b0b12 55%);
 }
 
-/* Dark mode must always win over time-of-day gradients, regardless of
-   which phase (morning/day/night) is currently active. Without these,
-   time-morning/time-day were overriding the dark background because
-   they had equal CSS specificity and came later in source order. */
-
 .dark.time-morning .motion-bg,
 .time-morning.dark .motion-bg {
     background: linear-gradient(160deg, #241a10 0%, #101010 55%);
@@ -395,13 +390,6 @@
             color: white;
         }
 
-        /* Belt-and-suspenders: the pre-paint script in <head> sets the
-           dark class on <html> immediately (before <body> exists), so
-           any text color relying only on body.dark can render out of
-           sync with the background for a moment (or longer, if body's
-           class ever fails to update). Scoping directly by ".dark" as
-           an ancestor guarantees the logo follows whichever element
-           actually carries the class. */
         .dark .logo {
             color: #fff;
         }
@@ -1603,9 +1591,6 @@
             text-align: right;
         }
 
-        /* BUG FIX: keep the page base layer synchronized with the motion layer.
-           This prevents the iPhone from showing a separate light/dark strip when
-           the theme changes from the home header button. */
         html,
         body {
             background: #f5f5f7;
@@ -4818,6 +4803,17 @@
         }
 
 
+        /*
+         * FIX: previously this function only signed the user in and closed
+         * the modal, relying entirely on the separate onAuthStateChanged
+         * listener (further below) to update the visible username/email.
+         * If that async Firestore read was slow — or failed — the UI kept
+         * showing the default "Not signed in" text even though the person
+         * was, in fact, signed in. This now mirrors createAccount(): it
+         * fetches the profile and writes the visible text immediately
+         * after a successful login, instead of waiting on a second async
+         * listener to (maybe) catch up later.
+         */
         async function login() {
 
             if (authOperationInProgress) return;
@@ -4856,11 +4852,69 @@
 
             try {
 
-                await signInWithEmailAndPassword(
-                    auth,
-                    email,
-                    password
-                );
+                const result =
+                    await signInWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
+
+
+                // Update the visible username/email right away instead of
+                // relying solely on onAuthStateChanged, which can be slow
+                // or (if the Firestore read fails) leave stale text on
+                // screen.
+                let resolvedUsername =
+                    t("guest");
+
+                try {
+
+                    const profile =
+                        await getDoc(
+                            doc(
+                                db,
+                                "users",
+                                result.user.uid
+                            )
+                        );
+
+                    if (
+                        profile.exists() &&
+                        profile.data().username
+                    ) {
+
+                        resolvedUsername =
+                            profile.data().username;
+                    }
+
+                } catch (profileError) {
+
+                    console.error(
+                        "Profile lookup error on login:",
+                        profileError
+                    );
+                }
+
+
+                document.getElementById(
+                    "settingsUsername"
+                ).textContent =
+                    resolvedUsername;
+
+                document.getElementById(
+                    "settingsEmail"
+                ).textContent =
+                    result.user.email || "";
+
+                document.getElementById(
+                    "profileUsername"
+                ).textContent =
+                    resolvedUsername;
+
+                document.getElementById(
+                    "profileEmail"
+                ).textContent =
+                    result.user.email || "";
 
 
                 document.getElementById(
@@ -5331,10 +5385,6 @@
             if (!currentUser) return;
 
 
-            // Read the collection without requiring a Firestore composite/indexed
-            // query. Older tasks may not have every indexed field, and this keeps
-            // the app working even if the database was created before createdAt
-            // was added. Sorting is done locally instead.
             const taskQuery =
                 getTasksCollection();
 
@@ -6938,12 +6988,10 @@ document.documentElement.classList.toggle(
 
         /* PRAYER TIMES — ASTRONOMICAL CALCULATION (precise, to the second) */
 
-        // Default coordinates: Erbil, Kurdistan Region (Asia/Baghdad, UTC+3, no DST)
         const ERBIL_LAT = 36.191113;
         const ERBIL_LNG = 44.009167;
         const ERBIL_TIMEZONE = 3;
 
-        // Kaaba coordinates, for Qibla bearing calculation
         const KAABA_LAT = 21.422487;
         const KAABA_LNG = 39.826206;
 
@@ -7105,7 +7153,6 @@ document.documentElement.classList.toggle(
             const eqtHours =
                 sunPosition(jDate).equation;
 
-            // Solar (Dhuhr) noon, shifted into the local civil timezone
             const noon =
                 fixHour(12 - eqtHours + (timezone - lng / 15));
 
@@ -7208,12 +7255,10 @@ document.documentElement.classList.toggle(
 
             if (typeof event.webkitCompassHeading === "number") {
 
-                // iOS Safari gives compass heading directly (0 = north)
                 heading = event.webkitCompassHeading;
 
             } else if (event.absolute && event.alpha !== null) {
 
-                // Standard DeviceOrientation alpha: counter-clockwise from north
                 heading = 360 - event.alpha;
 
             } else if (event.alpha !== null) {
@@ -7975,7 +8020,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_HISTORY_LIMIT = 10; // keep last N turns sent to the backend
+        const AI_HISTORY_LIMIT = 10;
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
 
         function aiEscape(str) {
@@ -8019,14 +8064,14 @@ document.documentElement.classList.toggle(
         // IMAGE UPLOAD / PREVIEW
         // =====================================================
 
-        const AI_MAX_IMAGE_SOURCE_BYTES = 15 * 1024 * 1024; // reject absurdly large originals
-        const AI_IMAGE_DIRECT_THRESHOLD_BYTES = 300 * 1024;  // send small images as-is, unmodified
+        const AI_MAX_IMAGE_SOURCE_BYTES = 15 * 1024 * 1024;
+        const AI_IMAGE_DIRECT_THRESHOLD_BYTES = 300 * 1024;
         const AI_IMAGE_MAX_DIMENSION = 1600;
         const AI_IMAGE_JPEG_QUALITY = 0.82;
         const AI_DEFAULT_IMAGE_PROMPT =
             "Please analyze this image and tell me what you can see.";
 
-        let aiSelectedImage = null; // { mimeType, data (base64), previewUrl }
+        let aiSelectedImage = null;
 
         function aiReadFileAsDataUrl(file) {
             return new Promise((resolve, reject) => {
@@ -8047,10 +8092,6 @@ document.documentElement.classList.toggle(
             });
         }
 
-        // Reads the file, and only resizes/recompresses it (via canvas,
-        // to a JPEG) if it's larger than a small direct-send threshold —
-        // small images are sent untouched to avoid unnecessary quality
-        // loss.
         async function aiPrepareImage(file) {
             if (!file.type || !file.type.startsWith("image/")) {
                 throw new Error("Unsupported file type");
@@ -8184,9 +8225,6 @@ document.documentElement.classList.toggle(
             `;
             messages.scrollTop = messages.scrollHeight;
 
-            // Streaming-aware state. Works whether the Worker sends the
-            // whole reply as one JSON object (current behavior) or as
-            // incremental chunks (future streaming behavior).
             let assistantText = "";
             let sourceLabel = null;
             let messageEl = null;
@@ -8219,11 +8257,6 @@ document.documentElement.classList.toggle(
                 messages.scrollTop = messages.scrollHeight;
             }
 
-            // Parses one already-JSON-decoded chunk object, whatever
-            // shape it comes in. Recognizes:
-            //   { delta: "..." }                        -> streamed piece
-            //   { response: "...", source: "..." }       -> full reply (current Worker)
-            //   { done: true, source: "..." }             -> stream end marker
             function handleParsedObject(obj) {
                 if (!obj || typeof obj !== "object") return;
 
@@ -8243,15 +8276,12 @@ document.documentElement.classList.toggle(
                 }
             }
 
-            // Handles one raw line of the response body. Flexible enough
-            // for JSON lines, "data: {...}" SSE-style lines, SSE comments
-            // ("event:", ":"), or plain text chunks.
             function handleLine(rawLine) {
                 let line = String(rawLine).trim();
                 if (!line) return;
 
-                if (line.startsWith(":")) return; // SSE keep-alive/comment
-                if (line.startsWith("event:")) return; // SSE event name only
+                if (line.startsWith(":")) return;
+                if (line.startsWith("event:")) return;
 
                 if (line.startsWith("data:")) {
                     line = line.slice(5).trim();
@@ -8262,8 +8292,6 @@ document.documentElement.classList.toggle(
                 try {
                     handleParsedObject(JSON.parse(line));
                 } catch (e) {
-                    // Not JSON — treat it as a plain text chunk so raw
-                    // JSON syntax is never shown to the user.
                     appendDelta(line);
                 }
             }
@@ -8296,8 +8324,6 @@ document.documentElement.classList.toggle(
                 }
 
                 if (response.body && typeof response.body.getReader === "function") {
-                    // Stream-capable path: read chunks as they arrive and
-                    // render them immediately.
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder();
                     let buffer = "";
@@ -8325,9 +8351,6 @@ document.documentElement.classList.toggle(
                         }
                     }
                 } else {
-                    // Fallback if a readable stream isn't available —
-                    // read the whole body at once and process it the
-                    // same way, so behavior stays identical either way.
                     const text = await response.text();
                     text.split("\n").forEach(handleLine);
                 }
