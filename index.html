@@ -4585,6 +4585,8 @@
 
                 let result;
 
+                let isNewAccount = true;
+
                 try {
 
                     result =
@@ -4608,6 +4610,8 @@
                          error.code === "auth/account-exists-with-different-credential")
                     ) {
 
+                        isNewAccount = false;
+
                         try {
 
                             result =
@@ -4619,7 +4623,11 @@
 
                         } catch (signInError) {
 
-                            if (signInError && signInError.code === "auth/invalid-credential") {
+                            if (
+                                signInError &&
+                                (signInError.code === "auth/invalid-credential" ||
+                                 signInError.code === "auth/wrong-password")
+                            ) {
                                 throw new Error("ACCOUNT_EXISTS_WRONG_PASSWORD");
                             }
 
@@ -4633,21 +4641,90 @@
                 }
 
 
-                await setDoc(
-                    doc(
-                        db,
-                        "users",
-                        result.user.uid
-                    ),
-                    {
-                        username,
-                        email,
-                        language:
-                            currentLanguage,
-                        createdAt:
-                            Date.now()
+                let resolvedUsername = username;
+
+                if (isNewAccount) {
+
+                    // Brand-new account: write the full profile document.
+                    await setDoc(
+                        doc(
+                            db,
+                            "users",
+                            result.user.uid
+                        ),
+                        {
+                            username,
+                            email,
+                            language:
+                                currentLanguage,
+                            createdAt:
+                                Date.now()
+                        }
+                    );
+
+                } else {
+
+                    // The account already existed (the person accidentally
+                    // used "Create Account" instead of "Sign In"). Don't
+                    // overwrite their existing profile — just read whatever
+                    // username is already stored for them.
+                    try {
+
+                        const existingProfile =
+                            await getDoc(
+                                doc(
+                                    db,
+                                    "users",
+                                    result.user.uid
+                                )
+                            );
+
+                        if (
+                            existingProfile.exists() &&
+                            existingProfile.data().username
+                        ) {
+
+                            resolvedUsername =
+                                existingProfile.data().username;
+                        }
+
+                    } catch (profileError) {
+
+                        console.error(
+                            "Existing profile lookup error:",
+                            profileError
+                        );
                     }
-                );
+                }
+
+
+                /*
+                 * Update the visible username/email immediately instead of
+                 * relying solely on onAuthStateChanged: for a brand-new
+                 * account, onAuthStateChanged can fire before the setDoc
+                 * above finishes, reading a not-yet-existing profile and
+                 * permanently showing "Guest" in Settings/Profile.
+                 */
+
+                document.getElementById(
+                    "settingsUsername"
+                ).textContent =
+                    resolvedUsername;
+
+                document.getElementById(
+                    "settingsEmail"
+                ).textContent =
+                    email;
+
+                document.getElementById(
+                    "profileUsername"
+                ).textContent =
+                    resolvedUsername;
+
+                document.getElementById(
+                    "profileEmail"
+                ).textContent =
+                    email;
 
 
                 document.getElementById(
@@ -4690,10 +4767,46 @@
                             : "This email already has an account. Sign in to continue."
                     );
 
+                } else if (
+                    error &&
+                    error.code === "auth/invalid-email"
+                ) {
+
+                    showError(
+                        currentLanguage === "ku"
+                            ? "ئیمەیڵەکە دروست نییە."
+                            : currentLanguage === "ar"
+                            ? "البريد الإلكتروني غير صالح."
+                            : "That email address isn't valid."
+                    );
+
+                } else if (
+                    error &&
+                    error.code === "auth/weak-password"
+                ) {
+
+                    showError(
+                        t("passwordShort")
+                    );
+
+                } else if (
+                    error &&
+                    error.code === "auth/network-request-failed"
+                ) {
+
+                    showError(
+                        currentLanguage === "ku"
+                            ? "کێشەی ئینتەرنێت هەیە. تکایە دووبارە هەوڵ بدەرەوە."
+                            : currentLanguage === "ar"
+                            ? "مشكلة في الاتصال بالإنترنت. حاول مرة أخرى."
+                            : "Network problem. Please try again."
+                    );
+
                 } else {
 
                     showError(
-                        error.message || "Unable to create the account."
+                        (error && error.message) ||
+                        "Unable to create the account."
                     );
                 }
 
@@ -4706,6 +4819,8 @@
 
 
         async function login() {
+
+            if (authOperationInProgress) return;
 
             clearError();
 
@@ -4731,6 +4846,13 @@
                 return;
             }
 
+            authOperationInProgress = true;
+
+            const authButton =
+                document.getElementById("authButton");
+
+            authButton.disabled = true;
+
 
             try {
 
@@ -4749,9 +4871,45 @@
 
             } catch (error) {
 
-                showError(
-                    t("incorrectLogin")
-                );
+                console.error("Login error:", error);
+
+                if (
+                    error &&
+                    error.code === "auth/network-request-failed"
+                ) {
+
+                    showError(
+                        currentLanguage === "ku"
+                            ? "کێشەی ئینتەرنێت هەیە. تکایە دووبارە هەوڵ بدەرەوە."
+                            : currentLanguage === "ar"
+                            ? "مشكلة في الاتصال بالإنترنت. حاول مرة أخرى."
+                            : "Network problem. Please try again."
+                    );
+
+                } else if (
+                    error &&
+                    error.code === "auth/too-many-requests"
+                ) {
+
+                    showError(
+                        currentLanguage === "ku"
+                            ? "هەوڵی زۆر هەڵە. تکایە کەمێک چاوەڕێ بکە و دووبارە هەوڵ بدەرەوە."
+                            : currentLanguage === "ar"
+                            ? "محاولات كثيرة جداً. يرجى الانتظار قليلاً والمحاولة مرة أخرى."
+                            : "Too many attempts. Please wait a moment and try again."
+                    );
+
+                } else {
+
+                    showError(
+                        t("incorrectLogin")
+                    );
+                }
+
+            } finally {
+
+                authOperationInProgress = false;
+                authButton.disabled = false;
             }
         }
 
