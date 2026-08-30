@@ -211,6 +211,65 @@
             background: #fff;
             color: #111;
         }
+
+        .aiImageBtn {
+            width: 38px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,.12);
+            border-radius: 10px;
+            background: transparent;
+            color: inherit;
+            font-size: 16px;
+        }
+
+        .dark .aiImageBtn {
+            border-color: rgba(255,255,255,.18);
+        }
+
+        #aiImagePreviewWrap {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px 0;
+        }
+
+        #aiImagePreviewWrap.show {
+            display: flex;
+        }
+
+        #aiImagePreviewThumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(0,0,0,.12);
+        }
+
+        .dark #aiImagePreviewThumb {
+            border-color: rgba(255,255,255,.18);
+        }
+
+        #aiImageRemoveBtn {
+            border: 0;
+            background: rgba(0,0,0,.08);
+            color: inherit;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            line-height: 1;
+        }
+
+        .dark #aiImageRemoveBtn {
+            background: rgba(255,255,255,.15);
+        }
+
+        .user-message img {
+            display: block;
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 6px;
+        }
     </style>
 
     <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
@@ -7728,7 +7787,25 @@ document.documentElement.classList.toggle(
     <div id="aiBox">
         <div id="aiMessages"></div>
 
+        <div id="aiImagePreviewWrap">
+            <img id="aiImagePreviewThumb" alt="Selected image preview" />
+            <button type="button" id="aiImageRemoveBtn" aria-label="Remove image" title="Remove image">✕</button>
+        </div>
+
         <div class="aiInput">
+            <input
+                type="file"
+                id="aiImageFileInput"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                hidden
+            />
+            <button
+                type="button"
+                class="aiImageBtn"
+                id="aiImageBtn"
+                aria-label="Add image"
+                title="Add image"
+            >📷</button>
             <input
                 id="aiInput"
                 type="text"
@@ -7774,23 +7851,173 @@ document.documentElement.classList.toggle(
         function aiSetInputDisabled(disabled) {
             const input = document.getElementById("aiInput");
             const sendBtn = document.querySelector("#aiBox .aiInput button");
+            const imageBtn = document.getElementById("aiImageBtn");
             input.disabled = disabled;
             if (sendBtn) sendBtn.disabled = disabled;
+            if (imageBtn) imageBtn.disabled = disabled;
         }
+
+        // =====================================================
+        // IMAGE UPLOAD / PREVIEW
+        // =====================================================
+
+        const AI_MAX_IMAGE_SOURCE_BYTES = 15 * 1024 * 1024; // reject absurdly large originals
+        const AI_IMAGE_DIRECT_THRESHOLD_BYTES = 300 * 1024;  // send small images as-is, unmodified
+        const AI_IMAGE_MAX_DIMENSION = 1600;
+        const AI_IMAGE_JPEG_QUALITY = 0.82;
+        const AI_DEFAULT_IMAGE_PROMPT =
+            "Please analyze this image and tell me what you can see.";
+
+        let aiSelectedImage = null; // { mimeType, data (base64), previewUrl }
+
+        function aiReadFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () =>
+                    reject(reader.error || new Error("File read failed"));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function aiLoadImageElement(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error("Image decode failed"));
+                img.src = dataUrl;
+            });
+        }
+
+        // Reads the file, and only resizes/recompresses it (via canvas,
+        // to a JPEG) if it's larger than a small direct-send threshold —
+        // small images are sent untouched to avoid unnecessary quality
+        // loss.
+        async function aiPrepareImage(file) {
+            if (!file.type || !file.type.startsWith("image/")) {
+                throw new Error("Unsupported file type");
+            }
+            if (file.size > AI_MAX_IMAGE_SOURCE_BYTES) {
+                throw new Error("Image is too large");
+            }
+
+            const originalDataUrl = await aiReadFileAsDataUrl(file);
+
+            if (file.size <= AI_IMAGE_DIRECT_THRESHOLD_BYTES) {
+                return {
+                    mimeType: file.type,
+                    data: originalDataUrl.split(",")[1],
+                    previewUrl: originalDataUrl
+                };
+            }
+
+            const img = await aiLoadImageElement(originalDataUrl);
+            let width = img.naturalWidth || img.width;
+            let height = img.naturalHeight || img.height;
+
+            if (width > AI_IMAGE_MAX_DIMENSION || height > AI_IMAGE_MAX_DIMENSION) {
+                if (width >= height) {
+                    height = Math.round(height * (AI_IMAGE_MAX_DIMENSION / width));
+                    width = AI_IMAGE_MAX_DIMENSION;
+                } else {
+                    width = Math.round(width * (AI_IMAGE_MAX_DIMENSION / height));
+                    height = AI_IMAGE_MAX_DIMENSION;
+                }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedDataUrl = canvas.toDataURL(
+                "image/jpeg",
+                AI_IMAGE_JPEG_QUALITY
+            );
+
+            return {
+                mimeType: "image/jpeg",
+                data: compressedDataUrl.split(",")[1],
+                previewUrl: compressedDataUrl
+            };
+        }
+
+        function aiShowImagePreview(previewUrl) {
+            const wrap = document.getElementById("aiImagePreviewWrap");
+            const thumb = document.getElementById("aiImagePreviewThumb");
+            if (!wrap || !thumb) return;
+            thumb.src = previewUrl;
+            wrap.classList.add("show");
+        }
+
+        function aiClearSelectedImage() {
+            aiSelectedImage = null;
+            const wrap = document.getElementById("aiImagePreviewWrap");
+            const thumb = document.getElementById("aiImagePreviewThumb");
+            const fileInput = document.getElementById("aiImageFileInput");
+            if (wrap) wrap.classList.remove("show");
+            if (thumb) thumb.src = "";
+            if (fileInput) fileInput.value = "";
+        }
+
+        document.getElementById("aiImageBtn")?.addEventListener("click", () => {
+            document.getElementById("aiImageFileInput")?.click();
+        });
+
+        document
+            .getElementById("aiImageFileInput")
+            ?.addEventListener("change", async (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+
+                try {
+                    aiSelectedImage = await aiPrepareImage(file);
+                    aiShowImagePreview(aiSelectedImage.previewUrl);
+                } catch (error) {
+                    aiClearSelectedImage();
+                    const messages = document.getElementById("aiMessages");
+                    messages.innerHTML += `
+                        <div class="ai-message">
+                            Sorry, that image couldn't be used. Please try a
+                            different photo.
+                        </div>
+                    `;
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            });
+
+        document
+            .getElementById("aiImageRemoveBtn")
+            ?.addEventListener("click", () => {
+                aiClearSelectedImage();
+            });
 
         async function sendAI() {
             const input = document.getElementById("aiInput");
             const messages = document.getElementById("aiMessages");
 
             const message = input.value.trim();
+            const pendingImage = aiSelectedImage;
 
-            if (!message) return;
+            if (!message && !pendingImage) return;
+
+            const effectiveMessage =
+                message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : "");
 
             messages.innerHTML += `
-                <div class="user-message">${aiEscape(message)}</div>
+                <div class="user-message">
+                    ${
+                        pendingImage
+                            ? `<img src="${pendingImage.previewUrl}" alt="Uploaded image" />`
+                            : ""
+                    }
+                    ${message ? aiEscape(message) : ""}
+                </div>
             `;
 
             input.value = "";
+            aiClearSelectedImage();
             aiSetInputDisabled(true);
             messages.scrollTop = messages.scrollHeight;
 
@@ -7884,17 +8111,26 @@ document.documentElement.classList.toggle(
             }
 
             try {
+                const requestBody = {
+                    message: effectiveMessage,
+                    history: aiConversationHistory.slice(
+                        -AI_HISTORY_LIMIT * 2
+                    )
+                };
+
+                if (pendingImage) {
+                    requestBody.image = {
+                        mimeType: pendingImage.mimeType,
+                        data: pendingImage.data
+                    };
+                }
+
                 const response = await fetch(AI_ENDPOINT, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
-                        message: message,
-                        history: aiConversationHistory.slice(
-                            -AI_HISTORY_LIMIT * 2
-                        )
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
@@ -7954,7 +8190,14 @@ document.documentElement.classList.toggle(
                 }
 
                 aiConversationHistory.push(
-                    { role: "user", content: message },
+                    {
+                        role: "user",
+                        content: pendingImage
+                            ? "[User uploaded an image and asked: " +
+                              effectiveMessage +
+                              "]"
+                            : message
+                    },
                     { role: "assistant", content: assistantText }
                 );
                 if (aiConversationHistory.length > AI_HISTORY_LIMIT * 2) {
