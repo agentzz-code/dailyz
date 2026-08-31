@@ -1,55 +1,63 @@
-// Daily.KRD service worker — handles background push notifications
+const CACHE_NAME = 'dailykrd-push-v1';
 
-self.addEventListener("install", () => {
+self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
+self.addEventListener('activate', (event) => {
     event.waitUntil(self.clients.claim());
 });
 
-// Fired when a push message arrives from the server, even if the app is closed
-self.addEventListener("push", event => {
+// PUSH NOTIFICATION RECEIVER
+self.addEventListener('push', (event) => {
+    let payload = {
+        title: 'Daily.KRD',
+        body: 'You have a new update!',
+        icon: './icons/icon-192.png',
+        badge: './icons/icon-32.png',
+        data: { url: './' }
+    };
 
-    let data = {};
-
-    try {
-        data = event.data ? event.data.json() : {};
-    } catch (e) {
-        data = { title: "Daily.KRD", body: event.data ? event.data.text() : "" };
+    if (event.data) {
+        try {
+            const json = event.data.json();
+            payload = { ...payload, ...json };
+        } catch (e) {
+            payload.body = event.data.text();
+        }
     }
 
-    const title = data.title || "Daily.KRD";
-
     const options = {
-        body: data.body || "",
-        icon: "icons/icon-192.png",
-        badge: "icons/icon-192.png",
-        tag: data.tag || "prayer-notification",
-        data: { url: data.url || "./index.html" }
+        body: payload.body,
+        icon: payload.icon || './icons/icon-192.png',
+        badge: payload.badge || './icons/icon-32.png',
+        data: payload.data || { url: './' },
+        vibrate: [200, 100, 200],
+        renotify: true,
+        tag: 'dailykrd-' + Date.now()
     };
 
     event.waitUntil(
-        self.registration.showNotification(title, options)
+        self.registration.showNotification(payload.title, options)
     );
 });
 
-// Fired when the user taps the notification
-self.addEventListener("notificationclick", event => {
-
+// NOTIFICATION CLICK ROUTING (Deep Linking)
+self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-
-    const targetUrl = event.notification.data?.url || "./index.html";
+    const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : './';
 
     event.waitUntil(
-        clients.matchAll({ type: "window", includeUncontrolled: true }).then(windowClients => {
-
-            for (const client of windowClients) {
-                if (client.url.includes("index.html") && "focus" in client) {
-                    return client.focus();
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            for (const client of clientList) {
+                if ('focus' in client) {
+                    client.focus();
+                    if ('navigate' in client && targetUrl !== './') {
+                        client.navigate(targetUrl);
+                    }
+                    return;
                 }
             }
-
             if (clients.openWindow) {
                 return clients.openWindow(targetUrl);
             }
