@@ -2878,11 +2878,7 @@ persistentMultipleTabManager,
          */
        
 
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
-}, "default");
+const db = getFirestore(app, "default");
         
         
 
