@@ -2758,6 +2758,7 @@
 
         import {
             getFirestore,
+            enableIndexedDbPersistence,
             doc,
             setDoc,
             getDoc,
@@ -2875,6 +2876,10 @@
          */
         const db =
             getFirestore(app, "default");
+
+        enableIndexedDbPersistence(db).catch((err) => {
+            console.error("Offline caching error:", err);
+        });
 
 
         let currentUser = null;
