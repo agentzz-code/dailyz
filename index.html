@@ -8134,7 +8134,7 @@ document.documentElement.classList.toggle(
         const PUSH_API_ENDPOINT = "https://dailypush.younismuhammed121.workers.dev/api/push";
         
         /* --- VAPID PUBLIC KEY --- */
-        const VAPID_PUBLIC_KEY = "BGcIbLjhqKZ2vgg8ih2v0vgMUfG5VIncCxaO1PWClym2EcCM9yrqdCQCCOLlRmSmvOtPIqIBLq6XEIO-0wK-4Y0";
+        const VAPID_PUBLIC_KEY = "BGcIbLjhqKZ2vgg8ih2v0vgMUfG5VIncCxa01PWClym2EcCM9yrqdCQCCOlLRmSmvOtPiQiBLq6XEIO-0wK-4Y0";
 
         let pushSettings = JSON.parse(localStorage.getItem("dailykrd_push_settings") || JSON.stringify({
             masterEnabled: false,
@@ -8239,7 +8239,7 @@ document.documentElement.classList.toggle(
             }
 
             try {
-                if (status) status.textContent = "Connecting...";
+                if (status) status.textContent = "Requesting permission...";
                 const permission = await Notification.requestPermission();
                 
                 if (permission !== "granted") {
@@ -8249,19 +8249,25 @@ document.documentElement.classList.toggle(
                     return;
                 }
 
+                if (status) status.textContent = "Registering worker...";
                 const reg = await navigator.serviceWorker.ready;
-                let sub = await reg.pushManager.getSubscription();
-
-                if (!sub) {
-                    if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_KEY_HERE") {
-                        alert("Developer error: VAPID Public Key not set!");
-                        return;
-                    }
-                    sub = await reg.pushManager.subscribe({
+                
+                if (status) status.textContent = "Subscribing to push...";
+                
+                // Add a timeout wrapper so it doesn't hang forever on iOS
+                const subscribePromise = reg.pushManager.getSubscription().then(async (existingSub) => {
+                    if (existingSub) return existingSub;
+                    return await reg.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                     });
-                }
+                });
+
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Subscription timed out. Try reopening the app.")), 8000)
+                );
+
+                const sub = await Promise.race([subscribePromise, timeoutPromise]);
 
                 pushSettings.masterEnabled = true;
                 renderPushSettingsUI();
