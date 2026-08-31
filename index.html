@@ -2748,6 +2748,8 @@
             getAuth,
             setPersistence,
             browserLocalPersistence,
+            browserSessionPersistence,
+            inMemoryPersistence,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
@@ -2800,6 +2802,17 @@
         const auth =
             getAuth(app);
 
+        /*
+         * FIX: browserLocalPersistence can silently fail to actually
+         * persist in some environments (Safari private browsing, some
+         * in-app/webview browsers, or when site storage is blocked).
+         * Previously, if it failed, the error was only logged and the
+         * app carried on with whatever persistence Firebase defaulted
+         * to — often resulting in a signed-in user being signed out on
+         * the next reload with no visible error. This now falls back
+         * step by step so the account stays signed in for as long as
+         * the current environment allows, instead of failing silently.
+         */
         try {
 
             await setPersistence(
@@ -2810,9 +2823,41 @@
         } catch (error) {
 
             console.error(
-                "Account persistence error:",
+                "Account persistence error (local):",
                 error
             );
+
+            try {
+
+                await setPersistence(
+                    auth,
+                    browserSessionPersistence
+                );
+
+            } catch (sessionError) {
+
+                console.error(
+                    "Account persistence error (session):",
+                    sessionError
+                );
+
+                try {
+
+                    await setPersistence(
+                        auth,
+                        inMemoryPersistence
+                    );
+
+                } catch (memoryError) {
+
+                    console.error(
+                        "Account persistence error (memory):",
+                        memoryError
+                    );
+
+                }
+
+            }
 
         }
 
@@ -5124,9 +5169,35 @@
                             : "Too many attempts. Please wait a moment and try again."
                     );
 
-                } else {
+                } else if (
+                    error &&
+                    (error.code === "auth/invalid-credential" ||
+                     error.code === "auth/wrong-password" ||
+                     error.code === "auth/user-not-found" ||
+                     error.code === "auth/invalid-email")
+                ) {
 
                     showError(
+                        t("incorrectLogin")
+                    );
+
+                } else {
+
+                    /*
+                     * FIX: previously any error code other than
+                     * network-request-failed/too-many-requests fell
+                     * through to "Incorrect email or password" — even
+                     * for problems that have nothing to do with the
+                     * entered credentials (e.g. the email/password
+                     * sign-in provider being disabled, an invalid API
+                     * key, a disabled account, or an internal Firebase
+                     * error). That mislabeling made real configuration
+                     * problems look like a typo in the password. Now
+                     * the actual error code/message is shown so the
+                     * real cause is visible instead of being masked.
+                     */
+                    showError(
+                        (error && (error.code || error.message)) ||
                         t("incorrectLogin")
                     );
                 }
@@ -5380,6 +5451,18 @@
 
         /* SIGN OUT */
 
+        /*
+         * FIX: previously this only called signOut() when the locally
+         * tracked `currentUser` variable was truthy. If that variable
+         * ever fell out of sync with Firebase's actual signed-in state
+         * (e.g. a slow or failed onAuthStateChanged update), the Sign
+         * Out button would silently do nothing — no error, no visible
+         * effect. signOut() is safe to call even when no one is signed
+         * in (it simply resolves), so it's now called unconditionally
+         * and wrapped in a try/catch so a network hiccup during sign
+         * out doesn't throw an unhandled error either.
+         */
+
         document
             .getElementById(
                 "logoutButton"
@@ -5388,9 +5471,16 @@
                 "click",
                 async () => {
 
-                    if (currentUser) {
+                    try {
 
                         await signOut(auth);
+
+                    } catch (error) {
+
+                        console.error(
+                            "Sign out error:",
+                            error
+                        );
 
                     }
 
@@ -5406,9 +5496,16 @@
                 "click",
                 async () => {
 
-                    if (currentUser) {
+                    try {
 
                         await signOut(auth);
+
+                    } catch (error) {
+
+                        console.error(
+                            "Sign out error:",
+                            error
+                        );
 
                     }
 
