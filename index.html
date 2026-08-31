@@ -8134,7 +8134,7 @@ document.documentElement.classList.toggle(
         const PUSH_API_ENDPOINT = "https://dailypush.younismuhammed121.workers.dev/api/push";
         
         /* --- VAPID PUBLIC KEY --- */
-        const VAPID_PUBLIC_KEY = "BGcIbLjhqKZ2vgg8ih2v0vgMUfG5VIncCxaO1PWClym2EcCM9yrqdCQCCOLlRmSmvOtPIqIBLq6XEIO-0wK-4Y0";
+        const VAPID_PUBLIC_KEY = "PASTE_YOUR_PUBLIC_KEY_HERE";
 
         let pushSettings = JSON.parse(localStorage.getItem("dailykrd_push_settings") || JSON.stringify({
             masterEnabled: false,
@@ -8238,32 +8238,42 @@ document.documentElement.classList.toggle(
                 return;
             }
 
-            const permission = await Notification.requestPermission();
-            if (permission !== "granted") {
-                pushSettings.masterEnabled = false;
-                renderPushSettingsUI();
-                if (status) status.textContent = t("notificationsDisabled");
-                return;
-            }
-
-            const reg = await navigator.serviceWorker.ready;
-            let sub = await reg.pushManager.getSubscription();
-
-            if (!sub) {
-                if (VAPID_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_KEY_HERE") {
-                    alert("Developer error: VAPID Public Key not set in index.html!");
+            try {
+                if (status) status.textContent = "Connecting...";
+                const permission = await Notification.requestPermission();
+                
+                if (permission !== "granted") {
+                    pushSettings.masterEnabled = false;
+                    renderPushSettingsUI();
+                    if (status) status.textContent = t("notificationsDisabled");
                     return;
                 }
-                sub = await reg.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-                });
-            }
 
-            pushSettings.masterEnabled = true;
-            renderPushSettingsUI();
-            await syncPushPreferences();
-            if (status) status.textContent = t("notificationsEnabled");
+                const reg = await navigator.serviceWorker.ready;
+                let sub = await reg.pushManager.getSubscription();
+
+                if (!sub) {
+                    if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_KEY_HERE") {
+                        alert("Developer error: VAPID Public Key not set!");
+                        return;
+                    }
+                    sub = await reg.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                    });
+                }
+
+                pushSettings.masterEnabled = true;
+                renderPushSettingsUI();
+                await syncPushPreferences();
+                if (status) status.textContent = t("notificationsEnabled");
+                
+            } catch (error) {
+                console.error("Subscription error:", error);
+                if (status) status.textContent = "Error: " + error.message;
+                pushSettings.masterEnabled = false;
+                renderPushSettingsUI();
+            }
         }
 
         async function disableMasterPush() {
