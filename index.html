@@ -8250,11 +8250,18 @@ document.documentElement.classList.toggle(
                 }
 
                 if (status) status.textContent = "Registering worker...";
-                const reg = await navigator.serviceWorker.ready;
+                
+                // FORCE EXPLICIT REGISTRATION TO CATCH 404 FILE ERRORS
+                let reg;
+                try {
+                    reg = await navigator.serviceWorker.register('./sw.js');
+                    reg = await navigator.serviceWorker.ready;
+                } catch (swErr) {
+                    throw new Error("sw.js file error: " + swErr.message);
+                }
                 
                 if (status) status.textContent = "Subscribing to push...";
                 
-                // Add a timeout wrapper so it doesn't hang forever on iOS
                 const subscribePromise = reg.pushManager.getSubscription().then(async (existingSub) => {
                     if (existingSub) return existingSub;
                     return await reg.pushManager.subscribe({
@@ -8264,7 +8271,7 @@ document.documentElement.classList.toggle(
                 });
 
                 const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Subscription timed out. Try reopening the app.")), 8000)
+                    setTimeout(() => reject(new Error("Subscription timed out. Try reopening.")), 8000)
                 );
 
                 const sub = await Promise.race([subscribePromise, timeoutPromise]);
