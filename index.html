@@ -8219,7 +8219,7 @@ document.documentElement.classList.toggle(
         const PUSH_API_ENDPOINT = "https://dailypush.younismuhammed121.workers.dev/api/push";
         
         /* --- VAPID PUBLIC KEY --- */
-        const VAPID_PUBLIC_KEY = "BJq4egPwoL9gmwHfd30tZKFsSZNBXLvozRYzqQ0M5LM3VKgaqa7u-PRkFhihH-MR6YimczxaIKDGHxs-Mz6iq1Y";
+        const VAPID_PUBLIC_KEY = "BMIHlPzYc3ALBpKkT6bFCame5l-9LrbE5zmsifKOMVSoOCQqsuPLkHIvYvNiPtf5ZlaSWF5_znm9RJLxwfzF4-I";
 
         let pushSettings = JSON.parse(localStorage.getItem("dailykrd_push_settings") || JSON.stringify({
             masterEnabled: false,
@@ -8359,7 +8359,18 @@ document.documentElement.classList.toggle(
                 if (status) status.textContent = "Subscribing to push...";
                 
                 const subscribePromise = reg.pushManager.getSubscription().then(async (existingSub) => {
-                    if (existingSub) return existingSub;
+                    if (existingSub) {
+                        // Don't blindly reuse an old subscription: if it was
+                        // created under a previous VAPID key, the push
+                        // service will reject every future send with
+                        // "VapidPkHashMismatch" and there is no way to
+                        // recover except unsubscribing first.
+                        try {
+                            await existingSub.unsubscribe();
+                        } catch (unsubError) {
+                            console.warn("Could not unsubscribe stale push subscription:", unsubError);
+                        }
+                    }
                     return await reg.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
