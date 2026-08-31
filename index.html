@@ -2758,9 +2758,6 @@
 
         import {
             getFirestore,
-            initializeFirestore,
-persistentLocalCache,
-persistentMultipleTabManager,
             doc,
             setDoc,
             getDoc,
@@ -2868,7 +2865,7 @@ persistentMultipleTabManager,
          * FIX: this project's Firestore database ID is the custom
          * database "default" (no parentheses), not the reserved
          * "(default)" database — confirmed via the 404 → 403 error
-
+         * change when testing the REST API directly. getFirestore(app)
          * with no second argument always targets "(default)", which
          * does not exist in this project, so every Firestore call was
          * silently failing (caught and swallowed elsewhere in the
@@ -2876,11 +2873,13 @@ persistentMultipleTabManager,
          * naming the database here points the SDK at the one that
          * actually exists and holds the data.
          */
-       
+        const db =
+            getFirestore(app, "default");
 
-const db = getFirestore(app, "default");
-        
-        
+
+        let currentUser = null;
+
+        let unsubscribeTasks = null;
 
         let unsubscribeSteps = null;
 
