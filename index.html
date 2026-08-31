@@ -1767,6 +1767,12 @@
                     <div class="streak-count" id="stepCount">0</div>
                     <div class="streak-label" id="stepLabel">steps today</div>
                 </div>
+                <button
+                    class="setting-button"
+                    id="syncStepsButton"
+                    type="button"
+                    style="margin-left:auto;"
+                >Sync Steps</button>
             </div>
 
             <div class="score-card">
@@ -5891,6 +5897,84 @@
                     }
                 );
         }
+
+
+        /* SYNC STEPS BUTTON (launches existing iPhone Shortcut) */
+        //
+        // This does NOT talk to Firestore or Firebase Auth directly.
+        // It only opens the iOS Shortcuts URL scheme, which hands off to
+        // the user's already-authorized "SyncDailySteps" Shortcut on their
+        // own device. That Shortcut is what reads Apple Health and writes
+        // to users/{uid}/health/today - this button never touches that
+        // write path, and never reads or sends currentUser.refreshToken.
+        //
+        // Because iOS does not give web pages any callback/result from a
+        // shortcuts:// URL, we can only ever know "we asked the OS to open
+        // the Shortcut" - never "the Shortcut finished" or "Firestore was
+        // updated". The onSnapshot listener already set up above is what
+        // actually reflects the new step count once the Shortcut writes it.
+
+        (function setupSyncStepsButton() {
+
+            const syncBtn =
+                document.getElementById(
+                    "syncStepsButton"
+                );
+
+            if (!syncBtn) return;
+
+            const SHORTCUT_NAME = "SyncDailySteps";
+            const defaultLabel = syncBtn.textContent;
+
+            syncBtn.addEventListener(
+                "click",
+                () => {
+
+                    if (syncBtn.disabled) return;
+
+                    syncBtn.disabled = true;
+                    syncBtn.textContent = "Syncing...";
+
+                    // Best-effort launch of the existing Shortcut. No auth
+                    // data of any kind is included in this URL - the
+                    // Shortcut itself already holds whatever credential it
+                    // needs to write to Firestore.
+                    const shortcutUrl =
+                        "shortcuts://run-shortcut?name=" +
+                        encodeURIComponent(SHORTCUT_NAME);
+
+                    try {
+
+                        window.location.href = shortcutUrl;
+
+                    } catch (error) {
+
+                        console.error(
+                            "Could not open Shortcuts URL:",
+                            error
+                        );
+                    }
+
+                    // We cannot detect whether the Shortcut actually ran
+                    // or finished (iOS gives web pages no callback for
+                    // shortcuts:// links). So we only ever claim "launched",
+                    // and let the existing Firestore listener above update
+                    // stepCount/stepLabel for real once (and if) the
+                    // Shortcut writes users/{uid}/health/today.
+                    setTimeout(
+                        () => {
+
+                            syncBtn.textContent = defaultLabel;
+                            syncBtn.disabled = false;
+
+                        },
+                        2000
+                    );
+
+                }
+            );
+
+        })();
 
 
         /* TASK DATE MATCHING */
