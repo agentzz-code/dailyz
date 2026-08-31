@@ -8239,6 +8239,56 @@ document.documentElement.classList.toggle(
             }
 
             try {
+                if (status) status.textContent = "Requesting permission...";
+                const permission = await Notification.requestPermission();
+                
+                if (permission !== "granted") {
+                    pushSettings.masterEnabled = false;
+                    renderPushSettingsUI();
+                    if (status) status.textContent = t("notificationsDisabled");
+                    return;
+                }
+
+                if (status) status.textContent = "Registering worker...";
+                const reg = await navigator.serviceWorker.ready;
+                
+                if (status) status.textContent = "Subscribing to push...";
+                
+                // Add a timeout wrapper so it doesn't hang forever on iOS
+                const subscribePromise = reg.pushManager.getSubscription().then(async (existingSub) => {
+                    if (existingSub) return existingSub;
+                    return await reg.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                    });
+                });
+
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Subscription timed out. Try reopening the app.")), 8000)
+                );
+
+                const sub = await Promise.race([subscribePromise, timeoutPromise]);
+
+                pushSettings.masterEnabled = true;
+                renderPushSettingsUI();
+                await syncPushPreferences();
+                if (status) status.textContent = t("notificationsEnabled");
+                
+            } catch (error) {
+                console.error("Subscription error:", error);
+                if (status) status.textContent = "Error: " + error.message;
+                pushSettings.masterEnabled = false;
+                renderPushSettingsUI();
+            }
+        }
+
+            const { isIOS, isStandalone } = isIOSStandalone();
+            if (isIOS && !isStandalone) {
+                alert(currentLanguage === "ku" ? "تکایە سەرەتا ئەپەکە زیاد بکە بۆ سەر شاشەی سەرەکی (Add to Home Screen)." : (currentLanguage === "ar" ? "يرجى إضافة التطبيق إلى الشاشة الرئيسية أولاً." : "Please add Daily.KRD to your Home Screen to enable notifications."));
+                return;
+            }
+
+            try {
                 if (status) status.textContent = "Connecting...";
                 const permission = await Notification.requestPermission();
                 
