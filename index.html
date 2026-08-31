@@ -1811,7 +1811,11 @@
                     >
 
                 </div>
-
+                
+                <div class="option-row">
+                    <label id="timeLabel">Time</label>
+                    <input class="task-date-input" id="taskTimeInput" type="time">
+                </div>
 
                 <div class="option-row">
 
@@ -2473,7 +2477,7 @@
 
             <!-- NOTIFICATIONS -->
 
-            <div class="settings-card">
+            <div class="settings-card" id="notificationsSettingsCard">
 
                 <div
                     class="settings-card-title"
@@ -2482,41 +2486,63 @@
                     Notifications
                 </div>
 
+                <div id="iosInstallNotice" style="display:none; background:rgba(255,149,0,0.12); border-left:4px solid #ff9500; padding:12px 14px; border-radius:10px; margin-bottom:14px; font-size:13px; line-height:1.4;">
+                    <strong id="iosInstallTitle">📱 Add to Home Screen Required</strong>
+                    <p id="iosInstallDesc" style="margin:4px 0 0; opacity:0.85;">On iPhone, Apple requires Daily.KRD to be added to your Home Screen before notifications can be delivered.</p>
+                </div>
+
                 <div class="setting-row">
-
                     <div>
+                        <div class="setting-label" id="masterNotificationLabel">All Notifications</div>
+                        <div class="setting-description" id="masterNotificationDesc">Enable or disable all app notifications.</div>
+                    </div>
+                    <button class="setting-button" id="masterNotificationBtn" type="button">Off</button>
+                </div>
 
-                        <div
-                            class="setting-label"
-                            id="notificationsLabel"
-                        >
-                            Prayer Notifications
+                <div id="notificationSubOptions" style="display:none; margin-top:14px; border-top:1px solid rgba(0,0,0,0.08); padding-top:10px;">
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label" id="prayerNotifLabel">Prayer Times</div>
+                            <div class="setting-description" id="prayerNotifDesc">Get notified at exact prayer calculation times.</div>
                         </div>
-
-                        <div
-                            class="setting-description"
-                            id="notificationsDescription"
-                        >
-                            Receive notifications for prayer times.
-                        </div>
-
+                        <button class="setting-button" id="prayerNotifBtn" type="button">On</button>
                     </div>
 
+                    <div id="individualPrayerToggles" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap:6px; margin:8px 0 16px;">
+                        <button class="repeat-day active" data-prayer="fajr" id="notifFajr">Fajr</button>
+                        <button class="repeat-day active" data-prayer="dhuhr" id="notifDhuhr">Dhuhr</button>
+                        <button class="repeat-day active" data-prayer="asr" id="notifAsr">Asr</button>
+                        <button class="repeat-day active" data-prayer="maghrib" id="notifMaghrib">Maghrib</button>
+                        <button class="repeat-day active" data-prayer="isha" id="notifIsha">Isha</button>
+                    </div>
+
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label" id="taskNotifLabel">Task Reminders</div>
+                            <div class="setting-description" id="taskNotifDesc">Alerts for scheduled task times.</div>
+                        </div>
+                        <button class="setting-button" id="taskNotifBtn" type="button">On</button>
+                    </div>
+
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label" id="stepNotifLabel">Step Reminders</div>
+                            <div class="setting-description" id="stepNotifDesc">Evening reminder if you're below goal.</div>
+                        </div>
+                        <button class="setting-button" id="stepNotifBtn" type="button">On</button>
+                    </div>
+                    
+                    <div class="option-row" style="margin-top:8px;">
+                        <label id="stepGoalLabel" style="min-width:110px;">Step Goal</label>
+                        <input type="number" id="stepGoalInput" class="task-date-input" value="10000" min="1000" step="500" />
+                    </div>
+
+                    <button class="setting-button" id="testPushBtn" type="button" style="width:100%; margin-top:16px; padding:12px; font-weight:700;">
+                        🔔 Send Test Push Notification
+                    </button>
                 </div>
 
-                <button
-                    class="notification-button"
-                    id="notificationButton"
-                    type="button"
-                >
-                    🔔 Enable Prayer Notifications
-                </button>
-
-                <div
-                    class="status"
-                    id="notificationStatus"
-                >
-                </div>
+                <div class="status" id="notificationStatus"></div>
 
             </div>
 
@@ -2803,17 +2829,6 @@
         const auth =
             getAuth(app);
 
-        /*
-         * FIX: browserLocalPersistence can silently fail to actually
-         * persist in some environments (Safari private browsing, some
-         * in-app/webview browsers, or when site storage is blocked).
-         * Previously, if it failed, the error was only logged and the
-         * app carried on with whatever persistence Firebase defaulted
-         * to — often resulting in a signed-in user being signed out on
-         * the next reload with no visible error. This now falls back
-         * step by step so the account stays signed in for as long as
-         * the current environment allows, instead of failing silently.
-         */
         try {
 
             await setPersistence(
@@ -2862,18 +2877,6 @@
 
         }
 
-        /*
-         * FIX: this project's Firestore database ID is the custom
-         * database "default" (no parentheses), not the reserved
-         * "(default)" database — confirmed via the 404 → 403 error
-         * change when testing the REST API directly. getFirestore(app)
-         * with no second argument always targets "(default)", which
-         * does not exist in this project, so every Firestore call was
-         * silently failing (caught and swallowed elsewhere in the
-         * code) even though the app appeared to work. Explicitly
-         * naming the database here points the SDK at the one that
-         * actually exists and holds the data.
-         */
         const db =
             getFirestore(app, "default");
 
@@ -2900,7 +2903,6 @@
 
         let currentTasksCache = [];
 
-        // Prevent accidental duplicate writes from rapid taps/presses.
         let taskWriteInProgress = false;
 
         let guestTasks =
@@ -4337,30 +4339,6 @@
 
 
             document.getElementById(
-                "notificationsTitle"
-            ).textContent =
-                t("notifications");
-
-
-            document.getElementById(
-                "notificationsLabel"
-            ).textContent =
-                t("prayerNotifications");
-
-
-            document.getElementById(
-                "notificationsDescription"
-            ).textContent =
-                t("prayerNotificationsDescription");
-
-
-            document.getElementById(
-                "notificationButton"
-            ).textContent =
-                t("enableNotifications");
-
-
-            document.getElementById(
                 "accountActionsTitle"
             ).textContent =
                 t("accountActions");
@@ -4605,7 +4583,6 @@
 
                     signUpMode = false;
 
-                    /* Open auth first so a UI refresh error cannot stop Sign In. */
                     const authOverlay =
                         document.getElementById("authOverlay");
 
@@ -4816,12 +4793,6 @@
 
                 } catch (error) {
 
-                    /*
-                     * Firebase may have already created this account from
-                     * an earlier signup attempt. In that case, don't leave
-                     * the user stuck on the signup form: immediately sign
-                     * them in with the credentials they just entered.
-                     */
                     if (
                         error &&
                         (error.code === "auth/email-already-in-use" ||
@@ -4863,7 +4834,6 @@
 
                 if (isNewAccount) {
 
-                    // Brand-new account: write the full profile document.
                     await setDoc(
                         doc(
                             db,
@@ -4882,10 +4852,6 @@
 
                 } else {
 
-                    // The account already existed (the person accidentally
-                    // used "Create Account" instead of "Sign In"). Don't
-                    // overwrite their existing profile — just read whatever
-                    // username is already stored for them.
                     try {
 
                         const existingProfile =
@@ -4915,14 +4881,6 @@
                     }
                 }
 
-
-                /*
-                 * Update the visible username/email immediately instead of
-                 * relying solely on onAuthStateChanged: for a brand-new
-                 * account, onAuthStateChanged can fire before the setDoc
-                 * above finishes, reading a not-yet-existing profile and
-                 * permanently showing "Guest" in Settings/Profile.
-                 */
 
                 document.getElementById(
                     "settingsUsername"
@@ -5036,17 +4994,6 @@
         }
 
 
-        /*
-         * FIX: previously this function only signed the user in and closed
-         * the modal, relying entirely on the separate onAuthStateChanged
-         * listener (further below) to update the visible username/email.
-         * If that async Firestore read was slow — or failed — the UI kept
-         * showing the default "Not signed in" text even though the person
-         * was, in fact, signed in. This now mirrors createAccount(): it
-         * fetches the profile and writes the visible text immediately
-         * after a successful login, instead of waiting on a second async
-         * listener to (maybe) catch up later.
-         */
         async function login() {
 
             if (authOperationInProgress) return;
@@ -5092,11 +5039,6 @@
                         password
                     );
 
-
-                // Update the visible username/email right away instead of
-                // relying solely on onAuthStateChanged, which can be slow
-                // or (if the Firestore read fails) leave stale text on
-                // screen.
                 let resolvedUsername =
                     t("guest");
 
@@ -5200,19 +5142,6 @@
 
                 } else {
 
-                    /*
-                     * FIX: previously any error code other than
-                     * network-request-failed/too-many-requests fell
-                     * through to "Incorrect email or password" — even
-                     * for problems that have nothing to do with the
-                     * entered credentials (e.g. the email/password
-                     * sign-in provider being disabled, an invalid API
-                     * key, a disabled account, or an internal Firebase
-                     * error). That mislabeling made real configuration
-                     * problems look like a typo in the password. Now
-                     * the actual error code/message is shown so the
-                     * real cause is visible instead of being masked.
-                     */
                     showError(
                         (error && (error.code || error.message)) ||
                         t("incorrectLogin")
@@ -5467,18 +5396,6 @@
 
 
         /* SIGN OUT */
-
-        /*
-         * FIX: previously this only called signOut() when the locally
-         * tracked `currentUser` variable was truthy. If that variable
-         * ever fell out of sync with Firebase's actual signed-in state
-         * (e.g. a slow or failed onAuthStateChanged update), the Sign
-         * Out button would silently do nothing — no error, no visible
-         * effect. signOut() is safe to call even when no one is signed
-         * in (it simply resolves), so it's now called unconditionally
-         * and wrapped in a try/catch so a network hiccup during sign
-         * out doesn't throw an unhandled error either.
-         */
 
         document
             .getElementById(
@@ -5770,6 +5687,8 @@
                         renderTasks(tasks);
 
                         renderCalendar();
+                        
+                        triggerPushSync();
 
                     },
                     error => {
@@ -5871,6 +5790,7 @@
                         }
 
                         updateStepsDisplay();
+                        triggerPushSync();
 
                     },
                     error => {
@@ -6631,6 +6551,7 @@
                 refreshTasks();
 
                 renderCalendar();
+                triggerPushSync();
 
                 return;
             }
@@ -6725,6 +6646,7 @@
                 refreshTasks();
 
                 renderCalendar();
+                triggerPushSync();
 
                 return;
             }
@@ -6792,6 +6714,7 @@
                     "prioritySelect"
                 ).value;
 
+            const reminderTime = document.getElementById("taskTimeInput").value || null;
 
             const task = {
 
@@ -6811,6 +6734,8 @@
                         "taskDateInput"
                     ).value ||
                     selectedDate,
+                    
+                reminderTime: reminderTime,
 
                 repeat,
 
@@ -6898,6 +6823,7 @@
 
 
             input.value = "";
+            document.getElementById("taskTimeInput").value = "";
 
 
             document.getElementById(
@@ -6933,6 +6859,8 @@
             refreshTasks();
 
             renderCalendar();
+            
+            triggerPushSync();
         }
 
 
@@ -8025,6 +7953,7 @@ document.documentElement.classList.toggle(
             }
 
             loadPrayerTimes();
+            triggerPushSync();
 
             if (currentUser) {
 
@@ -8198,146 +8127,250 @@ document.documentElement.classList.toggle(
         }
 
 
-        /* NOTIFICATIONS (PUSH) */
+        /* ==========================================================================
+           DAILY.KRD REAL-APP NOTIFICATION SYSTEM
+           ========================================================================== */
 
-        const VAPID_PUBLIC_KEY =
-            "BGqV3eJuJ6q426AfN4sxx2bJA8IYagZCVSHJEZQ9tIlyG5Ckxu-TkrHdGqqFLIYDF5Ym70cgX3ewMG2cpxUuApA";
+        const PUSH_API_ENDPOINT = "https://dailypush.younismuhammed121.workers.dev/api/push";
+        
+        /* --- VAPID PUBLIC KEY --- */
+        const VAPID_PUBLIC_KEY = "PASTE_YOUR_PUBLIC_KEY_HERE";
 
+        let pushSettings = JSON.parse(localStorage.getItem("dailykrd_push_settings") || JSON.stringify({
+            masterEnabled: false,
+            prayersEnabled: true,
+            prayers: { fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true },
+            tasksEnabled: true,
+            stepsEnabled: true,
+            stepGoal: 10000
+        }));
+
+        function isIOSStandalone() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+            return { isIOS, isStandalone };
+        }
+
+        function checkIOSNotificationEnvironment() {
+            const { isIOS, isStandalone } = isIOSStandalone();
+            const notice = document.getElementById("iosInstallNotice");
+            if (notice) {
+                notice.style.display = (isIOS && !isStandalone) ? "block" : "none";
+            }
+        }
+
+        async function syncPushPreferences() {
+            localStorage.setItem("dailykrd_push_settings", JSON.stringify(pushSettings));
+            
+            if (!('serviceWorker' in navigator)) return;
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            
+            if (!sub) return;
+
+            const payload = {
+                uid: currentUser ? currentUser.uid : null,
+                deviceId: localStorage.getItem("dailykrd_device_id") || (() => {
+                    const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+                    localStorage.setItem("dailykrd_device_id", id);
+                    return id;
+                })(),
+                subscription: sub.toJSON(),
+                settings: pushSettings,
+                language: currentLanguage || 'en',
+                timezone: getUserCoords().timezone,
+                prayerTimes: prayerTimes,
+                tasks: currentUser ? currentTasksCache : guestTasks,
+                todaySteps: todaySteps || 0
+            };
+
+            // Sync to Cloudflare Worker
+            try {
+                await fetch(`${PUSH_API_ENDPOINT}/subscribe`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                console.warn("Push sync worker offline:", e);
+            }
+
+            // Also sync to user's Firestore document if authenticated
+            if (currentUser) {
+                try {
+                    await setDoc(doc(db, "users", currentUser.uid, "notifications", "settings"), {
+                        ...pushSettings,
+                        updatedAt: Date.now()
+                    }, { merge: true });
+                } catch (e) {
+                    console.error("Firestore notification sync error:", e);
+                }
+            }
+        }
+
+        function triggerPushSync() {
+            if (pushSettings && pushSettings.masterEnabled) {
+                syncPushPreferences();
+            }
+        }
 
         function urlBase64ToUint8Array(base64String) {
-
-            const padding =
-                "=".repeat(
-                    (4 - (base64String.length % 4)) % 4
-                );
-
-            const base64 =
-                (base64String + padding)
-                    .replace(/-/g, "+")
-                    .replace(/_/g, "/");
-
-            const rawData =
-                window.atob(base64);
-
-            const outputArray =
-                new Uint8Array(rawData.length);
-
+            const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+            const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
             for (let i = 0; i < rawData.length; ++i) {
                 outputArray[i] = rawData.charCodeAt(i);
             }
-
             return outputArray;
         }
 
-
-        async function subscribeToPush() {
-
-            const status =
-                document.getElementById(
-                    "notificationStatus"
-                );
-
-
-            if (
-                !("serviceWorker" in navigator) ||
-                !("PushManager" in window)
-            ) {
-
-                status.textContent =
-                    t("notificationsUnsupported");
-
+        async function enableMasterPush() {
+            const status = document.getElementById("notificationStatus");
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+                if (status) status.textContent = t("notificationsUnsupported");
                 return;
             }
 
+            const { isIOS, isStandalone } = isIOSStandalone();
+            if (isIOS && !isStandalone) {
+                alert(currentLanguage === "ku" ? "تکایە سەرەتا ئەپەکە زیاد بکە بۆ سەر شاشەی سەرەکی (Add to Home Screen)." : (currentLanguage === "ar" ? "يرجى إضافة التطبيق إلى الشاشة الرئيسية أولاً." : "Please add Daily.KRD to your Home Screen to enable notifications."));
+                return;
+            }
 
-            try {
+            const permission = await Notification.requestPermission();
+            if (permission !== "granted") {
+                pushSettings.masterEnabled = false;
+                renderPushSettingsUI();
+                if (status) status.textContent = t("notificationsDisabled");
+                return;
+            }
 
-                const permission =
-                    await Notification.requestPermission();
+            const reg = await navigator.serviceWorker.ready;
+            let sub = await reg.pushManager.getSubscription();
 
-
-                if (permission !== "granted") {
-
-                    status.textContent =
-                        t("notificationsDisabled");
-
+            if (!sub) {
+                if (VAPID_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_KEY_HERE") {
+                    alert("Developer error: VAPID Public Key not set in index.html!");
                     return;
                 }
-
-
-                const registration =
-                    await navigator.serviceWorker.ready;
-
-
-                let subscription =
-                    await registration.pushManager.getSubscription();
-
-
-                if (!subscription) {
-
-                    subscription =
-                        await registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey:
-                                urlBase64ToUint8Array(
-                                    VAPID_PUBLIC_KEY
-                                )
-                        });
-                }
-
-
-                if (currentUser) {
-
-                    await updateDoc(
-                        doc(db, "users", currentUser.uid),
-                        {
-                            pushSubscription:
-                                subscription.toJSON(),
-                            notificationsEnabled: true
-                        }
-                    );
-
-                } else {
-
-                    localStorage.setItem(
-                        "dailykrd_push_subscription",
-                        JSON.stringify(
-                            subscription.toJSON()
-                        )
-                    );
-                }
-
-
-                status.textContent =
-                    t("notificationsEnabled");
-
-            } catch (error) {
-
-                console.error(
-                    "Push subscription error:",
-                    error
-                );
-
-                status.textContent =
-                    t("notificationsDisabled");
+                sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
             }
+
+            pushSettings.masterEnabled = true;
+            renderPushSettingsUI();
+            await syncPushPreferences();
+            if (status) status.textContent = t("notificationsEnabled");
         }
 
+        async function disableMasterPush() {
+            pushSettings.masterEnabled = false;
+            renderPushSettingsUI();
+            await syncPushPreferences();
+            const status = document.getElementById("notificationStatus");
+            if (status) status.textContent = t("notificationsDisabled");
+        }
 
-        document
-            .getElementById(
-                "notificationButton"
-            )
-            .addEventListener(
-                "click",
-                subscribeToPush
-            );
+        function renderPushSettingsUI() {
+            const masterBtn = document.getElementById("masterNotificationBtn");
+            const subOptions = document.getElementById("notificationSubOptions");
+            const prayerBtn = document.getElementById("prayerNotifBtn");
+            const taskBtn = document.getElementById("taskNotifBtn");
+            const stepBtn = document.getElementById("stepNotifBtn");
+            const stepInput = document.getElementById("stepGoalInput");
 
+            if (masterBtn) {
+                masterBtn.textContent = pushSettings.masterEnabled ? "On" : "Off";
+                masterBtn.className = "setting-button" + (pushSettings.masterEnabled ? " dark" : "");
+            }
+
+            if (subOptions) {
+                subOptions.style.display = pushSettings.masterEnabled ? "block" : "none";
+            }
+
+            if (prayerBtn) {
+                prayerBtn.textContent = pushSettings.prayersEnabled ? "On" : "Off";
+                prayerBtn.className = "setting-button" + (pushSettings.prayersEnabled ? " dark" : "");
+            }
+
+            if (taskBtn) {
+                taskBtn.textContent = pushSettings.tasksEnabled ? "On" : "Off";
+                taskBtn.className = "setting-button" + (pushSettings.tasksEnabled ? " dark" : "");
+            }
+
+            if (stepBtn) {
+                stepBtn.textContent = pushSettings.stepsEnabled ? "On" : "Off";
+                stepBtn.className = "setting-button" + (pushSettings.stepsEnabled ? " dark" : "");
+            }
+
+            if (stepInput) {
+                stepInput.value = pushSettings.stepGoal || 10000;
+            }
+
+            document.querySelectorAll("#individualPrayerToggles button").forEach(btn => {
+                const pName = btn.dataset.prayer;
+                const isActive = pushSettings.prayers[pName] !== false;
+                btn.classList.toggle("active", isActive);
+            });
+        }
+
+        document.getElementById("masterNotificationBtn")?.addEventListener("click", () => {
+            if (pushSettings.masterEnabled) disableMasterPush(); else enableMasterPush();
+        });
+
+        document.getElementById("prayerNotifBtn")?.addEventListener("click", () => {
+            pushSettings.prayersEnabled = !pushSettings.prayersEnabled;
+            renderPushSettingsUI(); syncPushPreferences();
+        });
+
+        document.getElementById("taskNotifBtn")?.addEventListener("click", () => {
+            pushSettings.tasksEnabled = !pushSettings.tasksEnabled;
+            renderPushSettingsUI(); syncPushPreferences();
+        });
+
+        document.getElementById("stepNotifBtn")?.addEventListener("click", () => {
+            pushSettings.stepsEnabled = !pushSettings.stepsEnabled;
+            renderPushSettingsUI(); syncPushPreferences();
+        });
+
+        document.getElementById("stepGoalInput")?.addEventListener("change", (e) => {
+            pushSettings.stepGoal = Number(e.target.value) || 10000;
+            syncPushPreferences();
+        });
+
+        document.querySelectorAll("#individualPrayerToggles button").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const pName = btn.dataset.prayer;
+                pushSettings.prayers[pName] = !(pushSettings.prayers[pName] !== false);
+                renderPushSettingsUI(); syncPushPreferences();
+            });
+        });
+
+        document.getElementById("testPushBtn")?.addEventListener("click", async () => {
+            if (!('serviceWorker' in navigator)) return;
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (!sub) {
+                alert("Please enable notifications first!");
+                return;
+            }
+            await fetch(`${PUSH_API_ENDPOINT}/test`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    subscription: sub.toJSON(),
+                    title: "Daily.KRD 🚀",
+                    message: "Push notification is working perfectly on your device!"
+                })
+            });
+        });
 
         /* START */
 
         applyTheme();
-
 
         if (!currentLanguage) {
 
@@ -8388,6 +8421,14 @@ document.documentElement.classList.toggle(
 
         updateStats();
 
+        checkIOSNotificationEnvironment();
+        
+        renderPushSettingsUI();
+        
+        // Initial sync of settings to worker
+        if (pushSettings.masterEnabled) {
+            syncPushPreferences();
+        }
 
         requestAnimationFrame(() => {
 
