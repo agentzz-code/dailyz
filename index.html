@@ -5267,6 +5267,21 @@
 
                     try {
 
+                        await migrateGuestTasksToAccount(user.uid);
+
+                    } catch (migrationError) {
+
+                        alert(
+                            currentLanguage === "ku"
+                                ? "گواستنەوەی ئەرکەکانی میوان سەرکەوتوو نەبوو. ئەرکەکانت لەسەر ئامێرەکەت پارێزراون و دووبارە هەوڵدەدرێتەوە کاتێک دووبارە بچیتە ژوورەوە."
+                                : currentLanguage === "ar"
+                                    ? "تعذر نقل مهام وضع الضيف. مهامك ما زالت محفوظة على جهازك وستتم إعادة المحاولة عند تسجيل الدخول لاحقاً."
+                                    : "Couldn't move your guest tasks to your account. They're still saved on this device, and migration will retry the next time you sign in."
+                        );
+                    }
+
+                    try {
+
                         const profile =
                             await getDoc(
                                 doc(
@@ -5629,6 +5644,76 @@
                 currentUser.uid,
                 "tasks"
             );
+        }
+
+
+        /* GUEST -> ACCOUNT TASK MIGRATION */
+
+        let guestMigrationInProgress = false;
+
+        async function migrateGuestTasksToAccount(uid) {
+
+            // Prevent a second concurrent call from re-uploading the same batch
+            if (guestMigrationInProgress) return { migrated: 0 };
+
+            const raw =
+                localStorage.getItem("dailykrd_guest_tasks");
+
+            if (!raw) return { migrated: 0 };
+
+            let guest;
+
+            try {
+
+                guest = JSON.parse(raw);
+
+            } catch (error) {
+
+                console.error("Guest task parse error:", error);
+                return { migrated: 0 };
+            }
+
+            if (!Array.isArray(guest) || guest.length === 0) {
+
+                // Nothing real to migrate; safe to clear
+                localStorage.removeItem("dailykrd_guest_tasks");
+                return { migrated: 0 };
+            }
+
+            guestMigrationInProgress = true;
+
+            try {
+
+                const tasksRef =
+                    collection(db, "users", uid, "tasks");
+
+                for (const task of guest) {
+
+                    // Drop the guest-local id; Firestore assigns its own doc id
+                    // (matches how addTask() already writes signed-in tasks)
+                    const { id, ...taskData } = task;
+
+                    await addDoc(tasksRef, taskData);
+                }
+
+                // Only clear guest storage AFTER every task is confirmed written
+                localStorage.removeItem("dailykrd_guest_tasks");
+
+                guestTasks = [];
+
+                return { migrated: guest.length };
+
+            } catch (error) {
+
+                console.error("Guest task migration error:", error);
+
+                // Keep guest tasks in localStorage untouched on failure
+                throw error;
+
+            } finally {
+
+                guestMigrationInProgress = false;
+            }
         }
 
 
@@ -8185,14 +8270,23 @@ document.documentElement.classList.toggle(
             };
 
             // Sync to Cloudflare Worker
+            let workerOk = true;
+            let workerError = null;
             try {
-                await fetch(`${PUSH_API_ENDPOINT}/subscribe`, {
+                const subscribeRes = await fetch(`${PUSH_API_ENDPOINT}/subscribe`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
+                if (!subscribeRes.ok) {
+                    workerOk = false;
+                    workerError = `Worker responded ${subscribeRes.status}`;
+                    console.error("Push sync worker error:", workerError);
+                }
             } catch (e) {
-                console.warn("Push sync worker offline:", e);
+                workerOk = false;
+                workerError = e.message || "Network error reaching push worker";
+                console.warn("Push sync worker unreachable:", e);
             }
 
             // Also sync to user's Firestore document if authenticated
@@ -8206,6 +8300,8 @@ document.documentElement.classList.toggle(
                     console.error("Firestore notification sync error:", e);
                 }
             }
+
+            return { ok: workerOk, error: workerError };
         }
 
         function triggerPushSync() {
@@ -8278,7 +8374,22 @@ document.documentElement.classList.toggle(
 
                 pushSettings.masterEnabled = true;
                 renderPushSettingsUI();
-                await syncPushPreferences();
+
+                const syncResult = await syncPushPreferences();
+
+                if (syncResult && syncResult.ok === false) {
+                    // The device subscription is valid, but the Worker never
+                    // confirmed storing it — no push will actually arrive.
+                    // Don't report success in that case.
+                    pushSettings.masterEnabled = false;
+                    renderPushSettingsUI();
+                    if (status) status.textContent =
+                        "Subscribed, but couldn't reach the notification server (" +
+                        (syncResult.error || "unknown error") +
+                        "). Try again.";
+                    return;
+                }
+
                 if (status) status.textContent = t("notificationsEnabled");
                 
             } catch (error) {
@@ -8373,6 +8484,7 @@ document.documentElement.classList.toggle(
         });
 
         document.getElementById("testPushBtn")?.addEventListener("click", async () => {
+            const status = document.getElementById("notificationStatus");
             if (!('serviceWorker' in navigator)) return;
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.getSubscription();
@@ -8380,15 +8492,28 @@ document.documentElement.classList.toggle(
                 alert("Please enable notifications first!");
                 return;
             }
-            await fetch(`${PUSH_API_ENDPOINT}/test`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    subscription: sub.toJSON(),
-                    title: "Daily.KRD 🚀",
-                    message: "Push notification is working perfectly on your device!"
-                })
-            });
+            if (status) status.textContent = "Sending test push...";
+            try {
+                const res = await fetch(`${PUSH_API_ENDPOINT}/test`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        subscription: sub.toJSON(),
+                        title: "Daily.KRD 🚀",
+                        message: "Push notification is working perfectly on your device!"
+                    })
+                });
+                if (res.ok) {
+                    if (status) status.textContent = "Test push sent — check your device.";
+                } else {
+                    const text = await res.text().catch(() => "");
+                    console.error("Test push error:", res.status, text);
+                    if (status) status.textContent = `Test push failed (${res.status}). ${text.slice(0, 120)}`;
+                }
+            } catch (e) {
+                console.error("Test push network error:", e);
+                if (status) status.textContent = "Couldn't reach notification server: " + e.message;
+            }
         });
 
         /* START */
