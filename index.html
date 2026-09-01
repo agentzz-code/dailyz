@@ -17,27 +17,8 @@
                 var dark = localStorage.getItem("dailykrd_dark") === "true";
                 document.documentElement.classList.toggle("dark", dark);
 
-                var hour = new Date().getHours();
-                var phase = "day";
-                if (hour < 6 || hour >= 20) {
-                    phase = "night";
-                } else if (hour < 11) {
-                    phase = "morning";
-                }
-
-                var color;
-                if (phase === "night") {
-                    color = "#14151f";
-                } else if (phase === "morning") {
-                    color = dark ? "#241a10" : "#fff3e0";
-                } else if (phase === "day") {
-                    color = dark ? "#10151f" : "#eaf4ff";
-                } else {
-                    color = dark ? "#101010" : "#f5f5f7";
-                }
-
                 var meta = document.querySelector('meta[name="theme-color"]');
-                if (meta) meta.setAttribute("content", color);
+                if (meta) meta.setAttribute("content", dark ? "#101010" : "#f5f5f7");
             } catch (e) {}
         })();
     </script>
@@ -309,61 +290,6 @@
 .dark .motion-bg {
     background: #101010;
 }
-
-/* TIME OF DAY VARIANTS */
-
-.time-morning .motion-bg {
-    background: linear-gradient(160deg, #fff3e0 0%, #f5f5f7 55%);
-}
-
-.time-morning .motion-orb.one { background: #ffb37a; }
-.time-morning .motion-orb.two { background: #ffd28a; }
-.time-morning .motion-orb.three { background: #ff9d6c; }
-
-.time-day .motion-bg {
-    background: linear-gradient(160deg, #eaf4ff 0%, #f5f5f7 55%);
-}
-
-.time-day .motion-orb.one { background: #7ec8ff; }
-.time-day .motion-orb.two { background: #a9d9ff; }
-.time-day .motion-orb.three { background: #5fb3f0; }
-
-.time-night .motion-bg {
-    background: linear-gradient(160deg, #14151f 0%, #101010 55%);
-}
-
-.time-night .motion-orb.one { background: #5b5b9c; }
-.time-night .motion-orb.two { background: #3f3f72; }
-.time-night .motion-orb.three { background: #6d6dae; }
-
-.time-night.dark .motion-bg,
-.dark.time-night .motion-bg {
-    background: linear-gradient(160deg, #14151f 0%, #0b0b12 55%);
-}
-
-.dark.time-morning .motion-bg,
-.time-morning.dark .motion-bg {
-    background: linear-gradient(160deg, #241a10 0%, #101010 55%);
-}
-
-.dark.time-day .motion-bg,
-.time-day.dark .motion-bg {
-    background: linear-gradient(160deg, #10151f 0%, #101010 55%);
-}
-
-.dark.time-morning .motion-orb.one,
-.time-morning.dark .motion-orb.one { background: #7a4a2a; }
-.dark.time-morning .motion-orb.two,
-.time-morning.dark .motion-orb.two { background: #8a5a2a; }
-.dark.time-morning .motion-orb.three,
-.time-morning.dark .motion-orb.three { background: #6a3a1a; }
-
-.dark.time-day .motion-orb.one,
-.time-day.dark .motion-orb.one { background: #2a4a6a; }
-.dark.time-day .motion-orb.two,
-.time-day.dark .motion-orb.two { background: #3a5a7a; }
-.dark.time-day .motion-orb.three,
-.time-day.dark .motion-orb.three { background: #1a3a5a; }
 
 .header,
 .tabs,
@@ -1787,12 +1713,6 @@
                     <div class="streak-count" id="stepCount">0</div>
                     <div class="streak-label" id="stepLabel">steps today</div>
                 </div>
-                <button
-                    class="setting-button"
-                    id="syncStepsButton"
-                    type="button"
-                    style="margin-left:auto;"
-                >Sync Steps</button>
             </div>
 
             <div class="score-card">
@@ -3873,31 +3793,14 @@
         }
 
 
-        /* TIME OF DAY BACKGROUND */
+        /* STATUS BAR / THEME COLOR */
 
         function syncThemeColorMeta() {
 
-            const root = document.documentElement;
-            const dark = root.classList.contains("dark");
+            const dark =
+                document.documentElement.classList.contains("dark");
 
-            let color;
-
-            if (root.classList.contains("time-night")) {
-
-                color = "#14151f";
-
-            } else if (root.classList.contains("time-morning")) {
-
-                color = dark ? "#241a10" : "#fff3e0";
-
-            } else if (root.classList.contains("time-day")) {
-
-                color = dark ? "#10151f" : "#eaf4ff";
-
-            } else {
-
-                color = dark ? "#101010" : "#f5f5f7";
-            }
+            const color = dark ? "#101010" : "#f5f5f7";
 
             const themeMeta =
                 document.querySelector('meta[name="theme-color"]');
@@ -3905,41 +3808,6 @@
             if (themeMeta) {
                 themeMeta.setAttribute("content", color);
             }
-        }
-
-
-        function applyTimeOfDay() {
-
-            const hour =
-                new Date().getHours();
-
-
-            let phase =
-                "day";
-
-
-            if (hour < 6 || hour >= 20) {
-
-                phase = "night";
-
-            } else if (hour < 11) {
-
-                phase = "morning";
-            }
-
-
-            document.documentElement.classList.remove(
-                "time-morning",
-                "time-day",
-                "time-night"
-            );
-
-
-            document.documentElement.classList.add(
-                "time-" + phase
-            );
-
-            syncThemeColorMeta();
         }
 
 
@@ -5952,84 +5820,6 @@
                     }
                 );
         }
-
-
-        /* SYNC STEPS BUTTON (launches existing iPhone Shortcut) */
-        //
-        // This does NOT talk to Firestore or Firebase Auth directly.
-        // It only opens the iOS Shortcuts URL scheme, which hands off to
-        // the user's already-authorized "SyncDailySteps" Shortcut on their
-        // own device. That Shortcut is what reads Apple Health and writes
-        // to users/{uid}/health/today - this button never touches that
-        // write path, and never reads or sends currentUser.refreshToken.
-        //
-        // Because iOS does not give web pages any callback/result from a
-        // shortcuts:// URL, we can only ever know "we asked the OS to open
-        // the Shortcut" - never "the Shortcut finished" or "Firestore was
-        // updated". The onSnapshot listener already set up above is what
-        // actually reflects the new step count once the Shortcut writes it.
-
-        (function setupSyncStepsButton() {
-
-            const syncBtn =
-                document.getElementById(
-                    "syncStepsButton"
-                );
-
-            if (!syncBtn) return;
-
-            const SHORTCUT_NAME = "Daily.krd stepss";
-            const defaultLabel = syncBtn.textContent;
-
-            syncBtn.addEventListener(
-                "click",
-                () => {
-
-                    if (syncBtn.disabled) return;
-
-                    syncBtn.disabled = true;
-                    syncBtn.textContent = "Syncing...";
-
-                    // Best-effort launch of the existing Shortcut. No auth
-                    // data of any kind is included in this URL - the
-                    // Shortcut itself already holds whatever credential it
-                    // needs to write to Firestore.
-                    const shortcutUrl =
-                        "shortcuts://run-shortcut?name=" +
-                        encodeURIComponent(SHORTCUT_NAME);
-
-                    try {
-
-                        window.location.href = shortcutUrl;
-
-                    } catch (error) {
-
-                        console.error(
-                            "Could not open Shortcuts URL:",
-                            error
-                        );
-                    }
-
-                    // We cannot detect whether the Shortcut actually ran
-                    // or finished (iOS gives web pages no callback for
-                    // shortcuts:// links). So we only ever claim "launched",
-                    // and let the existing Firestore listener above update
-                    // stepCount/stepLabel for real once (and if) the
-                    // Shortcut writes users/{uid}/health/today.
-                    setTimeout(
-                        () => {
-
-                            syncBtn.textContent = defaultLabel;
-                            syncBtn.disabled = false;
-
-                        },
-                        2000
-                    );
-
-                }
-            );
-
-        })();
 
 
         /* TASK DATE MATCHING */
@@ -8702,12 +8492,7 @@ document.documentElement.classList.toggle(
         }
 
 
-        applyTimeOfDay();
-
-        setInterval(
-            applyTimeOfDay,
-            10 * 60 * 1000
-        );
+        syncThemeColorMeta();
 
 
         renderCalendar();
