@@ -575,7 +575,106 @@
             display: block;
         }
 
-        /* STREAK + PROGRESS RING */
+        /* TODAY DASHBOARD STYLES */
+        .dashboard-header {
+            margin-bottom: 20px;
+            padding: 0 4px;
+        }
+        .dashboard-greeting {
+            font-size: 28px;
+            font-weight: 850;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.5px;
+        }
+        .dashboard-date {
+            color: #888;
+            font-size: 14px;
+        }
+        .dark .dashboard-date {
+            color: #999;
+        }
+        .dashboard-card {
+            background: rgba(255,255,255,.92);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .dark .dashboard-card {
+            background: #222;
+        }
+        .dashboard-title {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dashboard-action-card {
+            background: var(--accent);
+            color: var(--accent-contrast);
+        }
+        .dashboard-action-card .dashboard-title {
+            color: var(--accent-contrast);
+            opacity: 0.8;
+        }
+        .dashboard-progress-header {
+            font-size: 24px;
+            font-weight: 850;
+            margin-bottom: 10px;
+        }
+        .dashboard-progress-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        .dark .dashboard-progress-bar {
+            background: #3a3a3a;
+        }
+        .dashboard-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+        .dark .dashboard-progress-fill {
+            background: #fff;
+        }
+        .dashboard-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 650;
+        }
+        .dashboard-breakdown div {
+            display: flex;
+            justify-content: space-between;
+        }
+        .dashboard-breakdown span {
+            color: #888;
+        }
+        .dashboard-flex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 14px;
+        }
+        .dashboard-text-large {
+            font-size: 20px;
+            font-weight: 800;
+        }
+        .dashboard-text-medium {
+            font-size: 16px;
+            font-weight: 650;
+        }
+
+        /* STREAK + PROGRESS RING (Legacy DOM references) */
 
         .stats-row {
             display: flex;
@@ -1693,6 +1792,176 @@
             cursor: wait;
         }
 
+        /* STUDY */
+        .study-goal-card {
+            background: #111;
+            color: white;
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .dark .study-goal-card {
+            background: white;
+            color: black;
+        }
+
+        .study-goal-left {
+            flex: 1;
+        }
+
+        .study-goal-label {
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: .65;
+        }
+
+        .study-goal-value {
+            font-size: 36px;
+            font-weight: 850;
+            margin-top: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .study-goal-unit {
+            font-size: 14px;
+            font-weight: 600;
+            opacity: .6;
+        }
+
+        .study-goal-btn {
+            border: 0;
+            background: rgba(255,255,255,.18);
+            color: inherit;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .dark .study-goal-btn {
+            background: rgba(0,0,0,.1);
+        }
+
+        .study-progress-card {
+            background: rgba(255,255,255,.92);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+
+        .dark .study-progress-card {
+            background: #222;
+        }
+
+        .study-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .study-progress-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 800;
+            color: #888;
+        }
+
+        .study-progress-value {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .study-progress-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dark .study-progress-bar {
+            background: #3a3a3a;
+        }
+
+        .study-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            transition: width .4s ease;
+        }
+
+        .dark .study-progress-fill {
+            background: #fff;
+        }
+
+        .study-subjects-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .study-subjects-title {
+            font-size: 20px;
+            font-weight: 850;
+        }
+
+        .study-add-btn {
+            border: 0;
+            border-radius: 12px;
+            background: var(--accent);
+            color: var(--accent-contrast);
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .study-subject-list {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .study-subject {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,.92);
+            border-radius: 14px;
+            padding: 15px;
+        }
+
+        .dark .study-subject {
+            background: #222;
+        }
+
+        .study-subject-name {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .study-subject-delete {
+            border: 0;
+            background: transparent;
+            color: #999;
+            font-size: 20px;
+        }
+
+        .study-empty {
+            text-align: center;
+            color: #888;
+            padding: 30px 10px;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 
@@ -1801,229 +2070,277 @@
     </nav>
 
 
-    <!-- TASKS -->
+    <!-- TASKS / TODAY DASHBOARD -->
 
     <main>
 
-        <section
-            class="section active"
-            id="tasks"
-        >
+        <section class="section active" id="tasks">
 
-            <div class="stats-row">
-
-                <div class="streak-card">
-                    <div class="streak-emoji">🔥</div>
-                    <div>
+           <!-- HIDDEN LEGACY DOM (Kept to prevent JS errors) -->
+            <div style="display:none;">
+                <div class="stats-row">
+                    <div class="streak-card">
                         <div class="streak-count" id="streakCount">0</div>
-                        <div class="streak-label" id="streakLabel">day streak</div>
+                        <div class="streak-label" id="streakLabel"></div>
+                    </div>
+                    <div class="progress-ring-card">
+                        <svg><circle class="progress-ring-fill" id="progressRingFill"></circle></svg>
+                        <div id="progressRingText">0/0</div>
                     </div>
                 </div>
-
-                <div class="progress-ring-card">
-                    <div class="progress-ring-wrap">
-                        <svg viewBox="0 0 58 58">
-                            <circle class="progress-ring-track" cx="29" cy="29" r="24"></circle>
-                            <circle class="progress-ring-fill" id="progressRingFill" cx="29" cy="29" r="24"></circle>
-                        </svg>
-                        <div class="progress-ring-text" id="progressRingText">0/0</div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="step-card" id="stepCard">
-                <div class="streak-emoji">👟</div>
-                <div>
+                <div class="step-card" id="stepCard">
                     <div class="streak-count" id="stepCount">0</div>
-                    <div class="streak-label" id="stepLabel">steps today</div>
+                    <div class="streak-label" id="stepLabel"></div>
+                </div>
+                <div class="score-card">
+                    <div id="scoreLabel"></div>
+                    <div id="scoreValue"></div>
+                </div>
+                <div class="quote-card" id="quoteCard"></div>
+            </div>
+            
+            <!-- 1. GREETING -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-greeting" id="dashGreeting">Good morning</h1>
+                <div class="dashboard-date" id="dashDate"></div>
+            </div>
+
+            <!-- 7. WHAT SHOULD I DO NOW? -->
+            <div class="dashboard-card dashboard-action-card">
+                <div class="dashboard-title">⚡ What should I do now?</div>
+                <div class="dashboard-text-large" id="nextActionText">🎉 You're all caught up!</div>
+                <button class="setting-button dark" id="viewTaskButton" style="display:none; margin-top:12px; border:1px solid rgba(255,255,255,0.2); background:var(--accent-contrast); color:var(--accent);">View task →</button>
+            </div>
+
+            <!-- 2. TODAY'S PROGRESS -->
+            <div class="dashboard-card">
+                <div class="dashboard-title">🎯 Today's Progress</div>
+                <div class="dashboard-progress-header" id="dashProgressPercent">0%</div>
+                <div class="dashboard-progress-bar">
+                    <div class="dashboard-progress-fill" id="dashProgressFill" style="width: 0%;"></div>
+                </div>
+                <div class="dashboard-breakdown">
+                    <div>✅ Tasks <span id="dashTasksScore">0/0</span></div>
+                    <div>🕌 Prayer <span id="dashPrayerScore">—</span></div>
+                    <div>👟 Activity <span id="dashActivityScore">—</span></div>
                 </div>
             </div>
 
-            <div class="score-card">
-                <div class="score-label" id="scoreLabel">Today's Score</div>
-                <div class="score-value" id="scoreValue">🟢 0%</div>
+            <!-- 3. PRAYER -->
+            <div class="dashboard-card">
+                <div class="dashboard-title">🕌 Prayer</div>
+                <div class="dashboard-flex-row">
+                    <div>
+                        <div style="font-size:12px; color:#888; margin-bottom:4px;" id="dashNextPrayerLabel">NEXT PRAYER</div>
+                        <div class="dashboard-text-large" id="dashNextPrayerName">Fajr</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="dashboard-text-large" id="dashNextPrayerTime">--:--</div>
+                        <div style="color:#888; font-size:13px; font-variant-numeric: tabular-nums;" id="dashNextPrayerCountdown">--:--:--</div>
+                    </div>
+                </div>
+                <button class="setting-button" id="dashViewPrayersBtn" style="width:100%;">View prayers →</button>
             </div>
 
-            <div class="quote-card" id="quoteCard"></div>
-
-            <div class="task-input">
-
-                <input
-                    id="taskInput"
-                    type="text"
-                    placeholder="Add a task..."
-                    autocomplete="off"
-                >
-
-                <button
-                    class="add-button"
-                    id="addTaskButton"
-                    type="button"
-                >
-                    +
-                </button>
-
+            <!-- 4. STUDY -->
+            <div class="dashboard-card">
+                <div class="dashboard-title">📚 Study</div>
+                <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
+                <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
             </div>
 
+            <!-- 6. ACTIVITY -->
+            <div class="dashboard-card">
+                <div class="dashboard-title">👟 Activity</div>
+                <div class="dashboard-text-medium" id="dashActivityText">Steps haven't synced yet.</div>
+            </div>
 
-            <div class="task-options">
-
-                <div class="option-row">
-
-                    <label id="dateLabel">
-                        Date
-                    </label>
-
-                    <input
-                        class="task-date-input"
-                        id="taskDateInput"
-                        type="date"
-                    >
-
+            <!-- 5. TASKS (Wrapper for existing logic) -->
+            <div class="dashboard-card" style="padding-bottom: 2px;">
+                <div class="dashboard-title" style="margin-bottom: 16px;">
+                    <span>✅ Tasks</span>
+                    <span id="dashTasksCompleted" style="text-transform:none; font-weight:600;">0 of 0 completed</span>
                 </div>
                 
-                <div class="option-row">
-                    <label id="timeLabel">Time</label>
-                    <input class="task-date-input" id="taskTimeInput" type="time">
-                </div>
+                <div class="task-input">
 
-                <div class="option-row">
-
-                    <label id="repeatLabel">
-                        Repeat
-                    </label>
-
-                    <select
-                        class="repeat-select"
-                        id="repeatSelect"
+                    <input
+                        id="taskInput"
+                        type="text"
+                        placeholder="Add a task..."
+                        autocomplete="off"
                     >
 
-                        <option
-                            id="repeatOnce"
-                            value="once"
-                        >
-                            Once
-                        </option>
-
-                        <option
-                            id="repeatDaily"
-                            value="daily"
-                        >
-                            Every day
-                        </option>
-
-                        <option
-                            id="repeatWeekly"
-                            value="weekly"
-                        >
-                            Every week
-                        </option>
-
-                        <option
-                            id="repeatCustom"
-                            value="custom"
-                        >
-                            Custom days
-                        </option>
-
-                    </select>
+                    <button
+                        class="add-button"
+                        id="addTaskButton"
+                        type="button"
+                    >
+                        +
+                    </button>
 
                 </div>
 
 
-                <div class="option-row">
+                <div class="task-options">
 
-                    <label id="priorityLabel">
-                        Priority
-                    </label>
+                    <div class="option-row">
 
-                    <select
-                        class="priority-select"
-                        id="prioritySelect"
+                        <label id="dateLabel">
+                            Date
+                        </label>
+
+                        <input
+                            class="task-date-input"
+                            id="taskDateInput"
+                            type="date"
+                        >
+
+                    </div>
+                    
+                    <div class="option-row">
+                        <label id="timeLabel">Time</label>
+                        <input class="task-date-input" id="taskTimeInput" type="time">
+                    </div>
+
+                    <div class="option-row">
+
+                        <label id="repeatLabel">
+                            Repeat
+                        </label>
+
+                        <select
+                            class="repeat-select"
+                            id="repeatSelect"
+                        >
+
+                            <option
+                                id="repeatOnce"
+                                value="once"
+                            >
+                                Once
+                            </option>
+
+                            <option
+                                id="repeatDaily"
+                                value="daily"
+                            >
+                                Every day
+                            </option>
+
+                            <option
+                                id="repeatWeekly"
+                                value="weekly"
+                            >
+                                Every week
+                            </option>
+
+                            <option
+                                id="repeatCustom"
+                                value="custom"
+                            >
+                                Custom days
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="option-row">
+
+                        <label id="priorityLabel">
+                            Priority
+                        </label>
+
+                        <select
+                            class="priority-select"
+                            id="prioritySelect"
+                        >
+
+                            <option value="low" id="priorityLow">Low</option>
+                            <option value="medium" id="priorityMedium" selected>Medium</option>
+                            <option value="high" id="priorityHigh">High</option>
+
+                        </select>
+
+                    </div>
+
+                    <div
+                        class="repeat-days"
+                        id="repeatDays"
                     >
 
-                        <option value="low" id="priorityLow">Low</option>
-                        <option value="medium" id="priorityMedium" selected>Medium</option>
-                        <option value="high" id="priorityHigh">High</option>
+                        <button
+                            class="repeat-day"
+                            data-day="0"
+                            type="button"
+                        >
+                            Sun
+                        </button>
 
-                    </select>
+                        <button
+                            class="repeat-day"
+                            data-day="1"
+                            type="button"
+                        >
+                            Mon
+                        </button>
+
+                        <button
+                            class="repeat-day"
+                            data-day="2"
+                            type="button"
+                        >
+                            Tue
+                        </button>
+
+                        <button
+                            class="repeat-day"
+                            data-day="3"
+                            type="button"
+                        >
+                            Wed
+                        </button>
+
+                        <button
+                            class="repeat-day"
+                            data-day="4"
+                            type="button"
+                        >
+                            Thu
+                        </button>
+
+                        <button
+                            class="repeat-day"
+                            data-day="5"
+                            type="button"
+                        >
+                            Fri
+                        </button>
+
+                        <button
+                            class="repeat-day"
+                            data-day="6"
+                            type="button"
+                        >
+                            Sat
+                        </button>
+
+                    </div>
 
                 </div>
+
 
                 <div
-                    class="repeat-days"
-                    id="repeatDays"
+                    class="selected-day"
+                    id="selectedDayText"
                 >
-
-                    <button
-                        class="repeat-day"
-                        data-day="0"
-                        type="button"
-                    >
-                        Sun
-                    </button>
-
-                    <button
-                        class="repeat-day"
-                        data-day="1"
-                        type="button"
-                    >
-                        Mon
-                    </button>
-
-                    <button
-                        class="repeat-day"
-                        data-day="2"
-                        type="button"
-                    >
-                        Tue
-                    </button>
-
-                    <button
-                        class="repeat-day"
-                        data-day="3"
-                        type="button"
-                    >
-                        Wed
-                    </button>
-
-                    <button
-                        class="repeat-day"
-                        data-day="4"
-                        type="button"
-                    >
-                        Thu
-                    </button>
-
-                    <button
-                        class="repeat-day"
-                        data-day="5"
-                        type="button"
-                    >
-                        Fri
-                    </button>
-
-                    <button
-                        class="repeat-day"
-                        data-day="6"
-                        type="button"
-                    >
-                        Sat
-                    </button>
-
                 </div>
 
+                <div id="taskList"></div>
+
             </div>
-
-
-            <div
-                class="selected-day"
-                id="selectedDayText"
-            >
-            </div>
-
-            <div id="taskList"></div>
 
         </section>
 
@@ -2212,19 +2529,67 @@
         </section>
 
 
-        <!-- STUDY (placeholder — full Study system built in a later step) -->
+        <!-- STUDY -->
 
         <section
             class="section"
             id="study"
         >
 
-            <div class="settings-title">
-                📚 Study
+            <!-- STUDY GOAL -->
+
+            <div class="study-goal-card">
+                <div class="study-goal-left">
+                    <div class="study-goal-label">TODAY'S GOAL</div>
+                    <div class="study-goal-value">
+                        <span id="studyGoalValue">0</span>
+                        <span class="study-goal-unit">min</span>
+                    </div>
+                </div>
+                <button
+                    class="study-goal-btn"
+                    id="studyGoalBtn"
+                    type="button"
+                >
+                    Set Goal
+                </button>
             </div>
 
-            <div class="settings-subtitle">
-                Coming soon.
+
+            <!-- TODAY'S PROGRESS -->
+
+            <div class="study-progress-card">
+                <div class="study-progress-header">
+                    <div class="study-progress-title">TODAY'S PROGRESS</div>
+                    <div class="study-progress-value" id="studyProgressValue">0 min</div>
+                </div>
+                <div class="study-progress-bar">
+                    <div
+                        class="study-progress-fill"
+                        id="studyProgressFill"
+                        style="width: 0%;"
+                    ></div>
+                </div>
+            </div>
+
+
+            <!-- SUBJECTS -->
+
+            <div class="study-subjects-header">
+                <div class="study-subjects-title">Subjects</div>
+                <button
+                    class="study-add-btn"
+                    id="studyAddSubjectBtn"
+                    type="button"
+                >
+                    + Add
+                </button>
+            </div>
+
+            <div
+                class="study-subject-list"
+                id="studySubjectList"
+            >
             </div>
 
         </section>
@@ -4188,13 +4553,19 @@
 
 
         function updateDate() {
+            const d = new Date();
+            const hours = d.getHours();
+            let greeting = "Good evening";
+            if (hours < 12) greeting = "Good morning";
+            else if (hours < 17) greeting = "Good afternoon";
 
-            document.getElementById(
-                "date"
-            ).textContent =
-                formatDateKey(
-                    getTodayKey()
-                );
+            const dashGreeting = document.getElementById("dashGreeting");
+            if (dashGreeting) dashGreeting.textContent = greeting;
+
+            const dateStr = formatDateKey(getTodayKey());
+            document.getElementById("date").textContent = dateStr;
+            const dashDate = document.getElementById("dashDate");
+            if (dashDate) dashDate.textContent = dateStr;
         }
 
 
@@ -6018,6 +6389,21 @@
                 stepLabelEl.textContent =
                     t("stepsToday");
             }
+            
+            // DASHBOARD UPDATE
+            const dashActivityText = document.getElementById("dashActivityText");
+            const dashActivityScore = document.getElementById("dashActivityScore");
+
+            if (dashActivityText && dashActivityScore) {
+                if (todaySteps === null) {
+                    dashActivityText.textContent = "Steps haven't synced yet.";
+                    dashActivityScore.textContent = "Not started";
+                } else {
+                    const goal = pushSettings.stepGoal || 10000;
+                    dashActivityText.textContent = `${todaySteps.toLocaleString()} / ${goal.toLocaleString()} steps`;
+                    dashActivityScore.textContent = todaySteps.toLocaleString();
+                }
+            }
         }
 
 
@@ -6438,6 +6824,38 @@
                     `${emoji} ${percent}%`;
             }
         }
+        
+        function updateDashboardProgress() {
+            const tasks = getTasksForDate(getActiveTasksSource(), getTodayKey());
+            const total = tasks.length;
+            const done = tasks.filter(task => isTaskCompletedOnDate(task, getTodayKey())).length;
+            const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            const dashPercent = document.getElementById("dashProgressPercent");
+            const dashFill = document.getElementById("dashProgressFill");
+            const dashTasks = document.getElementById("dashTasksScore");
+            const dashTasksTitle = document.getElementById("dashTasksCompleted");
+
+            if (dashPercent) dashPercent.textContent = percent + "%";
+            if (dashFill) dashFill.style.width = percent + "%";
+            if (dashTasks) dashTasks.textContent = `${done}/${total}`;
+            if (dashTasksTitle) dashTasksTitle.textContent = `${done} of ${total} completed`;
+
+            // ⚡ What should I do now?
+            const nextActionText = document.getElementById("nextActionText");
+            const viewTaskBtn = document.getElementById("viewTaskButton");
+            if (nextActionText && viewTaskBtn) {
+                const incompleteTask = tasks.find(task => !isTaskCompletedOnDate(task, getTodayKey()));
+                if (incompleteTask) {
+                    nextActionText.textContent = "Finish: " + incompleteTask.text;
+                    viewTaskBtn.style.display = "inline-block";
+                    viewTaskBtn.onclick = () => { document.getElementById("taskInput").focus(); };
+                } else {
+                    nextActionText.textContent = "🎉 You're all caught up!";
+                    viewTaskBtn.style.display = "none";
+                }
+            }
+        }
 
 
         function updateStats() {
@@ -6447,6 +6865,9 @@
             updateProgressRing();
 
             updateTodayScore();
+            
+            updateDashboardProgress();
+
         }
 
 
@@ -8461,6 +8882,24 @@ document.documentElement.classList.toggle(
                     String(rm).padStart(2, "0") + ":" +
                     String(rs).padStart(2, "0");
             }
+            
+            // DASHBOARD UPDATE
+            const dashNextName = document.getElementById("dashNextPrayerName");
+            const dashNextTime = document.getElementById("dashNextPrayerTime");
+            const dashNextCount = document.getElementById("dashNextPrayerCountdown");
+            const dashNextLabel = document.getElementById("dashNextPrayerLabel");
+
+            if (dashNextName) dashNextName.textContent = t("prayer." + next[0]);
+            if (dashNextTime) dashNextTime.textContent = next[1];
+            if (dashNextLabel) dashNextLabel.textContent = t("nextPrayer");
+            if (dashNextCount) {
+                const rh = Math.floor(next[2] / 3600);
+                const rm = Math.floor((next[2] % 3600) / 60);
+                const rs = next[2] % 60;
+                dashNextCount.textContent = String(rh).padStart(2, "0") + ":" + String(rm).padStart(2, "0") + ":" + String(rs).padStart(2, "0");
+                const dashPrayerScore = document.getElementById("dashPrayerScore");
+                if (dashPrayerScore) dashPrayerScore.textContent = "Active"; 
+            }
         }
 
 
@@ -8987,6 +9426,10 @@ document.documentElement.classList.toggle(
                 if (status) status.textContent = "Couldn't reach notification server: " + e.message;
             }
         });
+        
+        // Setup initial Dashboard Listeners
+        document.getElementById("dashViewPrayersBtn")?.addEventListener("click", () => showSection("prayers"));
+        document.getElementById("dashSetStudyBtn")?.addEventListener("click", () => showSection("study"));
 
         /* START */
 
@@ -9058,6 +9501,131 @@ document.documentElement.classList.toggle(
             }, 300);
 
         });
+
+
+        /* STUDY */
+
+        const studyGoalEl = document.getElementById("studyGoalValue");
+        const studyGoalBtn = document.getElementById("studyGoalBtn");
+        const studyProgressValue = document.getElementById("studyProgressValue");
+        const studyProgressFill = document.getElementById("studyProgressFill");
+        const studySubjectList = document.getElementById("studySubjectList");
+        const studyAddBtn = document.getElementById("studyAddSubjectBtn");
+
+        function getStudyTodayKey() {
+            const d = new Date();
+            return d.getFullYear() + "-" +
+                String(d.getMonth() + 1).padStart(2, "0") + "-" +
+                String(d.getDate()).padStart(2, "0");
+        }
+
+        function loadStudyGoal() {
+            return parseInt(
+                localStorage.getItem("dailykrd_study_goal") || "0",
+                10
+            );
+        }
+
+        function saveStudyGoal(min) {
+            localStorage.setItem("dailykrd_study_goal", String(min));
+        }
+
+        function loadStudyMinutes() {
+            const data = JSON.parse(
+                localStorage.getItem("dailykrd_study_minutes") || "{}"
+            );
+            return data[getStudyTodayKey()] || 0;
+        }
+
+        function saveStudyMinutes(min) {
+            const data = JSON.parse(
+                localStorage.getItem("dailykrd_study_minutes") || "{}"
+            );
+            data[getStudyTodayKey()] = min;
+            localStorage.setItem(
+                "dailykrd_study_minutes",
+                JSON.stringify(data)
+            );
+        }
+
+        function loadStudySubjects() {
+            return JSON.parse(
+                localStorage.getItem("dailykrd_study_subjects") || "[]"
+            );
+        }
+
+        function saveStudySubjects(subjects) {
+            localStorage.setItem(
+                "dailykrd_study_subjects",
+                JSON.stringify(subjects)
+            );
+        }
+
+        function renderStudy() {
+            const goal = loadStudyGoal();
+            const minutes = loadStudyMinutes();
+            const pct = goal > 0
+                ? Math.min(100, Math.round((minutes / goal) * 100))
+                : 0;
+
+            studyGoalEl.textContent = goal;
+            studyGoalBtn.textContent = goal > 0
+                ? "Change Goal"
+                : "Set Goal";
+            studyProgressValue.textContent = minutes + " min";
+            studyProgressFill.style.width = pct + "%";
+
+            const subjects = loadStudySubjects();
+            if (subjects.length === 0) {
+                studySubjectList.innerHTML =
+                    '<div class="study-empty">No subjects yet. Add one to get started.</div>';
+                return;
+            }
+
+            studySubjectList.innerHTML = subjects.map((s, i) =>
+                '<div class="study-subject">' +
+                    '<div class="study-subject-name">' +
+                        s.replace(/</g, "&lt;") +
+                    '</div>' +
+                    '<button class="study-subject-delete" data-index="' + i + '" type="button">×</button>' +
+                '</div>'
+            ).join("");
+        }
+
+        studyGoalBtn.addEventListener("click", () => {
+            const current = loadStudyGoal();
+            const input = prompt(
+                "Set today's study goal (minutes):",
+                current || 60
+            );
+            if (input === null) return;
+            const val = parseInt(input, 10);
+            if (!isNaN(val) && val >= 0) {
+                saveStudyGoal(val);
+                renderStudy();
+            }
+        });
+
+        studyAddBtn.addEventListener("click", () => {
+            const name = prompt("Subject name:");
+            if (!name || !name.trim()) return;
+            const subjects = loadStudySubjects();
+            subjects.push(name.trim());
+            saveStudySubjects(subjects);
+            renderStudy();
+        });
+
+        studySubjectList.addEventListener("click", (e) => {
+            const btn = e.target.closest(".study-subject-delete");
+            if (!btn) return;
+            const idx = parseInt(btn.dataset.index, 10);
+            const subjects = loadStudySubjects();
+            subjects.splice(idx, 1);
+            saveStudySubjects(subjects);
+            renderStudy();
+        });
+
+        renderStudy();
 
 
         /* SERVICE WORKER */
