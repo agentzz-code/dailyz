@@ -575,9 +575,9 @@
             display: block;
         }
 
-        /* TODAY DASHBOARD STYLES */
+        /* DASHBOARD SHARED STYLES */
         .dashboard-header {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             padding: 0 4px;
         }
         .dashboard-greeting {
@@ -588,7 +588,8 @@
         }
         .dashboard-date {
             color: #888;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 600;
         }
         .dark .dashboard-date {
             color: #999;
@@ -613,19 +614,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        .dashboard-action-card {
-            background: var(--accent);
-            color: var(--accent-contrast);
-        }
-        .dashboard-action-card .dashboard-title {
-            color: var(--accent-contrast);
-            opacity: 0.8;
-        }
-        .dashboard-progress-header {
-            font-size: 24px;
-            font-weight: 850;
-            margin-bottom: 10px;
-        }
         .dashboard-progress-bar {
             height: 8px;
             background: #eee;
@@ -644,20 +632,6 @@
         }
         .dark .dashboard-progress-fill {
             background: #fff;
-        }
-        .dashboard-breakdown {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 650;
-        }
-        .dashboard-breakdown div {
-            display: flex;
-            justify-content: space-between;
-        }
-        .dashboard-breakdown span {
-            color: #888;
         }
         .dashboard-flex-row {
             display: flex;
@@ -685,159 +659,9 @@
         }
         .dark .study-subject-item { background: rgba(255,255,255,0.05); }
 
-        /* STREAK + PROGRESS RING (Legacy DOM references) */
-
-        .stats-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-
-        .streak-card {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 14px 16px;
-        }
-
-        .dark .streak-card {
-            background: #222;
-        }
-
-        .streak-emoji {
-            font-size: 26px;
-            line-height: 1;
-        }
-
-        .streak-count {
-            font-size: 19px;
-            font-weight: 850;
-            color: var(--accent);
-        }
-
-        .streak-label {
-            color: #888;
-            font-size: 12px;
-            margin-top: 1px;
-        }
-
-        /* STEP COUNTER CARD */
-
-        .step-card {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 15px;
-        }
-
-        .dark .step-card {
-            background: #222;
-        }
-
-        .progress-ring-card {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 10px;
-            width: 78px;
-            height: 78px;
-            flex-shrink: 0;
-        }
-
-        .dark .progress-ring-card {
-            background: #222;
-        }
-
-        .progress-ring-wrap {
-            position: relative;
-            width: 58px;
-            height: 58px;
-        }
-
-        .progress-ring-wrap svg {
-            transform: rotate(-90deg);
-            width: 58px;
-            height: 58px;
-        }
-
-        .progress-ring-track {
-            fill: none;
-            stroke: #eee;
-            stroke-width: 6;
-        }
-
-        .dark .progress-ring-track {
-            stroke: #3a3a3a;
-        }
-
-        .progress-ring-fill {
-            fill: none;
-            stroke: #111;
-            stroke-width: 6;
-            stroke-linecap: round;
-            transition: stroke-dashoffset .35s ease;
-        }
-
-        .dark .progress-ring-fill {
-            stroke: white;
-        }
-
-        .progress-ring-text {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .score-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 15px;
-        }
-
-        .dark .score-card {
-            background: #222;
-        }
-
-        .score-label {
-            font-weight: 650;
-        }
-
-        .score-value {
-            font-size: 17px;
-            font-weight: 850;
-        }
-
-        .quote-card {
-            background: rgba(255,255,255,.92);
-            border-radius: 16px;
-            padding: 14px 16px;
-            margin-bottom: 15px;
-            font-style: italic;
-            color: #555;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .dark .quote-card {
-            background: #222;
-            color: #ccc;
+        /* LEGACY STATS (Kept to prevent JS breakdown on unrelated references) */
+        .stats-row, .step-card, .progress-ring-card, .score-card, .quote-card {
+            display: none;
         }
 
         /* ACCENT / THEME VARIABLES */
@@ -1911,7 +1735,7 @@
     </nav>
 
 
-    <!-- TASKS / TODAY DASHBOARD -->
+    <!-- TODAY MINIMAL DASHBOARD -->
 
     <main>
 
@@ -1919,272 +1743,124 @@
 
            <!-- HIDDEN LEGACY DOM (Kept to prevent JS errors) -->
             <div style="display:none;">
-                <div class="stats-row">
-                    <div class="streak-card">
-                        <div class="streak-count" id="streakCount">0</div>
-                        <div class="streak-label" id="streakLabel"></div>
-                    </div>
-                    <div class="progress-ring-card">
-                        <svg><circle class="progress-ring-fill" id="progressRingFill"></circle></svg>
-                        <div id="progressRingText">0/0</div>
-                    </div>
-                </div>
-                <div class="step-card" id="stepCard">
-                    <div class="streak-count" id="stepCount">0</div>
-                    <div class="streak-label" id="stepLabel"></div>
-                </div>
-                <div class="score-card">
-                    <div id="scoreLabel"></div>
-                    <div id="scoreValue"></div>
-                </div>
+                <div class="stats-row"><div class="streak-card"><div class="streak-count" id="streakCount">0</div><div class="streak-label" id="streakLabel"></div></div><div class="progress-ring-card"><svg><circle class="progress-ring-fill" id="progressRingFill"></circle></svg><div id="progressRingText">0/0</div></div></div>
+                <div class="step-card" id="stepCard"><div class="streak-count" id="stepCount">0</div><div class="streak-label" id="stepLabel"></div></div>
+                <div class="score-card"><div id="scoreLabel"></div><div id="scoreValue"></div></div>
                 <div class="quote-card" id="quoteCard"></div>
+                <div id="dashGreeting"></div><div id="dashDate"></div><div id="nextActionText"></div><div id="viewTaskButton"></div>
+                <div id="dashProgressPercent"></div><div id="dashProgressFill"></div><div id="dashTasksScore"></div><div id="dashTasksCompleted"></div>
+                <div id="dashPrayerScore"></div><div id="dashActivityScore"></div><div id="dashNextPrayerName"></div><div id="dashNextPrayerTime"></div>
+                <div id="dashNextPrayerCountdown"></div><div id="dashNextPrayerLabel"></div><div id="dashStudyCardContent"></div><div id="dashSetStudyBtn"></div>
+                <div id="dashActivityText"></div>
             </div>
             
-            <!-- 1. GREETING -->
-            <div class="dashboard-header">
-                <h1 class="dashboard-greeting" id="dashGreeting">Good morning</h1>
-                <div class="dashboard-date" id="dashDate"></div>
+            <!-- HEADER -->
+            <div class="dashboard-header" style="margin-bottom:24px;">
+                <div style="font-size: 28px; font-weight: 850; letter-spacing: -0.5px;" id="dashGreetingFull">Good morning</div>
+                <div style="color: #888; font-size: 15px; font-weight: 600;" id="dashDateMinimal"></div>
             </div>
 
-            <!-- 7. WHAT SHOULD I DO NOW? -->
-            <div class="dashboard-card dashboard-action-card">
-                <div class="dashboard-title">⚡ What should I do now?</div>
-                <div class="dashboard-text-large" id="nextActionText">🎉 You're all caught up!</div>
-                <button class="setting-button dark" id="viewTaskButton" style="display:none; margin-top:12px; border:1px solid rgba(255,255,255,0.2); background:var(--accent-contrast); color:var(--accent);">View task →</button>
-            </div>
-
-            <!-- 2. TODAY'S PROGRESS -->
-            <div class="dashboard-card">
-                <div class="dashboard-title">🎯 Today's Progress</div>
-                <div class="dashboard-progress-header" id="dashProgressPercent">0%</div>
-                <div class="dashboard-progress-bar">
-                    <div class="dashboard-progress-fill" id="dashProgressFill" style="width: 0%;"></div>
-                </div>
-                <div class="dashboard-breakdown">
-                    <div>✅ Tasks <span id="dashTasksScore">0/0</span></div>
-                    <div>🕌 Prayer <span id="dashPrayerScore">—</span></div>
-                    <div>👟 Activity <span id="dashActivityScore">—</span></div>
+            <!-- TODAY'S MAIN CARD -->
+            <div class="dashboard-card" style="padding:22px; text-align:center;">
+                <div style="font-size: 14px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 8px;">🎯 Today</div>
+                <div style="font-size: 42px; font-weight: 900; margin-bottom: 12px; font-variant-numeric: tabular-nums;" id="dashMinimalPercent">0%</div>
+                <div class="dashboard-progress-bar" style="height: 10px; margin-bottom: 0;">
+                    <div class="dashboard-progress-fill" id="dashMinimalProgressFill" style="width: 0%;"></div>
                 </div>
             </div>
 
-            <!-- 3. PRAYER -->
-            <div class="dashboard-card">
-                <div class="dashboard-title">🕌 Prayer</div>
-                <div class="dashboard-flex-row">
-                    <div>
-                        <div style="font-size:12px; color:#888; margin-bottom:4px;" id="dashNextPrayerLabel">NEXT PRAYER</div>
-                        <div class="dashboard-text-large" id="dashNextPrayerName">Fajr</div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="dashboard-text-large" id="dashNextPrayerTime">--:--</div>
-                        <div style="color:#888; font-size:13px; font-variant-numeric: tabular-nums;" id="dashNextPrayerCountdown">--:--:--</div>
-                    </div>
+            <!-- NEXT UP -->
+            <div style="margin-bottom: 24px;">
+                <div style="font-size: 14px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 12px; margin-left: 4px;">Next up</div>
+                <div class="dashboard-card" style="margin-bottom: 0; padding: 18px; display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size:24px;" id="dashNextUpIcon">✨</div>
+                    <div style="font-weight:700; font-size:16px;" id="dashNextUpText">You're all caught up!</div>
                 </div>
-                <button class="setting-button" id="dashViewPrayersBtn" style="width:100%;">View prayers →</button>
             </div>
 
-            <!-- 4. STUDY DASHBOARD CARD -->
-            <div class="dashboard-card">
-                <div class="dashboard-title" id="dashStudyTitleText">📚 Study</div>
-                <div id="dashStudyCardContent">
-                    <div class="dashboard-text-medium" style="margin-bottom:14px;" id="dashStudyText">No study goal yet.</div>
+            <!-- QUICK OVERVIEW -->
+            <div style="margin-bottom: 24px;">
+                <div style="font-size: 14px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 12px; margin-left: 4px;">Overview</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="dashboard-card" style="margin-bottom:0; padding: 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="showSection('prayers')">
+                        <div style="font-weight:700; font-size:15px;">🕌 Prayer</div>
+                        <div style="font-weight:650; color:#888; font-size:14px;" id="minimalPrayerText">--:--</div>
+                    </div>
+                    <div class="dashboard-card" style="margin-bottom:0; padding: 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="showSection('study')">
+                        <div style="font-weight:700; font-size:15px;">📚 Study</div>
+                        <div style="font-weight:650; color:#888; font-size:14px;" id="minimalStudyText">0 / 0 min</div>
+                    </div>
+                    <div class="dashboard-card" style="margin-bottom:0; padding: 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="showSection('allTasksSection')">
+                        <div style="font-weight:700; font-size:15px;">✅ Tasks</div>
+                        <div style="font-weight:650; color:#888; font-size:14px;" id="minimalTasksText">0 / 0</div>
+                    </div>
+                    <div class="dashboard-card" style="margin-bottom:0; padding: 16px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-weight:700; font-size:15px;">👟 Activity</div>
+                        <div style="font-weight:650; color:#888; font-size:14px;" id="minimalActivityText">0 steps</div>
+                    </div>
                 </div>
-                <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
             </div>
 
-            <!-- 6. ACTIVITY -->
-            <div class="dashboard-card">
-                <div class="dashboard-title">👟 Activity</div>
-                <div class="dashboard-text-medium" id="dashActivityText">Steps haven't synced yet.</div>
+            <!-- QUICK ACTIONS -->
+            <div style="display: flex; gap: 8px;">
+                <button class="setting-button" style="flex:1; padding: 14px 0; font-weight:700;" onclick="showSection('allTasksSection'); setTimeout(()=>document.getElementById('taskInput').focus(), 100);">+ Task</button>
+                <button class="setting-button" style="flex:1; padding: 14px 0; font-weight:700;" onclick="showSection('study')">📚 Study</button>
+                <button class="setting-button" style="flex:1; padding: 14px 0; font-weight:700;" onclick="showSection('prayers')">🕌 Prayer</button>
             </div>
 
-            <!-- 5. TASKS (Wrapper for existing logic) -->
-            <div class="dashboard-card" style="padding-bottom: 2px;">
-                <div class="dashboard-title" style="margin-bottom: 16px;">
-                    <span>✅ Tasks</span>
-                    <span id="dashTasksCompleted" style="text-transform:none; font-weight:600;">0 of 0 completed</span>
-                </div>
-                
-                <div class="task-input">
+        </section>
 
-                    <input
-                        id="taskInput"
-                        type="text"
-                        placeholder="Add a task..."
-                        autocomplete="off"
-                    >
-
-                    <button
-                        class="add-button"
-                        id="addTaskButton"
-                        type="button"
-                    >
-                        +
-                    </button>
-
-                </div>
-
-
-                <div class="task-options">
-
-                    <div class="option-row">
-
-                        <label id="dateLabel">
-                            Date
-                        </label>
-
-                        <input
-                            class="task-date-input"
-                            id="taskDateInput"
-                            type="date"
-                        >
-
-                    </div>
-                    
-                    <div class="option-row">
-                        <label id="timeLabel">Time</label>
-                        <input class="task-date-input" id="taskTimeInput" type="time">
-                    </div>
-
-                    <div class="option-row">
-
-                        <label id="repeatLabel">
-                            Repeat
-                        </label>
-
-                        <select
-                            class="repeat-select"
-                            id="repeatSelect"
-                        >
-
-                            <option
-                                id="repeatOnce"
-                                value="once"
-                            >
-                                Once
-                            </option>
-
-                            <option
-                                id="repeatDaily"
-                                value="daily"
-                            >
-                                Every day
-                            </option>
-
-                            <option
-                                id="repeatWeekly"
-                                value="weekly"
-                            >
-                                Every week
-                            </option>
-
-                            <option
-                                id="repeatCustom"
-                                value="custom"
-                            >
-                                Custom days
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="option-row">
-
-                        <label id="priorityLabel">
-                            Priority
-                        </label>
-
-                        <select
-                            class="priority-select"
-                            id="prioritySelect"
-                        >
-
-                            <option value="low" id="priorityLow">Low</option>
-                            <option value="medium" id="priorityMedium" selected>Medium</option>
-                            <option value="high" id="priorityHigh">High</option>
-
-                        </select>
-
-                    </div>
-
-                    <div
-                        class="repeat-days"
-                        id="repeatDays"
-                    >
-
-                        <button
-                            class="repeat-day"
-                            data-day="0"
-                            type="button"
-                        >
-                            Sun
-                        </button>
-
-                        <button
-                            class="repeat-day"
-                            data-day="1"
-                            type="button"
-                        >
-                            Mon
-                        </button>
-
-                        <button
-                            class="repeat-day"
-                            data-day="2"
-                            type="button"
-                        >
-                            Tue
-                        </button>
-
-                        <button
-                            class="repeat-day"
-                            data-day="3"
-                            type="button"
-                        >
-                            Wed
-                        </button>
-
-                        <button
-                            class="repeat-day"
-                            data-day="4"
-                            type="button"
-                        >
-                            Thu
-                        </button>
-
-                        <button
-                            class="repeat-day"
-                            data-day="5"
-                            type="button"
-                        >
-                            Fri
-                        </button>
-
-                        <button
-                            class="repeat-day"
-                            data-day="6"
-                            type="button"
-                        >
-                            Sat
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="selected-day"
-                    id="selectedDayText"
-                >
-                </div>
-
-                <div id="taskList"></div>
-
+        <!-- TASKS LIST (Moved exactly as-is from Today into its own dedicated internal view) -->
+        <section class="section" id="allTasksSection">
+            <div class="prayer-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Tasks</h2>
+                <button class="setting-button dark" style="padding:6px 12px; font-size:12px;" onclick="showSection('tasks')">← Back</button>
             </div>
 
+            <div class="task-input">
+                <input id="taskInput" type="text" placeholder="Add a task..." autocomplete="off">
+                <button class="add-button" id="addTaskButton" type="button">+</button>
+            </div>
+
+            <div class="task-options">
+                <div class="option-row">
+                    <label id="dateLabel">Date</label>
+                    <input class="task-date-input" id="taskDateInput" type="date">
+                </div>
+                <div class="option-row">
+                    <label id="timeLabel">Time</label>
+                    <input class="task-date-input" id="taskTimeInput" type="time">
+                </div>
+                <div class="option-row">
+                    <label id="repeatLabel">Repeat</label>
+                    <select class="repeat-select" id="repeatSelect">
+                        <option id="repeatOnce" value="once">Once</option>
+                        <option id="repeatDaily" value="daily">Every day</option>
+                        <option id="repeatWeekly" value="weekly">Every week</option>
+                        <option id="repeatCustom" value="custom">Custom days</option>
+                    </select>
+                </div>
+                <div class="option-row">
+                    <label id="priorityLabel">Priority</label>
+                    <select class="priority-select" id="prioritySelect">
+                        <option value="low" id="priorityLow">Low</option>
+                        <option value="medium" id="priorityMedium" selected>Medium</option>
+                        <option value="high" id="priorityHigh">High</option>
+                    </select>
+                </div>
+                <div class="repeat-days" id="repeatDays">
+                    <button class="repeat-day" data-day="0" type="button">Sun</button>
+                    <button class="repeat-day" data-day="1" type="button">Mon</button>
+                    <button class="repeat-day" data-day="2" type="button">Tue</button>
+                    <button class="repeat-day" data-day="3" type="button">Wed</button>
+                    <button class="repeat-day" data-day="4" type="button">Thu</button>
+                    <button class="repeat-day" data-day="5" type="button">Fri</button>
+                    <button class="repeat-day" data-day="6" type="button">Sat</button>
+                </div>
+            </div>
+
+            <div class="selected-day" id="selectedDayText"></div>
+            <div id="taskList"></div>
         </section>
 
 
@@ -3117,6 +2793,30 @@
                 <input class="auth-input" id="sessionDurationInput" type="number" placeholder="Duration (minutes)" style="margin-bottom:10px;">
                 <input class="auth-input" id="sessionDateInput" type="date" style="margin-bottom:10px;">
                 <button class="auth-button" id="saveStudySessionBtn">Save Session</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Subject Name Modal (Replaces blocked prompt on iOS PWA) -->
+    <div class="auth-overlay" id="subjectModalOverlay">
+        <div id="authCard">
+            <button class="close-auth" type="button" onclick="document.getElementById('subjectModalOverlay').classList.remove('active')">×</button>
+            <h2 id="addSubjectTitleText">Subject</h2>
+            <div style="margin-top:15px;">
+                <input class="auth-input" id="subjectNameInput" type="text" placeholder="Subject name" style="margin-bottom:10px;" autocomplete="off">
+                <button class="auth-button" id="saveSubjectBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Subject Modal (Replaces blocked confirm on iOS PWA) -->
+    <div class="auth-overlay" id="confirmDeleteModalOverlay">
+        <div id="authCard">
+            <button class="close-auth" type="button" onclick="document.getElementById('confirmDeleteModalOverlay').classList.remove('active')">×</button>
+            <h2 id="confirmDeleteTitleText">Delete Subject</h2>
+            <div style="margin-top:15px;">
+                <p style="margin-bottom:15px; color:#888;" id="confirmDeleteDescText">Are you sure?</p>
+                <button class="danger-button" id="confirmDeleteBtn">Delete</button>
             </div>
         </div>
     </div>
@@ -4478,14 +4178,23 @@
             let greeting = "Good evening";
             if (hours < 12) greeting = "Good morning";
             else if (hours < 17) greeting = "Good afternoon";
+            
+            let username = t("guest");
+            const profileUserText = document.getElementById("profileUsername")?.textContent;
+            if (profileUserText && profileUserText !== t("notSignedIn")) {
+                username = profileUserText;
+            }
 
-            const dashGreeting = document.getElementById("dashGreeting");
-            if (dashGreeting) dashGreeting.textContent = greeting;
+            const dashGreetingFull = document.getElementById("dashGreetingFull");
+            if (dashGreetingFull) dashGreetingFull.textContent = `${greeting}, ${username}`;
 
             const dateStr = formatDateKey(getTodayKey());
-            document.getElementById("date").textContent = dateStr;
-            const dashDate = document.getElementById("dashDate");
-            if (dashDate) dashDate.textContent = dateStr;
+            const dashDateMinimal = document.getElementById("dashDateMinimal");
+            if (dashDateMinimal) dashDateMinimal.textContent = dateStr;
+            
+            // Legacy element for compat
+            const dateEl = document.getElementById("date");
+            if (dateEl) dateEl.textContent = dateStr;
         }
 
 
@@ -4654,7 +4363,11 @@
             const sGoalBtn = document.getElementById("saveStudyGoalBtn");
             const sDurInp = document.getElementById("sessionDurationInput");
             const sSesBtn = document.getElementById("saveStudySessionBtn");
-            const dashStudyTitle = document.getElementById("dashStudyTitleText");
+            
+            const subjNameInp = document.getElementById("subjectNameInput");
+            const confDelDesc = document.getElementById("confirmDeleteDescText");
+            const saveSubBtn = document.getElementById("saveSubjectBtn");
+            const confDelBtn = document.getElementById("confirmDeleteBtn");
 
             if (sGoalTitle) sGoalTitle.textContent = t("studyGoalTitle");
             if (sSubTitle) sSubTitle.textContent = t("mySubjects");
@@ -4670,7 +4383,11 @@
             if (sGoalBtn) sGoalBtn.textContent = t("save");
             if (sDurInp) sDurInp.placeholder = t("durationMinutes");
             if (sSesBtn) sSesBtn.textContent = t("saveSession");
-            if (dashStudyTitle) dashStudyTitle.textContent = t("studyTab").replace("📚 ", "📚 "); // ensuring emoji presence
+            
+            if (subjNameInp) subjNameInp.placeholder = t("enterSubjectName").replace(":","");
+            if (confDelDesc) confDelDesc.textContent = t("confirmDeleteSubject");
+            if (saveSubBtn) saveSubBtn.textContent = t("save");
+            if (confDelBtn) confDelBtn.textContent = t("delete");
             
             updateStepsDisplay();
             renderDailyQuote();
@@ -5095,6 +4812,8 @@
                     "profileEmail"
                 ).textContent =
                     email;
+                    
+                updateDate();
 
 
                 document.getElementById(
@@ -5284,6 +5003,8 @@
                     "profileEmail"
                 ).textContent =
                     result.user.email || "";
+                    
+                updateDate();
 
 
                 document.getElementById(
@@ -5519,6 +5240,7 @@
                         startTaskListener();
                         startStepsListener();
                         startStudyListeners();
+                        updateDate();
 
                     } catch (error) {
 
@@ -5553,6 +5275,7 @@
                         startTaskListener();
                         startStepsListener();
                         startStudyListeners();
+                        updateDate();
                     }
 
 
@@ -5597,6 +5320,7 @@
                     refreshTasks();
                     renderStudy();
                     renderCalendar();
+                    updateDate();
 
                 }
 
@@ -5715,7 +5439,7 @@
 
         /* NAVIGATION */
 
-        function showSection(id) {
+        window.showSection = function(id) {
 
             document
                 .querySelectorAll(
@@ -5767,6 +5491,8 @@
                     "active"
                 );
             }
+            
+            window.scrollTo(0,0);
         }
 
 
@@ -6014,20 +5740,17 @@
                     t("stepsToday");
             }
             
-            // DASHBOARD UPDATE
-            const dashActivityText = document.getElementById("dashActivityText");
-            const dashActivityScore = document.getElementById("dashActivityScore");
-
-            if (dashActivityText && dashActivityScore) {
+            // DASHBOARD UPDATE MINIMAL
+            const minimalActivityText = document.getElementById("minimalActivityText");
+            if (minimalActivityText) {
                 if (todaySteps === null) {
-                    dashActivityText.textContent = "Steps haven't synced yet.";
-                    dashActivityScore.textContent = "Not started";
+                    minimalActivityText.textContent = "No data";
                 } else {
-                    const goal = pushSettings.stepGoal || 10000;
-                    dashActivityText.textContent = `${todaySteps.toLocaleString()} / ${goal.toLocaleString()} steps`;
-                    dashActivityScore.textContent = todaySteps.toLocaleString();
+                    minimalActivityText.textContent = `${todaySteps.toLocaleString()} steps`;
                 }
             }
+            
+            updateDashboardProgress();
         }
 
 
@@ -6451,32 +6174,65 @@
         
         function updateDashboardProgress() {
             const tasks = getTasksForDate(getActiveTasksSource(), getTodayKey());
-            const total = tasks.length;
-            const done = tasks.filter(task => isTaskCompletedOnDate(task, getTodayKey())).length;
-            const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+            const totalTasks = tasks.length;
+            const doneTasks = tasks.filter(task => isTaskCompletedOnDate(task, getTodayKey())).length;
+            
+            const isGuest = !currentUser;
+            const activeGoal = isGuest ? guestStudyGoal : studyGoal;
+            const activeSessions = isGuest ? guestStudySessions : studySessions;
+            const todaySessions = activeSessions.filter(s => s.date === getTodayKey());
+            const completedMins = todaySessions.reduce((sum, s) => sum + Number(s.duration), 0);
+            
+            let totalWeight = 0;
+            let earnedWeight = 0;
+            
+            if (totalTasks > 0) {
+                totalWeight += 100;
+                earnedWeight += (doneTasks / totalTasks) * 100;
+            }
+            if (activeGoal > 0) {
+                totalWeight += 100;
+                earnedWeight += Math.min(100, (completedMins / activeGoal) * 100);
+            }
+            
+            const overallPercent = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0;
+            
+            const dashMinimalPercent = document.getElementById("dashMinimalPercent");
+            const dashMinimalFill = document.getElementById("dashMinimalProgressFill");
+            if (dashMinimalPercent) dashMinimalPercent.textContent = overallPercent + "%";
+            if (dashMinimalFill) dashMinimalFill.style.width = overallPercent + "%";
 
-            const dashPercent = document.getElementById("dashProgressPercent");
-            const dashFill = document.getElementById("dashProgressFill");
-            const dashTasks = document.getElementById("dashTasksScore");
-            const dashTasksTitle = document.getElementById("dashTasksCompleted");
+            const minTasksText = document.getElementById("minimalTasksText");
+            if (minTasksText) minTasksText.textContent = `${doneTasks} / ${totalTasks}`;
 
-            if (dashPercent) dashPercent.textContent = percent + "%";
-            if (dashFill) dashFill.style.width = percent + "%";
-            if (dashTasks) dashTasks.textContent = `${done}/${total}`;
-            if (dashTasksTitle) dashTasksTitle.textContent = `${done} of ${total} completed`;
-
-            // ⚡ What should I do now?
-            const nextActionText = document.getElementById("nextActionText");
-            const viewTaskBtn = document.getElementById("viewTaskButton");
-            if (nextActionText && viewTaskBtn) {
+            // NEXT UP LOGIC
+            const nextUpIcon = document.getElementById("dashNextUpIcon");
+            const nextUpText = document.getElementById("dashNextUpText");
+            if (nextUpIcon && nextUpText) {
+                const now = new Date();
+                const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                let nextPrayer = null;
+                for (const [name, time] of Object.entries(prayerTimes)) {
+                    if (timeStrToSeconds(time) > currentSeconds) {
+                        nextPrayer = { name, time };
+                        break;
+                    }
+                }
+                
                 const incompleteTask = tasks.find(task => !isTaskCompletedOnDate(task, getTodayKey()));
-                if (incompleteTask) {
-                    nextActionText.textContent = "Finish: " + incompleteTask.text;
-                    viewTaskBtn.style.display = "inline-block";
-                    viewTaskBtn.onclick = () => { document.getElementById("taskInput").focus(); };
+                
+                if (nextPrayer && (!incompleteTask || (timeStrToSeconds(nextPrayer.time) - currentSeconds < 3600))) {
+                    nextUpIcon.textContent = "🕌";
+                    nextUpText.textContent = `${t("prayer." + nextPrayer.name)} · ${nextPrayer.time}`;
+                } else if (incompleteTask) {
+                    nextUpIcon.textContent = "✅";
+                    nextUpText.textContent = incompleteTask.text;
+                } else if (activeGoal > completedMins) {
+                    nextUpIcon.textContent = "📚";
+                    nextUpText.textContent = `Study · ${activeGoal - completedMins} min left`;
                 } else {
-                    nextActionText.textContent = "🎉 You're all caught up!";
-                    viewTaskBtn.style.display = "none";
+                    nextUpIcon.textContent = "✨";
+                    nextUpText.textContent = "You're all caught up!";
                 }
             }
         }
@@ -8472,42 +8228,12 @@ document.documentElement.classList.toggle(
             }
 
 
-            document.getElementById(
-                "nextName"
-            ).textContent =
-                t(
-                    "prayer." +
-                    next[0]
-                );
-
-
-            document.getElementById(
-                "nextTime"
-            ).textContent =
-                next[1];
-
-
-            const countdownElement =
-                document.getElementById(
-                    "nextCountdown"
-                );
-
-
-            if (countdownElement) {
-
-                const remaining = next[2];
-
-                const rh = Math.floor(remaining / 3600);
-                const rm = Math.floor((remaining % 3600) / 60);
-                const rs = remaining % 60;
-
-                countdownElement.textContent =
-                    String(rh).padStart(2, "0") + ":" +
-                    String(rm).padStart(2, "0") + ":" +
-                    String(rs).padStart(2, "0");
+            const minimalPrayerText = document.getElementById("minimalPrayerText");
+            if (minimalPrayerText) {
+                minimalPrayerText.textContent = `${t("prayer." + next[0])} · ${next[1]}`;
             }
             
-            // DASHBOARD UPDATE
+            // Legacy elements kept to not break logic loop below
             const dashNextName = document.getElementById("dashNextPrayerName");
             const dashNextTime = document.getElementById("dashNextPrayerTime");
             const dashNextCount = document.getElementById("dashNextPrayerCountdown");
@@ -8523,6 +8249,11 @@ document.documentElement.classList.toggle(
                 dashNextCount.textContent = String(rh).padStart(2, "0") + ":" + String(rm).padStart(2, "0") + ":" + String(rs).padStart(2, "0");
                 const dashPrayerScore = document.getElementById("dashPrayerScore");
                 if (dashPrayerScore) dashPrayerScore.textContent = "Active"; 
+            }
+            
+            // Ensure next up card runs fresh
+            if (typeof updateDashboardProgress === "function") {
+                updateDashboardProgress();
             }
         }
 
@@ -9050,10 +8781,6 @@ document.documentElement.classList.toggle(
                 if (status) status.textContent = "Couldn't reach notification server: " + e.message;
             }
         });
-        
-        // Setup initial Dashboard Listeners
-        document.getElementById("dashViewPrayersBtn")?.addEventListener("click", () => showSection("prayers"));
-        document.getElementById("dashSetStudyBtn")?.addEventListener("click", () => showSection("study"));
 
         /* ==========================================================================
            STUDY SYSTEM
@@ -9069,6 +8796,9 @@ document.documentElement.classList.toggle(
         let guestStudyGoal = parseInt(localStorage.getItem("dailykrd_guest_study_goal")) || 60;
         let guestStudySubjects = JSON.parse(localStorage.getItem("dailykrd_guest_study_subjects") || "[]");
         let guestStudySessions = JSON.parse(localStorage.getItem("dailykrd_guest_study_sessions") || "[]");
+        
+        let editingSubjectId = null;
+        let deletingSubjectId = null;
 
         function stopStudyListeners() {
             if (unsubscribeStudySettings) unsubscribeStudySettings();
@@ -9185,28 +8915,12 @@ document.documentElement.classList.toggle(
                 }
             }
 
-            // 4. Update Today Dashboard Connection
-            updateDashboardStudyCard(activeGoal, completedMins, progressPercent);
-        }
-
-        function updateDashboardStudyCard(goal, completed, percent) {
-            const dashContent = document.getElementById("dashStudyCardContent");
-            const dashBtn = document.getElementById("dashSetStudyBtn");
-            if (!dashContent || !dashBtn) return;
-
-            if (goal > 0 && (completed > 0 || goal !== 60 || currentUser || guestStudyGoal)) {
-                dashContent.innerHTML = `
-                    <div style="font-size:20px; font-weight:800; margin-bottom:6px;">${completed} / ${goal} ${t("minutes")}</div>
-                    <div class="dashboard-progress-bar" style="margin-bottom:8px;">
-                        <div class="dashboard-progress-fill" style="width: ${percent}%;"></div>
-                    </div>
-                    <div style="font-size:14px; font-weight:650; color:#888; margin-bottom:14px;">${percent}% ${t("complete")}</div>
-                `;
-                dashBtn.textContent = t("goToStudy");
-            } else {
-                dashContent.innerHTML = `<div class="dashboard-text-medium" style="margin-bottom:14px;">${t("noStudyGoalYet")}</div>`;
-                dashBtn.textContent = t("setStudyGoal");
+            // 4. Update Today Dashboard Minimal
+            const minimalStudyText = document.getElementById("minimalStudyText");
+            if (minimalStudyText) {
+                minimalStudyText.textContent = `${completedMins} / ${activeGoal} ${t("minutes")}`;
             }
+            updateDashboardProgress();
         }
 
         // --- Goal Handlers ---
@@ -9240,293 +8954,4 @@ document.documentElement.classList.toggle(
                 localStorage.setItem("dailykrd_guest_study_goal", guestStudyGoal);
                 renderStudy();
             } else {
-                await setDoc(doc(db, "users", currentUser.uid, "study_settings", "config"), { goal: newGoal }, { merge: true });
-            }
-            document.getElementById("goalModalOverlay").classList.remove("active");
-        });
-
-        // --- Subject Handlers ---
-        document.getElementById("addStudySubjectBtn")?.addEventListener("click", async () => {
-            const name = prompt(t("enterSubjectName"));
-            if (!name || !name.trim()) return;
-
-            const newSub = {
-                id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-                name: name.trim(),
-                createdAt: Date.now()
-            };
-
-            if (!currentUser) {
-                guestStudySubjects.push(newSub);
-                localStorage.setItem("dailykrd_guest_study_subjects", JSON.stringify(guestStudySubjects));
-                renderStudy();
-            } else {
-                await setDoc(doc(db, "users", currentUser.uid, "study_subjects", newSub.id), newSub);
-            }
-        });
-
-        window.renameSubject = async function(id, oldName) {
-            const newName = prompt(t("enterSubjectName"), oldName);
-            if (!newName || !newName.trim() || newName.trim() === oldName) return;
-
-            if (!currentUser) {
-                const idx = guestStudySubjects.findIndex(s => s.id === id);
-                if (idx > -1) {
-                    guestStudySubjects[idx].name = newName.trim();
-                    localStorage.setItem("dailykrd_guest_study_subjects", JSON.stringify(guestStudySubjects));
-                    renderStudy();
-                }
-            } else {
-                await updateDoc(doc(db, "users", currentUser.uid, "study_subjects", id), { name: newName.trim() });
-            }
-        };
-
-        window.deleteSubject = async function(id) {
-            if (!confirm(t("confirmDeleteSubject"))) return;
-
-            if (!currentUser) {
-                guestStudySubjects = guestStudySubjects.filter(s => s.id !== id);
-                localStorage.setItem("dailykrd_guest_study_subjects", JSON.stringify(guestStudySubjects));
-                renderStudy();
-            } else {
-                await deleteDoc(doc(db, "users", currentUser.uid, "study_subjects", id));
-            }
-        };
-
-        // --- Session Handlers ---
-        document.getElementById("addStudySessionBtn")?.addEventListener("click", () => {
-            const activeSubs = currentUser ? studySubjects : guestStudySubjects;
-            if (activeSubs.length === 0) {
-                alert(t("noSubjectsDesc"));
-                return;
-            }
-
-            const select = document.getElementById("sessionSubjectSelect");
-            select.innerHTML = "";
-            activeSubs.forEach(sub => {
-                const opt = document.createElement("option");
-                opt.value = sub.id;
-                opt.textContent = sub.name;
-                select.appendChild(opt);
-            });
-
-            document.getElementById("sessionDurationInput").value = "30";
-            document.getElementById("sessionDateInput").value = getTodayKey();
-            document.getElementById("sessionModalOverlay").classList.add("active");
-        });
-
-        document.getElementById("saveStudySessionBtn")?.addEventListener("click", async () => {
-            const subjectId = document.getElementById("sessionSubjectSelect").value;
-            const duration = parseInt(document.getElementById("sessionDurationInput").value);
-            const dateStr = document.getElementById("sessionDateInput").value || getTodayKey();
-
-            if (!subjectId || !duration || duration < 1) return;
-
-            const newSes = {
-                id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-                subjectId,
-                duration,
-                date: dateStr,
-                createdAt: Date.now()
-            };
-
-            if (!currentUser) {
-                guestStudySessions.push(newSes);
-                localStorage.setItem("dailykrd_guest_study_sessions", JSON.stringify(guestStudySessions));
-                renderStudy();
-            } else {
-                await setDoc(doc(db, "users", currentUser.uid, "study_sessions", newSes.id), newSes);
-            }
-            document.getElementById("sessionModalOverlay").classList.remove("active");
-        });
-
-
-        /* START */
-
-        applyTheme();
-
-        if (!currentLanguage) {
-
-            currentLanguage =
-                "en";
-
-
-            document.getElementById(
-                "languageOverlay"
-            ).style.display =
-                "flex";
-        }
-
-
-        applyLanguage();
-
-
-        document.getElementById(
-            "taskDateInput"
-        ).value =
-            selectedDate;
-
-
-        if (
-            !localStorage.getItem(
-                "dailykrd_welcomed"
-            )
-        ) {
-
-            document.getElementById(
-                "welcomeScreen"
-            ).style.display =
-                "flex";
-        }
-
-
-        syncThemeColorMeta();
-
-
-        renderCalendar();
-
-        loadPrayerTimes();
-
-        updateStats();
-
-        checkIOSNotificationEnvironment();
-        
-        renderPushSettingsUI();
-        
-        // Initial sync of settings to worker
-        if (pushSettings.masterEnabled) {
-            syncPushPreferences();
-        }
-
-        requestAnimationFrame(() => {
-
-            document.documentElement.classList.add("app-ready");
-
-            setTimeout(() => {
-
-                const loader = document.getElementById("bootLoader");
-
-                if (loader) loader.remove();
-
-            }, 300);
-
-        });
-
-
-        /* SERVICE WORKER */
-
-        if (
-            "serviceWorker" in navigator
-        ) {
-
-            window.addEventListener(
-                "load",
-                () => {
-
-                    navigator.serviceWorker
-                        .register(
-                            "./sw.js"
-                        )
-                        .catch(
-                            error => {
-
-                                console.warn(
-                                    "Service worker registration failed:",
-                                    error
-                                );
-
-                            }
-                        );
-
-                }
-            );
-        }
-
-    </script>
-
-    <!-- DAILY AI -->
-
-    <button id="aiToggle" type="button" aria-label="Daily AI">💬</button>
-
-    <div id="aiBox">
-        <div id="aiMessages"></div>
-
-        <div id="aiImagePreviewWrap">
-            <img id="aiImagePreviewThumb" alt="Selected image preview" />
-            <button type="button" id="aiImageRemoveBtn" aria-label="Remove image" title="Remove image">✕</button>
-        </div>
-
-        <div class="aiInput">
-            <input
-                type="file"
-                id="aiImageFileInput"
-                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                hidden
-            />
-            <button
-                type="button"
-                class="aiImageBtn"
-                id="aiImageBtn"
-                aria-label="Add image"
-                title="Add image"
-            >📷</button>
-            <input
-                id="aiInput"
-                type="text"
-                placeholder="Ask Daily AI..."
-            />
-            <button type="button" onclick="sendAI()">➤</button>
-        </div>
-    </div>
-
-    <script>
-        const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_HISTORY_LIMIT = 10;
-        const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
-
-        function aiEscape(str) {
-            const div = document.createElement("div");
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        function aiLoadHistory() {
-            try {
-                const raw = sessionStorage.getItem(AI_HISTORY_STORAGE_KEY);
-                return raw ? JSON.parse(raw) : [];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function aiSaveHistory(history) {
-            try {
-                sessionStorage.setItem(
-                    AI_HISTORY_STORAGE_KEY,
-                    JSON.stringify(history)
-                );
-            } catch (e) {
-                /* storage unavailable — ignore, chat still works */
-            }
-        }
-
-        let aiConversationHistory = aiLoadHistory();
-
-        function aiSetInputDisabled(disabled) {
-            const input = document.getElementById("aiInput");
-            const sendBtn = document.querySelector("#aiBox .aiInput button");
-            const imageBtn = document.getElementById("aiImageBtn");
-            input.disabled = disabled;
-            if (sendBtn) sendBtn.disabled = disabled;
-            if (imageBtn) imageBtn.disabled = disabled;
-        }
-
-        // =====================================================
-        // IMAGE UPLOAD / PREVIEW
-        // =====================================================
-
-        const AI_MAX_IMAGE_SOURCE_BYTES = 15 * 1024 * 1024;
-        const AI_IMAGE_DIRECT_THRESHOLD_BYTES = 300 * 1024;
-        const AI_IMAGE_MAX_DIMENSION = 1600;
-        const AI_IMAGE_JPEG_QUALITY = 0.82;
-        Sorry, something went wrong. Please try your request again.
+                await setDoc(I seem to be encountering an error. Can I try something else for you?
