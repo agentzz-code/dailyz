@@ -673,17 +673,6 @@
             font-size: 16px;
             font-weight: 650;
         }
-        
-        .study-subject-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.03);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-        }
-        .dark .study-subject-item { background: rgba(255,255,255,0.05); }
 
         /* STREAK + PROGRESS RING (Legacy DOM references) */
 
@@ -1983,12 +1972,10 @@
                 <button class="setting-button" id="dashViewPrayersBtn" style="width:100%;">View prayers →</button>
             </div>
 
-            <!-- 4. STUDY DASHBOARD CARD -->
+            <!-- 4. STUDY -->
             <div class="dashboard-card">
-                <div class="dashboard-title" id="dashStudyTitleText">📚 Study</div>
-                <div id="dashStudyCardContent">
-                    <div class="dashboard-text-medium" style="margin-bottom:14px;" id="dashStudyText">No study goal yet.</div>
-                </div>
+                <div class="dashboard-title">📚 Study</div>
+                <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
                 <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
             </div>
 
@@ -2372,35 +2359,145 @@
         </section>
 
 
-        <!-- STUDY SYSTEM -->
+        <!-- STUDY -->
 
         <section
             class="section"
             id="study"
         >
-            <div class="dashboard-card">
-                <div class="dashboard-title"><span id="studyGoalTitleText">📚 Today's Study Goal</span></div>
-                <div class="dashboard-text-large" id="studyProgressMainText">0 / 60 min</div>
-                <div class="dashboard-progress-bar" style="margin-top:8px;">
-                    <div class="dashboard-progress-fill" id="studyMainProgressFill" style="width: 0%;"></div>
-                </div>
-                <div class="dashboard-flex-row" style="margin-top:8px; margin-bottom:0;">
-                    <div style="font-size:14px; font-weight:650;" id="studyStatusMainText">0% complete</div>
-                    <button class="setting-button dark" id="editStudyGoalBtn" style="padding:6px 12px; font-size:12px;">Edit Goal</button>
-                </div>
+
+            <div class="settings-title">
+                📚 Study
             </div>
 
-            <div class="dashboard-card">
-                <div class="dashboard-title"><span id="studySubjectsTitleText">📖 My Subjects</span></div>
-                <div id="studySubjectsList"></div>
-                <button class="setting-button" id="addStudySubjectBtn" style="width:100%; margin-top:10px;">+ Add Subject</button>
+            <div class="settings-subtitle" id="studySubtitle">
+                Organize your subjects and topics.
             </div>
 
-            <div class="dashboard-card">
-                <div class="dashboard-title"><span id="studySessionsTitleText">⏱️ Study Sessions</span></div>
-                <div id="studySessionsList"></div>
-                <button class="setting-button" id="addStudySessionBtn" style="width:100%; margin-top:10px;">+ Add Study Session</button>
+            <!-- MY SUBJECTS CARD -->
+
+            <div class="settings-card">
+
+                <div class="settings-card-title">
+                    My Subjects
+                </div>
+
+                <div id="subjectsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                </div>
+
+                <button
+                    class="setting-button"
+                    id="addSubjectBtn"
+                    type="button"
+                    style="width: 100%; background-color: var(--accent); color: var(--accent-contrast); border: none;"
+                >
+                    + Add Subject
+                </button>
+
             </div>
+
+            <!-- ADD SUBJECT MODAL -->
+
+            <div
+                id="addSubjectModal"
+                style="
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    z-index: 1000;
+                    background: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(4px);
+                    align-items: center;
+                    justify-content: center;
+                "
+            >
+
+                <div
+                    style="
+                        background: var(--bg);
+                        border-radius: 18px;
+                        padding: 24px;
+                        width: min(90vw, 400px);
+                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+                    "
+                >
+
+                    <div
+                        style="
+                            font-size: 18px;
+                            font-weight: 600;
+                            margin-bottom: 16px;
+                            color: var(--text);
+                        "
+                    >
+                        Add New Subject
+                    </div>
+
+                    <input
+                        type="text"
+                        id="subjectNameInput"
+                        placeholder="Subject name (e.g., Physics, Biology)"
+                        style="
+                            width: 100%;
+                            padding: 12px;
+                            border: 1px solid var(--border);
+                            border-radius: 10px;
+                            background: var(--input-bg);
+                            color: var(--text);
+                            font-size: 16px;
+                            box-sizing: border-box;
+                            margin-bottom: 16px;
+                        "
+                    />
+
+                    <div
+                        style="
+                            display: flex;
+                            gap: 10px;
+                            justify-content: flex-end;
+                        "
+                    >
+
+                        <button
+                            id="cancelSubjectBtn"
+                            type="button"
+                            style="
+                                padding: 10px 16px;
+                                border: 1px solid var(--border);
+                                border-radius: 10px;
+                                background: transparent;
+                                color: var(--text);
+                                cursor: pointer;
+                                font-size: 14px;
+                                font-weight: 500;
+                            "
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            id="saveSubjectBtn"
+                            type="button"
+                            style="
+                                padding: 10px 16px;
+                                border: none;
+                                border-radius: 10px;
+                                background: var(--accent);
+                                color: var(--accent-contrast);
+                                cursor: pointer;
+                                font-size: 14px;
+                                font-weight: 600;
+                            "
+                        >
+                            Save
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </section>
 
 
@@ -3086,40 +3183,6 @@
 
     </div>
 
-    <!-- STUDY MODALS -->
-    
-    <!-- Edit Goal Modal -->
-    <div class="auth-overlay" id="goalModalOverlay">
-        <div id="authCard">
-            <button class="close-auth" type="button" onclick="document.getElementById('goalModalOverlay').classList.remove('active')">×</button>
-            <h2 id="editGoalTitleText">Daily Goal</h2>
-            <div style="margin-top:15px;">
-                <select class="priority-select" id="studyGoalSelect" style="margin-bottom:10px;">
-                    <option value="30">30 min</option>
-                    <option value="60">60 min</option>
-                    <option value="90">90 min</option>
-                    <option value="120">120 min</option>
-                    <option value="custom" id="customGoalOptText">Custom</option>
-                </select>
-                <input class="auth-input" id="customStudyGoalInput" type="number" placeholder="Custom minutes" style="display:none; margin-bottom:10px;">
-                <button class="auth-button" id="saveStudyGoalBtn">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Session Modal -->
-    <div class="auth-overlay" id="sessionModalOverlay">
-        <div id="authCard">
-            <button class="close-auth" type="button" onclick="document.getElementById('sessionModalOverlay').classList.remove('active')">×</button>
-            <h2 id="addSessionTitleText">Add Session</h2>
-            <div style="margin-top:15px;">
-                <select class="priority-select" id="sessionSubjectSelect" style="margin-bottom:10px;"></select>
-                <input class="auth-input" id="sessionDurationInput" type="number" placeholder="Duration (minutes)" style="margin-bottom:10px;">
-                <input class="auth-input" id="sessionDateInput" type="date" style="margin-bottom:10px;">
-                <button class="auth-button" id="saveStudySessionBtn">Save Session</button>
-            </div>
-        </div>
-    </div>
 
     <!-- LANGUAGE -->
 
@@ -3292,6 +3355,7 @@
         let currentUser = null;
 
         let unsubscribeTasks = null;
+
         let unsubscribeSteps = null;
 
         let todaySteps = null;
@@ -3320,6 +3384,14 @@
                 ) || "[]"
             );
 
+        let guestSubjects =
+            JSON.parse(
+                localStorage.getItem(
+                    "dailykrd_guest_subjects"
+                ) || "[]"
+            );
+
+        let unsubscribeSubjects = null;
 
         /* TRANSLATIONS */
 
@@ -3580,32 +3652,6 @@
 
                 compassDenied:
                     "Compass permission was denied.",
-                    
-                studyGoalTitle: "📚 Today's Study Goal",
-                mySubjects: "📖 My Subjects",
-                studySessionsTitle: "⏱️ Study Sessions",
-                editGoal: "Edit Goal",
-                addSubject: "+ Add Subject",
-                addSession: "+ Add Study Session",
-                noSubjects: "📖 No subjects yet",
-                noSubjectsDesc: "Add a subject to start tracking your study.",
-                noSessions: "⏱️ No study sessions yet",
-                noSessionsDesc: "Complete your first session to see your progress here.",
-                studyGoalComplete: "🎉 Study goal complete!",
-                minutes: "min",
-                goToStudy: "Study →",
-                setStudyGoal: "Set study goal →",
-                noStudyGoalYet: "No study goal yet.",
-                rename: "Rename",
-                delete: "Delete",
-                enterSubjectName: "Enter subject name:",
-                confirmDeleteSubject: "Delete this subject?",
-                dailyGoal: "Daily Goal",
-                customMinutes: "Custom minutes",
-                save: "Save",
-                durationMinutes: "Duration (minutes)",
-                saveSession: "Save Session",
-                complete: "complete",
 
                 prayer: {
 
@@ -3885,32 +3931,6 @@
 
                 compassDenied:
                     "مۆڵەتی قوتوپاڵ ڕەتکرایەوە.",
-                    
-                studyGoalTitle: "📚 ئامانجی خوێندنی ئەمڕۆ",
-                mySubjects: "📖 بابەتەکانم",
-                studySessionsTitle: "⏱️ خولەکانی خوێندن",
-                editGoal: "گۆڕینی ئامانج",
-                addSubject: "+ زیادکردنی بابەت",
-                addSession: "+ زیادکردنی خول",
-                noSubjects: "📖 هیچ بابەتێک نییە",
-                noSubjectsDesc: "بابەتێک زیاد بکە بۆ دەستپێکردن.",
-                noSessions: "⏱️ هیچ خولێک نییە",
-                noSessionsDesc: "یەکەم خول تەواو بکە بۆ بینینی پێشکەوتن.",
-                studyGoalComplete: "🎉 ئامانجی خوێندن تەواو بوو!",
-                minutes: "خولەک",
-                goToStudy: "خوێندن ←",
-                setStudyGoal: "دانانی ئامانج ←",
-                noStudyGoalYet: "هیچ ئامانجێک نییە.",
-                rename: "گۆڕینی ناو",
-                delete: "سڕینەوە",
-                enterSubjectName: "ناوی بابەت بنووسە:",
-                confirmDeleteSubject: "ئەم بابەتە بسڕیتەوە؟",
-                dailyGoal: "ئامانجی ڕۆژانە",
-                customMinutes: "خولەکی دیاریکراو",
-                save: "پاشەکەوت",
-                durationMinutes: "ماوە (خولەک)",
-                saveSession: "پاشەکەوتنی خول",
-                complete: "تەواوبوو",
 
                 prayer: {
 
@@ -4190,32 +4210,6 @@
 
                 compassDenied:
                     "تم رفض إذن البوصلة.",
-
-                studyGoalTitle: "📚 هدف الدراسة اليوم",
-                mySubjects: "📖 موادي",
-                studySessionsTitle: "⏱️ جلسات الدراسة",
-                editGoal: "تعديل الهدف",
-                addSubject: "+ إضافة مادة",
-                addSession: "+ إضافة جلسة",
-                noSubjects: "📖 لا توجد مواد بعد",
-                noSubjectsDesc: "أضف مادة للبدء بتتبع دراستك.",
-                noSessions: "⏱️ لا توجد جلسات بعد",
-                noSessionsDesc: "أكمل جلستك الأولى لرؤية تقدمك هنا.",
-                studyGoalComplete: "🎉 اكتمل هدف الدراسة!",
-                minutes: "دقيقة",
-                goToStudy: "الدراسة ←",
-                setStudyGoal: "تحديد الهدف ←",
-                noStudyGoalYet: "لا يوجد هدف بعد.",
-                rename: "إعادة تسمية",
-                delete: "حذف",
-                enterSubjectName: "أدخل اسم المادة:",
-                confirmDeleteSubject: "هل تريد حذف هذه المادة؟",
-                dailyGoal: "الهدف اليومي",
-                customMinutes: "دقائق مخصصة",
-                save: "حفظ",
-                durationMinutes: "المدة (دقائق)",
-                saveSession: "حفظ الجلسة",
-                complete: "مكتمل",
 
                 prayer: {
 
@@ -4578,106 +4572,404 @@
                 language.direction;
 
 
-            document.getElementById("chooseLanguageText").textContent = t("chooseLanguage");
-            document.getElementById("welcomeSubtitle").textContent = t("welcomeSubtitle");
-            document.getElementById("welcomeSignIn").textContent = t("signIn");
-            document.getElementById("welcomeCreate").textContent = t("createAccount");
-            document.getElementById("welcomeGuest").textContent = t("continueGuest");
-            document.getElementById("authTitle").textContent = signUpMode ? t("authCreate") : t("authWelcome");
-            document.getElementById("authSubtitle").textContent = signUpMode ? t("authCreateSubtitle") : t("authLoginSubtitle");
-            document.getElementById("usernameInput").placeholder = t("username");
-            document.getElementById("emailInput").placeholder = t("email");
-            document.getElementById("passwordInput").placeholder = t("password");
-            document.getElementById("confirmPasswordInput").placeholder = t("confirmPassword");
-            document.getElementById("authButton").textContent = signUpMode ? t("createAccount") : t("signIn");
-            document.getElementById("switchText").textContent = signUpMode ? t("alreadyAccount") : t("noAccount");
-            document.getElementById("switchButton").textContent = signUpMode ? t("signIn") : t("signUp");
-            document.getElementById("tasksTab").textContent = t("tasks");
-            document.getElementById("calendarTab").textContent = t("calendar");
-            document.getElementById("prayersTab").textContent = t("prayers");
-            document.getElementById("studyTab").textContent = t("study");
-            document.getElementById("taskInput").placeholder = t("addTask");
-            document.getElementById("dateLabel").textContent = t("date");
-            document.getElementById("repeatLabel").textContent = t("repeat");
-            document.getElementById("repeatOnce").textContent = t("once");
-            document.getElementById("repeatDaily").textContent = t("daily");
-            document.getElementById("repeatWeekly").textContent = t("weekly");
-            document.getElementById("repeatCustom").textContent = t("custom");
-            document.getElementById("prayerTitle").textContent = t("prayerTimes");
-            document.getElementById("nextLabel").textContent = t("nextPrayer");
-            document.getElementById("settingsTitle").textContent = t("settings");
-            document.getElementById("settingsSubtitle").textContent = t("settingsSubtitle");
-            document.getElementById("accountTitle").textContent = t("account");
-            document.getElementById("appearanceTitle").textContent = t("appearance");
-            document.getElementById("darkModeLabel").textContent = t("darkMode");
-            document.getElementById("darkModeDescription").textContent = t("darkModeDescription");
-            document.getElementById("languageTitle").textContent = t("language");
-            document.getElementById("languageLabel").textContent = t("language");
-            document.getElementById("languageDescription").textContent = t("languageDescription");
-            document.getElementById("prayerSettingsTitle").textContent = t("prayerSettings");
-            document.getElementById("locationLabel").textContent = t("location");
-            document.getElementById("locationDescription").textContent = t("locationDescription");
-            document.getElementById("updateLocationButton").textContent = t("update");
-            document.getElementById("accountActionsTitle").textContent = t("accountActions");
-            document.getElementById("logoutButton").textContent = t("signOut");
-            document.getElementById("settingsLanguage").value = currentLanguage;
-            document.getElementById("selectedDayText").textContent = formatDateKey(selectedDate);
-            document.getElementById("calendarSelectedDay").textContent = formatDateKey(selectedDate);
-            document.getElementById("streakLabel").textContent = t("streakLabel");
-            document.getElementById("healthSyncTitle").textContent = t("healthSyncTitle");
-            document.getElementById("healthSyncLabel").textContent = t("healthSyncLabel");
-            document.getElementById("healthSyncDescription").textContent = t("healthSyncDescription");
-            document.getElementById("healthSyncKeyButton").textContent = t("healthSyncButton");
-            document.getElementById("scoreLabel").textContent = t("todaysScore");
-            document.getElementById("priorityLabel").textContent = t("priority");
-            document.getElementById("priorityLow").textContent = t("low");
-            document.getElementById("priorityMedium").textContent = t("medium");
-            document.getElementById("priorityHigh").textContent = t("high");
-            document.getElementById("qiblaTitle").textContent = t("qiblaTitle");
-            document.getElementById("qiblaHint").textContent = t("qiblaHint");
-            document.getElementById("locateMeLabel").textContent = t("locateMe");
-            document.getElementById("useErbilLabel").textContent = t("useErbil");
-            document.getElementById("enableCompassLabel").textContent = t("enableCompass");
+            document.getElementById(
+                "chooseLanguageText"
+            ).textContent =
+                t("chooseLanguage");
 
-            // Study specific text
-            const sGoalTitle = document.getElementById("studyGoalTitleText");
-            const sSubTitle = document.getElementById("studySubjectsTitleText");
-            const sSesTitle = document.getElementById("studySessionsTitleText");
-            const eGoalBtn = document.getElementById("editStudyGoalBtn");
-            const aSubBtn = document.getElementById("addStudySubjectBtn");
-            const aSesBtn = document.getElementById("addStudySessionBtn");
-            
-            const eGoalTitle = document.getElementById("editGoalTitleText");
-            const aSesModTitle = document.getElementById("addSessionTitleText");
-            const cGoalOpt = document.getElementById("customGoalOptText");
-            const cGoalInp = document.getElementById("customStudyGoalInput");
-            const sGoalBtn = document.getElementById("saveStudyGoalBtn");
-            const sDurInp = document.getElementById("sessionDurationInput");
-            const sSesBtn = document.getElementById("saveStudySessionBtn");
-            const dashStudyTitle = document.getElementById("dashStudyTitleText");
 
-            if (sGoalTitle) sGoalTitle.textContent = t("studyGoalTitle");
-            if (sSubTitle) sSubTitle.textContent = t("mySubjects");
-            if (sSesTitle) sSesTitle.textContent = t("studySessionsTitle");
-            if (eGoalBtn) eGoalBtn.textContent = t("editGoal");
-            if (aSubBtn) aSubBtn.textContent = t("addSubject");
-            if (aSesBtn) aSesBtn.textContent = t("addSession");
-            
-            if (eGoalTitle) eGoalTitle.textContent = t("dailyGoal");
-            if (aSesModTitle) aSesModTitle.textContent = t("addSession").replace("+ ","");
-            if (cGoalOpt) cGoalOpt.textContent = t("custom");
-            if (cGoalInp) cGoalInp.placeholder = t("customMinutes");
-            if (sGoalBtn) sGoalBtn.textContent = t("save");
-            if (sDurInp) sDurInp.placeholder = t("durationMinutes");
-            if (sSesBtn) sSesBtn.textContent = t("saveSession");
-            if (dashStudyTitle) dashStudyTitle.textContent = t("studyTab").replace("📚 ", "📚 "); // ensuring emoji presence
-            
+            document.getElementById(
+                "welcomeSubtitle"
+            ).textContent =
+                t("welcomeSubtitle");
+
+
+            document.getElementById(
+                "welcomeSignIn"
+            ).textContent =
+                t("signIn");
+
+
+            document.getElementById(
+                "welcomeCreate"
+            ).textContent =
+                t("createAccount");
+
+
+            document.getElementById(
+                "welcomeGuest"
+            ).textContent =
+                t("continueGuest");
+
+
+            document.getElementById(
+                "authTitle"
+            ).textContent =
+                signUpMode
+                    ? t("authCreate")
+                    : t("authWelcome");
+
+
+            document.getElementById(
+                "authSubtitle"
+            ).textContent =
+                signUpMode
+                    ? t("authCreateSubtitle")
+                    : t("authLoginSubtitle");
+
+
+            document.getElementById(
+                "usernameInput"
+            ).placeholder =
+                t("username");
+
+
+            document.getElementById(
+                "emailInput"
+            ).placeholder =
+                t("email");
+
+
+            document.getElementById(
+                "passwordInput"
+            ).placeholder =
+                t("password");
+
+
+            document.getElementById(
+                "confirmPasswordInput"
+            ).placeholder =
+                t("confirmPassword");
+
+
+            document.getElementById(
+                "authButton"
+            ).textContent =
+                signUpMode
+                    ? t("createAccount")
+                    : t("signIn");
+
+
+            document.getElementById(
+                "switchText"
+            ).textContent =
+                signUpMode
+                    ? t("alreadyAccount")
+                    : t("noAccount");
+
+
+            document.getElementById(
+                "switchButton"
+            ).textContent =
+                signUpMode
+                    ? t("signIn")
+                    : t("signUp");
+
+
+            document.getElementById(
+                "tasksTab"
+            ).textContent =
+                t("tasks");
+
+
+            document.getElementById(
+                "calendarTab"
+            ).textContent =
+                t("calendar");
+
+
+            document.getElementById(
+                "prayersTab"
+            ).textContent =
+                t("prayers");
+
+
+            document.getElementById(
+                "studyTab"
+            ).textContent =
+                t("study");
+
+
+            document.getElementById(
+                "taskInput"
+            ).placeholder =
+                t("addTask");
+
+
+            document.getElementById(
+                "dateLabel"
+            ).textContent =
+                t("date");
+
+
+            document.getElementById(
+                "repeatLabel"
+            ).textContent =
+                t("repeat");
+
+
+            document.getElementById(
+                "repeatOnce"
+            ).textContent =
+                t("once");
+
+
+            document.getElementById(
+                "repeatDaily"
+            ).textContent =
+                t("daily");
+
+
+            document.getElementById(
+                "repeatWeekly"
+            ).textContent =
+                t("weekly");
+
+
+            document.getElementById(
+                "repeatCustom"
+            ).textContent =
+                t("custom");
+
+
+            document.getElementById(
+                "prayerTitle"
+            ).textContent =
+                t("prayerTimes");
+
+
+            document.getElementById(
+                "nextLabel"
+            ).textContent =
+                t("nextPrayer");
+
+
+            document.getElementById(
+                "settingsTitle"
+            ).textContent =
+                t("settings");
+
+
+            document.getElementById(
+                "settingsSubtitle"
+            ).textContent =
+                t("settingsSubtitle");
+
+
+            document.getElementById(
+                "accountTitle"
+            ).textContent =
+                t("account");
+
+
+            document.getElementById(
+                "appearanceTitle"
+            ).textContent =
+                t("appearance");
+
+
+            document.getElementById(
+                "darkModeLabel"
+            ).textContent =
+                t("darkMode");
+
+
+            document.getElementById(
+                "darkModeDescription"
+            ).textContent =
+                t("darkModeDescription");
+
+
+            document.getElementById(
+                "languageTitle"
+            ).textContent =
+                t("language");
+
+
+            document.getElementById(
+                "languageLabel"
+            ).textContent =
+                t("language");
+
+
+            document.getElementById(
+                "languageDescription"
+            ).textContent =
+                t("languageDescription");
+
+
+            document.getElementById(
+                "prayerSettingsTitle"
+            ).textContent =
+                t("prayerSettings");
+
+
+            document.getElementById(
+                "locationLabel"
+            ).textContent =
+                t("location");
+
+
+            document.getElementById(
+                "locationDescription"
+            ).textContent =
+                t("locationDescription");
+
+
+            document.getElementById(
+                "updateLocationButton"
+            ).textContent =
+                t("update");
+
+
+            document.getElementById(
+                "accountActionsTitle"
+            ).textContent =
+                t("accountActions");
+
+
+            document.getElementById(
+                "logoutButton"
+            ).textContent =
+                t("signOut");
+
+
+            document.getElementById(
+                "settingsLanguage"
+            ).value =
+                currentLanguage;
+
+
+            document.getElementById(
+                "selectedDayText"
+            ).textContent =
+                formatDateKey(
+                    selectedDate
+                );
+
+
+            document.getElementById(
+                "calendarSelectedDay"
+            ).textContent =
+                formatDateKey(
+                    selectedDate
+                );
+
+
+            document.getElementById(
+                "streakLabel"
+            ).textContent =
+                t("streakLabel");
+
+
             updateStepsDisplay();
+
+
+            document.getElementById(
+                "healthSyncTitle"
+            ).textContent =
+                t("healthSyncTitle");
+
+
+            document.getElementById(
+                "healthSyncLabel"
+            ).textContent =
+                t("healthSyncLabel");
+
+
+            document.getElementById(
+                "healthSyncDescription"
+            ).textContent =
+                t("healthSyncDescription");
+
+
+            document.getElementById(
+                "healthSyncKeyButton"
+            ).textContent =
+                t("healthSyncButton");
+
+
+            document.getElementById(
+                "scoreLabel"
+            ).textContent =
+                t("todaysScore");
+
+
+            document.getElementById(
+                "priorityLabel"
+            ).textContent =
+                t("priority");
+
+
+            document.getElementById(
+                "priorityLow"
+            ).textContent =
+                t("low");
+
+
+            document.getElementById(
+                "priorityMedium"
+            ).textContent =
+                t("medium");
+
+
+            document.getElementById(
+                "priorityHigh"
+            ).textContent =
+                t("high");
+
+
+            document.getElementById(
+                "qiblaTitle"
+            ).textContent =
+                t("qiblaTitle");
+
+
+            document.getElementById(
+                "qiblaHint"
+            ).textContent =
+                t("qiblaHint");
+
+
+            document.getElementById(
+                "locateMeLabel"
+            ).textContent =
+                t("locateMe");
+
+
+            document.getElementById(
+                "useErbilLabel"
+            ).textContent =
+                t("useErbil");
+
+
+            document.getElementById(
+                "enableCompassLabel"
+            ).textContent =
+                t("enableCompass");
+
+
             renderDailyQuote();
+
+
             updateDate();
+
             renderCalendar();
+
             loadPrayerTimes();
-            if (typeof renderStudy === 'function') renderStudy();
+
+            loadSubjects();
+
+
+            if (currentUser) {
+
+                startTaskListener();
+
+            } else {
+
+                refreshTasks();
+
+            }
         }
 
 
@@ -5517,8 +5809,10 @@
 
 
                         startTaskListener();
+
+                        startSubjectListener();
+
                         startStepsListener();
-                        startStudyListeners();
 
                     } catch (error) {
 
@@ -5551,8 +5845,10 @@
 
 
                         startTaskListener();
+
+                        startSubjectListener();
+
                         startStepsListener();
-                        startStudyListeners();
                     }
 
 
@@ -5589,13 +5885,13 @@
 
 
                     stopTaskListener();
+
                     stopStepsListener();
-                    stopStudyListeners();
 
                     currentTasksCache = [];
 
                     refreshTasks();
-                    renderStudy();
+
                     renderCalendar();
 
                 }
@@ -5981,6 +6277,210 @@
                 );
         }
 
+
+        /* SUBJECT MANAGEMENT */
+
+        function getSubjectsCollection() {
+            return collection(db, "users", currentUser.uid, "subjects");
+        }
+
+        async function saveGuestSubjects() {
+            localStorage.setItem(
+                "dailykrd_guest_subjects",
+                JSON.stringify(guestSubjects)
+            );
+        }
+
+        async function migrateGuestSubjectsToAccount(uid) {
+            const raw = localStorage.getItem("dailykrd_guest_subjects");
+            if (!raw) return { migrated: 0 };
+
+            let guest;
+            try {
+                guest = JSON.parse(raw);
+            } catch (error) {
+                console.error("Guest subject parse error:", error);
+                return { migrated: 0 };
+            }
+
+            if (!Array.isArray(guest) || guest.length === 0) {
+                localStorage.removeItem("dailykrd_guest_subjects");
+                return { migrated: 0 };
+            }
+
+            try {
+                const subjectsRef = getSubjectsCollection();
+                for (const subject of guest) {
+                    const { id, ...subjectData } = subject;
+                    await addDoc(subjectsRef, subjectData);
+                }
+                localStorage.removeItem("dailykrd_guest_subjects");
+                guestSubjects = [];
+                return { migrated: guest.length };
+            } catch (error) {
+                console.error("Guest subject migration error:", error);
+                throw error;
+            }
+        }
+
+        function stopSubjectListener() {
+            if (unsubscribeSubjects) {
+                unsubscribeSubjects();
+                unsubscribeSubjects = null;
+            }
+        }
+
+        function startSubjectListener() {
+            stopSubjectListener();
+            if (!currentUser) return;
+
+            const subjectsRef = getSubjectsCollection();
+            unsubscribeSubjects = onSnapshot(
+                subjectsRef,
+                snapshot => {
+                    const subjects = [];
+                    snapshot.forEach(item => {
+                        subjects.push({
+                            id: item.id,
+                            ...item.data()
+                        });
+                    });
+                    subjects.sort(
+                        (a, b) =>
+                            (Number(a.createdAt) || 0) -
+                            (Number(b.createdAt) || 0)
+                    );
+                    renderSubjects(subjects);
+                },
+                error => {
+                    console.error("Subject listener error:", error);
+                }
+            );
+        }
+
+        function renderSubjects(subjects) {
+            const subjectsList = document.getElementById("subjectsList");
+            if (!subjectsList) return;
+
+            if (subjects.length === 0) {
+                subjectsList.innerHTML =
+                    '<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px;">No subjects yet. Add one to get started.</div>';
+                return;
+            }
+
+            subjectsList.innerHTML = subjects.map(subject => `
+                <div
+                    style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px;
+                        background: var(--input-bg);
+                        border-radius: 10px;
+                        border: 1px solid var(--border);
+                    "
+                >
+                    <div
+                        style="
+                            font-weight: 500;
+                            color: var(--text);
+                        "
+                    >
+                        ${subject.name || subject.title || 'Unnamed Subject'}
+                    </div>
+                    <button
+                        type="button"
+                        onclick="deleteSubject('${subject.id}')"
+                        style="
+                            background: transparent;
+                            border: none;
+                            color: #dc2626;
+                            cursor: pointer;
+                            font-size: 16px;
+                            padding: 4px 8px;
+                        "
+                    >
+                        ✕
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function loadSubjects() {
+            if (currentUser) {
+                startSubjectListener();
+            } else {
+                renderSubjects(guestSubjects);
+            }
+        }
+
+        async function addSubject(name) {
+            if (!name || name.trim() === "") return;
+
+            const subject = {
+                name: name.trim(),
+                createdAt: Date.now()
+            };
+
+            if (currentUser) {
+                try {
+                    const subjectsRef = getSubjectsCollection();
+                    await addDoc(subjectsRef, subject);
+                } catch (error) {
+                    console.error("Add subject error:", error);
+                    alert("Failed to add subject. Please try again.");
+                }
+            } else {
+                subject.id = Date.now().toString();
+                guestSubjects.push(subject);
+                await saveGuestSubjects();
+                renderSubjects(guestSubjects);
+            }
+        }
+
+        async function deleteSubject(subjectId) {
+            if (!confirm("Delete this subject?")) return;
+
+            if (currentUser) {
+                try {
+                    await deleteDoc(
+                        doc(db, "users", currentUser.uid, "subjects", subjectId)
+                    );
+                } catch (error) {
+                    console.error("Delete subject error:", error);
+                    alert("Failed to delete subject.");
+                }
+            } else {
+                guestSubjects = guestSubjects.filter(s => s.id !== subjectId);
+                await saveGuestSubjects();
+                renderSubjects(guestSubjects);
+            }
+        }
+
+        function showAddSubjectModal() {
+            const modal = document.getElementById("addSubjectModal");
+            const input = document.getElementById("subjectNameInput");
+            if (modal) {
+                modal.style.display = "flex";
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function hideAddSubjectModal() {
+            const modal = document.getElementById("addSubjectModal");
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function saveSubjectFromModal() {
+            const input = document.getElementById("subjectNameInput");
+            if (input) {
+                addSubject(input.value);
+                hideAddSubjectModal();
+            }
+        }
 
         /* STEP COUNTER (Apple Health sync) */
 
@@ -9055,291 +9555,31 @@ document.documentElement.classList.toggle(
         document.getElementById("dashViewPrayersBtn")?.addEventListener("click", () => showSection("prayers"));
         document.getElementById("dashSetStudyBtn")?.addEventListener("click", () => showSection("study"));
 
-        /* ==========================================================================
-           STUDY SYSTEM
-           ========================================================================== */
-
-        let studyGoal = 60;
-        let studySubjects = [];
-        let studySessions = [];
-        let unsubscribeStudySettings = null;
-        let unsubscribeStudySubjects = null;
-        let unsubscribeStudySessions = null;
-
-        let guestStudyGoal = parseInt(localStorage.getItem("dailykrd_guest_study_goal")) || 60;
-        let guestStudySubjects = JSON.parse(localStorage.getItem("dailykrd_guest_study_subjects") || "[]");
-        let guestStudySessions = JSON.parse(localStorage.getItem("dailykrd_guest_study_sessions") || "[]");
-
-        function stopStudyListeners() {
-            if (unsubscribeStudySettings) unsubscribeStudySettings();
-            if (unsubscribeStudySubjects) unsubscribeStudySubjects();
-            if (unsubscribeStudySessions) unsubscribeStudySessions();
-            unsubscribeStudySettings = null;
-            unsubscribeStudySubjects = null;
-            unsubscribeStudySessions = null;
-        }
-
-        function startStudyListeners() {
-            stopStudyListeners();
-            if (!currentUser) return;
-
-            unsubscribeStudySettings = onSnapshot(doc(db, "users", currentUser.uid, "study_settings", "config"), snapshot => {
-                if (snapshot.exists()) {
-                    studyGoal = snapshot.data().goal || 60;
-                } else {
-                    studyGoal = 60;
-                }
-                renderStudy();
-            });
-
-            unsubscribeStudySubjects = onSnapshot(collection(db, "users", currentUser.uid, "study_subjects"), snapshot => {
-                studySubjects = [];
-                snapshot.forEach(doc => studySubjects.push({ id: doc.id, ...doc.data() }));
-                renderStudy();
-            });
-
-            unsubscribeStudySessions = onSnapshot(collection(db, "users", currentUser.uid, "study_sessions"), snapshot => {
-                studySessions = [];
-                snapshot.forEach(doc => studySessions.push({ id: doc.id, ...doc.data() }));
-                renderStudy();
-            });
-        }
-
-        function renderStudy() {
-            const isGuest = !currentUser;
-            const activeGoal = isGuest ? guestStudyGoal : studyGoal;
-            const activeSubjects = isGuest ? guestStudySubjects : studySubjects;
-            const activeSessions = isGuest ? guestStudySessions : studySessions;
-
-            const today = getTodayKey();
-            const todaySessions = activeSessions.filter(s => s.date === today);
-            const completedMins = todaySessions.reduce((sum, s) => sum + Number(s.duration), 0);
-            const progressPercent = activeGoal > 0 ? Math.min(100, Math.round((completedMins / activeGoal) * 100)) : 0;
-
-            // 1. Update Study Section Header
-            const studyProgressText = document.getElementById("studyProgressMainText");
-            const studyProgressFill = document.getElementById("studyMainProgressFill");
-            const studyStatusText = document.getElementById("studyStatusMainText");
-            
-            if (studyProgressText) studyProgressText.textContent = `${completedMins} / ${activeGoal} ${t("minutes")}`;
-            if (studyProgressFill) studyProgressFill.style.width = `${progressPercent}%`;
-            
-            if (studyStatusText) {
-                if (completedMins >= activeGoal && activeGoal > 0) {
-                    studyStatusText.textContent = t("studyGoalComplete");
-                    studyStatusText.style.color = "var(--accent)";
-                } else {
-                    studyStatusText.textContent = `${progressPercent}% ${t("complete")}`;
-                    studyStatusText.style.color = "";
-                }
-            }
-
-            // 2. Update Subjects List
-            const subList = document.getElementById("studySubjectsList");
-            if (subList) {
-                subList.innerHTML = "";
-                if (activeSubjects.length === 0) {
-                    subList.innerHTML = `<div class="empty"><div style="font-size:16px; font-weight:700;">${t("noSubjects")}</div><div style="font-size:13px; margin-top:4px;">${t("noSubjectsDesc")}</div></div>`;
-                } else {
-                    activeSubjects.sort((a,b) => b.createdAt - a.createdAt).forEach(sub => {
-                        const subTotalMins = activeSessions.filter(s => s.subjectId === sub.id).reduce((sum, s) => sum + Number(s.duration), 0);
-                        const subDiv = document.createElement("div");
-                        subDiv.className = "study-subject-item";
-                        subDiv.innerHTML = `
-                            <div>
-                                <div style="font-weight:750; font-size:16px;">${sub.name}</div>
-                                <div style="font-size:12px; color:#888; margin-top:3px;">${subTotalMins} ${t("minutes")}</div>
-                            </div>
-                            <div style="display:flex; gap:6px;">
-                                <button class="setting-button" style="padding:6px; font-size:12px;" onclick="renameSubject('${sub.id}', '${sub.name}')">✏️</button>
-                                <button class="setting-button" style="padding:6px; font-size:12px;" onclick="deleteSubject('${sub.id}')">✕</button>
-                            </div>
-                        `;
-                        subList.appendChild(subDiv);
-                    });
-                }
-            }
-
-            // 3. Update Sessions List
-            const sesList = document.getElementById("studySessionsList");
-            if (sesList) {
-                sesList.innerHTML = "";
-                if (activeSessions.length === 0) {
-                    sesList.innerHTML = `<div class="empty"><div style="font-size:16px; font-weight:700;">${t("noSessions")}</div><div style="font-size:13px; margin-top:4px;">${t("noSessionsDesc")}</div></div>`;
-                } else {
-                    activeSessions.sort((a,b) => b.createdAt - a.createdAt).slice(0, 20).forEach(ses => {
-                        const subjectName = activeSubjects.find(s => s.id === ses.subjectId)?.name || "Unknown";
-                        const isToday = ses.date === getTodayKey();
-                        const displayDate = isToday ? t("today") : ses.date;
-                        const sesDiv = document.createElement("div");
-                        sesDiv.className = "study-subject-item";
-                        sesDiv.innerHTML = `
-                            <div>
-                                <div style="font-weight:750; font-size:15px;">📚 ${subjectName}</div>
-                                <div style="font-size:12px; color:#888; margin-top:3px;">${displayDate}</div>
-                            </div>
-                            <div style="font-weight:800;">${ses.duration} ${t("minutes")}</div>
-                        `;
-                        sesList.appendChild(sesDiv);
-                    });
-                }
-            }
-
-            // 4. Update Today Dashboard Connection
-            updateDashboardStudyCard(activeGoal, completedMins, progressPercent);
-        }
-
-        function updateDashboardStudyCard(goal, completed, percent) {
-            const dashContent = document.getElementById("dashStudyCardContent");
-            const dashBtn = document.getElementById("dashSetStudyBtn");
-            if (!dashContent || !dashBtn) return;
-
-            if (goal > 0 && (completed > 0 || goal !== 60 || currentUser || guestStudyGoal)) {
-                dashContent.innerHTML = `
-                    <div style="font-size:20px; font-weight:800; margin-bottom:6px;">${completed} / ${goal} ${t("minutes")}</div>
-                    <div class="dashboard-progress-bar" style="margin-bottom:8px;">
-                        <div class="dashboard-progress-fill" style="width: ${percent}%;"></div>
-                    </div>
-                    <div style="font-size:14px; font-weight:650; color:#888; margin-bottom:14px;">${percent}% ${t("complete")}</div>
-                `;
-                dashBtn.textContent = t("goToStudy");
-            } else {
-                dashContent.innerHTML = `<div class="dashboard-text-medium" style="margin-bottom:14px;">${t("noStudyGoalYet")}</div>`;
-                dashBtn.textContent = t("setStudyGoal");
-            }
-        }
-
-        // --- Goal Handlers ---
-        document.getElementById("editStudyGoalBtn")?.addEventListener("click", () => {
-            const goalInput = currentUser ? studyGoal : guestStudyGoal;
-            const select = document.getElementById("studyGoalSelect");
-            const customInput = document.getElementById("customStudyGoalInput");
-            
-            if (["30","60","90","120"].includes(String(goalInput))) {
-                select.value = String(goalInput);
-                customInput.style.display = "none";
-            } else {
-                select.value = "custom";
-                customInput.style.display = "block";
-                customInput.value = goalInput;
-            }
-            document.getElementById("goalModalOverlay").classList.add("active");
+        // Setup Subject Listeners
+        document.getElementById("addSubjectBtn")?.addEventListener("click", () => {
+            showAddSubjectModal();
         });
 
-        document.getElementById("studyGoalSelect")?.addEventListener("change", (e) => {
-            document.getElementById("customStudyGoalInput").style.display = e.target.value === "custom" ? "block" : "none";
+        document.getElementById("cancelSubjectBtn")?.addEventListener("click", () => {
+            hideAddSubjectModal();
         });
 
-        document.getElementById("saveStudyGoalBtn")?.addEventListener("click", async () => {
-            const selectVal = document.getElementById("studyGoalSelect").value;
-            let newGoal = selectVal === "custom" ? parseInt(document.getElementById("customStudyGoalInput").value) : parseInt(selectVal);
-            if (!newGoal || newGoal < 1) newGoal = 60;
-
-            if (!currentUser) {
-                guestStudyGoal = newGoal;
-                localStorage.setItem("dailykrd_guest_study_goal", guestStudyGoal);
-                renderStudy();
-            } else {
-                await setDoc(doc(db, "users", currentUser.uid, "study_settings", "config"), { goal: newGoal }, { merge: true });
-            }
-            document.getElementById("goalModalOverlay").classList.remove("active");
+        document.getElementById("saveSubjectBtn")?.addEventListener("click", () => {
+            saveSubjectFromModal();
         });
 
-        // --- Subject Handlers ---
-        document.getElementById("addStudySubjectBtn")?.addEventListener("click", async () => {
-            const name = prompt(t("enterSubjectName"));
-            if (!name || !name.trim()) return;
-
-            const newSub = {
-                id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-                name: name.trim(),
-                createdAt: Date.now()
-            };
-
-            if (!currentUser) {
-                guestStudySubjects.push(newSub);
-                localStorage.setItem("dailykrd_guest_study_subjects", JSON.stringify(guestStudySubjects));
-                renderStudy();
-            } else {
-                await setDoc(doc(db, "users", currentUser.uid, "study_subjects", newSub.id), newSub);
+        document.getElementById("subjectNameInput")?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                saveSubjectFromModal();
             }
         });
 
-        window.renameSubject = async function(id, oldName) {
-            const newName = prompt(t("enterSubjectName"), oldName);
-            if (!newName || !newName.trim() || newName.trim() === oldName) return;
-
-            if (!currentUser) {
-                const idx = guestStudySubjects.findIndex(s => s.id === id);
-                if (idx > -1) {
-                    guestStudySubjects[idx].name = newName.trim();
-                    localStorage.setItem("dailykrd_guest_study_subjects", JSON.stringify(guestStudySubjects));
-                    renderStudy();
-                }
-            } else {
-                await updateDoc(doc(db, "users", currentUser.uid, "study_subjects", id), { name: newName.trim() });
+        // Close modal on backdrop click
+        document.getElementById("addSubjectModal")?.addEventListener("click", (e) => {
+            if (e.target.id === "addSubjectModal") {
+                hideAddSubjectModal();
             }
-        };
-
-        window.deleteSubject = async function(id) {
-            if (!confirm(t("confirmDeleteSubject"))) return;
-
-            if (!currentUser) {
-                guestStudySubjects = guestStudySubjects.filter(s => s.id !== id);
-                localStorage.setItem("dailykrd_guest_study_subjects", JSON.stringify(guestStudySubjects));
-                renderStudy();
-            } else {
-                await deleteDoc(doc(db, "users", currentUser.uid, "study_subjects", id));
-            }
-        };
-
-        // --- Session Handlers ---
-        document.getElementById("addStudySessionBtn")?.addEventListener("click", () => {
-            const activeSubs = currentUser ? studySubjects : guestStudySubjects;
-            if (activeSubs.length === 0) {
-                alert(t("noSubjectsDesc"));
-                return;
-            }
-
-            const select = document.getElementById("sessionSubjectSelect");
-            select.innerHTML = "";
-            activeSubs.forEach(sub => {
-                const opt = document.createElement("option");
-                opt.value = sub.id;
-                opt.textContent = sub.name;
-                select.appendChild(opt);
-            });
-
-            document.getElementById("sessionDurationInput").value = "30";
-            document.getElementById("sessionDateInput").value = getTodayKey();
-            document.getElementById("sessionModalOverlay").classList.add("active");
         });
-
-        document.getElementById("saveStudySessionBtn")?.addEventListener("click", async () => {
-            const subjectId = document.getElementById("sessionSubjectSelect").value;
-            const duration = parseInt(document.getElementById("sessionDurationInput").value);
-            const dateStr = document.getElementById("sessionDateInput").value || getTodayKey();
-
-            if (!subjectId || !duration || duration < 1) return;
-
-            const newSes = {
-                id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-                subjectId,
-                duration,
-                date: dateStr,
-                createdAt: Date.now()
-            };
-
-            if (!currentUser) {
-                guestStudySessions.push(newSes);
-                localStorage.setItem("dailykrd_guest_study_sessions", JSON.stringify(guestStudySessions));
-                renderStudy();
-            } else {
-                await setDoc(doc(db, "users", currentUser.uid, "study_sessions", newSes.id), newSes);
-            }
-            document.getElementById("sessionModalOverlay").classList.remove("active");
-        });
-
 
         /* START */
 
@@ -9529,4 +9769,350 @@ document.documentElement.classList.toggle(
         const AI_IMAGE_DIRECT_THRESHOLD_BYTES = 300 * 1024;
         const AI_IMAGE_MAX_DIMENSION = 1600;
         const AI_IMAGE_JPEG_QUALITY = 0.82;
-        Sorry, something went wrong. Please try your request again.
+        const AI_DEFAULT_IMAGE_PROMPT =
+            "Please analyze this image and tell me what you can see.";
+
+        let aiSelectedImage = null;
+
+        function aiReadFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () =>
+                    reject(reader.error || new Error("File read failed"));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function aiLoadImageElement(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error("Image decode failed"));
+                img.src = dataUrl;
+            });
+        }
+
+        async function aiPrepareImage(file) {
+            if (!file.type || !file.type.startsWith("image/")) {
+                throw new Error("Unsupported file type");
+            }
+            if (file.size > AI_MAX_IMAGE_SOURCE_BYTES) {
+                throw new Error("Image is too large");
+            }
+
+            const originalDataUrl = await aiReadFileAsDataUrl(file);
+
+            if (file.size <= AI_IMAGE_DIRECT_THRESHOLD_BYTES) {
+                return {
+                    mimeType: file.type,
+                    data: originalDataUrl.split(",")[1],
+                    previewUrl: originalDataUrl
+                };
+            }
+
+            const img = await aiLoadImageElement(originalDataUrl);
+            let width = img.naturalWidth || img.width;
+            let height = img.naturalHeight || img.height;
+
+            if (width > AI_IMAGE_MAX_DIMENSION || height > AI_IMAGE_MAX_DIMENSION) {
+                if (width >= height) {
+                    height = Math.round(height * (AI_IMAGE_MAX_DIMENSION / width));
+                    width = AI_IMAGE_MAX_DIMENSION;
+                } else {
+                    width = Math.round(width * (AI_IMAGE_MAX_DIMENSION / height));
+                    height = AI_IMAGE_MAX_DIMENSION;
+                }
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedDataUrl = canvas.toDataURL(
+                "image/jpeg",
+                AI_IMAGE_JPEG_QUALITY
+            );
+
+            return {
+                mimeType: "image/jpeg",
+                data: compressedDataUrl.split(",")[1],
+                previewUrl: compressedDataUrl
+            };
+        }
+
+        function aiShowImagePreview(previewUrl) {
+            const wrap = document.getElementById("aiImagePreviewWrap");
+            const thumb = document.getElementById("aiImagePreviewThumb");
+            if (!wrap || !thumb) return;
+            thumb.src = previewUrl;
+            wrap.classList.add("show");
+        }
+
+        function aiClearSelectedImage() {
+            aiSelectedImage = null;
+            const wrap = document.getElementById("aiImagePreviewWrap");
+            const thumb = document.getElementById("aiImagePreviewThumb");
+            const fileInput = document.getElementById("aiImageFileInput");
+            if (wrap) wrap.classList.remove("show");
+            if (thumb) thumb.src = "";
+            if (fileInput) fileInput.value = "";
+        }
+
+        document.getElementById("aiImageBtn")?.addEventListener("click", () => {
+            document.getElementById("aiImageFileInput")?.click();
+        });
+
+        document
+            .getElementById("aiImageFileInput")
+            ?.addEventListener("change", async (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+
+                try {
+                    aiSelectedImage = await aiPrepareImage(file);
+                    aiShowImagePreview(aiSelectedImage.previewUrl);
+                } catch (error) {
+                    aiClearSelectedImage();
+                    const messages = document.getElementById("aiMessages");
+                    messages.innerHTML += `
+                        <div class="ai-message">
+                            Sorry, that image couldn't be used. Please try a
+                            different photo.
+                        </div>
+                    `;
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            });
+
+        document
+            .getElementById("aiImageRemoveBtn")
+            ?.addEventListener("click", () => {
+                aiClearSelectedImage();
+            });
+
+        async function sendAI() {
+            const input = document.getElementById("aiInput");
+            const messages = document.getElementById("aiMessages");
+
+            const message = input.value.trim();
+            const pendingImage = aiSelectedImage;
+
+            if (!message && !pendingImage) return;
+
+            const effectiveMessage =
+                message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : "");
+
+            messages.innerHTML += `
+                <div class="user-message">
+                    ${
+                        pendingImage
+                            ? `<img src="${pendingImage.previewUrl}" alt="Uploaded image" />`
+                            : ""
+                    }
+                    ${message ? aiEscape(message) : ""}
+                </div>
+            `;
+
+            input.value = "";
+            aiClearSelectedImage();
+            aiSetInputDisabled(true);
+            messages.scrollTop = messages.scrollHeight;
+
+            messages.innerHTML += `
+                <div class="ai-message" id="aiLoading">Thinking...</div>
+            `;
+            messages.scrollTop = messages.scrollHeight;
+
+            let assistantText = "";
+            let sourceLabel = null;
+            let messageEl = null;
+            let sawAnyContent = false;
+            let connectFailed = false;
+
+            function ensureMessageEl() {
+                if (!messageEl) {
+                    document.getElementById("aiLoading")?.remove();
+                    messageEl = document.createElement("div");
+                    messageEl.className = "ai-message";
+                    messages.appendChild(messageEl);
+                }
+                return messageEl;
+            }
+
+            function appendDelta(piece) {
+                if (!piece) return;
+                sawAnyContent = true;
+                assistantText += piece;
+                ensureMessageEl().textContent = assistantText;
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            function setFullText(text) {
+                if (!text) return;
+                sawAnyContent = true;
+                assistantText = text;
+                ensureMessageEl().textContent = assistantText;
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            function handleParsedObject(obj) {
+                if (!obj || typeof obj !== "object") return;
+
+                if (obj.error) {
+                    throw new Error(String(obj.error));
+                }
+                if (typeof obj.delta === "string") {
+                    appendDelta(obj.delta);
+                } else if (typeof obj.response === "string") {
+                    setFullText(obj.response);
+                }
+
+                if (obj.source === "local") {
+                    sourceLabel = "Local AI";
+                } else if (obj.source === "gemini") {
+                    sourceLabel = "Cloud AI";
+                }
+            }
+
+            function handleLine(rawLine) {
+                let line = String(rawLine).trim();
+                if (!line) return;
+
+                if (line.startsWith(":")) return;
+                if (line.startsWith("event:")) return;
+
+                if (line.startsWith("data:")) {
+                    line = line.slice(5).trim();
+                }
+
+                if (!line || line === "[DONE]") return;
+
+                try {
+                    handleParsedObject(JSON.parse(line));
+                } catch (e) {
+                    appendDelta(line);
+                }
+            }
+
+            try {
+                const requestBody = {
+                    message: effectiveMessage,
+                    history: aiConversationHistory.slice(
+                        -AI_HISTORY_LIMIT * 2
+                    )
+                };
+
+                if (pendingImage) {
+                    requestBody.image = {
+                        mimeType: pendingImage.mimeType,
+                        data: pendingImage.data
+                    };
+                }
+
+                const response = await fetch(AI_ENDPOINT, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Bad response: " + response.status);
+                }
+
+                if (response.body && typeof response.body.getReader === "function") {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = "";
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+
+                        if (value) {
+                            buffer += decoder.decode(value, { stream: true });
+
+                            let newlineIndex;
+                            while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+                                const line = buffer.slice(0, newlineIndex);
+                                buffer = buffer.slice(newlineIndex + 1);
+                                handleLine(line);
+                            }
+                        }
+
+                        if (done) {
+                            buffer += decoder.decode();
+                            if (buffer.trim()) {
+                                handleLine(buffer);
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    const text = await response.text();
+                    text.split("\n").forEach(handleLine);
+                }
+
+            } catch (error) {
+                if (!sawAnyContent) {
+                    connectFailed = true;
+                }
+            }
+
+            document.getElementById("aiLoading")?.remove();
+
+            if (sawAnyContent) {
+                if (sourceLabel) {
+                    messages.innerHTML += `
+                        <div class="ai-source">${sourceLabel}</div>
+                    `;
+                }
+
+                aiConversationHistory.push(
+                    {
+                        role: "user",
+                        content: pendingImage
+                            ? "[User uploaded an image and asked: " +
+                              effectiveMessage +
+                              "]"
+                            : message
+                    },
+                    { role: "assistant", content: assistantText }
+                );
+                if (aiConversationHistory.length > AI_HISTORY_LIMIT * 2) {
+                    aiConversationHistory = aiConversationHistory.slice(
+                        -AI_HISTORY_LIMIT * 2
+                    );
+                }
+                aiSaveHistory(aiConversationHistory);
+            } else if (connectFailed) {
+                messages.innerHTML += `
+                    <div class="ai-message">
+                        Couldn't connect to Daily AI.
+                    </div>
+                `;
+            } else {
+                messages.innerHTML += `
+                    <div class="ai-message">Something went wrong.</div>
+                `;
+            }
+
+            aiSetInputDisabled(false);
+            input.focus();
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        document.getElementById("aiInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") sendAI();
+        });
+
+        document.getElementById("aiToggle").addEventListener("click", () => {
+            document.getElementById("aiBox").classList.toggle("open");
+        });
+    </script>
+
+</body>
+</html>
