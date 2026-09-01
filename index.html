@@ -3053,6 +3053,11 @@
 
         let todaySteps = null;
 
+        // Task ids whose "just completed" animation should replay even if
+        // the Firestore listener re-renders the list before the CSS
+        // animation has finished playing.
+        const justCompletedTaskIds = new Set();
+
         let signUpMode = true;
 
         let selectedDate =
@@ -6491,6 +6496,16 @@
 
 
                 if (
+                    justCompletedTaskIds.has(task.id)
+                ) {
+
+                    row.classList.add(
+                        "just-completed"
+                    );
+                }
+
+
+                if (
                     task.priority === "high"
                 ) {
 
@@ -6543,6 +6558,10 @@
 
                         if (checkbox.checked) {
 
+                            justCompletedTaskIds.add(
+                                task.id
+                            );
+
                             row.classList.add(
                                 "just-completed"
                             );
@@ -6550,6 +6569,10 @@
 
                             setTimeout(
                                 () => {
+
+                                    justCompletedTaskIds.delete(
+                                        task.id
+                                    );
 
                                     row.classList.remove(
                                         "just-completed"
