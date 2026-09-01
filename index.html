@@ -740,16 +740,18 @@
             z-index: -4;
             pointer-events: none;
             opacity: 0;
-            background: radial-gradient(circle at 25% 15%, var(--theme-tint) 0%, transparent 62%);
+            background:
+                radial-gradient(circle at 15% 0%, var(--theme-tint) 0%, transparent 55%),
+                linear-gradient(160deg, var(--theme-tint) 0%, transparent 75%);
             transition: opacity .6s ease, background .6s ease;
         }
 
         .theme-tint-layer.active {
-            opacity: .28;
+            opacity: .55;
         }
 
         .dark .theme-tint-layer.active {
-            opacity: .4;
+            opacity: .6;
         }
 
         .accent-swatch {
@@ -7548,6 +7550,10 @@ document.documentElement.classList.toggle(
                         ? "On"
                         : "Off";
             }
+
+            if (typeof refreshAccentColor === "function") {
+                refreshAccentColor();
+            }
         }
 
 
@@ -7607,15 +7613,14 @@ document.documentElement.classList.toggle(
 
         function applyAccentColor(hex) {
 
-            document.documentElement.style.setProperty(
-                "--accent",
-                hex
-            );
+            const contrast = getContrastColor(hex);
 
-            document.documentElement.style.setProperty(
-                "--accent-contrast",
-                getContrastColor(hex)
-            );
+            [document.documentElement, document.body].forEach(el => {
+
+                el.style.setProperty("--accent", hex);
+                el.style.setProperty("--accent-contrast", contrast);
+
+            });
 
             document
                 .querySelectorAll(".accent-swatch")
@@ -7632,6 +7637,22 @@ document.documentElement.classList.toggle(
                 document.getElementById("accentColorPicker");
 
             if (picker) picker.value = hex;
+        }
+
+        function getDefaultAccentForMode() {
+
+            const isDark =
+                document.documentElement.classList.contains("dark");
+
+            return isDark ? "#ffffff" : "#111111";
+        }
+
+        function refreshAccentColor() {
+
+            const savedAccent =
+                localStorage.getItem("dailykrd_accent");
+
+            applyAccentColor(savedAccent || getDefaultAccentForMode());
         }
 
         function applyIconSet(streakIcon, stepIcon, setName) {
@@ -7700,10 +7721,7 @@ document.documentElement.classList.toggle(
 
         function loadAppearancePrefs() {
 
-            const savedAccent =
-                localStorage.getItem("dailykrd_accent") || "#111111";
-
-            applyAccentColor(savedAccent);
+            refreshAccentColor();
 
             const savedIconSet =
                 localStorage.getItem("dailykrd_iconset");
