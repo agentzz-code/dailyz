@@ -532,10 +532,19 @@
             flex: 1;
             border: 0;
             background: transparent;
-            padding: 11px 8px;
+            padding: 11px 4px;
             border-radius: 11px;
             color: #666;
             font-weight: 650;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 380px) {
+            .tab {
+                font-size: 11px;
+                padding: 10px 2px;
+            }
         }
 
         .tab.active {
@@ -1759,16 +1768,16 @@
             id="tasksTab"
             type="button"
         >
-            Tasks
+            🏠 Today
         </button>
 
         <button
             class="tab"
-            data-tab="calendar"
-            id="calendarTab"
+            data-tab="study"
+            id="studyTab"
             type="button"
         >
-            Calendar
+            📚 Study
         </button>
 
         <button
@@ -1777,7 +1786,25 @@
             id="prayersTab"
             type="button"
         >
-            Prayer Times
+            🕌 Prayer
+        </button>
+
+        <button
+            class="tab"
+            data-tab="timer"
+            id="timerTab"
+            type="button"
+        >
+            ⏱️ Timer
+        </button>
+
+        <button
+            class="tab"
+            data-tab="calendar"
+            id="calendarTab"
+            type="button"
+        >
+            📅 Calendar
         </button>
 
     </nav>
@@ -2189,6 +2216,42 @@
                     id="compassStatus"
                 ></div>
 
+            </div>
+
+        </section>
+
+
+        <!-- STUDY (placeholder — full Study system built in a later step) -->
+
+        <section
+            class="section"
+            id="study"
+        >
+
+            <div class="settings-title">
+                📚 Study
+            </div>
+
+            <div class="settings-subtitle">
+                Coming soon.
+            </div>
+
+        </section>
+
+
+        <!-- TIMER (placeholder — full Timer system built in a later step) -->
+
+        <section
+            class="section"
+            id="timer"
+        >
+
+            <div class="settings-title">
+                ⏱️ Timer
+            </div>
+
+            <div class="settings-subtitle">
+                Coming soon.
             </div>
 
         </section>
@@ -3135,13 +3198,19 @@
                     "Sign Up",
 
                 tasks:
-                    "Tasks",
+                    "🏠 Today",
 
                 calendar:
-                    "Calendar",
+                    "📅 Calendar",
 
                 prayers:
-                    "Prayer Times",
+                    "🕌 Prayer",
+
+                study:
+                    "📚 Study",
+
+                timerTabLabel:
+                    "⏱️ Timer",
 
                 addTask:
                     "Add a task...",
@@ -3411,13 +3480,19 @@
                     "خۆت تۆمار بکە",
 
                 tasks:
-                    "ئەرکەکان",
+                    "🏠 ئەمڕۆ",
 
                 calendar:
-                    "ڕۆژژمێر",
+                    "📅 ڕۆژژمێر",
 
                 prayers:
-                    "کاتی نوێژ",
+                    "🕌 نوێژ",
+
+                study:
+                    "📚 خوێندن",
+
+                timerTabLabel:
+                    "⏱️ کاتژمێر",
 
                 addTask:
                     "ئەرکێک زیاد بکە...",
@@ -3687,13 +3762,19 @@
                     "إنشاء حساب",
 
                 tasks:
-                    "المهام",
+                    "🏠 اليوم",
 
                 calendar:
-                    "التقويم",
+                    "📅 التقويم",
 
                 prayers:
-                    "أوقات الصلاة",
+                    "🕌 الصلاة",
+
+                study:
+                    "📚 الدراسة",
+
+                timerTabLabel:
+                    "⏱️ المؤقت",
 
                 addTask:
                     "أضف مهمة...",
@@ -4352,6 +4433,18 @@
                 "prayersTab"
             ).textContent =
                 t("prayers");
+
+
+            document.getElementById(
+                "studyTab"
+            ).textContent =
+                t("study");
+
+
+            document.getElementById(
+                "timerTab"
+            ).textContent =
+                t("timerTabLabel");
 
 
             document.getElementById(
