@@ -540,7 +540,7 @@
 
         .tab.active {
             background: white;
-            color: #111;
+            color: var(--accent);
             box-shadow: 0 2px 8px rgba(0,0,0,.08);
         }
 
@@ -550,7 +550,7 @@
 
         .dark .tab.active {
             background: #3a3a3a;
-            color: white;
+            color: var(--accent);
         }
 
         /* SECTIONS */
@@ -597,6 +597,7 @@
         .streak-count {
             font-size: 19px;
             font-weight: 850;
+            color: var(--accent);
         }
 
         .streak-label {
@@ -720,6 +721,65 @@
             color: #ccc;
         }
 
+        /* ACCENT / THEME VARIABLES */
+
+        :root {
+            --accent: #111111;
+            --accent-contrast: #ffffff;
+            --theme-tint: transparent;
+        }
+
+        .dark {
+            --accent: #ffffff;
+            --accent-contrast: #111111;
+        }
+
+        .theme-tint-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -4;
+            pointer-events: none;
+            opacity: 0;
+            background: radial-gradient(circle at 25% 15%, var(--theme-tint) 0%, transparent 62%);
+            transition: opacity .6s ease, background .6s ease;
+        }
+
+        .theme-tint-layer.active {
+            opacity: .28;
+        }
+
+        .dark .theme-tint-layer.active {
+            opacity: .4;
+        }
+
+        .accent-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            transition: transform .15s ease, border-color .15s ease;
+        }
+
+        .accent-swatch:active {
+            transform: scale(.88);
+        }
+
+        .accent-swatch.selected {
+            border-color: #111;
+        }
+
+        .dark .accent-swatch.selected {
+            border-color: #fff;
+        }
+
+        .icon-style-option.selected,
+        .theme-option.selected {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+
         /* TASK COMPLETE ANIMATION */
 
         .task {
@@ -727,11 +787,50 @@
         }
 
         .task-check {
-            transition: transform .25s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            border: 2px solid #ccc;
+            border-radius: 7px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: transform .25s ease, background .2s ease, border-color .2s ease;
+        }
+
+        .dark .task-check {
+            border-color: #555;
+        }
+
+        .task-check:active {
+            transform: scale(.88);
+        }
+
+        .task-check:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .task-check:checked::after {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 2px;
+            width: 6px;
+            height: 11px;
+            border: solid var(--accent-contrast);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
         }
 
         .task.just-completed .task-check {
             animation: checkPop .4s ease;
+        }
+
+        .task.just-completed .task-check::after {
+            animation: checkDraw .32s ease;
         }
 
         .task.just-completed .task-text {
@@ -742,6 +841,12 @@
             0% { transform: scale(1); }
             40% { transform: scale(1.35); }
             100% { transform: scale(1); }
+        }
+
+        @keyframes checkDraw {
+            0% { height: 0; opacity: 0; }
+            50% { height: 11px; opacity: 1; }
+            100% { height: 11px; opacity: 1; }
         }
 
         @keyframes taskFade {
@@ -833,14 +938,14 @@
             width: 52px;
             border: 0;
             border-radius: 13px;
-            background: #111;
-            color: white;
+            background: var(--accent);
+            color: var(--accent-contrast);
             font-size: 27px;
         }
 
         .dark .add-button {
-            background: white;
-            color: black;
+            background: var(--accent);
+            color: var(--accent-contrast);
         }
 
         .selected-day {
@@ -867,11 +972,6 @@
 
         .dark .task {
             background: #222;
-        }
-
-        .task-check {
-            width: 19px;
-            height: 19px;
         }
 
         .task-text {
@@ -1597,6 +1697,8 @@
         <div class="motion-orb three"></div>
     </div>
 
+    <div class="theme-tint-layer" id="themeTintLayer"></div>
+
     <div class="emoji e1">✓</div>
     <div class="emoji e2">★</div>
     <div class="emoji e3">☀</div>
@@ -2287,6 +2389,113 @@
                     >
                         Off
                     </button>
+
+                </div>
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <div
+                            class="setting-label"
+                            id="accentColorLabel"
+                        >
+                            Accent Color
+                        </div>
+
+                        <div
+                            class="setting-description"
+                            id="accentColorDescription"
+                        >
+                            Pick a color used for buttons, tabs, and checkmarks.
+                        </div>
+
+                        <div
+                            id="accentSwatches"
+                            style="display:flex; gap:10px; margin-top:10px; align-items:center; flex-wrap:wrap;"
+                        >
+                            <button type="button" class="accent-swatch" data-accent="#111111" style="background:#111111;" aria-label="Default"></button>
+                            <button type="button" class="accent-swatch" data-accent="#2f80ed" style="background:#2f80ed;" aria-label="Blue"></button>
+                            <button type="button" class="accent-swatch" data-accent="#ff7a45" style="background:#ff7a45;" aria-label="Orange"></button>
+                            <button type="button" class="accent-swatch" data-accent="#2e8b57" style="background:#2e8b57;" aria-label="Green"></button>
+                            <button type="button" class="accent-swatch" data-accent="#c2185b" style="background:#c2185b;" aria-label="Pink"></button>
+                            <button type="button" class="accent-swatch" data-accent="#7c4dff" style="background:#7c4dff;" aria-label="Purple"></button>
+
+                            <input
+                                type="color"
+                                id="accentColorPicker"
+                                value="#111111"
+                                style="width:34px; height:34px; border:none; border-radius:50%; padding:0; background:none; cursor:pointer;"
+                                aria-label="Custom accent color"
+                            >
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <div
+                            class="setting-label"
+                            id="iconStyleLabel"
+                        >
+                            Icons
+                        </div>
+
+                        <div
+                            class="setting-description"
+                            id="iconStyleDescription"
+                        >
+                            Choose the icons used for your streak and steps.
+                        </div>
+
+                        <div
+                            id="iconStyleOptions"
+                            style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;"
+                        >
+                            <button type="button" class="setting-button icon-style-option" data-streak-icon="🔥" data-step-icon="👟" data-icon-set="classic">🔥 👟</button>
+                            <button type="button" class="setting-button icon-style-option" data-streak-icon="⚡" data-step-icon="🚶" data-icon-set="minimal">⚡ 🚶</button>
+                            <button type="button" class="setting-button icon-style-option" data-streak-icon="🌱" data-step-icon="🥾" data-icon-set="nature">🌱 🥾</button>
+                            <button type="button" class="setting-button icon-style-option" data-streak-icon="⭐" data-step-icon="🏃" data-icon-set="star">⭐ 🏃</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <div
+                            class="setting-label"
+                            id="themeLabel"
+                        >
+                            Theme
+                        </div>
+
+                        <div
+                            class="setting-description"
+                            id="themeDescription"
+                        >
+                            Adds a soft color wash across the app to match your accent.
+                        </div>
+
+                        <div
+                            id="themeOptions"
+                            style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;"
+                        >
+                            <button type="button" class="setting-button theme-option" data-theme="none">None</button>
+                            <button type="button" class="setting-button theme-option" data-theme="ocean" data-theme-color="#2f80ed">Ocean</button>
+                            <button type="button" class="setting-button theme-option" data-theme="sunset" data-theme-color="#ff7a45">Sunset</button>
+                            <button type="button" class="setting-button theme-option" data-theme="forest" data-theme-color="#2e8b57">Forest</button>
+                            <button type="button" class="setting-button theme-option" data-theme="berry" data-theme-color="#c2185b">Berry</button>
+                        </div>
+
+                    </div>
 
                 </div>
 
@@ -7378,6 +7587,237 @@ document.documentElement.classList.toggle(
                 "click",
                 toggleTheme
             );
+
+
+        /* ACCENT COLOR / ICONS / THEME */
+
+        function getContrastColor(hex) {
+
+            const clean = hex.replace("#", "");
+
+            const r = parseInt(clean.substring(0, 2), 16);
+            const g = parseInt(clean.substring(2, 4), 16);
+            const b = parseInt(clean.substring(4, 6), 16);
+
+            const luminance =
+                (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+            return luminance > 0.6 ? "#111111" : "#ffffff";
+        }
+
+        function applyAccentColor(hex) {
+
+            document.documentElement.style.setProperty(
+                "--accent",
+                hex
+            );
+
+            document.documentElement.style.setProperty(
+                "--accent-contrast",
+                getContrastColor(hex)
+            );
+
+            document
+                .querySelectorAll(".accent-swatch")
+                .forEach(swatch => {
+
+                    swatch.classList.toggle(
+                        "selected",
+                        swatch.dataset.accent.toLowerCase() === hex.toLowerCase()
+                    );
+
+                });
+
+            const picker =
+                document.getElementById("accentColorPicker");
+
+            if (picker) picker.value = hex;
+        }
+
+        function applyIconSet(streakIcon, stepIcon, setName) {
+
+            const streakEmojiEl =
+                document.querySelector(".streak-emoji");
+
+            const stepEmojiEl =
+                document.querySelector("#stepCard .streak-emoji");
+
+            if (streakEmojiEl) streakEmojiEl.textContent = streakIcon;
+            if (stepEmojiEl) stepEmojiEl.textContent = stepIcon;
+
+            document
+                .querySelectorAll(".icon-style-option")
+                .forEach(btn => {
+
+                    btn.classList.toggle(
+                        "selected",
+                        btn.dataset.iconSet === setName
+                    );
+
+                });
+        }
+
+        function applyThemeTint(themeName) {
+
+            const tintLayer =
+                document.getElementById("themeTintLayer");
+
+            if (!tintLayer) return;
+
+            if (themeName === "none" || !themeName) {
+
+                tintLayer.classList.remove("active");
+                document.documentElement.style.setProperty("--theme-tint", "transparent");
+
+            } else {
+
+                const option =
+                    document.querySelector(
+                        `.theme-option[data-theme="${themeName}"]`
+                    );
+
+                const color =
+                    option ? option.dataset.themeColor : null;
+
+                if (color) {
+
+                    document.documentElement.style.setProperty("--theme-tint", color);
+                    tintLayer.classList.add("active");
+                }
+            }
+
+            document
+                .querySelectorAll(".theme-option")
+                .forEach(btn => {
+
+                    btn.classList.toggle(
+                        "selected",
+                        btn.dataset.theme === (themeName || "none")
+                    );
+
+                });
+        }
+
+        function loadAppearancePrefs() {
+
+            const savedAccent =
+                localStorage.getItem("dailykrd_accent") || "#111111";
+
+            applyAccentColor(savedAccent);
+
+            const savedIconSet =
+                localStorage.getItem("dailykrd_iconset");
+
+            const iconOption =
+                savedIconSet &&
+                document.querySelector(
+                    `.icon-style-option[data-icon-set="${savedIconSet}"]`
+                );
+
+            if (iconOption) {
+
+                applyIconSet(
+                    iconOption.dataset.streakIcon,
+                    iconOption.dataset.stepIcon,
+                    savedIconSet
+                );
+
+            } else {
+
+                applyIconSet("🔥", "👟", "classic");
+            }
+
+            const savedTheme =
+                localStorage.getItem("dailykrd_theme") || "none";
+
+            applyThemeTint(savedTheme);
+        }
+
+        document
+            .querySelectorAll(".accent-swatch")
+            .forEach(swatch => {
+
+                swatch.addEventListener(
+                    "click",
+                    () => {
+
+                        const hex = swatch.dataset.accent;
+
+                        localStorage.setItem(
+                            "dailykrd_accent",
+                            hex
+                        );
+
+                        applyAccentColor(hex);
+                    }
+                );
+
+            });
+
+        const accentColorPicker =
+            document.getElementById("accentColorPicker");
+
+        if (accentColorPicker) {
+
+            accentColorPicker.addEventListener(
+                "input",
+                () => {
+
+                    const hex = accentColorPicker.value;
+
+                    localStorage.setItem(
+                        "dailykrd_accent",
+                        hex
+                    );
+
+                    applyAccentColor(hex);
+                }
+            );
+        }
+
+        document
+            .querySelectorAll(".icon-style-option")
+            .forEach(btn => {
+
+                btn.addEventListener(
+                    "click",
+                    () => {
+
+                        localStorage.setItem(
+                            "dailykrd_iconset",
+                            btn.dataset.iconSet
+                        );
+
+                        applyIconSet(
+                            btn.dataset.streakIcon,
+                            btn.dataset.stepIcon,
+                            btn.dataset.iconSet
+                        );
+                    }
+                );
+
+            });
+
+        document
+            .querySelectorAll(".theme-option")
+            .forEach(btn => {
+
+                btn.addEventListener(
+                    "click",
+                    () => {
+
+                        localStorage.setItem(
+                            "dailykrd_theme",
+                            btn.dataset.theme
+                        );
+
+                        applyThemeTint(btn.dataset.theme);
+                    }
+                );
+
+            });
+
+        loadAppearancePrefs();
 
 
         /* PRAYER TIMES — ASTRONOMICAL CALCULATION (precise, to the second) */
