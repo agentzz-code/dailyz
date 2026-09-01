@@ -2359,7 +2359,7 @@
         </section>
 
 
-        <!-- STUDY -->
+        <!-- STUDY (placeholder — full Study system built in a later step) -->
 
         <section
             class="section"
@@ -2370,132 +2370,8 @@
                 📚 Study
             </div>
 
-            <div class="settings-subtitle" id="studySubtitle">
-                Organize your subjects and topics.
-            </div>
-
-            <!-- MY SUBJECTS CARD -->
-
-            <div class="settings-card">
-
-                <div class="settings-card-title">
-                    My Subjects
-                </div>
-
-                <div id="subjectsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                </div>
-
-                <button
-                    class="setting-button"
-                    id="addSubjectBtn"
-                    type="button"
-                    style="width: 100%; background-color: var(--accent); color: var(--accent-contrast); border: none;"
-                >
-                    + Add Subject
-                </button>
-
-            </div>
-
-            <!-- ADD SUBJECT MODAL -->
-
-            <div
-                id="addSubjectModal"
-                style="
-                    display: none;
-                    position: fixed;
-                    inset: 0;
-                    z-index: 1000;
-                    background: rgba(0, 0, 0, 0.5);
-                    backdrop-filter: blur(4px);
-                    align-items: center;
-                    justify-content: center;
-                "
-            >
-
-                <div
-                    style="
-                        background: var(--bg);
-                        border-radius: 18px;
-                        padding: 24px;
-                        width: min(90vw, 400px);
-                        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-                    "
-                >
-
-                    <div
-                        style="
-                            font-size: 18px;
-                            font-weight: 600;
-                            margin-bottom: 16px;
-                            color: var(--text);
-                        "
-                    >
-                        Add New Subject
-                    </div>
-
-                    <input
-                        type="text"
-                        id="subjectNameInput"
-                        placeholder="Subject name (e.g., Physics, Biology)"
-                        style="
-                            width: 100%;
-                            padding: 12px;
-                            border: 1px solid var(--border);
-                            border-radius: 10px;
-                            background: var(--input-bg);
-                            color: var(--text);
-                            font-size: 16px;
-                            box-sizing: border-box;
-                            margin-bottom: 16px;
-                        "
-                    />
-
-                    <div
-                        style="
-                            display: flex;
-                            gap: 10px;
-                            justify-content: flex-end;
-                        "
-                    >
-
-                        <button
-                            id="cancelSubjectBtn"
-                            type="button"
-                            style="
-                                padding: 10px 16px;
-                                border: 1px solid var(--border);
-                                border-radius: 10px;
-                                background: transparent;
-                                color: var(--text);
-                                cursor: pointer;
-                                font-size: 14px;
-                                font-weight: 500;
-                            "
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            id="saveSubjectBtn"
-                            type="button"
-                            style="
-                                padding: 10px 16px;
-                                border: none;
-                                border-radius: 10px;
-                                background: var(--accent);
-                                color: var(--accent-contrast);
-                                cursor: pointer;
-                                font-size: 14px;
-                                font-weight: 600;
-                            "
-                        >
-                            Save
-                        </button>
-
-                    </div>
-
-                </div>
-
+            <div class="settings-subtitle">
+                Coming soon.
             </div>
 
         </section>
@@ -3384,14 +3260,6 @@
                 ) || "[]"
             );
 
-        let guestSubjects =
-            JSON.parse(
-                localStorage.getItem(
-                    "dailykrd_guest_subjects"
-                ) || "[]"
-            );
-
-        let unsubscribeSubjects = null;
 
         /* TRANSLATIONS */
 
@@ -4958,8 +4826,6 @@
 
             loadPrayerTimes();
 
-            loadSubjects();
-
 
             if (currentUser) {
 
@@ -5810,8 +5676,6 @@
 
                         startTaskListener();
 
-                        startSubjectListener();
-
                         startStepsListener();
 
                     } catch (error) {
@@ -5845,8 +5709,6 @@
 
 
                         startTaskListener();
-
-                        startSubjectListener();
 
                         startStepsListener();
                     }
@@ -6277,210 +6139,6 @@
                 );
         }
 
-
-        /* SUBJECT MANAGEMENT */
-
-        function getSubjectsCollection() {
-            return collection(db, "users", currentUser.uid, "subjects");
-        }
-
-        async function saveGuestSubjects() {
-            localStorage.setItem(
-                "dailykrd_guest_subjects",
-                JSON.stringify(guestSubjects)
-            );
-        }
-
-        async function migrateGuestSubjectsToAccount(uid) {
-            const raw = localStorage.getItem("dailykrd_guest_subjects");
-            if (!raw) return { migrated: 0 };
-
-            let guest;
-            try {
-                guest = JSON.parse(raw);
-            } catch (error) {
-                console.error("Guest subject parse error:", error);
-                return { migrated: 0 };
-            }
-
-            if (!Array.isArray(guest) || guest.length === 0) {
-                localStorage.removeItem("dailykrd_guest_subjects");
-                return { migrated: 0 };
-            }
-
-            try {
-                const subjectsRef = getSubjectsCollection();
-                for (const subject of guest) {
-                    const { id, ...subjectData } = subject;
-                    await addDoc(subjectsRef, subjectData);
-                }
-                localStorage.removeItem("dailykrd_guest_subjects");
-                guestSubjects = [];
-                return { migrated: guest.length };
-            } catch (error) {
-                console.error("Guest subject migration error:", error);
-                throw error;
-            }
-        }
-
-        function stopSubjectListener() {
-            if (unsubscribeSubjects) {
-                unsubscribeSubjects();
-                unsubscribeSubjects = null;
-            }
-        }
-
-        function startSubjectListener() {
-            stopSubjectListener();
-            if (!currentUser) return;
-
-            const subjectsRef = getSubjectsCollection();
-            unsubscribeSubjects = onSnapshot(
-                subjectsRef,
-                snapshot => {
-                    const subjects = [];
-                    snapshot.forEach(item => {
-                        subjects.push({
-                            id: item.id,
-                            ...item.data()
-                        });
-                    });
-                    subjects.sort(
-                        (a, b) =>
-                            (Number(a.createdAt) || 0) -
-                            (Number(b.createdAt) || 0)
-                    );
-                    renderSubjects(subjects);
-                },
-                error => {
-                    console.error("Subject listener error:", error);
-                }
-            );
-        }
-
-        function renderSubjects(subjects) {
-            const subjectsList = document.getElementById("subjectsList");
-            if (!subjectsList) return;
-
-            if (subjects.length === 0) {
-                subjectsList.innerHTML =
-                    '<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px;">No subjects yet. Add one to get started.</div>';
-                return;
-            }
-
-            subjectsList.innerHTML = subjects.map(subject => `
-                <div
-                    style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 12px;
-                        background: var(--input-bg);
-                        border-radius: 10px;
-                        border: 1px solid var(--border);
-                    "
-                >
-                    <div
-                        style="
-                            font-weight: 500;
-                            color: var(--text);
-                        "
-                    >
-                        ${subject.name || subject.title || 'Unnamed Subject'}
-                    </div>
-                    <button
-                        type="button"
-                        onclick="deleteSubject('${subject.id}')"
-                        style="
-                            background: transparent;
-                            border: none;
-                            color: #dc2626;
-                            cursor: pointer;
-                            font-size: 16px;
-                            padding: 4px 8px;
-                        "
-                    >
-                        ✕
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        async function loadSubjects() {
-            if (currentUser) {
-                startSubjectListener();
-            } else {
-                renderSubjects(guestSubjects);
-            }
-        }
-
-        async function addSubject(name) {
-            if (!name || name.trim() === "") return;
-
-            const subject = {
-                name: name.trim(),
-                createdAt: Date.now()
-            };
-
-            if (currentUser) {
-                try {
-                    const subjectsRef = getSubjectsCollection();
-                    await addDoc(subjectsRef, subject);
-                } catch (error) {
-                    console.error("Add subject error:", error);
-                    alert("Failed to add subject. Please try again.");
-                }
-            } else {
-                subject.id = Date.now().toString();
-                guestSubjects.push(subject);
-                await saveGuestSubjects();
-                renderSubjects(guestSubjects);
-            }
-        }
-
-        async function deleteSubject(subjectId) {
-            if (!confirm("Delete this subject?")) return;
-
-            if (currentUser) {
-                try {
-                    await deleteDoc(
-                        doc(db, "users", currentUser.uid, "subjects", subjectId)
-                    );
-                } catch (error) {
-                    console.error("Delete subject error:", error);
-                    alert("Failed to delete subject.");
-                }
-            } else {
-                guestSubjects = guestSubjects.filter(s => s.id !== subjectId);
-                await saveGuestSubjects();
-                renderSubjects(guestSubjects);
-            }
-        }
-
-        function showAddSubjectModal() {
-            const modal = document.getElementById("addSubjectModal");
-            const input = document.getElementById("subjectNameInput");
-            if (modal) {
-                modal.style.display = "flex";
-                input.value = "";
-                input.focus();
-            }
-        }
-
-        function hideAddSubjectModal() {
-            const modal = document.getElementById("addSubjectModal");
-            if (modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        function saveSubjectFromModal() {
-            const input = document.getElementById("subjectNameInput");
-            if (input) {
-                addSubject(input.value);
-                hideAddSubjectModal();
-            }
-        }
 
         /* STEP COUNTER (Apple Health sync) */
 
@@ -9554,32 +9212,6 @@ document.documentElement.classList.toggle(
         // Setup initial Dashboard Listeners
         document.getElementById("dashViewPrayersBtn")?.addEventListener("click", () => showSection("prayers"));
         document.getElementById("dashSetStudyBtn")?.addEventListener("click", () => showSection("study"));
-
-        // Setup Subject Listeners
-        document.getElementById("addSubjectBtn")?.addEventListener("click", () => {
-            showAddSubjectModal();
-        });
-
-        document.getElementById("cancelSubjectBtn")?.addEventListener("click", () => {
-            hideAddSubjectModal();
-        });
-
-        document.getElementById("saveSubjectBtn")?.addEventListener("click", () => {
-            saveSubjectFromModal();
-        });
-
-        document.getElementById("subjectNameInput")?.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                saveSubjectFromModal();
-            }
-        });
-
-        // Close modal on backdrop click
-        document.getElementById("addSubjectModal")?.addEventListener("click", (e) => {
-            if (e.target.id === "addSubjectModal") {
-                hideAddSubjectModal();
-            }
-        });
 
         /* START */
 
