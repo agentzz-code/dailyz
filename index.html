@@ -1906,14 +1906,29 @@
 
         <section class="section active" id="tasks">
 
-            <!-- HIDDEN LEGACY DOM (Kept to prevent JS errors) -->
+           <!-- HIDDEN LEGACY DOM (Kept to prevent JS errors) -->
             <div style="display:none;">
-                <div class="stats-row"><div class="streak-card"><div class="streak-count" id="streakCount">0</div></div><div class="progress-ring-card"><svg><circle class="progress-ring-fill" id="progressRingFill"></circle></svg><div id="progressRingText">0/0</div></div></div>
-                <div class="step-card" id="stepCard"><div class="streak-count" id="stepCount">0</div><div class="streak-label" id="stepLabel"></div></div>
-                <div class="score-card"><div id="scoreLabel"></div><div id="scoreValue"></div></div>
+                <div class="stats-row">
+                    <div class="streak-card">
+                        <div class="streak-count" id="streakCount">0</div>
+                        <div class="streak-label" id="streakLabel"></div>
+                    </div>
+                    <div class="progress-ring-card">
+                        <svg><circle class="progress-ring-fill" id="progressRingFill"></circle></svg>
+                        <div id="progressRingText">0/0</div>
+                    </div>
+                </div>
+                <div class="step-card" id="stepCard">
+                    <div class="streak-count" id="stepCount">0</div>
+                    <div class="streak-label" id="stepLabel"></div>
+                </div>
+                <div class="score-card">
+                    <div id="scoreLabel"></div>
+                    <div id="scoreValue"></div>
+                </div>
                 <div class="quote-card" id="quoteCard"></div>
             </div>
-
+            
             <!-- 1. GREETING -->
             <div class="dashboard-header">
                 <h1 class="dashboard-greeting" id="dashGreeting">Good morning</h1>
