@@ -2156,6 +2156,69 @@
         .flashcard-summary-stat:last-child { border-bottom: 0; }
         .flashcard-summary-stat span:last-child { color: #888; }
 
+        /* FLASHCARD MODAL */
+        .flashcard-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            background: rgba(0,0,0,.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .flashcard-modal-overlay.open { display: flex; }
+        .flashcard-modal {
+            background: #fff;
+            border-radius: 18px;
+            padding: 24px 20px 20px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.2);
+        }
+        .dark .flashcard-modal { background: #1c1c1c; }
+        .flashcard-modal-title {
+            font-size: 18px; font-weight: 800; margin-bottom: 16px;
+        }
+        .flashcard-modal input {
+            width: 100%;
+            border: 1px solid #ddd;
+            background: rgba(255,255,255,.92);
+            color: #111;
+            padding: 14px;
+            border-radius: 13px;
+            outline: none;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+        .dark .flashcard-modal input {
+            background: #2a2a2a;
+            color: #fff;
+            border-color: #3a3a3a;
+        }
+        .flashcard-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .flashcard-modal-actions button {
+            flex: 1;
+            border: 0;
+            border-radius: 13px;
+            padding: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .flashcard-modal-cancel {
+            background: #eee;
+            color: #555;
+        }
+        .dark .flashcard-modal-cancel { background: #333; color: #aaa; }
+        .flashcard-modal-confirm {
+            background: var(--accent);
+            color: var(--accent-contrast);
+        }
+
     </style>
 </head>
 
@@ -2825,6 +2888,18 @@
                         <div id="flashcardsSummaryStats"></div>
                     </div>
                     <button class="study-add-btn" id="flashcardsSummaryDoneBtn" type="button" style="width:100%; padding:16px;"></button>
+                </div>
+            </div>
+
+            <!-- DECK MODAL -->
+            <div class="flashcard-modal-overlay" id="flashcardDeckModal">
+                <div class="flashcard-modal">
+                    <div class="flashcard-modal-title" id="flashcardDeckModalTitle"></div>
+                    <input type="text" id="flashcardDeckModalInput" autocomplete="off" />
+                    <div class="flashcard-modal-actions">
+                        <button type="button" class="flashcard-modal-cancel" id="flashcardDeckModalCancel"></button>
+                        <button type="button" class="flashcard-modal-confirm" id="flashcardDeckModalConfirm"></button>
+                    </div>
                 </div>
             </div>
 
@@ -4015,6 +4090,8 @@
                 done: "Done",
                 card: "card",
                 cards: "cards",
+                cancel: "Cancel",
+                create: "Create",
 
             },
 
@@ -4312,9 +4389,11 @@
                 cardsStudied: "کارتە خوێندراوەکان",
                 cardsKnown: "کارتە زانیارەکان",
                 cardsToReview: "کارتە بۆ سەیرکردن",
-                done: "تەواو",
+done: "تەواو",
                 card: "کارت",
                 cards: "کارت",
+                cancel: "پاشگەزبوون",
+                create: "دروستکردن",
 
             },
 
@@ -4615,6 +4694,8 @@
                 done: "تم",
                 card: "بطاقة",
                 cards: "بطاقات",
+                cancel: "إلغاء",
+                create: "إنشاء",
 
             }
 
@@ -10120,9 +10201,30 @@ document.documentElement.classList.toggle(
             localStorage.removeItem("dailykrd_flashcards");
         }
 
-        async function createFlashcardDeck() {
-            const name = prompt(t("deckName") + ":");
+        function openDeckModal() {
+            const modal = document.getElementById("flashcardDeckModal");
+            const input = document.getElementById("flashcardDeckModalInput");
+            const title = document.getElementById("flashcardDeckModalTitle");
+            const cancelBtn = document.getElementById("flashcardDeckModalCancel");
+            const confirmBtn = document.getElementById("flashcardDeckModalConfirm");
+            title.textContent = t("deckName");
+            input.value = "";
+            input.placeholder = t("deckName");
+            cancelBtn.textContent = t("cancel") || "Cancel";
+            confirmBtn.textContent = t("create") || "Create";
+            modal.classList.add("open");
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeDeckModal() {
+            document.getElementById("flashcardDeckModal").classList.remove("open");
+        }
+
+        async function confirmCreateDeck() {
+            const input = document.getElementById("flashcardDeckModalInput");
+            const name = input.value;
             if (!name || !name.trim()) return;
+            closeDeckModal();
             const deck = { name: name.trim(), createdAt: Date.now(), cards: [] };
             if (!currentUser) {
                 deck.id = generateFlashcardId();
@@ -10132,6 +10234,10 @@ document.documentElement.classList.toggle(
             } else {
                 await addDoc(getFlashcardsCollection(), deck);
             }
+        }
+
+        async function createFlashcardDeck() {
+            openDeckModal();
         }
 
         async function deleteFlashcardDeck(index) {
@@ -10379,6 +10485,16 @@ document.documentElement.classList.toggle(
                 });
             });
         }
+
+        document.getElementById("flashcardDeckModalCancel")?.addEventListener("click", closeDeckModal);
+        document.getElementById("flashcardDeckModalConfirm")?.addEventListener("click", confirmCreateDeck);
+        document.getElementById("flashcardDeckModalInput")?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") confirmCreateDeck();
+            if (e.key === "Escape") closeDeckModal();
+        });
+        document.getElementById("flashcardDeckModal")?.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) closeDeckModal();
+        });
 
         document.getElementById("flashcardAddDeckBtn")?.addEventListener("click", createFlashcardDeck);
         document.getElementById("flashcardBackBtn")?.addEventListener("click", () => {
