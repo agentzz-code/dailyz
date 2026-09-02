@@ -1962,6 +1962,91 @@
             font-size: 14px;
         }
 
+        /* DASHBOARD STUDY */
+        .dash-study-goal {
+            font-size: 14px;
+            font-weight: 650;
+            margin-bottom: 6px;
+        }
+        .dash-study-progress {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .dark .dash-study-progress {
+            background: #3a3a3a;
+        }
+        .dash-study-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width .4s ease;
+        }
+        .dark .dash-study-progress-fill {
+            background: #fff;
+        }
+        .dash-study-subjects {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .dash-study-subject {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,.06);
+        }
+        .dark .dash-study-subject {
+            border-bottom-color: rgba(255,255,255,.08);
+        }
+        .dash-study-subject:last-child {
+            border-bottom: 0;
+        }
+        .dash-study-check {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: transform .2s ease, background .2s ease, border-color .2s ease;
+        }
+        .dark .dash-study-check {
+            border-color: #555;
+        }
+        .dash-study-check:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .dash-study-check:checked::after {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 1px;
+            width: 5px;
+            height: 10px;
+            border: solid var(--accent-contrast);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .dash-study-subject-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .dash-study-subject-name.completed {
+            text-decoration: line-through;
+            opacity: .45;
+        }
+
     </style>
 </head>
 
@@ -2145,8 +2230,10 @@
             <!-- 4. STUDY -->
             <div class="dashboard-card">
                 <div class="dashboard-title">📚 Study</div>
-                <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
-                <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
+                <div id="dashStudyContent">
+                    <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
+                    <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
+                </div>
             </div>
 
             <!-- 6. ACTIVITY -->
@@ -9511,6 +9598,7 @@ document.documentElement.classList.toggle(
         const studyProgressFill = document.getElementById("studyProgressFill");
         const studySubjectList = document.getElementById("studySubjectList");
         const studyAddBtn = document.getElementById("studyAddSubjectBtn");
+        const dashStudyContent = document.getElementById("dashStudyContent");
 
         function getStudyTodayKey() {
             const d = new Date();
@@ -9576,20 +9664,55 @@ document.documentElement.classList.toggle(
             studyProgressFill.style.width = pct + "%";
 
             const subjects = loadStudySubjects();
+            const completed = JSON.parse(
+                localStorage.getItem("dailykrd_study_completed") || "{}"
+            );
+            const todayKey = getStudyTodayKey();
+            const todayCompleted = completed[todayKey] || [];
+
             if (subjects.length === 0) {
                 studySubjectList.innerHTML =
                     '<div class="study-empty">No subjects yet. Add one to get started.</div>';
+                if (typeof renderDashStudy === "function") renderDashStudy();
                 return;
             }
 
-            studySubjectList.innerHTML = subjects.map((s, i) =>
-                '<div class="study-subject">' +
-                    '<div class="study-subject-name">' +
-                        s.replace(/</g, "&lt;") +
-                    '</div>' +
+            studySubjectList.innerHTML = subjects.map((s, i) => {
+                const isChecked = todayCompleted.includes(s) ? "checked" : "";
+                const nameClass = todayCompleted.includes(s) ? " completed" : "";
+                return '<div class="study-subject">' +
+                    '<input type="checkbox" class="dash-study-check" data-subject="' +
+                    s.replace(/"/g, '&quot;') + '" ' + isChecked +
+                    ' style="margin-right:4px;">' +
+                    '<div class="study-subject-name' + nameClass + '">' +
+                    s.replace(/</g, "&lt;") + '</div>' +
                     '<button class="study-subject-delete" data-index="' + i + '" type="button">×</button>' +
-                '</div>'
-            ).join("");
+                    '</div>';
+            }).join("");
+
+            studySubjectList.querySelectorAll(".dash-study-check").forEach(cb => {
+                cb.addEventListener("change", () => {
+                    const subjectName = cb.dataset.subject;
+                    const allCompleted = JSON.parse(
+                        localStorage.getItem("dailykrd_study_completed") || "{}"
+                    );
+                    if (!allCompleted[todayKey]) allCompleted[todayKey] = [];
+                    if (cb.checked) {
+                        if (!allCompleted[todayKey].includes(subjectName)) {
+                            allCompleted[todayKey].push(subjectName);
+                        }
+                    } else {
+                        allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
+                    }
+                    localStorage.setItem(
+                        "dailykrd_study_completed",
+                        JSON.stringify(allCompleted)
+                    );
+                    renderStudy();
+                });
+            });
+
+            if (typeof renderDashStudy === "function") renderDashStudy();
         }
 
         studyGoalBtn.addEventListener("click", () => {
@@ -9626,6 +9749,83 @@ document.documentElement.classList.toggle(
         });
 
         renderStudy();
+
+
+        /* DASHBOARD STUDY */
+
+        function renderDashStudy() {
+            const goal = loadStudyGoal();
+            const minutes = loadStudyMinutes();
+            const subjects = loadStudySubjects();
+            const completed = JSON.parse(
+                localStorage.getItem("dailykrd_study_completed") || "{}"
+            );
+            const todayKey = getStudyTodayKey();
+            const todayCompleted = completed[todayKey] || [];
+
+            if (goal === 0 && subjects.length === 0) {
+                dashStudyContent.innerHTML =
+                    '<div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>' +
+                    '<button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal \u2192</button>';
+                document.getElementById("dashSetStudyBtn")
+                    ?.addEventListener("click", () => showSection("study"));
+                return;
+            }
+
+            let html = "";
+
+            if (goal > 0) {
+                const pct = Math.min(100, Math.round((minutes / goal) * 100));
+                html += '<div class="dash-study-goal">' + minutes + ' / ' + goal + ' min</div>';
+                html += '<div class="dash-study-progress"><div class="dash-study-progress-fill" style="width:' + pct + '%;"></div></div>';
+            }
+
+            if (subjects.length > 0) {
+                html += '<div class="dash-study-subjects">';
+                subjects.forEach((s, i) => {
+                    const isChecked = todayCompleted.includes(s) ? "checked" : "";
+                    const cls = todayCompleted.includes(s) ? " completed" : "";
+                    html += '<div class="dash-study-subject">' +
+                        '<input type="checkbox" class="dash-study-check" data-subject="' +
+                        s.replace(/"/g, '&quot;') + '" ' + isChecked + '>' +
+                        '<div class="dash-study-subject-name' + cls + '">' +
+                        s.replace(/</g, '&lt;') + '</div>' +
+                        '</div>';
+                });
+                html += '</div>';
+            }
+
+            html += '<button class="setting-button" id="dashSetStudyBtn" style="width:100%; margin-top:12px;">Study \u2192</button>';
+
+            dashStudyContent.innerHTML = html;
+
+            document.getElementById("dashSetStudyBtn")
+                ?.addEventListener("click", () => showSection("study"));
+
+            dashStudyContent.querySelectorAll(".dash-study-check").forEach(cb => {
+                cb.addEventListener("change", () => {
+                    const subjectName = cb.dataset.subject;
+                    const allCompleted = JSON.parse(
+                        localStorage.getItem("dailykrd_study_completed") || "{}"
+                    );
+                    if (!allCompleted[todayKey]) allCompleted[todayKey] = [];
+                    if (cb.checked) {
+                        if (!allCompleted[todayKey].includes(subjectName)) {
+                            allCompleted[todayKey].push(subjectName);
+                        }
+                    } else {
+                        allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
+                    }
+                    localStorage.setItem(
+                        "dailykrd_study_completed",
+                        JSON.stringify(allCompleted)
+                    );
+                    renderDashStudy();
+                });
+            });
+        }
+
+        renderDashStudy();
 
 
         /* SERVICE WORKER */
