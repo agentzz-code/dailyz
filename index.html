@@ -10350,6 +10350,12 @@ document.documentElement.classList.toggle(
                 }
 
                 renderStudy();
+
+                fetch("https://dailypush.younismuhammed121.workers.dev/api/push/study-complete", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ deviceId: localStorage.getItem("dailykrd_device_id") })
+                }).catch(() => {});
             }
             timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
             timerDoneMsg.style.display = "block";
