@@ -1885,11 +1885,81 @@
             background: #eee;
             border-radius: 4px;
             overflow: hidden;
-        }
-
-        .dark .study-progress-bar {
+        }        .dark .study-progress-bar {
             background: #3a3a3a;
         }
+
+        /* STUDY TIMER */
+        .study-timer-card {
+            background: rgba(255,255,255,.92);
+            border-radius: 18px;
+            padding: 22px 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .dark .study-timer-card { background: #222; }
+        .study-timer-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 800; color: #888; margin-bottom: 12px;
+        }
+        .study-timer-time {
+            font-size: 56px; font-weight: 850;
+            font-variant-numeric: tabular-nums; letter-spacing: -2px;
+            line-height: 1; margin-bottom: 16px;
+        }
+        .study-timer-presets {
+            display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;
+        }
+        .study-timer-preset {
+            border: 0; border-radius: 10px; padding: 8px 14px;
+            font-weight: 700; font-size: 13px; cursor: pointer;
+            background: #eee; color: #555;
+        }
+        .dark .study-timer-preset { background: #333; color: #aaa; }
+        .study-timer-preset.active { background: var(--accent); color: var(--accent-contrast); }
+        .study-timer-custom-wrap {
+            display: none; align-items: center; gap: 6px; justify-content: center; margin-bottom: 16px;
+        }
+        .study-timer-custom-wrap.show { display: flex; }
+        .study-timer-custom-input {
+            width: 60px; border: 1px solid #ddd; border-radius: 10px;
+            padding: 8px; text-align: center; font-weight: 700; font-size: 14px;
+            background: transparent; color: inherit;
+        }
+        .dark .study-timer-custom-input { border-color: #555; }
+        .study-timer-custom-ok {
+            border: 0; border-radius: 10px; padding: 8px 14px;
+            background: var(--accent); color: var(--accent-contrast);
+            font-weight: 700; font-size: 13px; cursor: pointer;
+        }
+        .study-timer-subject-row {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-bottom: 14px; font-size: 13px; color: #888;
+        }
+        .study-timer-subject-select {
+            border: 1px solid #ddd; border-radius: 10px; padding: 7px 10px;
+            font-size: 13px; background: transparent; color: inherit;
+        }
+        .dark .study-timer-subject-select { border-color: #555; }
+        .study-timer-btns {
+            display: flex; gap: 10px; justify-content: center;
+        }
+        .study-timer-btns button {
+            border: 0; border-radius: 13px; padding: 14px 22px;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+        }
+        .study-timer-start { background: var(--accent); color: var(--accent-contrast); }
+        .study-timer-pause { background: #f0b64c; color: #111; }
+        .study-timer-reset { background: #eee; color: #555; }
+        .dark .study-timer-reset { background: #333; color: #aaa; }
+        .study-timer-finish { background: #2e8b57; color: #fff; }
+        .study-timer-done-msg {
+            display: none; padding: 12px; font-weight: 700;
+            color: #2e8b57; font-size: 14px;
+        }
+
+
+
 
         .study-progress-fill {
             height: 100%;
@@ -2828,7 +2898,31 @@
                         id="studyProgressFill"
                         style="width: 0%;"
                     ></div>
+                </div>            </div>
+
+
+            <!-- STUDY TIMER -->
+            <div class="study-timer-card" id="studyTimerCard">
+                <div class="study-timer-label">⏱️ STUDY TIMER</div>
+                <div class="study-timer-time" id="studyTimerTime">25:00</div>
+                <div class="study-timer-presets" id="studyTimerPresets">
+                    <button class="study-timer-preset active" data-min="25" type="button">25 min</button>
+                    <button class="study-timer-preset" data-min="50" type="button">50 min</button>
+                    <button class="study-timer-preset" data-min="0" type="button">Custom</button>
                 </div>
+                <div class="study-timer-custom-wrap" id="studyTimerCustomWrap">
+                    <input type="number" class="study-timer-custom-input" id="studyTimerCustomMin" min="1" max="300" placeholder="min" />
+                    <button class="study-timer-custom-ok" id="studyTimerCustomOk" type="button">OK</button>
+                </div>
+                <div class="study-timer-subject-row">
+                    <span id="studyTimerSubjectLabel"></span>
+                    <select class="study-timer-subject-select" id="studyTimerSubject"></select>
+                </div>
+                <div class="study-timer-btns" id="studyTimerBtns">
+                    <button class="study-timer-start" id="studyTimerStart" type="button"></button>
+                    <button class="study-timer-reset" id="studyTimerReset" type="button" style="display:none;"></button>
+                </div>
+                <div class="study-timer-done-msg" id="studyTimerDoneMsg"></div>
             </div>
 
 
@@ -4092,6 +4186,15 @@
                 cards: "cards",
                 cancel: "Cancel",
                 create: "Create",
+                timer: "STUDY TIMER",
+                timerStart: "Start",
+                timerPause: "Pause",
+                timerResume: "Resume",
+                timerReset: "Reset",
+                timerFinish: "Finish Session",
+                timerDone: "Session saved!",
+                timerSubject: "Subject",
+                timerNone: "None",
 
             },
 
@@ -4394,6 +4497,15 @@ done: "تەواو",
                 cards: "کارت",
                 cancel: "پاشگەزبوون",
                 create: "دروستکردن",
+                timer: "ژمێری خوێندن",
+                timerStart: "دەستپێکردن",
+                timerPause: " вокەڵاندن",
+                timerResume: "بەردەوامبوون",
+                timerReset: "ڕێکخستنەوە",
+                timerFinish: "تەواوکردنی قۆناغ",
+                timerDone: "قۆناغ پاشەکراوە!",
+                timerSubject: "بابەت",
+                timerNone: "هیچ",
 
             },
 
@@ -4696,6 +4808,15 @@ done: "تەواو",
                 cards: "بطاقات",
                 cancel: "إلغاء",
                 create: "إنشاء",
+                timer: "مؤقت المذاكرة",
+                timerStart: "ابدأ",
+                timerPause: "إيقاف مؤقت",
+                timerResume: "استئناف",
+                timerReset: "إعادة تعيين",
+                timerFinish: "إنهاء الجلسة",
+                timerDone: "تم حفظ الجلسة!",
+                timerSubject: "المادة",
+                timerNone: "بدون",
 
             }
 
@@ -10119,6 +10240,185 @@ document.documentElement.classList.toggle(
         }
 
         renderDashStudy();
+
+
+        /* STUDY TIMER */
+
+        const timerTimeEl = document.getElementById("studyTimerTime");
+        const timerPresetsEl = document.getElementById("studyTimerPresets");
+        const timerCustomWrap = document.getElementById("studyTimerCustomWrap");
+        const timerCustomMin = document.getElementById("studyTimerCustomMin");
+        const timerCustomOk = document.getElementById("studyTimerCustomOk");
+        const timerStartBtn = document.getElementById("studyTimerStart");
+        const timerResetBtn = document.getElementById("studyTimerReset");
+        const timerSubjectSel = document.getElementById("studyTimerSubject");
+        const timerSubjectLabel = document.getElementById("studyTimerSubjectLabel");
+        const timerDoneMsg = document.getElementById("studyTimerDoneMsg");
+
+        let timerDuration = 25 * 60;
+        let timerEndAt = 0;
+        let timerPausedRemaining = 0;
+        let timerInterval = null;
+        let timerState = "idle"; /* idle | running | paused */
+
+        function timerFormat(s) {
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+        }
+
+        function timerRender() {
+            let remaining;
+            if (timerState === "running") {
+                remaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
+            } else if (timerState === "paused") {
+                remaining = timerPausedRemaining;
+            } else {
+                remaining = timerDuration;
+            }
+            timerTimeEl.textContent = timerFormat(remaining);
+            document.title = (remaining > 0 ? timerFormat(remaining) + " - " : "") + "Daily.KRD";
+        }
+
+        function timerTick() {
+            timerRender();
+            if (timerState === "running" && Date.now() >= timerEndAt) {
+                timerFinishSession();
+            }
+        }
+
+        function timerStart() {
+            if (timerState === "running") {
+                /* Pause */
+                timerPausedRemaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
+                timerState = "paused";
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timerStartBtn.textContent = t("timerResume");
+                timerStartBtn.className = "study-timer-start";
+                timerRender();
+                return;
+            }
+            if (timerState === "paused") {
+                /* Resume */
+                timerEndAt = Date.now() + timerPausedRemaining * 1000;
+                timerState = "running";
+            } else {
+                /* Fresh start */
+                timerEndAt = Date.now() + timerDuration * 1000;
+                timerState = "running";
+            }
+            timerDoneMsg.style.display = "none";
+            timerStartBtn.textContent = t("timerPause");
+            timerStartBtn.className = "study-timer-pause";
+            timerResetBtn.style.display = "";
+            timerRender();
+            timerInterval = setInterval(timerTick, 500);
+        }
+
+        function timerFinishSession() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            const elapsed = Math.round(timerDuration - timerPausedRemaining);
+            if (timerState === "running") {
+                /* full session */
+            }
+            timerState = "idle";
+            timerStartBtn.textContent = t("timerStart");
+            timerStartBtn.className = "study-timer-start";
+            timerResetBtn.style.display = "none";
+            timerRender();
+            document.title = "Daily.KRD";
+
+            /* Save session */
+            const mins = Math.round(elapsed / 60);
+            if (mins > 0) {
+                const todayKey = getStudyTodayKey();
+                const data = JSON.parse(localStorage.getItem("dailykrd_study_minutes") || "{}");
+                data[todayKey] = (data[todayKey] || 0) + mins;
+                localStorage.setItem("dailykrd_study_minutes", JSON.stringify(data));
+
+                const sessions = JSON.parse(localStorage.getItem("dailykrd_study_sessions") || "[]");
+                sessions.push({ date: todayKey, duration: mins, subject: timerSubjectSel.value || "" });
+                localStorage.setItem("dailykrd_study_sessions", JSON.stringify(sessions));
+
+                if (currentUser) {
+                    try {
+                        const ref = doc(db, "users", currentUser.uid, "study", "sessions");
+                        setDoc(ref, { sessions: sessions }, { merge: true }).catch(() => {});
+                    } catch (e) {}
+                }
+
+                renderStudy();
+            }
+            timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
+            timerDoneMsg.style.display = "block";
+        }
+
+        function timerReset() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerState = "idle";
+            timerPausedRemaining = 0;
+            timerStartBtn.textContent = t("timerStart");
+            timerStartBtn.className = "study-timer-start";
+            timerResetBtn.style.display = "none";
+            timerDoneMsg.style.display = "none";
+            timerRender();
+            document.title = "Daily.KRD";
+        }
+
+        function timerPopulateSubject() {
+            const subjects = loadStudySubjects();
+            timerSubjectLabel.textContent = t("timerSubject") + ":";
+            timerSubjectSel.innerHTML = '<option value="">' + (t("timerNone") || "None") + "</option>" +
+                subjects.map(s => '<option value="' + s.replace(/"/g, "&quot;") + '">' + s.replace(/</g, "&lt;") + '</option>').join("");
+        }
+
+        function timerInit() {
+            timerPopulateSubject();
+            timerStartBtn.textContent = t("timerStart");
+            timerRender();
+        }
+
+        timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(btn => {
+            btn.addEventListener("click", () => {
+                if (timerState !== "idle") return;
+                timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                const min = parseInt(btn.dataset.min, 10);
+                if (min === 0) {
+                    timerCustomWrap.classList.add("show");
+                    timerCustomMin.focus();
+                } else {
+                    timerCustomWrap.classList.remove("show");
+                    timerDuration = min * 60;
+                    timerRender();
+                }
+            });
+        });
+
+        timerCustomOk.addEventListener("click", () => {
+            const v = parseInt(timerCustomMin.value, 10);
+            if (v > 0 && v <= 300) {
+                timerDuration = v * 60;
+                timerRender();
+                timerCustomWrap.classList.remove("show");
+            }
+        });
+
+        timerCustomMin.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") timerCustomOk.click();
+        });
+
+        timerStartBtn.addEventListener("click", timerStart);
+        timerResetBtn.addEventListener("click", timerReset);
+
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden && timerState === "running") timerTick();
+        });
+
+        timerInit();
 
 
         /* FLASHCARDS */
