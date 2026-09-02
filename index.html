@@ -10345,22 +10345,11 @@ document.documentElement.classList.toggle(
                 if (currentUser) {
                     try {
                         const ref = doc(db, "users", currentUser.uid, "study", "sessions");
-                        const cleanSessions = sessions.map(s => ({
-                            date: String(s.date || ""),
-                            duration: Number(s.duration) || 0,
-                            subject: String(s.subject || "")
-                        })).filter(s => s.duration > 0);
-                        setDoc(ref, { sessions: cleanSessions }, { merge: true }).catch(() => {});
+                        setDoc(ref, { sessions: sessions }, { merge: true }).catch(() => {});
                     } catch (e) {}
                 }
 
                 renderStudy();
-
-                fetch("https://dailypush.younismuhammed121.workers.dev/api/push/study-complete", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ deviceId: localStorage.getItem("dailykrd_device_id") })
-                }).catch(() => {});
             }
             timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
             timerDoneMsg.style.display = "block";
