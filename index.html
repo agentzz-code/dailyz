@@ -10232,7 +10232,10 @@ document.documentElement.classList.toggle(
                 saveGuestFlashcards();
                 renderFlashcardDeckList();
             } else {
-                await addDoc(getFlashcardsCollection(), deck);
+                flashcardDecks.push(deck);
+                renderFlashcardDeckList();
+                try { await addDoc(getFlashcardsCollection(), deck); }
+                catch (e) { console.error("Create deck error:", e); }
             }
         }
 
@@ -10248,13 +10251,14 @@ document.documentElement.classList.toggle(
                 : currentLanguage === "ar"
                 ? "حذف مجموعة «" + deck.name + "»؟"
                 : "Delete \"" + deck.name + "\"?")) return;
+            flashcardDecks.splice(index, 1);
+            showFlashcardView('list');
+            renderFlashcardDeckList();
             if (!currentUser) {
-                flashcardDecks.splice(index, 1);
                 saveGuestFlashcards();
-                showFlashcardView('list');
-                renderFlashcardDeckList();
             } else {
-                await deleteDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id));
+                try { await deleteDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id)); }
+                catch (e) { console.error("Delete deck error:", e); }
             }
         }
 
@@ -10267,13 +10271,13 @@ document.documentElement.classList.toggle(
             if (back === null || !back.trim()) return;
             const card = { id: generateFlashcardId(), front: front.trim(), back: back.trim(), needsReview: false };
             deck.cards.push(card);
+            renderFlashcardDeckDetail();
             if (!currentUser) {
                 saveGuestFlashcards();
-                renderFlashcardDeckDetail();
             } else {
-                await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
                     name: deck.name, createdAt: deck.createdAt, cards: deck.cards
-                });
+                }); } catch (e) { console.error("Add card error:", e); }
             }
         }
 
@@ -10288,13 +10292,13 @@ document.documentElement.classList.toggle(
             if (back === null) return;
             if (front.trim()) card.front = front.trim();
             if (back.trim()) card.back = back.trim();
+            renderFlashcardDeckDetail();
             if (!currentUser) {
                 saveGuestFlashcards();
-                renderFlashcardDeckDetail();
             } else {
-                await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
                     name: deck.name, createdAt: deck.createdAt, cards: deck.cards
-                });
+                }); } catch (e) { console.error("Edit card error:", e); }
             }
         }
 
@@ -10302,13 +10306,13 @@ document.documentElement.classList.toggle(
             const deck = flashcardDecks[deckIdx];
             if (!deck) return;
             deck.cards.splice(cardIdx, 1);
+            renderFlashcardDeckDetail();
             if (!currentUser) {
                 saveGuestFlashcards();
-                renderFlashcardDeckDetail();
             } else {
-                await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
                     name: deck.name, createdAt: deck.createdAt, cards: deck.cards
-                });
+                }); } catch (e) { console.error("Delete card error:", e); }
             }
         }
 
@@ -10367,12 +10371,12 @@ document.documentElement.classList.toggle(
             studySession.index++;
             if (studySession.index >= studySession.cards.length) {
                 if (deck) {
-                    if (currentUser) {
-                        await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
-                            name: deck.name, createdAt: deck.createdAt, cards: deck.cards
-                        });
-                    } else {
+                    if (!currentUser) {
                         saveGuestFlashcards();
+                    } else {
+                        try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                            name: deck.name, createdAt: deck.createdAt, cards: deck.cards
+                        }); } catch (e) { console.error("Study sync error:", e); }
                     }
                 }
                 showStudySummary();
