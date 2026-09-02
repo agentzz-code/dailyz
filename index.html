@@ -1885,11 +1885,81 @@
             background: #eee;
             border-radius: 4px;
             overflow: hidden;
-        }
-
-        .dark .study-progress-bar {
+        }        .dark .study-progress-bar {
             background: #3a3a3a;
         }
+
+        /* STUDY TIMER */
+        .study-timer-card {
+            background: rgba(255,255,255,.92);
+            border-radius: 18px;
+            padding: 22px 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .dark .study-timer-card { background: #222; }
+        .study-timer-label {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 800; color: #888; margin-bottom: 12px;
+        }
+        .study-timer-time {
+            font-size: 56px; font-weight: 850;
+            font-variant-numeric: tabular-nums; letter-spacing: -2px;
+            line-height: 1; margin-bottom: 16px;
+        }
+        .study-timer-presets {
+            display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;
+        }
+        .study-timer-preset {
+            border: 0; border-radius: 10px; padding: 8px 14px;
+            font-weight: 700; font-size: 13px; cursor: pointer;
+            background: #eee; color: #555;
+        }
+        .dark .study-timer-preset { background: #333; color: #aaa; }
+        .study-timer-preset.active { background: var(--accent); color: var(--accent-contrast); }
+        .study-timer-custom-wrap {
+            display: none; align-items: center; gap: 6px; justify-content: center; margin-bottom: 16px;
+        }
+        .study-timer-custom-wrap.show { display: flex; }
+        .study-timer-custom-input {
+            width: 60px; border: 1px solid #ddd; border-radius: 10px;
+            padding: 8px; text-align: center; font-weight: 700; font-size: 14px;
+            background: transparent; color: inherit;
+        }
+        .dark .study-timer-custom-input { border-color: #555; }
+        .study-timer-custom-ok {
+            border: 0; border-radius: 10px; padding: 8px 14px;
+            background: var(--accent); color: var(--accent-contrast);
+            font-weight: 700; font-size: 13px; cursor: pointer;
+        }
+        .study-timer-subject-row {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-bottom: 14px; font-size: 13px; color: #888;
+        }
+        .study-timer-subject-select {
+            border: 1px solid #ddd; border-radius: 10px; padding: 7px 10px;
+            font-size: 13px; background: transparent; color: inherit;
+        }
+        .dark .study-timer-subject-select { border-color: #555; }
+        .study-timer-btns {
+            display: flex; gap: 10px; justify-content: center;
+        }
+        .study-timer-btns button {
+            border: 0; border-radius: 13px; padding: 14px 22px;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+        }
+        .study-timer-start { background: var(--accent); color: var(--accent-contrast); }
+        .study-timer-pause { background: #f0b64c; color: #111; }
+        .study-timer-reset { background: #eee; color: #555; }
+        .dark .study-timer-reset { background: #333; color: #aaa; }
+        .study-timer-finish { background: #2e8b57; color: #fff; }
+        .study-timer-done-msg {
+            display: none; padding: 12px; font-weight: 700;
+            color: #2e8b57; font-size: 14px;
+        }
+
+
+
 
         .study-progress-fill {
             height: 100%;
@@ -2045,6 +2115,178 @@
         .dash-study-subject-name.completed {
             text-decoration: line-through;
             opacity: .45;
+        }
+
+        /* FLASHCARDS */
+        .flashcard-deck {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,.92);
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 9px;
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+        .dark .flashcard-deck { background: #222; }
+        .flashcard-deck:active { opacity: .85; }
+        .flashcard-deck-info { flex: 1; min-width: 0; }
+        .flashcard-deck-name { font-weight: 700; font-size: 15px; }
+        .flashcard-deck-count { color: #888; font-size: 13px; margin-top: 2px; }
+        .flashcard-deck-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .flashcard-mini-study {
+            border: 0; background: var(--accent); color: var(--accent-contrast);
+            border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: 13px;
+        }
+        .flashcard-delete-deck {
+            border: 0; background: transparent; color: #999;
+            font-size: 20px; padding: 4px 8px;
+        }
+        .flashcard-back-btn {
+            border: 0; background: transparent; color: #888;
+            font-size: 15px; font-weight: 650; padding: 8px 0; margin-bottom: 8px; cursor: pointer;
+        }
+        .flashcard-back-btn:active { opacity: .6; }
+        .flashcard-detail-name { font-size: 22px; font-weight: 850; margin: 0 0 4px 0; }
+        .flashcard-detail-count { color: #888; font-size: 13px; margin-bottom: 16px; }
+        .flashcard-detail-actions { display: flex; gap: 8px; margin-bottom: 16px; }
+        .flashcard-card-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,.92); border-radius: 14px; padding: 14px; margin-bottom: 9px;
+        }
+        .dark .flashcard-card-item { background: #222; }
+        .flashcard-card-text { flex: 1; min-width: 0; }
+        .flashcard-card-front-text {
+            font-weight: 700; font-size: 14px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .flashcard-card-back-text {
+            color: #888; font-size: 13px; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .flashcard-card-btns { display: flex; gap: 2px; flex-shrink: 0; }
+        .flashcard-card-btns button {
+            border: 0; background: transparent; color: #999; font-size: 16px; padding: 4px 6px;
+        }
+        .flashcard-study-progress {
+            font-size: 16px; font-weight: 700; color: #888;
+            margin-bottom: 16px; text-align: center;
+        }
+        .flashcard-study-card {
+            background: rgba(255,255,255,.92); border-radius: 20px;
+            padding: 40px 24px; min-height: 260px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; font-size: 20px; font-weight: 700;
+            cursor: pointer; margin-bottom: 20px; user-select: none;
+            word-break: break-word; line-height: 1.5;
+        }
+        .dark .flashcard-study-card { background: #222; }
+        .flashcard-study-card:active { transform: scale(.98); }
+        .flashcard-study-hint {
+            font-size: 13px; color: #888; margin-top: 16px; font-weight: 500;
+        }
+        .flashcard-study-back-text {
+            margin-top: 20px; font-size: 17px; font-weight: 500;
+            color: #555; line-height: 1.5;
+        }
+        .dark .flashcard-study-back-text { color: #ccc; }
+        .flashcard-study-actions { display: flex; gap: 12px; }
+        .flashcard-action-btn {
+            flex: 1; border: 0; border-radius: 14px;
+            padding: 16px 12px; font-weight: 700; font-size: 15px;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 6px;
+        }
+        .flashcard-action-btn:active { transform: scale(.95); }
+        .flashcard-review-btn {
+            background: rgba(224,92,92,.12); color: #e05c5c;
+        }
+        .dark .flashcard-review-btn {
+            background: rgba(224,92,92,.2); color: #ff7b7b;
+        }
+        .flashcard-know-btn {
+            background: rgba(46,139,87,.12); color: #2e8b57;
+        }
+        .dark .flashcard-know-btn {
+            background: rgba(46,139,87,.2); color: #5cb882;
+        }
+        .flashcard-summary-card {
+            background: rgba(255,255,255,.92); border-radius: 20px;
+            padding: 30px 24px; text-align: center; margin-bottom: 20px;
+        }
+        .dark .flashcard-summary-card { background: #222; }
+        .flashcard-summary-title { font-size: 24px; font-weight: 850; margin-bottom: 24px; }
+        .flashcard-summary-stat {
+            display: flex; justify-content: space-between;
+            padding: 12px 0; font-size: 16px; font-weight: 650;
+            border-bottom: 1px solid rgba(0,0,0,.06);
+        }
+        .dark .flashcard-summary-stat { border-bottom-color: rgba(255,255,255,.08); }
+        .flashcard-summary-stat:last-child { border-bottom: 0; }
+        .flashcard-summary-stat span:last-child { color: #888; }
+
+        /* FLASHCARD MODAL */
+        .flashcard-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            background: rgba(0,0,0,.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .flashcard-modal-overlay.open { display: flex; }
+        .flashcard-modal {
+            background: #fff;
+            border-radius: 18px;
+            padding: 24px 20px 20px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.2);
+        }
+        .dark .flashcard-modal { background: #1c1c1c; }
+        .flashcard-modal-title {
+            font-size: 18px; font-weight: 800; margin-bottom: 16px;
+        }
+        .flashcard-modal input {
+            width: 100%;
+            border: 1px solid #ddd;
+            background: rgba(255,255,255,.92);
+            color: #111;
+            padding: 14px;
+            border-radius: 13px;
+            outline: none;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+        .dark .flashcard-modal input {
+            background: #2a2a2a;
+            color: #fff;
+            border-color: #3a3a3a;
+        }
+        .flashcard-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .flashcard-modal-actions button {
+            flex: 1;
+            border: 0;
+            border-radius: 13px;
+            padding: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .flashcard-modal-cancel {
+            background: #eee;
+            color: #555;
+        }
+        .dark .flashcard-modal-cancel { background: #333; color: #aaa; }
+        .flashcard-modal-confirm {
+            background: var(--accent);
+            color: var(--accent-contrast);
         }
 
     </style>
@@ -2656,7 +2898,31 @@
                         id="studyProgressFill"
                         style="width: 0%;"
                     ></div>
+                </div>            </div>
+
+
+            <!-- STUDY TIMER -->
+            <div class="study-timer-card" id="studyTimerCard">
+                <div class="study-timer-label">⏱️ STUDY TIMER</div>
+                <div class="study-timer-time" id="studyTimerTime">25:00</div>
+                <div class="study-timer-presets" id="studyTimerPresets">
+                    <button class="study-timer-preset active" data-min="25" type="button">25 min</button>
+                    <button class="study-timer-preset" data-min="50" type="button">50 min</button>
+                    <button class="study-timer-preset" data-min="0" type="button">Custom</button>
                 </div>
+                <div class="study-timer-custom-wrap" id="studyTimerCustomWrap">
+                    <input type="number" class="study-timer-custom-input" id="studyTimerCustomMin" min="1" max="300" placeholder="min" />
+                    <button class="study-timer-custom-ok" id="studyTimerCustomOk" type="button">OK</button>
+                </div>
+                <div class="study-timer-subject-row">
+                    <span id="studyTimerSubjectLabel"></span>
+                    <select class="study-timer-subject-select" id="studyTimerSubject"></select>
+                </div>
+                <div class="study-timer-btns" id="studyTimerBtns">
+                    <button class="study-timer-start" id="studyTimerStart" type="button"></button>
+                    <button class="study-timer-reset" id="studyTimerReset" type="button" style="display:none;"></button>
+                </div>
+                <div class="study-timer-done-msg" id="studyTimerDoneMsg"></div>
             </div>
 
 
@@ -2677,6 +2943,58 @@
                 class="study-subject-list"
                 id="studySubjectList"
             >
+            </div>
+
+            <!-- FLASHCARDS -->
+            <div id="flashcardsSection" style="margin-top: 20px;">
+                <div id="flashcardsDeckListView">
+                    <div class="study-subjects-header">
+                        <div class="study-subjects-title" id="flashcardsTitle"></div>
+                        <button class="study-add-btn" id="flashcardAddDeckBtn" type="button"></button>
+                    </div>
+                    <div id="flashcardDeckList" class="study-subject-list"></div>
+                </div>
+                <div id="flashcardsDetailView" style="display:none;">
+                    <button class="flashcard-back-btn" id="flashcardBackBtn" type="button"></button>
+                    <div class="flashcard-detail-name" id="flashcardDetailName"></div>
+                    <div class="flashcard-detail-count" id="flashcardDetailCount"></div>
+                    <div class="flashcard-detail-actions">
+                        <button class="study-add-btn" id="flashcardStudyBtn" type="button" style="flex:1;"></button>
+                        <button class="setting-button" id="flashcardAddCardBtn" type="button" style="flex:1;"></button>
+                    </div>
+                    <div id="flashcardCardList"></div>
+                </div>
+                <div id="flashcardsStudyView" style="display:none;">
+                    <div class="flashcard-study-progress" id="flashcardsStudyProgressText"></div>
+                    <div class="flashcard-study-card" id="flashcardsStudyCard">
+                        <div id="flashcardsStudyFront"></div>
+                        <div class="flashcard-study-hint" id="flashcardsStudyHint"></div>
+                        <div class="flashcard-study-back-text" id="flashcardsStudyBack" style="display:none;"></div>
+                    </div>
+                    <div class="flashcard-study-actions" id="flashcardsStudyActions" style="display:none;">
+                        <button class="flashcard-action-btn flashcard-review-btn" id="flashcardReviewBtn" type="button">❌ <span id="flashcardReviewLabel"></span></button>
+                        <button class="flashcard-action-btn flashcard-know-btn" id="flashcardKnowBtn" type="button">✅ <span id="flashcardKnowLabel"></span></button>
+                    </div>
+                </div>
+                <div id="flashcardsSummaryView" style="display:none;">
+                    <div class="flashcard-summary-card">
+                        <div class="flashcard-summary-title" id="flashcardsSummaryTitle"></div>
+                        <div id="flashcardsSummaryStats"></div>
+                    </div>
+                    <button class="study-add-btn" id="flashcardsSummaryDoneBtn" type="button" style="width:100%; padding:16px;"></button>
+                </div>
+            </div>
+
+            <!-- DECK MODAL -->
+            <div class="flashcard-modal-overlay" id="flashcardDeckModal">
+                <div class="flashcard-modal">
+                    <div class="flashcard-modal-title" id="flashcardDeckModalTitle"></div>
+                    <input type="text" id="flashcardDeckModalInput" autocomplete="off" />
+                    <div class="flashcard-modal-actions">
+                        <button type="button" class="flashcard-modal-cancel" id="flashcardDeckModalCancel"></button>
+                        <button type="button" class="flashcard-modal-confirm" id="flashcardDeckModalConfirm"></button>
+                    </div>
+                </div>
             </div>
 
         </section>
@@ -3844,7 +4162,39 @@
                     "Thu",
                     "Fri",
                     "Sat"
-                ]
+                ],
+
+                flashcards: "Flashcards",
+                newDeck: "New Deck",
+                deckName: "Deck name",
+                front: "Question",
+                back: "Answer",
+                backToList: "← Back",
+                startStudy: "🧠 Start Study",
+                addCard: "+ Add Card",
+                noFlashcards: "No flashcard decks yet. Create one to start studying!",
+                noCards: "No cards yet. Add some to start studying.",
+                needReview: "Need to Review",
+                knowIt: "Know It",
+                tapToReveal: "Tap to reveal answer",
+                sessionComplete: "Session Complete!",
+                cardsStudied: "Cards Studied",
+                cardsKnown: "Cards Known",
+                cardsToReview: "Cards to Review",
+                done: "Done",
+                card: "card",
+                cards: "cards",
+                cancel: "Cancel",
+                create: "Create",
+                timer: "STUDY TIMER",
+                timerStart: "Start",
+                timerPause: "Pause",
+                timerResume: "Resume",
+                timerReset: "Reset",
+                timerFinish: "Finish Session",
+                timerDone: "Session saved!",
+                timerSubject: "Subject",
+                timerNone: "None",
 
             },
 
@@ -4123,7 +4473,39 @@
                     "پێنج",
                     "هەینی",
                     "شەم"
-                ]
+                ],
+
+                flashcards: "کارتە فلش",
+                newDeck: "دەستەی نوێ",
+                deckName: "ناوی دەستە",
+                front: "پرسیار",
+                back: "وەڵام",
+                backToList: "← گەڕانەوە",
+                startStudy: "🧠 دەستپێکردنی خوێندن",
+                addCard: "+ کارت زیاد بکە",
+                noFlashcards: "هێشتا هیچ دەستەی کارت فلش نییە. یەک دروست بکە بۆ دەستپێکردنی خوێندن!",
+                noCards: "هێشتا هیچ کارتێک نییە. کارتێک زیاد بکە بۆ دەستپێکردنی خوێندن.",
+                needReview: "پێویستە بچمەوە",
+                knowIt: "زانیاریم هەیە",
+                tapToReveal: "گرتە بکە بۆ دیاریکردنی وەڵام",
+                sessionComplete: "قۆناغ تەواو بوو!",
+                cardsStudied: "کارتە خوێندراوەکان",
+                cardsKnown: "کارتە زانیارەکان",
+                cardsToReview: "کارتە بۆ سەیرکردن",
+done: "تەواو",
+                card: "کارت",
+                cards: "کارت",
+                cancel: "پاشگەزبوون",
+                create: "دروستکردن",
+                timer: "ژمێری خوێندن",
+                timerStart: "دەستپێکردن",
+                timerPause: " вокەڵاندن",
+                timerResume: "بەردەوامبوون",
+                timerReset: "ڕێکخستنەوە",
+                timerFinish: "تەواوکردنی قۆناغ",
+                timerDone: "قۆناغ پاشەکراوە!",
+                timerSubject: "بابەت",
+                timerNone: "هیچ",
 
             },
 
@@ -4402,7 +4784,39 @@
                     "خميس",
                     "جمعة",
                     "سبت"
-                ]
+                ],
+
+                flashcards: "بطاقات تعليمية",
+                newDeck: "مجموعة جديدة",
+                deckName: "اسم المجموعة",
+                front: "السؤال",
+                back: "الإجابة",
+                backToList: "← رجوع",
+                startStudy: "🧠 ابدأ الدراسة",
+                addCard: "+ إضافة بطاقة",
+                noFlashcards: "لا توجد مجموعات بعد. أنشئ واحدة لبدء الدراسة!",
+                noCards: "لا توجد بطاقات بعد. أضف بعض البطاقات لبدء الدراسة.",
+                needReview: "أحتاج للمراجعة",
+                knowIt: "أعرفها",
+                tapToReveal: "اضغط للكشف عن الإجابة",
+                sessionComplete: "اكتملت الجلسة!",
+                cardsStudied: "البطاقات المدروسة",
+                cardsKnown: "البطاقات المعروفة",
+                cardsToReview: "بطاقات للمراجعة",
+                done: "تم",
+                card: "بطاقة",
+                cards: "بطاقات",
+                cancel: "إلغاء",
+                create: "إنشاء",
+                timer: "مؤقت المذاكرة",
+                timerStart: "ابدأ",
+                timerPause: "إيقاف مؤقت",
+                timerResume: "استئناف",
+                timerReset: "إعادة تعيين",
+                timerFinish: "إنهاء الجلسة",
+                timerDone: "تم حفظ الجلسة!",
+                timerSubject: "المادة",
+                timerNone: "بدون",
 
             }
 
@@ -9826,6 +10240,598 @@ document.documentElement.classList.toggle(
         }
 
         renderDashStudy();
+
+
+        /* STUDY TIMER */
+
+        const timerTimeEl = document.getElementById("studyTimerTime");
+        const timerPresetsEl = document.getElementById("studyTimerPresets");
+        const timerCustomWrap = document.getElementById("studyTimerCustomWrap");
+        const timerCustomMin = document.getElementById("studyTimerCustomMin");
+        const timerCustomOk = document.getElementById("studyTimerCustomOk");
+        const timerStartBtn = document.getElementById("studyTimerStart");
+        const timerResetBtn = document.getElementById("studyTimerReset");
+        const timerSubjectSel = document.getElementById("studyTimerSubject");
+        const timerSubjectLabel = document.getElementById("studyTimerSubjectLabel");
+        const timerDoneMsg = document.getElementById("studyTimerDoneMsg");
+
+        let timerDuration = 25 * 60;
+        let timerEndAt = 0;
+        let timerPausedRemaining = 0;
+        let timerInterval = null;
+        let timerState = "idle"; /* idle | running | paused */
+
+        function timerFormat(s) {
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+        }
+
+        function timerRender() {
+            let remaining;
+            if (timerState === "running") {
+                remaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
+            } else if (timerState === "paused") {
+                remaining = timerPausedRemaining;
+            } else {
+                remaining = timerDuration;
+            }
+            timerTimeEl.textContent = timerFormat(remaining);
+            document.title = (remaining > 0 ? timerFormat(remaining) + " - " : "") + "Daily.KRD";
+        }
+
+        function timerTick() {
+            timerRender();
+            if (timerState === "running" && Date.now() >= timerEndAt) {
+                timerFinishSession();
+            }
+        }
+
+        function timerStart() {
+            if (timerState === "running") {
+                /* Pause */
+                timerPausedRemaining = Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
+                timerState = "paused";
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timerStartBtn.textContent = t("timerResume");
+                timerStartBtn.className = "study-timer-start";
+                timerRender();
+                return;
+            }
+            if (timerState === "paused") {
+                /* Resume */
+                timerEndAt = Date.now() + timerPausedRemaining * 1000;
+                timerState = "running";
+            } else {
+                /* Fresh start */
+                timerEndAt = Date.now() + timerDuration * 1000;
+                timerState = "running";
+            }
+            timerDoneMsg.style.display = "none";
+            timerStartBtn.textContent = t("timerPause");
+            timerStartBtn.className = "study-timer-pause";
+            timerResetBtn.style.display = "";
+            timerRender();
+            timerInterval = setInterval(timerTick, 500);
+        }
+
+        function timerFinishSession() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            const elapsed = Math.round(timerDuration - timerPausedRemaining);
+            if (timerState === "running") {
+                /* full session */
+            }
+            timerState = "idle";
+            timerStartBtn.textContent = t("timerStart");
+            timerStartBtn.className = "study-timer-start";
+            timerResetBtn.style.display = "none";
+            timerRender();
+            document.title = "Daily.KRD";
+
+            /* Save session */
+            const mins = Math.round(elapsed / 60);
+            if (mins > 0) {
+                const todayKey = getStudyTodayKey();
+                const data = JSON.parse(localStorage.getItem("dailykrd_study_minutes") || "{}");
+                data[todayKey] = (data[todayKey] || 0) + mins;
+                localStorage.setItem("dailykrd_study_minutes", JSON.stringify(data));
+
+                const sessions = JSON.parse(localStorage.getItem("dailykrd_study_sessions") || "[]");
+                sessions.push({ date: todayKey, duration: mins, subject: timerSubjectSel.value || "" });
+                localStorage.setItem("dailykrd_study_sessions", JSON.stringify(sessions));
+
+                if (currentUser) {
+                    try {
+                        const ref = doc(db, "users", currentUser.uid, "study", "sessions");
+                        setDoc(ref, { sessions: sessions }, { merge: true }).catch(() => {});
+                    } catch (e) {}
+                }
+
+                renderStudy();
+
+                fetch("https://dailypush.younismuhammed121.workers.dev/api/push/study-complete", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ deviceId: localStorage.getItem("dailykrd_device_id") })
+                }).catch(() => {});
+            }
+            timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
+            timerDoneMsg.style.display = "block";
+        }
+
+        function timerReset() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerState = "idle";
+            timerPausedRemaining = 0;
+            timerStartBtn.textContent = t("timerStart");
+            timerStartBtn.className = "study-timer-start";
+            timerResetBtn.style.display = "none";
+            timerDoneMsg.style.display = "none";
+            timerRender();
+            document.title = "Daily.KRD";
+        }
+
+        function timerPopulateSubject() {
+            const subjects = loadStudySubjects();
+            timerSubjectLabel.textContent = t("timerSubject") + ":";
+            timerSubjectSel.innerHTML = '<option value="">' + (t("timerNone") || "None") + "</option>" +
+                subjects.map(s => '<option value="' + s.replace(/"/g, "&quot;") + '">' + s.replace(/</g, "&lt;") + '</option>').join("");
+        }
+
+        function timerInit() {
+            timerPopulateSubject();
+            timerStartBtn.textContent = t("timerStart");
+            timerRender();
+        }
+
+        timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(btn => {
+            btn.addEventListener("click", () => {
+                if (timerState !== "idle") return;
+                timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                const min = parseInt(btn.dataset.min, 10);
+                if (min === 0) {
+                    timerCustomWrap.classList.add("show");
+                    timerCustomMin.focus();
+                } else {
+                    timerCustomWrap.classList.remove("show");
+                    timerDuration = min * 60;
+                    timerRender();
+                }
+            });
+        });
+
+        timerCustomOk.addEventListener("click", () => {
+            const v = parseInt(timerCustomMin.value, 10);
+            if (v > 0 && v <= 300) {
+                timerDuration = v * 60;
+                timerRender();
+                timerCustomWrap.classList.remove("show");
+            }
+        });
+
+        timerCustomMin.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") timerCustomOk.click();
+        });
+
+        timerStartBtn.addEventListener("click", timerStart);
+        timerResetBtn.addEventListener("click", timerReset);
+
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden && timerState === "running") timerTick();
+        });
+
+        timerInit();
+
+
+        /* FLASHCARDS */
+
+        let flashcardDecks = [];
+        let currentFlashcardView = 'list';
+        let currentDeckIndex = -1;
+        let studySession = { cards: [], index: 0, known: 0, review: 0 };
+        let unsubscribeFlashcards = null;
+
+        function generateFlashcardId() {
+            return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2, 8);
+        }
+
+        function shuffleFlashcardArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function loadGuestFlashcards() {
+            try {
+                return JSON.parse(localStorage.getItem("dailykrd_flashcards") || "[]");
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveGuestFlashcards() {
+            localStorage.setItem("dailykrd_flashcards", JSON.stringify(flashcardDecks));
+        }
+
+        function getFlashcardsCollection() {
+            return collection(db, "users", currentUser.uid, "flashcards");
+        }
+
+        function stopFlashcardListener() {
+            if (unsubscribeFlashcards) {
+                unsubscribeFlashcards();
+                unsubscribeFlashcards = null;
+            }
+        }
+
+        function startFlashcardListener() {
+            stopFlashcardListener();
+            if (!currentUser) return;
+            unsubscribeFlashcards = onSnapshot(
+                getFlashcardsCollection(),
+                snapshot => {
+                    const serverDecks = [];
+                    snapshot.forEach(d => {
+                        serverDecks.push({ id: d.id, ...d.data() });
+                    });
+                    serverDecks.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                    /* Merge: keep any local-only decks that haven't synced yet */
+                    const serverIds = new Set(serverDecks.map(d => d.id));
+                    const localOnly = flashcardDecks.filter(d => d.id && !serverIds.has(d.id));
+                    flashcardDecks = [...serverDecks, ...localOnly];
+                    renderFlashcardDeckList();
+                },
+                error => {
+                    console.error("Flashcard listener error:", error);
+                }
+            );
+        }
+
+        async function migrateGuestFlashcardsToAccount(uid) {
+            const raw = localStorage.getItem("dailykrd_flashcards");
+            if (!raw) return;
+            let guest;
+            try { guest = JSON.parse(raw); } catch (e) { return; }
+            if (!Array.isArray(guest) || guest.length === 0) {
+                localStorage.removeItem("dailykrd_flashcards");
+                return;
+            }
+            const col = collection(db, "users", uid, "flashcards");
+            for (const deck of guest) {
+                const { id, ...deckData } = deck;
+                await addDoc(col, deckData);
+            }
+            localStorage.removeItem("dailykrd_flashcards");
+        }
+
+        function openDeckModal() {
+            const modal = document.getElementById("flashcardDeckModal");
+            const input = document.getElementById("flashcardDeckModalInput");
+            const title = document.getElementById("flashcardDeckModalTitle");
+            const cancelBtn = document.getElementById("flashcardDeckModalCancel");
+            const confirmBtn = document.getElementById("flashcardDeckModalConfirm");
+            title.textContent = t("deckName");
+            input.value = "";
+            input.placeholder = t("deckName");
+            cancelBtn.textContent = t("cancel") || "Cancel";
+            confirmBtn.textContent = t("create") || "Create";
+            modal.classList.add("open");
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeDeckModal() {
+            document.getElementById("flashcardDeckModal").classList.remove("open");
+        }
+
+        async function confirmCreateDeck() {
+            const input = document.getElementById("flashcardDeckModalInput");
+            const name = input.value;
+            if (!name || !name.trim()) return;
+            closeDeckModal();
+            const deck = { name: name.trim(), createdAt: Date.now(), cards: [] };
+            deck.id = generateFlashcardId();
+            flashcardDecks.push(deck);
+            saveGuestFlashcards();
+            renderFlashcardDeckList();
+            if (currentUser) {
+                try { await addDoc(getFlashcardsCollection(), deck); }
+                catch (e) { console.error("Create deck error:", e); }
+            }
+        }
+
+        async function createFlashcardDeck() {
+            openDeckModal();
+        }
+
+        async function deleteFlashcardDeck(index) {
+            const deck = flashcardDecks[index];
+            if (!deck) return;
+            if (!confirm(currentLanguage === "ku"
+                ? "دەستەی «" + deck.name + "» بسڕەوە؟"
+                : currentLanguage === "ar"
+                ? "حذف مجموعة «" + deck.name + "»؟"
+                : "Delete \"" + deck.name + "\"?")) return;
+            flashcardDecks.splice(index, 1);
+            showFlashcardView('list');
+            saveGuestFlashcards();
+            renderFlashcardDeckList();
+            if (currentUser && deck.id) {
+                try { await deleteDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id)); }
+                catch (e) { console.error("Delete deck error:", e); }
+            }
+        }
+
+        async function addCardToDeck() {
+            const deck = flashcardDecks[currentDeckIndex];
+            if (!deck) return;
+            const front = prompt(t("front") + ":");
+            if (front === null || !front.trim()) return;
+            const back = prompt(t("back") + ":");
+            if (back === null || !back.trim()) return;
+            const card = { id: generateFlashcardId(), front: front.trim(), back: back.trim(), needsReview: false };
+            deck.cards.push(card);
+            saveGuestFlashcards();
+            renderFlashcardDeckDetail();
+            if (currentUser && deck.id) {
+                try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                    name: deck.name, createdAt: deck.createdAt, cards: deck.cards
+                }); } catch (e) { console.error("Add card error:", e); }
+            }
+        }
+
+        async function editFlashcardCard(deckIdx, cardIdx) {
+            const deck = flashcardDecks[deckIdx];
+            if (!deck) return;
+            const card = deck.cards[cardIdx];
+            if (!card) return;
+            const front = prompt(t("front") + ":", card.front);
+            if (front === null) return;
+            const back = prompt(t("back") + ":", card.back);
+            if (back === null) return;
+            if (front.trim()) card.front = front.trim();
+            if (back.trim()) card.back = back.trim();
+            saveGuestFlashcards();
+            renderFlashcardDeckDetail();
+            if (currentUser && deck.id) {
+                try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                    name: deck.name, createdAt: deck.createdAt, cards: deck.cards
+                }); } catch (e) { console.error("Edit card error:", e); }
+            }
+        }
+
+        async function deleteFlashcardCard(deckIdx, cardIdx) {
+            const deck = flashcardDecks[deckIdx];
+            if (!deck) return;
+            deck.cards.splice(cardIdx, 1);
+            saveGuestFlashcards();
+            renderFlashcardDeckDetail();
+            if (currentUser && deck.id) {
+                try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                    name: deck.name, createdAt: deck.createdAt, cards: deck.cards
+                }); } catch (e) { console.error("Delete card error:", e); }
+            }
+        }
+
+        function getStudyOrder(cards) {
+            const review = shuffleFlashcardArray(cards.filter(c => c.needsReview));
+            const fresh = shuffleFlashcardArray(cards.filter(c => !c.needsReview));
+            return [...review, ...fresh];
+        }
+
+        function startStudySession() {
+            const deck = flashcardDecks[currentDeckIndex];
+            if (!deck || !deck.cards || deck.cards.length === 0) return;
+            studySession = { cards: getStudyOrder(deck.cards), index: 0, known: 0, review: 0 };
+            showFlashcardView('study');
+            renderStudyCard();
+        }
+
+        function renderStudyCard() {
+            const card = studySession.cards[studySession.index];
+            const total = studySession.cards.length;
+            const current = studySession.index + 1;
+            document.getElementById("flashcardsStudyProgressText").textContent = current + " / " + total;
+            document.getElementById("flashcardsStudyFront").textContent = card.front;
+            document.getElementById("flashcardsStudyBack").style.display = "none";
+            document.getElementById("flashcardsStudyFront").style.display = "block";
+            document.getElementById("flashcardsStudyHint").textContent = t("tapToReveal");
+            document.getElementById("flashcardsStudyHint").style.display = "block";
+            document.getElementById("flashcardsStudyActions").style.display = "none";
+            document.getElementById("flashcardReviewLabel").textContent = t("needReview");
+            document.getElementById("flashcardKnowLabel").textContent = t("knowIt");
+        }
+
+        function flipStudyCard() {
+            const card = studySession.cards[studySession.index];
+            document.getElementById("flashcardsStudyFront").style.display = "none";
+            document.getElementById("flashcardsStudyHint").style.display = "none";
+            document.getElementById("flashcardsStudyBack").textContent = card.back;
+            document.getElementById("flashcardsStudyBack").style.display = "block";
+            document.getElementById("flashcardsStudyActions").style.display = "flex";
+        }
+
+        async function markStudyCard(type) {
+            const card = studySession.cards[studySession.index];
+            if (type === 'know') {
+                studySession.known++;
+                card.needsReview = false;
+            } else {
+                studySession.review++;
+                card.needsReview = true;
+            }
+            const deck = flashcardDecks[currentDeckIndex];
+            if (deck) {
+                const origCard = deck.cards.find(c => c.id === card.id);
+                if (origCard) origCard.needsReview = card.needsReview;
+            }
+            studySession.index++;
+            if (studySession.index >= studySession.cards.length) {
+                if (deck) {
+                    saveGuestFlashcards();
+                    if (currentUser && deck.id) {
+                        try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), {
+                            name: deck.name, createdAt: deck.createdAt, cards: deck.cards
+                        }); } catch (e) { console.error("Study sync error:", e); }
+                    }
+                }
+                showStudySummary();
+            } else {
+                renderStudyCard();
+            }
+        }
+
+        function showStudySummary() {
+            showFlashcardView('summary');
+            const total = studySession.cards.length;
+            document.getElementById("flashcardsSummaryTitle").textContent = t("sessionComplete");
+            document.getElementById("flashcardsSummaryStats").innerHTML =
+                '<div class="flashcard-summary-stat"><span>' + t("cardsStudied") + '</span><span>' + total + '</span></div>' +
+                '<div class="flashcard-summary-stat"><span>' + t("cardsKnown") + '</span><span>' + studySession.known + '</span></div>' +
+                '<div class="flashcard-summary-stat"><span>' + t("cardsToReview") + '</span><span>' + studySession.review + '</span></div>';
+            document.getElementById("flashcardsSummaryDoneBtn").textContent = t("done");
+        }
+
+        function showFlashcardView(view) {
+            currentFlashcardView = view;
+            document.getElementById("flashcardsDeckListView").style.display = view === 'list' ? '' : 'none';
+            document.getElementById("flashcardsDetailView").style.display = view === 'detail' ? '' : 'none';
+            document.getElementById("flashcardsStudyView").style.display = view === 'study' ? '' : 'none';
+            document.getElementById("flashcardsSummaryView").style.display = view === 'summary' ? '' : 'none';
+        }
+
+        function renderFlashcardDeckList() {
+            const list = document.getElementById("flashcardDeckList");
+            const titleEl = document.getElementById("flashcardsTitle");
+            const addBtn = document.getElementById("flashcardAddDeckBtn");
+            if (titleEl) titleEl.textContent = t("flashcards");
+            if (addBtn) addBtn.textContent = "+ " + t("newDeck");
+            if (!list) return;
+            if (flashcardDecks.length === 0) {
+                list.innerHTML = '<div class="study-empty">' + t("noFlashcards") + '</div>';
+                return;
+            }
+            list.innerHTML = flashcardDecks.map((deck, i) => {
+                const count = (deck.cards || []).length;
+                const cardWord = count === 1 ? (t("card") || "card") : (t("cards") || "cards");
+                return '<div class="flashcard-deck" data-index="' + i + '">' +
+                    '<div class="flashcard-deck-info">' +
+                    '<div class="flashcard-deck-name">' + deck.name.replace(/</g, '&lt;') + '</div>' +
+                    '<div class="flashcard-deck-count">' + count + ' ' + cardWord + '</div>' +
+                    '</div>' +
+                    '<div class="flashcard-deck-right">' +
+                    '<button class="flashcard-mini-study" data-index="' + i + '" type="button">🧠</button>' +
+                    '<button class="flashcard-delete-deck" data-index="' + i + '" type="button">×</button>' +
+                    '</div></div>';
+            }).join("");
+            list.querySelectorAll(".flashcard-deck").forEach(el => {
+                el.addEventListener("click", (e) => {
+                    if (e.target.closest(".flashcard-delete-deck")) return;
+                    if (e.target.closest(".flashcard-mini-study")) {
+                        currentDeckIndex = parseInt(e.target.closest(".flashcard-mini-study").dataset.index);
+                        startStudySession();
+                        return;
+                    }
+                    currentDeckIndex = parseInt(el.dataset.index);
+                    showFlashcardView('detail');
+                    renderFlashcardDeckDetail();
+                });
+            });
+            list.querySelectorAll(".flashcard-delete-deck").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    deleteFlashcardDeck(parseInt(btn.dataset.index));
+                });
+            });
+        }
+
+        function renderFlashcardDeckDetail() {
+            const deck = flashcardDecks[currentDeckIndex];
+            if (!deck) return;
+            document.getElementById("flashcardBackBtn").textContent = t("backToList");
+            document.getElementById("flashcardDetailName").textContent = deck.name;
+            document.getElementById("flashcardStudyBtn").textContent = t("startStudy");
+            document.getElementById("flashcardAddCardBtn").textContent = t("addCard");
+            const count = (deck.cards || []).length;
+            const cardWord = count === 1 ? (t("card") || "card") : (t("cards") || "cards");
+            document.getElementById("flashcardDetailCount").textContent = count + " " + cardWord;
+            document.getElementById("flashcardStudyBtn").style.display = count > 0 ? "" : "none";
+            const list = document.getElementById("flashcardCardList");
+            if (count === 0) {
+                list.innerHTML = '<div class="study-empty">' + t("noCards") + '</div>';
+                return;
+            }
+            list.innerHTML = deck.cards.map((card, i) => {
+                return '<div class="flashcard-card-item">' +
+                    '<div class="flashcard-card-text">' +
+                    '<div class="flashcard-card-front-text">' + card.front.replace(/</g, '&lt;') + '</div>' +
+                    '<div class="flashcard-card-back-text">' + card.back.replace(/</g, '&lt;') + '</div>' +
+                    '</div>' +
+                    '<div class="flashcard-card-btns">' +
+                    '<button class="flashcard-edit-card" data-index="' + i + '" type="button">✏️</button>' +
+                    '<button class="flashcard-del-card" data-index="' + i + '" type="button">🗑️</button>' +
+                    '</div></div>';
+            }).join("");
+            list.querySelectorAll(".flashcard-edit-card").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    editFlashcardCard(currentDeckIndex, parseInt(btn.dataset.index));
+                });
+            });
+            list.querySelectorAll(".flashcard-del-card").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    deleteFlashcardCard(currentDeckIndex, parseInt(btn.dataset.index));
+                });
+            });
+        }
+
+        document.getElementById("flashcardDeckModalCancel")?.addEventListener("click", closeDeckModal);
+        document.getElementById("flashcardDeckModalConfirm")?.addEventListener("click", confirmCreateDeck);
+        document.getElementById("flashcardDeckModalInput")?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") confirmCreateDeck();
+            if (e.key === "Escape") closeDeckModal();
+        });
+        document.getElementById("flashcardDeckModal")?.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) closeDeckModal();
+        });
+
+        document.getElementById("flashcardAddDeckBtn")?.addEventListener("click", createFlashcardDeck);
+        document.getElementById("flashcardBackBtn")?.addEventListener("click", () => {
+            showFlashcardView('list');
+            renderFlashcardDeckList();
+        });
+        document.getElementById("flashcardStudyBtn")?.addEventListener("click", startStudySession);
+        document.getElementById("flashcardAddCardBtn")?.addEventListener("click", addCardToDeck);
+        document.getElementById("flashcardsStudyCard")?.addEventListener("click", flipStudyCard);
+        document.getElementById("flashcardReviewBtn")?.addEventListener("click", () => markStudyCard('review'));
+        document.getElementById("flashcardKnowBtn")?.addEventListener("click", () => markStudyCard('know'));
+        document.getElementById("flashcardsSummaryDoneBtn")?.addEventListener("click", () => {
+            showFlashcardView('list');
+            renderFlashcardDeckList();
+        });
+
+        onAuthStateChanged(auth, async user => {
+            if (user) {
+                try { await migrateGuestFlashcardsToAccount(user.uid); } catch (e) { console.error("Flashcard migration error:", e); }
+                startFlashcardListener();
+            } else {
+                stopFlashcardListener();
+                flashcardDecks = loadGuestFlashcards();
+                showFlashcardView('list');
+                renderFlashcardDeckList();
+            }
+        });
+
+        flashcardDecks = loadGuestFlashcards();
+        showFlashcardView('list');
+        renderFlashcardDeckList();
 
 
         /* SERVICE WORKER */
