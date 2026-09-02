@@ -2289,6 +2289,98 @@
             color: var(--accent-contrast);
         }
 
+        /* STUDY STATISTICS */
+        .study-stats-launch {
+            background: rgba(255,255,255,.92);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform .15s ease, opacity .15s ease;
+        }
+        .dark .study-stats-launch { background: #222; }
+        .study-stats-launch:active { transform: scale(.97); opacity: .8; }
+        .study-stats-launch-left { display: flex; align-items: center; gap: 12px; }
+        .study-stats-launch-icon { font-size: 28px; }
+        .study-stats-launch-text { font-weight: 800; font-size: 16px; }
+        .study-stats-launch-arrow { font-size: 18px; color: #888; }
+        .dark .study-stats-launch-arrow { color: #aaa; }
+
+        .study-stats-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 18px; padding: 4px 0;
+        }
+        .study-stats-back {
+            border: 0; background: transparent; font-size: 18px;
+            font-weight: 700; color: var(--accent); padding: 6px 10px 6px 0;
+            cursor: pointer;
+        }
+        .study-stats-back:active { opacity: .6; }
+        .study-stats-page-title {
+            font-size: 22px; font-weight: 850;
+        }
+
+        .study-stats-periods {
+            display: flex; gap: 3px; background: rgba(230,230,235,.9);
+            padding: 4px; border-radius: 14px; margin-bottom: 18px;
+        }
+        .dark .study-stats-periods { background: #242424; }
+        .study-stats-period {
+            flex: 1; border: 0; background: transparent;
+            padding: 10px 4px; border-radius: 11px;
+            color: #666; font-weight: 650; font-size: 13px;
+            white-space: nowrap; cursor: pointer;
+        }
+        .dark .study-stats-period { color: #aaa; }
+        .study-stats-period.active {
+            background: white; color: var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+        .dark .study-stats-period.active { background: #3a3a3a; color: var(--accent); }
+
+        .study-stats-summary {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; margin-bottom: 18px;
+        }
+        .study-stats-summary-card {
+            background: rgba(255,255,255,.92); border-radius: 16px;
+            padding: 14px; text-align: center;
+        }
+        .dark .study-stats-summary-card { background: #222; }
+        .study-stats-summary-value {
+            font-size: 24px; font-weight: 850;
+            font-variant-numeric: tabular-nums;
+        }
+        .study-stats-summary-label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: .5px; color: #888; margin-top: 4px;
+            font-weight: 700;
+        }
+
+        .study-stats-chart-card {
+            background: rgba(255,255,255,.92); border-radius: 18px;
+            padding: 18px; margin-bottom: 15px;
+        }
+        .dark .study-stats-chart-card { background: #222; }
+        .study-stats-chart-title {
+            font-size: 12px; text-transform: uppercase;
+            letter-spacing: 1px; font-weight: 800; color: #888;
+            margin-bottom: 14px;
+        }
+        .study-stats-chart-wrap {
+            position: relative; width: 100%; overflow-x: auto;
+        }
+        .study-stats-chart-wrap canvas {
+            display: block; width: 100%;
+        }
+        .study-stats-empty {
+            text-align: center; color: #888; padding: 40px 10px;
+            font-size: 15px;
+        }
+
     </style>
 </head>
 
@@ -2926,6 +3018,15 @@
             </div>
 
 
+            <!-- STUDY STATISTICS LAUNCH -->
+            <div class="study-stats-launch" id="studyStatsLaunch" role="button" tabindex="0">
+                <div class="study-stats-launch-left">
+                    <span class="study-stats-launch-icon">📊</span>
+                    <span class="study-stats-launch-text" id="studyStatsLaunchText">Study Statistics</span>
+                </div>
+                <span class="study-stats-launch-arrow">›</span>
+            </div>
+
             <!-- SUBJECTS -->
 
             <div class="study-subjects-header">
@@ -2996,6 +3097,27 @@
                     </div>
                 </div>
             </div>
+
+        </section>
+
+
+        <!-- STUDY STATISTICS -->
+
+        <section class="section" id="studyStats">
+
+            <div class="study-stats-header">
+                <button class="study-stats-back" id="studyStatsBack" type="button">← <span id="studyStatsBackLabel">Back</span></button>
+                <div class="study-stats-page-title" id="studyStatsTitle">Study Statistics</div>
+            </div>
+
+            <div class="study-stats-periods" id="studyStatsPeriods">
+                <button class="study-stats-period active" data-period="daily" type="button" id="statsPeriodDaily">Daily</button>
+                <button class="study-stats-period" data-period="weekly" type="button" id="statsPeriodWeekly">Weekly</button>
+                <button class="study-stats-period" data-period="monthly" type="button" id="statsPeriodMonthly">Monthly</button>
+                <button class="study-stats-period" data-period="yearly" type="button" id="statsPeriodYearly">Yearly</button>
+            </div>
+
+            <div id="studyStatsContent"></div>
 
         </section>
 
@@ -4195,6 +4317,25 @@
                 timerDone: "Session saved!",
                 timerSubject: "Subject",
                 timerNone: "None",
+                statsTitle: "Study Statistics",
+                statsBack: "← Back",
+                statsDaily: "Daily",
+                statsWeekly: "Weekly",
+                statsMonthly: "Monthly",
+                statsYearly: "Yearly",
+                statsTotalTime: "Total Time",
+                statsSessions: "Sessions",
+                statsAvgSession: "Avg Session",
+                statsMinutes: "min",
+                statsHours: "h",
+                statsNoData: "No study data for this period.",
+                statsTodayLabel: "Today",
+                statsChartStudyTime: "Study Time",
+                statsByHour: "By Hour",
+                statsByDay: "By Day",
+                statsByMonthDay: "By Day of Month",
+                statsByMonth: "By Month",
+                statsLaunchText: "Study Statistics",
 
             },
 
@@ -4506,6 +4647,25 @@ done: "تەواو",
                 timerDone: "قۆناغ پاشەکراوە!",
                 timerSubject: "بابەت",
                 timerNone: "هیچ",
+                statsTitle: "ئاماری خوێندن",
+                statsBack: "← گەڕانەوە",
+                statsDaily: "ڕۆژانە",
+                statsWeekly: "هەفتانە",
+                statsMonthly: "مانگانە",
+                statsYearly: "ساڵانە",
+                statsTotalTime: "کۆی کات",
+                statsSessions: "قۆناغەکان",
+                statsAvgSession: "ناوخۆی قۆناغ",
+                statsMinutes: "خولەک",
+                statsHours: "کاتژمێر",
+                statsNoData: "هیچ داتای خوێندن بۆ ئەم ئەدوارە نییە.",
+                statsTodayLabel: "ئەمڕۆ",
+                statsChartStudyTime: "کاتی خوێندن",
+                statsByHour: "بەپێی کاتژمێر",
+                statsByDay: "بەپێی ڕۆژ",
+                statsByMonthDay: "بەپێی ڕۆژی مانگ",
+                statsByMonth: "بەپێی مانگ",
+                statsLaunchText: "ئاماری خوێندن",
 
             },
 
@@ -4817,6 +4977,25 @@ done: "تەواو",
                 timerDone: "تم حفظ الجلسة!",
                 timerSubject: "المادة",
                 timerNone: "بدون",
+                statsTitle: "إحصائيات الدراسة",
+                statsBack: "← رجوع",
+                statsDaily: "يومي",
+                statsWeekly: "أسبوعي",
+                statsMonthly: "شهري",
+                statsYearly: "سنوي",
+                statsTotalTime: "إجمالي الوقت",
+                statsSessions: "الجلسات",
+                statsAvgSession: "متوسط الجلسة",
+                statsMinutes: "دقيقة",
+                statsHours: "ساعة",
+                statsNoData: "لا توجد بيانات دراسة لهذه الفترة.",
+                statsTodayLabel: "اليوم",
+                statsChartStudyTime: "وقت الدراسة",
+                statsByHour: "بالساعة",
+                statsByDay: "باليوم",
+                statsByMonthDay: "بأيام الشهر",
+                statsByMonth: "بالشهر",
+                statsLaunchText: "إحصائيات الدراسة",
 
             }
 
@@ -5543,17 +5722,19 @@ done: "تەواو",
 
             renderCalendar();
 
-            loadPrayerTimes();
-
-
-            if (currentUser) {
+            loadPrayerTimes();            if (currentUser) {
 
                 startTaskListener();
 
             } else {
 
                 refreshTasks();
+            }
 
+            // Re-render study stats page if it's currently active
+            if (document.getElementById("studyStats")?.classList.contains("active")) {
+                document.getElementById("studyStatsLaunchText").textContent = t("statsLaunchText");
+                if (typeof window._renderStudyStatsPage === "function") window._renderStudyStatsPage();
             }
         }
 
@@ -10833,6 +11014,383 @@ document.documentElement.classList.toggle(
         showFlashcardView('list');
         renderFlashcardDeckList();
 
+
+        /* STUDY STATISTICS */
+
+        (function initStudyStats() {
+            let statsPeriod = "daily";
+            let statsSessions = [];
+
+            function loadStudySessions() {
+                try {
+                    statsSessions = JSON.parse(localStorage.getItem("dailykrd_study_sessions") || "[]");
+                    if (!Array.isArray(statsSessions)) statsSessions = [];
+                } catch (e) {
+                    statsSessions = [];
+                }
+            }
+
+            function isSameDay(d1, d2) {
+                return d1.getFullYear() === d2.getFullYear()
+                    && d1.getMonth() === d2.getMonth()
+                    && d1.getDate() === d2.getDate();
+            }
+
+            function getDateKey(d) {
+                return d.getFullYear() + "-"
+                    + String(d.getMonth() + 1).padStart(2, "0") + "-"
+                    + String(d.getDate()).padStart(2, "0");
+            }
+
+            function getWeekStart(d) {
+                const day = d.getDay();
+                const diff = day === 0 ? 6 : day - 1;
+                const start = new Date(d);
+                start.setDate(start.getDate() - diff);
+                start.setHours(0, 0, 0, 0);
+                return start;
+            }
+
+            function getSessionsForRange(sessions, startDate, endDate) {
+                return sessions.filter(s => {
+                    if (!s.date) return false;
+                    const parts = s.date.split("-").map(Number);
+                    const sd = new Date(parts[0], parts[1] - 1, parts[2]);
+                    return sd >= startDate && sd <= endDate;
+                });
+            }
+
+            function formatMinutes(m) {
+                if (m < 60) return m + "";
+                const h = Math.floor(m / 60);
+                const rm = m % 60;
+                return rm > 0 ? h + "h " + rm + "m" : h + "h";
+            }
+
+            function getDailyData() {
+                const now = new Date();
+                const todayKey = getDateKey(now);
+                const todaySessions = statsSessions.filter(s => s.date === todayKey);
+                const totalMin = todaySessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+                const count = todaySessions.length;
+                const avg = count > 0 ? Math.round(totalMin / count) : 0;
+
+                // Chart data: by hour (group sessions by hour)
+                const hourData = new Array(24).fill(0);
+                todaySessions.forEach(s => {
+                    if (s.startHour !== undefined) {
+                        hourData[s.startHour] += s.duration || 0;
+                    }
+                });
+                // If no startHour data, distribute evenly across hours 8-22
+                if (todaySessions.length > 0 && hourData.every(v => v === 0)) {
+                    todaySessions.forEach((s, i) => {
+                        const h = 8 + (i % 15);
+                        hourData[h] += s.duration || 0;
+                    });
+                }
+
+                const labels = [];
+                const values = [];
+                const startH = hourData.some(v => v > 0) ? hourData.findIndex(v => v > 0) : 8;
+                const endH = hourData.some(v => v > 0) ? hourData.length - 1 - [...hourData].reverse().findIndex(v => v > 0) : 22;
+                for (let h = Math.max(0, startH); h <= Math.min(23, endH); h++) {
+                    labels.push(String(h).padStart(2, "0") + ":00");
+                    values.push(hourData[h]);
+                }
+                if (labels.length === 0) {
+                    for (let h = 8; h <= 22; h++) {
+                        labels.push(String(h).padStart(2, "0") + ":00");
+                        values.push(0);
+                    }
+                }
+
+                return { totalMin, count, avg, labels, values, chartLabel: t("statsByHour") };
+            }
+
+            function getWeeklyData() {
+                const now = new Date();
+                const weekStart = getWeekStart(now);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                weekEnd.setHours(23, 59, 59, 999);
+
+                const weekSessions = getSessionsForRange(statsSessions, weekStart, weekEnd);
+                const totalMin = weekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+                const count = weekSessions.length;
+                const avg = count > 0 ? Math.round(totalMin / count) : 0;
+
+                const dayLabels = [t("statsByDay"), t("weekdays.1"), t("weekdays.2"), t("weekdays.3"), t("weekdays.4"), t("weekdays.5"), t("weekdays.6"), t("weekdays.0")];
+                const dayMins = new Array(7).fill(0);
+                weekSessions.forEach(s => {
+                    const parts = s.date.split("-").map(Number);
+                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    let dayIdx = d.getDay();
+                    dayIdx = dayIdx === 0 ? 6 : dayIdx - 1;
+                    dayMins[dayIdx] += s.duration || 0;
+                });
+
+                return { totalMin, count, avg, labels: dayLabels.slice(1), values: dayMins, chartLabel: t("statsByDay") };
+            }
+
+            function getMonthlyData() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                const monthStart = new Date(year, month, 1);
+                const monthEnd = new Date(year, month, daysInMonth, 23, 59, 59, 999);
+                const monthSessions = getSessionsForRange(statsSessions, monthStart, monthEnd);
+                const totalMin = monthSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+                const count = monthSessions.length;
+                const avg = count > 0 ? Math.round(totalMin / count) : 0;
+
+                const labels = [];
+                const values = [];
+                for (let d = 1; d <= daysInMonth; d++) {
+                    labels.push(String(d));
+                    const dateKey = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+                    const dayMin = monthSessions.filter(s => s.date === dateKey).reduce((sum, s) => sum + (s.duration || 0), 0);
+                    values.push(dayMin);
+                }
+
+                return { totalMin, count, avg, labels, values, chartLabel: t("statsByMonthDay") };
+            }
+
+            function getYearlyData() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const monthNames = [
+                    t("weekdays.0") === "Sun" ? "Jan" : "",
+                    t("weekdays.0") === "Sun" ? "Feb" : "",
+                    t("weekdays.0") === "Sun" ? "Mar" : "",
+                    t("weekdays.0") === "Sun" ? "Apr" : "",
+                    t("weekdays.0") === "Sun" ? "May" : "",
+                    t("weekdays.0") === "Sun" ? "Jun" : "",
+                    t("weekdays.0") === "Sun" ? "Jul" : "",
+                    t("weekdays.0") === "Sun" ? "Aug" : "",
+                    t("weekdays.0") === "Sun" ? "Sep" : "",
+                    t("weekdays.0") === "Sun" ? "Oct" : "",
+                    t("weekdays.0") === "Sun" ? "Nov" : "",
+                    t("weekdays.0") === "Sun" ? "Dec" : ""
+                ];
+
+                // Use locale month names
+                const localeMap = { en: "en-US", ku: "ar-IQ", ar: "ar-IQ" };
+                const locale = localeMap[currentLanguage] || "en-US";
+                const tempDate = new Date(2024, 0, 1);
+                const monthLabels = [];
+                for (let m = 0; m < 12; m++) {
+                    tempDate.setMonth(m);
+                    monthLabels.push(tempDate.toLocaleString(locale, { month: "short" }));
+                }
+
+                const yearStart = new Date(year, 0, 1);
+                const yearEnd = new Date(year, 11, 31, 23, 59, 59, 999);
+                const yearSessions = getSessionsForRange(statsSessions, yearStart, yearEnd);
+                const totalMin = yearSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+                const count = yearSessions.length;
+                const avg = count > 0 ? Math.round(totalMin / count) : 0;
+
+                const monthMins = new Array(12).fill(0);
+                yearSessions.forEach(s => {
+                    const parts = s.date.split("-").map(Number);
+                    monthMins[parts[1] - 1] += s.duration || 0;
+                });
+
+                return { totalMin, count, avg, labels: monthLabels, values: monthMins, chartLabel: t("statsByMonth") };
+            }
+
+            function drawChart(canvasEl, labels, values, color) {
+                const ctx = canvasEl.getContext("2d");
+                const dpr = window.devicePixelRatio || 1;
+                const w = canvasEl.parentElement.clientWidth;
+                const barCount = labels.length;
+                const minBarWidth = 20;
+                const gap = 4;
+                const chartH = 180;
+                const padTop = 10;
+                const padBottom = 30;
+                const padLeft = 0;
+                const padRight = 0;
+                const totalW = Math.max(w, barCount * (minBarWidth + gap));
+
+                canvasEl.width = totalW * dpr;
+                canvasEl.height = chartH * dpr;
+                canvasEl.style.width = totalW + "px";
+                canvasEl.style.height = chartH + "px";
+                ctx.scale(dpr, dpr);
+
+                const maxVal = Math.max(...values, 1);
+                const barW = Math.min(40, Math.max(8, (totalW - padLeft - padRight - (barCount - 1) * gap) / barCount));
+                const chartAreaH = chartH - padTop - padBottom;
+                const startX = (totalW - barCount * (barW + gap) + gap) / 2;
+
+                ctx.clearRect(0, 0, totalW, chartH);
+
+                const isDark = document.documentElement.classList.contains("dark");
+                const barColor = color || (isDark ? "#ffffff" : "#111111");
+                const labelColor = isDark ? "#888" : "#999";
+                const gridColor = isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)";
+
+                // Grid lines
+                for (let i = 0; i <= 4; i++) {
+                    const y = padTop + (chartAreaH / 4) * i;
+                    ctx.strokeStyle = gridColor;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(padLeft, y);
+                    ctx.lineTo(totalW - padRight, y);
+                    ctx.stroke();
+                }
+
+                // Bars
+                values.forEach((val, i) => {
+                    const barH = maxVal > 0 ? (val / maxVal) * chartAreaH : 0;
+                    const x = startX + i * (barW + gap);
+                    const y = padTop + chartAreaH - barH;
+
+                    if (barH > 0) {
+                        ctx.fillStyle = barColor;
+                        ctx.beginPath();
+                        const r = Math.min(4, barW / 2, barH / 2);
+                        if (barH <= r * 2) {
+                            ctx.rect(x, y, barW, barH);
+                        } else {
+                            ctx.moveTo(x + r, y);
+                            ctx.lineTo(x + barW - r, y);
+                            ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+                            ctx.lineTo(x + barW, y + barH);
+                            ctx.lineTo(x, y + barH);
+                            ctx.lineTo(x, y + r);
+                            ctx.quadraticCurveTo(x, y, x + r, y);
+                        }
+                        ctx.fill();
+                    }
+
+                    // Label
+                    ctx.fillStyle = labelColor;
+                    ctx.font = "600 " + (barCount > 15 ? "9" : "11") + "px -apple-system, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "top";
+
+                    // Show every Nth label to avoid overlap
+                    const showEvery = barCount > 12 ? (barCount > 20 ? 5 : 3) : 1;
+                    if (i % showEvery === 0) {
+                        ctx.fillText(labels[i], x + barW / 2, padTop + chartAreaH + 8);
+                    }
+                });
+
+                // Y-axis max label
+                if (maxVal > 0) {
+                    ctx.fillStyle = labelColor;
+                    ctx.font = "600 10px -apple-system, sans-serif";
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "top";
+                    ctx.fillText(maxVal + "m", 0, padTop - 2);
+                }
+            }
+
+            function renderStatsPage() {
+                loadStudySessions();
+
+                const content = document.getElementById("studyStatsContent");
+                if (!content) return;
+
+                // Update period labels
+                document.getElementById("statsPeriodDaily").textContent = t("statsDaily");
+                document.getElementById("statsPeriodWeekly").textContent = t("statsWeekly");
+                document.getElementById("statsPeriodMonthly").textContent = t("statsMonthly");
+                document.getElementById("statsPeriodYearly").textContent = t("statsYearly");
+                document.getElementById("studyStatsTitle").textContent = t("statsTitle");
+                document.getElementById("studyStatsBackLabel").textContent = t("statsBack").replace("← ", "");
+                document.getElementById("studyStatsLaunchText").textContent = t("statsLaunchText");
+
+                // Update active period button
+                document.querySelectorAll(".study-stats-period").forEach(btn => {
+                    btn.classList.toggle("active", btn.dataset.period === statsPeriod);
+                });
+
+                let data;
+                if (statsPeriod === "daily") data = getDailyData();
+                else if (statsPeriod === "weekly") data = getWeeklyData();
+                else if (statsPeriod === "monthly") data = getMonthlyData();
+                else data = getYearlyData();
+
+                if (data.count === 0 && data.totalMin === 0) {
+                    content.innerHTML = '<div class="study-stats-empty">' + t("statsNoData") + '</div>';
+                    return;
+                }
+
+                let html = '';
+
+                // Summary cards
+                html += '<div class="study-stats-summary">';
+                html += '<div class="study-stats-summary-card"><div class="study-stats-summary-value">' + formatMinutes(data.totalMin) + '</div><div class="study-stats-summary-label">' + t("statsTotalTime") + '</div></div>';
+                html += '<div class="study-stats-summary-card"><div class="study-stats-summary-value">' + data.count + '</div><div class="study-stats-summary-label">' + t("statsSessions") + '</div></div>';
+                html += '<div class="study-stats-summary-card"><div class="study-stats-summary-value">' + formatMinutes(data.avg) + '</div><div class="study-stats-summary-label">' + t("statsAvgSession") + '</div></div>';
+                html += '</div>';
+
+                // Chart card
+                html += '<div class="study-stats-chart-card">';
+                html += '<div class="study-stats-chart-title">' + t("statsChartStudyTime") + ' — ' + data.chartLabel + '</div>';
+                html += '<div class="study-stats-chart-wrap"><canvas id="studyStatsCanvas"></canvas></div>';
+                html += '</div>';
+
+                content.innerHTML = html;
+
+                // Draw chart
+                requestAnimationFrame(() => {
+                    const canvas = document.getElementById("studyStatsCanvas");
+                    if (canvas) {
+                        drawChart(canvas, data.labels, data.values);
+                    }
+                });
+            }
+
+            // Period switching
+            document.querySelectorAll(".study-stats-period").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    statsPeriod = btn.dataset.period;
+                    renderStatsPage();
+                });
+            });
+
+            // Back button
+            document.getElementById("studyStatsBack")?.addEventListener("click", () => {
+                showSection("study");
+            });
+
+            // Launch button
+            document.getElementById("studyStatsLaunch")?.addEventListener("click", () => {
+                showSection("studyStats");
+                renderStatsPage();
+            });
+            document.getElementById("studyStatsLaunch")?.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    showSection("studyStats");
+                    renderStatsPage();
+                }
+            });
+
+            // Update stats on language change
+            const origApplyLanguage = typeof applyLanguage === "function" ? applyLanguage : null;
+            const origShowSection = typeof showSection === "function" ? showSection : null;
+
+            // Re-render stats when returning to the stats section
+            if (origShowSection) {
+                // The original showSection is already defined; we don't override it.
+                // Instead, the renderStatsPage is called when navigating to studyStats.
+            }
+
+            // Update launch text on first load
+            renderStudy();
+
+            // Expose for language-change re-render
+            window._renderStudyStatsPage = renderStatsPage;
+        })();
 
         /* SERVICE WORKER */
 
