@@ -2380,6 +2380,50 @@
             text-align: center; color: #888; padding: 40px 10px;
             font-size: 15px;
         }
+        .study-stats-subjects-card {
+            background: rgba(255,255,255,.92); border-radius: 18px;
+            padding: 18px; margin-bottom: 15px;
+        }
+        .dark .study-stats-subjects-card { background: #222; }
+        .study-stats-subjects-title {
+            font-size: 12px; text-transform: uppercase;
+            letter-spacing: 1px; font-weight: 800; color: #888;
+            margin-bottom: 14px;
+        }
+        .study-stats-most-studied {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--accent); color: var(--accent-contrast);
+            border-radius: 14px; padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+        .study-stats-most-emoji { font-size: 22px; }
+        .study-stats-most-label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: .5px; opacity: .7; font-weight: 700;
+        }
+        .study-stats-most-name {
+            font-size: 16px; font-weight: 800; margin-top: 2px;
+        }
+        .study-stats-subject-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,.06);
+        }
+        .dark .study-stats-subject-row { border-bottom-color: rgba(255,255,255,.08); }
+        .study-stats-subject-row:last-child { border-bottom: 0; }
+        .study-stats-subject-info { flex: 1; min-width: 0; }
+        .study-stats-subject-name {
+            font-weight: 700; font-size: 15px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .study-stats-subject-meta {
+            color: #888; font-size: 12px; margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+        .study-stats-subject-pct {
+            font-size: 14px; font-weight: 800;
+            flex-shrink: 0; font-variant-numeric: tabular-nums;
+        }
 
     </style>
 </head>
@@ -4334,8 +4378,13 @@
                 statsByHour: "By Hour",
                 statsByDay: "By Day",
                 statsByMonthDay: "By Day of Month",
-                statsByMonth: "By Month",
-                statsLaunchText: "Study Statistics",
+                statsByMonth: "By Month",                statsLaunchText: "Study Statistics",
+                statsSubjects: "Subjects",
+                statsMostStudied: "Most Studied",
+                statsOther: "Other",
+                statsSessionsLabel: "sessions",
+                statsSessionLabel: "session",
+
 
             },
 
@@ -4664,8 +4713,13 @@ done: "تەواو",
                 statsByHour: "بەپێی کاتژمێر",
                 statsByDay: "بەپێی ڕۆژ",
                 statsByMonthDay: "بەپێی ڕۆژی مانگ",
-                statsByMonth: "بەپێی مانگ",
-                statsLaunchText: "ئاماری خوێندن",
+                statsByMonth: "بەپێی مانگ",                statsLaunchText: "ئاماری خوێندن",
+                statsSubjects: "بابەتەکان",
+                statsMostStudied: "زۆرترین خوێندراو",
+                statsOther: "هیتر",
+                statsSessionsLabel: "قۆناغ",
+                statsSessionLabel: "قۆناغ",
+
 
             },
 
@@ -4996,6 +5050,11 @@ done: "تەواو",
                 statsByMonthDay: "بأيام الشهر",
                 statsByMonth: "بالشهر",
                 statsLaunchText: "إحصائيات الدراسة",
+                statsSubjects: "المواد الدراسية",
+                statsMostStudied: "الأكثر دراسة",
+                statsOther: "أخرى",
+                statsSessionsLabel: "جلسات",
+                statsSessionLabel: "جلسة",
 
             }
 
@@ -11292,6 +11351,19 @@ document.documentElement.classList.toggle(
                 }
             }
 
+            function getSubjectStats(sessions) {
+                const map = {};
+                sessions.forEach(s => {
+                    const name = (s.subject && s.subject.trim()) ? s.subject.trim() : t("statsOther");
+                    if (!map[name]) map[name] = { name: name, count: 0, totalMin: 0 };
+                    map[name].count++;
+                    map[name].totalMin += (s.duration || 0);
+                });
+                const arr = Object.values(map);
+                arr.sort((a, b) => b.totalMin - a.totalMin);
+                return arr;
+            }
+
             function renderStatsPage() {
                 loadStudySessions();
 
@@ -11337,6 +11409,53 @@ document.documentElement.classList.toggle(
                 html += '<div class="study-stats-chart-title">' + t("statsChartStudyTime") + ' — ' + data.chartLabel + '</div>';
                 html += '<div class="study-stats-chart-wrap"><canvas id="studyStatsCanvas"></canvas></div>';
                 html += '</div>';
+
+                // Subject statistics
+                const subjectData = getSubjectStats(statsSessions.filter(s => {
+                    if (!s.date) return false;
+                    const parts = s.date.split("-").map(Number);
+                    const sd = new Date(parts[0], parts[1] - 1, parts[2]);
+                    const now = new Date();
+                    if (statsPeriod === "daily") {
+                        return isSameDay(sd, now);
+                    } else if (statsPeriod === "weekly") {
+                        const ws = getWeekStart(now);
+                        const we = new Date(ws); we.setDate(we.getDate() + 6); we.setHours(23,59,59,999);
+                        return sd >= ws && sd <= we;
+                    } else if (statsPeriod === "monthly") {
+                        return sd.getFullYear() === now.getFullYear() && sd.getMonth() === now.getMonth();
+                    } else {
+                        return sd.getFullYear() === now.getFullYear();
+                    }
+                }));
+
+                if (subjectData.length > 0) {
+                    html += '<div class="study-stats-subjects-card">';
+                    html += '<div class="study-stats-subjects-title">📚 ' + t("statsSubjects") + '</div>';
+
+                    // Most studied
+                    const topSubject = subjectData[0];
+                    html += '<div class="study-stats-most-studied">';
+                    html += '<span class="study-stats-most-emoji">🏆</span>';
+                    html += '<div><div class="study-stats-most-label">' + t("statsMostStudied") + '</div>';
+                    html += '<div class="study-stats-most-name">' + topSubject.name.replace(/</g, '&lt;') + '</div></div>';
+                    html += '</div>';
+
+                    // Subject rows
+                    subjectData.forEach(sub => {
+                        const pct = data.totalMin > 0 ? Math.round((sub.totalMin / data.totalMin) * 100) : 0;
+                        const sessWord = sub.count === 1 ? t("statsSessionLabel") : t("statsSessionsLabel");
+                        html += '<div class="study-stats-subject-row">';
+                        html += '<div class="study-stats-subject-info">';
+                        html += '<div class="study-stats-subject-name">' + sub.name.replace(/</g, '&lt;') + '</div>';
+                        html += '<div class="study-stats-subject-meta">' + sub.count + ' ' + sessWord + ' · ' + formatMinutes(sub.totalMin) + '</div>';
+                        html += '</div>';
+                        html += '<div class="study-stats-subject-pct">' + pct + '%</div>';
+                        html += '</div>';
+                    });
+
+                    html += '</div>';
+                }
 
                 content.innerHTML = html;
 
