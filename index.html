@@ -4230,6 +4230,619 @@
             );
 
 
+        /* ============================================================
+           OFFLINE LAYER (STEP 2) — IndexedDB local storage
+
+           Uses the browser's native IndexedDB API (no library).
+
+           Database : "dailykrd-offline"  (versioned, upgradeable)
+           Stores   :
+             tasks     -> mirror of task records, keyPath "id"
+             appData   -> generic key/value app state, keyPath "key"
+             syncQueue -> pending change queue, keyPath "id"
+
+           NOTES
+           - IndexedDB is NOT the source of truth yet. Firebase (signed-in)
+             and localStorage (guest) keep their current roles exactly as
+             before. This layer only mirrors task writes locally and,
+             while the browser reports being offline, records them in the
+             sync queue for a later step to replay to Firebase.
+           - No automatic Firebase sync happens here (that is a later step).
+           - Everything is best-effort: if IndexedDB is missing or a call
+             fails, the app keeps working exactly as it did before.
+           - Only ordinary app data is stored — never passwords, auth
+             tokens, API secrets, or Firebase private credentials.
+        ============================================================ */
+
+        const OFFLINE_DB_NAME = "dailykrd-offline";
+        const OFFLINE_DB_VERSION = 1;
+
+        const OFFLINE_STORE_TASKS = "tasks";
+        const OFFLINE_STORE_APP_DATA = "appData";
+        const OFFLINE_STORE_SYNC_QUEUE = "syncQueue";
+
+        let offlineDB = null;
+        let offlineDBReady = false;
+
+        // Best-effort online flag. A real "am I offline?" probe can be
+        // refined in a later step; this keeps the sync queue clean while
+        // the device is clearly online.
+        let isBrowserOnline =
+            typeof navigator !== "undefined" &&
+            navigator.onLine !== false;
+
+        if (typeof window !== "undefined") {
+
+            window.addEventListener("online", () => {
+                isBrowserOnline = true;
+            });
+
+            window.addEventListener("offline", () => {
+                isBrowserOnline = false;
+            });
+        }
+
+
+        function offlineGetIDB() {
+
+            try {
+
+                return (
+                    typeof indexedDB !== "undefined"
+                        ? indexedDB
+                        : null
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "IndexedDB unavailable — offline storage disabled:",
+                    error
+                );
+
+                return null;
+            }
+        }
+
+
+        function offlineRequest(request) {
+
+            return new Promise((resolve, reject) => {
+
+                request.onsuccess = () =>
+                    resolve(request.result);
+
+                request.onerror = () =>
+                    reject(
+                        request.error ||
+                        new Error(
+                            "IndexedDB request failed"
+                        )
+                    );
+            });
+        }
+
+
+        async function offlineWrite(storeName, value) {
+
+            if (!offlineDB) return false;
+
+            try {
+
+                const transaction =
+                    offlineDB.transaction(
+                        storeName,
+                        "readwrite"
+                    );
+
+                const store =
+                    transaction.objectStore(
+                        storeName
+                    );
+
+                await offlineRequest(
+                    store.put(value)
+                );
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "Offline store write error:",
+                    error
+                );
+
+                return false;
+            }
+        }
+
+
+        async function offlineDelete(storeName, key) {
+
+            if (!offlineDB) return false;
+
+            try {
+
+                const transaction =
+                    offlineDB.transaction(
+                        storeName,
+                        "readwrite"
+                    );
+
+                const store =
+                    transaction.objectStore(
+                        storeName
+                    );
+
+                await offlineRequest(
+                    store.delete(key)
+                );
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "Offline store delete error:",
+                    error
+                );
+
+                return false;
+            }
+        }
+
+
+        async function offlineReadAll(storeName) {
+
+            if (!offlineDB) return [];
+
+            try {
+
+                const transaction =
+                    offlineDB.transaction(
+                        storeName,
+                        "readonly"
+                    );
+
+                const store =
+                    transaction.objectStore(
+                        storeName
+                    );
+
+                const values =
+                    await offlineRequest(
+                        store.getAll()
+                    );
+
+                return Array.isArray(values)
+                    ? values
+                    : [];
+
+            } catch (error) {
+
+                console.warn(
+                    "Offline store read error:",
+                    error
+                );
+
+                return [];
+            }
+        }
+
+
+        /* OPEN / UPGRADE THE DATABASE (safe, versioned) */
+
+        function initOfflineDB() {
+
+            const idb = offlineGetIDB();
+
+            if (!idb) {
+
+                offlineDB = null;
+                offlineDBReady = false;
+
+                return Promise.resolve(null);
+            }
+
+            return new Promise((resolve) => {
+
+                let openRequest;
+
+                try {
+
+                    openRequest =
+                        idb.open(
+                            OFFLINE_DB_NAME,
+                            OFFLINE_DB_VERSION
+                        );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Offline DB open failed — continuing online:",
+                        error
+                    );
+
+                    offlineDB = null;
+                    offlineDBReady = false;
+
+                    resolve(null);
+
+                    return;
+                }
+
+                openRequest.onupgradeneeded = (
+                    event
+                ) => {
+
+                    const database =
+                        event.target.result;
+
+                    const oldVersion =
+                        event.oldVersion;
+
+                    // v1: initial schema
+                    if (oldVersion < 1) {
+
+                        if (
+                            !database.objectStoreNames.contains(
+                                OFFLINE_STORE_TASKS
+                            )
+                        ) {
+
+                            const tasksStore =
+                                database.createObjectStore(
+                                    OFFLINE_STORE_TASKS,
+                                    { keyPath: "id" }
+                                );
+
+                            tasksStore.createIndex(
+                                "date",
+                                "date",
+                                { unique: false }
+                            );
+                        }
+
+                        if (
+                            !database.objectStoreNames.contains(
+                                OFFLINE_STORE_APP_DATA
+                            )
+                        ) {
+
+                            database.createObjectStore(
+                                OFFLINE_STORE_APP_DATA,
+                                { keyPath: "key" }
+                            );
+                        }
+
+                        if (
+                            !database.objectStoreNames.contains(
+                                OFFLINE_STORE_SYNC_QUEUE
+                            )
+                        ) {
+
+                            database.createObjectStore(
+                                OFFLINE_STORE_SYNC_QUEUE,
+                                { keyPath: "id" }
+                            );
+                        }
+                    }
+
+                    // Future upgrades (later steps): add new stores/indexes
+                    // here, e.g.:
+                    //   if (oldVersion < 2) {
+                    //       database.createObjectStore("events", ...);
+                    //   }
+                    // ...and bump OFFLINE_DB_VERSION accordingly.
+                };
+
+                openRequest.onsuccess = () => {
+
+                    offlineDB =
+                        openRequest.result;
+
+                    offlineDBReady = true;
+
+                    resolve(offlineDB);
+                };
+
+                openRequest.onerror = () => {
+
+                    console.warn(
+                        "Offline DB init failed — continuing online:",
+                        openRequest.error
+                    );
+
+                    offlineDB = null;
+                    offlineDBReady = false;
+
+                    resolve(null);
+                };
+            });
+        }
+
+
+        function offlineDBIsAvailable() {
+            return !!offlineDB;
+        }
+
+
+        function offlineNewID() {
+
+            return crypto.randomUUID
+                ? crypto.randomUUID()
+                : String(Date.now()) +
+                    "-" +
+                    Math.random()
+                        .toString(36)
+                        .slice(2, 10);
+        }
+
+
+        /* TASKS STORE */
+
+        // Guest tasks keep their existing uuid; signed-in tasks use the
+        // Firestore document id (both are unique per task on this device).
+        async function saveTaskOffline(task) {
+
+            if (
+                !offlineDB ||
+                !task ||
+                !task.id
+            ) {
+
+                return false;
+            }
+
+            return offlineWrite(
+                OFFLINE_STORE_TASKS,
+                task
+            );
+        }
+
+
+        // Full-object update (same store as save — put replaces by id).
+        async function updateTaskOffline(task) {
+            return saveTaskOffline(task);
+        }
+
+
+        async function deleteTaskOffline(idOrTask) {
+
+            const id =
+                typeof idOrTask === "string"
+                    ? idOrTask
+                    : idOrTask && idOrTask.id;
+
+            if (!offlineDB || !id) return false;
+
+            return offlineDelete(
+                OFFLINE_STORE_TASKS,
+                id
+            );
+        }
+
+
+        async function getTasksOffline() {
+            return offlineReadAll(
+                OFFLINE_STORE_TASKS
+            );
+        }
+
+
+        /* APPDATA STORE (generic key/value app state) */
+
+        async function saveAppDataOffline(key, value) {
+
+            if (!offlineDB || !key) return false;
+
+            return offlineWrite(
+                OFFLINE_STORE_APP_DATA,
+                {
+                    key,
+                    value,
+                    updatedAt: Date.now()
+                }
+            );
+        }
+
+
+        async function getAppDataOffline(key) {
+
+            if (!offlineDB || !key) return null;
+
+            try {
+
+                const transaction =
+                    offlineDB.transaction(
+                        OFFLINE_STORE_APP_DATA,
+                        "readonly"
+                    );
+
+                const record =
+                    await offlineRequest(
+                        transaction
+                            .objectStore(
+                                OFFLINE_STORE_APP_DATA
+                            )
+                            .get(key)
+                    );
+
+                return record
+                    ? record.value
+                    : null;
+
+            } catch (error) {
+
+                console.warn(
+                    "Offline app data read error:",
+                    error
+                );
+
+                return null;
+            }
+        }
+
+
+        async function removeAppDataOffline(key) {
+
+            if (!offlineDB || !key) return false;
+
+            return offlineDelete(
+                OFFLINE_STORE_APP_DATA,
+                key
+            );
+        }
+
+
+        /* SYNC QUEUE STORE */
+
+        // change = { entity, type, data }
+        //   entity : what changed, e.g. "task" (default)
+        //   type   : "create" | "update" | "delete"
+        //   data   : the record (or, for delete, { id })
+        // Each queued entry is stamped with its own unique id + timestamp
+        // so a later step can replay it to Firestore in order and then
+        // clear it with clearSyncedChange(id).
+        async function queueOfflineChange(change) {
+
+            if (
+                !offlineDB ||
+                !change ||
+                !change.type
+            ) {
+
+                return null;
+            }
+
+            const record = {
+                id: offlineNewID(),
+                entity:
+                    change.entity || "task",
+                type: change.type,
+                data:
+                    change.data !== undefined
+                        ? change.data
+                        : null,
+                timestamp: Date.now()
+            };
+
+            const ok = await offlineWrite(
+                OFFLINE_STORE_SYNC_QUEUE,
+                record
+            );
+
+            return ok ? record.id : null;
+        }
+
+
+        async function getPendingSyncChanges() {
+
+            const records = await offlineReadAll(
+                OFFLINE_STORE_SYNC_QUEUE
+            );
+
+            return records.sort(
+                (a, b) =>
+                    (Number(a.timestamp) || 0) -
+                    (Number(b.timestamp) || 0)
+            );
+        }
+
+
+        async function clearSyncedChange(id) {
+
+            if (!offlineDB || !id) return false;
+
+            return offlineDelete(
+                OFFLINE_STORE_SYNC_QUEUE,
+                id
+            );
+        }
+
+
+        /* MIRROR HELPER USED BY THE EXISTING TASK WRITE PATHS */
+
+        // op: "create" | "update" | "delete"
+        // Mirrors a task write into the IndexedDB tasks store. While the
+        // browser is offline the same change is also appended to the sync
+        // queue (auto-sync to Firebase arrives in a later step). Fire and
+        // forget: never blocks or breaks the existing online flow.
+        function mirrorTaskWriteOffline(op, task) {
+
+            if (!offlineDB) return;
+
+            const run = async () => {
+
+                if (op === "delete") {
+
+                    await deleteTaskOffline(
+                        task && task.id
+                            ? { id: task.id }
+                            : task
+                    );
+
+                } else {
+
+                    if (!task || !task.id) return;
+
+                    await saveTaskOffline(
+                        task
+                    );
+                }
+
+                // Only changes made while the browser is offline belong in
+                // the pending queue. While online the live sources already
+                // have the data, so queueing would only duplicate it for a
+                // future sync step.
+                if (!isBrowserOnline) {
+
+                    await queueOfflineChange({
+                        entity: "task",
+                        type: op,
+                        data:
+                            op === "delete"
+                                ? { id: task.id }
+                                : task
+                    });
+                }
+            };
+
+            run().catch(error => {
+                console.warn(
+                    "Offline task mirror error:",
+                    error
+                );
+            });
+        }
+
+
+        // Initialize once at startup. If it fails (unavailable, private
+        // mode, storage full, ...) every helper above is a safe no-op and
+        // the app continues with its existing Firebase/localStorage flow.
+        initOfflineDB();
+
+        // Small debug/testing handle (console: await window.dailyKrdOffline.getTasksOffline())
+        if (typeof window !== "undefined") {
+
+            window.dailyKrdOffline = {
+                initOfflineDB,
+                isAvailable: offlineDBIsAvailable,
+                saveTaskOffline,
+                updateTaskOffline,
+                deleteTaskOffline,
+                getTasksOffline,
+                saveAppDataOffline,
+                getAppDataOffline,
+                removeAppDataOffline,
+                queueOfflineChange,
+                getPendingSyncChanges,
+                clearSyncedChange
+            };
+        }
+
+
         /* TRANSLATIONS */
 
         const translations = {
@@ -8336,6 +8949,12 @@ done: "تەواو",
                 );
 
 
+                mirrorTaskWriteOffline(
+                    "update",
+                    found
+                );
+
+
                 refreshTasks();
 
                 renderCalendar();
@@ -8391,6 +9010,15 @@ done: "تەواو",
                     }
                 );
 
+                mirrorTaskWriteOffline(
+                    "update",
+                    {
+                        id: task.id,
+                        ...task,
+                        completedDates: dates
+                    }
+                );
+
             } else {
 
                 await updateDoc(
@@ -8404,6 +9032,15 @@ done: "تەواو",
                     {
                         completed:
                             checked
+                    }
+                );
+
+                mirrorTaskWriteOffline(
+                    "update",
+                    {
+                        id: task.id,
+                        ...task,
+                        completed: checked
                     }
                 );
             }
@@ -8431,6 +9068,12 @@ done: "تەواو",
                 );
 
 
+                mirrorTaskWriteOffline(
+                    "delete",
+                    { id: task.id }
+                );
+
+
                 refreshTasks();
 
                 renderCalendar();
@@ -8448,6 +9091,11 @@ done: "تەواو",
                     "tasks",
                     task.id
                 )
+            );
+
+            mirrorTaskWriteOffline(
+                "delete",
+                { id: task.id }
             );
         }
 
@@ -8576,14 +9224,33 @@ done: "تەواو",
                         )
                     );
 
+                    mirrorTaskWriteOffline(
+                        "create",
+                        task
+                    );
+
                 } else {
 
                     delete task.id;
 
-                    await addDoc(
-                        getTasksCollection(),
-                        task
-                    );
+                    const taskRef =
+                        await addDoc(
+                            getTasksCollection(),
+                            task
+                        );
+
+                    // Mirror using the Firestore doc id so the local copy
+                    // matches the task exactly as the app renders it.
+                    if (taskRef && taskRef.id) {
+
+                        mirrorTaskWriteOffline(
+                            "create",
+                            {
+                                id: taskRef.id,
+                                ...task
+                            }
+                        );
+                    }
                 }
 
             } catch (error) {
@@ -12200,10 +12867,15 @@ document.documentElement.classList.toggle(
                     };
                     try {
                         if (currentUser) {
-                            await addDoc(getTasksCollection(), task);
+                            const taskRef = await addDoc(getTasksCollection(), task);
+                            if (taskRef && taskRef.id) {
+                                mirrorTaskWriteOffline('create', { id: taskRef.id, ...task });
+                            }
                         } else {
-                            guestTasks.push({ ...task, id: genId() });
+                            const guestTask = { ...task, id: genId() };
+                            guestTasks.push(guestTask);
                             localStorage.setItem('dailykrd_guest_tasks', JSON.stringify(guestTasks));
+                            mirrorTaskWriteOffline('create', guestTask);
                         }
                         refreshTasks();
                     } catch(e) { console.error('Task create from event error:', e); }
