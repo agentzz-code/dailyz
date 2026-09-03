@@ -4718,6 +4718,13 @@
 
             const record = {
                 id: offlineNewID(),
+                // Who this change belongs to, so a later sync step never
+                // pushes guest/local data into a signed-in account.
+                owner:
+                    (
+                        currentUser &&
+                        currentUser.uid
+                    ) || "guest",
                 entity:
                     change.entity || "task",
                 type: change.type,
@@ -4795,10 +4802,19 @@
                 // Changes belong in the pending queue when the browser is
                 // offline OR when the Firestore listener had to fall back
                 // to the IndexedDB cache (connectivity can be broken even
-                // if navigator.onLine still reports true). While normally
-                // online the live sources already have the data, so
-                // queueing would only duplicate it for a future sync step.
-                if (!isBrowserOnline || offlineTasksActive) {
+                // if navigator.onLine still reports true). Only signed-in
+                // changes are queued — guest changes live in localStorage
+                // and must never be pushed to a Firebase account. While
+                // normally online the live sources already have the data,
+                // so queueing would only duplicate it for a future sync
+                // step.
+                if (
+                    currentUser &&
+                    (
+                        !isBrowserOnline ||
+                        offlineTasksActive
+                    )
+                ) {
 
                     await queueOfflineChange({
                         entity: "task",
@@ -4843,7 +4859,8 @@
                 removeAppDataOffline,
                 queueOfflineChange,
                 getPendingSyncChanges,
-                clearSyncedChange
+                clearSyncedChange,
+                syncPendingTaskChanges
             };
         }
 
@@ -7570,20 +7587,32 @@ done: "تەواو",
                             user.email || "";
 
 
-                        if (
-                            !isBrowserOnline ||
-                            offlineTasksActive
-                        ) {
+                        if (!isBrowserOnline) {
 
                             // No connectivity right now: serve signed-in
                             // tasks from the IndexedDB cache until an
-                            // "online" event (or listener retry) returns
-                            // Firestore to the picture.
+                            // "online" event (or retry) returns Firestore
+                            // to the picture.
                             enterOfflineTasks();
 
                         } else {
 
-                            startTaskListener();
+                            // STEP 4: replay any queue leftovers from an
+                            // earlier offline session BEFORE the Firestore
+                            // snapshot becomes authoritative again.
+                            await syncPendingTaskChanges().then(result => {
+
+                                if (result && result.pending) {
+
+                                    // Sync couldn't finish (Firestore still
+                                    // unreachable) — keep showing the cache.
+                                    enterOfflineTasks();
+
+                                } else {
+
+                                    startTaskListener();
+                                }
+                            });
                         }
 
                         startStepsListener();
@@ -7618,16 +7647,25 @@ done: "تەواو",
                             user.email || "";
 
 
-                        if (
-                            !isBrowserOnline ||
-                            offlineTasksActive
-                        ) {
+                        if (!isBrowserOnline) {
 
                             enterOfflineTasks();
 
                         } else {
 
-                            startTaskListener();
+                            // STEP 4: replay queue leftovers before the
+                            // Firestore snapshot becomes authoritative.
+                            await syncPendingTaskChanges().then(result => {
+
+                                if (result && result.pending) {
+
+                                    enterOfflineTasks();
+
+                                } else {
+
+                                    startTaskListener();
+                                }
+                            });
                         }
 
                         startStepsListener();
@@ -7963,7 +8001,21 @@ done: "تەواو",
                     return;
                 }
 
-                startTaskListener();
+                // STEP 4: replay queued changes first; only hand rendering
+                // back to Firestore once nothing of ours is still pending.
+                syncPendingTaskChanges().then(result => {
+
+                    if (!offlineTasksActive) return;
+
+                    if (result && result.pending) {
+
+                        scheduleOfflineRetry();
+
+                    } else {
+
+                        exitOfflineTasks();
+                    }
+                });
 
             }, 20000);
         }
@@ -8111,16 +8163,41 @@ done: "تەواو",
 
             if (!offlineTasksActive) return;
 
-            resetOfflineTaskMode();
+            // STEP 4: flush the queue first. Only when nothing of the
+            // user's is still pending do we switch back to the Firestore
+            // listener — otherwise an older server snapshot would hide
+            // the user's offline changes.
+            syncPendingTaskChanges().then(result => {
 
-            if (currentUser) {
+                if (!offlineTasksActive) return;
 
-                startTaskListener();
+                if (result && result.pending) {
 
-            } else {
+                    if (isBrowserOnline) {
 
-                refreshTasks();
-            }
+                        scheduleOfflineRetry();
+                    }
+
+                    return;
+                }
+
+                resetOfflineTaskMode();
+
+                if (currentUser) {
+
+                    startTaskListener();
+
+                } else {
+
+                    refreshTasks();
+                }
+
+                // Drain anything queued while the flush above was running
+                // (writes made while we were still in offline mode but
+                // after the queue was read). Writes after reset go straight
+                // to Firestore, so this is the final pass for stragglers.
+                syncPendingTaskChanges();
+            });
         }
 
 
@@ -8198,8 +8275,284 @@ done: "تەواو",
 
             window.addEventListener("online", () => {
 
+                // STEP 4: flush queued changes, then resume Firestore.
+                syncPendingTaskChanges();
+
                 exitOfflineTasks();
             });
+        }
+
+
+        /* ============================================================
+           OFFLINE -> FIREBASE SYNC (STEP 4)
+
+           Replays the Step 2 syncQueue against Firestore when
+           connectivity returns, for the signed-in user only.
+
+           Rules:
+           - Only queue entries owned by the current user are synced.
+             Guest/local entries stay in the queue untouched.
+           - Entries are replayed in timestamp order (CREATE/UPDATE/
+             DELETE sequences end in the user's latest offline state).
+           - CREATE uses setDoc() with the task's stable id (the same
+             id offline mode used), which makes creates idempotent
+             across reconnects, refreshes and crashes.
+           - A queue item is removed ONLY after its Firestore operation
+             succeeds. Failures keep the item for the next retry.
+           - Deleting or updating a document that is already gone
+             counts as synchronized (no-op).
+           - Guests are never synced - their data stays in localStorage.
+        ============================================================ */
+
+        let syncPromise = null;
+
+
+        // Fields that go to Firestore: everything except the local id and
+        // undefined values (setDoc/updateDoc reject undefined).
+        function offlineTaskFields(data) {
+
+            const fields = {};
+
+            for (const key of Object.keys(data)) {
+
+                if (key !== "id" && data[key] !== undefined) {
+                    fields[key] = data[key];
+                }
+            }
+
+            return fields;
+        }
+
+
+        function isFirestoreNotFound(error) {
+            return !!(
+                error &&
+                error.code === "not-found"
+            );
+        }
+
+
+        // Replay one queue entry against the signed-in user's tasks
+        // collection. Throws on failure so the caller keeps the item.
+        async function replayTaskSyncChange(change) {
+
+            const type =
+                change && change.type;
+
+            const data =
+                change && change.data;
+
+            if (!data || !type) return;
+
+            const taskId = data.id;
+
+            if (type === "create") {
+
+                const fields =
+                    offlineTaskFields(data);
+
+                if (taskId) {
+
+                    // Idempotent create: the stable (device-generated) id
+                    // becomes the Firestore doc id, so replaying this entry
+                    // again (e.g. after a crash before clearing) overwrites
+                    // the SAME doc instead of duplicating the task.
+                    await setDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            taskId
+                        ),
+                        fields
+                    );
+
+                } else {
+
+                    // Legacy safety (entries without an id): let Firestore
+                    // assign a new doc id.
+                    await addDoc(
+                        getTasksCollection(),
+                        fields
+                    );
+                }
+
+            } else if (type === "update") {
+
+                if (!taskId) {
+                    throw new Error(
+                        "Sync update missing task id"
+                    );
+                }
+
+                const fields =
+                    offlineTaskFields(data);
+
+                if (!Object.keys(fields).length) return;
+
+                try {
+
+                    await updateDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            taskId
+                        ),
+                        fields
+                    );
+
+                } catch (error) {
+
+                    // The doc was already removed (e.g. deleted on another
+                    // device) - nothing left to update.
+                    if (isFirestoreNotFound(error)) return;
+
+                    throw error;
+                }
+
+            } else if (type === "delete") {
+
+                if (!taskId) {
+                    throw new Error(
+                        "Sync delete missing task id"
+                    );
+                }
+
+                try {
+
+                    await deleteDoc(
+                        doc(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "tasks",
+                            taskId
+                        )
+                    );
+
+                } catch (error) {
+
+                    // Already gone on the server: delete is a no-op now.
+                    if (isFirestoreNotFound(error)) return;
+
+                    throw error;
+                }
+            }
+        }
+
+
+        // One pass over the queue. Returns { synced, pending } where
+        // "pending" means items still need a retry (a failure, or we went
+        // offline mid-run). Callers must NOT switch back to Firestore
+        // rendering while pending, or an older server snapshot would hide
+        // the user's offline changes.
+        async function runPendingTaskSync() {
+
+            if (!currentUser) {
+                return { synced: 0, pending: false };
+            }
+
+            if (!isBrowserOnline) {
+                return { synced: 0, pending: true };
+            }
+
+            const changes =
+                await getPendingSyncChanges();
+
+            if (!changes.length) {
+                return { synced: 0, pending: false };
+            }
+
+            let synced = 0;
+
+            for (const change of changes) {
+
+                if (!currentUser || !isBrowserOnline) {
+                    return { synced, pending: true };
+                }
+
+                // Only the signed-in user's own task changes are replayed.
+                // Guest/local legacy entries (no owner, or owner "guest")
+                // stay in the queue untouched.
+                if (
+                    change.entity !== "task" ||
+                    (change.owner || "guest") !== currentUser.uid
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    await replayTaskSyncChange(
+                        change
+                    );
+
+                    // Clear only after the Firestore write succeeded.
+                    await clearSyncedChange(
+                        change.id
+                    );
+
+                    synced++;
+
+                } catch (error) {
+
+                    console.warn(
+                        "Task sync failed - keeping queue item for retry:",
+                        change.id,
+                        error
+                    );
+
+                    return { synced, pending: true };
+                }
+            }
+
+            return { synced, pending: false };
+        }
+
+
+        // Single-flight entry point used by the online event, the auth
+        // flow and the retry watchdog. Never throws; safe to call and
+        // to fire-and-forget.
+        function syncPendingTaskChanges() {
+
+            if (!currentUser) {
+                return Promise.resolve(
+                    { synced: 0, pending: false }
+                );
+            }
+
+            if (syncPromise) {
+                return syncPromise;
+            }
+
+            syncPromise =
+                runPendingTaskSync()
+                    .then(result => {
+
+                        // Drained successfully: make sure the Firestore
+                        // listener is the active source (its snapshot also
+                        // refreshes the IndexedDB cache, per Step 3).
+                        if (
+                            result &&
+                            !result.pending &&
+                            currentUser &&
+                            !offlineTasksActive &&
+                            !unsubscribeTasks
+                        ) {
+
+                            startTaskListener();
+                        }
+
+                        return result;
+                    })
+                    .finally(() => {
+                        syncPromise = null;
+                    });
+
+            return syncPromise;
         }
 
 
@@ -8315,12 +8668,16 @@ done: "تەواو",
 
                         if (offlineTasksActive) {
 
-                            // The Firestore listener is live again — online
+                            // The Firestore listener is live again - online
                             // mode resumes and this server snapshot becomes
                             // authoritative for the UI.
                             offlineTasksActive = false;
 
                             offlineReadGeneration++;
+
+                            // STEP 4: anything queued while we were offline
+                            // can now be replayed to Firestore.
+                            syncPendingTaskChanges();
                         }
 
                         if (offlineRetryTimer) {
