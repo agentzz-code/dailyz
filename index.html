@@ -26,6 +26,33 @@
         })();
     </script>
 
+    <script>
+        // Bounded loading-screen safety net (offline startup).
+        // The main module hides the boot loader itself once it finishes
+        // initializing. If Firebase/module startup ever stalls because the
+        // device is offline (e.g. an SDK fetch or auth init waiting on a
+        // network that is not there), this reveals the already-loaded app
+        // shell after a bounded wait instead of leaving the boot screen up
+        // forever. It never fakes a Firebase/auth state — it only hides the
+        // loader so offline mode and guest/localStorage can take over.
+        setTimeout(function () {
+            try {
+                var html = document.documentElement;
+                if (html && !html.classList.contains("app-ready")) {
+                    html.classList.add("app-ready");
+                    var loader = document.getElementById("bootLoader");
+                    if (loader) {
+                        setTimeout(function () {
+                            if (loader.parentNode) {
+                                loader.parentNode.removeChild(loader);
+                            }
+                        }, 300);
+                    }
+                }
+            } catch (e) {}
+        }, 8000);
+    </script>
+
     <style>
         #bootLoader {
             position: fixed;
@@ -4141,53 +4168,65 @@
         const auth =
             getAuth(app);
 
-        try {
-
-            await setPersistence(
-                auth,
-                browserLocalPersistence
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Account persistence error (local):",
-                error
-            );
+        // IMPORTANT (offline-startup fix): auth persistence is configured in
+        // the background and must NEVER be awaited at module top level. On a
+        // network-less launch this promise can stay pending, and because the
+        // boot code that hides the loading screen lives later in this module,
+        // awaiting it here would leave the app frozen on its loading screen
+        // while offline. Firebase auth state is restored independently by
+        // onAuthStateChanged() below, so not blocking changes nothing online
+        // and unblocks offline startup.
+        (async () => {
 
             try {
 
                 await setPersistence(
                     auth,
-                    browserSessionPersistence
+                    browserLocalPersistence
                 );
 
-            } catch (sessionError) {
+            } catch (error) {
 
                 console.error(
-                    "Account persistence error (session):",
-                    sessionError
+                    "Account persistence error (local):",
+                    error
                 );
 
                 try {
 
                     await setPersistence(
                         auth,
-                        inMemoryPersistence
+                        browserSessionPersistence
                     );
 
-                } catch (memoryError) {
+                } catch (sessionError) {
 
                     console.error(
-                        "Account persistence error (memory):",
-                        memoryError
+                        "Account persistence error (session):",
+                        sessionError
                     );
+
+                    try {
+
+                        await setPersistence(
+                            auth,
+                            inMemoryPersistence
+                        );
+
+                    } catch (memoryError) {
+
+                        console.error(
+                            "Account persistence error (memory):",
+                            memoryError
+                        );
+
+                    }
 
                 }
 
             }
 
-        }
+        })();
 
         const db =
             getFirestore(app, "default");
@@ -7529,6 +7568,16 @@ done: "تەواو",
 
 
                 if (user) {
+
+                    // Offline cold start: enter offline task mode as soon as
+                    // the cached session is restored, so IndexedDB tasks
+                    // render even if the Firestore profile/migration steps
+                    // below wait on a network that is not there. Safe no-op
+                    // when already active; the online path is untouched.
+                    if (!isBrowserOnline) {
+
+                        enterOfflineTasks();
+                    }
 
                     try {
 
