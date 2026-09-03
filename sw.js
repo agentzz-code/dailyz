@@ -1,11 +1,87 @@
-const CACHE_NAME = 'dailykrd-push-v1';
+const RUNTIME_CACHE = 'dailykrd-offline-v1';
+
+// Any cache that starts with this prefix is considered ours and eligible for
+// cleanup on activate when it is no longer the active cache version.
+const CACHE_PREFIX = 'dailykrd-';
+
+// The app entry point. Because Daily.KRD is a single-file PWA, `./` resolves to
+// index.html and is the only asset we can safely precache without guessing.
+// All other same-origin GETs are cached dynamically at runtime instead.
+const PRECACHE_URLS = ['./'];
 
 self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(RUNTIME_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
+    );
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(
+        Promise.all([
+            // Take control of open pages immediately.
+            self.clients.claim(),
+            // Remove old Daily.KRD cache versions that are no longer needed.
+            caches.keys().then((keys) =>
+                Promise.all(
+                    keys
+                        .filter((key) => key.startsWith(CACHE_PREFIX) && key !== RUNTIME_CACHE)
+                        .map((key) => caches.delete(key))
+                )
+            )
+        ])
+    );
+});
+
+// OFFLINE CACHING
+// Strategy: network-first with cache fallback for same-origin GET requests.
+//  - Successful same-origin GET responses are saved to the runtime cache.
+//  - When the network fails, the cached copy is served so the app works offline.
+//  - Non-GET requests (POST/PUT/DELETE) are never intercepted or cached.
+//  - Cross-origin requests (Firebase, Google APIs, the Cloudflare Worker push/AI
+//    endpoints, gstatic SDKs, etc.) are passed straight through untouched, so
+//    dynamic API responses are never cached.
+self.addEventListener('fetch', (event) => {
+    const request = event.request;
+
+    // Never touch non-GET requests (POST/PUT/DELETE, etc.).
+    if (request.method !== 'GET') return;
+
+    const url = new URL(request.url);
+
+    // Only handle same-origin requests. Firebase, Cloudflare Worker push/AI,
+    // authentication, and all other dynamic APIs are cross-origin, so they are
+    // automatically excluded from offline caching here.
+    if (url.origin !== self.location.origin) return;
+
+    event.respondWith(
+        fetch(request)
+            .then((response) => {
+                // Cache a copy of successful responses for offline use.
+                if (response && response.ok) {
+                    const copy = response.clone();
+                    caches
+                        .open(RUNTIME_CACHE)
+                        .then((cache) => cache.put(request, copy));
+                }
+                return response;
+            })
+            .catch(() =>
+                caches.match(request).then((cached) => {
+                    if (cached) return cached;
+                    // For page navigations, fall back to the cached app shell
+                    // (index.html) so relative routes like `./` still load offline.
+                    if (request.mode === 'navigate') {
+                        const root = new Request(
+                            new URL('./', self.registration.scope).toString()
+                        );
+                        return caches.match(root);
+                    }
+                    // Uncached asset offline: let the network error surface.
+                    return undefined;
+                })
+            )
+    );
 });
 
 // PUSH NOTIFICATION RECEIVER
