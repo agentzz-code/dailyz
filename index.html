@@ -26,33 +26,6 @@
         })();
     </script>
 
-    <script>
-        // Bounded loading-screen safety net (offline startup).
-        // The main module hides the boot loader itself once it finishes
-        // initializing. If Firebase/module startup ever stalls because the
-        // device is offline (e.g. an SDK fetch or auth init waiting on a
-        // network that is not there), this reveals the already-loaded app
-        // shell after a bounded wait instead of leaving the boot screen up
-        // forever. It never fakes a Firebase/auth state — it only hides the
-        // loader so offline mode and guest/localStorage can take over.
-        setTimeout(function () {
-            try {
-                var html = document.documentElement;
-                if (html && !html.classList.contains("app-ready")) {
-                    html.classList.add("app-ready");
-                    var loader = document.getElementById("bootLoader");
-                    if (loader) {
-                        setTimeout(function () {
-                            if (loader.parentNode) {
-                                loader.parentNode.removeChild(loader);
-                            }
-                        }, 300);
-                    }
-                }
-            } catch (e) {}
-        }, 8000);
-    </script>
-
     <style>
         #bootLoader {
             position: fixed;
@@ -1466,6 +1439,457 @@
 
         .dark .prayer {
             background: #222;
+        }
+
+        /* PRAYER TRACKING & STATISTICS */
+
+        .prayer {
+            gap: 12px;
+        }
+
+        .prayer-check-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .prayer-check {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: transform .2s ease, background .2s ease, border-color .2s ease;
+        }
+
+        .dark .prayer-check {
+            border-color: #555;
+        }
+
+        .prayer-check:active {
+            transform: scale(.88);
+        }
+
+        .prayer-check:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .prayer-check:checked::after {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 2px;
+            width: 7px;
+            height: 13px;
+            border: solid var(--accent-contrast);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .prayer-name {
+            flex: 1;
+            min-width: 0;
+            font-weight: 650;
+            transition: opacity .25s ease;
+        }
+
+        .prayer.done .prayer-name {
+            opacity: .5;
+        }
+
+        .prayer.just-checked .prayer-check {
+            animation: checkPop .4s ease;
+        }
+
+        .prayer > strong {
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Tracker card */
+
+        .prayer-tracker {
+            background: rgba(255,255,255,.92);
+            border-radius: 20px;
+            padding: 17px;
+            margin: 0 0 15px;
+        }
+
+        .dark .prayer-tracker {
+            background: #222;
+        }
+
+        .prayer-stats-tabs {
+            display: flex;
+            gap: 3px;
+            background: rgba(230,230,235,.9);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .dark .prayer-stats-tabs {
+            background: #242424;
+        }
+
+        .prayer-stats-tab {
+            flex: 1;
+            border: 0;
+            background: transparent;
+            padding: 10px 2px;
+            border-radius: 11px;
+            color: #666;
+            font-weight: 650;
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        @media (max-width: 380px) {
+            .prayer-stats-tab {
+                font-size: 10.5px;
+                padding: 9px 1px;
+            }
+        }
+
+        .dark .prayer-stats-tab {
+            color: #aaa;
+        }
+
+        .prayer-stats-tab.active {
+            background: white;
+            color: var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+
+        .dark .prayer-stats-tab.active {
+            background: #3a3a3a;
+            color: var(--accent);
+        }
+
+        /* Summary block */
+
+        .prayer-summary-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .prayer-summary-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            font-weight: 800;
+            color: #888;
+        }
+
+        .prayer-summary-sub {
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .prayer-summary-nums {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .prayer-summary-ratio {
+            font-size: 34px;
+            font-weight: 850;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1;
+        }
+
+        .prayer-summary-pct {
+            font-size: 17px;
+            font-weight: 800;
+            color: #777;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .dark .prayer-summary-pct {
+            color: #bbb;
+        }
+
+        .prayer-progress-track {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 13px 0 9px;
+        }
+
+        .dark .prayer-progress-track {
+            background: #3a3a3a;
+        }
+
+        .prayer-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            transition: width .35s ease;
+        }
+
+        .dark .prayer-progress-fill {
+            background: #fff;
+        }
+
+        .prayer-summary-caption {
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Weekly / yearly rows and monthly chips */
+
+        .prayer-stats-list {
+            margin-top: 14px;
+        }
+
+        .prayer-stats-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,.06);
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .dark .prayer-stats-row {
+            border-bottom-color: rgba(255,255,255,.08);
+        }
+
+        .prayer-stats-row:last-child {
+            border-bottom: 0;
+        }
+
+        .prayer-stats-row-label {
+            flex-shrink: 0;
+        }
+
+        .prayer-stats-row-mid {
+            flex: 1;
+            min-width: 20px;
+        }
+
+        .prayer-mini-track {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .dark .prayer-mini-track {
+            background: #3a3a3a;
+        }
+
+        .prayer-mini-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .dark .prayer-mini-fill {
+            background: #fff;
+        }
+
+        .prayer-stats-row-value {
+            flex-shrink: 0;
+            font-variant-numeric: tabular-nums;
+            color: #555;
+        }
+
+        .dark .prayer-stats-row-value {
+            color: #ccc;
+        }
+
+        .prayer-month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 14px;
+        }
+
+        .prayer-month-cell {
+            background: rgba(0,0,0,.04);
+            border-radius: 9px;
+            padding: 6px 2px 5px;
+            text-align: center;
+        }
+
+        .dark .prayer-month-cell {
+            background: rgba(255,255,255,.06);
+        }
+
+        .prayer-month-cell-day {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .prayer-month-cell-score {
+            display: block;
+            font-size: 9.5px;
+            color: #888;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Prayer history calendar */
+
+        .prayer-cal-nav {
+            display: flex;
+            gap: 6px;
+        }
+
+        .prayer-cal-nav button {
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 10px;
+            background: #eee;
+            cursor: pointer;
+        }
+
+        .dark .prayer-cal-nav button {
+            background: #333;
+            color: white;
+        }
+
+        .prayer-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .prayer-cal-day {
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            padding: 7px 0 5px;
+            text-align: center;
+            cursor: pointer;
+            color: inherit;
+            min-width: 0;
+        }
+
+        .prayer-cal-day:hover {
+            background: #eee;
+        }
+
+        .dark .prayer-cal-day:hover {
+            background: #333;
+        }
+
+        .prayer-cal-day.today {
+            box-shadow: inset 0 0 0 2px #888;
+        }
+
+        .prayer-cal-day.selected {
+            background: #111;
+            color: #fff;
+        }
+
+        .dark .prayer-cal-day.selected {
+            background: #fff;
+            color: #000;
+        }
+
+        .prayer-cal-day.future {
+            opacity: .38;
+        }
+
+        .prayer-cal-day-num {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .prayer-cal-day-score {
+            display: block;
+            font-size: 9.5px;
+            color: #888;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .prayer-cal-day.selected .prayer-cal-day-score {
+            color: rgba(255,255,255,.7);
+        }
+
+        .dark .prayer-cal-day.selected .prayer-cal-day-score {
+            color: rgba(0,0,0,.55);
+        }
+
+        .prayer-cal-detail {
+            margin-top: 14px;
+            border-top: 1px solid rgba(0,0,0,.06);
+            padding-top: 12px;
+        }
+
+        .dark .prayer-cal-detail {
+            border-top-color: rgba(255,255,255,.08);
+        }
+
+        .prayer-cal-detail-date {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .prayer-day-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 0;
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .prayer-day-mark {
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .prayer-day-mark.no {
+            color: #888;
+        }
+
+        .dark .prayer-day-mark.no {
+            color: #777;
+        }
+
+        .prayer-cal-detail-summary {
+            margin-top: 4px;
+            padding-top: 9px;
+            border-top: 1px solid rgba(0,0,0,.06);
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .dark .prayer-cal-detail-summary {
+            border-top-color: rgba(255,255,255,.08);
         }
 
         /* SETTINGS */
@@ -3144,6 +3568,66 @@
 
             <div id="prayerList"></div>
 
+
+            <!-- PRAYER TRACKING & STATISTICS -->
+
+            <div
+                class="prayer-tracker"
+                id="prayerTracking"
+            >
+
+                <div
+                    class="prayer-stats-tabs"
+                    id="prayerStatsTabs"
+                >
+
+                    <button
+                        class="prayer-stats-tab active"
+                        data-pstat="daily"
+                        type="button"
+                    >
+                        Daily
+                    </button>
+
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="weekly"
+                        type="button"
+                    >
+                        Weekly
+                    </button>
+
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="monthly"
+                        type="button"
+                    >
+                        Monthly
+                    </button>
+
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="yearly"
+                        type="button"
+                    >
+                        Yearly
+                    </button>
+
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="calendar"
+                        type="button"
+                    >
+                        Calendar
+                    </button>
+
+                </div>
+
+                <div id="prayerStatsBody"></div>
+
+            </div>
+
+
             <div class="qibla-card">
 
                 <div
@@ -4168,65 +4652,53 @@
         const auth =
             getAuth(app);
 
-        // IMPORTANT (offline-startup fix): auth persistence is configured in
-        // the background and must NEVER be awaited at module top level. On a
-        // network-less launch this promise can stay pending, and because the
-        // boot code that hides the loading screen lives later in this module,
-        // awaiting it here would leave the app frozen on its loading screen
-        // while offline. Firebase auth state is restored independently by
-        // onAuthStateChanged() below, so not blocking changes nothing online
-        // and unblocks offline startup.
-        (async () => {
+        try {
+
+            await setPersistence(
+                auth,
+                browserLocalPersistence
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Account persistence error (local):",
+                error
+            );
 
             try {
 
                 await setPersistence(
                     auth,
-                    browserLocalPersistence
+                    browserSessionPersistence
                 );
 
-            } catch (error) {
+            } catch (sessionError) {
 
                 console.error(
-                    "Account persistence error (local):",
-                    error
+                    "Account persistence error (session):",
+                    sessionError
                 );
 
                 try {
 
                     await setPersistence(
                         auth,
-                        browserSessionPersistence
+                        inMemoryPersistence
                     );
 
-                } catch (sessionError) {
+                } catch (memoryError) {
 
                     console.error(
-                        "Account persistence error (session):",
-                        sessionError
+                        "Account persistence error (memory):",
+                        memoryError
                     );
-
-                    try {
-
-                        await setPersistence(
-                            auth,
-                            inMemoryPersistence
-                        );
-
-                    } catch (memoryError) {
-
-                        console.error(
-                            "Account persistence error (memory):",
-                            memoryError
-                        );
-
-                    }
 
                 }
 
             }
 
-        })();
+        }
 
         const db =
             getFirestore(app, "default");
@@ -4269,639 +4741,69 @@
             );
 
 
-        /* ============================================================
-           OFFLINE LAYER (STEP 2) — IndexedDB local storage
+        /* PRAYER TRACKING — per-date completion records.
+           Guest users persist to localStorage; signed-in users keep the
+           same shape in Firestore (users/{uid}/prayers/{date}) via the
+           existing offline-capable persistence. */
 
-           Uses the browser's native IndexedDB API (no library).
+        const PRAYER_GUEST_KEY =
+            "dailykrd_guest_prayers";
 
-           Database : "dailykrd-offline"  (versioned, upgradeable)
-           Stores   :
-             tasks     -> mirror of task records, keyPath "id"
-             appData   -> generic key/value app state, keyPath "key"
-             syncQueue -> pending change queue, keyPath "id"
+        // Lower-case Firestore field names (mirrors the existing
+        // notification settings shape, e.g. { fajr: true, ... }).
+        const PRAYER_FIELDS = [
+            "fajr",
+            "dhuhr",
+            "asr",
+            "maghrib",
+            "isha"
+        ];
 
-           NOTES
-           - IndexedDB is NOT the source of truth yet. Firebase (signed-in)
-             and localStorage (guest) keep their current roles exactly as
-             before. This layer only mirrors task writes locally and,
-             while the browser reports being offline, records them in the
-             sync queue for a later step to replay to Firebase.
-           - No automatic Firebase sync happens here (that is a later step).
-           - Everything is best-effort: if IndexedDB is missing or a call
-             fails, the app keeps working exactly as it did before.
-           - Only ordinary app data is stored — never passwords, auth
-             tokens, API secrets, or Firebase private credentials.
-        ============================================================ */
+        // Display order, matching Object.entries(prayerTimes).
+        const PRAYER_UI_KEYS = [
+            "Fajr",
+            "Dhuhr",
+            "Asr",
+            "Maghrib",
+            "Isha"
+        ];
 
-        const OFFLINE_DB_NAME = "dailykrd-offline";
-        const OFFLINE_DB_VERSION = 1;
-
-        const OFFLINE_STORE_TASKS = "tasks";
-        const OFFLINE_STORE_APP_DATA = "appData";
-        const OFFLINE_STORE_SYNC_QUEUE = "syncQueue";
-
-        let offlineDB = null;
-        let offlineDBReady = false;
-
-        // Best-effort online flag. A real "am I offline?" probe can be
-        // refined in a later step; this keeps the sync queue clean while
-        // the device is clearly online.
-        let isBrowserOnline =
-            typeof navigator !== "undefined" &&
-            navigator.onLine !== false;
-
-        if (typeof window !== "undefined") {
-
-            window.addEventListener("online", () => {
-                isBrowserOnline = true;
-            });
-
-            window.addEventListener("offline", () => {
-                isBrowserOnline = false;
-            });
-        }
-
-
-        function offlineGetIDB() {
+        function loadGuestPrayerRecords() {
 
             try {
+
+                const parsed =
+                    JSON.parse(
+                        localStorage.getItem(
+                            PRAYER_GUEST_KEY
+                        ) || "{}"
+                    );
 
                 return (
-                    typeof indexedDB !== "undefined"
-                        ? indexedDB
-                        : null
-                );
+                    parsed &&
+                    typeof parsed === "object" &&
+                    !Array.isArray(parsed)
+                )
+                    ? parsed
+                    : {};
 
             } catch (error) {
 
-                console.warn(
-                    "IndexedDB unavailable — offline storage disabled:",
+                console.error(
+                    "Guest prayer records parse error:",
                     error
                 );
 
-                return null;
+                return {};
             }
         }
 
-
-        function offlineRequest(request) {
-
-            return new Promise((resolve, reject) => {
-
-                request.onsuccess = () =>
-                    resolve(request.result);
-
-                request.onerror = () =>
-                    reject(
-                        request.error ||
-                        new Error(
-                            "IndexedDB request failed"
-                        )
-                    );
-            });
-        }
-
-
-        async function offlineWrite(storeName, value) {
-
-            if (!offlineDB) return false;
-
-            try {
-
-                const transaction =
-                    offlineDB.transaction(
-                        storeName,
-                        "readwrite"
-                    );
-
-                const store =
-                    transaction.objectStore(
-                        storeName
-                    );
-
-                await offlineRequest(
-                    store.put(value)
-                );
-
-                return true;
-
-            } catch (error) {
-
-                console.warn(
-                    "Offline store write error:",
-                    error
-                );
-
-                return false;
-            }
-        }
-
-
-        async function offlineDelete(storeName, key) {
-
-            if (!offlineDB) return false;
-
-            try {
-
-                const transaction =
-                    offlineDB.transaction(
-                        storeName,
-                        "readwrite"
-                    );
-
-                const store =
-                    transaction.objectStore(
-                        storeName
-                    );
-
-                await offlineRequest(
-                    store.delete(key)
-                );
-
-                return true;
-
-            } catch (error) {
-
-                console.warn(
-                    "Offline store delete error:",
-                    error
-                );
-
-                return false;
-            }
-        }
-
-
-        async function offlineReadAll(storeName) {
-
-            if (!offlineDB) return [];
-
-            try {
-
-                const transaction =
-                    offlineDB.transaction(
-                        storeName,
-                        "readonly"
-                    );
-
-                const store =
-                    transaction.objectStore(
-                        storeName
-                    );
-
-                const values =
-                    await offlineRequest(
-                        store.getAll()
-                    );
-
-                return Array.isArray(values)
-                    ? values
-                    : [];
-
-            } catch (error) {
-
-                console.warn(
-                    "Offline store read error:",
-                    error
-                );
-
-                return [];
-            }
-        }
-
-
-        /* OPEN / UPGRADE THE DATABASE (safe, versioned) */
-
-        function initOfflineDB() {
-
-            const idb = offlineGetIDB();
-
-            if (!idb) {
-
-                offlineDB = null;
-                offlineDBReady = false;
-
-                return Promise.resolve(null);
-            }
-
-            return new Promise((resolve) => {
-
-                let openRequest;
-
-                try {
-
-                    openRequest =
-                        idb.open(
-                            OFFLINE_DB_NAME,
-                            OFFLINE_DB_VERSION
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Offline DB open failed — continuing online:",
-                        error
-                    );
-
-                    offlineDB = null;
-                    offlineDBReady = false;
-
-                    resolve(null);
-
-                    return;
-                }
-
-                openRequest.onupgradeneeded = (
-                    event
-                ) => {
-
-                    const database =
-                        event.target.result;
-
-                    const oldVersion =
-                        event.oldVersion;
-
-                    // v1: initial schema
-                    if (oldVersion < 1) {
-
-                        if (
-                            !database.objectStoreNames.contains(
-                                OFFLINE_STORE_TASKS
-                            )
-                        ) {
-
-                            const tasksStore =
-                                database.createObjectStore(
-                                    OFFLINE_STORE_TASKS,
-                                    { keyPath: "id" }
-                                );
-
-                            tasksStore.createIndex(
-                                "date",
-                                "date",
-                                { unique: false }
-                            );
-                        }
-
-                        if (
-                            !database.objectStoreNames.contains(
-                                OFFLINE_STORE_APP_DATA
-                            )
-                        ) {
-
-                            database.createObjectStore(
-                                OFFLINE_STORE_APP_DATA,
-                                { keyPath: "key" }
-                            );
-                        }
-
-                        if (
-                            !database.objectStoreNames.contains(
-                                OFFLINE_STORE_SYNC_QUEUE
-                            )
-                        ) {
-
-                            database.createObjectStore(
-                                OFFLINE_STORE_SYNC_QUEUE,
-                                { keyPath: "id" }
-                            );
-                        }
-                    }
-
-                    // Future upgrades (later steps): add new stores/indexes
-                    // here, e.g.:
-                    //   if (oldVersion < 2) {
-                    //       database.createObjectStore("events", ...);
-                    //   }
-                    // ...and bump OFFLINE_DB_VERSION accordingly.
-                };
-
-                openRequest.onsuccess = () => {
-
-                    offlineDB =
-                        openRequest.result;
-
-                    offlineDBReady = true;
-
-                    resolve(offlineDB);
-                };
-
-                openRequest.onerror = () => {
-
-                    console.warn(
-                        "Offline DB init failed — continuing online:",
-                        openRequest.error
-                    );
-
-                    offlineDB = null;
-                    offlineDBReady = false;
-
-                    resolve(null);
-                };
-            });
-        }
-
-
-        function offlineDBIsAvailable() {
-            return !!offlineDB;
-        }
-
-
-        function offlineNewID() {
-
-            return crypto.randomUUID
-                ? crypto.randomUUID()
-                : String(Date.now()) +
-                    "-" +
-                    Math.random()
-                        .toString(36)
-                        .slice(2, 10);
-        }
-
-
-        /* TASKS STORE */
-
-        // Guest tasks keep their existing uuid; signed-in tasks use the
-        // Firestore document id (both are unique per task on this device).
-        async function saveTaskOffline(task) {
-
-            if (
-                !offlineDB ||
-                !task ||
-                !task.id
-            ) {
-
-                return false;
-            }
-
-            return offlineWrite(
-                OFFLINE_STORE_TASKS,
-                task
-            );
-        }
-
-
-        // Full-object update (same store as save — put replaces by id).
-        async function updateTaskOffline(task) {
-            return saveTaskOffline(task);
-        }
-
-
-        async function deleteTaskOffline(idOrTask) {
-
-            const id =
-                typeof idOrTask === "string"
-                    ? idOrTask
-                    : idOrTask && idOrTask.id;
-
-            if (!offlineDB || !id) return false;
-
-            return offlineDelete(
-                OFFLINE_STORE_TASKS,
-                id
-            );
-        }
-
-
-        async function getTasksOffline() {
-            return offlineReadAll(
-                OFFLINE_STORE_TASKS
-            );
-        }
-
-
-        /* APPDATA STORE (generic key/value app state) */
-
-        async function saveAppDataOffline(key, value) {
-
-            if (!offlineDB || !key) return false;
-
-            return offlineWrite(
-                OFFLINE_STORE_APP_DATA,
-                {
-                    key,
-                    value,
-                    updatedAt: Date.now()
-                }
-            );
-        }
-
-
-        async function getAppDataOffline(key) {
-
-            if (!offlineDB || !key) return null;
-
-            try {
-
-                const transaction =
-                    offlineDB.transaction(
-                        OFFLINE_STORE_APP_DATA,
-                        "readonly"
-                    );
-
-                const record =
-                    await offlineRequest(
-                        transaction
-                            .objectStore(
-                                OFFLINE_STORE_APP_DATA
-                            )
-                            .get(key)
-                    );
-
-                return record
-                    ? record.value
-                    : null;
-
-            } catch (error) {
-
-                console.warn(
-                    "Offline app data read error:",
-                    error
-                );
-
-                return null;
-            }
-        }
-
-
-        async function removeAppDataOffline(key) {
-
-            if (!offlineDB || !key) return false;
-
-            return offlineDelete(
-                OFFLINE_STORE_APP_DATA,
-                key
-            );
-        }
-
-
-        /* SYNC QUEUE STORE */
-
-        // change = { entity, type, data }
-        //   entity : what changed, e.g. "task" (default)
-        //   type   : "create" | "update" | "delete"
-        //   data   : the record (or, for delete, { id })
-        // Each queued entry is stamped with its own unique id + timestamp
-        // so a later step can replay it to Firestore in order and then
-        // clear it with clearSyncedChange(id).
-        async function queueOfflineChange(change) {
-
-            if (
-                !offlineDB ||
-                !change ||
-                !change.type
-            ) {
-
-                return null;
-            }
-
-            const record = {
-                id: offlineNewID(),
-                // Who this change belongs to, so a later sync step never
-                // pushes guest/local data into a signed-in account.
-                owner:
-                    (
-                        currentUser &&
-                        currentUser.uid
-                    ) || "guest",
-                entity:
-                    change.entity || "task",
-                type: change.type,
-                data:
-                    change.data !== undefined
-                        ? change.data
-                        : null,
-                timestamp: Date.now()
-            };
-
-            const ok = await offlineWrite(
-                OFFLINE_STORE_SYNC_QUEUE,
-                record
-            );
-
-            return ok ? record.id : null;
-        }
-
-
-        async function getPendingSyncChanges() {
-
-            const records = await offlineReadAll(
-                OFFLINE_STORE_SYNC_QUEUE
-            );
-
-            return records.sort(
-                (a, b) =>
-                    (Number(a.timestamp) || 0) -
-                    (Number(b.timestamp) || 0)
-            );
-        }
-
-
-        async function clearSyncedChange(id) {
-
-            if (!offlineDB || !id) return false;
-
-            return offlineDelete(
-                OFFLINE_STORE_SYNC_QUEUE,
-                id
-            );
-        }
-
-
-        /* MIRROR HELPER USED BY THE EXISTING TASK WRITE PATHS */
-
-        // op: "create" | "update" | "delete"
-        // Mirrors a task write into the IndexedDB tasks store. While the
-        // browser is offline the same change is also appended to the sync
-        // queue (auto-sync to Firebase arrives in a later step). Fire and
-        // forget: never blocks or breaks the existing online flow.
-        function mirrorTaskWriteOffline(op, task) {
-
-            if (!offlineDB) return;
-
-            const run = async () => {
-
-                if (op === "delete") {
-
-                    await deleteTaskOffline(
-                        task && task.id
-                            ? { id: task.id }
-                            : task
-                    );
-
-                } else {
-
-                    if (!task || !task.id) return;
-
-                    await saveTaskOffline(
-                        task
-                    );
-                }
-
-                // Changes belong in the pending queue when the browser is
-                // offline OR when the Firestore listener had to fall back
-                // to the IndexedDB cache (connectivity can be broken even
-                // if navigator.onLine still reports true). Only signed-in
-                // changes are queued — guest changes live in localStorage
-                // and must never be pushed to a Firebase account. While
-                // normally online the live sources already have the data,
-                // so queueing would only duplicate it for a future sync
-                // step.
-                if (
-                    currentUser &&
-                    (
-                        !isBrowserOnline ||
-                        offlineTasksActive
-                    )
-                ) {
-
-                    await queueOfflineChange({
-                        entity: "task",
-                        type: op,
-                        data:
-                            op === "delete"
-                                ? { id: task.id }
-                                : task
-                    });
-                }
-            };
-
-            // Return the promise so offline write paths can await the
-            // mirror (and queued change) before re-rendering the cache.
-            // Existing callers ignore the return value — no behavior change.
-            return run().catch(error => {
-                console.warn(
-                    "Offline task mirror error:",
-                    error
-                );
-            });
-        }
-
-
-        // Initialize once at startup. If it fails (unavailable, private
-        // mode, storage full, ...) every helper above is a safe no-op and
-        // the app continues with its existing Firebase/localStorage flow.
-        initOfflineDB();
-
-        // Small debug/testing handle (console: await window.dailyKrdOffline.getTasksOffline())
-        if (typeof window !== "undefined") {
-
-            window.dailyKrdOffline = {
-                initOfflineDB,
-                isAvailable: offlineDBIsAvailable,
-                saveTaskOffline,
-                updateTaskOffline,
-                deleteTaskOffline,
-                getTasksOffline,
-                saveAppDataOffline,
-                getAppDataOffline,
-                removeAppDataOffline,
-                queueOfflineChange,
-                getPendingSyncChanges,
-                clearSyncedChange,
-                syncPendingTaskChanges
-            };
-        }
+        let guestPrayerRecords =
+            loadGuestPrayerRecords();
+
+        // Mirror of guestPrayerRecords for signed-in users, fed by a
+        // single onSnapshot listener over users/{uid}/prayers.
+        let userPrayerRecords = {};
 
 
         /* TRANSLATIONS */
@@ -5287,6 +5189,13 @@
                 calEventsToday: "Today's Events",
                 calNoUpcoming: "No upcoming events.",
 
+                prayerStats: {
+                    progress: "Prayer Progress",
+                    calendar: "Calendar",
+                    completed: "completed",
+                    prayers: "prayers"
+                },
+
             },
 
 
@@ -5667,6 +5576,13 @@ done: "تەواو",
                 calEventsThisWeek: "ئەم هەفتانە",
                 calEventsToday: "رووداوەکانی ئەمڕۆ",
                 calNoUpcoming: "هیچ رووداوی داهاتوو نییە.",
+
+                prayerStats: {
+                    progress: "پێشکەوتنی نوێژ",
+                    calendar: "ڕۆژژمێر",
+                    completed: "تەواوکراون",
+                    prayers: "نوێژ"
+                },
 
             },
 
@@ -6050,6 +5966,12 @@ done: "تەواو",
                 calEventsThisWeek: "أحداث هذا الأسبوع",
                 calEventsToday: "أحداث اليوم",
                 calNoUpcoming: "لا أحداث قادمة.",
+                prayerStats: {
+                    progress: "تقدم الصلاة",
+                    calendar: "التقويم",
+                    completed: "مكتملة",
+                    prayers: "صلاة"
+                },
             }
 
         };
@@ -6775,9 +6697,14 @@ done: "تەواو",
 
             renderCalendar();
 
-            loadPrayerTimes();
+            loadPrayerTimes();            if (currentUser) {
 
-            startOrRefreshTasks();
+                startTaskListener();
+
+            } else {
+
+                refreshTasks();
+            }
 
             // Re-render study stats page if it's currently active
             if (document.getElementById("studyStats")?.classList.contains("active")) {
@@ -7569,16 +7496,6 @@ done: "تەواو",
 
                 if (user) {
 
-                    // Offline cold start: enter offline task mode as soon as
-                    // the cached session is restored, so IndexedDB tasks
-                    // render even if the Firestore profile/migration steps
-                    // below wait on a network that is not there. Safe no-op
-                    // when already active; the online path is untouched.
-                    if (!isBrowserOnline) {
-
-                        enterOfflineTasks();
-                    }
-
                     try {
 
                         await migrateGuestTasksToAccount(user.uid);
@@ -7636,33 +7553,7 @@ done: "تەواو",
                             user.email || "";
 
 
-                        if (!isBrowserOnline) {
-
-                            // No connectivity right now: serve signed-in
-                            // tasks from the IndexedDB cache until an
-                            // "online" event (or retry) returns Firestore
-                            // to the picture.
-                            enterOfflineTasks();
-
-                        } else {
-
-                            // STEP 4: replay any queue leftovers from an
-                            // earlier offline session BEFORE the Firestore
-                            // snapshot becomes authoritative again.
-                            await syncPendingTaskChanges().then(result => {
-
-                                if (result && result.pending) {
-
-                                    // Sync couldn't finish (Firestore still
-                                    // unreachable) — keep showing the cache.
-                                    enterOfflineTasks();
-
-                                } else {
-
-                                    startTaskListener();
-                                }
-                            });
-                        }
+                        startTaskListener();
 
                         startStepsListener();
 
@@ -7696,26 +7587,7 @@ done: "تەواو",
                             user.email || "";
 
 
-                        if (!isBrowserOnline) {
-
-                            enterOfflineTasks();
-
-                        } else {
-
-                            // STEP 4: replay queue leftovers before the
-                            // Firestore snapshot becomes authoritative.
-                            await syncPendingTaskChanges().then(result => {
-
-                                if (result && result.pending) {
-
-                                    enterOfflineTasks();
-
-                                } else {
-
-                                    startTaskListener();
-                                }
-                            });
-                        }
+                        startTaskListener();
 
                         startStepsListener();
                     }
@@ -7756,10 +7628,6 @@ done: "تەواو",
                     stopTaskListener();
 
                     stopStepsListener();
-
-                    // Signed out: leave offline task mode so guests are
-                    // served from localStorage exactly as before.
-                    resetOfflineTaskMode();
 
                     currentTasksCache = [];
 
@@ -7997,614 +7865,6 @@ done: "تەواو",
             );
 
 
-        /* ============================================================
-           OFFLINE TASK READS (STEP 3)
-
-           Signed-in task lists are rendered from Firestore while online.
-           When the device is offline (or Firestore itself is unreachable)
-           the same existing UI renders the IndexedDB "tasks" mirror that
-           Step 2 keeps up to date.
-
-           - Online  : Firestore listener runs as before. Each snapshot is
-                       also cached (whole-list replace) into IndexedDB so
-                       the offline copy is always the latest server list.
-           - Offline : the Firestore listener is stopped and renderTasks()
-                       is fed from the IndexedDB cache instead.
-           - Guest   : unchanged — localStorage already works offline.
-           - Writes while offline (toggle/delete/add) update the cache and
-             the syncQueue ONLY. Firestore is not touched until a later
-             step replays the queue, so nothing here overwrites server
-             data with older/cached data.
-        ============================================================ */
-
-        let offlineTasksActive = false;
-
-        // Bumped whenever the authoritative source switches (offline ->
-        // online snapshot, sign-out, ...) so a slow IndexedDB read can
-        // never paint over a newer Firestore render.
-        let offlineReadGeneration = 0;
-
-        let offlineRetryTimer = null;
-
-
-        function scheduleOfflineRetry() {
-
-            clearTimeout(offlineRetryTimer);
-
-            if (!offlineTasksActive) return;
-
-            // Keep trying to restore the Firestore listener while the
-            // browser still reports being online (e.g. server hiccup).
-            offlineRetryTimer = setTimeout(() => {
-
-                offlineRetryTimer = null;
-
-                if (!offlineTasksActive) return;
-
-                if (
-                    typeof navigator !== "undefined" &&
-                    !navigator.onLine
-                ) {
-
-                    // Truly offline — the window "online" event resumes us.
-                    return;
-                }
-
-                // STEP 4: replay queued changes first; only hand rendering
-                // back to Firestore once nothing of ours is still pending.
-                syncPendingTaskChanges().then(result => {
-
-                    if (!offlineTasksActive) return;
-
-                    if (result && result.pending) {
-
-                        scheduleOfflineRetry();
-
-                    } else {
-
-                        exitOfflineTasks();
-                    }
-                });
-
-            }, 20000);
-        }
-
-
-        async function readCachedTasks() {
-
-            const cached =
-                await getTasksOffline();
-
-            if (!Array.isArray(cached)) {
-                return [];
-            }
-
-            return cached
-                .filter(task => task && task.id)
-                .sort(
-                    (a, b) =>
-                        (Number(a.createdAt) || 0) -
-                        (Number(b.createdAt) || 0)
-                );
-        }
-
-
-        // Render the IndexedDB mirror through the SAME renderTasks() UI
-        // the Firestore listener uses.
-        async function renderTasksFromOfflineCache() {
-
-            if (!offlineTasksActive) return;
-
-            const generation =
-                offlineReadGeneration;
-
-            const cached =
-                await readCachedTasks();
-
-            if (generation !== offlineReadGeneration) {
-                return;
-            }
-
-            currentTasksCache =
-                cached;
-
-            renderTasks(
-                cached
-            );
-
-            renderCalendar();
-        }
-
-
-        // Best-effort whole-list cache refresh from a Firestore snapshot.
-        // Replacing (not merging) keeps the offline copy exactly equal to
-        // the authoritative server list — no stale or foreign records.
-        async function cacheTasksFromFirestore(tasks) {
-
-            if (
-                !offlineDB ||
-                !Array.isArray(tasks)
-            ) {
-
-                return;
-            }
-
-            try {
-
-                const transaction =
-                    offlineDB.transaction(
-                        OFFLINE_STORE_TASKS,
-                        "readwrite"
-                    );
-
-                const store =
-                    transaction.objectStore(
-                        OFFLINE_STORE_TASKS
-                    );
-
-                store.clear();
-
-                for (const task of tasks) {
-
-                    if (task && task.id) {
-                        store.put(task);
-                    }
-                }
-
-                await new Promise((resolve, reject) => {
-
-                    transaction.oncomplete = resolve;
-
-                    transaction.onerror = () =>
-                        reject(
-                            transaction.error ||
-                            new Error(
-                                "IndexedDB transaction failed"
-                            )
-                        );
-
-                    transaction.onabort = () =>
-                        reject(
-                            transaction.error ||
-                            new Error(
-                                "IndexedDB transaction aborted"
-                            )
-                        );
-                });
-
-            } catch (error) {
-
-                console.warn(
-                    "Offline cache refresh error:",
-                    error
-                );
-            }
-        }
-
-
-        function enterOfflineTasks() {
-
-            // Guests already have fully offline localStorage storage — the
-            // cached-task path is only for signed-in users.
-            if (!currentUser) return;
-
-            if (offlineTasksActive) return;
-
-            offlineTasksActive = true;
-
-            stopTaskListener();
-
-            renderTasksFromOfflineCache();
-
-            // If the browser still reports being online, Firestore may be
-            // temporarily unreachable — retry so we resume automatically.
-            if (
-                typeof navigator !== "undefined" &&
-                navigator.onLine
-            ) {
-
-                scheduleOfflineRetry();
-            }
-        }
-
-
-        function exitOfflineTasks() {
-
-            if (!offlineTasksActive) return;
-
-            // STEP 4: flush the queue first. Only when nothing of the
-            // user's is still pending do we switch back to the Firestore
-            // listener — otherwise an older server snapshot would hide
-            // the user's offline changes.
-            syncPendingTaskChanges().then(result => {
-
-                if (!offlineTasksActive) return;
-
-                if (result && result.pending) {
-
-                    if (isBrowserOnline) {
-
-                        scheduleOfflineRetry();
-                    }
-
-                    return;
-                }
-
-                resetOfflineTaskMode();
-
-                if (currentUser) {
-
-                    startTaskListener();
-
-                } else {
-
-                    refreshTasks();
-                }
-
-                // Drain anything queued while the flush above was running
-                // (writes made while we were still in offline mode but
-                // after the queue was read). Writes after reset go straight
-                // to Firestore, so this is the final pass for stragglers.
-                syncPendingTaskChanges();
-            });
-        }
-
-
-        function resetOfflineTaskMode() {
-
-            offlineTasksActive = false;
-
-            offlineReadGeneration++;
-
-            if (offlineRetryTimer) {
-
-                clearTimeout(offlineRetryTimer);
-
-                offlineRetryTimer = null;
-            }
-        }
-
-
-        // Network-ish Firestore failures switch signed-in task rendering
-        // to the IndexedDB cache (navigator.onLine alone is not enough).
-        function handleFirestoreTaskFailure(error) {
-
-            console.error(
-                "Task listener error:",
-                error
-            );
-
-            const code =
-                error && error.code;
-
-            const message =
-                String(
-                    (error && error.message) || ""
-                );
-
-            const networkFailure =
-                code === "unavailable" ||
-                code === "failed-precondition" ||
-                /network|offline|internet|fetch|unavailable/i.test(
-                    message
-                );
-
-            if (networkFailure) {
-
-                enterOfflineTasks();
-            }
-        }
-
-
-        // Central entry point used after UI-driven refreshes (e.g. language
-        // change) so the app never starts a Firestore listener it can't use.
-        function startOrRefreshTasks() {
-
-            if (!currentUser) {
-
-                refreshTasks();
-
-            } else if (offlineTasksActive) {
-
-                renderTasksFromOfflineCache();
-
-            } else {
-
-                startTaskListener();
-            }
-        }
-
-
-        if (typeof window !== "undefined") {
-
-            window.addEventListener("offline", () => {
-
-                enterOfflineTasks();
-            });
-
-            window.addEventListener("online", () => {
-
-                // STEP 4: flush queued changes, then resume Firestore.
-                syncPendingTaskChanges();
-
-                exitOfflineTasks();
-            });
-        }
-
-
-        /* ============================================================
-           OFFLINE -> FIREBASE SYNC (STEP 4)
-
-           Replays the Step 2 syncQueue against Firestore when
-           connectivity returns, for the signed-in user only.
-
-           Rules:
-           - Only queue entries owned by the current user are synced.
-             Guest/local entries stay in the queue untouched.
-           - Entries are replayed in timestamp order (CREATE/UPDATE/
-             DELETE sequences end in the user's latest offline state).
-           - CREATE uses setDoc() with the task's stable id (the same
-             id offline mode used), which makes creates idempotent
-             across reconnects, refreshes and crashes.
-           - A queue item is removed ONLY after its Firestore operation
-             succeeds. Failures keep the item for the next retry.
-           - Deleting or updating a document that is already gone
-             counts as synchronized (no-op).
-           - Guests are never synced - their data stays in localStorage.
-        ============================================================ */
-
-        let syncPromise = null;
-
-
-        // Fields that go to Firestore: everything except the local id and
-        // undefined values (setDoc/updateDoc reject undefined).
-        function offlineTaskFields(data) {
-
-            const fields = {};
-
-            for (const key of Object.keys(data)) {
-
-                if (key !== "id" && data[key] !== undefined) {
-                    fields[key] = data[key];
-                }
-            }
-
-            return fields;
-        }
-
-
-        function isFirestoreNotFound(error) {
-            return !!(
-                error &&
-                error.code === "not-found"
-            );
-        }
-
-
-        // Replay one queue entry against the signed-in user's tasks
-        // collection. Throws on failure so the caller keeps the item.
-        async function replayTaskSyncChange(change) {
-
-            const type =
-                change && change.type;
-
-            const data =
-                change && change.data;
-
-            if (!data || !type) return;
-
-            const taskId = data.id;
-
-            if (type === "create") {
-
-                const fields =
-                    offlineTaskFields(data);
-
-                if (taskId) {
-
-                    // Idempotent create: the stable (device-generated) id
-                    // becomes the Firestore doc id, so replaying this entry
-                    // again (e.g. after a crash before clearing) overwrites
-                    // the SAME doc instead of duplicating the task.
-                    await setDoc(
-                        doc(
-                            db,
-                            "users",
-                            currentUser.uid,
-                            "tasks",
-                            taskId
-                        ),
-                        fields
-                    );
-
-                } else {
-
-                    // Legacy safety (entries without an id): let Firestore
-                    // assign a new doc id.
-                    await addDoc(
-                        getTasksCollection(),
-                        fields
-                    );
-                }
-
-            } else if (type === "update") {
-
-                if (!taskId) {
-                    throw new Error(
-                        "Sync update missing task id"
-                    );
-                }
-
-                const fields =
-                    offlineTaskFields(data);
-
-                if (!Object.keys(fields).length) return;
-
-                try {
-
-                    await updateDoc(
-                        doc(
-                            db,
-                            "users",
-                            currentUser.uid,
-                            "tasks",
-                            taskId
-                        ),
-                        fields
-                    );
-
-                } catch (error) {
-
-                    // The doc was already removed (e.g. deleted on another
-                    // device) - nothing left to update.
-                    if (isFirestoreNotFound(error)) return;
-
-                    throw error;
-                }
-
-            } else if (type === "delete") {
-
-                if (!taskId) {
-                    throw new Error(
-                        "Sync delete missing task id"
-                    );
-                }
-
-                try {
-
-                    await deleteDoc(
-                        doc(
-                            db,
-                            "users",
-                            currentUser.uid,
-                            "tasks",
-                            taskId
-                        )
-                    );
-
-                } catch (error) {
-
-                    // Already gone on the server: delete is a no-op now.
-                    if (isFirestoreNotFound(error)) return;
-
-                    throw error;
-                }
-            }
-        }
-
-
-        // One pass over the queue. Returns { synced, pending } where
-        // "pending" means items still need a retry (a failure, or we went
-        // offline mid-run). Callers must NOT switch back to Firestore
-        // rendering while pending, or an older server snapshot would hide
-        // the user's offline changes.
-        async function runPendingTaskSync() {
-
-            if (!currentUser) {
-                return { synced: 0, pending: false };
-            }
-
-            if (!isBrowserOnline) {
-                return { synced: 0, pending: true };
-            }
-
-            const changes =
-                await getPendingSyncChanges();
-
-            if (!changes.length) {
-                return { synced: 0, pending: false };
-            }
-
-            let synced = 0;
-
-            for (const change of changes) {
-
-                if (!currentUser || !isBrowserOnline) {
-                    return { synced, pending: true };
-                }
-
-                // Only the signed-in user's own task changes are replayed.
-                // Guest/local legacy entries (no owner, or owner "guest")
-                // stay in the queue untouched.
-                if (
-                    change.entity !== "task" ||
-                    (change.owner || "guest") !== currentUser.uid
-                ) {
-                    continue;
-                }
-
-                try {
-
-                    await replayTaskSyncChange(
-                        change
-                    );
-
-                    // Clear only after the Firestore write succeeded.
-                    await clearSyncedChange(
-                        change.id
-                    );
-
-                    synced++;
-
-                } catch (error) {
-
-                    console.warn(
-                        "Task sync failed - keeping queue item for retry:",
-                        change.id,
-                        error
-                    );
-
-                    return { synced, pending: true };
-                }
-            }
-
-            return { synced, pending: false };
-        }
-
-
-        // Single-flight entry point used by the online event, the auth
-        // flow and the retry watchdog. Never throws; safe to call and
-        // to fire-and-forget.
-        function syncPendingTaskChanges() {
-
-            if (!currentUser) {
-                return Promise.resolve(
-                    { synced: 0, pending: false }
-                );
-            }
-
-            if (syncPromise) {
-                return syncPromise;
-            }
-
-            syncPromise =
-                runPendingTaskSync()
-                    .then(result => {
-
-                        // Drained successfully: make sure the Firestore
-                        // listener is the active source (its snapshot also
-                        // refreshes the IndexedDB cache, per Step 3).
-                        if (
-                            result &&
-                            !result.pending &&
-                            currentUser &&
-                            !offlineTasksActive &&
-                            !unsubscribeTasks
-                        ) {
-
-                            startTaskListener();
-                        }
-
-                        return result;
-                    })
-                    .finally(() => {
-                        syncPromise = null;
-                    });
-
-            return syncPromise;
-        }
-
-
         /* TASK COLLECTION */
 
         function getTasksCollection() {
@@ -8715,28 +7975,6 @@ done: "تەواو",
                     taskQuery,
                     snapshot => {
 
-                        if (offlineTasksActive) {
-
-                            // The Firestore listener is live again - online
-                            // mode resumes and this server snapshot becomes
-                            // authoritative for the UI.
-                            offlineTasksActive = false;
-
-                            offlineReadGeneration++;
-
-                            // STEP 4: anything queued while we were offline
-                            // can now be replayed to Firestore.
-                            syncPendingTaskChanges();
-                        }
-
-                        if (offlineRetryTimer) {
-
-                            clearTimeout(offlineRetryTimer);
-
-                            offlineRetryTimer = null;
-                        }
-
-
                         const tasks = [];
 
 
@@ -8762,13 +8000,6 @@ done: "تەواو",
                             tasks;
 
 
-                        // Keep the IndexedDB mirror equal to the server
-                        // list so an offline launch shows the latest data.
-                        cacheTasksFromFirestore(
-                            tasks
-                        );
-
-
                         renderTasks(tasks);
 
                         renderCalendar();
@@ -8778,7 +8009,8 @@ done: "تەواو",
                     },
                     error => {
 
-                        handleFirestoreTaskFailure(
+                        console.error(
+                            "Task listener error:",
                             error
                         );
 
@@ -9700,80 +8932,10 @@ done: "تەواو",
                 );
 
 
-                mirrorTaskWriteOffline(
-                    "update",
-                    found
-                );
-
-
                 refreshTasks();
 
                 renderCalendar();
                 triggerPushSync();
-
-                return;
-            }
-
-
-            if (offlineTasksActive) {
-
-                // OFFLINE (signed-in): apply the toggle to the IndexedDB
-                // cache + sync queue ONLY. Firestore is updated later when
-                // a sync step replays the queue.
-                let offlineDates =
-                    task.completedDates || [];
-
-                let nextTask;
-
-                if (
-                    task.repeat &&
-                    task.repeat !== "once"
-                ) {
-
-                    if (checked) {
-
-                        if (
-                            !offlineDates.includes(
-                                selectedDate
-                            )
-                        ) {
-
-                            offlineDates.push(
-                                selectedDate
-                            );
-                        }
-
-                    } else {
-
-                        offlineDates =
-                            offlineDates.filter(
-                                d =>
-                                    d !== selectedDate
-                            );
-                    }
-
-                    nextTask = {
-                        id: task.id,
-                        ...task,
-                        completedDates:
-                            offlineDates
-                    };
-
-                } else {
-
-                    nextTask = {
-                        id: task.id,
-                        ...task,
-                        completed: checked
-                    };
-                }
-
-                await mirrorTaskWriteOffline(
-                    "update",
-                    nextTask
-                );
-
-                await renderTasksFromOfflineCache();
 
                 return;
             }
@@ -9825,15 +8987,6 @@ done: "تەواو",
                     }
                 );
 
-                mirrorTaskWriteOffline(
-                    "update",
-                    {
-                        id: task.id,
-                        ...task,
-                        completedDates: dates
-                    }
-                );
-
             } else {
 
                 await updateDoc(
@@ -9847,15 +9000,6 @@ done: "تەواو",
                     {
                         completed:
                             checked
-                    }
-                );
-
-                mirrorTaskWriteOffline(
-                    "update",
-                    {
-                        id: task.id,
-                        ...task,
-                        completed: checked
                     }
                 );
             }
@@ -9883,31 +9027,10 @@ done: "تەواو",
                 );
 
 
-                mirrorTaskWriteOffline(
-                    "delete",
-                    { id: task.id }
-                );
-
-
                 refreshTasks();
 
                 renderCalendar();
                 triggerPushSync();
-
-                return;
-            }
-
-
-            if (offlineTasksActive) {
-
-                // OFFLINE (signed-in): remove from the IndexedDB cache +
-                // sync queue ONLY. Firestore is updated by a later sync step.
-                await mirrorTaskWriteOffline(
-                    "delete",
-                    { id: task.id }
-                );
-
-                await renderTasksFromOfflineCache();
 
                 return;
             }
@@ -9921,11 +9044,6 @@ done: "تەواو",
                     "tasks",
                     task.id
                 )
-            );
-
-            mirrorTaskWriteOffline(
-                "delete",
-                { id: task.id }
             );
         }
 
@@ -10054,44 +9172,14 @@ done: "تەواو",
                         )
                     );
 
-                    mirrorTaskWriteOffline(
-                        "create",
-                        task
-                    );
-
-                } else if (offlineTasksActive) {
-
-                    // OFFLINE (signed-in): cache + queue the task, keeping
-                    // the device-generated id, and render it immediately.
-                    await mirrorTaskWriteOffline(
-                        "create",
-                        task
-                    );
-
-                    await renderTasksFromOfflineCache();
-
                 } else {
 
                     delete task.id;
 
-                    const taskRef =
-                        await addDoc(
-                            getTasksCollection(),
-                            task
-                        );
-
-                    // Mirror using the Firestore doc id so the local copy
-                    // matches the task exactly as the app renders it.
-                    if (taskRef && taskRef.id) {
-
-                        mirrorTaskWriteOffline(
-                            "create",
-                            {
-                                id: taskRef.id,
-                                ...task
-                            }
-                        );
-                    }
+                    await addDoc(
+                        getTasksCollection(),
+                        task
+                    );
                 }
 
             } catch (error) {
@@ -11297,10 +10385,23 @@ document.documentElement.classList.toggle(
             list.innerHTML = "";
 
 
+            const todayKey =
+                getTodayKey();
+
+
+            const todayRecord =
+                prayerRecordForDate(
+                    todayKey
+                );
+
+
             Object.entries(
                 prayerTimes
             ).forEach(
                 ([name, time]) => {
+
+                    const field =
+                        name.toLowerCase();
 
                     const row =
                         document.createElement(
@@ -11312,10 +10413,76 @@ document.documentElement.classList.toggle(
                         "prayer";
 
 
+                    if (
+                        todayRecord[field] ===
+                        true
+                    ) {
+
+                        row.classList.add(
+                            "done"
+                        );
+                    }
+
+
+                    const label =
+                        document.createElement(
+                            "label"
+                        );
+
+
+                    label.className =
+                        "prayer-check-label";
+
+
+                    label.setAttribute(
+                        "for",
+                        "prayer-check-" + field
+                    );
+
+
+                    const checkbox =
+                        document.createElement(
+                            "input"
+                        );
+
+
+                    checkbox.type =
+                        "checkbox";
+
+
+                    checkbox.id =
+                        "prayer-check-" + field;
+
+
+                    checkbox.className =
+                        "prayer-check";
+
+
+                    checkbox.dataset.field =
+                        field;
+
+
+                    checkbox.checked =
+                        todayRecord[field] === true;
+
+
+                    checkbox.setAttribute(
+                        "aria-label",
+                        t(
+                            "prayer." +
+                            name
+                        )
+                    );
+
+
                     const nameElement =
                         document.createElement(
                             "span"
                         );
+
+
+                    nameElement.className =
+                        "prayer-name";
 
 
                     nameElement.textContent =
@@ -11323,6 +10490,78 @@ document.documentElement.classList.toggle(
                             "prayer." +
                             name
                         );
+
+
+                    label.appendChild(
+                        checkbox
+                    );
+
+
+                    label.appendChild(
+                        nameElement
+                    );
+
+
+                    checkbox.addEventListener(
+                        "change",
+                        async () => {
+
+                            const desired =
+                                checkbox.checked;
+
+
+                            if (desired) {
+
+                                row.classList.add(
+                                    "just-checked"
+                                );
+
+
+                                setTimeout(
+                                    () => {
+
+                                        row.classList.remove(
+                                            "just-checked"
+                                        );
+
+                                    },
+                                    450
+                                );
+                            }
+
+
+                            row.classList.toggle(
+                                "done",
+                                desired
+                            );
+
+
+                            try {
+
+                                await setPrayerCompleted(
+                                    field,
+                                    todayKey,
+                                    desired
+                                );
+
+                            } catch (error) {
+
+                                console.error(
+                                    "Prayer update error:",
+                                    error
+                                );
+
+                                checkbox.checked =
+                                    !desired;
+
+                                row.classList.toggle(
+                                    "done",
+                                    !desired
+                                );
+                            }
+
+                        }
+                    );
 
 
                     const timeElement =
@@ -11336,7 +10575,7 @@ document.documentElement.classList.toggle(
 
 
                     row.appendChild(
-                        nameElement
+                        label
                     );
 
 
@@ -11356,6 +10595,8 @@ document.documentElement.classList.toggle(
             updateQiblaDisplay();
 
             updateNextPrayer();
+
+            refreshPrayerUI();
         }
 
 
@@ -11470,8 +10711,7 @@ document.documentElement.classList.toggle(
                 const rm = Math.floor((next[2] % 3600) / 60);
                 const rs = next[2] % 60;
                 dashNextCount.textContent = String(rh).padStart(2, "0") + ":" + String(rm).padStart(2, "0") + ":" + String(rs).padStart(2, "0");
-                const dashPrayerScore = document.getElementById("dashPrayerScore");
-                if (dashPrayerScore) dashPrayerScore.textContent = "Active"; 
+                updateDashPrayerScore();
             }
         }
 
@@ -12003,6 +11243,1408 @@ document.documentElement.classList.toggle(
         // Setup initial Dashboard Listeners
         document.getElementById("dashViewPrayersBtn")?.addEventListener("click", () => showSection("prayers"));
         document.getElementById("dashSetStudyBtn")?.addEventListener("click", () => showSection("study"));
+
+        /* ======================================================================
+           PRAYER TRACKING + STATISTICS
+           ======================================================================
+
+           Storage model (reuses Daily.KRD's existing architecture):
+
+           - Signed-in users:
+             users/{uid}/prayers/{date} Firestore documents, one per calendar
+             date (no per-checkbox documents). The existing
+             enableIndexedDbPersistence() call above already makes Firestore
+             offline-capable: writes are stored locally, reflected by the
+             listener, and flushed to Firebase automatically when the device
+             reconnects — exactly how task completion works today. There is no
+             second sync queue to maintain.
+
+           - Guest users:
+             localStorage key "dailykrd_guest_prayers", one entry per
+             calendar date, in the same shape as the Firestore documents.
+
+           Dates are always "YYYY-MM-DD" keys built with getDateKeyFromDate() /
+           getTodayKey(), i.e. the device's local calendar — no UTC shifting.
+        ====================================================================== */
+
+        let unsubscribePrayers = null;
+
+        let prayerStatsPeriod = "daily";
+
+        let prayerCalDate =
+            new Date();
+
+        let prayerCalSelectedKey =
+            getTodayKey();
+
+        let prayerMigrationInProgress = false;
+
+
+        function getPrayerRecords() {
+
+            return currentUser
+                ? userPrayerRecords
+                : guestPrayerRecords;
+        }
+
+
+        function prayerRecordForDate(dateKey) {
+
+            const record =
+                getPrayerRecords()[dateKey];
+
+            return (
+                record &&
+                typeof record === "object"
+            )
+                ? record
+                : {};
+        }
+
+
+        function countPrayersDone(record) {
+
+            let total = 0;
+
+            for (
+                const field of PRAYER_FIELDS
+            ) {
+
+                if (
+                    record[field] === true
+                ) {
+                    total++;
+                }
+            }
+
+            return total;
+        }
+
+
+        function prayerCountOn(dateKey) {
+
+            return countPrayersDone(
+                prayerRecordForDate(dateKey)
+            );
+        }
+
+
+        function isLeapYear(year) {
+
+            return (
+                (year % 4 === 0 &&
+                    year % 100 !== 0) ||
+                year % 400 === 0
+            );
+        }
+
+
+        function daysInMonthOf(year, month) {
+
+            return new Date(
+                year,
+                month + 1,
+                0
+            ).getDate();
+        }
+
+
+        /* Monday-based start of the current week (local time). */
+
+        function getMondayOfCurrentWeek(base) {
+
+            const day = base.getDay();
+
+            const diff = (day + 6) % 7;
+
+            const monday = new Date(
+                base.getFullYear(),
+                base.getMonth(),
+                base.getDate()
+            );
+
+            monday.setDate(
+                monday.getDate() - diff
+            );
+
+            return monday;
+        }
+
+
+        function formatPrayerPercent(
+            done,
+            possible,
+            decimals
+        ) {
+
+            if (!possible) return "0%";
+
+            const raw = (done / possible) * 100;
+
+            if (decimals > 0) {
+
+                return (
+                    raw
+                        .toFixed(decimals)
+                        .replace(
+                            /\.0+$/,
+                            ""
+                        ) +
+                    "%"
+                );
+            }
+
+            return Math.round(raw) + "%";
+        }
+
+
+        function formatPrayerNumber(number) {
+
+            return Number(number).toLocaleString(
+                "en-US"
+            );
+        }
+
+
+        function prayerMonthLabel(date) {
+
+            if (
+                currentLanguage === "ku"
+            ) {
+
+                return kurdishMonths[
+                    date.getMonth()
+                ];
+            }
+
+            const localeMap = {
+                en: "en-US",
+                ar: "ar-IQ"
+            };
+
+            return date.toLocaleDateString(
+                localeMap[
+                    currentLanguage
+                ] || "en-US",
+                { month: "short" }
+            );
+        }
+
+
+        /* Shared HTML helpers */
+
+        function prayerProgressBarHtml(
+            done,
+            possible
+        ) {
+
+            const pct = possible
+                ? Math.min(
+                    100,
+                    (done / possible) * 100
+                )
+                : 0;
+
+            return (
+                '<div class="prayer-progress-track">' +
+                '<div class="prayer-progress-fill" style="width:' +
+                pct.toFixed(2) +
+                '%;"></div></div>'
+            );
+        }
+
+
+        function prayerMiniBarHtml(
+            done,
+            possible
+        ) {
+
+            const pct = possible
+                ? Math.min(
+                    100,
+                    (done / possible) * 100
+                )
+                : 0;
+
+            return (
+                '<div class="prayer-mini-track">' +
+                '<div class="prayer-mini-fill" style="width:' +
+                pct.toFixed(2) +
+                '%;"></div></div>'
+            );
+        }
+
+
+        function prayerSummaryCardHtml(
+            label,
+            sub,
+            done,
+            possible,
+            decimals,
+            caption
+        ) {
+
+            return (
+                '<div class="prayer-summary-top">' +
+                '<span class="prayer-summary-label">' +
+                label +
+                '</span><span class="prayer-summary-sub">' +
+                sub +
+                "</span></div>" +
+                '<div class="prayer-summary-nums">' +
+                '<span class="prayer-summary-ratio">' +
+                formatPrayerNumber(done) +
+                " / " +
+                formatPrayerNumber(possible) +
+                '</span><span class="prayer-summary-pct">' +
+                formatPrayerPercent(
+                    done,
+                    possible,
+                    decimals
+                ) +
+                "</span></div>" +
+                prayerProgressBarHtml(
+                    done,
+                    possible
+                ) +
+                '<div class="prayer-summary-caption">' +
+                caption +
+                "</div>"
+            );
+        }
+
+
+        function prayerDoneCaption(done) {
+
+            return (
+                formatPrayerNumber(done) +
+                " " +
+                t("prayerStats.prayers") +
+                " " +
+                t("prayerStats.completed")
+            );
+        }
+
+
+        /* Period views */
+
+        function buildDailyPrayerStats() {
+
+            const todayKey =
+                getTodayKey();
+
+            const done =
+                prayerCountOn(todayKey);
+
+            return prayerSummaryCardHtml(
+                t("prayerStats.progress"),
+                formatDateKey(todayKey),
+                done,
+                5,
+                0,
+                prayerDoneCaption(done)
+            );
+        }
+
+
+        function buildWeeklyPrayerStats(now) {
+
+            const monday =
+                getMondayOfCurrentWeek(now);
+
+            const weekdayLabels =
+                t("weekdays");
+
+            let doneTotal = 0;
+
+            let rows = "";
+
+            for (
+                let i = 0;
+                i < 7;
+                i++
+            ) {
+
+                const day = new Date(
+                    monday
+                );
+
+                day.setDate(
+                    monday.getDate() + i
+                );
+
+                const key =
+                    getDateKeyFromDate(day);
+
+                const done =
+                    prayerCountOn(key);
+
+                doneTotal += done;
+
+                // weekdayLabels is Sun-first; rotate to Mon-first.
+                const label =
+                    weekdayLabels[(i + 1) % 7];
+
+                rows +=
+                    '<div class="prayer-stats-row">' +
+                    '<span class="prayer-stats-row-label">' +
+                    label +
+                    '</span><div class="prayer-stats-row-mid"></div>' +
+                    '<span class="prayer-stats-row-value">' +
+                    done +
+                    " / 5</span></div>";
+            }
+
+            return (
+                prayerSummaryCardHtml(
+                    t("prayerStats.progress"),
+                    t("statsWeekly"),
+                    doneTotal,
+                    35,
+                    1,
+                    prayerDoneCaption(doneTotal)
+                ) +
+                '<div class="prayer-stats-list">' +
+                rows +
+                "</div>"
+            );
+        }
+
+
+        function buildMonthlyPrayerStats(now) {
+
+            const year =
+                now.getFullYear();
+
+            const month =
+                now.getMonth();
+
+            const daysInMonth =
+                daysInMonthOf(year, month);
+
+            let doneTotal = 0;
+
+            let cells = "";
+
+            for (
+                let day = 1;
+                day <= daysInMonth;
+                day++
+            ) {
+
+                const key =
+                    getDateKeyFromDate(
+                        new Date(
+                            year,
+                            month,
+                            day
+                        )
+                    );
+
+                const done =
+                    prayerCountOn(key);
+
+                doneTotal += done;
+
+                cells +=
+                    '<div class="prayer-month-cell">' +
+                    '<span class="prayer-month-cell-day">' +
+                    day +
+                    '</span><span class="prayer-month-cell-score">' +
+                    done +
+                    "/5</span></div>";
+            }
+
+            const possible =
+                daysInMonth * 5;
+
+            return (
+                prayerSummaryCardHtml(
+                    t("prayerStats.progress"),
+                    getCalendarMonthName(now),
+                    doneTotal,
+                    possible,
+                    1,
+                    prayerDoneCaption(doneTotal)
+                ) +
+                '<div class="prayer-month-grid">' +
+                cells +
+                "</div>"
+            );
+        }
+
+
+        function buildYearlyPrayerStats(now) {
+
+            const year =
+                now.getFullYear();
+
+            let doneTotal = 0;
+
+            let rows = "";
+
+            for (
+                let month = 0;
+                month < 12;
+                month++
+            ) {
+
+                const daysInMonth =
+                    daysInMonthOf(year, month);
+
+                const possible =
+                    daysInMonth * 5;
+
+                let done = 0;
+
+                for (
+                    let day = 1;
+                    day <= daysInMonth;
+                    day++
+                ) {
+
+                    done +=
+                        prayerCountOn(
+                            getDateKeyFromDate(
+                                new Date(
+                                    year,
+                                    month,
+                                    day
+                                )
+                            )
+                        );
+                }
+
+                doneTotal += done;
+
+                rows +=
+                    '<div class="prayer-stats-row">' +
+                    '<span class="prayer-stats-row-label">' +
+                    prayerMonthLabel(
+                        new Date(
+                            year,
+                            month,
+                            1
+                        )
+                    ) +
+                    '</span><div class="prayer-stats-row-mid">' +
+                    prayerMiniBarHtml(
+                        done,
+                        possible
+                    ) +
+                    '</div><span class="prayer-stats-row-value">' +
+                    done +
+                    " / " +
+                    possible +
+                    "</span></div>";
+            }
+
+            const possible =
+                (isLeapYear(year) ? 366 : 365) * 5;
+
+            return (
+                prayerSummaryCardHtml(
+                    t("prayerStats.progress"),
+                    String(year),
+                    doneTotal,
+                    possible,
+                    1,
+                    prayerDoneCaption(doneTotal)
+                ) +
+                '<div class="prayer-stats-list">' +
+                rows +
+                "</div>"
+            );
+        }
+
+
+        /* Prayer history calendar */
+
+        function buildPrayerDayDetail(dateKey) {
+
+            const record =
+                prayerRecordForDate(dateKey);
+
+            const doneCount =
+                countPrayersDone(record);
+
+            let rows = "";
+
+            for (
+                const name of PRAYER_UI_KEYS
+            ) {
+
+                const field =
+                    name.toLowerCase();
+
+                const isDone =
+                    record[field] === true;
+
+                rows +=
+                    '<div class="prayer-day-row">' +
+                    "<span>" +
+                    t(
+                        "prayer." +
+                        name
+                    ) +
+                    '</span><span class="prayer-day-mark' +
+                    (isDone ? "" : " no") +
+                    '">' +
+                    (isDone ? "✓" : "✕") +
+                    "</span></div>";
+            }
+
+            return (
+                '<div class="prayer-cal-detail">' +
+                '<div class="prayer-cal-detail-date">' +
+                formatDateKey(dateKey) +
+                "</div>" +
+                rows +
+                '<div class="prayer-cal-detail-summary">' +
+                doneCount +
+                " / 5 " +
+                t("prayerStats.completed") +
+                "</div></div>"
+            );
+        }
+
+
+        function prayerMonthPrefix(date) {
+
+            return (
+                date.getFullYear() +
+                "-" +
+                String(
+                    date.getMonth() + 1
+                ).padStart(2, "0")
+            );
+        }
+
+
+        function renderPrayerCalendarBody() {
+
+            const body =
+                document.getElementById(
+                    "prayerStatsBody"
+                );
+
+            if (!body) return;
+
+            const year =
+                prayerCalDate.getFullYear();
+
+            const month =
+                prayerCalDate.getMonth();
+
+            const firstWeekday =
+                new Date(
+                    year,
+                    month,
+                    1
+                ).getDay();
+
+            const daysInMonth =
+                daysInMonthOf(
+                    year,
+                    month
+                );
+
+            const todayKey =
+                getTodayKey();
+
+            const weekdayLabels =
+                t("weekdays");
+
+            let html =
+                '<div class="calendar-head">' +
+                '<div class="calendar-month" id="prayerCalMonthLabel">' +
+                getCalendarMonthName(prayerCalDate) +
+                '</div><div class="calendar-nav">' +
+                '<button id="prayerCalPrev" type="button">‹</button>' +
+                '<button id="prayerCalToday" type="button">•</button>' +
+                '<button id="prayerCalNext" type="button">›</button>' +
+                "</div></div>";
+
+            html +=
+                '<div class="calendar-weekdays">';
+
+            weekdayLabels.forEach(
+                day => {
+
+                    html +=
+                        "<div>" +
+                        day +
+                        "</div>";
+                }
+            );
+
+            html += "</div>";
+
+            html +=
+                '<div class="prayer-cal-grid">';
+
+            for (
+                let i = 0;
+                i < firstWeekday;
+                i++
+            ) {
+
+                html += "<div></div>";
+            }
+
+            for (
+                let day = 1;
+                day <= daysInMonth;
+                day++
+            ) {
+
+                const key =
+                    getDateKeyFromDate(
+                        new Date(
+                            year,
+                            month,
+                            day
+                        )
+                    );
+
+                const done =
+                    prayerCountOn(key);
+
+                const classes =
+                    "prayer-cal-day" +
+                    (key === todayKey
+                        ? " today"
+                        : "") +
+                    (key ===
+                        prayerCalSelectedKey
+                        ? " selected"
+                        : "") +
+                    (key > todayKey
+                        ? " future"
+                        : "");
+
+                html +=
+                    '<button type="button" class="' +
+                    classes +
+                    '" data-prayer-key="' +
+                    key +
+                    '"><span class="prayer-cal-day-num">' +
+                    day +
+                    '</span><span class="prayer-cal-day-score">' +
+                    done +
+                    "/5</span></button>";
+            }
+
+            html += "</div>";
+
+            let detail = "";
+
+            if (
+                prayerCalSelectedKey &&
+                prayerCalSelectedKey.indexOf(
+                    prayerMonthPrefix(
+                        prayerCalDate
+                    )
+                ) === 0
+            ) {
+
+                detail =
+                    buildPrayerDayDetail(
+                        prayerCalSelectedKey
+                    );
+            }
+
+            html +=
+                '<div id="prayerCalDetail">' +
+                detail +
+                "</div>";
+
+            body.innerHTML = html;
+
+
+            document
+                .getElementById(
+                    "prayerCalPrev"
+                )
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        prayerCalDate =
+                            new Date(
+                                year,
+                                month - 1,
+                                1
+                            );
+
+                        prayerCalSelectedKey =
+                            null;
+
+                        renderPrayerCalendarBody();
+                    }
+                );
+
+
+            document
+                .getElementById(
+                    "prayerCalNext"
+                )
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        prayerCalDate =
+                            new Date(
+                                year,
+                                month + 1,
+                                1
+                            );
+
+                        prayerCalSelectedKey =
+                            null;
+
+                        renderPrayerCalendarBody();
+                    }
+                );
+
+
+            document
+                .getElementById(
+                    "prayerCalToday"
+                )
+                .addEventListener(
+                    "click",
+                    () => {
+
+                        prayerCalDate =
+                            new Date();
+
+                        prayerCalSelectedKey =
+                            getTodayKey();
+
+                        renderPrayerCalendarBody();
+                    }
+                );
+
+
+            body
+                .querySelectorAll(
+                    ".prayer-cal-day"
+                )
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                prayerCalSelectedKey =
+                                    button.dataset.prayerKey;
+
+                                renderPrayerCalendarBody();
+                            }
+                        );
+                    }
+                );
+        }
+
+
+        /* Tabs + body dispatch */
+
+        function renderPrayerStatsTabs() {
+
+            const wrap =
+                document.getElementById(
+                    "prayerStatsTabs"
+                );
+
+            if (!wrap) return;
+
+            const definitions = [
+                ["daily", t("statsDaily")],
+                ["weekly", t("statsWeekly")],
+                ["monthly", t("statsMonthly")],
+                ["yearly", t("statsYearly")],
+                ["calendar", t("prayerStats.calendar")]
+            ];
+
+            wrap.innerHTML = "";
+
+            definitions.forEach(
+                ([period, label]) => {
+
+                    const button =
+                        document.createElement(
+                            "button"
+                        );
+
+                    button.type = "button";
+
+                    button.className =
+                        "prayer-stats-tab" +
+                        (prayerStatsPeriod ===
+                            period
+                            ? " active"
+                            : "");
+
+                    button.dataset.pstat =
+                        period;
+
+                    button.textContent =
+                        label;
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            if (
+                                prayerStatsPeriod ===
+                                period
+                            ) {
+                                return;
+                            }
+
+                            prayerStatsPeriod =
+                                period;
+
+                            renderPrayerStatsTabs();
+
+                            renderPrayerStatsBody();
+                        }
+                    );
+
+                    wrap.appendChild(button);
+                }
+            );
+        }
+
+
+        function renderPrayerStatsBody() {
+
+            const body =
+                document.getElementById(
+                    "prayerStatsBody"
+                );
+
+            if (!body) return;
+
+            const now =
+                new Date();
+
+            if (
+                prayerStatsPeriod ===
+                "daily"
+            ) {
+
+                body.innerHTML =
+                    buildDailyPrayerStats();
+
+            } else if (
+                prayerStatsPeriod ===
+                "weekly"
+            ) {
+
+                body.innerHTML =
+                    buildWeeklyPrayerStats(now);
+
+            } else if (
+                prayerStatsPeriod ===
+                "monthly"
+            ) {
+
+                body.innerHTML =
+                    buildMonthlyPrayerStats(now);
+
+            } else if (
+                prayerStatsPeriod ===
+                "yearly"
+            ) {
+
+                body.innerHTML =
+                    buildYearlyPrayerStats(now);
+
+            } else {
+
+                renderPrayerCalendarBody();
+            }
+        }
+
+
+        /* Refresh checkbox rows, stats, and the dashboard score together */
+
+        function refreshPrayerUI() {
+
+            const todayKey =
+                getTodayKey();
+
+            const record =
+                prayerRecordForDate(todayKey);
+
+            const list =
+                document.getElementById(
+                    "prayerList"
+                );
+
+            if (list) {
+
+                list
+                    .querySelectorAll(".prayer")
+                    .forEach(row => {
+
+                        const checkbox =
+                            row.querySelector(
+                                ".prayer-check"
+                            );
+
+                        if (!checkbox) return;
+
+                        const field =
+                            checkbox.dataset.field;
+
+                        const isDone =
+                            record[field] === true;
+
+                        checkbox.checked =
+                            isDone;
+
+                        row.classList.toggle(
+                            "done",
+                            isDone
+                        );
+                    });
+            }
+
+            if (
+                document.getElementById(
+                    "prayerStatsBody"
+                )
+            ) {
+
+                renderPrayerStatsTabs();
+
+                renderPrayerStatsBody();
+            }
+
+            updateDashPrayerScore();
+        }
+
+
+        function updateDashPrayerScore() {
+
+            const element =
+                document.getElementById(
+                    "dashPrayerScore"
+                );
+
+            if (!element) return;
+
+            const record =
+                prayerRecordForDate(
+                    getTodayKey()
+                );
+
+            let anyDone = false;
+
+            for (
+                const field of PRAYER_FIELDS
+            ) {
+
+                if (
+                    record[field] === true
+                ) {
+
+                    anyDone = true;
+
+                    break;
+                }
+            }
+
+            if (!anyDone) {
+
+                element.textContent =
+                    "—";
+
+                return;
+            }
+
+            element.textContent =
+                countPrayersDone(record) +
+                "/5";
+        }
+
+
+        /* Toggle a single prayer for a single local calendar date */
+
+        async function setPrayerCompleted(
+            field,
+            dateKey,
+            done
+        ) {
+
+            if (!currentUser) {
+
+                const record =
+                    Object.assign(
+                        {},
+                        guestPrayerRecords[dateKey] || {}
+                    );
+
+                record[field] = done;
+
+                if (
+                    PRAYER_FIELDS.some(
+                        item =>
+                            record[item] === true
+                    )
+                ) {
+
+                    guestPrayerRecords[dateKey] =
+                        record;
+
+                } else {
+
+                    // Nothing completed left for this date — drop it so an
+                    // unchecked day is indistinguishable from a fresh day.
+                    delete guestPrayerRecords[dateKey];
+                }
+
+                try {
+
+                    localStorage.setItem(
+                        PRAYER_GUEST_KEY,
+                        JSON.stringify(
+                            guestPrayerRecords
+                        )
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Guest prayer storage error:",
+                        error
+                    );
+                }
+
+                refreshPrayerUI();
+
+                return;
+            }
+
+
+            const previous =
+                (userPrayerRecords[dateKey] ||
+                    {})[field] === true;
+
+            const record =
+                Object.assign(
+                    {},
+                    userPrayerRecords[dateKey] || {}
+                );
+
+            record[field] = done;
+
+            userPrayerRecords[dateKey] =
+                record;
+
+            // Optimistic UI update first (matches task completion behavior).
+            refreshPrayerUI();
+
+            try {
+
+                // Field-level merge so that two quick toggles on the same
+                // day (e.g. Fajr then Isha) never overwrite each other.
+                await setDoc(
+                    doc(
+                        db,
+                        "users",
+                        currentUser.uid,
+                        "prayers",
+                        dateKey
+                    ),
+                    {
+                        date: dateKey,
+                        [field]: done
+                    },
+                    { merge: true }
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Prayer save error:",
+                    error
+                );
+
+                const rollback =
+                    Object.assign(
+                        {},
+                        userPrayerRecords[dateKey] || {}
+                    );
+
+                rollback[field] =
+                    previous;
+
+                userPrayerRecords[dateKey] =
+                    rollback;
+
+                refreshPrayerUI();
+            }
+        }
+
+
+        /* Firestore listener for signed-in prayer records */
+
+        function stopPrayerListener() {
+
+            if (unsubscribePrayers) {
+
+                unsubscribePrayers();
+
+                unsubscribePrayers = null;
+            }
+        }
+
+
+        function startPrayerListener() {
+
+            stopPrayerListener();
+
+            if (!currentUser) return;
+
+            const prayersRef =
+                collection(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "prayers"
+                );
+
+            unsubscribePrayers =
+                onSnapshot(
+                    prayersRef,
+                    snapshot => {
+
+                        const records = {};
+
+                        snapshot.forEach(
+                            item => {
+
+                                records[item.id] =
+                                    item.data() || {};
+                            }
+                        );
+
+                        userPrayerRecords =
+                            records;
+
+                        refreshPrayerUI();
+                    },
+                    error => {
+
+                        console.error(
+                            "Prayer records listener error:",
+                            error
+                        );
+                    }
+                );
+        }
+
+
+        /* Guest -> account migration (mirrors migrateGuestTasksToAccount) */
+
+        async function migrateGuestPrayersToAccount(uid) {
+
+            if (prayerMigrationInProgress) {
+
+                return { migrated: 0 };
+            }
+
+            const raw =
+                localStorage.getItem(
+                    PRAYER_GUEST_KEY
+                );
+
+            if (!raw) {
+
+                return { migrated: 0 };
+            }
+
+            let guest;
+
+            try {
+
+                guest = JSON.parse(raw);
+
+            } catch (error) {
+
+                console.error(
+                    "Guest prayer parse error:",
+                    error
+                );
+
+                return { migrated: 0 };
+            }
+
+            if (
+                !guest ||
+                typeof guest !== "object" ||
+                Array.isArray(guest)
+            ) {
+
+                localStorage.removeItem(
+                    PRAYER_GUEST_KEY
+                );
+
+                return { migrated: 0 };
+            }
+
+            const entries =
+                Object.entries(guest).filter(
+                    ([key]) =>
+                        /^\d{4}-\d{2}-\d{2}$/.test(
+                            key
+                        )
+                );
+
+            if (entries.length === 0) {
+
+                localStorage.removeItem(
+                    PRAYER_GUEST_KEY
+                );
+
+                return { migrated: 0 };
+            }
+
+            prayerMigrationInProgress = true;
+
+            try {
+
+                for (
+                    const [dateKey, rec] of entries
+                ) {
+
+                    const ref =
+                        doc(
+                            db,
+                            "users",
+                            uid,
+                            "prayers",
+                            dateKey
+                        );
+
+                    let serverData = {};
+
+                    try {
+
+                        const snapshot =
+                            await getDoc(ref);
+
+                        if (snapshot.exists()) {
+
+                            serverData =
+                                snapshot.data() || {};
+                        }
+
+                    } catch (readError) {
+
+                        console.warn(
+                            "Prayer migration read failed for",
+                            dateKey,
+                            readError
+                        );
+                    }
+
+                    // Lossless merge: a prayer stays completed if either the
+                    // guest device or the server already marked it done.
+                    const merged = {};
+
+                    for (
+                        const field of PRAYER_FIELDS
+                    ) {
+
+                        merged[field] =
+                            serverData[field] ===
+                                true ||
+                            (rec &&
+                                rec[field] === true)
+                                ? true
+                                : false;
+                    }
+
+                    merged.date = dateKey;
+
+                    await setDoc(
+                        ref,
+                        merged,
+                        { merge: true }
+                    );
+                }
+
+                // Clear the guest copy only after every date is confirmed
+                // written (same guarantee as the task migration).
+                localStorage.removeItem(
+                    PRAYER_GUEST_KEY
+                );
+
+                guestPrayerRecords = {};
+
+                return { migrated: entries.length };
+
+            } catch (error) {
+
+                console.error(
+                    "Guest prayer migration error:",
+                    error
+                );
+
+                throw error;
+
+            } finally {
+
+                prayerMigrationInProgress = false;
+            }
+        }
+
+
+        /* Auth state: start/stop listener + migrate guest history */
+
+        onAuthStateChanged(
+            auth,
+            user => {
+
+                if (user) {
+
+                    // Listener first so server records render immediately;
+                    // the guest migration then uploads any local-only history
+                    // in the background. Offline writes stay queued inside the
+                    // existing Firestore persistence until connectivity
+                    // returns, and guest storage is only cleared afterwards.
+                    startPrayerListener();
+
+                    migrateGuestPrayersToAccount(
+                        user.uid
+                    ).catch(error => {
+
+                        console.error(
+                            "Guest prayer migration error:",
+                            error
+                        );
+                    });
+
+                } else {
+
+                    stopPrayerListener();
+
+                    userPrayerRecords = {};
+
+                    guestPrayerRecords =
+                        loadGuestPrayerRecords();
+
+                    refreshPrayerUI();
+                }
+            }
+        );
+
 
         /* START */
 
@@ -13708,15 +14350,10 @@ document.documentElement.classList.toggle(
                     };
                     try {
                         if (currentUser) {
-                            const taskRef = await addDoc(getTasksCollection(), task);
-                            if (taskRef && taskRef.id) {
-                                mirrorTaskWriteOffline('create', { id: taskRef.id, ...task });
-                            }
+                            await addDoc(getTasksCollection(), task);
                         } else {
-                            const guestTask = { ...task, id: genId() };
-                            guestTasks.push(guestTask);
+                            guestTasks.push({ ...task, id: genId() });
                             localStorage.setItem('dailykrd_guest_tasks', JSON.stringify(guestTasks));
-                            mirrorTaskWriteOffline('create', guestTask);
                         }
                         refreshTasks();
                     } catch(e) { console.error('Task create from event error:', e); }
