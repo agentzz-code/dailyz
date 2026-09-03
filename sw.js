@@ -38,9 +38,12 @@ self.addEventListener('activate', (event) => {
 //  - Successful same-origin GET responses are saved to the runtime cache.
 //  - When the network fails, the cached copy is served so the app works offline.
 //  - Non-GET requests (POST/PUT/DELETE) are never intercepted or cached.
-//  - Cross-origin requests (Firebase, Google APIs, the Cloudflare Worker push/AI
-//    endpoints, gstatic SDKs, etc.) are passed straight through untouched, so
-//    dynamic API responses are never cached.
+//  - Cross-origin requests are passed straight through untouched, so dynamic
+//    API responses are never cached — with ONE exception: the Firebase SDK
+//    modules on gstatic.com. They are immutable, versioned files and the app
+//    literally cannot boot without them, so they are cached cache-first to
+//    make fully-offline launches deterministic (the browser HTTP cache is
+//    not reliable enough to depend on).
 self.addEventListener('fetch', (event) => {
     const request = event.request;
 
@@ -49,9 +52,30 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
-    // Only handle same-origin requests. Firebase, Cloudflare Worker push/AI,
-    // authentication, and all other dynamic APIs are cross-origin, so they are
-    // automatically excluded from offline caching here.
+    // Firebase SDK modules (cross-origin, versioned, immutable).
+    if (url.origin === 'https://www.gstatic.com' && url.pathname.startsWith('/firebasejs/')) {
+        event.respondWith(
+            caches.match(request).then((cached) => {
+                if (cached) return cached;
+                return fetch(request)
+                    .then((response) => {
+                        if (response && response.ok) {
+                            const copy = response.clone();
+                            caches
+                                .open(RUNTIME_CACHE)
+                                .then((cache) => cache.put(request, copy));
+                        }
+                        return response;
+                    })
+                    .catch(() => caches.match(request));
+            })
+        );
+        return;
+    }
+
+    // Only handle same-origin requests. Firebase data/auth APIs, Cloudflare
+    // Worker push/AI, and all other dynamic APIs are cross-origin, so they
+    // are automatically excluded from offline caching here.
     if (url.origin !== self.location.origin) return;
 
     event.respondWith(
