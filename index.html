@@ -5441,6 +5441,10 @@
 
         let appstateLastError = false;
 
+        let appstateRetryDelay = 4000;
+
+        let appstateWrittenTotal = 0;
+
         const appstateDirty =
             new Set();
 
@@ -5709,6 +5713,8 @@
 
                     appstateServerStamps[key] = stamp;
 
+                    appstateWrittenTotal += 1;
+
                 } catch (error) {
 
                     console.error(
@@ -5741,17 +5747,32 @@
                 }
             }
 
-            appstateLastError = failed && !switchedLayout;
+            // Every failure is reported, including one that triggered a
+            // layout switch, so the indicator never claims "Synced" while
+            // writes are being rejected.
+            appstateLastError = failed;
+
+            if (failed) {
+
+                appstateRetryDelay =
+                    Math.min(appstateRetryDelay * 3, 60000);
+
+            } else {
+
+                appstateRetryDelay = 4000;
+            }
 
             if (
                 appstateDirty.size > 0 &&
                 navigator.onLine
             ) {
 
+                // Back off instead of hammering Firestore with a change that
+                // keeps being rejected.
                 scheduleAppstateFlush(
                     switchedLayout
                         ? 300
-                        : 4000
+                        : appstateRetryDelay
                 );
             }
 
@@ -5887,12 +5908,18 @@
                     if (merged !== value) {
 
                         // This device holds extra history: store the union and
-                        // publish it back so no session is ever lost.
+                        // publish it back so no session is ever lost. The stamp
+                        // must beat the remote stamp it supersedes, otherwise a
+                        // device whose clock is slightly behind would keep the
+                        // union locally and never publish it.
                         rawStorageWrite(key, merged);
 
                         setSyncStamp(
                             key,
-                            Date.now(),
+                            Math.max(
+                                Date.now(),
+                                remoteStamp + 1
+                            ),
                             uid
                         );
 
@@ -6373,6 +6400,67 @@
 
             setSyncStatus("syncing");
 
+            console.info(
+                "[Daily.KRD sync] app-state sync active · uid=" +
+                uid +
+                " · layout=" +
+                appstateSyncPath
+            );
+
+            // If another device already had to fall back to the profile
+            // document (users/{uid}.syncState), that layout is what this
+            // account uses: converge on it, so one device never publishes into
+            // a place the other one does not read.
+            if (appstateSyncPath === "collection") {
+
+                getDoc(doc(db, "users", uid))
+                    .then(snapshot => {
+
+                        const data =
+                            snapshot.exists()
+                                ? snapshot.data() || {}
+                                : {};
+
+                        const state =
+                            data.syncState;
+
+                        const hasProfileState =
+                            state &&
+                            typeof state === "object" &&
+                            Object.keys(state).length > 0;
+
+                        if (!hasProfileState) return;
+
+                        appstateSyncPath = "profile";
+
+                        rawStorageWrite(
+                            "dailykrd_sync_path",
+                            "profile"
+                        );
+
+                        if (
+                            !currentUser ||
+                            currentUser.uid !== uid ||
+                            appstateListenerUid !== uid
+                        ) {
+
+                            return;
+                        }
+
+                        appstateListenerUid = null;
+
+                        startAppstateSync(uid);
+
+                    })
+                    .catch(error => {
+
+                        console.warn(
+                            "[Daily.KRD sync] could not inspect the profile document:",
+                            error
+                        );
+                    });
+            }
+
             if (appstateSyncPath === "profile") {
 
                 appstateListener =
@@ -6444,6 +6532,58 @@
 
             refreshSyncStatus();
         }
+
+        /* DIAGNOSTICS
+           Type dailykrdSyncStatus() in the browser console to see exactly what
+           the sync layer is doing on this device, or dailykrdSyncNow() to push
+           every local setting to the account immediately. */
+
+        window.dailykrdSyncStatus = function () {
+
+            return {
+                signedIn: !!currentUser,
+                uid: currentUser ? currentUser.uid : null,
+                layout: appstateSyncPath,
+                listenerActive: !!appstateListener,
+                listenerUid: appstateListenerUid,
+                pendingWrites: appstatePendingWrites,
+                lastError: appstateLastError,
+                writtenThisSession: appstateWrittenTotal,
+                queued: [...appstateDirty],
+
+                keys: SYNCED_STORAGE_KEYS.map(key => ({
+                    key: key,
+                    hasLocalValue: rawStorageRead(key) !== null,
+                    localStamp: syncStampTime(key),
+                    localOwner: syncStampOwner(key),
+                    serverStamp: appstateServerStamps[key] || 0
+                }))
+            };
+        };
+
+        window.dailykrdSyncNow = async function () {
+
+            if (!currentUser) return "not signed in";
+
+            SYNCED_STORAGE_KEYS.forEach(key => {
+
+                if (rawStorageRead(key) === null) return;
+
+                setSyncStamp(
+                    key,
+                    Date.now(),
+                    currentUser.uid
+                );
+
+                appstateDirty.add(key);
+            });
+
+            saveSyncStamps();
+
+            await flushAppstate();
+
+            return window.dailykrdSyncStatus();
+        };
 
         window.addEventListener(
             "online",
