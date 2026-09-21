@@ -510,6 +510,45 @@
             color: #999;
         }
 
+        /* CLOUD SYNC INDICATOR (small, unobtrusive, under the header date) */
+
+        .sync-status {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 650;
+            color: #888;
+            transition: color .25s ease;
+        }
+
+        .sync-status.synced {
+            color: #6b9c7d;
+        }
+
+        .sync-status.syncing {
+            color: #8a8f99;
+        }
+
+        .sync-status.offline,
+        .sync-status.error {
+            color: #d9952b;
+        }
+
+        .dark .sync-status {
+            color: #999;
+        }
+
+        .dark .sync-status.synced {
+            color: #7fbc95;
+        }
+
+        .dark .sync-status.offline,
+        .dark .sync-status.error {
+            color: #f0b64c;
+        }
+
         .header-actions {
             display: flex;
             gap: 8px;
@@ -3550,6 +3589,7 @@
         <div>
             <div class="logo">Daily.KRD</div>
             <div class="date" id="date"></div>
+            <div class="sync-status" id="syncStatus"></div>
         </div>
 
         <div class="header-actions">
@@ -5161,6 +5201,1271 @@
         let unsubscribeSteps = null;
 
         let todaySteps = null;
+
+
+        /* ==========================================================================
+           CROSS-DEVICE APP-STATE SYNC
+           (appearance · language · location · study data · notification prefs)
+
+           Tasks, prayers, flashcards, calendar events, health steps and the
+           push subscription already live in Firestore. Everything else the user
+           owns — theme, accent, icon set, dark mode, language, prayer location,
+           study goal, study minutes, study subjects, completed study days,
+           study sessions and the notification preferences — has always been
+           written to localStorage only, which is why it never followed the user
+           to another device.
+
+           Those exact keys are now mirrored into:
+
+               users/{uid}/appstate/{key}
+
+           one tiny document per key holding { value, updatedAt, device }.
+
+           One document per key (instead of one big settings document) means two
+           devices editing different settings can never overwrite each other,
+           every value carries its own timestamp so "newest change wins" is
+           decided per setting, and a cleared key is written as value:null so a
+           removal made on one device cannot resurrect from another device's
+           older cache.
+
+           Nothing about the existing offline architecture changes: writes go
+           through the same Firestore instance that already has
+           enableIndexedDbPersistence() active, so they are queued in IndexedDB
+           while offline and replayed automatically when connectivity returns.
+           A single snapshot listener applies remote changes live, so no manual
+           refresh is ever needed. The listener is created once per signed-in
+           uid and torn down on sign-out / account switch.
+
+           Guest mode is untouched: nothing is uploaded while signed out. Values
+           written as a guest are only stamped locally, so they can be merged
+           into the account on the next sign-in instead of being lost.
+           ========================================================================== */
+
+        const APPSTATE_COLLECTION = "appstate";
+
+        // localStorage keys that belong to the user account (never UI-only state).
+        const SYNCED_STORAGE_KEYS = [
+            "dailykrd_dark",
+            "dailykrd_theme",
+            "dailykrd_accent",
+            "dailykrd_iconset",
+            "dailykrd_language",
+            "dailykrd_lat",
+            "dailykrd_lng",
+            "dailykrd_tz",
+            "dailykrd_study_goal",
+            "dailykrd_study_minutes",
+            "dailykrd_study_subjects",
+            "dailykrd_study_completed",
+            "dailykrd_study_sessions",
+            "dailykrd_push_settings",
+            "dailykrd_welcomed"
+        ];
+
+        const SYNCED_KEY_SET =
+            new Set(SYNCED_STORAGE_KEYS);
+
+        // History-shaped values are union-merged instead of replaced so study
+        // time recorded on two devices is never dropped.
+        const SYNCED_UNION_KEYS =
+            new Set([
+                "dailykrd_study_sessions",
+                "dailykrd_study_completed"
+            ]);
+
+        const SYNC_STAMPS_KEY =
+            "dailykrd_sync_stamps";
+
+        const SYNC_DEVICE_ID_KEY =
+            "dailykrd_device_id";
+
+        // Original Storage methods, captured before the hooks below are
+        // installed, so sync-internal writes can never re-trigger the hooks.
+        const rawStorageGet =
+            Storage.prototype.getItem;
+
+        const rawStorageSet =
+            Storage.prototype.setItem;
+
+        const rawStorageRemove =
+            Storage.prototype.removeItem;
+
+        function rawStorageRead(key) {
+
+            try {
+
+                return rawStorageGet.call(
+                    window.localStorage,
+                    key
+                );
+
+            } catch (error) {
+
+                return null;
+            }
+        }
+
+        function rawStorageWrite(key, value) {
+
+            try {
+
+                if (value === null) {
+
+                    rawStorageRemove.call(
+                        window.localStorage,
+                        key
+                    );
+
+                } else {
+
+                    rawStorageSet.call(
+                        window.localStorage,
+                        key,
+                        value
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Local storage error:",
+                    key,
+                    error
+                );
+            }
+        }
+
+        /* Local stamps: { key: { t: epoch ms, u: uid | null } }.
+           "u" records which account the local value came from, so settings
+           belonging to one account are never uploaded into a different account
+           when two people share a device. */
+
+        function loadSyncStamps() {
+
+            try {
+
+                const parsed =
+                    JSON.parse(
+                        rawStorageRead(SYNC_STAMPS_KEY) || "{}"
+                    );
+
+                return (
+                    parsed &&
+                    typeof parsed === "object" &&
+                    !Array.isArray(parsed)
+                )
+                    ? parsed
+                    : {};
+
+            } catch (error) {
+
+                return {};
+            }
+        }
+
+        let localSyncStamps =
+            loadSyncStamps();
+
+        function saveSyncStamps() {
+
+            rawStorageWrite(
+                SYNC_STAMPS_KEY,
+                JSON.stringify(localSyncStamps)
+            );
+        }
+
+        function syncStampTime(key) {
+
+            const stamp =
+                localSyncStamps[key];
+
+            return stamp
+                ? Number(stamp.t) || 0
+                : 0;
+        }
+
+        function syncStampOwner(key) {
+
+            const stamp =
+                localSyncStamps[key];
+
+            return stamp && stamp.u
+                ? stamp.u
+                : null;
+        }
+
+        function setSyncStamp(key, time, owner) {
+
+            localSyncStamps[key] = {
+                t: time,
+                u: owner || null
+            };
+        }
+
+        function getSyncDeviceId() {
+
+            let id =
+                rawStorageRead(SYNC_DEVICE_ID_KEY);
+
+            if (!id) {
+
+                id = crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : String(Date.now()) +
+                        Math.random().toString(36).slice(2, 8);
+
+                rawStorageWrite(SYNC_DEVICE_ID_KEY, id);
+            }
+
+            return id;
+        }
+
+        function appstateDocId(key) {
+
+            return key.replace(/^dailykrd_/, "");
+        }
+
+        /* Live sync bookkeeping */
+
+        let appstateListener = null;
+
+        let appstateListenerUid = null;
+
+        let appstateLocalMergeDone = false;
+
+        let appstateServerStamps = {};
+
+        let appstateFlushTimer = null;
+
+        let appstatePendingWrites = false;
+
+        let appstateLastError = false;
+
+        const appstateDirty =
+            new Set();
+
+        /* SYNC INDICATOR (☁ Synced · ↻ Syncing… · ⚠ Offline) */
+
+        const SYNC_LABELS = {
+
+            en: {
+                synced: "Synced",
+                syncing: "Syncing...",
+                offline: "Offline",
+                error: "Sync paused"
+            },
+
+            ku: {
+                synced: "هاوکاتکراوە",
+                syncing: "هاوکاتکردن...",
+                offline: "بێ ئینتەرنێت",
+                error: "هەڵە لە هاوکاتکردن"
+            },
+
+            ar: {
+                synced: "تمت المزامنة",
+                syncing: "جارٍ المزامنة...",
+                offline: "غير متصل",
+                error: "تعذرت المزامنة"
+            }
+        };
+
+        const SYNC_ICONS = {
+            synced: "☁",
+            syncing: "↻",
+            offline: "⚠",
+            error: "⚠"
+        };
+
+        let currentSyncState =
+            null;
+
+        function setSyncStatus(state) {
+
+            if (state === currentSyncState) return;
+
+            currentSyncState = state;
+
+            const el =
+                document.getElementById("syncStatus");
+
+            if (!el) return;
+
+            if (state === "guest") {
+
+                el.style.display = "none";
+
+                return;
+            }
+
+            const labels =
+                SYNC_LABELS[currentLanguage] ||
+                SYNC_LABELS.en;
+
+            el.style.display = "inline-flex";
+
+            el.className =
+                "sync-status " + state;
+
+            el.textContent =
+                (SYNC_ICONS[state] || "☁") +
+                " " +
+                (labels[state] || state);
+        }
+
+        function refreshSyncStatus() {
+
+            if (!currentUser) {
+
+                setSyncStatus("guest");
+
+                return;
+            }
+
+            if (!navigator.onLine) {
+
+                setSyncStatus("offline");
+
+                return;
+            }
+
+            if (
+                appstatePendingWrites ||
+                appstateFlushTimer ||
+                appstateDirty.size > 0
+            ) {
+
+                setSyncStatus("syncing");
+
+                return;
+            }
+
+            setSyncStatus(
+                appstateLastError
+                    ? "error"
+                    : "synced"
+            );
+        }
+
+        /* LOCAL -> CLOUD
+           Installed as a hook on Storage.prototype so every existing
+           localStorage.setItem("dailykrd_...") call in the app — theme,
+           language, accent, location, study, notification preferences — is
+           picked up automatically, without touching any of the code that has
+           been working until now. */
+
+        Storage.prototype.setItem = function (key, value) {
+
+            const isLocalStorage =
+                this === window.localStorage;
+
+            const isSyncedKey =
+                isLocalStorage &&
+                SYNCED_KEY_SET.has(key);
+
+            const previous =
+                isSyncedKey
+                    ? rawStorageGet.call(this, key)
+                    : null;
+
+            rawStorageSet.call(this, key, value);
+
+            if (
+                isSyncedKey &&
+                previous !== String(value)
+            ) {
+
+                noteLocalAppstateChange(key);
+            }
+        };
+
+        Storage.prototype.removeItem = function (key) {
+
+            const isLocalStorage =
+                this === window.localStorage;
+
+            const isSyncedKey =
+                isLocalStorage &&
+                SYNCED_KEY_SET.has(key);
+
+            const previous =
+                isSyncedKey
+                    ? rawStorageGet.call(this, key)
+                    : null;
+
+            rawStorageRemove.call(this, key);
+
+            if (
+                isSyncedKey &&
+                previous !== null
+            ) {
+
+                noteLocalAppstateChange(key);
+            }
+        };
+
+        function noteLocalAppstateChange(key) {
+
+            setSyncStamp(
+                key,
+                Date.now(),
+                currentUser
+                    ? currentUser.uid
+                    : null
+            );
+
+            saveSyncStamps();
+
+            // Guests stay strictly local: the value is stamped so it can be
+            // merged into the account on the next sign-in, but nothing is
+            // ever uploaded to a Firebase account from guest mode.
+            if (!currentUser) return;
+
+            appstateDirty.add(key);
+
+            scheduleAppstateFlush(900);
+
+            setSyncStatus("syncing");
+        }
+
+        function scheduleAppstateFlush(delay) {
+
+            if (appstateFlushTimer) return;
+
+            appstateFlushTimer =
+                setTimeout(
+                    () => {
+
+                        appstateFlushTimer = null;
+
+                        flushAppstate();
+
+                    },
+                    delay || 900
+                );
+        }
+
+        async function flushAppstate() {
+
+            if (!currentUser || appstateDirty.size === 0) {
+
+                refreshSyncStatus();
+
+                return;
+            }
+
+            const uid =
+                currentUser.uid;
+
+            const keys =
+                [...appstateDirty];
+
+            appstateDirty.clear();
+
+            let failed = false;
+
+            let switchedLayout = false;
+
+            for (let i = 0; i < keys.length; i++) {
+
+                const key =
+                    keys[i];
+
+                // Account switched mid-flush: stop, never write to the
+                // previous user's documents.
+                if (!currentUser || currentUser.uid !== uid) return;
+
+                const owner =
+                    syncStampOwner(key);
+
+                if (owner && owner !== uid) continue;
+
+                const value =
+                    rawStorageRead(key);
+
+                const stamp =
+                    syncStampTime(key) || Date.now();
+
+                // A cleared key is published as a tombstone, but only when it
+                // was part of the account before (otherwise there is nothing
+                // to remove on the other devices).
+                if (value === null && !localSyncStamps[key]) continue;
+
+                if (
+                    stamp <=
+                    (appstateServerStamps[key] || 0)
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    await appstateWriteKey(
+                        uid,
+                        key,
+                        value,
+                        stamp
+                    );
+
+                    appstateServerStamps[key] = stamp;
+
+                } catch (error) {
+
+                    console.error(
+                        "App state sync error:",
+                        key,
+                        error
+                    );
+
+                    // Keep the change queued; Firestore's IndexedDB
+                    // persistence replays it once connectivity returns.
+                    appstateDirty.add(key);
+
+                    failed = true;
+
+                    if (isPermissionDenied(error)) {
+
+                        useAppstateProfileFallback(uid);
+
+                        switchedLayout = true;
+
+                        // Re-queue the settings we have not written yet so the
+                        // new layout receives all of them.
+                        for (let j = i; j < keys.length; j++) {
+
+                            appstateDirty.add(keys[j]);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            appstateLastError = failed && !switchedLayout;
+
+            if (
+                appstateDirty.size > 0 &&
+                navigator.onLine
+            ) {
+
+                scheduleAppstateFlush(
+                    switchedLayout
+                        ? 300
+                        : 4000
+                );
+            }
+
+            refreshSyncStatus();
+        }
+
+        /* Union merge for history-shaped values (study sessions / completed
+           study days) — never drops an entry that exists on either side. */
+
+        function mergeSyncedValue(key, localRaw, remoteRaw) {
+
+            try {
+
+                if (key === "dailykrd_study_sessions") {
+
+                    const local =
+                        JSON.parse(localRaw);
+
+                    const remote =
+                        JSON.parse(remoteRaw);
+
+                    if (
+                        !Array.isArray(local) ||
+                        !Array.isArray(remote)
+                    ) {
+
+                        return remoteRaw;
+                    }
+
+                    const seen =
+                        new Set();
+
+                    const union = [];
+
+                    local
+                        .concat(remote)
+                        .forEach(session => {
+
+                            const fingerprint =
+                                JSON.stringify(session);
+
+                            if (seen.has(fingerprint)) return;
+
+                            seen.add(fingerprint);
+
+                            union.push(session);
+                        });
+
+                    return JSON.stringify(union);
+                }
+
+                if (key === "dailykrd_study_completed") {
+
+                    const local =
+                        JSON.parse(localRaw);
+
+                    const remote =
+                        JSON.parse(remoteRaw);
+
+                    if (
+                        !local ||
+                        !remote ||
+                        typeof local !== "object" ||
+                        typeof remote !== "object" ||
+                        Array.isArray(local) ||
+                        Array.isArray(remote)
+                    ) {
+
+                        return remoteRaw;
+                    }
+
+                    const union =
+                        { ...remote };
+
+                    Object.keys(local).forEach(dateKey => {
+
+                        const days =
+                            new Set([
+                                ...(Array.isArray(remote[dateKey])
+                                    ? remote[dateKey]
+                                    : []),
+                                ...(Array.isArray(local[dateKey])
+                                    ? local[dateKey]
+                                    : [])
+                            ]);
+
+                        union[dateKey] = [...days];
+                    });
+
+                    return JSON.stringify(union);
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "App state merge error:",
+                    key,
+                    error
+                );
+            }
+
+            return remoteRaw;
+        }
+
+        /* CLOUD -> LOCAL */
+
+        function applyRemoteAppstate(uid, key, remoteValue, remoteStamp) {
+
+            let value =
+                remoteValue;
+
+            const localValue =
+                rawStorageRead(key);
+
+            if (
+                value !== null &&
+                localValue !== null &&
+                SYNCED_UNION_KEYS.has(key)
+            ) {
+
+                const owner =
+                    syncStampOwner(key);
+
+                if (!owner || owner === uid) {
+
+                    const merged =
+                        mergeSyncedValue(
+                            key,
+                            localValue,
+                            value
+                        );
+
+                    if (merged !== value) {
+
+                        // This device holds extra history: store the union and
+                        // publish it back so no session is ever lost.
+                        rawStorageWrite(key, merged);
+
+                        setSyncStamp(
+                            key,
+                            Date.now(),
+                            uid
+                        );
+
+                        saveSyncStamps();
+
+                        appstateDirty.add(key);
+
+                        scheduleAppstateFlush(600);
+
+                        refreshAppstateUI(key);
+
+                        return;
+                    }
+
+                    value = merged;
+                }
+            }
+
+            rawStorageWrite(key, value);
+
+            setSyncStamp(key, remoteStamp, uid);
+
+            saveSyncStamps();
+
+            refreshAppstateUI(key);
+        }
+
+        /* Re-apply the affected part of the UI after a remote change so the
+           other device's edit shows up without a refresh. */
+
+        function refreshAppstateUI(key) {
+
+            try {
+
+                if (
+                    key === "dailykrd_dark" ||
+                    key === "dailykrd_theme" ||
+                    key === "dailykrd_accent" ||
+                    key === "dailykrd_iconset"
+                ) {
+
+                    applyTheme();
+
+                    loadAppearancePrefs();
+
+                    return;
+                }
+
+                if (key === "dailykrd_language") {
+
+                    const language =
+                        rawStorageRead(key);
+
+                    if (language) {
+
+                        currentLanguage = language;
+
+                        const select =
+                            document.getElementById(
+                                "settingsLanguage"
+                            );
+
+                        if (select) select.value = language;
+
+                        applyLanguage();
+
+                        // The indicator is translated too: re-render its label
+                        // in the newly applied language.
+                        currentSyncState = null;
+
+                        refreshSyncStatus();
+                    }
+
+                    return;
+                }
+
+                if (
+                    key === "dailykrd_lat" ||
+                    key === "dailykrd_lng" ||
+                    key === "dailykrd_tz"
+                ) {
+
+                    loadPrayerTimes();
+
+                    return;
+                }
+
+                if (
+                    key === "dailykrd_study_goal" ||
+                    key === "dailykrd_study_minutes" ||
+                    key === "dailykrd_study_subjects" ||
+                    key === "dailykrd_study_completed"
+                ) {
+
+                    renderStudy();
+
+                    if (typeof renderDashStudy === "function") {
+
+                        renderDashStudy();
+                    }
+
+                    if (
+                        key === "dailykrd_study_subjects" &&
+                        typeof timerPopulateSubject === "function"
+                    ) {
+
+                        timerPopulateSubject();
+                    }
+
+                    return;
+                }
+
+                if (key === "dailykrd_study_sessions") {
+
+                    if (
+                        document
+                            .getElementById("studyStats")
+                            ?.classList.contains("active") &&
+                        typeof window._renderStudyStatsPage ===
+                            "function"
+                    ) {
+
+                        window._renderStudyStatsPage();
+                    }
+
+                    return;
+                }
+
+                if (key === "dailykrd_push_settings") {
+
+                    try {
+
+                        pushSettings =
+                            JSON.parse(
+                                rawStorageRead(key) || "{}"
+                            );
+
+                    } catch (error) {
+
+                        return;
+                    }
+
+                    renderPushSettingsUI();
+
+                    return;
+                }
+
+                if (key === "dailykrd_welcomed") {
+
+                    if (rawStorageRead(key)) {
+
+                        const welcome =
+                            document.getElementById(
+                                "welcomeScreen"
+                            );
+
+                        if (welcome) {
+
+                            welcome.style.display = "none";
+                        }
+                    }
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "App state UI refresh error:",
+                    key,
+                    error
+                );
+            }
+        }
+
+        /* Two Firestore layouts carry the same data:
+
+           - "collection" (preferred): users/{uid}/appstate/{key} — one small
+             document per setting, so every setting is an independent write;
+           - "profile" (automatic fallback): users/{uid} with a
+             syncState.<key> field, used when the project's security rules only
+             cover the paths the app already used before this change, so sync
+             keeps working without requiring a rules edit.
+
+           The layout that worked is remembered per device. */
+
+        let appstateSyncPath =
+            rawStorageRead("dailykrd_sync_path") === "profile"
+                ? "profile"
+                : "collection";
+
+        function isPermissionDenied(error) {
+
+            return !!(error && (
+                error.code === "permission-denied" ||
+                error.code === "firestore/permission-denied"
+            ));
+        }
+
+        function appstateWriteKey(uid, key, value, stamp) {
+
+            const id =
+                appstateDocId(key);
+
+            if (appstateSyncPath === "profile") {
+
+                const fields = {};
+
+                // Dotted path = only this one setting is written, so two
+                // devices changing different settings never clash.
+                fields["syncState." + id] = {
+                    value: value,
+                    updatedAt: stamp,
+                    device: getSyncDeviceId()
+                };
+
+                return updateDoc(
+                    doc(db, "users", uid),
+                    fields
+                );
+            }
+
+            return setDoc(
+                doc(
+                    db,
+                    "users",
+                    uid,
+                    APPSTATE_COLLECTION,
+                    id
+                ),
+                {
+                    value: value,
+                    updatedAt: stamp,
+                    device: getSyncDeviceId()
+                },
+                { merge: true }
+            );
+        }
+
+        function useAppstateProfileFallback(uid) {
+
+            if (appstateSyncPath === "profile") return;
+
+            appstateSyncPath = "profile";
+
+            rawStorageWrite(
+                "dailykrd_sync_path",
+                "profile"
+            );
+
+            console.warn(
+                "App state sync: users/{uid}/appstate is not permitted by the current Firestore rules — using users/{uid}.syncState instead."
+            );
+
+            // Restart the listener against the profile document.
+            appstateListenerUid = null;
+
+            startAppstateSync(uid);
+        }
+
+        function appstateItemsFromCollection(snapshot) {
+
+            const items = [];
+
+            snapshot.forEach(item => {
+
+                const key =
+                    "dailykrd_" + item.id;
+
+                if (!SYNCED_KEY_SET.has(key)) return;
+
+                const data =
+                    item.data() || {};
+
+                items.push({
+                    key: key,
+                    value: typeof data.value === "string"
+                        ? data.value
+                        : null,
+                    stamp: Number(data.updatedAt) || 0
+                });
+            });
+
+            return items;
+        }
+
+        function appstateItemsFromProfile(snapshot) {
+
+            const items = [];
+
+            const data =
+                snapshot.exists()
+                    ? snapshot.data() || {}
+                    : {};
+
+            const state =
+                data.syncState &&
+                typeof data.syncState === "object"
+                    ? data.syncState
+                    : {};
+
+            Object.keys(state).forEach(id => {
+
+                const key =
+                    "dailykrd_" + id;
+
+                if (!SYNCED_KEY_SET.has(key)) return;
+
+                const entry =
+                    state[id] || {};
+
+                items.push({
+                    key: key,
+                    value: typeof entry.value === "string"
+                        ? entry.value
+                        : null,
+                    stamp: Number(entry.updatedAt) || 0
+                });
+            });
+
+            return items;
+        }
+
+        function handleAppstateItems(uid, items, snapshotMeta) {
+
+            if (!currentUser || currentUser.uid !== uid) return;
+
+            appstatePendingWrites =
+                !!(snapshotMeta && snapshotMeta.hasPendingWrites);
+
+            // A cache-only snapshot (no connectivity yet, or the very first
+            // snapshot before the server answers) must never be used as proof
+            // that a setting does not exist in the account, otherwise a fresh
+            // device could upload its own defaults over the account's values.
+            const fromCache =
+                !!(snapshotMeta && snapshotMeta.fromCache);
+
+            const remoteKeys =
+                new Set();
+
+            items.forEach(item => {
+
+                const key =
+                    item.key;
+
+                const remoteValue =
+                    item.value;
+
+                const remoteStamp =
+                    item.stamp;
+
+                remoteKeys.add(key);
+
+                // Already applied / queued on this device.
+                if (
+                    remoteStamp <=
+                    (appstateServerStamps[key] || 0)
+                ) {
+
+                    return;
+                }
+
+                appstateServerStamps[key] = remoteStamp;
+
+                const localStamp =
+                    syncStampTime(key);
+
+                if (remoteStamp > localStamp) {
+
+                    // Other device is newer: adopt it and re-render.
+                    applyRemoteAppstate(
+                        uid,
+                        key,
+                        remoteValue,
+                        remoteStamp
+                    );
+
+                    return;
+                }
+
+                if (localStamp > remoteStamp) {
+
+                    // This device is newer: keep it and push it up.
+                    appstateDirty.add(key);
+
+                    return;
+                }
+
+                // Same instant (e.g. an offline write this device just
+                // replayed): the account copy is the tie-breaker.
+                if (remoteValue !== null) {
+
+                    applyRemoteAppstate(
+                        uid,
+                        key,
+                        remoteValue,
+                        remoteStamp
+                    );
+                }
+            });
+
+            // Values that exist on this device but not in the account yet:
+            // upload them (this is how a guest's local settings and study data
+            // merge into the account instead of being destroyed). Only once the
+            // server has confirmed what the account actually holds.
+            if (!appstateLocalMergeDone && !fromCache) {
+
+                appstateLocalMergeDone = true;
+
+                SYNCED_STORAGE_KEYS.forEach(key => {
+
+                    if (remoteKeys.has(key)) return;
+
+                    if (rawStorageRead(key) === null) return;
+
+                    const owner =
+                        syncStampOwner(key);
+
+                    if (owner && owner !== uid) return;
+
+                    appstateDirty.add(key);
+                });
+            }
+
+            if (appstateDirty.size > 0) {
+
+                scheduleAppstateFlush(300);
+
+            } else {
+
+                refreshSyncStatus();
+            }
+        }
+
+        function appstateListenerFailed(uid, error) {
+
+            console.error(
+                "App state listener error:",
+                error
+            );
+
+            // Rules that only allow the paths the app already used cannot
+            // read users/{uid}/appstate — switch to the profile layout instead
+            // of leaving sync switched off.
+            if (
+                isPermissionDenied(error) &&
+                appstateSyncPath === "collection"
+            ) {
+
+                useAppstateProfileFallback(uid);
+
+                return;
+            }
+
+            appstateLastError = true;
+
+            refreshSyncStatus();
+        }
+
+        function startAppstateSync(uid) {
+
+            if (!currentUser || currentUser.uid !== uid) return;
+
+            // Never create a second listener for the same account.
+            if (
+                appstateListener &&
+                appstateListenerUid === uid
+            ) {
+
+                return;
+            }
+
+            stopAppstateSync();
+
+            appstateListenerUid = uid;
+
+            appstateLocalMergeDone = false;
+
+            appstateServerStamps = {};
+
+            setSyncStatus("syncing");
+
+            if (appstateSyncPath === "profile") {
+
+                appstateListener =
+                    onSnapshot(
+                        doc(db, "users", uid),
+                        snapshot => {
+
+                            handleAppstateItems(
+                                uid,
+                                appstateItemsFromProfile(snapshot),
+                                snapshot.metadata
+                            );
+                        },
+                        error => appstateListenerFailed(uid, error)
+                    );
+
+                return;
+            }
+
+            appstateListener =
+                onSnapshot(
+                    collection(
+                        db,
+                        "users",
+                        uid,
+                        APPSTATE_COLLECTION
+                    ),
+                    snapshot => {
+
+                        handleAppstateItems(
+                            uid,
+                            appstateItemsFromCollection(snapshot),
+                            snapshot.metadata
+                        );
+                    },
+                    error => appstateListenerFailed(uid, error)
+                );
+        }
+
+        function stopAppstateSync() {
+
+            if (appstateListener) {
+
+                appstateListener();
+
+                appstateListener = null;
+            }
+
+            appstateListenerUid = null;
+
+            appstateLocalMergeDone = false;
+
+            appstateServerStamps = {};
+
+            appstatePendingWrites = false;
+
+            appstateLastError = false;
+
+            if (appstateFlushTimer) {
+
+                clearTimeout(appstateFlushTimer);
+
+                appstateFlushTimer = null;
+            }
+
+            // Drop pending writes so nothing is written to the account that
+            // just signed out. Local values themselves are left untouched.
+            appstateDirty.clear();
+
+            refreshSyncStatus();
+        }
+
+        window.addEventListener(
+            "online",
+            () => {
+
+                if (!currentUser) return;
+
+                if (appstateDirty.size > 0) {
+
+                    scheduleAppstateFlush(200);
+
+                } else {
+
+                    refreshSyncStatus();
+                }
+            }
+        );
+
+        window.addEventListener(
+            "offline",
+            refreshSyncStatus
+        );
 
         // Task ids whose "just completed" animation should replay even if
         // the Firestore listener re-renders the list before the CSS
@@ -7973,6 +9278,12 @@ done: "تەواو",
 
                 if (user) {
 
+                    // Cross-device sync for settings, location, study data and
+                    // notification preferences. Called on every sign-in, but it
+                    // reuses one listener per uid and tears down any previous
+                    // account's listener first.
+                    startAppstateSync(user.uid);
+
                     try {
 
                         await migrateGuestTasksToAccount(user.uid);
@@ -8100,6 +9411,11 @@ done: "تەواو",
                         "accountButton"
                     ).style.display =
                         "block";
+
+
+                    // Stop account-specific sync: no listener, no queued
+                    // writes, nothing written to the previous user's account.
+                    stopAppstateSync();
 
 
                     stopTaskListener();
@@ -13687,6 +15003,25 @@ document.documentElement.classList.toggle(
             }
         }
 
+        const flashcardsUploadPending = new Set();
+        const flashcardsNormalizePending = new Set();
+
+        /* Older builds stored a deck under an auto-generated document id while
+           also keeping the deck's own id inside the document, which made a deck
+           look duplicated and let a deleted deck come back from the second
+           document. Heal those documents into the single id-based document. */
+        function normalizeLegacyFlashcardDoc(docId, data) {
+            if (!data || !data.id || data.id === docId) return;
+            if (flashcardsNormalizePending.has(docId)) return;
+            flashcardsNormalizePending.add(docId);
+            setDoc(doc(db, "users", currentUser.uid, "flashcards", data.id), data)
+                .then(() => deleteDoc(doc(db, "users", currentUser.uid, "flashcards", docId)))
+                .catch(error => {
+                    flashcardsNormalizePending.delete(docId);
+                    console.error("Flashcard doc migration error:", error);
+                });
+        }
+
         function startFlashcardListener() {
             stopFlashcardListener();
             if (!currentUser) return;
@@ -13694,13 +15029,29 @@ document.documentElement.classList.toggle(
                 getFlashcardsCollection(),
                 snapshot => {
                     const serverDecks = [];
+                    const serverIds = new Set();
                     snapshot.forEach(d => {
-                        serverDecks.push({ id: d.id, ...d.data() });
+                        const deckData = d.data() || {};
+                        normalizeLegacyFlashcardDoc(d.id, deckData);
+                        const deck = { id: d.id, ...deckData };
+                        if (serverIds.has(deck.id)) return;
+                        serverIds.add(deck.id);
+                        serverDecks.push(deck);
                     });
                     serverDecks.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                    /* Merge: keep any local-only decks that haven't synced yet */
-                    const serverIds = new Set(serverDecks.map(d => d.id));
+                    /* Decks that exist only on this device (created as a guest or
+                       while offline) are uploaded once, so they follow the user
+                       to the other devices instead of staying here. */
                     const localOnly = flashcardDecks.filter(d => d.id && !serverIds.has(d.id));
+                    localOnly.forEach(deck => {
+                        if (flashcardsUploadPending.has(deck.id)) return;
+                        flashcardsUploadPending.add(deck.id);
+                        setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), deck)
+                            .catch(error => {
+                                flashcardsUploadPending.delete(deck.id);
+                                console.error("Flashcard upload error:", error);
+                            });
+                    });
                     flashcardDecks = [...serverDecks, ...localOnly];
                     renderFlashcardDeckList();
                 },
@@ -13722,7 +15073,10 @@ document.documentElement.classList.toggle(
             const col = collection(db, "users", uid, "flashcards");
             for (const deck of guest) {
                 const { id, ...deckData } = deck;
-                await addDoc(col, deckData);
+                // Prefer the deck's own id so the deck keeps exactly one
+                // document everywhere (and deletions stay effective).
+                if (id) await setDoc(doc(col, id), { id, ...deckData });
+                else await addDoc(col, deckData);
             }
             localStorage.removeItem("dailykrd_flashcards");
         }
@@ -13757,7 +15111,9 @@ document.documentElement.classList.toggle(
             saveGuestFlashcards();
             renderFlashcardDeckList();
             if (currentUser) {
-                try { await addDoc(getFlashcardsCollection(), deck); }
+                // Store the deck under its own id: one document per deck on
+                // every device, so edits and deletions always match.
+                try { await setDoc(doc(db, "users", currentUser.uid, "flashcards", deck.id), deck); }
                 catch (e) { console.error("Create deck error:", e); }
             }
         }
@@ -14519,6 +15875,7 @@ document.documentElement.classList.toggle(
             let calFilter = 'all';
             let editingEvent = null;
             let unsubscribeEvents = null;
+            const eventsUploadPending = new Set();
 
             /* ---- Storage ---- */
             function loadEvents() {
@@ -14545,7 +15902,22 @@ document.documentElement.classList.toggle(
                     server.sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
                     const serverIds = new Set(server.map(e => e.id));
                     const localOnly = calEvents.filter(e => e.id && !serverIds.has(e.id));
-                    calEvents = [...server, ...localOnly];
+                    // Events that only exist on this device (created as a guest,
+                    // or while offline) are pushed to the account once so they
+                    // reach the user's other devices too.
+                    localOnly.forEach(ev => {
+                        if (eventsUploadPending.has(ev.id)) return;
+                        eventsUploadPending.add(ev.id);
+                        setDoc(doc(db, 'users', currentUser.uid, 'events', ev.id), ev)
+                            .catch(err => {
+                                eventsUploadPending.delete(ev.id);
+                                console.error('Event upload error:', err);
+                            });
+                    });
+                    const merged = new Map();
+                    server.forEach(e => merged.set(e.id, e));
+                    localOnly.forEach(e => { if (!merged.has(e.id)) merged.set(e.id, e); });
+                    calEvents = [...merged.values()];
                     localStorage.setItem('dailykrd_events', JSON.stringify(calEvents));
                     renderCalendar();
                     renderDayEvents();
