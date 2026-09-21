@@ -5727,18 +5727,25 @@
             "dailykrd_study_completed",
             "dailykrd_study_sessions",
             "dailykrd_push_settings",
-            "dailykrd_welcomed"
+            "dailykrd_welcomed",
+            /* Tombstones of Subjects the user deleted, so a subject removed on
+               one device is never re-adopted from another device's stale
+               Homework checklist. */
+            "dailykrd_subjects_removed"
         ];
 
         const SYNCED_KEY_SET =
             new Set(SYNCED_STORAGE_KEYS);
 
-        // History-shaped values are union-merged instead of replaced so study
-        // time recorded on two devices is never dropped.
+        /* History-shaped values are union-merged instead of replaced so study
+           time recorded on two devices is never dropped. The subjects tombstone
+           list unions too: two devices deleting different subjects offline must
+           both stay deleted. */
         const SYNCED_UNION_KEYS =
             new Set([
                 "dailykrd_study_sessions",
-                "dailykrd_study_completed"
+                "dailykrd_study_completed",
+                "dailykrd_subjects_removed"
             ]);
 
         const SYNC_STAMPS_KEY =
@@ -6292,6 +6299,46 @@
                     return JSON.stringify(union);
                 }
 
+                // Deleted-subject tombstones: keep every name either side has
+                // removed, so an offline device can never resurrect one.
+                if (key === "dailykrd_subjects_removed") {
+
+                    const local =
+                        JSON.parse(localRaw);
+
+                    const remote =
+                        JSON.parse(remoteRaw);
+
+                    if (
+                        !Array.isArray(local) ||
+                        !Array.isArray(remote)
+                    ) {
+
+                        return remoteRaw;
+                    }
+
+                    const seen =
+                        new Set();
+
+                    const union = [];
+
+                    local
+                        .concat(remote)
+                        .forEach(name => {
+
+                            const fingerprint =
+                                String(name).toLowerCase();
+
+                            if (!fingerprint || seen.has(fingerprint)) return;
+
+                            seen.add(fingerprint);
+
+                            union.push(name);
+                        });
+
+                    return JSON.stringify(union);
+                }
+
                 if (key === "dailykrd_study_completed") {
 
                     const local =
@@ -6421,6 +6468,20 @@
         function refreshAppstateUI(key) {
 
             try {
+
+                // Synced deletion tombstones arrived (or changed): let the
+                // Subjects & Notes module drop any subject that raced back in
+                // from another device's stale checklist.
+                if (key === "dailykrd_subjects_removed") {
+
+                    if (
+                        typeof window._subjectsTombstonesChanged ===
+                        "function"
+                    ) {
+
+                        window._subjectsTombstonesChanged();
+                    }
+                }
 
                 if (
                     key === "dailykrd_dark" ||
@@ -16631,7 +16692,12 @@ document.documentElement.classList.toggle(
             const GUEST_MEDIA_KEY = 'dailykrd_guest_media';
             const LEGACY_SUBJECTS_KEY = 'dailykrd_study_subjects';
             const COMPLETED_KEY = 'dailykrd_study_completed';
-            const REMOVED_SUBJECTS_KEY = 'dailykrd_subjects_removed_';
+            /* Shared, synced tombstone list (in the app-state sync list) so a
+               subject deleted on one device is never re-adopted from another
+               device's stale Homework checklist. The old per-uid local key is
+               still read so nothing already tombstoned is forgotten. */
+            const REMOVED_SUBJECTS_KEY = 'dailykrd_subjects_removed';
+            const REMOVED_SUBJECTS_LEGACY_PREFIX = 'dailykrd_subjects_removed_';
 
             const MAX_PHOTOS_PER_NOTE = 6;
             const MAX_MEDIA_STRING = 700 * 1024;   // data URL characters, safely under the 1 MiB document limit
@@ -16703,6 +16769,14 @@ document.documentElement.classList.toggle(
             }
 
             function writeJson(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            }
+
+            /* Same, but for a key in the app-state sync list (the Homework
+               checklist): the write goes through the hooked Storage methods, so
+               the cross-device sync layer stamps it and uploads it like any
+               other user edit, instead of the change being invisible to it. */
+            function writeSyncedJson(key, value) {
                 localStorage.setItem(key, JSON.stringify(value));
             }
 
@@ -16888,6 +16962,17 @@ document.documentElement.classList.toggle(
                         cloudBlocked = false;
                         notesIndex = null;
                         setSubjectsStatus('');
+
+                        /* The Homework checklist is synced on its own (it is in
+                           the app-state sync list), so subjects renamed or
+                           deleted here reach other devices as ordinary stamped
+                           checklist edits — and this device receives the other
+                           devices' checklist edits through that same channel.
+                           The checklist is therefore never rewritten from the
+                           subjects snapshot: it also holds homework items that
+                           are not subjects, which must survive. Only the
+                           checklist -> subjects adoption below runs here. */
+
                         renderSubjectsList();
 
                         // A cache-only snapshot does not prove what the account
@@ -17846,6 +17931,35 @@ document.documentElement.classList.toggle(
                 if (status) setNoteStatus(status);
             }
 
+            /* Synced tombstones arrived: delete any subject document that was
+               auto-created from a stale checklist before the tombstone landed
+               here. Manual subjects are never touched — only our own
+               `auto-<name>` creations can race like this. */
+            window._subjectsTombstonesChanged = function () {
+                if (!cloudMode() || cloudBlocked) return;
+                if (!subjectsLoadedOnce) return;
+
+                const removed = new Set(removedSubjectNames());
+                if (removed.size === 0) return;
+
+                subjectList.forEach(subject => {
+                    const name = String(subject.name || '').trim().toLowerCase();
+                    if (!name || !removed.has(name)) return;
+                    if (!String(subject.id).startsWith('auto-')) return;
+
+                    deleteSubjectWithNotes(subject.id).catch(() => {});
+                    subjectList = sortSubjects(subjectList.filter(item => item.id !== subject.id));
+                });
+
+                notesIndex = null;
+                renderSubjectsList();
+                if (selectedSubjectId && !findSubject(selectedSubjectId)) {
+                    selectedSubjectId = null;
+                    subjectNotes = [];
+                    showSection('subjects');
+                }
+            };
+
             /* ---------- study checklist integration ---------- */
 
             function legacySubjectNames() {
@@ -17854,7 +17968,8 @@ document.documentElement.classList.toggle(
             }
 
             function writeLegacySubjectNames(names) {
-                localStorage.setItem(LEGACY_SUBJECTS_KEY, JSON.stringify(names));
+                // Synced key: hooked storage stamps + uploads the change.
+                writeSyncedJson(LEGACY_SUBJECTS_KEY, names);
             }
 
             function addLegacySubjectName(name) {
@@ -17905,7 +18020,8 @@ document.documentElement.classList.toggle(
                         }
                     });
 
-                    if (changed) localStorage.setItem(COMPLETED_KEY, JSON.stringify(map));
+                    // Synced key: hooked storage stamps + uploads the change.
+                    if (changed) writeSyncedJson(COMPLETED_KEY, map);
                 } catch (error) {
                     console.warn('[Daily.KRD notes] completed subjects update failed:', error);
                 }
@@ -17932,25 +18048,44 @@ document.documentElement.classList.toggle(
              *     adopted again.
              */
             function removedSubjectNames() {
-                const key = REMOVED_SUBJECTS_KEY + (syncUid || 'guest');
-                const list = readJson(key, []);
-                return (Array.isArray(list) ? list : []).map(name => String(name).toLowerCase());
+                const list = readJson(REMOVED_SUBJECTS_KEY, []);
+                const merged = (Array.isArray(list) ? list : []).map(name => String(name).toLowerCase());
+
+                // Fold in tombstones recorded by older builds (per-uid local).
+                let legacyFound = false;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !key.startsWith(REMOVED_SUBJECTS_LEGACY_PREFIX)) continue;
+                    const old = readJson(key, []);
+                    (Array.isArray(old) ? old : []).forEach(name => {
+                        const lower = String(name).toLowerCase();
+                        if (lower && !merged.includes(lower)) {
+                            merged.push(lower);
+                            legacyFound = true;
+                        }
+                    });
+                }
+
+                // Persist the folded list into the synced key so it uploads.
+                if (legacyFound) writeSyncedJson(REMOVED_SUBJECTS_KEY, merged);
+
+                return merged;
             }
 
             function rememberRemovedSubject(name) {
-                const key = REMOVED_SUBJECTS_KEY + (syncUid || 'guest');
+                const target = String(name).toLowerCase();
                 const list = removedSubjectNames();
-                if (!list.includes(String(name).toLowerCase())) {
-                    writeJson(key, list.concat([String(name).toLowerCase()]));
+                if (!list.includes(target)) {
+                    // Synced key: hooked storage stamps + uploads the tombstone.
+                    writeSyncedJson(REMOVED_SUBJECTS_KEY, list.concat([target]));
                 }
             }
 
             function forgetRemovedSubject(name) {
-                const key = REMOVED_SUBJECTS_KEY + (syncUid || 'guest');
                 const target = String(name).toLowerCase();
                 const list = removedSubjectNames();
                 if (list.includes(target)) {
-                    writeJson(key, list.filter(item => item !== target));
+                    writeSyncedJson(REMOVED_SUBJECTS_KEY, list.filter(item => item !== target));
                 }
             }
 
