@@ -7629,6 +7629,7 @@
                 subjectsDeleteConfirm: "Delete this subject? Its notes will be deleted too.",
                 subjectsDeleteNoteConfirm: "Delete this note?",
                 subjectsNameRequired: "Enter a subject name.",
+                subjectsExists: "A subject with this name already exists.",
                 subjectsNewNote: "New Note",
                 subjectsAddNote: "+ Add Note",
                 subjectsNote: "Note",
@@ -7645,6 +7646,8 @@
                 subjectsPhotoLimit: "A note can hold up to 6 photos.",
                 subjectsStorageFull: "This device is full — sign in to keep photos in the cloud.",
                 subjectsCloudError: "Cloud sync unavailable — subjects and notes stay safe on this device.",
+                subjectsNoteSaveFailed: "Couldn't save the note — it stays on this device and will sync later.",
+                subjectsNoteDeleteFailed: "Couldn't delete the note — check your connection and try again.",
                 subjectsDialogBlocked: "This browser blocked the dialog — open Daily.KRD directly and try again.",
                 subjectsSearchNotes: "Matching notes",
                 subjectsPhoto: "photo",
@@ -8060,6 +8063,7 @@ done: "تەواو",
                 subjectsDeleteConfirm: "ئەم بابەتە بسڕدرێتەوە؟ تێبینییەکانیشی دەسڕدرێنەوە.",
                 subjectsDeleteNoteConfirm: "ئەم تێبینییە بسڕدرێتەوە؟",
                 subjectsNameRequired: "ناوی بابەت بنووسە.",
+                subjectsExists: "بابەتێکی هەمان ناو پێشتر هەیە.",
                 subjectsNewNote: "تێبینی نوێ",
                 subjectsAddNote: "+ زیادکردنی تێبینی",
                 subjectsNote: "تێبینی",
@@ -8076,6 +8080,8 @@ done: "تەواو",
                 subjectsPhotoLimit: "هەر تێبینییەک تا ٦ وێنە هەڵدەگرێت.",
                 subjectsStorageFull: "بیرگەی ئەم ئامێرە پڕبووە — بچۆ ژوورەوە بۆ هەڵگرتنی وێنەکان لە هەور.",
                 subjectsCloudError: "هاوکاتکردنی هەور بەردەست نییە — بابەت و تێبینی لەم ئامێرەدا پارێزراون.",
+                subjectsNoteSaveFailed: "تێبینییەکە پاشەکەوت نەکرا — لەسەر ئەم ئامێرە دەمێنێتەوە و دواتر هاوکات دەکرێت.",
+                subjectsNoteDeleteFailed: "تێبینییەکە سڕ نەکرایەوە — پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدە.",
                 subjectsDialogBlocked: "ئەم وێبگەڕە دەرگای گفتوگۆی داخستووە — ڕاستەوخۆ Daily.KRD بکەرەوە و دووبارە هەوڵ بدە.",
                 subjectsSearchNotes: "تێبینییە هاوشێوەکان",
                 subjectsPhoto: "وێنە",
@@ -8493,6 +8499,7 @@ done: "تەواو",
                 subjectsDeleteConfirm: "حذف هذه المادة؟ سيتم حذف ملاحظاتها أيضاً.",
                 subjectsDeleteNoteConfirm: "حذف هذه الملاحظة؟",
                 subjectsNameRequired: "أدخل اسم المادة.",
+                subjectsExists: "مادة بنفس الاسم موجودة بالفعل.",
                 subjectsNewNote: "ملاحظة جديدة",
                 subjectsAddNote: "+ إضافة ملاحظة",
                 subjectsNote: "ملاحظة",
@@ -8509,6 +8516,8 @@ done: "تەواو",
                 subjectsPhotoLimit: "كل ملاحظة تحتفظ بـ 6 صور كحد أقصى.",
                 subjectsStorageFull: "ذاكرة الجهاز ممتلئة — سجّل الدخول لحفظ الصور في السحابة.",
                 subjectsCloudError: "مزامنة السحابة غير متاحة — المواد والملاحظات محفوظة على هذا الجهاز.",
+                subjectsNoteSaveFailed: "تعذّر حفظ الملاحظة — تبقى على هذا الجهاز وستُزامن لاحقًا.",
+                subjectsNoteDeleteFailed: "تعذّر حذف الملاحظة — تحقق من اتصالك وحاول مجددًا.",
                 subjectsDialogBlocked: "هذا المتصفح منع نافذة التأكيد — افتح Daily.KRD مباشرة وأعد المحاولة.",
                 subjectsSearchNotes: "ملاحظات مطابقة",
                 subjectsPhoto: "صورة",
@@ -15403,6 +15412,9 @@ document.documentElement.classList.toggle(
         function renderStudy() {
             const hwTitleEl = document.getElementById("studySubjectsTitle");
             if (hwTitleEl) hwTitleEl.textContent = t("homework");
+            // Keep the Study Timer's Subject dropdown in step with the checklist
+            // (late-bound; undefined during early boot, where timerInit covers it).
+            if (typeof window._timerPopulateSubject === "function") window._timerPopulateSubject();
             const goal = loadStudyGoal();
             const minutes = loadStudyMinutes();
             const pct = goal > 0
@@ -15720,11 +15732,16 @@ document.documentElement.classList.toggle(
                 subjects.map(s => '<option value="' + s.replace(/"/g, "&quot;") + '">' + s.replace(/</g, "&lt;") + '</option>').join("");
         }
 
+        // Late-bound hook so the Subjects & Notes module can refresh the
+        // dropdown after adding/renaming/deleting a subject (timerInit runs
+        // later in boot, so this is undefined until then).
+
         function timerInit() {
             timerPopulateSubject();
             timerStartBtn.textContent = t("timerStart");
             timerRender();
         }
+        window._timerPopulateSubject = timerPopulateSubject;
 
         timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(btn => {
             btn.addEventListener("click", () => {
@@ -16983,8 +17000,10 @@ document.documentElement.classList.toggle(
                     error => {
                         console.error('Subjects listener error:', error);
                         if (error && error.code === 'permission-denied') {
+                            // Sync stays off for this session (data remains safe
+                            // locally) but no scary banner: subjects and notes
+                            // keep working from local storage.
                             cloudBlocked = true;
-                            setSubjectsStatus(t('subjectsCloudError'));
                         }
                     }
                 );
@@ -17077,6 +17096,15 @@ document.documentElement.classList.toggle(
                     return;
                 }
 
+                // Two subjects with the same name would confuse the Homework
+                // mirror (deleting one would pull the shared checklist entry).
+                const exists = subjectList.some(item =>
+                    String(item.name || '').trim().toLowerCase() === name.toLowerCase());
+                if (exists) {
+                    alert(t('subjectsExists'));
+                    return;
+                }
+
                 const now = Date.now();
                 const subject = { id: newId(), name: name, createdAt: now, updatedAt: now };
 
@@ -17102,7 +17130,6 @@ document.documentElement.classList.toggle(
                     }
                 } catch (error) {
                     console.error('Add subject error:', error);
-                    setSubjectsStatus(t('subjectsCloudError'));
                 }
             }
 
@@ -17141,7 +17168,6 @@ document.documentElement.classList.toggle(
                     }
                 } catch (error) {
                     console.error('Rename subject error:', error);
-                    setSubjectsStatus(t('subjectsCloudError'));
                 }
             }
 
@@ -17188,7 +17214,6 @@ document.documentElement.classList.toggle(
                     }
                 } catch (error) {
                     console.error('Delete subject error:', error);
-                    setSubjectsStatus(t('subjectsCloudError'));
                 }
             }
 
@@ -17811,7 +17836,7 @@ document.documentElement.classList.toggle(
                     }
                 } catch (error) {
                     console.error('Note save error:', error);
-                    setNoteStatus(t('subjectsCloudError'));
+                    setNoteStatus(t('subjectsNoteSaveFailed'));
                 } finally {
                     if (optimisticNoteId === note.id) optimisticNoteId = null;
                 }
@@ -17837,7 +17862,7 @@ document.documentElement.classList.toggle(
                     renderSubjectDetail();
                 } catch (error) {
                     console.error('Delete note error:', error);
-                    setNoteStatus(t('subjectsCloudError'));
+                    setNoteStatus(t('subjectsNoteDeleteFailed'));
                 }
             }
 
