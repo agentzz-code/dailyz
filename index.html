@@ -6469,20 +6469,6 @@
 
             try {
 
-                // Synced deletion tombstones arrived (or changed): let the
-                // Subjects & Notes module drop any subject that raced back in
-                // from another device's stale checklist.
-                if (key === "dailykrd_subjects_removed") {
-
-                    if (
-                        typeof window._subjectsTombstonesChanged ===
-                        "function"
-                    ) {
-
-                        window._subjectsTombstonesChanged();
-                    }
-                }
-
                 if (
                     key === "dailykrd_dark" ||
                     key === "dailykrd_theme" ||
@@ -16707,14 +16693,6 @@ document.documentElement.classList.toggle(
             const GUEST_SUBJECTS_KEY = 'dailykrd_guest_subjects';
             const GUEST_NOTES_KEY = 'dailykrd_guest_notes';
             const GUEST_MEDIA_KEY = 'dailykrd_guest_media';
-            const LEGACY_SUBJECTS_KEY = 'dailykrd_study_subjects';
-            const COMPLETED_KEY = 'dailykrd_study_completed';
-            /* Shared, synced tombstone list (in the app-state sync list) so a
-               subject deleted on one device is never re-adopted from another
-               device's stale Homework checklist. The old per-uid local key is
-               still read so nothing already tombstoned is forgotten. */
-            const REMOVED_SUBJECTS_KEY = 'dailykrd_subjects_removed';
-            const REMOVED_SUBJECTS_LEGACY_PREFIX = 'dailykrd_subjects_removed_';
 
             const MAX_PHOTOS_PER_NOTE = 6;
             const MAX_MEDIA_STRING = 700 * 1024;   // data URL characters, safely under the 1 MiB document limit
@@ -16735,9 +16713,6 @@ document.documentElement.classList.toggle(
             let unsubscribeSubjects = null;
             let unsubscribeNotes = null;
             let subjectsLoadedOnce = false;
-            let promotionReady = false;
-            let promotionInFlight = false;
-            const adoptedNames = new Set();
             let notesIndex = null;
             let notesIndexLoading = false;
             let openNoteId = null;
@@ -16786,14 +16761,6 @@ document.documentElement.classList.toggle(
             }
 
             function writeJson(key, value) {
-                localStorage.setItem(key, JSON.stringify(value));
-            }
-
-            /* Same, but for a key in the app-state sync list (the Homework
-               checklist): the write goes through the hooked Storage methods, so
-               the cross-device sync layer stamps it and uploads it like any
-               other user edit, instead of the change being invisible to it. */
-            function writeSyncedJson(key, value) {
                 localStorage.setItem(key, JSON.stringify(value));
             }
 
@@ -16860,6 +16827,60 @@ document.documentElement.classList.toggle(
 
             function saveGuestSubjects(list) {
                 writeJson(GUEST_SUBJECTS_KEY, list);
+            }
+
+            /* ---------- signed-in local cache ----------
+
+               Subjects are ALSO kept in localStorage while signed in, per
+               account. Firestore remains the source of truth for sync, but the
+               cache guarantees a subject survives even if the app is closed
+               before its write reaches Firestore, or if writes are being
+               rejected (offline rules, etc.). On sign-in the cache is reconciled
+               with the account: docs that never made it are pushed up again. */
+
+            function cacheKeyFor(uid) {
+                return 'dailykrd_acc_subjects_' + uid;
+            }
+
+            function cachedSubjects(uid) {
+                const list = readJson(cacheKeyFor(uid), []);
+                return Array.isArray(list) ? list.filter(item => item && item.id) : [];
+            }
+
+            function saveCachedSubjects(uid, list) {
+                try {
+                    writeJson(cacheKeyFor(uid), list);
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] subject cache write failed:', error);
+                }
+            }
+
+            function clearCachedSubjects(uid) {
+                try {
+                    localStorage.removeItem(cacheKeyFor(uid));
+                } catch (error) { /* ignore */ }
+            }
+
+            /* Push any cached subject the account does not have yet (a write
+               that never landed). Merges by id; remote wins for name changes. */
+            function resubmitCachedSubjects(uid) {
+                const cached = cachedSubjects(uid);
+                if (cached.length === 0) return;
+
+                const known = new Set(subjectList.map(item => item.id));
+                const missing = cached.filter(item => !known.has(item.id));
+
+                missing.forEach(item => {
+                    setDoc(subjectRef(item.id), {
+                        name: item.name,
+                        createdAt: item.createdAt || Date.now(),
+                        updatedAt: item.updatedAt || Date.now()
+                    }, { merge: true }).catch(() => {});
+                });
+
+                if (missing.length > 0) {
+                    console.info('[Daily.KRD notes] re-pushed', missing.length, 'cached subject(s)');
+                }
             }
 
             function guestNotesMap() {
@@ -16980,22 +17001,17 @@ document.documentElement.classList.toggle(
                         notesIndex = null;
                         setSubjectsStatus('');
 
-                        /* The Homework checklist is synced on its own (it is in
-                           the app-state sync list), so subjects renamed or
-                           deleted here reach other devices as ordinary stamped
-                           checklist edits — and this device receives the other
-                           devices' checklist edits through that same channel.
-                           The checklist is therefore never rewritten from the
-                           subjects snapshot: it also holds homework items that
-                           are not subjects, which must survive. Only the
-                           checklist -> subjects adoption below runs here. */
+                        // Once the account's real state is known, push up any
+                        // cached subject whose write never landed — BEFORE the
+                        // cache is overwritten with the account list, which
+                        // would erase the evidence. Then keep the cache aligned.
+                        if (syncUid) {
+                            const fromCache = !!(snapshot.metadata && snapshot.metadata.fromCache);
+                            if (!fromCache) resubmitCachedSubjects(syncUid);
+                            saveCachedSubjects(syncUid, subjectList);
+                        }
 
                         renderSubjectsList();
-
-                        // A cache-only snapshot does not prove what the account
-                        // holds, so never adopt from one.
-                        const fromCache = !!(snapshot.metadata && snapshot.metadata.fromCache);
-                        if (!fromCache) promoteLegacySubjects();
                     },
                     error => {
                         console.error('Subjects listener error:', error);
@@ -17049,31 +17065,36 @@ document.documentElement.classList.toggle(
                 if (!uid || !currentUser || currentUser.uid !== uid) return;
                 syncUid = uid;
 
-                // Guest subjects are the user's own subjects. Wait for them to be
-                // migrated before the Study checklist is consulted, and treat the
-                // migrated names as already handled, so adoption can never create
-                // a second copy of a subject that is still being uploaded.
-                promotionReady = !hasGuestData();
+                // Show the account's local cache right away: subjects created on
+                // this device are on screen even before Firestore confirms, and
+                // they survive an app close that happens before writes land.
+                subjectList = sortSubjects(cachedSubjects(uid));
+                subjectsLoadedOnce = true;
 
                 startSubjectsListener();
 
+                // Guest work made on this device moves into the account, then
+                // joins the account cache.
                 migrateGuestSubjectsToAccount(uid)
-                    .then(result => {
-                        (result.names || []).forEach(name => adoptedNames.add(name));
+                    .then(() => {
+                        if (syncUid !== uid) return;
+                        const merged = sortSubjects(cachedSubjects(uid).concat(guestSubjects()));
+                        saveCachedSubjects(uid, merged);
+                        subjectList = merged;
+                        notesIndex = null;
+                        renderSubjectsList();
                     })
-                    .catch(error => console.error('Guest subjects migration error:', error))
-                    .finally(() => { promotionReady = true; });
+                    .catch(error => console.error('Guest subjects migration error:', error));
             }
 
             function stopSubjectsSync() {
                 stopSubjectsListener();
                 stopNotesListener();
                 closeNoteOverlay();
+                // The per-account cache is deliberately KEPT: it is this
+                // account's local safety copy for the next sign-in.
                 syncUid = null;
                 subjectsLoadedOnce = false;
-                promotionReady = false;
-                promotionInFlight = false;
-                adoptedNames.clear();
                 cloudBlocked = false;
                 notesIndex = null;
                 mediaCache.clear();
@@ -17108,12 +17129,17 @@ document.documentElement.classList.toggle(
                 const now = Date.now();
                 const subject = { id: newId(), name: name, createdAt: now, updatedAt: now };
 
-                // Put it on screen immediately. Offline, the write below is held
-                // by the existing IndexedDB persistence and replayed on reconnect,
-                // so creating a subject never blocks on the network.
+                // Put it on screen immediately and cache it on this device, so
+                // it survives even if the app closes before the write lands.
+                // Offline, the write below is held by the existing IndexedDB
+                // persistence and replayed on reconnect, so creating a subject
+                // never blocks on the network.
                 subjectList = sortSubjects(subjectList.concat([subject]));
-                addLegacySubjectName(name);
-                forgetRemovedSubject(name);
+                if (guestMode()) {
+                    saveGuestSubjects(subjectList);
+                } else {
+                    saveCachedSubjects(syncUid, subjectList);
+                }
                 notesIndex = null;
                 renderSubjectsList();
                 renderStudy();
@@ -17155,7 +17181,6 @@ document.documentElement.classList.toggle(
 
                 // Rename locally first so it works with no connection.
                 subjectList = rename(subjectList);
-                renameLegacySubjectName(subject.name, name);
                 notesIndex = null;
                 renderSubjectDetail();
                 renderStudy();
@@ -17164,6 +17189,7 @@ document.documentElement.classList.toggle(
                     if (guestMode()) {
                         saveGuestSubjects(rename(guestSubjects()));
                     } else {
+                        saveCachedSubjects(syncUid, rename(cachedSubjects(syncUid)));
                         await setDoc(subjectRef(subject.id), { name: name, updatedAt: now }, { merge: true });
                     }
                 } catch (error) {
@@ -17186,8 +17212,6 @@ document.documentElement.classList.toggle(
                 // Remove locally first: the queued delete (notes and photos with
                 // it) is replayed when the connection returns.
                 subjectList = sortSubjects(subjectList.filter(item => item.id !== subject.id));
-                removeLegacySubjectName(subject.name);
-                rememberRemovedSubject(subject.name);
                 notesIndex = null;
                 selectedSubjectId = null;
                 subjectNotes = [];
@@ -17210,6 +17234,7 @@ document.documentElement.classList.toggle(
                         saveGuestNotesMap(notes);
                         saveGuestMediaMap(media);
                     } else {
+                        saveCachedSubjects(syncUid, cachedSubjects(syncUid).filter(item => item.id !== subject.id));
                         await deleteSubjectWithNotes(subject.id);
                     }
                 } catch (error) {
@@ -17956,219 +17981,6 @@ document.documentElement.classList.toggle(
                 if (status) setNoteStatus(status);
             }
 
-            /* Synced tombstones arrived: delete any subject document that was
-               auto-created from a stale checklist before the tombstone landed
-               here. Manual subjects are never touched — only our own
-               `auto-<name>` creations can race like this. */
-            window._subjectsTombstonesChanged = function () {
-                if (!cloudMode() || cloudBlocked) return;
-                if (!subjectsLoadedOnce) return;
-
-                const removed = new Set(removedSubjectNames());
-                if (removed.size === 0) return;
-
-                subjectList.forEach(subject => {
-                    const name = String(subject.name || '').trim().toLowerCase();
-                    if (!name || !removed.has(name)) return;
-                    if (!String(subject.id).startsWith('auto-')) return;
-
-                    deleteSubjectWithNotes(subject.id).catch(() => {});
-                    subjectList = sortSubjects(subjectList.filter(item => item.id !== subject.id));
-                });
-
-                notesIndex = null;
-                renderSubjectsList();
-                if (selectedSubjectId && !findSubject(selectedSubjectId)) {
-                    selectedSubjectId = null;
-                    subjectNotes = [];
-                    showSection('subjects');
-                }
-            };
-
-            /* ---------- study checklist integration ---------- */
-
-            function legacySubjectNames() {
-                const list = readJson(LEGACY_SUBJECTS_KEY, []);
-                return Array.isArray(list) ? list.filter(name => typeof name === 'string') : [];
-            }
-
-            function writeLegacySubjectNames(names) {
-                // Synced key: hooked storage stamps + uploads the change.
-                writeSyncedJson(LEGACY_SUBJECTS_KEY, names);
-            }
-
-            function addLegacySubjectName(name) {
-                if (!name) return;
-                const names = legacySubjectNames();
-                if (names.some(item => item.toLowerCase() === name.toLowerCase())) return;
-                writeLegacySubjectNames(names.concat([name]));
-            }
-
-            function removeLegacySubjectName(name) {
-                if (!name) return;
-                const names = legacySubjectNames();
-                const next = names.filter(item => item.toLowerCase() !== name.toLowerCase());
-                if (next.length === names.length) return;
-                writeLegacySubjectNames(next);
-                forgetCompletedSubject(name);
-            }
-
-            function renameLegacySubjectName(oldName, newName) {
-                const names = legacySubjectNames();
-                const index = names.findIndex(item => item.toLowerCase() === String(oldName).toLowerCase());
-
-                if (index >= 0) names[index] = newName;
-                else names.push(newName);
-
-                writeLegacySubjectNames(names);
-                renameCompletedSubject(oldName, newName);
-            }
-
-            function updateCompletedSubjects(mapper) {
-                try {
-                    const map = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}');
-                    if (!map || typeof map !== 'object' || Array.isArray(map)) return;
-
-                    let changed = false;
-
-                    Object.keys(map).forEach(dateKey => {
-                        if (!Array.isArray(map[dateKey])) return;
-
-                        // mapper returns null to drop an entry; a rename keeps it.
-                        const next = map[dateKey]
-                            .map(mapper)
-                            .filter(name => typeof name === 'string');
-
-                        if (next.length !== map[dateKey].length || next.some((name, index) => name !== map[dateKey][index])) {
-                            map[dateKey] = next;
-                            changed = true;
-                        }
-                    });
-
-                    // Synced key: hooked storage stamps + uploads the change.
-                    if (changed) writeSyncedJson(COMPLETED_KEY, map);
-                } catch (error) {
-                    console.warn('[Daily.KRD notes] completed subjects update failed:', error);
-                }
-            }
-
-            function forgetCompletedSubject(name) {
-                updateCompletedSubjects(item => (item === name ? null : item));
-            }
-
-            function renameCompletedSubject(oldName, newName) {
-                updateCompletedSubjects(item => (item === oldName ? newName : item));
-            }
-
-            /*
-             * The Study section already keeps its own subject checklist. Subjects
-             * the user adds there should be usable for notes too, so any checklist
-             * name that has no subject yet is adopted into the Subjects list as
-             * well. Adoption is idempotent from every direction:
-             *   - a name that already exists as a subject is skipped,
-             *   - the deterministic `auto-<name>` document is only created when
-             *     that document does not exist, so a subject that was renamed on
-             *     another device is never overwritten or duplicated,
-             *   - names the user deleted on this device are remembered and never
-             *     adopted again.
-             */
-            function removedSubjectNames() {
-                const list = readJson(REMOVED_SUBJECTS_KEY, []);
-                const merged = (Array.isArray(list) ? list : []).map(name => String(name).toLowerCase());
-
-                // Fold in tombstones recorded by older builds (per-uid local).
-                let legacyFound = false;
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (!key || !key.startsWith(REMOVED_SUBJECTS_LEGACY_PREFIX)) continue;
-                    const old = readJson(key, []);
-                    (Array.isArray(old) ? old : []).forEach(name => {
-                        const lower = String(name).toLowerCase();
-                        if (lower && !merged.includes(lower)) {
-                            merged.push(lower);
-                            legacyFound = true;
-                        }
-                    });
-                }
-
-                // Persist the folded list into the synced key so it uploads.
-                if (legacyFound) writeSyncedJson(REMOVED_SUBJECTS_KEY, merged);
-
-                return merged;
-            }
-
-            function rememberRemovedSubject(name) {
-                const target = String(name).toLowerCase();
-                const list = removedSubjectNames();
-                if (!list.includes(target)) {
-                    // Synced key: hooked storage stamps + uploads the tombstone.
-                    writeSyncedJson(REMOVED_SUBJECTS_KEY, list.concat([target]));
-                }
-            }
-
-            function forgetRemovedSubject(name) {
-                const target = String(name).toLowerCase();
-                const list = removedSubjectNames();
-                if (list.includes(target)) {
-                    writeSyncedJson(REMOVED_SUBJECTS_KEY, list.filter(item => item !== target));
-                }
-            }
-
-            function promoteLegacySubjects() {
-                if (cloudBlocked || !promotionReady || promotionInFlight) return;
-                if (!subjectsLoadedOnce) return;
-                if (!guestMode() && !cloudMode()) return;
-
-                const removed = new Set(removedSubjectNames());
-                const existing = new Set(subjectList.map(subject => String(subject.name || '').trim().toLowerCase()));
-
-                const missing = legacySubjectNames().filter(name => {
-                    const key = String(name || '').trim().toLowerCase();
-                    return key && !existing.has(key) && !removed.has(key) && !adoptedNames.has(key);
-                });
-
-                if (missing.length === 0) return;
-
-                const now = Date.now();
-                promotionInFlight = true;
-
-                const done = () => {
-                    missing.forEach(name => adoptedNames.add(String(name).trim().toLowerCase()));
-                    promotionInFlight = false;
-                };
-
-                if (guestMode()) {
-                    const created = missing.map((name, position) => ({
-                        id: 'auto-' + slugify(name),
-                        name: name,
-                        createdAt: now + position,
-                        updatedAt: now + position
-                    }));
-
-                    subjectList = sortSubjects(subjectList.concat(created));
-                    saveGuestSubjects(subjectList);
-                    renderSubjectsList();
-                    done();
-                    return;
-                }
-
-                Promise.all(
-                    missing.map((name, position) => {
-                        const ref = doc(db, 'users', syncUid, SUBJECTS_COLLECTION, 'auto-' + slugify(name));
-                        return getDoc(ref)
-                            .then(snapshot => {
-                                if (snapshot.exists()) return null;
-                                return setDoc(ref, {
-                                    name: name,
-                                    createdAt: now + position,
-                                    updatedAt: now + position
-                                });
-                            })
-                            .catch(() => null);
-                    })
-                ).then(done).catch(done);
-            }
-
             /* ---------- guest -> account migration ---------- */
 
             async function migrateGuestSubjectsToAccount(uid) {
@@ -18240,11 +18052,7 @@ document.documentElement.classList.toggle(
                 if (guestMode()) {
                     subjectList = sortSubjects(guestSubjects());
                     notesIndex = null;
-                    // Guests keep their subjects locally, and the Study checklist
-                    // is mirrored into them just like it is for an account.
                     subjectsLoadedOnce = true;
-                    promotionReady = true;
-                    promoteLegacySubjects();
                 }
                 renderSubjectsView();
                 showSection('subjects');
@@ -18287,9 +18095,6 @@ document.documentElement.classList.toggle(
                 subjectList = sortSubjects(guestSubjects());
                 selectedSubjectId = null;
                 subjectNotes = [];
-                // Guests have nothing to migrate, so the checklist can be
-                // mirrored into their subjects right away.
-                promotionReady = true;
                 renderSubjectsView();
             }
 
