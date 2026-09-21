@@ -4627,7 +4627,7 @@
             <!-- SUBJECTS -->
 
             <div class="study-subjects-header">
-                <div class="study-subjects-title">Subjects</div>
+                <div class="study-subjects-title" id="studySubjectsTitle"></div>
                 <button
                     class="study-add-btn"
                     id="studyAddSubjectBtn"
@@ -7550,6 +7550,9 @@
 
                 subjectsNotes: "Subjects & Notes",
                 subjectsTitle: "Subjects",
+                homework: "Homework",
+                homeworkEmpty: "No homework yet. Add one to get started.",
+                homeworkPh: "Homework name:",
                 subjectsBack: "Back",
                 subjectsSearchPlaceholder: "Search subjects and notes...",
                 subjectsAdd: "+ Add Subject",
@@ -7978,6 +7981,9 @@ done: "تەواو",
 
                 subjectsNotes: "بابەت و تێبینییەکان",
                 subjectsTitle: "بابەتەکان",
+                homework: "ئەرکی ماڵەوە",
+                homeworkEmpty: "هیچ ئەرکێکی ماڵەوە نییە. یەکێک زیاد بکە بۆ دەستپێکردن.",
+                homeworkPh: "ناوی ئەرکی ماڵەوە:",
                 subjectsBack: "گەڕانەوە",
                 subjectsSearchPlaceholder: "گەڕان بەدوای بابەت و تێبینی...",
                 subjectsAdd: "+ زیادکردنی بابەت",
@@ -8408,6 +8414,9 @@ done: "تەواو",
 
                 subjectsNotes: "المواد والملاحظات",
                 subjectsTitle: "المواد",
+                homework: "الواجبات",
+                homeworkEmpty: "لا توجد واجبات بعد. أضف واحدًا للبدء.",
+                homeworkPh: "اسم الواجب:",
                 subjectsBack: "رجوع",
                 subjectsSearchPlaceholder: "ابحث في المواد والملاحظات...",
                 subjectsAdd: "+ إضافة مادة",
@@ -9228,6 +9237,10 @@ done: "تەواو",
             }
             // Re-render subjects & notes labels while that view is on screen
             if (typeof window._renderSubjects === "function") window._renderSubjects();
+            // Refresh the Homework checklist labels (assigned after study init,
+            // so this is a no-op during early boot — the initial renderStudy()
+            // below already renders with the current language)
+            if (typeof window._renderStudyChecklist === "function") window._renderStudyChecklist();
         }
 
 
@@ -15327,6 +15340,8 @@ document.documentElement.classList.toggle(
         }
 
         function renderStudy() {
+            const hwTitleEl = document.getElementById("studySubjectsTitle");
+            if (hwTitleEl) hwTitleEl.textContent = t("homework");
             const goal = loadStudyGoal();
             const minutes = loadStudyMinutes();
             const pct = goal > 0
@@ -15349,7 +15364,7 @@ document.documentElement.classList.toggle(
 
             if (subjects.length === 0) {
                 studySubjectList.innerHTML =
-                    '<div class="study-empty">No subjects yet. Add one to get started.</div>';
+                    '<div class="study-empty">' + t("homeworkEmpty") + '</div>';
                 if (typeof renderDashStudy === "function") renderDashStudy();
                 return;
             }
@@ -15407,7 +15422,7 @@ document.documentElement.classList.toggle(
         });
 
         studyAddBtn.addEventListener("click", () => {
-            const name = prompt("Subject name:");
+            const name = prompt(t("homeworkPh"));
             if (!name || !name.trim()) return;
             const subjects = loadStudySubjects();
             subjects.push(name.trim());
@@ -15427,8 +15442,8 @@ document.documentElement.classList.toggle(
 
         renderStudy();
 
-
-        /* DASHBOARD STUDY */
+        // Late-bound hook for applyLanguage (see comment there)
+        window._renderStudyChecklist = renderStudy;
 
         function renderDashStudy() {
             const goal = loadStudyGoal();
