@@ -17264,8 +17264,10 @@ document.documentElement.classList.toggle(
 
             /* ---------- notes ---------- */
 
-            async function persistNote(note) {
-                const subjectId = selectedSubjectId;
+            // `subjectId` is passed in rather than read from selectedSubjectId:
+            // a save that is still in flight must keep writing to the subject it
+            // started from, even if the user has already navigated away.
+            async function persistNote(note, subjectId) {
                 if (!subjectId) return false;
 
                 if (guestMode()) {
@@ -17739,6 +17741,34 @@ document.documentElement.classList.toggle(
                 setNoteStatus('');
             }
 
+            function editorHasUnsavedContent() {
+                if (viewMode === 'read') return false;
+                const title = (el('noteViewTitleInput')?.value || '').trim();
+                const text = (el('noteViewTextInput')?.value || '');
+                return !!(title || text.trim() || draftPhotos.length);
+            }
+
+            /*
+             * Closing the sheet with the X, or by tapping the backdrop, keeps
+             * whatever was typed. Every notes app people compare this to behaves
+             * that way, and the backdrop is easy to hit by accident on a phone
+             * because the sheet is anchored to the bottom -- so treating those
+             * taps as a discard was silently throwing notes away. The Cancel
+             * button is still an explicit "throw this away".
+             */
+            async function dismissNoteOverlay() {
+                if (!editorHasUnsavedContent() || !selectedSubjectId) {
+                    closeNoteOverlay();
+                    return;
+                }
+
+                // Wait for the write: if it is rejected the sheet stays open
+                // with the text still in it and the error on screen, instead of
+                // closing over a note that was never stored.
+                const saved = await saveOpenNote();
+                if (saved) closeNoteOverlay();
+            }
+
             function editOpenNote() {
                 const note = currentNote();
                 if (!note) return;
@@ -17755,7 +17785,7 @@ document.documentElement.classList.toggle(
 
             async function saveOpenNote() {
                 const subjectId = selectedSubjectId;
-                if (!subjectId) return;
+                if (!subjectId) return false;
 
                 const title = (el('noteViewTitleInput')?.value || '').trim();
                 const text = (el('noteViewTextInput')?.value || '');
@@ -17763,7 +17793,7 @@ document.documentElement.classList.toggle(
 
                 if (!title && !text.trim() && draftPhotos.length === 0) {
                     setNoteStatus(t('subjectsNoteEmpty'));
-                    return;
+                    return false;
                 }
 
                 const now = Date.now();
@@ -17800,6 +17830,14 @@ document.documentElement.classList.toggle(
                 // Show the saved note immediately. Offline the writes below are
                 // queued by the existing IndexedDB persistence and replayed when
                 // the connection returns, so writing a note never blocks on it.
+                // Everything the optimistic update is about to overwrite is kept
+                // so a failed write can be undone instead of leaving a note on
+                // screen that was never stored.
+                const notesBefore = subjectNotes;
+                const openNoteIdBefore = openNoteId;
+                const viewModeBefore = viewMode;
+                const draftBefore = draftPhotos;
+
                 const localNote = { ...note, photos: localPhotos };
                 notesIndex = null;
                 openNoteId = note.id;
@@ -17813,7 +17851,7 @@ document.documentElement.classList.toggle(
                         : subjectNotes.concat([localNote])
                 );
                 renderSubjectDetail();
-                renderNoteOverlay();                    setNoteStatus(t('subjectsSaved'), true);
+                renderNoteOverlay();
 
                 const failedPhotos = new Set();
 
@@ -17832,9 +17870,16 @@ document.documentElement.classList.toggle(
                         if (outcome === 'quota') failedPhotos.add(photo.id);
                     }
 
-                    await persistNote(failedPhotos.size
+                    const noteToStore = failedPhotos.size
                         ? { ...note, photos: storedPhotos.filter(photo => !failedPhotos.has(photo.id)) }
-                        : note);
+                        : note;
+
+                    await persistNote(noteToStore, subjectId);
+
+                    // Only reported once the write has actually been accepted.
+                    // Saying "Saved" up front is how a note that never got
+                    // stored still looks like it did.
+                    setNoteStatus(t('subjectsSaved'), true);
 
                     if (failedPhotos.size) {
                         // This device could not keep those photos, so drop them
@@ -17861,10 +17906,38 @@ document.documentElement.classList.toggle(
                     }
                 } catch (error) {
                     console.error('Note save error:', error);
+
+                    // The write was rejected, so undo the optimistic copy. Left
+                    // on screen it looks saved and then disappears the moment
+                    // the subject is reopened, which reads as "my note did not
+                    // save". The editor is put back exactly as it was -- without
+                    // bumping overlayInputToken -- so nothing typed is lost and
+                    // the user can try again.
+                    subjectNotes = notesBefore;
+                    openNoteId = openNoteIdBefore;
+                    viewMode = viewModeBefore;
+                    draftPhotos = draftBefore;
+                    notesIndex = null;
+                    renderSubjectDetail();
+                    renderNoteOverlay();
+
+                    // The optimistic render above switched the sheet to read
+                    // mode, which clears both fields -- so put the typed text
+                    // back into them by hand. renderNoteOverlay() leaves the
+                    // values alone here (overlayInputToken was not bumped), and
+                    // the restored viewMode puts the editor back on screen.
+                    const titleInput = el('noteViewTitleInput');
+                    const textInput = el('noteViewTextInput');
+                    if (titleInput) titleInput.value = title;
+                    if (textInput) textInput.value = text;
+
                     setNoteStatus(t('subjectsNoteSaveFailed'));
+                    return false;
                 } finally {
                     if (optimisticNoteId === note.id) optimisticNoteId = null;
                 }
+
+                return true;
             }
 
             async function deleteOpenNote() {
@@ -18149,9 +18222,9 @@ document.documentElement.classList.toggle(
                     if (row) openNoteOverlay(row.dataset.noteId);
                 });
 
-                el('noteViewClose')?.addEventListener('click', closeNoteOverlay);
+                el('noteViewClose')?.addEventListener('click', () => dismissNoteOverlay());
                 el('noteViewOverlay')?.addEventListener('click', event => {
-                    if (event.target === el('noteViewOverlay')) closeNoteOverlay();
+                    if (event.target === el('noteViewOverlay')) dismissNoteOverlay();
                 });
 
                 el('noteViewActions')?.addEventListener('click', event => {
