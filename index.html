@@ -16883,6 +16883,66 @@ document.documentElement.classList.toggle(
                 }
             }
 
+            /*
+             * Notes that could not be written to the account are held on this
+             * device and retried every time the account becomes writable again.
+             * A note that uploads is dropped from the local store, so it lives
+             * in exactly one place at a time.
+             */
+            async function resubmitLocalNotes(uid) {
+                if (!uid || guestMode()) return;
+
+                const map = guestNotesMap();
+                const subjectIds = Object.keys(map);
+                if (subjectIds.length === 0) return;
+
+                let pushed = 0;
+
+                for (const subjectId of subjectIds) {
+                    const notes = Array.isArray(map[subjectId]) ? map[subjectId] : [];
+                    const stillPending = [];
+
+                    for (const note of notes) {
+                        if (!note || !note.id) continue;
+                        try {
+                            await setDoc(
+                                doc(db, 'users', uid, SUBJECTS_COLLECTION, subjectId,
+                                    NOTES_SUBCOLLECTION, note.id),
+                                {
+                                    title: note.title || '',
+                                    text: note.text || '',
+                                    // The local copy can carry photo data so it
+                                    // renders offline; the account document
+                                    // must not.
+                                    photos: (note.photos || []).map(photo => ({
+                                        id: photo.id,
+                                        width: photo.width,
+                                        height: photo.height
+                                    })),
+                                    createdAt: note.createdAt || Date.now(),
+                                    updatedAt: note.updatedAt || note.createdAt || Date.now()
+                                },
+                                { merge: true }
+                            );
+                            pushed += 1;
+                        } catch (error) {
+                            stillPending.push(note);
+                        }
+                    }
+
+                    if (stillPending.length) map[subjectId] = stillPending;
+                    else delete map[subjectId];
+                }
+
+                saveGuestNotesMap(map);
+                notesIndex = null;
+
+                if (pushed > 0) {
+                    console.info('[Daily.KRD notes] re-pushed', pushed, 'note(s) held on this device');
+                    if (selectedSubjectId) renderSubjectDetail();
+                }
+            }
+
             function guestNotesMap() {
                 const map = readJson(GUEST_NOTES_KEY, {});
                 return map && typeof map === 'object' && !Array.isArray(map) ? map : {};
@@ -17007,7 +17067,11 @@ document.documentElement.classList.toggle(
                         // would erase the evidence. Then keep the cache aligned.
                         if (syncUid) {
                             const fromCache = !!(snapshot.metadata && snapshot.metadata.fromCache);
-                            if (!fromCache) resubmitCachedSubjects(syncUid);
+                            if (!fromCache) {
+                                resubmitCachedSubjects(syncUid);
+                                resubmitLocalNotes(syncUid).catch(error =>
+                                    console.warn('[Daily.KRD notes] note re-push failed:', error));
+                            }
                             saveCachedSubjects(syncUid, subjectList);
                         }
 
@@ -17020,6 +17084,9 @@ document.documentElement.classList.toggle(
                             // locally) but no scary banner: subjects and notes
                             // keep working from local storage.
                             cloudBlocked = true;
+                            // Say so on the small status line, so "my note did
+                            // not sync" has a visible explanation.
+                            setSubjectsStatus(t('subjectsCloudError'));
                         }
                     }
                 );
@@ -17035,7 +17102,10 @@ document.documentElement.classList.toggle(
                         if (subjectId !== selectedSubjectId) return;
                         const list = [];
                         snapshot.forEach(item => list.push({ id: item.id, ...item.data() }));
-                        subjectNotes = sortNotes(list);
+                        // Notes this device could not upload are folded in, so
+                        // a note kept locally stays on screen instead of
+                        // vanishing because the account never received it.
+                        subjectNotes = sortNotes(mergeLocalNotes(subjectId, list));
                         notesIndex = null;
                         // If another device deleted the note we are reading, close
                         // it rather than leaving an empty sheet on screen. A note
@@ -17264,30 +17334,84 @@ document.documentElement.classList.toggle(
 
             /* ---------- notes ---------- */
 
+            // Writes one note into this device's local store. Used for guest
+            // mode, and as the fallback when an account write cannot land.
+            function writeNoteToLocalStore(subjectId, note) {
+                const map = guestNotesMap();
+                const list = Array.isArray(map[subjectId]) ? map[subjectId] : [];
+                const index = list.findIndex(item => item.id === note.id);
+                if (index >= 0) list[index] = note; else list.push(note);
+                map[subjectId] = list;
+                saveGuestNotesMap(map);
+                return list;
+            }
+
+            // Notes this device could not upload, folded into the account's
+            // list so they stay visible until the write goes through.
+            function mergeLocalNotes(subjectId, serverNotes) {
+                const local = guestNotesMap()[subjectId];
+                if (!Array.isArray(local) || local.length === 0) return serverNotes;
+                const onServer = new Set(serverNotes.map(item => item.id));
+                const pending = local.filter(item => item && item.id && !onServer.has(item.id));
+                return pending.length ? serverNotes.concat(pending) : serverNotes;
+            }
+
             // `subjectId` is passed in rather than read from selectedSubjectId:
             // a save that is still in flight must keep writing to the subject it
             // started from, even if the user has already navigated away.
-            async function persistNote(note, subjectId) {
+            //
+            // Returns true when the account stored it, 'local' when the account
+            // write failed and the note was kept on this device instead, and
+            // false when it could not be stored at all.
+            async function persistNote(note, subjectId, localCopy) {
                 if (!subjectId) return false;
 
                 if (guestMode()) {
-                    const map = guestNotesMap();
-                    const list = Array.isArray(map[subjectId]) ? map[subjectId] : [];
-                    const index = list.findIndex(item => item.id === note.id);
-                    if (index >= 0) list[index] = note; else list.push(note);
-                    map[subjectId] = list;
-                    saveGuestNotesMap(map);
-                    subjectNotes = sortNotes(list);
+                    subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, note));
                     return true;
                 }
 
-                await setDoc(noteRef(subjectId, note.id), {
-                    title: note.title,
-                    text: note.text,
-                    photos: note.photos || [],
-                    createdAt: note.createdAt,
-                    updatedAt: note.updatedAt
-                }, { merge: true });
+                // The account has already refused writes this session, so do not
+                // spend a round trip finding that out again.
+                if (cloudBlocked) {
+                    subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, localCopy || note));
+                    return 'local';
+                }
+
+                try {
+                    await setDoc(noteRef(subjectId, note.id), {
+                        title: note.title,
+                        text: note.text,
+                        photos: note.photos || [],
+                        createdAt: note.createdAt,
+                        updatedAt: note.updatedAt
+                    }, { merge: true });
+                } catch (error) {
+                    // The account write was rejected -- security rules, a
+                    // document over the 1 MiB limit, or no connection. Until now
+                    // this threw straight out and the note was written nowhere:
+                    // not to the account, and not here either, because the local
+                    // branch above had already been skipped. Keep it on this
+                    // device, which is what the message shown to the user says.
+                    console.warn('[Daily.KRD notes] account write failed, keeping note on this device:',
+                        error && error.code ? error.code : error);
+                    try {
+                        subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, localCopy || note));
+                    } catch (quotaError) {
+                        // The photo data did not fit on this device either.
+                        // Keep the text rather than losing the whole note.
+                        subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, note));
+                    }
+                    return 'local';
+                }
+
+                // The account has it now, so a local copy would only linger.
+                const map = guestNotesMap();
+                if (Array.isArray(map[subjectId]) && map[subjectId].some(item => item.id === note.id)) {
+                    map[subjectId] = map[subjectId].filter(item => item.id !== note.id);
+                    if (map[subjectId].length === 0) delete map[subjectId];
+                    saveGuestNotesMap(map);
+                }
 
                 subjectNotes = sortNotes(
                     subjectNotes.some(item => item.id === note.id)
@@ -17415,6 +17539,24 @@ document.documentElement.classList.toggle(
                                     subjectId: subject.id,
                                     subjectName: subject.name,
                                     noteId: item.id,
+                                    title: note.title || '',
+                                    text: note.text || ''
+                                });
+                            });
+                        });
+
+                        // Notes held on this device because their account write
+                        // has not landed yet are searchable too.
+                        const indexed = new Set(index.map(entry => entry.noteId));
+                        const localMap = guestNotesMap();
+                        subjectList.forEach(subject => {
+                            const held = Array.isArray(localMap[subject.id]) ? localMap[subject.id] : [];
+                            held.forEach(note => {
+                                if (!note || !note.id || indexed.has(note.id)) return;
+                                index.push({
+                                    subjectId: subject.id,
+                                    subjectName: subject.name,
+                                    noteId: note.id,
                                     title: note.title || '',
                                     text: note.text || ''
                                 });
@@ -17874,12 +18016,25 @@ document.documentElement.classList.toggle(
                         ? { ...note, photos: storedPhotos.filter(photo => !failedPhotos.has(photo.id)) }
                         : note;
 
-                    await persistNote(noteToStore, subjectId);
+                    // The local copy carries the photo data, so a note kept on
+                    // this device still shows its images.
+                    const localToKeep = {
+                        ...localNote,
+                        photos: localPhotos.filter(photo => !failedPhotos.has(photo.id))
+                    };
 
-                    // Only reported once the write has actually been accepted.
-                    // Saying "Saved" up front is how a note that never got
-                    // stored still looks like it did.
-                    setNoteStatus(t('subjectsSaved'), true);
+                    const outcome = await persistNote(noteToStore, subjectId, localToKeep);
+
+                    if (outcome === 'local') {
+                        // On this device, not yet in the account. The note is
+                        // safe and the write is retried later.
+                        setNoteStatus(t('subjectsNoteSaveFailed'));
+                    } else {
+                        // Only reported once the write has actually been
+                        // accepted. Saying "Saved" up front is how a note that
+                        // never got stored still looks like it did.
+                        setNoteStatus(t('subjectsSaved'), true);
+                    }
 
                     if (failedPhotos.size) {
                         // This device could not keep those photos, so drop them
@@ -18106,9 +18261,22 @@ document.documentElement.classList.toggle(
                     }
                 }
 
-                // Only clear local guest data after everything is stored.
+                // Only clear what was actually stored above. The upload loops
+                // walk guestSubjects(), so a note held against a subject that
+                // lives in the account -- for instance one kept locally after an
+                // account write was refused -- is never uploaded here. Clearing
+                // the whole notes key used to delete exactly those notes, on
+                // every sign-in, without ever sending them anywhere.
                 localStorage.removeItem(GUEST_SUBJECTS_KEY);
-                localStorage.removeItem(GUEST_NOTES_KEY);
+
+                const migratedIds = new Set(subjects.map(subject => subject.id));
+                const stillHeld = {};
+                Object.keys(notesMap).forEach(subjectId => {
+                    if (!migratedIds.has(subjectId)) stillHeld[subjectId] = notesMap[subjectId];
+                });
+                if (Object.keys(stillHeld).length > 0) saveGuestNotesMap(stillHeld);
+                else localStorage.removeItem(GUEST_NOTES_KEY);
+
                 localStorage.removeItem(GUEST_MEDIA_KEY);
 
                 notesIndex = null;
