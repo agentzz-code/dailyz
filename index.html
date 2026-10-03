@@ -15509,52 +15509,108 @@ document.documentElement.classList.toggle(
                id: "lofi-01",
                title: "Midnight Focus",
                category: "lofi",
-               audioUrl: "music/midnight-focus.mp3",
+               audioUrl: "music/<your-file>.mp3",
                artwork: "",
                duration: 0
            }
            "layerText" is an optional short description shown in lists. */
         const MUSIC_TRACKS = [
             {
-                id: "lofi-01",
-                title: "Midnight Focus",
+                id: "tokyo-lofi",
+                title: "Tokyo Lo-fi",
+                layerText: "Chill night-time lo-fi beat",
                 category: "lofi",
-                audioUrl: "music/midnight-focus.mp3",
+                audioUrl: "music/tokyo-lofi.mp3",
                 artwork: "",
                 duration: 0
             },
             {
-                id: "lofi-02",
-                title: "Slow Coffee",
+                id: "lofi-chill",
+                title: "Lofi Chill",
+                layerText: "Mellow lo-fi groove",
                 category: "lofi",
-                audioUrl: "music/slow-coffee.mp3",
+                audioUrl: "music/lofi-chill.mp3",
                 artwork: "",
                 duration: 0
             },
             {
-                id: "rain-01",
-                title: "Gentle Rain",
-                layerText: "Rain on glass · seamless loop",
-                category: "rain",
-                audioUrl: "music/gentle-rain.mp3",
+                id: "calm-piano",
+                title: "Calm Piano",
+                layerText: "Soft solo piano",
+                category: "piano",
+                audioUrl: "music/calm-piano.mp3",
                 artwork: "",
                 duration: 0
             },
             {
-                id: "rain-02",
-                title: "Forest Rain",
-                layerText: "Soft rain with distant leaves · seamless loop",
-                category: "rain",
-                audioUrl: "music/forest-rain.mp3",
+                id: "piano-notes",
+                title: "Gentle Piano",
+                layerText: "Sparse piano notes",
+                category: "piano",
+                audioUrl: "music/piano-notes.mp3",
                 artwork: "",
                 duration: 0
             },
             {
-                id: "ambient-01",
-                title: "Weightless",
-                layerText: "Slow evolving pad · seamless loop",
+                id: "ambient-horizon",
+                title: "Ambient Horizon",
+                layerText: "Wide, slow ambient pad",
                 category: "ambient",
-                audioUrl: "music/weightless.mp3",
+                audioUrl: "music/ambient-horizon.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "ambient-drift",
+                title: "Ambient Drift",
+                layerText: "Floating ambient textures",
+                category: "ambient",
+                audioUrl: "music/ambient-drift.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "cozy-rain",
+                title: "Cozy Rain",
+                layerText: "Rain & soft indoor ambience",
+                category: "rain",
+                audioUrl: "music/cozy-rain.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "rain-and-thunder",
+                title: "Rain & Thunder",
+                layerText: "Rain with distant thunder",
+                category: "rain",
+                audioUrl: "music/rain-and-thunder.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "mountain-forest-birds",
+                title: "Mountain Forest",
+                layerText: "Birdsong in mountain forest",
+                category: "nature",
+                audioUrl: "music/mountain-forest-birds.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "deep-forest-birds",
+                title: "Deep Forest",
+                layerText: "Birdsong deep in the woods",
+                category: "nature",
+                audioUrl: "music/deep-forest-birds.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "cafe-ambience",
+                title: "Café Ambience",
+                layerText: "Café music & soft chatter",
+                category: "cafe",
+                audioUrl: "music/cafe-ambience.mp3",
                 artwork: "",
                 duration: 0
             }
@@ -16465,22 +16521,28 @@ document.documentElement.classList.toggle(
             const sel = musicEls.timerMusicSel;
             const prev = sel.value;
 
+            /* Offer every category that actually has tracks, so the
+               timer never shows a selection that would stay silent. */
+            const availableCats = [];
+
+            MUSIC_TRACKS.forEach(tr => {
+                if (!availableCats.includes(tr.category)) {
+                    availableCats.push(tr.category);
+                }
+            });
+
             let html =
                 '<option value="">' +
                 musicEscape(t("musicNone")) +
-                '</option>' +
-                '<option value="cat:lofi">' +
-                musicEscape(musicCategoryLabel("lofi")) +
-                '</option>' +
-                '<option value="cat:focus">' +
-                musicEscape(musicCategoryLabel("focus")) +
-                '</option>' +
-                '<option value="cat:rain">' +
-                musicEscape(musicCategoryLabel("rain")) +
-                '</option>' +
-                '<option value="cat:ambient">' +
-                musicEscape(musicCategoryLabel("ambient")) +
                 '</option>';
+
+            availableCats.forEach(catId => {
+
+                html +=
+                    '<option value="cat:' + musicEscape(catId) + '">' +
+                    musicEscape(musicCategoryLabel(catId)) +
+                    '</option>';
+            });
 
             MUSIC_TRACKS.forEach(tr => {
 
