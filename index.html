@@ -15667,6 +15667,23 @@ document.documentElement.classList.toggle(
         syncThemeColorMeta();
 
 
+        /* ===================================================================== */
+
+        renderCalendar();
+
+        loadPrayerTimes();
+
+        updateStats();
+
+        checkIOSNotificationEnvironment();
+        
+        renderPushSettingsUI();
+
+        // Initial sync of settings to worker
+        if (pushSettings.masterEnabled) {
+            syncPushPreferences();
+        }
+
         /* HAPTIC FEEDBACK SYSTEM */
         /* ===================================================================== */
 
@@ -15796,21 +15813,6 @@ document.documentElement.classList.toggle(
         })();
 
         /* ===================================================================== */
-
-        renderCalendar();
-
-        loadPrayerTimes();
-
-        updateStats();
-
-        checkIOSNotificationEnvironment();
-        
-        renderPushSettingsUI();
-        
-        // Initial sync of settings to worker
-        if (pushSettings.masterEnabled) {
-            syncPushPreferences();
-        }
 
         requestAnimationFrame(() => {
 
