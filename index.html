@@ -5843,7 +5843,7 @@
             "dailykrd_music_prefs",
             "dailykrd_push_settings",
             "dailykrd_welcomed",
-            "dailykrd_haptic_settings"
+            "dailykrd_haptic_enabled"
         ];
 
         const SYNCED_KEY_SET =
@@ -5851,200 +5851,7 @@
 
         // History-shaped values are union-merged instead of replaced so study
         // time recorded on two devices is never dropped.
-        const SHARED_SETTING_STATE = {
-        key: "dailykrd_haptic_settings",
-        storageKey: "dailykrd_haptic_settings",
-        labelKey: "hapticSettings",
-        onLabelKey: "hapticSettingsOn",
-        offLabelKey: "hapticSettingsOff",
-        unsupportedKey: "hapticSettingsUnsupported",
-        raw: function () { return localStorage.getItem("dailykrd_haptic_settings") !== null; },
-        get: function () {
-            var raw = localStorage.getItem("dailykrd_haptic_settings");
-            return raw ? JSON.parse(raw) : true;
-        },
-        set: function (v) {
-            localStorage.setItem("dailykrd_haptic_settings", JSON.stringify(v));
-        },
-        sync: function (v) {
-            localStorage.setItem("dailykrd_haptic_settings", JSON.stringify(v));
-            if (currentUser) noteLocalAppstateChange("dailykrd_haptic_settings");
-        }
-    };
-
-// ------------------------------------------------------------------
-// HAPTIC CONTROLLER
-// ------------------------------------------------------------------
-// Centralized, zero-dependency vibration layer. Every vibration in the
-// app now goes through `haptics.request(type)` so we get a single shared
-// instance, a built-in debounce + cooldown, and no accidental duplicate
-// taps. It is completely offline-first: if `navigator.vibrate` is missing
-// (iOS Safari PWA / some desktop browsers) it silently does nothing.
-// ------------------------------------------------------------------
-const haptics = (function () {
-
-    var hasVibrate = function () {
-        return typeof navigator !== "undefined" &&
-            navigator !== null &&
-            typeof navigator.vibrate === "function";
-    };
-
-    // `true` = vibration enabled by the user (default), `false` = disabled,
-    // `undefined` = browser does not support vibration.
-    var enabled = typeof SHARED_SETTING_STATE.get === "function"
-        ? SHARED_SETTING_STATE.get()
-        : true;
-
-    // Small cooldown so rapid taps never build into a continuous buzz.
-    var lastRequest = 0;
-    var cooldownUntil = 0;
-
-    // Debounce a fast burst: if several requests arrive within `debounceMs`,
-    // keep only the last one (often the most meaningful action).
-    var debounceTimer = null;
-
-    var debounceMs = 60;
-    var cooldownMs = 900;
-
-    var patternFor = function (type) {
-        switch (type) {
-            case "light":
-                return [10, 12];
-            case "selection":
-                return [14, 16];
-            case "success":
-                return [18, 20, 18];
-            case "warning":
-                return [22, 24, 22];
-            case "error":
-                return [26, 28, 26];
-            case "complete":
-                return [28, 24, 28, 24, 28];
-            case "danger":
-                return [28, 40, 28, 40, 28];
-            default:
-                return [10, 12];
-        }
-    };
-
-    // Public: request a haptic pattern by name.
-    var request = function (type, props) {
-        if (!hasVibrate()) return;
-        if (typeof enabled === "boolean" && !enabled) return;
-        try {
-            var elapsed = Date.now() - lastRequest;
-            if (elapsed < cooldownMs) return;
-            if (debounceTimer) {
-                clearTimeout(debounceTimer);
-                debounceTimer = null;
-            }
-            debounceTimer = setTimeout(function () {
-                debounceTimer = null;
-            }, debounceMs);
-            var pattern = patternFor(type);
-            navigator.vibrate(pattern);
-            lastRequest = Date.now();
-            cooldownUntil = Date.now() + cooldownMs;
-        } catch (e) {
-            // Never let a Vibration-API quirk break the UI.
-        }
-    };
-
-    // Public: enable / disable feedback at runtime.
-    var setEnabled = function (v) {
-        enabled = (typeof v === "boolean") ? v : true;
-    };
-
-    var getEnabled = function () { return enabled; };
-
-    // Lightweight "light tap" used for normal UI clicks, focusing, etc.
-    var tap = function () { return request("light"); };
-
-    // Subtle tick for tabs, date/subject/category selection.
-    var selection = function () { return request("selection"); };
-
-    // Unmisable positive outcome.
-    var success = function () { return request("success"); };
-
-    // Potentially destructive / confirmation state.
-    var warning = function () { return request("warning"); };
-
-    // Real error (save fail, invalid action).
-    var error = function () { return request("error"); };
-
-    // Major completed milestone (study timer done, deck finished).
-    var complete = function () { return request("complete"); };
-
-    // Deliberate destructive action (task delete, deck delete).
-    var danger = function () { return request("danger"); };
-
-    // Exposed API.
-    return {
-        canVibrate: hasVibrate,
-        enabled: getEnabled,
-        setEnabled:
-        request,
-        tap,
-        selection,
-        success,
-        warning,
-        error,
-        complete,
-        danger
-    };
-})();
-
-// Read the saved preference on first load (must run after SHARED_SETTING_STATE is defined).
-try {
-    haptics.setEnabled(SHARED_SETTING_STATE.get());
-} catch (e) {
-    /* Ignore; default remains enabled. */
-}
-
-function refreshAppstateUI(key) {
-    if (key === "dailykrd_haptic_settings") {
-        try {
-            haptics.setEnabled(SHARED_SETTING_STATE.get());
-            if (typeof applyLanguage === "function") {
-                applyLanguage();
-            }
-        } catch (e) {
-            /* Never let appstate refresh break the UI. */
-        }
-    }
-}
-
-const hapticSettingsInit = (function () {
-    try {
-        // If the user has never chosen, default to ON for a brand-new install.
-        if (SHARED_SETTING_STATE.raw()) {
-            haptics.setEnabled(SHARED_SETTING_STATE.get());
-        }
-    } catch (e) {
-        /* storage unavailable — keep defaults; haptics stay silent. */
-    }
-})();
-
-// Re-fire the app's language renderer when this setting changes so the
-// toggle label translates correctly on the fly.
-if (typeof applyLanguage === "function") {
-    var _origApplyLanguage = applyLanguage;
-    applyLanguage = function () {
-        _origApplyLanguage.apply(this, arguments);
-        try { haptics.tap(); } catch (e) { /* never break UI */ }
-    };
-}
-
-window._hapticsForTimer = {
-    forTimerStart: function () { haptics.tap(); },
-    forTimerStop: function () { haptics.complete(); }
-};
-
-// Guard: keep the module loop tidy and idempotent; no re-init.
-Object.freeze(haptics);
-Object.freeze(SHARED_SETTING_STATE);
-
-const SYNCED_UNION_KEYS =
+        const SYNCED_UNION_KEYS =
             new Set([
                 "dailykrd_study_sessions",
                 "dailykrd_study_completed"
@@ -9178,18 +8985,7 @@ done: "تەواو",
                 "welcomeSubtitle"
 ).textContent = t("welcomeSubtitle");
 
-            // ---- HAPTIC SETTINGS (applyLanguage hook) ----
-            try { haptics.setEnabled(SHARED_SETTING_STATE.get()); } catch (e) { /* default ON */ }
-            var _hsSwitch = document.getElementById("hapticSwitch");
-            var _hsLabel = document.getElementById("hapticLabel");
-            var _hsUnsupported = document.getElementById("hapticUnsupported");
-            if (_hsSwitch) { _hsSwitch.checked = (SHARED_SETTING_STATE.raw() ? SHARED_SETTING_STATE.get() : true); }
-            _hsLabel.textContent = (_hsSwitch && _hsSwitch.checked) ? t("hapticSettingsOn") : t("hapticSettingsOff");
-            if (_hsUnsupported) { _hsUnsupported.style.display = haptics.canVibrate() ? "none" : "inline"; }
-            // ---- /HAPTIC SETTINGS ----
-
-            // Continue.
-
+            
             document.getElementById(
                 "welcomeSignIn"
             ).textContent =
@@ -15766,7 +15562,7 @@ document.documentElement.classList.toggle(
             const toggleBtn = document.getElementById("hapticToggleBtn");
             if (toggleBtn) {
                 toggleBtn.addEventListener("click", () => {
-                    window.Haptics.setEnabled(!hapticsEnabled);
+                    window.Haptics.setEnabled(!window.Haptics.isEnabled());
                     window.Haptics.tap(); // Immediate feedback on toggle
                 });
             }
