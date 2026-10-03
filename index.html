@@ -2800,6 +2800,369 @@
             color: var(--accent-contrast);
         }
 
+        /* SUBJECTS & NOTES */
+
+        .subjects-search-wrap {
+            margin-bottom: 12px;
+        }
+
+        .subjects-search {
+            width: 100%;
+            border: 1px solid #ddd;
+            background: rgba(255,255,255,.92);
+            color: #111;
+            padding: 14px;
+            border-radius: 13px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .dark .subjects-search {
+            background: #222;
+            color: white;
+            border-color: #3a3a3a;
+        }
+
+        .subjects-add-btn {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 14px;
+        }
+
+        .subjects-actions-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .subjects-actions-row .setting-button {
+            font-size: 16px;
+            padding: 9px 13px;
+        }
+
+        .subjects-cloud-status {
+            display: none;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 650;
+            color: #d9952b;
+        }
+
+        .subjects-cloud-status.show {
+            display: block;
+        }
+
+        .subject-note-count {
+            color: #888;
+            font-size: 13px;
+            font-weight: 650;
+            margin-bottom: 10px;
+        }
+
+        .subject-note-list {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .subject-note {
+            background: rgba(255,255,255,.92);
+            border-radius: 14px;
+            padding: 15px;
+            cursor: pointer;
+            transition: background .2s ease, transform .15s ease, opacity .15s ease;
+        }
+
+        .dark .subject-note {
+            background: #222;
+        }
+
+        .subject-note:active {
+            transform: scale(.98);
+            opacity: .85;
+        }
+
+        .subject-note-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .subject-note-title {
+            flex: 1;
+            min-width: 0;
+            font-weight: 700;
+            font-size: 15px;
+            word-break: break-word;
+        }
+
+        .subject-note-photo-badge {
+            flex-shrink: 0;
+            font-size: 12px;
+            font-weight: 700;
+            color: #888;
+            background: rgba(0,0,0,.05);
+            border-radius: 8px;
+            padding: 3px 7px;
+        }
+
+        .dark .subject-note-photo-badge {
+            background: rgba(255,255,255,.08);
+        }
+
+        .subject-note-snippet {
+            color: #888;
+            font-size: 13px;
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .subject-note-meta {
+            color: #999;
+            font-size: 11px;
+            margin-top: 7px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .subject-note-subject {
+            color: #888;
+            font-size: 12px;
+            font-weight: 650;
+            margin-top: 4px;
+        }
+
+        /* NOTE VIEW / EDITOR */
+
+        .note-view-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9500;
+            background: rgba(0,0,0,.55);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .note-view-overlay.open {
+            display: flex;
+        }
+
+        .note-view-sheet {
+            background: #fff;
+            border-radius: 22px 22px 0 0;
+            width: 100%;
+            max-width: 560px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 20px 18px calc(26px + env(safe-area-inset-bottom));
+            animation: sheetUp .25s ease;
+        }
+
+        .dark .note-view-sheet {
+            background: #1c1c1c;
+        }
+
+        .note-view-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .note-view-heading {
+            font-size: 20px;
+            font-weight: 850;
+            word-break: break-word;
+        }
+
+        .note-view-date {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+
+        .note-view-title-input,
+        .note-view-text-input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 13px;
+            padding: 13px;
+            background: transparent;
+            color: inherit;
+            outline: none;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .note-view-text-input {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .dark .note-view-title-input,
+        .dark .note-view-text-input {
+            border-color: #3a3a3a;
+        }
+
+        .note-view-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        .note-view-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .note-view-photo-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .note-view-photo-wrap.thumb {
+            width: 84px;
+        }
+
+        .note-view-photo {
+            display: block;
+            width: 100%;
+            border-radius: 14px;
+            background: rgba(0,0,0,.04);
+        }
+
+        .dark .note-view-photo {
+            background: rgba(255,255,255,.06);
+        }
+
+        .note-view-photo-thumb {
+            width: 84px;
+            height: 84px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: rgba(0,0,0,.04);
+        }
+
+        .dark .note-view-photo-thumb {
+            background: rgba(255,255,255,.06);
+        }
+
+        .note-view-photo-remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 26px;
+            height: 26px;
+            border: 0;
+            border-radius: 50%;
+            background: #111;
+            color: #fff;
+            font-size: 13px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .dark .note-view-photo-remove {
+            background: #fff;
+            color: #111;
+        }
+
+        .note-photo-add {
+            width: 100%;
+            border: 1px dashed #ccc;
+            background: transparent;
+            color: inherit;
+            border-radius: 13px;
+            padding: 13px;
+            font-weight: 650;
+            font-size: 14px;
+            margin-bottom: 14px;
+            cursor: pointer;
+        }
+
+        .dark .note-photo-add {
+            border-color: #444;
+        }
+
+        .note-view-status {
+            display: none;
+            color: #d9952b;
+            font-size: 13px;
+            font-weight: 650;
+            margin-bottom: 12px;
+        }
+
+        .note-view-status.show {
+            display: block;
+        }
+
+        .note-view-status.ok {
+            color: #2e8b57;
+        }
+
+        .dark .note-view-status.ok {
+            color: #6ee7a0;
+        }
+
+        .note-view-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .note-view-actions button {
+            flex: 1;
+            border: 0;
+            border-radius: 13px;
+            padding: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .note-view-btn-save {
+            background: var(--accent);
+            color: var(--accent-contrast);
+        }
+
+        .note-view-btn-neutral {
+            background: #eee;
+            color: #555;
+        }
+
+        .dark .note-view-btn-neutral {
+            background: #333;
+            color: #aaa;
+        }
+
+        .note-view-btn-danger {
+            background: rgba(224,92,92,.1);
+            color: #e05c5c;
+        }
+
+        @media (min-width: 620px) {
+            .note-view-overlay {
+                align-items: center;
+            }
+
+            .note-view-sheet {
+                border-radius: 22px;
+                max-height: 86vh;
+            }
+        }
+
         /* STUDY STATISTICS */
         .study-stats-launch {
             background: rgba(255,255,255,.92);
@@ -3194,6 +3557,7 @@
         .theme-palette .study-stats-summary-card,
         .theme-palette .study-stats-chart-card,
         .theme-palette .study-stats-subjects-card,
+        .theme-palette .subject-note,
         .theme-palette .cal-day-events-card,
         .theme-palette .cal-upcoming-card {
             background: var(--tp-card);
@@ -3205,6 +3569,7 @@
         .theme-palette #aiBox,
         .theme-palette .flashcard-modal,
         .theme-palette .cal-modal-sheet,
+        .theme-palette .note-view-sheet,
         .theme-palette #authCard,
         .theme-palette .language-box {
             background: var(--tp-modal);
@@ -3212,6 +3577,9 @@
         }
         .theme-palette .flashcard-modal input,
         .theme-palette .cal-modal-sheet input,
+        .theme-palette .subjects-search,
+        .theme-palette .note-view-title-input,
+        .theme-palette .note-view-text-input,
         .theme-palette .priority-select,
         .theme-palette .language-select,
         .theme-palette .study-timer-subject-select {
@@ -4247,10 +4615,19 @@
                 <span class="study-stats-launch-arrow">›</span>
             </div>
 
+            <!-- SUBJECTS & NOTES LAUNCH -->
+            <div class="study-stats-launch" id="studySubjectsLaunch" role="button" tabindex="0">
+                <div class="study-stats-launch-left">
+                    <span class="study-stats-launch-icon">📒</span>
+                    <span class="study-stats-launch-text" id="studySubjectsLaunchText">Subjects &amp; Notes</span>
+                </div>
+                <span class="study-stats-launch-arrow">›</span>
+            </div>
+
             <!-- SUBJECTS -->
 
             <div class="study-subjects-header">
-                <div class="study-subjects-title">Subjects</div>
+                <div class="study-subjects-title" id="studySubjectsTitle"></div>
                 <button
                     class="study-add-btn"
                     id="studyAddSubjectBtn"
@@ -4338,6 +4715,97 @@
             </div>
 
             <div id="studyStatsContent"></div>
+
+        </section>
+
+
+        <!-- SUBJECTS & NOTES -->
+
+        <section class="section" id="subjects">
+
+            <div class="study-stats-header">
+                <button class="study-stats-back" id="subjectsBack" type="button">← <span id="subjectsBackLabel">Back</span></button>
+                <div class="study-stats-page-title" id="subjectsTitle">Subjects</div>
+            </div>
+
+            <div class="subjects-search-wrap">
+                <input
+                    type="search"
+                    class="subjects-search"
+                    id="subjectsSearchInput"
+                    autocomplete="off"
+                    placeholder="Search subjects and notes..."
+                />
+            </div>
+
+            <button class="study-add-btn subjects-add-btn" id="subjectsAddBtn" type="button">+ Add Subject</button>
+
+            <div class="study-subject-list" id="subjectsList"></div>
+
+            <div class="subjects-cloud-status" id="subjectsCloudStatus"></div>
+
+        </section>
+
+
+        <!-- SUBJECT DETAIL (notes of one subject) -->
+
+        <section class="section" id="subjectDetail">
+
+            <div class="study-stats-header">
+                <button class="study-stats-back" id="subjectDetailBack" type="button">← <span id="subjectDetailBackLabel">Back</span></button>
+                <div class="study-stats-page-title" id="subjectDetailName"></div>
+            </div>
+
+            <div class="subjects-actions-row">
+                <button class="study-add-btn" id="subjectAddNoteBtn" type="button" style="flex:1;">+ Add Note</button>
+                <button class="setting-button" id="subjectRenameBtn" type="button" aria-label="Rename">✏️</button>
+                <button class="setting-button" id="subjectDeleteBtn" type="button" aria-label="Delete">🗑️</button>
+            </div>
+
+            <div class="subject-note-count" id="subjectDetailCount"></div>
+
+            <div class="subject-note-list" id="subjectNoteList"></div>
+
+            <!-- NOTE VIEW / EDITOR -->
+            <div class="note-view-overlay" id="noteViewOverlay">
+                <div class="note-view-sheet">
+
+                    <div class="note-view-head">
+                        <div class="note-view-heading" id="noteViewHeading">Note</div>
+                        <button class="cal-modal-close" id="noteViewClose" type="button">✕</button>
+                    </div>
+
+                    <div class="note-view-date" id="noteViewDate"></div>
+
+                    <input
+                        type="text"
+                        class="note-view-title-input"
+                        id="noteViewTitleInput"
+                        autocomplete="off"
+                        placeholder="Note title"
+                    />
+
+                    <div class="note-view-text" id="noteViewText"></div>
+
+                    <textarea
+                        class="note-view-text-input"
+                        id="noteViewTextInput"
+                        rows="8"
+                        placeholder="Write your note..."
+                    ></textarea>
+
+                    <div class="note-view-photos" id="noteViewPhotos"></div>
+
+                    <input type="file" id="notePhotoInput" accept="image/*" multiple hidden />
+
+                    <button class="note-photo-add" id="notePhotoAddBtn" type="button">📷 Add Photo</button>
+
+                    <div class="note-view-status" id="noteViewStatus"></div>
+
+                    <div class="note-view-actions" id="noteViewActions"></div>
+
+                </div>
+            </div>
 
         </section>
 
@@ -5259,18 +5727,25 @@
             "dailykrd_study_completed",
             "dailykrd_study_sessions",
             "dailykrd_push_settings",
-            "dailykrd_welcomed"
+            "dailykrd_welcomed",
+            /* Tombstones of Subjects the user deleted, so a subject removed on
+               one device is never re-adopted from another device's stale
+               Homework checklist. */
+            "dailykrd_subjects_removed"
         ];
 
         const SYNCED_KEY_SET =
             new Set(SYNCED_STORAGE_KEYS);
 
-        // History-shaped values are union-merged instead of replaced so study
-        // time recorded on two devices is never dropped.
+        /* History-shaped values are union-merged instead of replaced so study
+           time recorded on two devices is never dropped. The subjects tombstone
+           list unions too: two devices deleting different subjects offline must
+           both stay deleted. */
         const SYNCED_UNION_KEYS =
             new Set([
                 "dailykrd_study_sessions",
-                "dailykrd_study_completed"
+                "dailykrd_study_completed",
+                "dailykrd_subjects_removed"
             ]);
 
         const SYNC_STAMPS_KEY =
@@ -5819,6 +6294,46 @@
                             seen.add(fingerprint);
 
                             union.push(session);
+                        });
+
+                    return JSON.stringify(union);
+                }
+
+                // Deleted-subject tombstones: keep every name either side has
+                // removed, so an offline device can never resurrect one.
+                if (key === "dailykrd_subjects_removed") {
+
+                    const local =
+                        JSON.parse(localRaw);
+
+                    const remote =
+                        JSON.parse(remoteRaw);
+
+                    if (
+                        !Array.isArray(local) ||
+                        !Array.isArray(remote)
+                    ) {
+
+                        return remoteRaw;
+                    }
+
+                    const seen =
+                        new Set();
+
+                    const union = [];
+
+                    local
+                        .concat(remote)
+                        .forEach(name => {
+
+                            const fingerprint =
+                                String(name).toLowerCase();
+
+                            if (!fingerprint || seen.has(fingerprint)) return;
+
+                            seen.add(fingerprint);
+
+                            union.push(name);
                         });
 
                     return JSON.stringify(union);
@@ -7080,6 +7595,53 @@
                 calEventsToday: "Today's Events",
                 calNoUpcoming: "No upcoming events.",
 
+                subjectsNotes: "Subjects & Notes",
+                subjectsTitle: "Subjects",
+                homework: "Homework",
+                homeworkEmpty: "No homework yet. Add one to get started.",
+                homeworkPh: "Homework name:",
+                subjectsBack: "Back",
+                subjectsSearchPlaceholder: "Search subjects and notes...",
+                subjectsAdd: "+ Add Subject",
+                subjectsEmpty: "No subjects yet. Add one to start taking notes.",
+                subjectsNoResults: "No matches found.",
+                subjectsNotesEmpty: "No notes yet. Tap + Add Note to write one.",
+                subjectsNotesCount: "notes",
+                subjectsNoteCount: "note",
+                subjectsAddSubjectPrompt: "Subject name:",
+                subjectsRenamePrompt: "New subject name:",
+                subjectsRename: "Rename",
+                subjectsDelete: "Delete",
+                subjectsDeleteConfirm: "Delete this subject? Its notes will be deleted too.",
+                subjectsDeleteNoteConfirm: "Delete this note?",
+                subjectsNameRequired: "Enter a subject name.",
+                subjectsExists: "A subject with this name already exists.",
+                subjectsNewNote: "New Note",
+                subjectsAddNote: "+ Add Note",
+                subjectsNote: "Note",
+                subjectsEditNote: "Edit Note",
+                subjectsNoteTitlePlaceholder: "Note title",
+                subjectsNoteTextPlaceholder: "Write your note...",
+                subjectsAddPhoto: "📷 Add Photo",
+                subjectsEdit: "Edit",
+                subjectsSave: "Save",
+                subjectsCancel: "Cancel",
+                subjectsSaved: "Saved",
+                subjectsNoteEmpty: "Add a title, some text or a photo first.",
+                subjectsPhotoTooBig: "That photo is too large — try a smaller one.",
+                subjectsPhotoLimit: "A note can hold up to 6 photos.",
+                subjectsStorageFull: "This device is full — sign in to keep photos in the cloud.",
+                subjectsCloudError: "Cloud sync unavailable — subjects and notes stay safe on this device.",
+                subjectsNoteSaveFailed: "Couldn't save the note — it stays on this device and will sync later.",
+                subjectsNoteDeleteFailed: "Couldn't delete the note — check your connection and try again.",
+                subjectsDeleteFailed: "Couldn't delete the subject — please try again.",
+                subjectsDialogBlocked: "This browser blocked the dialog — open Daily.KRD directly and try again.",
+                subjectsSearchNotes: "Matching notes",
+                subjectsPhoto: "photo",
+                subjectsPhotos: "photos",
+                subjectsUpdated: "Updated",
+                subjectsSubjectEmpty: "No subject selected.",
+
                 prayerStats: {
                     progress: "Prayer Progress",
                     calendar: "Calendar",
@@ -7467,6 +8029,53 @@ done: "تەواو",
                 calEventsThisWeek: "ئەم هەفتانە",
                 calEventsToday: "رووداوەکانی ئەمڕۆ",
                 calNoUpcoming: "هیچ رووداوی داهاتوو نییە.",
+
+                subjectsNotes: "بابەت و تێبینییەکان",
+                subjectsTitle: "بابەتەکان",
+                homework: "ئەرکی ماڵەوە",
+                homeworkEmpty: "هیچ ئەرکێکی ماڵەوە نییە. یەکێک زیاد بکە بۆ دەستپێکردن.",
+                homeworkPh: "ناوی ئەرکی ماڵەوە:",
+                subjectsBack: "گەڕانەوە",
+                subjectsSearchPlaceholder: "گەڕان بەدوای بابەت و تێبینی...",
+                subjectsAdd: "+ زیادکردنی بابەت",
+                subjectsEmpty: "هیچ بابەتێک نییە. یەکێک زیاد بکە بۆ نووسینی تێبینی.",
+                subjectsNoResults: "هیچ ئەنجامێک نەدۆزرایەوە.",
+                subjectsNotesEmpty: "هیچ تێبینییەک نییە. کرتە لە + زیادکردنی تێبینی بکە.",
+                subjectsNotesCount: "تێبینی",
+                subjectsNoteCount: "تێبینی",
+                subjectsAddSubjectPrompt: "ناوی بابەت:",
+                subjectsRenamePrompt: "ناوی نوێی بابەت:",
+                subjectsRename: "ناونان",
+                subjectsDelete: "سڕینەوە",
+                subjectsDeleteConfirm: "ئەم بابەتە بسڕدرێتەوە؟ تێبینییەکانیشی دەسڕدرێنەوە.",
+                subjectsDeleteNoteConfirm: "ئەم تێبینییە بسڕدرێتەوە؟",
+                subjectsNameRequired: "ناوی بابەت بنووسە.",
+                subjectsExists: "بابەتێکی هەمان ناو پێشتر هەیە.",
+                subjectsNewNote: "تێبینی نوێ",
+                subjectsAddNote: "+ زیادکردنی تێبینی",
+                subjectsNote: "تێبینی",
+                subjectsEditNote: "دەستکاری تێبینی",
+                subjectsNoteTitlePlaceholder: "ناونیشانی تێبینی",
+                subjectsNoteTextPlaceholder: "تێبینیت بنووسە...",
+                subjectsAddPhoto: "📷 زیادکردنی وێنە",
+                subjectsEdit: "دەستکاری",
+                subjectsSave: "پاشەکەوتکردن",
+                subjectsCancel: "پاشگەزبوونەوە",
+                subjectsSaved: "پاشەکەوتکرا",
+                subjectsNoteEmpty: "سەرەتا ناونیشان یان دەق یان وێنەیەک زیاد بکە.",
+                subjectsPhotoTooBig: "ئەم وێنەیە زۆر گەورەیە — وێنەیەکی بچووکتر هەڵبژێرە.",
+                subjectsPhotoLimit: "هەر تێبینییەک تا ٦ وێنە هەڵدەگرێت.",
+                subjectsStorageFull: "بیرگەی ئەم ئامێرە پڕبووە — بچۆ ژوورەوە بۆ هەڵگرتنی وێنەکان لە هەور.",
+                subjectsCloudError: "هاوکاتکردنی هەور بەردەست نییە — بابەت و تێبینی لەم ئامێرەدا پارێزراون.",
+                subjectsNoteSaveFailed: "تێبینییەکە پاشەکەوت نەکرا — لەسەر ئەم ئامێرە دەمێنێتەوە و دواتر هاوکات دەکرێت.",
+                subjectsNoteDeleteFailed: "تێبینییەکە سڕ نەکرایەوە — پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدە.",
+                subjectsDeleteFailed: "ناتوانرێت بابەتەکە بسڕدرێتەوە — تکایە دووبارە هەوڵ بدە.",
+                subjectsDialogBlocked: "ئەم وێبگەڕە دەرگای گفتوگۆی داخستووە — ڕاستەوخۆ Daily.KRD بکەرەوە و دووبارە هەوڵ بدە.",
+                subjectsSearchNotes: "تێبینییە هاوشێوەکان",
+                subjectsPhoto: "وێنە",
+                subjectsPhotos: "وێنە",
+                subjectsUpdated: "نوێکرایەوە",
+                subjectsSubjectEmpty: "هیچ بابەتێک هەڵنەبژێردراوە.",
 
                 prayerStats: {
                     progress: "پێشکەوتنی نوێژ",
@@ -7857,6 +8466,54 @@ done: "تەواو",
                 calEventsThisWeek: "أحداث هذا الأسبوع",
                 calEventsToday: "أحداث اليوم",
                 calNoUpcoming: "لا أحداث قادمة.",
+
+                subjectsNotes: "المواد والملاحظات",
+                subjectsTitle: "المواد",
+                homework: "الواجبات",
+                homeworkEmpty: "لا توجد واجبات بعد. أضف واحدًا للبدء.",
+                homeworkPh: "اسم الواجب:",
+                subjectsBack: "رجوع",
+                subjectsSearchPlaceholder: "ابحث في المواد والملاحظات...",
+                subjectsAdd: "+ إضافة مادة",
+                subjectsEmpty: "لا توجد مواد بعد. أضف مادة لتبدأ بتدوين الملاحظات.",
+                subjectsNoResults: "لا توجد نتائج مطابقة.",
+                subjectsNotesEmpty: "لا توجد ملاحظات بعد. اضغط + إضافة ملاحظة.",
+                subjectsNotesCount: "ملاحظات",
+                subjectsNoteCount: "ملاحظة",
+                subjectsAddSubjectPrompt: "اسم المادة:",
+                subjectsRenamePrompt: "اسم المادة الجديد:",
+                subjectsRename: "إعادة تسمية",
+                subjectsDelete: "حذف",
+                subjectsDeleteConfirm: "حذف هذه المادة؟ سيتم حذف ملاحظاتها أيضاً.",
+                subjectsDeleteNoteConfirm: "حذف هذه الملاحظة؟",
+                subjectsNameRequired: "أدخل اسم المادة.",
+                subjectsExists: "مادة بنفس الاسم موجودة بالفعل.",
+                subjectsNewNote: "ملاحظة جديدة",
+                subjectsAddNote: "+ إضافة ملاحظة",
+                subjectsNote: "ملاحظة",
+                subjectsEditNote: "تعديل الملاحظة",
+                subjectsNoteTitlePlaceholder: "عنوان الملاحظة",
+                subjectsNoteTextPlaceholder: "اكتب ملاحظتك...",
+                subjectsAddPhoto: "📷 إضافة صورة",
+                subjectsEdit: "تعديل",
+                subjectsSave: "حفظ",
+                subjectsCancel: "إلغاء",
+                subjectsSaved: "تم الحفظ",
+                subjectsNoteEmpty: "أضف عنواناً أو نصاً أو صورة أولاً.",
+                subjectsPhotoTooBig: "هذه الصورة كبيرة جداً — جرّب صورة أصغر.",
+                subjectsPhotoLimit: "كل ملاحظة تحتفظ بـ 6 صور كحد أقصى.",
+                subjectsStorageFull: "ذاكرة الجهاز ممتلئة — سجّل الدخول لحفظ الصور في السحابة.",
+                subjectsCloudError: "مزامنة السحابة غير متاحة — المواد والملاحظات محفوظة على هذا الجهاز.",
+                subjectsNoteSaveFailed: "تعذّر حفظ الملاحظة — تبقى على هذا الجهاز وستُزامن لاحقًا.",
+                subjectsNoteDeleteFailed: "تعذّر حذف الملاحظة — تحقق من اتصالك وحاول مجددًا.",
+                subjectsDeleteFailed: "تعذّر حذف المادة — يرجى المحاولة مرة أخرى.",
+                subjectsDialogBlocked: "هذا المتصفح منع نافذة التأكيد — افتح Daily.KRD مباشرة وأعد المحاولة.",
+                subjectsSearchNotes: "ملاحظات مطابقة",
+                subjectsPhoto: "صورة",
+                subjectsPhotos: "صور",
+                subjectsUpdated: "آخر تحديث",
+                subjectsSubjectEmpty: "لم يتم اختيار أي مادة.",
+
                 prayerStats: {
                     progress: "تقدم الصلاة",
                     calendar: "التقويم",
@@ -8637,6 +9294,12 @@ done: "تەواو",
             if (document.getElementById("calendar")?.classList.contains("active")) {
                 if (typeof window._renderCalEvents === "function") window._renderCalEvents();
             }
+            // Re-render subjects & notes labels while that view is on screen
+            if (typeof window._renderSubjects === "function") window._renderSubjects();
+            // Refresh the Homework checklist labels (assigned after study init,
+            // so this is a no-op during early boot — the initial renderStudy()
+            // below already renders with the current language)
+            if (typeof window._renderStudyChecklist === "function") window._renderStudyChecklist();
         }
 
 
@@ -14736,6 +15399,11 @@ document.documentElement.classList.toggle(
         }
 
         function renderStudy() {
+            const hwTitleEl = document.getElementById("studySubjectsTitle");
+            if (hwTitleEl) hwTitleEl.textContent = t("homework");
+            // Keep the Study Timer's Subject dropdown in step with the checklist
+            // (late-bound; undefined during early boot, where timerInit covers it).
+            if (typeof window._timerPopulateSubject === "function") window._timerPopulateSubject();
             const goal = loadStudyGoal();
             const minutes = loadStudyMinutes();
             const pct = goal > 0
@@ -14758,7 +15426,7 @@ document.documentElement.classList.toggle(
 
             if (subjects.length === 0) {
                 studySubjectList.innerHTML =
-                    '<div class="study-empty">No subjects yet. Add one to get started.</div>';
+                    '<div class="study-empty">' + t("homeworkEmpty") + '</div>';
                 if (typeof renderDashStudy === "function") renderDashStudy();
                 return;
             }
@@ -14816,7 +15484,7 @@ document.documentElement.classList.toggle(
         });
 
         studyAddBtn.addEventListener("click", () => {
-            const name = prompt("Subject name:");
+            const name = prompt(t("homeworkPh"));
             if (!name || !name.trim()) return;
             const subjects = loadStudySubjects();
             subjects.push(name.trim());
@@ -14836,8 +15504,8 @@ document.documentElement.classList.toggle(
 
         renderStudy();
 
-
-        /* DASHBOARD STUDY */
+        // Late-bound hook for applyLanguage (see comment there)
+        window._renderStudyChecklist = renderStudy;
 
         function renderDashStudy() {
             const goal = loadStudyGoal();
@@ -15053,11 +15721,16 @@ document.documentElement.classList.toggle(
                 subjects.map(s => '<option value="' + s.replace(/"/g, "&quot;") + '">' + s.replace(/</g, "&lt;") + '</option>').join("");
         }
 
+        // Late-bound hook so the Subjects & Notes module can refresh the
+        // dropdown after adding/renaming/deleting a subject (timerInit runs
+        // later in boot, so this is undefined until then).
+
         function timerInit() {
             timerPopulateSubject();
             timerStartBtn.textContent = t("timerStart");
             timerRender();
         }
+        window._timerPopulateSubject = timerPopulateSubject;
 
         timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(btn => {
             btn.addEventListener("click", () => {
@@ -15534,12 +16207,16 @@ document.documentElement.classList.toggle(
                 try { await migrateGuestFlashcardsToAccount(user.uid); } catch (e) { console.error("Flashcard migration error:", e); }
                 startFlashcardListener();
                 if (typeof window._calStartEvents === 'function') window._calStartEvents();
+                // Subjects & notes: attach their listeners (and adopt any guest work)
+                if (typeof window._subjectsAuthChanged === 'function') window._subjectsAuthChanged(user.uid);
             } else {
                 stopFlashcardListener();
                 flashcardDecks = loadGuestFlashcards();
                 showFlashcardView('list');
                 renderFlashcardDeckList();
                 if (typeof window._calStopEvents === 'function') window._calStopEvents();
+                // Subjects & notes: detach listeners, fall back to guest storage
+                if (typeof window._subjectsAuthChanged === 'function') window._subjectsAuthChanged(null);
             }
         });
 
@@ -15984,6 +16661,1895 @@ document.documentElement.classList.toggle(
             // Expose for language-change re-render
             window._renderStudyStatsPage = renderStatsPage;
         })();
+
+        /* ============================================================
+           SUBJECTS & NOTES (Study)
+
+           A note-taking system for the Study section:
+
+             users/{uid}/subjects/{subjectId}                { name, createdAt, updatedAt }
+             users/{uid}/subjects/{subjectId}/notes/{noteId} { title, text, photos[], createdAt, updatedAt }
+             users/{uid}/studyMedia/{mediaId}                { data, width, height, createdAt }
+
+           Photos are stored one-per-document in `studyMedia` instead of inside
+           the note, so a note document always stays tiny and can never hit
+           Firestore's per-document size limit. Photos are rescaled and
+           re-compressed on the device before they are stored (a normal photo
+           lands around 60-250 KB), and nothing here needs a paid service: this
+           is the same Firestore database the rest of the app already uses.
+
+           Offline behaves like every other part of the app: all reads and
+           writes go through the existing Firestore instance that already has
+           enableIndexedDbPersistence() enabled, so subjects, notes and photos
+           created while offline are queued in IndexedDB and uploaded when the
+           connection returns. Guest mode keeps everything in localStorage
+           (never in someone's account) and merges into the account on the next
+           sign-in, mirroring the existing guest migrations.
+           ============================================================ */
+
+        (function initSubjectsNotes() {
+
+            const SUBJECTS_COLLECTION = 'subjects';
+            const NOTES_SUBCOLLECTION = 'notes';
+            const MEDIA_COLLECTION = 'studyMedia';
+
+            const GUEST_SUBJECTS_KEY = 'dailykrd_guest_subjects';
+            const GUEST_NOTES_KEY = 'dailykrd_guest_notes';
+            const GUEST_MEDIA_KEY = 'dailykrd_guest_media';
+
+            const MAX_PHOTOS_PER_NOTE = 6;
+            const MAX_MEDIA_STRING = 700 * 1024;   // data URL characters, safely under the 1 MiB document limit
+            const GUEST_MEDIA_BUDGET = 3 * 1024 * 1024;
+
+            const IMAGE_LADDER = [
+                { max: 1400, quality: 0.72 },
+                { max: 1400, quality: 0.6 },
+                { max: 1100, quality: 0.55 },
+                { max: 900, quality: 0.5 },
+                { max: 700, quality: 0.45 },
+                { max: 560, quality: 0.4 }
+            ];
+
+            let subjectList = [];
+            let selectedSubjectId = null;
+            let subjectNotes = [];
+            let unsubscribeSubjects = null;
+            let unsubscribeNotes = null;
+            let subjectsLoadedOnce = false;
+            let notesIndex = null;
+            let notesIndexLoading = false;
+            let openNoteId = null;
+            let optimisticNoteId = null;
+            let viewMode = 'read';
+            let draftPhotos = [];
+            let overlayToken = 0;
+            let overlayInputToken = 0;
+            let overlayInputsRenderedFor = -1;
+            let cloudBlocked = false;
+            let searchTimer = null;
+            /* The uid this module is syncing for. Kept separately from
+               currentUser so a stale value can never write to the account the
+               user just signed out of. */
+            let syncUid = null;
+            const mediaCache = new Map();
+
+            /* ---------- helpers ---------- */
+
+            function el(id) {
+                return document.getElementById(id);
+            }
+
+            function newId() {
+                return (typeof crypto !== 'undefined' && crypto.randomUUID)
+                    ? crypto.randomUUID()
+                    : String(Date.now()) + Math.random().toString(36).slice(2, 10);
+            }
+
+            function escapeHtml(value) {
+                return String(value == null ? '' : value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function readJson(key, fallback) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    return raw ? JSON.parse(raw) : fallback;
+                } catch (error) {
+                    return fallback;
+                }
+            }
+
+            function writeJson(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            }
+
+            function cloudMode() {
+                return !!syncUid && !!currentUser && currentUser.uid === syncUid;
+            }
+
+            function guestMode() {
+                return !cloudMode();
+            }
+
+            function sortSubjects(list) {
+                return [...list].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+            }
+
+            function sortNotes(list) {
+                return [...list].sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
+            }
+
+            function findSubject(subjectId) {
+                return subjectList.find(subject => subject.id === subjectId) || null;
+            }
+
+            function currentNote() {
+                return openNoteId
+                    ? subjectNotes.find(note => note.id === openNoteId) || null
+                    : null;
+            }
+
+            function formatWhen(timestamp) {
+                const value = Number(timestamp);
+                if (!value) return '';
+                try {
+                    return new Date(value).toLocaleDateString();
+                } catch (error) {
+                    return '';
+                }
+            }
+
+            function subjectCountLabel(count) {
+                return count + ' ' + t(count === 1 ? 'subjectsNoteCount' : 'subjectsNotesCount');
+            }
+
+            function firstLine(text) {
+                return String(text || '').split('\n').find(line => line.trim()) || '';
+            }
+
+            function slugify(name) {
+                const slug = String(name || '')
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[^\p{L}\p{N}]+/gu, '-')
+                    .replace(/^-+|-+$/g, '')
+                    .slice(0, 60);
+                return slug || 'subject';
+            }
+
+            /* ---------- guest storage ---------- */
+
+            function guestSubjects() {
+                const list = readJson(GUEST_SUBJECTS_KEY, []);
+                return Array.isArray(list) ? list.filter(item => item && item.id) : [];
+            }
+
+            function saveGuestSubjects(list) {
+                writeJson(GUEST_SUBJECTS_KEY, list);
+            }
+
+            /* ---------- signed-in local cache ----------
+
+               Subjects are ALSO kept in localStorage while signed in, per
+               account. Firestore remains the source of truth for sync, but the
+               cache guarantees a subject survives even if the app is closed
+               before its write reaches Firestore, or if writes are being
+               rejected (offline rules, etc.). On sign-in the cache is reconciled
+               with the account: docs that never made it are pushed up again. */
+
+            function cacheKeyFor(uid) {
+                return 'dailykrd_acc_subjects_' + uid;
+            }
+
+            function cachedSubjects(uid) {
+                const list = readJson(cacheKeyFor(uid), []);
+                return Array.isArray(list)
+                    ? pruneRemovedSubjects(uid, list.filter(item => item && item.id))
+                    : [];
+            }
+
+            function saveCachedSubjects(uid, list) {
+                try {
+                    writeJson(cacheKeyFor(uid), list);
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] subject cache write failed:', error);
+                }
+            }
+
+            function clearCachedSubjects(uid) {
+                try {
+                    localStorage.removeItem(cacheKeyFor(uid));
+                } catch (error) { /* ignore */ }
+            }
+
+            /* ---------- deletion tombstones ----------
+
+               A delete has to outlive the moment it was made. While the
+               Firestore delete is in flight (or queued offline), a subjects
+               snapshot can still contain the deleted document, and this
+               device's cache is rebuilt from that list — which
+               resubmitCachedSubjects() would then treat as "a write that
+               never landed" and push back to the account on the next
+               snapshot or sign-in. Deleted ids are therefore recorded here,
+               and every path that builds a subject list drops them, so a
+               deleted subject can never reappear after a refresh. Entries
+               expire after 30 days. */
+
+            function removedSubjectsKey(uid) {
+                return 'dailykrd_acc_subjects_removed_' + uid;
+            }
+
+            function removedSubjectRecords(uid) {
+                if (!uid) return [];
+                const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+                const list = readJson(removedSubjectsKey(uid), []);
+                const fresh = Array.isArray(list)
+                    ? list.filter(item => item && item.id && Number(item.at) > cutoff)
+                    : [];
+                if (Array.isArray(list) && fresh.length !== list.length) {
+                    try {
+                        writeJson(removedSubjectsKey(uid), fresh);
+                    } catch (error) { /* ignore */ }
+                }
+                return fresh;
+            }
+
+            function rememberRemovedSubject(uid, subject) {
+                if (!uid || !subject || !subject.id) return;
+                try {
+                    const records = removedSubjectRecords(uid);
+                    if (records.some(item => item.id === subject.id)) return;
+                    records.push({ id: subject.id, name: subject.name || '', at: Date.now() });
+                    writeJson(removedSubjectsKey(uid), records);
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] delete tombstone write failed:', error);
+                }
+            }
+
+            /* Drops deleted subjects from any list before it is shown or cached. */
+            function pruneRemovedSubjects(uid, list) {
+                if (!uid || !Array.isArray(list) || list.length === 0) return list;
+                const removed = new Set(removedSubjectRecords(uid).map(item => item.id));
+                if (removed.size === 0) return list;
+                return list.filter(item => item && item.id && !removed.has(item.id));
+            }
+
+            /* Push any cached subject the account does not have yet (a write
+               that never landed). Merges by id; remote wins for name changes. */
+            function resubmitCachedSubjects(uid) {
+                const cached = cachedSubjects(uid);
+                if (cached.length === 0) return;
+
+                const known = new Set(subjectList.map(item => item.id));
+                const missing = cached.filter(item => !known.has(item.id));
+
+                missing.forEach(item => {
+                    setDoc(subjectRef(item.id), {
+                        name: item.name,
+                        createdAt: item.createdAt || Date.now(),
+                        updatedAt: item.updatedAt || Date.now()
+                    }, { merge: true }).catch(() => {});
+                });
+
+                if (missing.length > 0) {
+                    console.info('[Daily.KRD notes] re-pushed', missing.length, 'cached subject(s)');
+                }
+            }
+
+            /*
+             * Notes that could not be written to the account are held on this
+             * device and retried every time the account becomes writable again.
+             * A note that uploads is dropped from the local store, so it lives
+             * in exactly one place at a time.
+             */
+            async function resubmitLocalNotes(uid) {
+                if (!uid || guestMode()) return;
+
+                const map = guestNotesMap();
+                const subjectIds = Object.keys(map);
+                if (subjectIds.length === 0) return;
+
+                let pushed = 0;
+
+                const removedIds = new Set(
+                    removedSubjectRecords(uid).map(item => item.id)
+                );
+
+                for (const subjectId of subjectIds) {
+                    // The subject was deleted: its notes stay deleted too,
+                    // so the retry must never re-upload them.
+                    if (removedIds.has(subjectId)) {
+                        delete map[subjectId];
+                        continue;
+                    }
+
+                    const notes = Array.isArray(map[subjectId]) ? map[subjectId] : [];
+                    const stillPending = [];
+
+                    for (const note of notes) {
+                        if (!note || !note.id) continue;
+                        try {
+                            await setDoc(
+                                doc(db, 'users', uid, SUBJECTS_COLLECTION, subjectId,
+                                    NOTES_SUBCOLLECTION, note.id),
+                                {
+                                    title: note.title || '',
+                                    text: note.text || '',
+                                    // The local copy can carry photo data so it
+                                    // renders offline; the account document
+                                    // must not.
+                                    photos: (note.photos || []).map(photo => ({
+                                        id: photo.id,
+                                        width: photo.width,
+                                        height: photo.height
+                                    })),
+                                    createdAt: note.createdAt || Date.now(),
+                                    updatedAt: note.updatedAt || note.createdAt || Date.now()
+                                },
+                                { merge: true }
+                            );
+                            pushed += 1;
+                        } catch (error) {
+                            stillPending.push(note);
+                        }
+                    }
+
+                    if (stillPending.length) map[subjectId] = stillPending;
+                    else delete map[subjectId];
+                }
+
+                saveGuestNotesMap(map);
+                notesIndex = null;
+
+                if (pushed > 0) {
+                    console.info('[Daily.KRD notes] re-pushed', pushed, 'note(s) held on this device');
+                    if (selectedSubjectId) renderSubjectDetail();
+                }
+            }
+
+            function guestNotesMap() {
+                const map = readJson(GUEST_NOTES_KEY, {});
+                return map && typeof map === 'object' && !Array.isArray(map) ? map : {};
+            }
+
+            function saveGuestNotesMap(map) {
+                writeJson(GUEST_NOTES_KEY, map);
+            }
+
+            function guestMediaMap() {
+                const map = readJson(GUEST_MEDIA_KEY, {});
+                return map && typeof map === 'object' && !Array.isArray(map) ? map : {};
+            }
+
+            function saveGuestMediaMap(map) {
+                writeJson(GUEST_MEDIA_KEY, map);
+            }
+
+            function guestMediaUsed(map) {
+                return Object.keys(map).reduce(
+                    (total, key) => total + String((map[key] && map[key].data) || '').length,
+                    0
+                );
+            }
+
+            /* ---------- firestore refs ---------- */
+
+            function subjectsRef() {
+                return collection(db, 'users', syncUid, SUBJECTS_COLLECTION);
+            }
+
+            function subjectRef(subjectId) {
+                return doc(db, 'users', syncUid, SUBJECTS_COLLECTION, subjectId);
+            }
+
+            function notesRef(subjectId) {
+                return collection(db, 'users', syncUid, SUBJECTS_COLLECTION, subjectId, NOTES_SUBCOLLECTION);
+            }
+
+            function noteRef(subjectId, noteId) {
+                return doc(db, 'users', syncUid, SUBJECTS_COLLECTION, subjectId, NOTES_SUBCOLLECTION, noteId);
+            }
+
+            function mediaRef(mediaId) {
+                return doc(db, 'users', syncUid, MEDIA_COLLECTION, mediaId);
+            }
+
+            /* ---------- sync status ---------- */
+
+            function setSubjectsStatus(message) {
+                const status = el('subjectsCloudStatus');
+                if (!status) return;
+                status.textContent = message || '';
+                status.classList.toggle('show', !!message);
+            }
+
+            /*
+             * Some environments (embedded frames, restricted standalone modes)
+             * refuse to open prompt()/confirm(). These wrappers return undefined
+             * in that case so the caller can say so instead of failing silently.
+             */
+            function askForText(message, fallbackValue) {
+                try {
+                    return window.prompt(message, fallbackValue === undefined ? '' : fallbackValue);
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] prompt unavailable:', error);
+                    return undefined;
+                }
+            }
+
+            function askForConfirm(message) {
+                try {
+                    return window.confirm(message);
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] confirm unavailable:', error);
+                    return undefined;
+                }
+            }
+
+            function setNoteStatus(message, ok) {
+                const status = el('noteViewStatus');
+                if (!status) return;
+                status.textContent = message || '';
+                status.classList.toggle('show', !!message);
+                status.classList.toggle('ok', !!ok);
+            }
+
+            /* ---------- listeners ---------- */
+
+            function stopSubjectsListener() {
+                if (unsubscribeSubjects) {
+                    unsubscribeSubjects();
+                    unsubscribeSubjects = null;
+                }
+            }
+
+            function stopNotesListener() {
+                if (unsubscribeNotes) {
+                    unsubscribeNotes();
+                    unsubscribeNotes = null;
+                }
+            }
+
+            function startSubjectsListener() {
+                stopSubjectsListener();
+                if (!cloudMode()) return;
+
+                unsubscribeSubjects = onSnapshot(
+                    subjectsRef(),
+                    snapshot => {
+                        const list = [];
+                        snapshot.forEach(item => list.push({ id: item.id, ...item.data() }));
+                        // A snapshot taken while a delete is still in flight can
+                        // still carry the deleted subject. Tombstones keep it
+                        // out of the list and out of the cache written below.
+                        subjectList = sortSubjects(pruneRemovedSubjects(syncUid, list));
+                        subjectsLoadedOnce = true;
+                        cloudBlocked = false;
+                        notesIndex = null;
+                        setSubjectsStatus('');
+
+                        // Once the account's real state is known, push up any
+                        // cached subject whose write never landed — BEFORE the
+                        // cache is overwritten with the account list, which
+                        // would erase the evidence. Then keep the cache aligned.
+                        if (syncUid) {
+                            const fromCache = !!(snapshot.metadata && snapshot.metadata.fromCache);
+                            if (!fromCache) {
+                                resubmitCachedSubjects(syncUid);
+                                resubmitLocalNotes(syncUid).catch(error =>
+                                    console.warn('[Daily.KRD notes] note re-push failed:', error));
+                            }
+                            saveCachedSubjects(syncUid, subjectList);
+                        }
+
+                        renderSubjectsList();
+                    },
+                    error => {
+                        console.error('Subjects listener error:', error);
+                        if (error && error.code === 'permission-denied') {
+                            // Sync stays off for this session (data remains safe
+                            // locally) but no scary banner: subjects and notes
+                            // keep working from local storage.
+                            cloudBlocked = true;
+                            // Say so on the small status line, so "my note did
+                            // not sync" has a visible explanation.
+                            setSubjectsStatus(t('subjectsCloudError'));
+                        }
+                    }
+                );
+            }
+
+            function startNotesListener(subjectId) {
+                stopNotesListener();
+                if (!cloudMode()) return;
+
+                unsubscribeNotes = onSnapshot(
+                    notesRef(subjectId),
+                    snapshot => {
+                        if (subjectId !== selectedSubjectId) return;
+                        const list = [];
+                        snapshot.forEach(item => list.push({ id: item.id, ...item.data() }));
+                        // Notes this device could not upload are folded in, so
+                        // a note kept locally stays on screen instead of
+                        // vanishing because the account never received it.
+                        subjectNotes = sortNotes(mergeLocalNotes(subjectId, list));
+                        notesIndex = null;
+                        // If another device deleted the note we are reading, close
+                        // it rather than leaving an empty sheet on screen. A note
+                        // this device just saved is exempt until its write lands,
+                        // otherwise a snapshot from before that write would close
+                        // the editor under the user.
+                        if (openNoteId &&
+                            openNoteId !== optimisticNoteId &&
+                            !subjectNotes.some(item => item.id === openNoteId)) {
+                            closeNoteOverlay();
+                        }
+                        renderSubjectDetail();
+                    },
+                    error => {
+                        console.error('Notes listener error:', error);
+                    }
+                );
+            }
+
+            function hasGuestData() {
+                return guestSubjects().length > 0 ||
+                    Object.keys(guestNotesMap()).length > 0 ||
+                    Object.keys(guestMediaMap()).length > 0;
+            }
+
+            function startSubjectsSync(uid) {
+                if (!uid || !currentUser || currentUser.uid !== uid) return;
+                syncUid = uid;
+
+                // Show the account's local cache right away: subjects created on
+                // this device are on screen even before Firestore confirms, and
+                // they survive an app close that happens before writes land.
+                subjectList = sortSubjects(cachedSubjects(uid));
+                subjectsLoadedOnce = true;
+
+                startSubjectsListener();
+
+                // Guest work made on this device moves into the account, then
+                // joins the account cache.
+                migrateGuestSubjectsToAccount(uid)
+                    .then(() => {
+                        if (syncUid !== uid) return;
+                        const merged = pruneRemovedSubjects(uid,
+                            sortSubjects(cachedSubjects(uid).concat(guestSubjects())));
+                        saveCachedSubjects(uid, merged);
+                        subjectList = merged;
+                        notesIndex = null;
+                        renderSubjectsList();
+                    })
+                    .catch(error => console.error('Guest subjects migration error:', error));
+            }
+
+            function stopSubjectsSync() {
+                stopSubjectsListener();
+                stopNotesListener();
+                closeNoteOverlay();
+                // The per-account cache is deliberately KEPT: it is this
+                // account's local safety copy for the next sign-in.
+                syncUid = null;
+                subjectsLoadedOnce = false;
+                cloudBlocked = false;
+                notesIndex = null;
+                mediaCache.clear();
+                setSubjectsStatus('');
+            }
+
+            /* ---------- subjects ---------- */
+
+            async function addSubjectFlow() {
+                const answer = askForText(t('subjectsAddSubjectPrompt'), '');
+                if (answer === undefined) {
+                    setSubjectsStatus(t('subjectsDialogBlocked'));
+                    return;
+                }
+                if (answer === null) return;
+
+                const name = answer.trim();
+                if (!name) {
+                    alert(t('subjectsNameRequired'));
+                    return;
+                }
+
+                // Two subjects with the same name would confuse the Homework
+                // mirror (deleting one would pull the shared checklist entry).
+                const exists = subjectList.some(item =>
+                    String(item.name || '').trim().toLowerCase() === name.toLowerCase());
+                if (exists) {
+                    alert(t('subjectsExists'));
+                    return;
+                }
+
+                const now = Date.now();
+                const subject = { id: newId(), name: name, createdAt: now, updatedAt: now };
+
+                // Put it on screen immediately and cache it on this device, so
+                // it survives even if the app closes before the write lands.
+                // Offline, the write below is held by the existing IndexedDB
+                // persistence and replayed on reconnect, so creating a subject
+                // never blocks on the network.
+                subjectList = sortSubjects(subjectList.concat([subject]));
+                if (guestMode()) {
+                    saveGuestSubjects(subjectList);
+                } else {
+                    saveCachedSubjects(syncUid, subjectList);
+                }
+                notesIndex = null;
+                renderSubjectsList();
+                renderStudy();
+
+                try {
+                    if (guestMode()) {
+                        saveGuestSubjects(subjectList);
+                    } else {
+                        await setDoc(subjectRef(subject.id), {
+                            name: subject.name,
+                            createdAt: now,
+                            updatedAt: now
+                        }, { merge: true });
+                    }
+                } catch (error) {
+                    console.error('Add subject error:', error);
+                }
+            }
+
+            async function renameSubjectFlow() {
+                const subject = findSubject(selectedSubjectId);
+                if (!subject) return;
+
+                const answer = askForText(t('subjectsRenamePrompt'), subject.name);
+                if (answer === undefined) {
+                    setSubjectsStatus(t('subjectsDialogBlocked'));
+                    return;
+                }
+                if (answer === null) return;
+
+                const name = answer.trim();
+                if (!name || name === subject.name) return;
+
+                const now = Date.now();
+
+                const rename = list => sortSubjects(list.map(item =>
+                    item.id === subject.id ? { ...item, name: name, updatedAt: now } : item
+                ));
+
+                // Rename locally first so it works with no connection.
+                subjectList = rename(subjectList);
+                notesIndex = null;
+                renderSubjectDetail();
+                renderStudy();
+
+                try {
+                    if (guestMode()) {
+                        saveGuestSubjects(rename(guestSubjects()));
+                    } else {
+                        saveCachedSubjects(syncUid, rename(cachedSubjects(syncUid)));
+                        await setDoc(subjectRef(subject.id), { name: name, updatedAt: now }, { merge: true });
+                    }
+                } catch (error) {
+                    console.error('Rename subject error:', error);
+                }
+            }
+
+            async function deleteSubjectFlow() {
+                const subject = findSubject(selectedSubjectId);
+                if (!subject) return;
+
+                // Clear warning: the subject's notes go with it.
+                const confirmed = askForConfirm(t('subjectsDeleteConfirm'));
+                if (confirmed === undefined) {
+                    setSubjectsStatus(t('subjectsDialogBlocked'));
+                    return;
+                }
+                if (!confirmed) return;
+
+                // Persist the deletion FIRST. Only update the UI if storage
+                // operations succeed, so a refresh never brings the subject back.
+                try {
+                    if (guestMode()) {
+                        saveGuestSubjects(guestSubjects().filter(item => item.id !== subject.id));
+
+                        const notes = guestNotesMap();
+                        const media = guestMediaMap();
+                        (Array.isArray(notes[subject.id]) ? notes[subject.id] : []).forEach(note =>
+                            (note.photos || []).forEach(photo => {
+                                if (photo && photo.id) delete media[photo.id];
+                            })
+                        );
+                        delete notes[subject.id];
+                        saveGuestNotesMap(notes);
+                        saveGuestMediaMap(media);
+                    } else {
+                        // Record the delete durably FIRST. With this tombstone
+                        // the removal survives a refresh even if the app closes
+                        // before the Firestore delete lands, and no stale
+                        // snapshot or re-push can bring the subject back.
+                        rememberRemovedSubject(syncUid, subject);
+
+                        saveCachedSubjects(syncUid, cachedSubjects(syncUid).filter(item => item.id !== subject.id));
+
+                        // Notes (and their photos) still held on this device
+                        // for the deleted subject go too, so the retry loop
+                        // cannot re-upload them under a removed subject.
+                        const heldNotes = guestNotesMap();
+                        const heldMedia = guestMediaMap();
+                        (Array.isArray(heldNotes[subject.id]) ? heldNotes[subject.id] : []).forEach(note =>
+                            (note.photos || []).forEach(photo => {
+                                if (photo && photo.id) delete heldMedia[photo.id];
+                            })
+                        );
+                        delete heldNotes[subject.id];
+                        saveGuestNotesMap(heldNotes);
+                        saveGuestMediaMap(heldMedia);
+
+                        await deleteSubjectWithNotes(subject.id);
+                    }
+
+                    // Storage deletion succeeded — now update the UI.
+                    subjectList = sortSubjects(subjectList.filter(item => item.id !== subject.id));
+                    notesIndex = null;
+                    selectedSubjectId = null;
+                    subjectNotes = [];
+                    renderStudy();
+                    showSection('subjects');
+                    renderSubjectsList();
+                } catch (error) {
+                    console.error('Delete subject error:', error);
+                    setSubjectsStatus(t('subjectsDeleteFailed'));
+                }
+            }
+
+            async function deleteSubjectWithNotes(subjectId) {
+                // Notes (and their photos) are deleted first so nothing is left
+                // orphaned in the account, then the subject itself.
+                const snapshot = await getDocs(notesRef(subjectId));
+                const work = [];
+
+                snapshot.forEach(item => {
+                    const note = item.data() || {};
+                    (note.photos || []).forEach(photo => {
+                        if (photo && photo.id) {
+                            work.push(deleteDoc(mediaRef(photo.id)).catch(() => {}));
+                        }
+                    });
+                    work.push(deleteDoc(item.ref).catch(() => {}));
+                });
+
+                await Promise.all(work);
+                await deleteDoc(subjectRef(subjectId));
+            }
+
+            /* ---------- notes ---------- */
+
+            // Writes one note into this device's local store. Used for guest
+            // mode, and as the fallback when an account write cannot land.
+            function writeNoteToLocalStore(subjectId, note) {
+                const map = guestNotesMap();
+                const list = Array.isArray(map[subjectId]) ? map[subjectId] : [];
+                const index = list.findIndex(item => item.id === note.id);
+                if (index >= 0) list[index] = note; else list.push(note);
+                map[subjectId] = list;
+                saveGuestNotesMap(map);
+                return list;
+            }
+
+            // Notes this device could not upload, folded into the account's
+            // list so they stay visible until the write goes through.
+            function mergeLocalNotes(subjectId, serverNotes) {
+                const local = guestNotesMap()[subjectId];
+                if (!Array.isArray(local) || local.length === 0) return serverNotes;
+                const onServer = new Set(serverNotes.map(item => item.id));
+                const pending = local.filter(item => item && item.id && !onServer.has(item.id));
+                return pending.length ? serverNotes.concat(pending) : serverNotes;
+            }
+
+            // `subjectId` is passed in rather than read from selectedSubjectId:
+            // a save that is still in flight must keep writing to the subject it
+            // started from, even if the user has already navigated away.
+            //
+            // Returns true when the account stored it, 'local' when the account
+            // write failed and the note was kept on this device instead, and
+            // false when it could not be stored at all.
+            async function persistNote(note, subjectId, localCopy) {
+                if (!subjectId) return false;
+
+                if (guestMode()) {
+                    subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, note));
+                    return true;
+                }
+
+                // The account has already refused writes this session, so do not
+                // spend a round trip finding that out again.
+                if (cloudBlocked) {
+                    subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, localCopy || note));
+                    return 'local';
+                }
+
+                try {
+                    await setDoc(noteRef(subjectId, note.id), {
+                        title: note.title,
+                        text: note.text,
+                        photos: note.photos || [],
+                        createdAt: note.createdAt,
+                        updatedAt: note.updatedAt
+                    }, { merge: true });
+                } catch (error) {
+                    // The account write was rejected -- security rules, a
+                    // document over the 1 MiB limit, or no connection. Until now
+                    // this threw straight out and the note was written nowhere:
+                    // not to the account, and not here either, because the local
+                    // branch above had already been skipped. Keep it on this
+                    // device, which is what the message shown to the user says.
+                    console.warn('[Daily.KRD notes] account write failed, keeping note on this device:',
+                        error && error.code ? error.code : error);
+                    try {
+                        subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, localCopy || note));
+                    } catch (quotaError) {
+                        // The photo data did not fit on this device either.
+                        // Keep the text rather than losing the whole note.
+                        subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, note));
+                    }
+                    return 'local';
+                }
+
+                // The account has it now, so a local copy would only linger.
+                const map = guestNotesMap();
+                if (Array.isArray(map[subjectId]) && map[subjectId].some(item => item.id === note.id)) {
+                    map[subjectId] = map[subjectId].filter(item => item.id !== note.id);
+                    if (map[subjectId].length === 0) delete map[subjectId];
+                    saveGuestNotesMap(map);
+                }
+
+                subjectNotes = sortNotes(
+                    subjectNotes.some(item => item.id === note.id)
+                        ? subjectNotes.map(item => item.id === note.id ? note : item)
+                        : subjectNotes.concat([note])
+                );
+                return true;
+            }
+
+            async function deleteNoteById(subjectId, noteId, photos) {
+                if (guestMode()) {
+                    const map = guestNotesMap();
+                    map[subjectId] = (Array.isArray(map[subjectId]) ? map[subjectId] : []).filter(note => note.id !== noteId);
+                    saveGuestNotesMap(map);
+                } else {
+                    await deleteDoc(noteRef(subjectId, noteId));
+                }
+
+                for (const photo of (photos || [])) {
+                    if (photo && photo.id) deleteMedia(photo.id).catch(() => {});
+                }
+            }
+
+            async function persistMedia(media) {
+                mediaCache.set(media.id, { data: media.data, width: media.width, height: media.height });
+
+                if (guestMode()) {
+                    const map = guestMediaMap();
+                    if (guestMediaUsed(map) + media.data.length > GUEST_MEDIA_BUDGET) return 'quota';
+                    map[media.id] = {
+                        data: media.data,
+                        width: media.width,
+                        height: media.height,
+                        createdAt: media.createdAt || Date.now()
+                    };
+                    try {
+                        saveGuestMediaMap(map);
+                    } catch (error) {
+                        return 'quota';
+                    }
+                    return 'ok';
+                }
+
+                await setDoc(mediaRef(media.id), {
+                    data: media.data,
+                    width: media.width,
+                    height: media.height,
+                    createdAt: media.createdAt || Date.now()
+                });
+                return 'ok';
+            }
+
+            async function loadMedia(mediaId) {
+                if (mediaCache.has(mediaId)) return mediaCache.get(mediaId);
+
+                if (guestMode()) {
+                    const saved = guestMediaMap()[mediaId] || null;
+                    if (saved) mediaCache.set(mediaId, saved);
+                    return saved;
+                }
+
+                try {
+                    const snapshot = await getDoc(mediaRef(mediaId));
+                    if (!snapshot.exists()) return null;
+                    const data = snapshot.data() || {};
+                    const media = { data: data.data, width: data.width, height: data.height };
+                    mediaCache.set(mediaId, media);
+                    return media;
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] photo load failed:', error);
+                    return null;
+                }
+            }
+
+            async function deleteMedia(mediaId) {
+                mediaCache.delete(mediaId);
+                if (guestMode()) {
+                    const map = guestMediaMap();
+                    if (map[mediaId]) {
+                        delete map[mediaId];
+                        saveGuestMediaMap(map);
+                    }
+                    return;
+                }
+                await deleteDoc(mediaRef(mediaId));
+            }
+
+            /* ---------- search ---------- */
+
+            async function ensureNotesIndex() {
+                if (notesIndex) return notesIndex;
+                if (notesIndexLoading) return notesIndex || [];
+                notesIndexLoading = true;
+
+                const index = [];
+
+                try {
+                    if (guestMode()) {
+                        const map = guestNotesMap();
+                        subjectList.forEach(subject => {
+                            (Array.isArray(map[subject.id]) ? map[subject.id] : []).forEach(note => {
+                                index.push({
+                                    subjectId: subject.id,
+                                    subjectName: subject.name,
+                                    noteId: note.id,
+                                    title: note.title || '',
+                                    text: note.text || ''
+                                });
+                            });
+                        });
+                    } else {
+                        const results = await Promise.all(
+                            subjectList.map(subject =>
+                                getDocs(notesRef(subject.id))
+                                    .then(snapshot => ({ subject, snapshot }))
+                                    .catch(() => ({ subject, snapshot: null }))
+                            )
+                        );
+
+                        results.forEach(({ subject, snapshot }) => {
+                            if (!snapshot) return;
+                            snapshot.forEach(item => {
+                                const note = item.data() || {};
+                                index.push({
+                                    subjectId: subject.id,
+                                    subjectName: subject.name,
+                                    noteId: item.id,
+                                    title: note.title || '',
+                                    text: note.text || ''
+                                });
+                            });
+                        });
+
+                        // Notes held on this device because their account write
+                        // has not landed yet are searchable too.
+                        const indexed = new Set(index.map(entry => entry.noteId));
+                        const localMap = guestNotesMap();
+                        subjectList.forEach(subject => {
+                            const held = Array.isArray(localMap[subject.id]) ? localMap[subject.id] : [];
+                            held.forEach(note => {
+                                if (!note || !note.id || indexed.has(note.id)) return;
+                                index.push({
+                                    subjectId: subject.id,
+                                    subjectName: subject.name,
+                                    noteId: note.id,
+                                    title: note.title || '',
+                                    text: note.text || ''
+                                });
+                            });
+                        });
+                    }
+
+                    notesIndex = index;
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] search index failed:', error);
+                } finally {
+                    notesIndexLoading = false;
+                }
+
+                return notesIndex || [];
+            }
+
+            function renderSearchResults(query) {
+                const matches = {
+                    subjects: subjectList.filter(subject =>
+                        !query || String(subject.name || '').toLowerCase().includes(query)
+                    ),
+                    notes: []
+                };
+
+                if (query && notesIndex) {
+                    matches.notes = notesIndex
+                        .filter(entry =>
+                            String(entry.title || '').toLowerCase().includes(query) ||
+                            String(entry.text || '').toLowerCase().includes(query)
+                        )
+                        .slice(0, 40);
+                }
+
+                return matches;
+            }
+
+            /* ---------- rendering ---------- */
+
+            function renderSubjectsView() {
+                const launchText = el('studySubjectsLaunchText');
+                if (launchText) launchText.textContent = t('subjectsNotes');
+
+                const backLabel = el('subjectsBackLabel');
+                if (backLabel) backLabel.textContent = t('subjectsBack');
+
+                const title = el('subjectsTitle');
+                if (title) title.textContent = t('subjectsTitle');
+
+                const search = el('subjectsSearchInput');
+                if (search) search.placeholder = t('subjectsSearchPlaceholder');
+
+                const addBtn = el('subjectsAddBtn');
+                if (addBtn) addBtn.textContent = t('subjectsAdd');
+
+                renderSubjectsList();
+
+                if (selectedSubjectId) renderSubjectDetail();
+
+                if (el('noteViewOverlay')?.classList.contains('open')) renderNoteOverlay();
+            }
+
+            function renderSubjectsList() {
+                const listEl = el('subjectsList');
+                if (!listEl) return;
+
+                const query = (el('subjectsSearchInput')?.value || '').trim().toLowerCase();
+                const matches = renderSearchResults(query);
+
+                let html = '';
+
+                if (matches.subjects.length === 0 && matches.notes.length === 0) {
+                    html += '<div class="study-empty">' +
+                        escapeHtml(subjectList.length === 0 && !query ? t('subjectsEmpty') : t('subjectsNoResults')) +
+                        '</div>';
+                }
+
+                html += matches.subjects.map(subject =>
+                    '<div class="study-subject" data-subject-id="' + escapeHtml(subject.id) + '" role="button" tabindex="0">' +
+                        '<div class="study-subject-name">' + escapeHtml(subject.name) + '</div>' +
+                        '<span class="study-stats-launch-arrow">›</span>' +
+                    '</div>'
+                ).join('');
+
+                if (matches.notes.length > 0) {
+                    html += '<div class="subject-note-count" style="margin-top:16px;">' +
+                        escapeHtml(t('subjectsSearchNotes')) +
+                        '</div>';
+
+                    html += matches.notes.map(entry =>
+                        '<div class="subject-note" data-subject-id="' + escapeHtml(entry.subjectId) +
+                            '" data-note-id="' + escapeHtml(entry.noteId) + '">' +
+                            '<div class="subject-note-head"><div class="subject-note-title">' +
+                                escapeHtml(entry.title || firstLine(entry.text) || t('subjectsPhoto')) +
+                            '</div></div>' +
+                            (entry.text
+                                ? '<div class="subject-note-snippet">' + escapeHtml(entry.text.slice(0, 180)) + '</div>'
+                                : '') +
+                            '<div class="subject-note-subject">' + escapeHtml(entry.subjectName) + '</div>' +
+                        '</div>'
+                    ).join('');
+                }
+
+                listEl.innerHTML = html;
+            }
+
+            function renderSubjectDetail() {
+                const subject = findSubject(selectedSubjectId);
+
+                const backLabel = el('subjectDetailBackLabel');
+                if (backLabel) backLabel.textContent = t('subjectsBack');
+
+                const nameEl = el('subjectDetailName');
+                if (nameEl) nameEl.textContent = subject ? subject.name : t('subjectsSubjectEmpty');
+
+                const addBtn = el('subjectAddNoteBtn');
+                if (addBtn) addBtn.textContent = t('subjectsAddNote');
+
+                const renameBtn = el('subjectRenameBtn');
+                if (renameBtn) {
+                    renameBtn.title = t('subjectsRename');
+                    renameBtn.setAttribute('aria-label', t('subjectsRename'));
+                }
+
+                const deleteBtn = el('subjectDeleteBtn');
+                if (deleteBtn) {
+                    deleteBtn.title = t('subjectsDelete');
+                    deleteBtn.setAttribute('aria-label', t('subjectsDelete'));
+                }
+
+                const countEl = el('subjectDetailCount');
+                if (countEl) {
+                    countEl.textContent = subjectNotes.length
+                        ? subjectCountLabel(subjectNotes.length)
+                        : '';
+                }
+
+                const listEl = el('subjectNoteList');
+                if (!listEl) return;
+
+                if (subjectNotes.length === 0) {
+                    listEl.innerHTML = '<div class="study-empty">' + escapeHtml(t('subjectsNotesEmpty')) + '</div>';
+                    return;
+                }
+
+                listEl.innerHTML = subjectNotes.map(note => {
+                    const photos = note.photos || [];
+                    const title = note.title && note.title.trim()
+                        ? note.title
+                        : (firstLine(note.text) || t('subjectsPhoto'));
+                    const snippet = String(note.text || '').slice(0, 180);
+
+                    return '<div class="subject-note" data-note-id="' + escapeHtml(note.id) + '">' +
+                        '<div class="subject-note-head">' +
+                            '<div class="subject-note-title">' + escapeHtml(title) + '</div>' +
+                            (photos.length
+                                ? '<span class="subject-note-photo-badge">📷 ' + photos.length + '</span>'
+                                : '') +
+                        '</div>' +
+                        (snippet
+                            ? '<div class="subject-note-snippet">' + escapeHtml(snippet) + '</div>'
+                            : '') +
+                        '<div class="subject-note-meta">' +
+                            escapeHtml(t('subjectsUpdated')) + ' ' + escapeHtml(formatWhen(note.updatedAt)) +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+            }
+
+            function renderNoteOverlay() {
+                const overlay = el('noteViewOverlay');
+                if (!overlay || !overlay.classList.contains('open')) return;
+
+                const note = currentNote();
+                const editing = viewMode !== 'read';
+                const token = ++overlayToken;
+
+                const heading = el('noteViewHeading');
+                if (heading) {
+                    heading.textContent = viewMode === 'new'
+                        ? t('subjectsNewNote')
+                        : (viewMode === 'edit'
+                            ? t('subjectsEditNote')
+                            : (note && note.title ? note.title : t('subjectsNote')));
+                }
+
+                const dateEl = el('noteViewDate');
+                if (dateEl) {
+                    dateEl.textContent = note
+                        ? t('subjectsUpdated') + ' ' + formatWhen(note.updatedAt || note.createdAt)
+                        : '';
+                }
+
+                // Title and text are loaded once per opened note: re-rendering
+                // (for instance after adding a photo) must never wipe what the
+                // user has already typed.
+                const loadInputs = overlayInputToken !== overlayInputsRenderedFor;
+                overlayInputsRenderedFor = overlayInputToken;
+
+                const titleInput = el('noteViewTitleInput');
+                if (titleInput) {
+                    titleInput.style.display = editing ? 'block' : 'none';
+                    titleInput.placeholder = t('subjectsNoteTitlePlaceholder');
+                    if (loadInputs) titleInput.value = editing ? ((note && note.title) || '') : '';
+                }
+
+                const textEl = el('noteViewText');
+                if (textEl) {
+                    textEl.style.display = editing ? 'none' : 'block';
+                    textEl.textContent = editing ? '' : ((note && note.text) || '');
+                }
+
+                const textInput = el('noteViewTextInput');
+                if (textInput) {
+                    textInput.style.display = editing ? 'block' : 'none';
+                    textInput.placeholder = t('subjectsNoteTextPlaceholder');
+                    if (loadInputs) textInput.value = editing ? ((note && note.text) || '') : '';
+                }
+
+                const photoBtn = el('notePhotoAddBtn');
+                if (photoBtn) {
+                    photoBtn.style.display = editing ? 'block' : 'none';
+                    photoBtn.textContent = t('subjectsAddPhoto');
+                }
+
+                const actions = el('noteViewActions');
+                if (actions) {
+                    actions.innerHTML = editing
+                        ? '<button type="button" class="note-view-btn-neutral" data-note-action="cancel">' +
+                                escapeHtml(t('subjectsCancel')) + '</button>' +
+                          '<button type="button" class="note-view-btn-save" data-note-action="save">' +
+                                escapeHtml(t('subjectsSave')) + '</button>'
+                        : '<button type="button" class="note-view-btn-neutral" data-note-action="edit">' +
+                                escapeHtml(t('subjectsEdit')) + '</button>' +
+                          '<button type="button" class="note-view-btn-danger" data-note-action="delete">' +
+                                escapeHtml(t('subjectsDelete')) + '</button>';
+                }
+
+                setNoteStatus('');
+                renderNotePhotos(token);
+            }
+
+            async function renderNotePhotos(token) {
+                const container = el('noteViewPhotos');
+                if (!container) return;
+
+                const note = currentNote();
+                const editing = viewMode !== 'read';
+                const photos = editing
+                    ? draftPhotos
+                    : ((note && note.photos) || []);
+
+                container.innerHTML = '';
+
+                for (const photo of photos) {
+                    if (token !== overlayToken) return;
+
+                    const wrap = document.createElement('div');
+                    wrap.className = 'note-view-photo-wrap' + (editing ? ' thumb' : '');
+
+                    const image = document.createElement('img');
+                    image.className = editing ? 'note-view-photo-thumb' : 'note-view-photo';
+                    image.alt = '';
+                    wrap.appendChild(image);
+
+                    if (editing) {
+                        const remove = document.createElement('button');
+                        remove.type = 'button';
+                        remove.className = 'note-view-photo-remove';
+                        remove.textContent = '✕';
+                        remove.addEventListener('click', () => {
+                            draftPhotos = draftPhotos.filter(item => item.id !== photo.id);
+                            renderNoteOverlay();
+                        });
+                        wrap.appendChild(remove);
+                    }
+
+                    container.appendChild(wrap);
+
+                    const media = photo.data
+                        ? { data: photo.data, width: photo.width, height: photo.height }
+                        : await loadMedia(photo.id);
+
+                    if (token !== overlayToken) return;
+
+                    if (media && media.data) image.src = media.data;
+                }
+            }
+
+            function openNoteOverlay(noteId) {
+                const overlay = el('noteViewOverlay');
+                if (!overlay) return;
+
+                if (noteId) {
+                    const note = subjectNotes.find(item => item.id === noteId);
+                    if (!note) return;
+                    openNoteId = noteId;
+                    viewMode = 'read';
+                    draftPhotos = (note.photos || []).map(photo => ({
+                        id: photo.id,
+                        width: photo.width,
+                        height: photo.height,
+                        stored: true
+                    }));
+                } else {
+                    openNoteId = null;
+                    viewMode = 'new';
+                    draftPhotos = [];
+                }
+
+                overlayInputToken += 1;
+                overlay.classList.add('open');
+                renderNoteOverlay();
+            }
+
+            function closeNoteOverlay() {
+                const overlay = el('noteViewOverlay');
+                if (overlay) overlay.classList.remove('open');
+                openNoteId = null;
+                viewMode = 'read';
+                draftPhotos = [];
+                overlayToken += 1;
+                overlayInputToken += 1;
+                setNoteStatus('');
+            }
+
+            function editorHasUnsavedContent() {
+                if (viewMode === 'read') return false;
+                const title = (el('noteViewTitleInput')?.value || '').trim();
+                const text = (el('noteViewTextInput')?.value || '');
+                return !!(title || text.trim() || draftPhotos.length);
+            }
+
+            /*
+             * Closing the sheet with the X, or by tapping the backdrop, keeps
+             * whatever was typed. Every notes app people compare this to behaves
+             * that way, and the backdrop is easy to hit by accident on a phone
+             * because the sheet is anchored to the bottom -- so treating those
+             * taps as a discard was silently throwing notes away. The Cancel
+             * button is still an explicit "throw this away".
+             */
+            async function dismissNoteOverlay() {
+                if (!editorHasUnsavedContent() || !selectedSubjectId) {
+                    closeNoteOverlay();
+                    return;
+                }
+
+                // Wait for the write: if it is rejected the sheet stays open
+                // with the text still in it and the error on screen, instead of
+                // closing over a note that was never stored.
+                const saved = await saveOpenNote();
+                if (saved) closeNoteOverlay();
+            }
+
+            function editOpenNote() {
+                const note = currentNote();
+                if (!note) return;
+                viewMode = 'edit';
+                draftPhotos = (note.photos || []).map(photo => ({
+                    id: photo.id,
+                    width: photo.width,
+                    height: photo.height,
+                    stored: true
+                }));
+                overlayInputToken += 1;
+                renderNoteOverlay();
+            }
+
+            async function saveOpenNote() {
+                const subjectId = selectedSubjectId;
+                if (!subjectId) return false;
+
+                const title = (el('noteViewTitleInput')?.value || '').trim();
+                const text = (el('noteViewTextInput')?.value || '');
+                const existing = viewMode === 'edit' ? currentNote() : null;
+
+                if (!title && !text.trim() && draftPhotos.length === 0) {
+                    setNoteStatus(t('subjectsNoteEmpty'));
+                    return false;
+                }
+
+                const now = Date.now();
+
+                // Photos that still need to be stored, captured before the local
+                // copies (marked stored) replace them below.
+                const pendingPhotos = draftPhotos.filter(photo => !photo.stored && photo.data);
+
+                // What the account stores (no image data in the note document) …
+                const storedPhotos = draftPhotos.map(photo => ({
+                    id: photo.id,
+                    width: photo.width,
+                    height: photo.height
+                }));
+
+                // … and what this device shows right away, photos included.
+                const localPhotos = draftPhotos.map(photo => ({
+                    id: photo.id,
+                    width: photo.width,
+                    height: photo.height,
+                    stored: true,
+                    data: photo.data
+                }));
+
+                const note = {
+                    id: existing ? existing.id : newId(),
+                    title: title,
+                    text: text,
+                    photos: storedPhotos,
+                    createdAt: existing ? (existing.createdAt || now) : now,
+                    updatedAt: now
+                };
+
+                // Show the saved note immediately. Offline the writes below are
+                // queued by the existing IndexedDB persistence and replayed when
+                // the connection returns, so writing a note never blocks on it.
+                // Everything the optimistic update is about to overwrite is kept
+                // so a failed write can be undone instead of leaving a note on
+                // screen that was never stored.
+                const notesBefore = subjectNotes;
+                const openNoteIdBefore = openNoteId;
+                const viewModeBefore = viewMode;
+                const draftBefore = draftPhotos;
+
+                const localNote = { ...note, photos: localPhotos };
+                notesIndex = null;
+                openNoteId = note.id;
+                optimisticNoteId = note.id;
+                viewMode = 'read';
+                draftPhotos = localPhotos;
+                overlayInputToken += 1;
+                subjectNotes = sortNotes(
+                    subjectNotes.some(item => item.id === note.id)
+                        ? subjectNotes.map(item => item.id === note.id ? localNote : item)
+                        : subjectNotes.concat([localNote])
+                );
+                renderSubjectDetail();
+                renderNoteOverlay();
+
+                const failedPhotos = new Set();
+
+                try {
+                    // Photos are stored before the note so the note never points
+                    // at a photo that is not there yet.
+                    for (const photo of pendingPhotos) {
+                        const outcome = await persistMedia({
+                            id: photo.id,
+                            data: photo.data,
+                            width: photo.width,
+                            height: photo.height,
+                            createdAt: now
+                        });
+
+                        if (outcome === 'quota') failedPhotos.add(photo.id);
+                    }
+
+                    const noteToStore = failedPhotos.size
+                        ? { ...note, photos: storedPhotos.filter(photo => !failedPhotos.has(photo.id)) }
+                        : note;
+
+                    // The local copy carries the photo data, so a note kept on
+                    // this device still shows its images.
+                    const localToKeep = {
+                        ...localNote,
+                        photos: localPhotos.filter(photo => !failedPhotos.has(photo.id))
+                    };
+
+                    const outcome = await persistNote(noteToStore, subjectId, localToKeep);
+
+                    if (outcome === 'local') {
+                        // On this device, not yet in the account. The note is
+                        // safe and the write is retried later.
+                        setNoteStatus(t('subjectsNoteSaveFailed'));
+                    } else {
+                        // Only reported once the write has actually been
+                        // accepted. Saying "Saved" up front is how a note that
+                        // never got stored still looks like it did.
+                        setNoteStatus(t('subjectsSaved'), true);
+                    }
+
+                    if (failedPhotos.size) {
+                        // This device could not keep those photos, so drop them
+                        // from the note too rather than show an empty frame.
+                        draftPhotos = localPhotos.filter(photo => !failedPhotos.has(photo.id));
+                        subjectNotes = subjectNotes.map(item =>
+                            item.id === note.id ? { ...item, photos: draftPhotos } : item
+                        );
+                        renderSubjectDetail();
+                        renderNoteOverlay();
+                        setNoteStatus(t('subjectsStorageFull'));
+                    }
+
+
+                    // Photos removed while editing are cleaned up on the other
+                    // side too, so they cannot come back on another device.
+                    if (existing) {
+                        const kept = new Set(storedPhotos.map(photo => photo.id));
+                        (existing.photos || []).forEach(photo => {
+                            if (photo && photo.id && !kept.has(photo.id)) {
+                                deleteMedia(photo.id).catch(() => {});
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Note save error:', error);
+
+                    // The write was rejected, so undo the optimistic copy. Left
+                    // on screen it looks saved and then disappears the moment
+                    // the subject is reopened, which reads as "my note did not
+                    // save". The editor is put back exactly as it was -- without
+                    // bumping overlayInputToken -- so nothing typed is lost and
+                    // the user can try again.
+                    subjectNotes = notesBefore;
+                    openNoteId = openNoteIdBefore;
+                    viewMode = viewModeBefore;
+                    draftPhotos = draftBefore;
+                    notesIndex = null;
+                    renderSubjectDetail();
+                    renderNoteOverlay();
+
+                    // The optimistic render above switched the sheet to read
+                    // mode, which clears both fields -- so put the typed text
+                    // back into them by hand. renderNoteOverlay() leaves the
+                    // values alone here (overlayInputToken was not bumped), and
+                    // the restored viewMode puts the editor back on screen.
+                    const titleInput = el('noteViewTitleInput');
+                    const textInput = el('noteViewTextInput');
+                    if (titleInput) titleInput.value = title;
+                    if (textInput) textInput.value = text;
+
+                    setNoteStatus(t('subjectsNoteSaveFailed'));
+                    return false;
+                } finally {
+                    if (optimisticNoteId === note.id) optimisticNoteId = null;
+                }
+
+                return true;
+            }
+
+            async function deleteOpenNote() {
+                const note = currentNote();
+                const subjectId = selectedSubjectId;
+                if (!note || !subjectId) return;
+
+                const confirmed = askForConfirm(t('subjectsDeleteNoteConfirm'));
+                if (confirmed === undefined) {
+                    setNoteStatus(t('subjectsDialogBlocked'));
+                    return;
+                }
+                if (!confirmed) return;
+
+                try {
+                    await deleteNoteById(subjectId, note.id, note.photos || []);
+                    subjectNotes = subjectNotes.filter(item => item.id !== note.id);
+                    notesIndex = null;
+                    closeNoteOverlay();
+                    renderSubjectDetail();
+                } catch (error) {
+                    console.error('Delete note error:', error);
+                    setNoteStatus(t('subjectsNoteDeleteFailed'));
+                }
+            }
+
+            /* ---------- photos ---------- */
+
+            function loadImageFile(file) {
+                return new Promise((resolve, reject) => {
+                    const url = URL.createObjectURL(file);
+                    const image = new Image();
+
+                    image.onload = () => resolve({ image, url });
+                    image.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        reject(new Error('Could not read that image.'));
+                    };
+                    image.src = url;
+                });
+            }
+
+            function drawScaled(image, maxDimension) {
+                const scale = Math.min(1, maxDimension / Math.max(image.width || 1, image.height || 1));
+                const width = Math.max(1, Math.round((image.width || 1) * scale));
+                const height = Math.max(1, Math.round((image.height || 1) * scale));
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const context = canvas.getContext('2d');
+                // JPEG has no transparency: paint white instead of black.
+                context.fillStyle = '#ffffff';
+                context.fillRect(0, 0, width, height);
+                context.drawImage(image, 0, 0, width, height);
+
+                return { canvas, width, height };
+            }
+
+            async function compressPhoto(file) {
+                const { image, url } = await loadImageFile(file);
+
+                try {
+                    for (const step of IMAGE_LADDER) {
+                        const { canvas, width, height } = drawScaled(image, step.max);
+                        const data = canvas.toDataURL('image/jpeg', step.quality);
+
+                        if (data.length <= MAX_MEDIA_STRING) {
+                            return { data, width, height };
+                        }
+                    }
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
+
+                return null;
+            }
+
+            async function handlePhotoFiles(fileList) {
+                const files = [...(fileList || [])];
+                if (files.length === 0) return;
+
+                let status = '';
+
+                for (const file of files) {
+                    if (!/^image\//i.test(file.type || '')) continue;
+
+                    if (draftPhotos.length >= MAX_PHOTOS_PER_NOTE) {
+                        status = t('subjectsPhotoLimit');
+                        break;
+                    }
+
+                    try {
+                        const compressed = await compressPhoto(file);
+                        if (!compressed) {
+                            status = t('subjectsPhotoTooBig');
+                            continue;
+                        }
+                        draftPhotos.push({
+                            id: newId(),
+                            data: compressed.data,
+                            width: compressed.width,
+                            height: compressed.height,
+                            stored: false
+                        });
+                    } catch (error) {
+                        console.error('Photo error:', error);
+                        status = t('subjectsPhotoTooBig');
+                    }
+                }
+
+                // Re-render first (it clears the status line), then report.
+                renderNoteOverlay();
+                if (status) setNoteStatus(status);
+            }
+
+            /* ---------- guest -> account migration ---------- */
+
+            async function migrateGuestSubjectsToAccount(uid) {
+                // A guest subject the user already deleted from this account
+                // (its earlier migration failed halfway, then it was deleted)
+                // must not be uploaded again on the next sign-in.
+                const deletedIds = new Set(
+                    removedSubjectRecords(uid).map(item => item.id)
+                );
+                const subjects = guestSubjects().filter(subject =>
+                    subject && subject.id && !deletedIds.has(subject.id));
+                const notesMap = guestNotesMap();
+                const mediaMap = guestMediaMap();
+
+                const hasData = subjects.length > 0 ||
+                    Object.keys(notesMap).length > 0 ||
+                    Object.keys(mediaMap).length > 0;
+
+                if (!hasData) return { migrated: 0, names: [] };
+
+                // Photos first so notes never point at missing images.
+                for (const mediaId of Object.keys(mediaMap)) {
+                    const media = mediaMap[mediaId];
+                    if (!media || !media.data) continue;
+                    await setDoc(doc(db, 'users', uid, MEDIA_COLLECTION, mediaId), {
+                        data: media.data,
+                        width: media.width || 0,
+                        height: media.height || 0,
+                        createdAt: media.createdAt || Date.now()
+                    });
+                }
+
+                for (const subject of subjects) {
+                    const createdAt = subject.createdAt || Date.now();
+                    await setDoc(doc(db, 'users', uid, SUBJECTS_COLLECTION, subject.id), {
+                        name: subject.name,
+                        createdAt: createdAt,
+                        updatedAt: subject.updatedAt || createdAt
+                    }, { merge: true });
+
+                    const notes = Array.isArray(notesMap[subject.id]) ? notesMap[subject.id] : [];
+
+                    for (const note of notes) {
+                        if (!note || !note.id) continue;
+                        const noteCreated = note.createdAt || Date.now();
+                        await setDoc(
+                            doc(db, 'users', uid, SUBJECTS_COLLECTION, subject.id, NOTES_SUBCOLLECTION, note.id),
+                            {
+                                title: note.title || '',
+                                text: note.text || '',
+                                photos: note.photos || [],
+                                createdAt: noteCreated,
+                                updatedAt: note.updatedAt || noteCreated
+                            },
+                            { merge: true }
+                        );
+                    }
+                }
+
+                // Only clear what was actually stored above. The upload loops
+                // walk guestSubjects(), so a note held against a subject that
+                // lives in the account -- for instance one kept locally after an
+                // account write was refused -- is never uploaded here. Clearing
+                // the whole notes key used to delete exactly those notes, on
+                // every sign-in, without ever sending them anywhere.
+                localStorage.removeItem(GUEST_SUBJECTS_KEY);
+
+                const migratedIds = new Set(subjects.map(subject => subject.id));
+                const stillHeld = {};
+                Object.keys(notesMap).forEach(subjectId => {
+                    if (!migratedIds.has(subjectId)) stillHeld[subjectId] = notesMap[subjectId];
+                });
+                if (Object.keys(stillHeld).length > 0) saveGuestNotesMap(stillHeld);
+                else localStorage.removeItem(GUEST_NOTES_KEY);
+
+                localStorage.removeItem(GUEST_MEDIA_KEY);
+
+                notesIndex = null;
+
+                return {
+                    migrated: subjects.length,
+                    names: subjects.map(subject => String(subject.name || '').trim().toLowerCase())
+                };
+            }
+
+            /* ---------- navigation & wiring ---------- */
+
+            function openSubjectsView() {
+                if (guestMode()) {
+                    subjectList = sortSubjects(guestSubjects());
+                    notesIndex = null;
+                    subjectsLoadedOnce = true;
+                }
+                renderSubjectsView();
+                showSection('subjects');
+            }
+
+            function openSubject(subjectId) {
+                const subject = findSubject(subjectId);
+                if (!subject) return;
+
+                selectedSubjectId = subjectId;
+
+                if (guestMode()) {
+                    stopNotesListener();
+                    subjectNotes = sortNotes(guestNotesMap()[subjectId] || []);
+                } else {
+                    subjectNotes = [];
+                    startNotesListener(subjectId);
+                }
+
+                renderSubjectDetail();
+                showSection('subjectDetail');
+            }
+
+            function closeSubject() {
+                stopNotesListener();
+                selectedSubjectId = null;
+                subjectNotes = [];
+                closeNoteOverlay();
+                renderSubjectsList();
+                showSection('subjects');
+            }
+
+            function handleAuthChange(uid) {
+                if (uid) {
+                    startSubjectsSync(uid);
+                    return;
+                }
+
+                stopSubjectsSync();
+                subjectList = sortSubjects(guestSubjects());
+                selectedSubjectId = null;
+                subjectNotes = [];
+                renderSubjectsView();
+            }
+
+            function handleSubjectsListClick(event) {
+                const noteRow = event.target.closest('[data-note-id]');
+
+                if (noteRow) {
+                    openSubject(noteRow.dataset.subjectId);
+                    openNoteOverlay(noteRow.dataset.noteId);
+                    return;
+                }
+
+                const subjectRow = event.target.closest('[data-subject-id]');
+                if (subjectRow) openSubject(subjectRow.dataset.subjectId);
+            }
+
+            function bind() {
+                const launch = el('studySubjectsLaunch');
+
+                if (launch) {
+                    launch.addEventListener('click', openSubjectsView);
+                    launch.addEventListener('keydown', event => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            openSubjectsView();
+                        }
+                    });
+                }
+
+                el('subjectsBack')?.addEventListener('click', () => showSection('study'));
+                el('subjectDetailBack')?.addEventListener('click', closeSubject);
+                el('subjectsAddBtn')?.addEventListener('click', () => addSubjectFlow());
+                el('subjectRenameBtn')?.addEventListener('click', () => renameSubjectFlow());
+                el('subjectDeleteBtn')?.addEventListener('click', () => deleteSubjectFlow());
+                el('subjectAddNoteBtn')?.addEventListener('click', () => openNoteOverlay(null));
+                el('subjectsList')?.addEventListener('click', handleSubjectsListClick);
+                el('subjectsList')?.addEventListener('keydown', event => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    const row = event.target.closest('[data-subject-id]');
+                    if (!row) return;
+                    event.preventDefault();
+                    if (row.dataset.noteId) {
+                        openSubject(row.dataset.subjectId);
+                        openNoteOverlay(row.dataset.noteId);
+                    } else {
+                        openSubject(row.dataset.subjectId);
+                    }
+                });
+
+                el('subjectNoteList')?.addEventListener('click', event => {
+                    const row = event.target.closest('[data-note-id]');
+                    if (row) openNoteOverlay(row.dataset.noteId);
+                });
+
+                el('noteViewClose')?.addEventListener('click', () => dismissNoteOverlay());
+                el('noteViewOverlay')?.addEventListener('click', event => {
+                    if (event.target === el('noteViewOverlay')) dismissNoteOverlay();
+                });
+
+                el('noteViewActions')?.addEventListener('click', event => {
+                    const action = event.target.closest('[data-note-action]')?.dataset.noteAction;
+                    if (!action) return;
+
+                    if (action === 'edit') editOpenNote();
+                    else if (action === 'cancel') { closeNoteOverlay(); }
+                    else if (action === 'save') saveOpenNote();
+                    else if (action === 'delete') deleteOpenNote();
+                });
+
+                const photoInput = el('notePhotoInput');
+                el('notePhotoAddBtn')?.addEventListener('click', () => photoInput?.click());
+                photoInput?.addEventListener('change', event => {
+                    // Copy the FileList before resetting the input: clearing the
+                    // input empties the live FileList, which would drop the
+                    // photos the user just picked.
+                    const files = [...(event.target.files || [])];
+                    event.target.value = '';
+                    handlePhotoFiles(files);
+                });
+
+                const search = el('subjectsSearchInput');
+                search?.addEventListener('input', () => {
+                    const query = search.value.trim().toLowerCase();
+                    renderSubjectsList();
+
+                    if (!query || notesIndex || notesIndexLoading) return;
+
+                    if (searchTimer) clearTimeout(searchTimer);
+                    // Note text lives in each subject's notes: load them once so
+                    // search can look inside note titles and text as well.
+                    searchTimer = setTimeout(() => {
+                        ensureNotesIndex().then(() => {
+                            if (search.value.trim().toLowerCase() === query) renderSubjectsList();
+                        });
+                    }, 250);
+                });
+
+                window._renderSubjects = function () {
+                    renderSubjectsView();
+                    if (selectedSubjectId) renderSubjectDetail();
+                    if (el('noteViewOverlay')?.classList.contains('open')) renderNoteOverlay();
+                };
+
+                window._subjectsAuthChanged = handleAuthChange;
+            }
+
+            bind();
+            renderSubjectsView();
+            handleAuthChange(currentUser && currentUser.uid ? currentUser.uid : null);
+
+        })();
+
 
         /* ============================================================
            CALENDAR EVENT SYSTEM
