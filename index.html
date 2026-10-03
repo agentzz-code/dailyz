@@ -5727,25 +5727,18 @@
             "dailykrd_study_completed",
             "dailykrd_study_sessions",
             "dailykrd_push_settings",
-            "dailykrd_welcomed",
-            /* Tombstones of Subjects the user deleted, so a subject removed on
-               one device is never re-adopted from another device's stale
-               Homework checklist. */
-            "dailykrd_subjects_removed"
+            "dailykrd_welcomed"
         ];
 
         const SYNCED_KEY_SET =
             new Set(SYNCED_STORAGE_KEYS);
 
-        /* History-shaped values are union-merged instead of replaced so study
-           time recorded on two devices is never dropped. The subjects tombstone
-           list unions too: two devices deleting different subjects offline must
-           both stay deleted. */
+        // History-shaped values are union-merged instead of replaced so study
+        // time recorded on two devices is never dropped.
         const SYNCED_UNION_KEYS =
             new Set([
                 "dailykrd_study_sessions",
-                "dailykrd_study_completed",
-                "dailykrd_subjects_removed"
+                "dailykrd_study_completed"
             ]);
 
         const SYNC_STAMPS_KEY =
@@ -6294,46 +6287,6 @@
                             seen.add(fingerprint);
 
                             union.push(session);
-                        });
-
-                    return JSON.stringify(union);
-                }
-
-                // Deleted-subject tombstones: keep every name either side has
-                // removed, so an offline device can never resurrect one.
-                if (key === "dailykrd_subjects_removed") {
-
-                    const local =
-                        JSON.parse(localRaw);
-
-                    const remote =
-                        JSON.parse(remoteRaw);
-
-                    if (
-                        !Array.isArray(local) ||
-                        !Array.isArray(remote)
-                    ) {
-
-                        return remoteRaw;
-                    }
-
-                    const seen =
-                        new Set();
-
-                    const union = [];
-
-                    local
-                        .concat(remote)
-                        .forEach(name => {
-
-                            const fingerprint =
-                                String(name).toLowerCase();
-
-                            if (!fingerprint || seen.has(fingerprint)) return;
-
-                            seen.add(fingerprint);
-
-                            union.push(name);
                         });
 
                     return JSON.stringify(union);
@@ -7615,7 +7568,6 @@
                 subjectsDeleteConfirm: "Delete this subject? Its notes will be deleted too.",
                 subjectsDeleteNoteConfirm: "Delete this note?",
                 subjectsNameRequired: "Enter a subject name.",
-                subjectsExists: "A subject with this name already exists.",
                 subjectsNewNote: "New Note",
                 subjectsAddNote: "+ Add Note",
                 subjectsNote: "Note",
@@ -7632,8 +7584,6 @@
                 subjectsPhotoLimit: "A note can hold up to 6 photos.",
                 subjectsStorageFull: "This device is full — sign in to keep photos in the cloud.",
                 subjectsCloudError: "Cloud sync unavailable — subjects and notes stay safe on this device.",
-                subjectsNoteSaveFailed: "Couldn't save the note — it stays on this device and will sync later.",
-                subjectsNoteDeleteFailed: "Couldn't delete the note — check your connection and try again.",
                 subjectsDialogBlocked: "This browser blocked the dialog — open Daily.KRD directly and try again.",
                 subjectsSearchNotes: "Matching notes",
                 subjectsPhoto: "photo",
@@ -8049,7 +7999,6 @@ done: "تەواو",
                 subjectsDeleteConfirm: "ئەم بابەتە بسڕدرێتەوە؟ تێبینییەکانیشی دەسڕدرێنەوە.",
                 subjectsDeleteNoteConfirm: "ئەم تێبینییە بسڕدرێتەوە؟",
                 subjectsNameRequired: "ناوی بابەت بنووسە.",
-                subjectsExists: "بابەتێکی هەمان ناو پێشتر هەیە.",
                 subjectsNewNote: "تێبینی نوێ",
                 subjectsAddNote: "+ زیادکردنی تێبینی",
                 subjectsNote: "تێبینی",
@@ -8066,8 +8015,6 @@ done: "تەواو",
                 subjectsPhotoLimit: "هەر تێبینییەک تا ٦ وێنە هەڵدەگرێت.",
                 subjectsStorageFull: "بیرگەی ئەم ئامێرە پڕبووە — بچۆ ژوورەوە بۆ هەڵگرتنی وێنەکان لە هەور.",
                 subjectsCloudError: "هاوکاتکردنی هەور بەردەست نییە — بابەت و تێبینی لەم ئامێرەدا پارێزراون.",
-                subjectsNoteSaveFailed: "تێبینییەکە پاشەکەوت نەکرا — لەسەر ئەم ئامێرە دەمێنێتەوە و دواتر هاوکات دەکرێت.",
-                subjectsNoteDeleteFailed: "تێبینییەکە سڕ نەکرایەوە — پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدە.",
                 subjectsDialogBlocked: "ئەم وێبگەڕە دەرگای گفتوگۆی داخستووە — ڕاستەوخۆ Daily.KRD بکەرەوە و دووبارە هەوڵ بدە.",
                 subjectsSearchNotes: "تێبینییە هاوشێوەکان",
                 subjectsPhoto: "وێنە",
@@ -8485,7 +8432,6 @@ done: "تەواو",
                 subjectsDeleteConfirm: "حذف هذه المادة؟ سيتم حذف ملاحظاتها أيضاً.",
                 subjectsDeleteNoteConfirm: "حذف هذه الملاحظة؟",
                 subjectsNameRequired: "أدخل اسم المادة.",
-                subjectsExists: "مادة بنفس الاسم موجودة بالفعل.",
                 subjectsNewNote: "ملاحظة جديدة",
                 subjectsAddNote: "+ إضافة ملاحظة",
                 subjectsNote: "ملاحظة",
@@ -8502,8 +8448,6 @@ done: "تەواو",
                 subjectsPhotoLimit: "كل ملاحظة تحتفظ بـ 6 صور كحد أقصى.",
                 subjectsStorageFull: "ذاكرة الجهاز ممتلئة — سجّل الدخول لحفظ الصور في السحابة.",
                 subjectsCloudError: "مزامنة السحابة غير متاحة — المواد والملاحظات محفوظة على هذا الجهاز.",
-                subjectsNoteSaveFailed: "تعذّر حفظ الملاحظة — تبقى على هذا الجهاز وستُزامن لاحقًا.",
-                subjectsNoteDeleteFailed: "تعذّر حذف الملاحظة — تحقق من اتصالك وحاول مجددًا.",
                 subjectsDialogBlocked: "هذا المتصفح منع نافذة التأكيد — افتح Daily.KRD مباشرة وأعد المحاولة.",
                 subjectsSearchNotes: "ملاحظات مطابقة",
                 subjectsPhoto: "صورة",
@@ -15398,9 +15342,6 @@ document.documentElement.classList.toggle(
         function renderStudy() {
             const hwTitleEl = document.getElementById("studySubjectsTitle");
             if (hwTitleEl) hwTitleEl.textContent = t("homework");
-            // Keep the Study Timer's Subject dropdown in step with the checklist
-            // (late-bound; undefined during early boot, where timerInit covers it).
-            if (typeof window._timerPopulateSubject === "function") window._timerPopulateSubject();
             const goal = loadStudyGoal();
             const minutes = loadStudyMinutes();
             const pct = goal > 0
@@ -15718,16 +15659,11 @@ document.documentElement.classList.toggle(
                 subjects.map(s => '<option value="' + s.replace(/"/g, "&quot;") + '">' + s.replace(/</g, "&lt;") + '</option>').join("");
         }
 
-        // Late-bound hook so the Subjects & Notes module can refresh the
-        // dropdown after adding/renaming/deleting a subject (timerInit runs
-        // later in boot, so this is undefined until then).
-
         function timerInit() {
             timerPopulateSubject();
             timerStartBtn.textContent = t("timerStart");
             timerRender();
         }
-        window._timerPopulateSubject = timerPopulateSubject;
 
         timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(btn => {
             btn.addEventListener("click", () => {
@@ -16693,6 +16629,9 @@ document.documentElement.classList.toggle(
             const GUEST_SUBJECTS_KEY = 'dailykrd_guest_subjects';
             const GUEST_NOTES_KEY = 'dailykrd_guest_notes';
             const GUEST_MEDIA_KEY = 'dailykrd_guest_media';
+            const LEGACY_SUBJECTS_KEY = 'dailykrd_study_subjects';
+            const COMPLETED_KEY = 'dailykrd_study_completed';
+            const REMOVED_SUBJECTS_KEY = 'dailykrd_subjects_removed_';
 
             const MAX_PHOTOS_PER_NOTE = 6;
             const MAX_MEDIA_STRING = 700 * 1024;   // data URL characters, safely under the 1 MiB document limit
@@ -16713,6 +16652,9 @@ document.documentElement.classList.toggle(
             let unsubscribeSubjects = null;
             let unsubscribeNotes = null;
             let subjectsLoadedOnce = false;
+            let promotionReady = false;
+            let promotionInFlight = false;
+            const adoptedNames = new Set();
             let notesIndex = null;
             let notesIndexLoading = false;
             let openNoteId = null;
@@ -16827,120 +16769,6 @@ document.documentElement.classList.toggle(
 
             function saveGuestSubjects(list) {
                 writeJson(GUEST_SUBJECTS_KEY, list);
-            }
-
-            /* ---------- signed-in local cache ----------
-
-               Subjects are ALSO kept in localStorage while signed in, per
-               account. Firestore remains the source of truth for sync, but the
-               cache guarantees a subject survives even if the app is closed
-               before its write reaches Firestore, or if writes are being
-               rejected (offline rules, etc.). On sign-in the cache is reconciled
-               with the account: docs that never made it are pushed up again. */
-
-            function cacheKeyFor(uid) {
-                return 'dailykrd_acc_subjects_' + uid;
-            }
-
-            function cachedSubjects(uid) {
-                const list = readJson(cacheKeyFor(uid), []);
-                return Array.isArray(list) ? list.filter(item => item && item.id) : [];
-            }
-
-            function saveCachedSubjects(uid, list) {
-                try {
-                    writeJson(cacheKeyFor(uid), list);
-                } catch (error) {
-                    console.warn('[Daily.KRD notes] subject cache write failed:', error);
-                }
-            }
-
-            function clearCachedSubjects(uid) {
-                try {
-                    localStorage.removeItem(cacheKeyFor(uid));
-                } catch (error) { /* ignore */ }
-            }
-
-            /* Push any cached subject the account does not have yet (a write
-               that never landed). Merges by id; remote wins for name changes. */
-            function resubmitCachedSubjects(uid) {
-                const cached = cachedSubjects(uid);
-                if (cached.length === 0) return;
-
-                const known = new Set(subjectList.map(item => item.id));
-                const missing = cached.filter(item => !known.has(item.id));
-
-                missing.forEach(item => {
-                    setDoc(subjectRef(item.id), {
-                        name: item.name,
-                        createdAt: item.createdAt || Date.now(),
-                        updatedAt: item.updatedAt || Date.now()
-                    }, { merge: true }).catch(() => {});
-                });
-
-                if (missing.length > 0) {
-                    console.info('[Daily.KRD notes] re-pushed', missing.length, 'cached subject(s)');
-                }
-            }
-
-            /*
-             * Notes that could not be written to the account are held on this
-             * device and retried every time the account becomes writable again.
-             * A note that uploads is dropped from the local store, so it lives
-             * in exactly one place at a time.
-             */
-            async function resubmitLocalNotes(uid) {
-                if (!uid || guestMode()) return;
-
-                const map = guestNotesMap();
-                const subjectIds = Object.keys(map);
-                if (subjectIds.length === 0) return;
-
-                let pushed = 0;
-
-                for (const subjectId of subjectIds) {
-                    const notes = Array.isArray(map[subjectId]) ? map[subjectId] : [];
-                    const stillPending = [];
-
-                    for (const note of notes) {
-                        if (!note || !note.id) continue;
-                        try {
-                            await setDoc(
-                                doc(db, 'users', uid, SUBJECTS_COLLECTION, subjectId,
-                                    NOTES_SUBCOLLECTION, note.id),
-                                {
-                                    title: note.title || '',
-                                    text: note.text || '',
-                                    // The local copy can carry photo data so it
-                                    // renders offline; the account document
-                                    // must not.
-                                    photos: (note.photos || []).map(photo => ({
-                                        id: photo.id,
-                                        width: photo.width,
-                                        height: photo.height
-                                    })),
-                                    createdAt: note.createdAt || Date.now(),
-                                    updatedAt: note.updatedAt || note.createdAt || Date.now()
-                                },
-                                { merge: true }
-                            );
-                            pushed += 1;
-                        } catch (error) {
-                            stillPending.push(note);
-                        }
-                    }
-
-                    if (stillPending.length) map[subjectId] = stillPending;
-                    else delete map[subjectId];
-                }
-
-                saveGuestNotesMap(map);
-                notesIndex = null;
-
-                if (pushed > 0) {
-                    console.info('[Daily.KRD notes] re-pushed', pushed, 'note(s) held on this device');
-                    if (selectedSubjectId) renderSubjectDetail();
-                }
             }
 
             function guestNotesMap() {
@@ -17060,32 +16888,17 @@ document.documentElement.classList.toggle(
                         cloudBlocked = false;
                         notesIndex = null;
                         setSubjectsStatus('');
-
-                        // Once the account's real state is known, push up any
-                        // cached subject whose write never landed — BEFORE the
-                        // cache is overwritten with the account list, which
-                        // would erase the evidence. Then keep the cache aligned.
-                        if (syncUid) {
-                            const fromCache = !!(snapshot.metadata && snapshot.metadata.fromCache);
-                            if (!fromCache) {
-                                resubmitCachedSubjects(syncUid);
-                                resubmitLocalNotes(syncUid).catch(error =>
-                                    console.warn('[Daily.KRD notes] note re-push failed:', error));
-                            }
-                            saveCachedSubjects(syncUid, subjectList);
-                        }
-
                         renderSubjectsList();
+
+                        // A cache-only snapshot does not prove what the account
+                        // holds, so never adopt from one.
+                        const fromCache = !!(snapshot.metadata && snapshot.metadata.fromCache);
+                        if (!fromCache) promoteLegacySubjects();
                     },
                     error => {
                         console.error('Subjects listener error:', error);
                         if (error && error.code === 'permission-denied') {
-                            // Sync stays off for this session (data remains safe
-                            // locally) but no scary banner: subjects and notes
-                            // keep working from local storage.
                             cloudBlocked = true;
-                            // Say so on the small status line, so "my note did
-                            // not sync" has a visible explanation.
                             setSubjectsStatus(t('subjectsCloudError'));
                         }
                     }
@@ -17102,10 +16915,7 @@ document.documentElement.classList.toggle(
                         if (subjectId !== selectedSubjectId) return;
                         const list = [];
                         snapshot.forEach(item => list.push({ id: item.id, ...item.data() }));
-                        // Notes this device could not upload are folded in, so
-                        // a note kept locally stays on screen instead of
-                        // vanishing because the account never received it.
-                        subjectNotes = sortNotes(mergeLocalNotes(subjectId, list));
+                        subjectNotes = sortNotes(list);
                         notesIndex = null;
                         // If another device deleted the note we are reading, close
                         // it rather than leaving an empty sheet on screen. A note
@@ -17135,36 +16945,31 @@ document.documentElement.classList.toggle(
                 if (!uid || !currentUser || currentUser.uid !== uid) return;
                 syncUid = uid;
 
-                // Show the account's local cache right away: subjects created on
-                // this device are on screen even before Firestore confirms, and
-                // they survive an app close that happens before writes land.
-                subjectList = sortSubjects(cachedSubjects(uid));
-                subjectsLoadedOnce = true;
+                // Guest subjects are the user's own subjects. Wait for them to be
+                // migrated before the Study checklist is consulted, and treat the
+                // migrated names as already handled, so adoption can never create
+                // a second copy of a subject that is still being uploaded.
+                promotionReady = !hasGuestData();
 
                 startSubjectsListener();
 
-                // Guest work made on this device moves into the account, then
-                // joins the account cache.
                 migrateGuestSubjectsToAccount(uid)
-                    .then(() => {
-                        if (syncUid !== uid) return;
-                        const merged = sortSubjects(cachedSubjects(uid).concat(guestSubjects()));
-                        saveCachedSubjects(uid, merged);
-                        subjectList = merged;
-                        notesIndex = null;
-                        renderSubjectsList();
+                    .then(result => {
+                        (result.names || []).forEach(name => adoptedNames.add(name));
                     })
-                    .catch(error => console.error('Guest subjects migration error:', error));
+                    .catch(error => console.error('Guest subjects migration error:', error))
+                    .finally(() => { promotionReady = true; });
             }
 
             function stopSubjectsSync() {
                 stopSubjectsListener();
                 stopNotesListener();
                 closeNoteOverlay();
-                // The per-account cache is deliberately KEPT: it is this
-                // account's local safety copy for the next sign-in.
                 syncUid = null;
                 subjectsLoadedOnce = false;
+                promotionReady = false;
+                promotionInFlight = false;
+                adoptedNames.clear();
                 cloudBlocked = false;
                 notesIndex = null;
                 mediaCache.clear();
@@ -17187,29 +16992,15 @@ document.documentElement.classList.toggle(
                     return;
                 }
 
-                // Two subjects with the same name would confuse the Homework
-                // mirror (deleting one would pull the shared checklist entry).
-                const exists = subjectList.some(item =>
-                    String(item.name || '').trim().toLowerCase() === name.toLowerCase());
-                if (exists) {
-                    alert(t('subjectsExists'));
-                    return;
-                }
-
                 const now = Date.now();
                 const subject = { id: newId(), name: name, createdAt: now, updatedAt: now };
 
-                // Put it on screen immediately and cache it on this device, so
-                // it survives even if the app closes before the write lands.
-                // Offline, the write below is held by the existing IndexedDB
-                // persistence and replayed on reconnect, so creating a subject
-                // never blocks on the network.
+                // Put it on screen immediately. Offline, the write below is held
+                // by the existing IndexedDB persistence and replayed on reconnect,
+                // so creating a subject never blocks on the network.
                 subjectList = sortSubjects(subjectList.concat([subject]));
-                if (guestMode()) {
-                    saveGuestSubjects(subjectList);
-                } else {
-                    saveCachedSubjects(syncUid, subjectList);
-                }
+                addLegacySubjectName(name);
+                forgetRemovedSubject(name);
                 notesIndex = null;
                 renderSubjectsList();
                 renderStudy();
@@ -17226,6 +17017,7 @@ document.documentElement.classList.toggle(
                     }
                 } catch (error) {
                     console.error('Add subject error:', error);
+                    setSubjectsStatus(t('subjectsCloudError'));
                 }
             }
 
@@ -17251,6 +17043,7 @@ document.documentElement.classList.toggle(
 
                 // Rename locally first so it works with no connection.
                 subjectList = rename(subjectList);
+                renameLegacySubjectName(subject.name, name);
                 notesIndex = null;
                 renderSubjectDetail();
                 renderStudy();
@@ -17259,11 +17052,11 @@ document.documentElement.classList.toggle(
                     if (guestMode()) {
                         saveGuestSubjects(rename(guestSubjects()));
                     } else {
-                        saveCachedSubjects(syncUid, rename(cachedSubjects(syncUid)));
                         await setDoc(subjectRef(subject.id), { name: name, updatedAt: now }, { merge: true });
                     }
                 } catch (error) {
                     console.error('Rename subject error:', error);
+                    setSubjectsStatus(t('subjectsCloudError'));
                 }
             }
 
@@ -17282,6 +17075,8 @@ document.documentElement.classList.toggle(
                 // Remove locally first: the queued delete (notes and photos with
                 // it) is replayed when the connection returns.
                 subjectList = sortSubjects(subjectList.filter(item => item.id !== subject.id));
+                removeLegacySubjectName(subject.name);
+                rememberRemovedSubject(subject.name);
                 notesIndex = null;
                 selectedSubjectId = null;
                 subjectNotes = [];
@@ -17304,11 +17099,11 @@ document.documentElement.classList.toggle(
                         saveGuestNotesMap(notes);
                         saveGuestMediaMap(media);
                     } else {
-                        saveCachedSubjects(syncUid, cachedSubjects(syncUid).filter(item => item.id !== subject.id));
                         await deleteSubjectWithNotes(subject.id);
                     }
                 } catch (error) {
                     console.error('Delete subject error:', error);
+                    setSubjectsStatus(t('subjectsCloudError'));
                 }
             }
 
@@ -17334,84 +17129,28 @@ document.documentElement.classList.toggle(
 
             /* ---------- notes ---------- */
 
-            // Writes one note into this device's local store. Used for guest
-            // mode, and as the fallback when an account write cannot land.
-            function writeNoteToLocalStore(subjectId, note) {
-                const map = guestNotesMap();
-                const list = Array.isArray(map[subjectId]) ? map[subjectId] : [];
-                const index = list.findIndex(item => item.id === note.id);
-                if (index >= 0) list[index] = note; else list.push(note);
-                map[subjectId] = list;
-                saveGuestNotesMap(map);
-                return list;
-            }
-
-            // Notes this device could not upload, folded into the account's
-            // list so they stay visible until the write goes through.
-            function mergeLocalNotes(subjectId, serverNotes) {
-                const local = guestNotesMap()[subjectId];
-                if (!Array.isArray(local) || local.length === 0) return serverNotes;
-                const onServer = new Set(serverNotes.map(item => item.id));
-                const pending = local.filter(item => item && item.id && !onServer.has(item.id));
-                return pending.length ? serverNotes.concat(pending) : serverNotes;
-            }
-
-            // `subjectId` is passed in rather than read from selectedSubjectId:
-            // a save that is still in flight must keep writing to the subject it
-            // started from, even if the user has already navigated away.
-            //
-            // Returns true when the account stored it, 'local' when the account
-            // write failed and the note was kept on this device instead, and
-            // false when it could not be stored at all.
-            async function persistNote(note, subjectId, localCopy) {
+            async function persistNote(note) {
+                const subjectId = selectedSubjectId;
                 if (!subjectId) return false;
 
                 if (guestMode()) {
-                    subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, note));
+                    const map = guestNotesMap();
+                    const list = Array.isArray(map[subjectId]) ? map[subjectId] : [];
+                    const index = list.findIndex(item => item.id === note.id);
+                    if (index >= 0) list[index] = note; else list.push(note);
+                    map[subjectId] = list;
+                    saveGuestNotesMap(map);
+                    subjectNotes = sortNotes(list);
                     return true;
                 }
 
-                // The account has already refused writes this session, so do not
-                // spend a round trip finding that out again.
-                if (cloudBlocked) {
-                    subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, localCopy || note));
-                    return 'local';
-                }
-
-                try {
-                    await setDoc(noteRef(subjectId, note.id), {
-                        title: note.title,
-                        text: note.text,
-                        photos: note.photos || [],
-                        createdAt: note.createdAt,
-                        updatedAt: note.updatedAt
-                    }, { merge: true });
-                } catch (error) {
-                    // The account write was rejected -- security rules, a
-                    // document over the 1 MiB limit, or no connection. Until now
-                    // this threw straight out and the note was written nowhere:
-                    // not to the account, and not here either, because the local
-                    // branch above had already been skipped. Keep it on this
-                    // device, which is what the message shown to the user says.
-                    console.warn('[Daily.KRD notes] account write failed, keeping note on this device:',
-                        error && error.code ? error.code : error);
-                    try {
-                        subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, localCopy || note));
-                    } catch (quotaError) {
-                        // The photo data did not fit on this device either.
-                        // Keep the text rather than losing the whole note.
-                        subjectNotes = sortNotes(writeNoteToLocalStore(subjectId, note));
-                    }
-                    return 'local';
-                }
-
-                // The account has it now, so a local copy would only linger.
-                const map = guestNotesMap();
-                if (Array.isArray(map[subjectId]) && map[subjectId].some(item => item.id === note.id)) {
-                    map[subjectId] = map[subjectId].filter(item => item.id !== note.id);
-                    if (map[subjectId].length === 0) delete map[subjectId];
-                    saveGuestNotesMap(map);
-                }
+                await setDoc(noteRef(subjectId, note.id), {
+                    title: note.title,
+                    text: note.text,
+                    photos: note.photos || [],
+                    createdAt: note.createdAt,
+                    updatedAt: note.updatedAt
+                }, { merge: true });
 
                 subjectNotes = sortNotes(
                     subjectNotes.some(item => item.id === note.id)
@@ -17539,24 +17278,6 @@ document.documentElement.classList.toggle(
                                     subjectId: subject.id,
                                     subjectName: subject.name,
                                     noteId: item.id,
-                                    title: note.title || '',
-                                    text: note.text || ''
-                                });
-                            });
-                        });
-
-                        // Notes held on this device because their account write
-                        // has not landed yet are searchable too.
-                        const indexed = new Set(index.map(entry => entry.noteId));
-                        const localMap = guestNotesMap();
-                        subjectList.forEach(subject => {
-                            const held = Array.isArray(localMap[subject.id]) ? localMap[subject.id] : [];
-                            held.forEach(note => {
-                                if (!note || !note.id || indexed.has(note.id)) return;
-                                index.push({
-                                    subjectId: subject.id,
-                                    subjectName: subject.name,
-                                    noteId: note.id,
                                     title: note.title || '',
                                     text: note.text || ''
                                 });
@@ -17883,34 +17604,6 @@ document.documentElement.classList.toggle(
                 setNoteStatus('');
             }
 
-            function editorHasUnsavedContent() {
-                if (viewMode === 'read') return false;
-                const title = (el('noteViewTitleInput')?.value || '').trim();
-                const text = (el('noteViewTextInput')?.value || '');
-                return !!(title || text.trim() || draftPhotos.length);
-            }
-
-            /*
-             * Closing the sheet with the X, or by tapping the backdrop, keeps
-             * whatever was typed. Every notes app people compare this to behaves
-             * that way, and the backdrop is easy to hit by accident on a phone
-             * because the sheet is anchored to the bottom -- so treating those
-             * taps as a discard was silently throwing notes away. The Cancel
-             * button is still an explicit "throw this away".
-             */
-            async function dismissNoteOverlay() {
-                if (!editorHasUnsavedContent() || !selectedSubjectId) {
-                    closeNoteOverlay();
-                    return;
-                }
-
-                // Wait for the write: if it is rejected the sheet stays open
-                // with the text still in it and the error on screen, instead of
-                // closing over a note that was never stored.
-                const saved = await saveOpenNote();
-                if (saved) closeNoteOverlay();
-            }
-
             function editOpenNote() {
                 const note = currentNote();
                 if (!note) return;
@@ -17927,7 +17620,7 @@ document.documentElement.classList.toggle(
 
             async function saveOpenNote() {
                 const subjectId = selectedSubjectId;
-                if (!subjectId) return false;
+                if (!subjectId) return;
 
                 const title = (el('noteViewTitleInput')?.value || '').trim();
                 const text = (el('noteViewTextInput')?.value || '');
@@ -17935,7 +17628,7 @@ document.documentElement.classList.toggle(
 
                 if (!title && !text.trim() && draftPhotos.length === 0) {
                     setNoteStatus(t('subjectsNoteEmpty'));
-                    return false;
+                    return;
                 }
 
                 const now = Date.now();
@@ -17972,14 +17665,6 @@ document.documentElement.classList.toggle(
                 // Show the saved note immediately. Offline the writes below are
                 // queued by the existing IndexedDB persistence and replayed when
                 // the connection returns, so writing a note never blocks on it.
-                // Everything the optimistic update is about to overwrite is kept
-                // so a failed write can be undone instead of leaving a note on
-                // screen that was never stored.
-                const notesBefore = subjectNotes;
-                const openNoteIdBefore = openNoteId;
-                const viewModeBefore = viewMode;
-                const draftBefore = draftPhotos;
-
                 const localNote = { ...note, photos: localPhotos };
                 notesIndex = null;
                 openNoteId = note.id;
@@ -17993,7 +17678,7 @@ document.documentElement.classList.toggle(
                         : subjectNotes.concat([localNote])
                 );
                 renderSubjectDetail();
-                renderNoteOverlay();
+                renderNoteOverlay();                    setNoteStatus(t('subjectsSaved'), true);
 
                 const failedPhotos = new Set();
 
@@ -18012,29 +17697,9 @@ document.documentElement.classList.toggle(
                         if (outcome === 'quota') failedPhotos.add(photo.id);
                     }
 
-                    const noteToStore = failedPhotos.size
+                    await persistNote(failedPhotos.size
                         ? { ...note, photos: storedPhotos.filter(photo => !failedPhotos.has(photo.id)) }
-                        : note;
-
-                    // The local copy carries the photo data, so a note kept on
-                    // this device still shows its images.
-                    const localToKeep = {
-                        ...localNote,
-                        photos: localPhotos.filter(photo => !failedPhotos.has(photo.id))
-                    };
-
-                    const outcome = await persistNote(noteToStore, subjectId, localToKeep);
-
-                    if (outcome === 'local') {
-                        // On this device, not yet in the account. The note is
-                        // safe and the write is retried later.
-                        setNoteStatus(t('subjectsNoteSaveFailed'));
-                    } else {
-                        // Only reported once the write has actually been
-                        // accepted. Saying "Saved" up front is how a note that
-                        // never got stored still looks like it did.
-                        setNoteStatus(t('subjectsSaved'), true);
-                    }
+                        : note);
 
                     if (failedPhotos.size) {
                         // This device could not keep those photos, so drop them
@@ -18061,38 +17726,10 @@ document.documentElement.classList.toggle(
                     }
                 } catch (error) {
                     console.error('Note save error:', error);
-
-                    // The write was rejected, so undo the optimistic copy. Left
-                    // on screen it looks saved and then disappears the moment
-                    // the subject is reopened, which reads as "my note did not
-                    // save". The editor is put back exactly as it was -- without
-                    // bumping overlayInputToken -- so nothing typed is lost and
-                    // the user can try again.
-                    subjectNotes = notesBefore;
-                    openNoteId = openNoteIdBefore;
-                    viewMode = viewModeBefore;
-                    draftPhotos = draftBefore;
-                    notesIndex = null;
-                    renderSubjectDetail();
-                    renderNoteOverlay();
-
-                    // The optimistic render above switched the sheet to read
-                    // mode, which clears both fields -- so put the typed text
-                    // back into them by hand. renderNoteOverlay() leaves the
-                    // values alone here (overlayInputToken was not bumped), and
-                    // the restored viewMode puts the editor back on screen.
-                    const titleInput = el('noteViewTitleInput');
-                    const textInput = el('noteViewTextInput');
-                    if (titleInput) titleInput.value = title;
-                    if (textInput) textInput.value = text;
-
-                    setNoteStatus(t('subjectsNoteSaveFailed'));
-                    return false;
+                    setNoteStatus(t('subjectsCloudError'));
                 } finally {
                     if (optimisticNoteId === note.id) optimisticNoteId = null;
                 }
-
-                return true;
             }
 
             async function deleteOpenNote() {
@@ -18115,7 +17752,7 @@ document.documentElement.classList.toggle(
                     renderSubjectDetail();
                 } catch (error) {
                     console.error('Delete note error:', error);
-                    setNoteStatus(t('subjectsNoteDeleteFailed'));
+                    setNoteStatus(t('subjectsCloudError'));
                 }
             }
 
@@ -18209,6 +17846,169 @@ document.documentElement.classList.toggle(
                 if (status) setNoteStatus(status);
             }
 
+            /* ---------- study checklist integration ---------- */
+
+            function legacySubjectNames() {
+                const list = readJson(LEGACY_SUBJECTS_KEY, []);
+                return Array.isArray(list) ? list.filter(name => typeof name === 'string') : [];
+            }
+
+            function writeLegacySubjectNames(names) {
+                localStorage.setItem(LEGACY_SUBJECTS_KEY, JSON.stringify(names));
+            }
+
+            function addLegacySubjectName(name) {
+                if (!name) return;
+                const names = legacySubjectNames();
+                if (names.some(item => item.toLowerCase() === name.toLowerCase())) return;
+                writeLegacySubjectNames(names.concat([name]));
+            }
+
+            function removeLegacySubjectName(name) {
+                if (!name) return;
+                const names = legacySubjectNames();
+                const next = names.filter(item => item.toLowerCase() !== name.toLowerCase());
+                if (next.length === names.length) return;
+                writeLegacySubjectNames(next);
+                forgetCompletedSubject(name);
+            }
+
+            function renameLegacySubjectName(oldName, newName) {
+                const names = legacySubjectNames();
+                const index = names.findIndex(item => item.toLowerCase() === String(oldName).toLowerCase());
+
+                if (index >= 0) names[index] = newName;
+                else names.push(newName);
+
+                writeLegacySubjectNames(names);
+                renameCompletedSubject(oldName, newName);
+            }
+
+            function updateCompletedSubjects(mapper) {
+                try {
+                    const map = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}');
+                    if (!map || typeof map !== 'object' || Array.isArray(map)) return;
+
+                    let changed = false;
+
+                    Object.keys(map).forEach(dateKey => {
+                        if (!Array.isArray(map[dateKey])) return;
+
+                        // mapper returns null to drop an entry; a rename keeps it.
+                        const next = map[dateKey]
+                            .map(mapper)
+                            .filter(name => typeof name === 'string');
+
+                        if (next.length !== map[dateKey].length || next.some((name, index) => name !== map[dateKey][index])) {
+                            map[dateKey] = next;
+                            changed = true;
+                        }
+                    });
+
+                    if (changed) localStorage.setItem(COMPLETED_KEY, JSON.stringify(map));
+                } catch (error) {
+                    console.warn('[Daily.KRD notes] completed subjects update failed:', error);
+                }
+            }
+
+            function forgetCompletedSubject(name) {
+                updateCompletedSubjects(item => (item === name ? null : item));
+            }
+
+            function renameCompletedSubject(oldName, newName) {
+                updateCompletedSubjects(item => (item === oldName ? newName : item));
+            }
+
+            /*
+             * The Study section already keeps its own subject checklist. Subjects
+             * the user adds there should be usable for notes too, so any checklist
+             * name that has no subject yet is adopted into the Subjects list as
+             * well. Adoption is idempotent from every direction:
+             *   - a name that already exists as a subject is skipped,
+             *   - the deterministic `auto-<name>` document is only created when
+             *     that document does not exist, so a subject that was renamed on
+             *     another device is never overwritten or duplicated,
+             *   - names the user deleted on this device are remembered and never
+             *     adopted again.
+             */
+            function removedSubjectNames() {
+                const key = REMOVED_SUBJECTS_KEY + (syncUid || 'guest');
+                const list = readJson(key, []);
+                return (Array.isArray(list) ? list : []).map(name => String(name).toLowerCase());
+            }
+
+            function rememberRemovedSubject(name) {
+                const key = REMOVED_SUBJECTS_KEY + (syncUid || 'guest');
+                const list = removedSubjectNames();
+                if (!list.includes(String(name).toLowerCase())) {
+                    writeJson(key, list.concat([String(name).toLowerCase()]));
+                }
+            }
+
+            function forgetRemovedSubject(name) {
+                const key = REMOVED_SUBJECTS_KEY + (syncUid || 'guest');
+                const target = String(name).toLowerCase();
+                const list = removedSubjectNames();
+                if (list.includes(target)) {
+                    writeJson(key, list.filter(item => item !== target));
+                }
+            }
+
+            function promoteLegacySubjects() {
+                if (cloudBlocked || !promotionReady || promotionInFlight) return;
+                if (!subjectsLoadedOnce) return;
+                if (!guestMode() && !cloudMode()) return;
+
+                const removed = new Set(removedSubjectNames());
+                const existing = new Set(subjectList.map(subject => String(subject.name || '').trim().toLowerCase()));
+
+                const missing = legacySubjectNames().filter(name => {
+                    const key = String(name || '').trim().toLowerCase();
+                    return key && !existing.has(key) && !removed.has(key) && !adoptedNames.has(key);
+                });
+
+                if (missing.length === 0) return;
+
+                const now = Date.now();
+                promotionInFlight = true;
+
+                const done = () => {
+                    missing.forEach(name => adoptedNames.add(String(name).trim().toLowerCase()));
+                    promotionInFlight = false;
+                };
+
+                if (guestMode()) {
+                    const created = missing.map((name, position) => ({
+                        id: 'auto-' + slugify(name),
+                        name: name,
+                        createdAt: now + position,
+                        updatedAt: now + position
+                    }));
+
+                    subjectList = sortSubjects(subjectList.concat(created));
+                    saveGuestSubjects(subjectList);
+                    renderSubjectsList();
+                    done();
+                    return;
+                }
+
+                Promise.all(
+                    missing.map((name, position) => {
+                        const ref = doc(db, 'users', syncUid, SUBJECTS_COLLECTION, 'auto-' + slugify(name));
+                        return getDoc(ref)
+                            .then(snapshot => {
+                                if (snapshot.exists()) return null;
+                                return setDoc(ref, {
+                                    name: name,
+                                    createdAt: now + position,
+                                    updatedAt: now + position
+                                });
+                            })
+                            .catch(() => null);
+                    })
+                ).then(done).catch(done);
+            }
+
             /* ---------- guest -> account migration ---------- */
 
             async function migrateGuestSubjectsToAccount(uid) {
@@ -18261,22 +18061,9 @@ document.documentElement.classList.toggle(
                     }
                 }
 
-                // Only clear what was actually stored above. The upload loops
-                // walk guestSubjects(), so a note held against a subject that
-                // lives in the account -- for instance one kept locally after an
-                // account write was refused -- is never uploaded here. Clearing
-                // the whole notes key used to delete exactly those notes, on
-                // every sign-in, without ever sending them anywhere.
+                // Only clear local guest data after everything is stored.
                 localStorage.removeItem(GUEST_SUBJECTS_KEY);
-
-                const migratedIds = new Set(subjects.map(subject => subject.id));
-                const stillHeld = {};
-                Object.keys(notesMap).forEach(subjectId => {
-                    if (!migratedIds.has(subjectId)) stillHeld[subjectId] = notesMap[subjectId];
-                });
-                if (Object.keys(stillHeld).length > 0) saveGuestNotesMap(stillHeld);
-                else localStorage.removeItem(GUEST_NOTES_KEY);
-
+                localStorage.removeItem(GUEST_NOTES_KEY);
                 localStorage.removeItem(GUEST_MEDIA_KEY);
 
                 notesIndex = null;
@@ -18293,7 +18080,11 @@ document.documentElement.classList.toggle(
                 if (guestMode()) {
                     subjectList = sortSubjects(guestSubjects());
                     notesIndex = null;
+                    // Guests keep their subjects locally, and the Study checklist
+                    // is mirrored into them just like it is for an account.
                     subjectsLoadedOnce = true;
+                    promotionReady = true;
+                    promoteLegacySubjects();
                 }
                 renderSubjectsView();
                 showSection('subjects');
@@ -18336,6 +18127,9 @@ document.documentElement.classList.toggle(
                 subjectList = sortSubjects(guestSubjects());
                 selectedSubjectId = null;
                 subjectNotes = [];
+                // Guests have nothing to migrate, so the checklist can be
+                // mirrored into their subjects right away.
+                promotionReady = true;
                 renderSubjectsView();
             }
 
@@ -18390,9 +18184,9 @@ document.documentElement.classList.toggle(
                     if (row) openNoteOverlay(row.dataset.noteId);
                 });
 
-                el('noteViewClose')?.addEventListener('click', () => dismissNoteOverlay());
+                el('noteViewClose')?.addEventListener('click', closeNoteOverlay);
                 el('noteViewOverlay')?.addEventListener('click', event => {
-                    if (event.target === el('noteViewOverlay')) dismissNoteOverlay();
+                    if (event.target === el('noteViewOverlay')) closeNoteOverlay();
                 });
 
                 el('noteViewActions')?.addEventListener('click', event => {
