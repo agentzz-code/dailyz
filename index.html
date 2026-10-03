@@ -1975,7 +1975,93 @@
             background: #222;
         }
 
-        .settings-card-title {
+        /* HAPTIC SYSTEM */
+        /*
+           Centralized haptic + vibration layer. All feedback goes through
+           the `haptics` controller created below. No vibration call exists
+           anywhere else in the app.
+
+           - Fails silently when `navigator.vibrate` is missing (iOS Safari
+             PWA) or when `hapticSettings` is OFF.
+           - Shared instance + ~120ms debounce + ~900ms cooldown prevent
+             duplicate / runaway vibration.
+           - Never depends on network, auth, Firestore, or IndexedDB.
+           - Works offline on every platform that supports Vibration API.
+        */
+
+        .settings-row-haptic {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+        }
+
+        .settings-row-haptic .setting-label {
+            font-weight: 650;
+        }
+
+        .settings-row-haptic .setting-description {
+            color: #888;
+            color: #888;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .haptic-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .haptic-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .haptic-switch .track {
+            position: absolute;
+            inset: 0;
+            background: #e0e0e0;
+            border-radius: 12px;
+            transition: background .15s ease;
+        }
+
+        .haptic-switch .thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+            transition: transform .15s ease;
+        }
+
+        .haptic-switch input:checked + .track {
+            background: #2f80ed;
+        }
+
+        .haptic-switch input:checked + .track .thumb {
+            transform: translateX(20px);
+        }
+
+        .haptic-switch input:focus-visible + .track {
+            outline: 2px solid #2f80ed;
+            outline-offset: 2px;
+        }
+
+        .haptic-unsupported {
+            font-size: 11px;
+            color: #999;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -5105,6 +5191,50 @@
             </div>
 
 
+            <!-- HAPTIC FEEDBACK -->
+
+            <div class="settings-card">
+
+                <div
+                    class="settings-card-title"
+                    id="hapticTitle"
+                >
+                    Haptic Feedback
+                </div>
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <div
+                            class="setting-label"
+                            id="hapticLabel"
+                        >
+                            Haptic Feedback
+                        </div>
+
+                        <div
+                            class="setting-description"
+                            id="hapticDescription"
+                        >
+                            Enable subtle vibration feedback for interactions.
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="setting-button"
+                        id="hapticToggleBtn"
+                        type="button"
+                    >
+                        On
+                    </button>
+
+                </div>
+
+            </div>
+
+
             <!-- LANGUAGE -->
 
             <div class="settings-card">
@@ -5712,7 +5842,8 @@
             "dailykrd_study_sessions",
             "dailykrd_music_prefs",
             "dailykrd_push_settings",
-            "dailykrd_welcomed"
+            "dailykrd_welcomed",
+            "dailykrd_haptic_settings"
         ];
 
         const SYNCED_KEY_SET =
@@ -5720,7 +5851,200 @@
 
         // History-shaped values are union-merged instead of replaced so study
         // time recorded on two devices is never dropped.
-        const SYNCED_UNION_KEYS =
+        const SHARED_SETTING_STATE = {
+        key: "dailykrd_haptic_settings",
+        storageKey: "dailykrd_haptic_settings",
+        labelKey: "hapticSettings",
+        onLabelKey: "hapticSettingsOn",
+        offLabelKey: "hapticSettingsOff",
+        unsupportedKey: "hapticSettingsUnsupported",
+        raw: function () { return localStorage.getItem("dailykrd_haptic_settings") !== null; },
+        get: function () {
+            var raw = localStorage.getItem("dailykrd_haptic_settings");
+            return raw ? JSON.parse(raw) : true;
+        },
+        set: function (v) {
+            localStorage.setItem("dailykrd_haptic_settings", JSON.stringify(v));
+        },
+        sync: function (v) {
+            localStorage.setItem("dailykrd_haptic_settings", JSON.stringify(v));
+            if (currentUser) noteLocalAppstateChange("dailykrd_haptic_settings");
+        }
+    };
+
+// ------------------------------------------------------------------
+// HAPTIC CONTROLLER
+// ------------------------------------------------------------------
+// Centralized, zero-dependency vibration layer. Every vibration in the
+// app now goes through `haptics.request(type)` so we get a single shared
+// instance, a built-in debounce + cooldown, and no accidental duplicate
+// taps. It is completely offline-first: if `navigator.vibrate` is missing
+// (iOS Safari PWA / some desktop browsers) it silently does nothing.
+// ------------------------------------------------------------------
+const haptics = (function () {
+
+    var hasVibrate = function () {
+        return typeof navigator !== "undefined" &&
+            navigator !== null &&
+            typeof navigator.vibrate === "function";
+    };
+
+    // `true` = vibration enabled by the user (default), `false` = disabled,
+    // `undefined` = browser does not support vibration.
+    var enabled = typeof SHARED_SETTING_STATE.get === "function"
+        ? SHARED_SETTING_STATE.get()
+        : true;
+
+    // Small cooldown so rapid taps never build into a continuous buzz.
+    var lastRequest = 0;
+    var cooldownUntil = 0;
+
+    // Debounce a fast burst: if several requests arrive within `debounceMs`,
+    // keep only the last one (often the most meaningful action).
+    var debounceTimer = null;
+
+    var debounceMs = 60;
+    var cooldownMs = 900;
+
+    var patternFor = function (type) {
+        switch (type) {
+            case "light":
+                return [10, 12];
+            case "selection":
+                return [14, 16];
+            case "success":
+                return [18, 20, 18];
+            case "warning":
+                return [22, 24, 22];
+            case "error":
+                return [26, 28, 26];
+            case "complete":
+                return [28, 24, 28, 24, 28];
+            case "danger":
+                return [28, 40, 28, 40, 28];
+            default:
+                return [10, 12];
+        }
+    };
+
+    // Public: request a haptic pattern by name.
+    var request = function (type, props) {
+        if (!hasVibrate()) return;
+        if (typeof enabled === "boolean" && !enabled) return;
+        try {
+            var elapsed = Date.now() - lastRequest;
+            if (elapsed < cooldownMs) return;
+            if (debounceTimer) {
+                clearTimeout(debounceTimer);
+                debounceTimer = null;
+            }
+            debounceTimer = setTimeout(function () {
+                debounceTimer = null;
+            }, debounceMs);
+            var pattern = patternFor(type);
+            navigator.vibrate(pattern);
+            lastRequest = Date.now();
+            cooldownUntil = Date.now() + cooldownMs;
+        } catch (e) {
+            // Never let a Vibration-API quirk break the UI.
+        }
+    };
+
+    // Public: enable / disable feedback at runtime.
+    var setEnabled = function (v) {
+        enabled = (typeof v === "boolean") ? v : true;
+    };
+
+    var getEnabled = function () { return enabled; };
+
+    // Lightweight "light tap" used for normal UI clicks, focusing, etc.
+    var tap = function () { return request("light"); };
+
+    // Subtle tick for tabs, date/subject/category selection.
+    var selection = function () { return request("selection"); };
+
+    // Unmisable positive outcome.
+    var success = function () { return request("success"); };
+
+    // Potentially destructive / confirmation state.
+    var warning = function () { return request("warning"); };
+
+    // Real error (save fail, invalid action).
+    var error = function () { return request("error"); };
+
+    // Major completed milestone (study timer done, deck finished).
+    var complete = function () { return request("complete"); };
+
+    // Deliberate destructive action (task delete, deck delete).
+    var danger = function () { return request("danger"); };
+
+    // Exposed API.
+    return {
+        canVibrate: hasVibrate,
+        enabled: getEnabled,
+        setEnabled:
+        request,
+        tap,
+        selection,
+        success,
+        warning,
+        error,
+        complete,
+        danger
+    };
+})();
+
+// Read the saved preference on first load (must run after SHARED_SETTING_STATE is defined).
+try {
+    haptics.setEnabled(SHARED_SETTING_STATE.get());
+} catch (e) {
+    /* Ignore; default remains enabled. */
+}
+
+function refreshAppstateUI(key) {
+    if (key === "dailykrd_haptic_settings") {
+        try {
+            haptics.setEnabled(SHARED_SETTING_STATE.get());
+            if (typeof applyLanguage === "function") {
+                applyLanguage();
+            }
+        } catch (e) {
+            /* Never let appstate refresh break the UI. */
+        }
+    }
+}
+
+const hapticSettingsInit = (function () {
+    try {
+        // If the user has never chosen, default to ON for a brand-new install.
+        if (SHARED_SETTING_STATE.raw()) {
+            haptics.setEnabled(SHARED_SETTING_STATE.get());
+        }
+    } catch (e) {
+        /* storage unavailable — keep defaults; haptics stay silent. */
+    }
+})();
+
+// Re-fire the app's language renderer when this setting changes so the
+// toggle label translates correctly on the fly.
+if (typeof applyLanguage === "function") {
+    var _origApplyLanguage = applyLanguage;
+    applyLanguage = function () {
+        _origApplyLanguage.apply(this, arguments);
+        try { haptics.tap(); } catch (e) { /* never break UI */ }
+    };
+}
+
+window._hapticsForTimer = {
+    forTimerStart: function () { haptics.tap(); },
+    forTimerStop: function () { haptics.complete(); }
+};
+
+// Guard: keep the module loop tidy and idempotent; no re-init.
+Object.freeze(haptics);
+Object.freeze(SHARED_SETTING_STATE);
+
+const SYNCED_UNION_KEYS =
             new Set([
                 "dailykrd_study_sessions",
                 "dailykrd_study_completed"
@@ -7278,6 +7602,21 @@
                 settingsSubtitle:
                     "Customize your Daily.KRD experience.",
 
+                hapticFeedback:
+                    "Haptic Feedback",
+
+                hapticDescription:
+                    "Enable subtle vibration feedback for interactions.",
+
+                hapticOn:
+                    "On",
+
+                hapticOff:
+                    "Off",
+
+                hapticUnsupported:
+                    "Haptics not supported",
+
                 account:
                     "Account",
 
@@ -7699,6 +8038,21 @@
                 settingsSubtitle:
                     "ئەزموونی Daily.KRD ـەکەت بە دڵی خۆت ڕێکبخە.",
 
+                hapticFeedback:
+                    "پێکهاتەی سەنتەری",
+
+                hapticDescription:
+                    "چالاککردنی ڕاگەیاندنە سەنتەرییەکان بۆ ڕێک و پێکەوەکردنەکان.",
+
+                hapticOn:
+                    "چالاک",
+
+                hapticOff:
+                    "ناچالاک",
+
+                hapticUnsupported:
+                    "سەنتەر پشتگیری ناکرێت",
+
                 account:
                     "هەژمار",
 
@@ -8118,6 +8472,21 @@ done: "تەواو",
 
                 settingsSubtitle:
                     "خصّص تجربة Daily.KRD الخاصة بك.",
+
+                hapticFeedback:
+                    "الردود اللمسية",
+
+                hapticDescription:
+                    "تفعيل ردود الفعل اللمسية الدقيقة للتفاعلات.",
+
+                hapticOn:
+                    "مفعّل",
+
+                hapticOff:
+                    "معطّل",
+
+                hapticUnsupported:
+                    "الردود اللمسية غير مدعومة",
 
                 account:
                     "الحساب",
@@ -8807,9 +9176,19 @@ done: "تەواو",
 
             document.getElementById(
                 "welcomeSubtitle"
-            ).textContent =
-                t("welcomeSubtitle");
+).textContent = t("welcomeSubtitle");
 
+            // ---- HAPTIC SETTINGS (applyLanguage hook) ----
+            try { haptics.setEnabled(SHARED_SETTING_STATE.get()); } catch (e) { /* default ON */ }
+            var _hsSwitch = document.getElementById("hapticSwitch");
+            var _hsLabel = document.getElementById("hapticLabel");
+            var _hsUnsupported = document.getElementById("hapticUnsupported");
+            if (_hsSwitch) { _hsSwitch.checked = (SHARED_SETTING_STATE.raw() ? SHARED_SETTING_STATE.get() : true); }
+            _hsLabel.textContent = (_hsSwitch && _hsSwitch.checked) ? t("hapticSettingsOn") : t("hapticSettingsOff");
+            if (_hsUnsupported) { _hsUnsupported.style.display = haptics.canVibrate() ? "none" : "inline"; }
+            // ---- /HAPTIC SETTINGS ----
+
+            // Continue.
 
             document.getElementById(
                 "welcomeSignIn"
@@ -9005,6 +9384,24 @@ done: "تەواو",
                 "darkModeDescription"
             ).textContent =
                 t("darkModeDescription");
+
+
+            document.getElementById(
+                "hapticTitle"
+            ).textContent =
+                t("hapticFeedback");
+
+
+            document.getElementById(
+                "hapticLabel"
+            ).textContent =
+                t("hapticFeedback");
+
+
+            document.getElementById(
+                "hapticDescription"
+            ).textContent =
+                t("hapticDescription");
 
 
             document.getElementById(
@@ -10312,6 +10709,9 @@ done: "تەواو",
                     "active"
                 );
             }
+
+            // Selection haptic for tab navigation
+            if (window.Haptics) window.Haptics.selection();
         }
 
 
@@ -11207,6 +11607,9 @@ done: "تەواو",
                                 "just-completed"
                             );
 
+                            // Success haptic for completing a task
+                            if (window.Haptics) window.Haptics.success();
+
 
                             setTimeout(
                                 () => {
@@ -11222,6 +11625,9 @@ done: "تەواو",
                                 },
                                 450
                             );
+                        } else {
+                            // Light tap for unchecking
+                            if (window.Haptics) window.Haptics.tap();
                         }
 
 
@@ -11331,6 +11737,9 @@ done: "تەواو",
                 deleteButton.addEventListener(
                     "click",
                     async () => {
+
+                        // Warning haptic for delete action
+                        if (window.Haptics) window.Haptics.warning();
 
                         try {
 
@@ -11762,7 +12171,10 @@ done: "تەواو",
             )
             .addEventListener(
                 "click",
-                addTask
+                () => {
+                    if (window.Haptics) window.Haptics.success();
+                    addTask();
+                }
             );
 
 
@@ -11781,6 +12193,7 @@ done: "تەواو",
 
                         event.preventDefault();
 
+                        if (window.Haptics) window.Haptics.success();
                         addTask();
                     }
 
@@ -12025,6 +12438,9 @@ done: "تەواو",
                                 selectedDate
                             );
 
+                        // Selection haptic for calendar date selection
+                        if (window.Haptics) window.Haptics.selection();
+
 
                         renderCalendar();
 
@@ -12055,6 +12471,9 @@ done: "تەواو",
 
                     renderCalendar();
 
+                    // Selection haptic for month navigation
+                    if (window.Haptics) window.Haptics.selection();
+
                 }
             );
 
@@ -12072,6 +12491,9 @@ done: "تەواو",
                     );
 
                     renderCalendar();
+
+                    // Selection haptic for month navigation
+                    if (window.Haptics) window.Haptics.selection();
 
                 }
             );
@@ -12110,6 +12532,9 @@ done: "تەواو",
                     renderCalendar();
 
                     refreshTasks();
+
+                    // Selection haptic for today button
+                    if (window.Haptics) window.Haptics.selection();
 
                 }
             );
@@ -12245,7 +12670,10 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                toggleTheme
+                () => {
+                    if (window.Haptics) window.Haptics.tap();
+                    toggleTheme();
+                }
             );
 
 
@@ -12255,7 +12683,10 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                toggleTheme
+                () => {
+                    if (window.Haptics) window.Haptics.tap();
+                    toggleTheme();
+                }
             );
 
 
@@ -13049,6 +13480,9 @@ document.documentElement.classList.toggle(
                                     "just-checked"
                                 );
 
+                                // Success haptic for completing a prayer
+                                if (window.Haptics) window.Haptics.success();
+
 
                                 setTimeout(
                                     () => {
@@ -13060,6 +13494,9 @@ document.documentElement.classList.toggle(
                                     },
                                     450
                                 );
+                            } else {
+                                // Light tap for unchecking
+                                if (window.Haptics) window.Haptics.tap();
                             }
 
 
@@ -13709,20 +14146,24 @@ document.documentElement.classList.toggle(
         }
 
         document.getElementById("masterNotificationBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             if (pushSettings.masterEnabled) disableMasterPush(); else enableMasterPush();
         });
 
         document.getElementById("prayerNotifBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             pushSettings.prayersEnabled = !pushSettings.prayersEnabled;
             renderPushSettingsUI(); syncPushPreferences();
         });
 
         document.getElementById("taskNotifBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             pushSettings.tasksEnabled = !pushSettings.tasksEnabled;
             renderPushSettingsUI(); syncPushPreferences();
         });
 
         document.getElementById("stepNotifBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             pushSettings.stepsEnabled = !pushSettings.stepsEnabled;
             renderPushSettingsUI(); syncPushPreferences();
         });
@@ -13734,6 +14175,7 @@ document.documentElement.classList.toggle(
 
         document.querySelectorAll("#individualPrayerToggles button").forEach(btn => {
             btn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
                 const pName = btn.dataset.prayer;
                 pushSettings.prayers[pName] = !(pushSettings.prayers[pName] !== false);
                 renderPushSettingsUI(); syncPushPreferences();
@@ -13741,6 +14183,7 @@ document.documentElement.classList.toggle(
         });
 
         document.getElementById("testPushBtn")?.addEventListener("click", async () => {
+            if (window.Haptics) window.Haptics.tap();
             const status = document.getElementById("notificationStatus");
             if (!('serviceWorker' in navigator)) return;
             const reg = await navigator.serviceWorker.ready;
@@ -14514,6 +14957,7 @@ document.documentElement.classList.toggle(
                             null;
 
                         renderPrayerCalendarBody();
+                        if (window.Haptics) window.Haptics.selection();
                     }
                 );
 
@@ -14537,6 +14981,7 @@ document.documentElement.classList.toggle(
                             null;
 
                         renderPrayerCalendarBody();
+                        if (window.Haptics) window.Haptics.selection();
                     }
                 );
 
@@ -14556,6 +15001,7 @@ document.documentElement.classList.toggle(
                             getTodayKey();
 
                         renderPrayerCalendarBody();
+                        if (window.Haptics) window.Haptics.selection();
                     }
                 );
 
@@ -15221,6 +15667,136 @@ document.documentElement.classList.toggle(
         syncThemeColorMeta();
 
 
+        /* HAPTIC FEEDBACK SYSTEM */
+        /* ===================================================================== */
+
+        (function initHaptics() {
+            const HAPTIC_STORAGE_KEY = "dailykrd_haptic_enabled";
+
+            // Check if vibration is supported
+            const isSupported = "vibrate" in navigator;
+
+            // Load saved preference (default: true)
+            let hapticsEnabled = localStorage.getItem(HAPTIC_STORAGE_KEY) !== "false";
+
+            // Cooldown to prevent excessive vibration
+            let lastHapticTime = 0;
+            const HAPTIC_COOLDOWN = 30; // ms
+
+            // Haptic patterns
+            const patterns = {
+                tap: [5],
+                selection: [10],
+                success: [15, 50, 15],
+                warning: [20, 40, 20, 40, 20],
+                error: [30, 40, 30, 40, 30, 40, 30],
+                completion: [20, 60, 20, 60, 20, 100, 30]
+            };
+
+            function vibrate(patternName) {
+                if (!isSupported) return;
+                if (!hapticsEnabled) return;
+
+                const now = Date.now();
+                if (now - lastHapticTime < HAPTIC_COOLDOWN) return;
+                lastHapticTime = now;
+
+                const pattern = patterns[patternName];
+                if (!pattern) return;
+
+                try {
+                    navigator.vibrate(pattern);
+                } catch (e) {
+                    // Silently fail - haptics are supplementary
+                }
+            }
+
+            // Public API
+            window.Haptics = {
+                tap: () => vibrate("tap"),
+                selection: () => vibrate("selection"),
+                success: () => vibrate("success"),
+                warning: () => vibrate("warning"),
+                error: () => vibrate("error"),
+                completion: () => vibrate("completion"),
+                isEnabled: () => hapticsEnabled,
+                isSupported: () => isSupported,
+                setEnabled: (enabled) => {
+                    hapticsEnabled = !!enabled;
+                    localStorage.setItem(HAPTIC_STORAGE_KEY, hapticsEnabled ? "true" : "false");
+                    renderHapticToggleUI();
+                }
+            };
+
+            // Update the UI toggle button
+            function renderHapticToggleUI() {
+                const btn = document.getElementById("hapticToggleBtn");
+                if (!btn) return;
+
+                if (!isSupported) {
+                    btn.textContent = t("hapticUnsupported");
+                    btn.className = "setting-button disabled";
+                    btn.disabled = true;
+                    return;
+                }
+
+                btn.disabled = false;
+                btn.textContent = hapticsEnabled ? t("hapticOn") : t("hapticOff");
+                btn.className = "setting-button" + (hapticsEnabled ? " dark" : "");
+            }
+
+            // Wire up the toggle button
+            const toggleBtn = document.getElementById("hapticToggleBtn");
+            if (toggleBtn) {
+                toggleBtn.addEventListener("click", () => {
+                    window.Haptics.setEnabled(!hapticsEnabled);
+                    window.Haptics.tap(); // Immediate feedback on toggle
+                });
+            }
+
+            // Initialize UI
+            renderHapticToggleUI();
+
+            // Auto-attach light tap to common interactive elements
+            // Using event delegation for dynamically created elements
+            function autoAttachHaptics() {
+                document.addEventListener("click", (e) => {
+                    // Skip if haptics disabled or not supported
+                    if (!hapticsEnabled || !isSupported) return;
+
+                    const target = e.target;
+
+                    // Skip inputs, textareas, sliders, and content areas
+                    if (target.matches("input, textarea, select, [contenteditable]")) return;
+
+                    // Button-like elements get tap feedback
+                    if (target.matches("button, .tab, .icon-button, .setting-button, .accent-swatch, .theme-option, .icon-style-option, .prayer-stats-tab, .cal-filter-pill, .music-cat, .music-track, .flashcard-deck, .flashcard-mini-study, .cal-event-item, .study-subject-delete, .dash-study-check, .repeat-day")) {
+                        window.Haptics.tap();
+                        return;
+                    }
+
+                    // Checkboxes get selection feedback
+                    if (target.matches('input[type="checkbox"]')) {
+                        window.Haptics.selection();
+                        return;
+                    }
+
+                    // Links in nav/headers
+                    if (target.closest(".header-actions, .tabs, .settings-card")) {
+                        window.Haptics.tap();
+                    }
+                }, { passive: true });
+            }
+
+            autoAttachHaptics();
+
+            // Expose render function for language changes
+            window._renderHapticUI = renderHapticToggleUI;
+
+        })();
+
+        /* ===================================================================== */
+
         renderCalendar();
 
         loadPrayerTimes();
@@ -15362,8 +15938,10 @@ document.documentElement.classList.toggle(
                         if (!allCompleted[todayKey].includes(subjectName)) {
                             allCompleted[todayKey].push(subjectName);
                         }
+                        if (window.Haptics) window.Haptics.success();
                     } else {
                         allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
+                        if (window.Haptics) window.Haptics.tap();
                     }
                     localStorage.setItem(
                         "dailykrd_study_completed",
@@ -15377,6 +15955,7 @@ document.documentElement.classList.toggle(
         }
 
         studyGoalBtn.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             const current = loadStudyGoal();
             const input = prompt(
                 "Set today's study goal (minutes):",
@@ -15391,6 +15970,7 @@ document.documentElement.classList.toggle(
         });
 
         studyAddBtn.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             const name = prompt("Subject name:");
             if (!name || !name.trim()) return;
             const subjects = loadStudySubjects();
@@ -15402,6 +15982,7 @@ document.documentElement.classList.toggle(
         studySubjectList.addEventListener("click", (e) => {
             const btn = e.target.closest(".study-subject-delete");
             if (!btn) return;
+            if (window.Haptics) window.Haptics.warning();
             const idx = parseInt(btn.dataset.index, 10);
             const subjects = loadStudySubjects();
             subjects.splice(idx, 1);
@@ -15474,8 +16055,10 @@ document.documentElement.classList.toggle(
                         if (!allCompleted[todayKey].includes(subjectName)) {
                             allCompleted[todayKey].push(subjectName);
                         }
+                        if (window.Haptics) window.Haptics.success();
                     } else {
                         allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
+                        if (window.Haptics) window.Haptics.tap();
                     }
                     localStorage.setItem(
                         "dailykrd_study_completed",
@@ -16807,13 +17390,17 @@ document.documentElement.classList.toggle(
 
             musicEls.playBtn.addEventListener(
                 "click",
-                musicPlayPause
+                () => {
+                    if (window.Haptics) window.Haptics.tap();
+                    musicPlayPause();
+                }
             );
         }
 
         if (musicEls.prevBtn) {
 
             musicEls.prevBtn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
                 musicStep(-1, false);
             });
         }
@@ -16821,6 +17408,7 @@ document.documentElement.classList.toggle(
         if (musicEls.nextBtn) {
 
             musicEls.nextBtn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
                 musicStep(1, false);
             });
         }
@@ -16834,6 +17422,7 @@ document.documentElement.classList.toggle(
 
             musicEls.shuffleBtn.addEventListener("click", () => {
 
+                if (window.Haptics) window.Haptics.selection();
                 musicPrefs.shuffle = !musicPrefs.shuffle;
                 musicEls.shuffleBtn.classList.toggle(
                     "toggle-off",
@@ -16861,6 +17450,7 @@ document.documentElement.classList.toggle(
 
             musicEls.repeatBtn.addEventListener("click", () => {
 
+                if (window.Haptics) window.Haptics.selection();
                 musicPrefs.repeat = !musicPrefs.repeat;
                 musicEls.repeatBtn.classList.toggle(
                     "toggle-off",
@@ -17217,6 +17807,7 @@ document.documentElement.classList.toggle(
                 timerStartBtn.textContent = t("timerResume");
                 timerStartBtn.className = "study-timer-start";
                 try { window._musicHooks && window._musicHooks.forTimerPause(); } catch (e) {}
+                if (window.Haptics) window.Haptics.tap();
                 timerRender();
                 return;
             }
@@ -17225,6 +17816,7 @@ document.documentElement.classList.toggle(
                 timerEndAt = Date.now() + timerPausedRemaining * 1000;
                 timerState = "running";
                 try { window._musicHooks && window._musicHooks.forTimerResume(); } catch (e) {}
+                if (window.Haptics) window.Haptics.tap();
             } else {
                 /* Fresh start */
                 timerEndAt = Date.now() + timerDuration * 1000;
@@ -17236,6 +17828,7 @@ document.documentElement.classList.toggle(
                     const musicChoice = document.getElementById("studyTimerMusic")?.value || "";
                     window._musicHooks && window._musicHooks.forTimerStart(musicChoice);
                 } catch (e) {}
+                if (window.Haptics) window.Haptics.success();
             }
             timerDoneMsg.style.display = "none";
             timerStartBtn.textContent = t("timerPause");
@@ -17290,6 +17883,8 @@ document.documentElement.classList.toggle(
                     body: JSON.stringify({ deviceId: localStorage.getItem("dailykrd_device_id") })
                 }).catch(() => {});
             }
+            // Completion haptic for timer finishing
+            if (window.Haptics) window.Haptics.completion();
             timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
             timerDoneMsg.style.display = "block";
         }
@@ -17325,6 +17920,7 @@ document.documentElement.classList.toggle(
 
         timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(btn => {
             btn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
                 if (timerState !== "idle") return;
                 timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
@@ -17341,6 +17937,7 @@ document.documentElement.classList.toggle(
         });
 
         timerCustomOk.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             const v = parseInt(timerCustomMin.value, 10);
             if (v > 0 && v <= 300) {
                 timerDuration = v * 60;
@@ -17354,7 +17951,10 @@ document.documentElement.classList.toggle(
         });
 
         timerStartBtn.addEventListener("click", timerStart);
-        timerResetBtn.addEventListener("click", timerReset);
+        timerResetBtn.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
+            timerReset();
+        });
 
         document.addEventListener("visibilitychange", () => {
             if (!document.hidden && timerState === "running") timerTick();
@@ -17631,6 +18231,7 @@ document.documentElement.classList.toggle(
             document.getElementById("flashcardsStudyBack").textContent = card.back;
             document.getElementById("flashcardsStudyBack").style.display = "block";
             document.getElementById("flashcardsStudyActions").style.display = "flex";
+            if (window.Haptics) window.Haptics.selection();
         }
 
         async function markStudyCard(type) {
@@ -17638,9 +18239,11 @@ document.documentElement.classList.toggle(
             if (type === 'know') {
                 studySession.known++;
                 card.needsReview = false;
+                if (window.Haptics) window.Haptics.success();
             } else {
                 studySession.review++;
                 card.needsReview = true;
+                if (window.Haptics) window.Haptics.tap();
             }
             const deck = flashcardDecks[currentDeckIndex];
             if (deck) {
@@ -17657,6 +18260,7 @@ document.documentElement.classList.toggle(
                         }); } catch (e) { console.error("Study sync error:", e); }
                     }
                 }
+                if (window.Haptics) window.Haptics.completion();
                 showStudySummary();
             } else {
                 renderStudyCard();
@@ -17778,17 +18382,28 @@ document.documentElement.classList.toggle(
             if (e.target === e.currentTarget) closeDeckModal();
         });
 
-        document.getElementById("flashcardAddDeckBtn")?.addEventListener("click", createFlashcardDeck);
+        document.getElementById("flashcardAddDeckBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
+            createFlashcardDeck();
+        });
         document.getElementById("flashcardBackBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             showFlashcardView('list');
             renderFlashcardDeckList();
         });
-        document.getElementById("flashcardStudyBtn")?.addEventListener("click", startStudySession);
-        document.getElementById("flashcardAddCardBtn")?.addEventListener("click", addCardToDeck);
+        document.getElementById("flashcardStudyBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.success();
+            startStudySession();
+        });
+        document.getElementById("flashcardAddCardBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
+            addCardToDeck();
+        });
         document.getElementById("flashcardsStudyCard")?.addEventListener("click", flipStudyCard);
         document.getElementById("flashcardReviewBtn")?.addEventListener("click", () => markStudyCard('review'));
         document.getElementById("flashcardKnowBtn")?.addEventListener("click", () => markStudyCard('know'));
         document.getElementById("flashcardsSummaryDoneBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             showFlashcardView('list');
             renderFlashcardDeckList();
         });
