@@ -1031,6 +1031,138 @@
             100% { opacity: .45; }
         }
 
+        /* === MINIMALISTIC UI ANIMATIONS === */
+
+        /* Item entrance - slide up + fade */
+        @keyframes itemEnter {
+            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Item exit - slide down + fade */
+        @keyframes itemExit {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+        }
+
+        /* Button press - subtle scale */
+        @keyframes pressDown {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        /* Toggle switch - smooth slide */
+        @keyframes toggleSlide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(var(--toggle-distance, 20px)); }
+        }
+
+        /* Checkbox check - pop + draw */
+        @keyframes checkPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes checkDraw {
+            0% { stroke-dashoffset: 16; opacity: 0; }
+            100% { stroke-dashoffset: 0; opacity: 1; }
+        }
+
+        /* Radio/select - ripple */
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 0.3; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        /* Play button - pulse */
+        @keyframes playPulse {
+            0% { box-shadow: 0 0 0 0 var(--accent); }
+            70% { box-shadow: 0 0 0 12px transparent; }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+
+        /* Card/row hover/tap lift */
+        @keyframes liftTap {
+            0% { transform: translateY(0); }
+            30% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Delete - shrink + rotate */
+        @keyframes deleteShrink {
+            0% { opacity: 1; transform: translateX(0) rotate(0); }
+            100% { opacity: 0; transform: translateX(-20px) rotate(-15deg) scale(0.9); }
+        }
+
+        /* Toast/notification - slide in */
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Staggered list item entrance */
+        .animate-stagger > * {
+            animation: itemEnter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+        .animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+        .animate-stagger > *:nth-child(2) { animation-delay: 40ms; }
+        .animate-stagger > *:nth-child(3) { animation-delay: 80ms; }
+        .animate-stagger > *:nth-child(4) { animation-delay: 120ms; }
+        .animate-stagger > *:nth-child(5) { animation-delay: 160ms; }
+        .animate-stagger > *:nth-child(6) { animation-delay: 200ms; }
+        .animate-stagger > *:nth-child(7) { animation-delay: 240ms; }
+        .animate-stagger > *:nth-child(8) { animation-delay: 280ms; }
+
+        /* Utility classes */
+        .animate-enter { animation: itemEnter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .animate-exit { animation: itemExit 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .animate-press { animation: pressDown 0.12s ease; }
+        .animate-lift { animation: liftTap 0.15s ease; }
+        .animate-pulse { animation: playPulse 0.6s ease; }
+        .animate-ripple::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: inherit;
+            background: currentColor;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .animate-ripple:active::after { animation: ripple 0.4s ease; }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-enter,
+            .animate-exit,
+            .animate-press,
+            .animate-lift,
+            .animate-pulse,
+            .animate-stagger > *,
+            .task-check,
+            .prayer-check,
+            .dash-study-check,
+            .repeat-day,
+            .accent-swatch,
+            .theme-option,
+            .icon-style-option,
+            .music-track,
+            .flashcard-deck,
+            .cal-event-item,
+            .study-subject,
+            .task {
+                animation: none !important;
+                transition: none !important;
+            }
+            .task.just-completed .task-check,
+            .task.just-completed .task-check::after,
+            .task.just-completed .task-text,
+            .prayer.just-checked .prayer-check {
+                animation: none !important;
+            }
+        }
+
         /* PRIORITY */
 
         .priority-select {
@@ -11414,6 +11546,10 @@ done: "تەواو",
                     "change",
                     async () => {
 
+                        // Press animation on checkbox
+                        checkbox.classList.add('animate-press');
+                        setTimeout(() => checkbox.classList.remove('animate-press'), 120);
+
                         if (checkbox.checked) {
 
                             justCompletedTaskIds.add(
@@ -11558,16 +11694,17 @@ done: "تەواو",
                         // Warning haptic for delete action
                         if (window.Haptics) window.Haptics.warning();
 
+                        // Animate delete
+                        row.style.animation = 'deleteShrink 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+
                         try {
-
-                            await deleteTask(
-                                task
-                            );
-
+                            // Wait for animation to complete before actually deleting
+                            await new Promise(r => setTimeout(r, 200));
+                            await deleteTask(task);
                         } catch (error) {
-
                             console.error("Task delete error:", error);
-
+                            // Revert animation on error
+                            row.style.animation = '';
                         }
 
                     }
@@ -11942,6 +12079,14 @@ done: "تەواو",
 
             input.value = "";
             document.getElementById("taskTimeInput").value = "";
+
+            // Animate new task entry
+            setTimeout(() => {
+                const newTaskRow = document.querySelector('.task:first-child');
+                if (newTaskRow) {
+                    newTaskRow.classList.add('animate-enter');
+                }
+            }, 0);
 
 
             document.getElementById(
@@ -13286,6 +13431,10 @@ document.documentElement.classList.toggle(
                     checkbox.addEventListener(
                         "change",
                         async () => {
+
+                            // Press animation on checkbox
+                            checkbox.classList.add('animate-press');
+                            setTimeout(() => checkbox.classList.remove('animate-press'), 120);
 
                             const desired =
                                 checkbox.checked;
@@ -15634,6 +15783,41 @@ document.documentElement.classList.toggle(
 
             autoAttachHaptics();
 
+            // Auto-attach press animations to interactive elements (event delegation)
+            function autoAttachAnimations() {
+                document.addEventListener("click", (e) => {
+                    // Skip if reduced motion
+                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                    const target = e.target;
+
+                    // Skip inputs, textareas, sliders, and content areas
+                    if (target.matches("input, textarea, select, [contenteditable]")) return;
+
+                    // Button-like elements get press animation
+                    if (target.matches("button, .tab, .icon-button, .setting-button, .accent-swatch, .theme-option, .icon-style-option, .prayer-stats-tab, .cal-filter-pill, .music-cat, .music-track, .flashcard-deck, .flashcard-mini-study, .cal-event-item, .study-subject-delete, .dash-study-check, .repeat-day")) {
+                        target.classList.add('animate-press');
+                        setTimeout(() => target.classList.remove('animate-press'), 120);
+                        return;
+                    }
+
+                    // Checkboxes get press animation
+                    if (target.matches('input[type="checkbox"]')) {
+                        target.classList.add('animate-press');
+                        setTimeout(() => target.classList.remove('animate-press'), 120);
+                        return;
+                    }
+
+                    // Links in nav/headers
+                    if (target.closest(".header-actions, .tabs, .settings-card")) {
+                        target.classList.add('animate-press');
+                        setTimeout(() => target.classList.remove('animate-press'), 120);
+                    }
+                }, { passive: true });
+            }
+
+            autoAttachAnimations();
+
             // Expose render function for language changes
             window._renderHapticUI = renderHapticToggleUI;
 
@@ -16798,7 +16982,7 @@ document.documentElement.classList.toggle(
             musicRenderProgress();
         }
 
-        function musicPlayPause() {
+        function musicPlayPause(playBtn) {
 
             if (!musicCurrentTrackId) {
 
@@ -16814,6 +16998,12 @@ document.documentElement.classList.toggle(
             }
 
             const audio = musicGetAudio();
+
+            // Pulse animation on play button
+            if (playBtn) {
+                playBtn.classList.add('animate-pulse');
+                setTimeout(() => playBtn.classList.remove('animate-pulse'), 600);
+            }
 
             if (audio.paused) {
 
@@ -17263,7 +17453,7 @@ document.documentElement.classList.toggle(
                 "click",
                 () => {
                     if (window.Haptics) window.Haptics.tap();
-                    musicPlayPause();
+                    musicPlayPause(musicEls.playBtn);
                 }
             );
         }
@@ -17272,6 +17462,8 @@ document.documentElement.classList.toggle(
 
             musicEls.prevBtn.addEventListener("click", () => {
                 if (window.Haptics) window.Haptics.selection();
+                musicEls.prevBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.prevBtn.classList.remove('animate-press'), 120);
                 musicStep(-1, false);
             });
         }
@@ -17280,6 +17472,8 @@ document.documentElement.classList.toggle(
 
             musicEls.nextBtn.addEventListener("click", () => {
                 if (window.Haptics) window.Haptics.selection();
+                musicEls.nextBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.nextBtn.classList.remove('animate-press'), 120);
                 musicStep(1, false);
             });
         }
@@ -17294,6 +17488,8 @@ document.documentElement.classList.toggle(
             musicEls.shuffleBtn.addEventListener("click", () => {
 
                 if (window.Haptics) window.Haptics.selection();
+                musicEls.shuffleBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.shuffleBtn.classList.remove('animate-press'), 120);
                 musicPrefs.shuffle = !musicPrefs.shuffle;
                 musicEls.shuffleBtn.classList.toggle(
                     "toggle-off",
@@ -17322,6 +17518,8 @@ document.documentElement.classList.toggle(
             musicEls.repeatBtn.addEventListener("click", () => {
 
                 if (window.Haptics) window.Haptics.selection();
+                musicEls.repeatBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.repeatBtn.classList.remove('animate-press'), 120);
                 musicPrefs.repeat = !musicPrefs.repeat;
                 musicEls.repeatBtn.classList.toggle(
                     "toggle-off",
