@@ -18728,102 +18728,6 @@ document.documentElement.classList.toggle(
         window._musicApplyLanguage();
 
 
-        /* Labels need refreshing when the app language changes. */
-        window._swmApplyLanguage = function () {
-            // Launch card
-            const launchTitle = document.getElementById('swmLaunchTitle');
-            const launchDesc = document.getElementById('swmLaunchDesc');
-            if (launchTitle) launchTitle.textContent = t('studyWithMe');
-            if (launchDesc) launchDesc.textContent = t('studyWithMeDesc');
-
-            // Setup screen
-            const setupTitle = document.getElementById('swmSetupTitle');
-            const subjectLabel = document.getElementById('swmSubjectLabel');
-            const durationLabel = document.getElementById('swmDurationLabel');
-            const goalLabel = document.getElementById('swmGoalLabel');
-            const notesLabel = document.getElementById('swmNotesLabel');
-            const startBtn = document.getElementById('swmStartBtn');
-            if (setupTitle) setupTitle.textContent = t('studyWithMe');
-            if (subjectLabel) subjectLabel.textContent = t('swmSubject');
-            if (durationLabel) durationLabel.textContent = t('swmDuration');
-            if (goalLabel) goalLabel.textContent = t('swmGoal');
-            if (notesLabel) notesLabel.textContent = t('swmNotes');
-            if (startBtn) startBtn.textContent = t('swmStart');
-
-            // Subject select placeholder
-            if (swmSubjectSelect && swmSubjectSelect.options.length > 0) {
-                swmSubjectSelect.options[0].textContent = t('swmSubjectPlaceholder');
-            }
-
-            // Goal input placeholder
-            if (swmGoalInput) swmGoalInput.placeholder = t('swmGoalPlaceholder');
-
-            // Notes input placeholder
-            if (swmNotesInput) swmNotesInput.placeholder = t('swmNotesPlaceholder');
-
-            // Session screen
-            const sessionStreakLabel = document.getElementById('swmSessionStreakLabel');
-            const pauseBtn = document.getElementById('swmPauseBtn');
-            const finishBtn = document.getElementById('swmFinishBtn');
-            const cancelBtn = document.getElementById('swmCancelBtn');
-            const sessionGoalLabel = document.getElementById('swmSessionGoalLabel');
-            if (sessionStreakLabel) sessionStreakLabel.textContent = getFocusStreak() === 1 ? t('swmDay') : t('swmDays');
-            if (pauseBtn) pauseBtn.textContent = t('swmPause');
-            if (finishBtn) finishBtn.textContent = t('swmFinish');
-            if (cancelBtn) cancelBtn.textContent = t('swmCancel');
-            if (sessionGoalLabel) sessionGoalLabel.textContent = t('swmSessionGoal');
-
-            // Break screen
-            const breakTitle = document.getElementById('swmBreakTitle');
-            const breakSubtitle = document.getElementById('swmBreakSubtitle');
-            const breakStartBtn = document.getElementById('swmBreakStartBtn');
-            const breakSkipBtn = document.getElementById('swmBreakSkipBtn');
-            if (breakTitle) breakTitle.textContent = t('swmBreak');
-            if (breakSubtitle) breakSubtitle.textContent = t('swmBreakSubtitle') || 'You\'ve earned a break';
-            if (breakStartBtn) breakStartBtn.textContent = t('swmBreak') + ' ' + t('swmStart').toLowerCase();
-            if (breakSkipBtn) breakSkipBtn.textContent = t('swmSkipBreak');
-
-            // Completion screen
-            const completeTitle = document.getElementById('swmCompleteTitle');
-            const completeSubtitle = document.getElementById('swmCompleteSubtitle');
-            const completeTimeLabel = document.getElementById('swmCompleteTimeLabel');
-            const completeXPLabel = document.getElementById('swmCompleteXPLabel');
-            const completeStreakLabel = document.getElementById('swmCompleteStreakLabel');
-            const completeGoalLabel = document.getElementById('swmCompleteGoalLabel');
-            const completeNotesLabel = document.getElementById('swmCompleteNotesLabel');
-            const completeNotesInput = document.getElementById('swmCompleteNotesInput');
-            const saveNoteBtn = document.getElementById('swmSaveNoteBtn');
-            const studyAgainBtn = document.getElementById('swmStudyAgainBtn');
-            const doneBtn = document.getElementById('swmDoneBtn');
-            if (completeTitle) completeTitle.textContent = t('swmSessionComplete');
-            if (completeSubtitle) completeSubtitle.textContent = t('swmCompleteSubtitle') || 'Great focus session';
-            if (completeTimeLabel) completeTimeLabel.textContent = t('swmTimeStudied');
-            if (completeXPLabel) completeXPLabel.textContent = t('swmXPEarned');
-            if (completeStreakLabel) completeStreakLabel.textContent = t('swmFocusStreak');
-            if (completeGoalLabel) completeGoalLabel.textContent = t('swmSessionGoal');
-            if (completeNotesLabel) completeNotesLabel.textContent = t('swmNotes');
-            if (completeNotesInput) completeNotesInput.placeholder = t('swmAddNote');
-            if (saveNoteBtn) saveNoteBtn.textContent = t('swmSaveNote');
-            if (studyAgainBtn) studyAgainBtn.textContent = t('swmStudyAgain');
-            if (doneBtn) doneBtn.textContent = t('swmDone');
-
-            // History screen
-            const historyTitle = document.getElementById('swmHistoryTitle');
-            const historyTodayLabel = document.getElementById('swmHistoryTodayLabel');
-            const historyWeekLabel = document.getElementById('swmHistoryWeekLabel');
-            const historyTotalLabel = document.getElementById('swmHistoryTotalLabel');
-            if (historyTitle) historyTitle.textContent = t('swmHistory');
-            if (historyTodayLabel) historyTodayLabel.textContent = t('swmToday');
-            if (historyWeekLabel) historyWeekLabel.textContent = t('swmThisWeek');
-            if (historyTotalLabel) historyTotalLabel.textContent = t('swmTotalTime');
-
-            // Re-render history to update day labels
-            renderHistory();
-        };
-
-        window._swmApplyLanguage();
-
-
         /* STUDY TIMER */
 
         const timerTimeEl = document.getElementById("studyTimerTime");
@@ -19108,6 +19012,99 @@ document.documentElement.classList.toggle(
         const swmHistoryWeek = document.getElementById('swmHistoryWeek');
         const swmHistoryTotal = document.getElementById('swmHistoryTotal');
         const swmHistoryBackBtn = document.getElementById('swmHistoryBackBtn');
+
+        /* Labels need refreshing when the app language changes. */
+        window._swmApplyLanguage = function () {
+            // Launch card
+            const launchTitle = document.getElementById('swmLaunchTitle');
+            const launchDesc = document.getElementById('swmLaunchDesc');
+            if (launchTitle) launchTitle.textContent = t('studyWithMe');
+            if (launchDesc) launchDesc.textContent = t('studyWithMeDesc');
+
+            // Setup screen
+            const setupTitle = document.getElementById('swmSetupTitle');
+            const subjectLabel = document.getElementById('swmSubjectLabel');
+            const durationLabel = document.getElementById('swmDurationLabel');
+            const goalLabel = document.getElementById('swmGoalLabel');
+            const notesLabel = document.getElementById('swmNotesLabel');
+            const startBtn = document.getElementById('swmStartBtn');
+            if (setupTitle) setupTitle.textContent = t('studyWithMe');
+            if (subjectLabel) subjectLabel.textContent = t('swmSubject');
+            if (durationLabel) durationLabel.textContent = t('swmDuration');
+            if (goalLabel) goalLabel.textContent = t('swmGoal');
+            if (notesLabel) notesLabel.textContent = t('swmNotes');
+            if (startBtn) startBtn.textContent = t('swmStart');
+
+            // Subject select placeholder
+            if (swmSubjectSelect && swmSubjectSelect.options.length > 0) {
+                swmSubjectSelect.options[0].textContent = t('swmSubjectPlaceholder');
+            }
+
+            // Goal input placeholder
+            if (swmGoalInput) swmGoalInput.placeholder = t('swmGoalPlaceholder');
+
+            // Notes input placeholder
+            if (swmNotesInput) swmNotesInput.placeholder = t('swmNotesPlaceholder');
+
+            // Session screen
+            const sessionStreakLabel = document.getElementById('swmSessionStreakLabel');
+            const pauseBtn = document.getElementById('swmPauseBtn');
+            const finishBtn = document.getElementById('swmFinishBtn');
+            const cancelBtn = document.getElementById('swmCancelBtn');
+            const sessionGoalLabel = document.getElementById('swmSessionGoalLabel');
+            if (sessionStreakLabel) sessionStreakLabel.textContent = getFocusStreak() === 1 ? t('swmDay') : t('swmDays');
+            if (pauseBtn) pauseBtn.textContent = t('swmPause');
+            if (finishBtn) finishBtn.textContent = t('swmFinish');
+            if (cancelBtn) cancelBtn.textContent = t('swmCancel');
+            if (sessionGoalLabel) sessionGoalLabel.textContent = t('swmSessionGoal');
+
+            // Break screen
+            const breakTitle = document.getElementById('swmBreakTitle');
+            const breakSubtitle = document.getElementById('swmBreakSubtitle');
+            const breakStartBtn = document.getElementById('swmBreakStartBtn');
+            const breakSkipBtn = document.getElementById('swmBreakSkipBtn');
+            if (breakTitle) breakTitle.textContent = t('swmBreak');
+            if (breakSubtitle) breakSubtitle.textContent = t('swmBreakSubtitle') || 'You\'ve earned a break';
+            if (breakStartBtn) breakStartBtn.textContent = t('swmBreak') + ' ' + t('swmStart').toLowerCase();
+            if (breakSkipBtn) breakSkipBtn.textContent = t('swmSkipBreak');
+
+            // Completion screen
+            const completeTitle = document.getElementById('swmCompleteTitle');
+            const completeSubtitle = document.getElementById('swmCompleteSubtitle');
+            const completeTimeLabel = document.getElementById('swmCompleteTimeLabel');
+            const completeXPLabel = document.getElementById('swmCompleteXPLabel');
+            const completeStreakLabel = document.getElementById('swmCompleteStreakLabel');
+            const completeGoalLabel = document.getElementById('swmCompleteGoalLabel');
+            const completeNotesLabel = document.getElementById('swmCompleteNotesLabel');
+            const completeNotesInput = document.getElementById('swmCompleteNotesInput');
+            const saveNoteBtn = document.getElementById('swmSaveNoteBtn');
+            const studyAgainBtn = document.getElementById('swmStudyAgainBtn');
+            const doneBtn = document.getElementById('swmDoneBtn');
+            if (completeTitle) completeTitle.textContent = t('swmSessionComplete');
+            if (completeSubtitle) completeSubtitle.textContent = t('swmCompleteSubtitle') || 'Great focus session';
+            if (completeTimeLabel) completeTimeLabel.textContent = t('swmTimeStudied');
+            if (completeXPLabel) completeXPLabel.textContent = t('swmXPEarned');
+            if (completeStreakLabel) completeStreakLabel.textContent = t('swmFocusStreak');
+            if (completeGoalLabel) completeGoalLabel.textContent = t('swmSessionGoal');
+            if (completeNotesLabel) completeNotesLabel.textContent = t('swmNotes');
+            if (completeNotesInput) completeNotesInput.placeholder = t('swmAddNote');
+            if (saveNoteBtn) saveNoteBtn.textContent = t('swmSaveNote');
+            if (studyAgainBtn) studyAgainBtn.textContent = t('swmStudyAgain');
+            if (doneBtn) doneBtn.textContent = t('swmDone');
+
+            // History screen
+            const historyTitle = document.getElementById('swmHistoryTitle');
+            const historyTodayLabel = document.getElementById('swmHistoryTodayLabel');
+            const historyWeekLabel = document.getElementById('swmHistoryWeekLabel');
+            const historyTotalLabel = document.getElementById('swmHistoryTotalLabel');
+            if (historyTitle) historyTitle.textContent = t('swmHistory');
+            if (historyTodayLabel) historyTodayLabel.textContent = t('swmToday');
+            if (historyWeekLabel) historyWeekLabel.textContent = t('swmThisWeek');
+            if (historyTotalLabel) historyTotalLabel.textContent = t('swmTotalTime');
+
+            // Re-render history to update day labels
+            renderHistory();
+        };
 
         // Focus streak functions
         function loadFocusStreak() {
