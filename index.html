@@ -2710,6 +2710,313 @@
         }
 
         /* STUDY TIMER */
+
+        /* ============================================================
+           STUDY WITH ME — FULL-SCREEN FOCUS SESSION
+           ============================================================ */
+        #studyWithMeOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99990;
+            display: none;
+            overflow: hidden;
+            isolation: isolate;
+            background: #0b0d12;
+            color: #fff;
+            padding:
+                max(22px, env(safe-area-inset-top))
+                max(22px, env(safe-area-inset-right))
+                max(22px, env(safe-area-inset-bottom))
+                max(22px, env(safe-area-inset-left));
+        }
+
+        #studyWithMeOverlay.open {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .swm-bg,
+        .swm-bg::before,
+        .swm-bg::after {
+            position: absolute;
+            inset: -15%;
+            pointer-events: none;
+        }
+
+        .swm-bg {
+            z-index: -3;
+            background:
+                radial-gradient(circle at 18% 20%, rgba(104, 130, 255, .24), transparent 34%),
+                radial-gradient(circle at 82% 26%, rgba(130, 93, 210, .22), transparent 32%),
+                radial-gradient(circle at 52% 90%, rgba(55, 177, 180, .16), transparent 36%),
+                linear-gradient(145deg, #080a0f, #111522 48%, #090b11);
+            animation: swmBackgroundDrift 18s ease-in-out infinite alternate;
+        }
+
+        .swm-bg::before {
+            content: "";
+            z-index: -2;
+            background:
+                radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+                radial-gradient(circle at 70% 65%, rgba(255,255,255,.06) 0 1px, transparent 2px);
+            background-size: 90px 90px, 130px 130px;
+            opacity: .45;
+            animation: swmStars 24s linear infinite;
+        }
+
+        .swm-bg::after {
+            content: "";
+            z-index: -1;
+            background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.045) 48%, transparent 68%);
+            transform: translateX(-30%);
+            animation: swmSheen 12s ease-in-out infinite;
+        }
+
+        @keyframes swmBackgroundDrift {
+            0% { transform: scale(1) translate3d(-1%, -1%, 0); }
+            100% { transform: scale(1.08) translate3d(2%, 1%, 0); }
+        }
+
+        @keyframes swmStars {
+            from { transform: translate3d(0,0,0); }
+            to { transform: translate3d(70px, 45px, 0); }
+        }
+
+        @keyframes swmSheen {
+            0%, 30% { transform: translateX(-35%); opacity: 0; }
+            48% { opacity: .8; }
+            70%, 100% { transform: translateX(35%); opacity: 0; }
+        }
+
+        .swm-topbar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .swm-icon-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 15px;
+            background: rgba(255,255,255,.08);
+            color: #fff;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            font-size: 18px;
+        }
+
+        .swm-clock {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            opacity: .82;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .swm-top-spacer {
+            width: 44px;
+            height: 44px;
+        }
+
+        .swm-main {
+            width: min(680px, 100%);
+            margin: auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .swm-eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: .55;
+        }
+
+        .swm-subject {
+            font-size: clamp(28px, 8vw, 48px);
+            line-height: 1.05;
+            font-weight: 850;
+            letter-spacing: -1.5px;
+            max-width: 92%;
+            word-break: break-word;
+        }
+
+        .swm-timer {
+            font-size: clamp(68px, 18vw, 128px);
+            line-height: .95;
+            font-weight: 800;
+            letter-spacing: -4px;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 12px 50px rgba(0,0,0,.28);
+        }
+
+        .swm-status {
+            min-height: 20px;
+            font-size: 13px;
+            opacity: .62;
+        }
+
+        .swm-progress {
+            width: min(430px, 78vw);
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.12);
+            overflow: hidden;
+        }
+
+        .swm-progress-fill {
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            background: rgba(255,255,255,.86);
+            transform-origin: left center;
+            transition: transform .5s linear;
+        }
+
+        .swm-music {
+            min-height: 20px;
+            max-width: 85%;
+            font-size: 12px;
+            opacity: .58;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .swm-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .swm-control {
+            min-width: 118px;
+            height: 48px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 16px;
+            font-weight: 800;
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.12);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .swm-control.primary {
+            background: #fff;
+            color: #0b0d12;
+            border-color: transparent;
+        }
+
+        .swm-control.danger {
+            background: rgba(255,255,255,.07);
+            color: #fff;
+        }
+
+        .swm-bottom {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .swm-tip {
+            font-size: 11px;
+            opacity: .42;
+            text-align: center;
+        }
+
+        .study-with-me-launch {
+            width: 100%;
+            border: 0;
+            border-radius: 20px;
+            padding: 17px 18px;
+            margin: 0 0 15px;
+            background: linear-gradient(135deg, #171b28, #272e43);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            text-align: left;
+            box-shadow: 0 12px 30px rgba(0,0,0,.12);
+        }
+
+        .dark .study-with-me-launch {
+            background: linear-gradient(135deg, #171b28, #272e43);
+        }
+
+        .study-with-me-launch-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-width: 0;
+        }
+
+        .study-with-me-launch-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: rgba(255,255,255,.12);
+            font-size: 21px;
+            flex-shrink: 0;
+        }
+
+        .study-with-me-launch-title {
+            font-weight: 850;
+            font-size: 15px;
+        }
+
+        .study-with-me-launch-sub {
+            display: block;
+            margin-top: 3px;
+            font-size: 11px;
+            opacity: .62;
+        }
+
+        .study-with-me-launch-arrow {
+            font-size: 25px;
+            opacity: .7;
+        }
+
+        @media (max-width: 480px) {
+            .swm-controls {
+                width: 100%;
+            }
+            .swm-control {
+                flex: 1;
+                min-width: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .swm-bg,
+            .swm-bg::before,
+            .swm-bg::after {
+                animation: none !important;
+            }
+        }
+
         .study-timer-card {
             background: rgba(255,255,255,.92);
             border-radius: 18px;
@@ -2777,632 +3084,6 @@
             display: none; padding: 12px; font-weight: 700;
             color: #2e8b57; font-size: 14px;
         }
-
-        /* ============================================================
-           STUDY WITH ME V1
-           Calm, focused study session interface
-           ============================================================ */
-
-        /* Study With Me launcher card */
-        .swm-launch-card {
-            background: rgba(255,255,255,.92);
-            border-radius: 18px;
-            padding: 20px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: transform .15s ease, box-shadow .15s ease;
-            border: 0;
-            width: 100%;
-            color: inherit;
-            font: inherit;
-            text-align: inherit;
-        }
-        .dark .swm-launch-card { background: #222; }
-        .swm-launch-card:active { transform: scale(.98); }
-        .swm-launch-icon {
-            font-size: 36px;
-            flex-shrink: 0;
-        }
-        .swm-launch-content { flex: 1; }
-        .swm-launch-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-        .swm-launch-desc {
-            font-size: 13px;
-            color: #888;
-            font-weight: 600;
-        }
-        .swm-launch-arrow {
-            font-size: 20px;
-            color: #888;
-            flex-shrink: 0;
-        }
-
-        /* ============================================================
-   STUDY WITH ME V1 - IMMERSIVE FULL-SCREEN ENVIRONMENT
-   ============================================================ */
-
-   /* Launch Card (in Study section) */
-   .swm-launch-card {
-       background: rgba(255,255,255,.92);
-       border-radius: 18px;
-       padding: 20px;
-       margin-bottom: 16px;
-       display: flex;
-       align-items: center;
-       gap: 16px;
-       cursor: pointer;
-       transition: transform .15s ease, box-shadow .15s ease;
-       border: 0;
-       width: 100%;
-       color: inherit;
-       font: inherit;
-       text-align: inherit;
-   }
-   .dark .swm-launch-card { background: #222; }
-   .swm-launch-card:active { transform: scale(.98); }
-   .swm-launch-icon { font-size: 36px; flex-shrink: 0; }
-   .swm-launch-content { flex: 1; }
-   .swm-launch-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
-   .swm-launch-desc { font-size: 13px; color: #888; font-weight: 600; }
-   .swm-launch-arrow { font-size: 20px; color: #888; flex-shrink: 0; }
-
-   /* ============================================================
-      IMMERSIVE FULL-SCREEN ENVIRONMENT
-      ============================================================ */
-
-   .swm-immersive {
-       position: fixed;
-       inset: 0;
-       z-index: 1000;
-       display: none;
-       flex-direction: column;
-       background: #0a0a0f;
-       overflow: hidden;
-   }
-   .swm-immersive.active { display: flex; }
-
-   /* Background Layers */
-   .swm-bg {
-       position: absolute;
-       inset: 0;
-       z-index: 0;
-       overflow: hidden;
-   }
-   .swm-bg-gradient {
-       position: absolute;
-       inset: 0;
-       background:
-           radial-gradient(ellipse 80% 50% at 50% 20%, rgba(30, 50, 80, 0.4) 0%, transparent 70%),
-           radial-gradient(ellipse 60% 40% at 80% 80%, rgba(60, 30, 70, 0.3) 0%, transparent 60%),
-           radial-gradient(ellipse 50% 50% at 20% 60%, rgba(20, 60, 40, 0.3) 0%, transparent 65%),
-           linear-gradient(180deg, #0a0a0f 0%, #0d0d15 50%, #0a0a0f 100%);
-       animation: swmBgShift 20s ease-in-out infinite alternate;
-   }
-   @keyframes swmBgShift {
-       0% { transform: scale(1) translate(0, 0); }
-       50% { transform: scale(1.02) translate(-1%, -1%); }
-       100% { transform: scale(1) translate(0, 0); }
-   }
-   .swm-bg-particles {
-       position: absolute;
-       inset: 0;
-       pointer-events: none;
-   }
-   .swm-bg-particle {
-       position: absolute;
-       border-radius: 50%;
-       background: rgba(255, 255, 255, 0.15);
-       animation: swmParticleFloat linear infinite;
-       pointer-events: none;
-   }
-   @keyframes swmParticleFloat {
-       0% { transform: translateY(100vh) scale(0); opacity: 0; }
-       10% { opacity: 0.3; }
-       90% { opacity: 0.3; }
-       100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-   }
-   .swm-bg-glow {
-       position: absolute;
-       inset: 0;
-       background:
-           radial-gradient(circle at 30% 30%, rgba(60, 100, 140, 0.15) 0%, transparent 60%),
-           radial-gradient(circle at 70% 70%, rgba(120, 60, 140, 0.1) 0%, transparent 55%);
-       animation: swmGlowPulse 8s ease-in-out infinite alternate;
-   }
-   @keyframes swmGlowPulse {
-       0% { opacity: 0.5; }
-       100% { opacity: 1; }
-   }
-
-   /* Top Bar: Clock & Date */
-   .swm-top-bar {
-       position: relative;
-       z-index: 10;
-       display: flex;
-       align-items: center;
-       justify-content: space-between;
-       padding: env(safe-area-inset-top) 20px 16px;
-       pointer-events: none;
-   }
-   .swm-top-bar > * { pointer-events: auto; }
-   .swm-clock-wrap { text-align: center; }
-   .swm-clock {
-       font-size: 28px;
-       font-weight: 700;
-       font-variant-numeric: tabular-nums;
-       letter-spacing: -1px;
-       line-height: 1.1;
-       color: #fff;
-       text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-   }
-   .swm-date {
-       font-size: 13px;
-       font-weight: 500;
-       color: rgba(255,255,255,0.6);
-       margin-top: 2px;
-       text-transform: capitalize;
-   }
-   .swm-exit-btn {
-       width: 44px;
-       height: 44px;
-       border: none;
-       border-radius: 14px;
-       background: rgba(255,255,255,0.08);
-       color: #fff;
-       display: flex;
-       align-items: center;
-       justify-content: center;
-       cursor: pointer;
-       transition: background 0.2s, transform 0.15s;
-       backdrop-filter: blur(10px);
-       border: 1px solid rgba(255,255,255,0.1);
-   }
-   .swm-exit-btn:active { transform: scale(0.92); }
-   .swm-exit-btn:hover { background: rgba(255,255,255,0.15); }
-   .swm-exit-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-   /* Main Content */
-   .swm-main {
-       position: relative;
-       z-index: 10;
-       flex: 1;
-       display: flex;
-       align-items: center;
-       justify-content: center;
-       padding: 20px;
-       overflow-y: auto;
-   }
-
-   /* Screens */
-   .swm-screen {
-       display: none;
-       width: 100%;
-       max-width: 520px;
-       animation: swmScreenIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-   }
-   .swm-screen.active { display: block; }
-   @keyframes swmScreenIn {
-       from { opacity: 0; transform: translateY(20px) scale(0.98); }
-       to { opacity: 1; transform: translateY(0) scale(1); }
-   }
-
-   /* Setup Screen */
-   .swm-setup-content { text-align: center; }
-   .swm-setup-title {
-       font-size: 28px;
-       font-weight: 850;
-       color: #fff;
-       margin-bottom: 6px;
-       letter-spacing: -0.5px;
-   }
-   .swm-setup-subtitle {
-       font-size: 15px;
-       color: rgba(255,255,255,0.5);
-       margin-bottom: 32px;
-   }
-   .swm-field { margin-bottom: 24px; text-align: left; }
-   .swm-field-label {
-       display: block;
-       font-size: 13px;
-       font-weight: 600;
-       color: rgba(255,255,255,0.7);
-       margin-bottom: 10px;
-       text-transform: uppercase;
-       letter-spacing: 0.5px;
-   }
-   .swm-subject-select,
-   .swm-goal-input,
-   .swm-notes-textarea,
-   .swm-duration-custom-input {
-       width: 100%;
-       border: 1px solid rgba(255,255,255,0.15);
-       border-radius: 14px;
-       padding: 16px 18px;
-       font-size: 16px;
-       background: rgba(255,255,255,0.05);
-       color: #fff;
-       font-family: inherit;
-       backdrop-filter: blur(10px);
-       transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-   }
-   .swm-subject-select option { background: #0a0a0f; color: #fff; }
-   .swm-subject-select:focus,
-   .swm-goal-input:focus,
-   .swm-notes-textarea:focus,
-   .swm-duration-custom-input:focus {
-       outline: none;
-       border-color: var(--accent);
-       background: rgba(255,255,255,0.08);
-       box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
-   }
-   .swm-notes-textarea {
-       min-height: 100px;
-       resize: vertical;
-   }
-   .swm-duration-options {
-       display: flex;
-       gap: 10px;
-       flex-wrap: wrap;
-   }
-   .swm-duration-btn {
-       flex: 1;
-       min-width: 80px;
-       border: 1px solid rgba(255,255,255,0.15);
-       border-radius: 14px;
-       padding: 16px 12px;
-       font-size: 14px;
-       font-weight: 700;
-       background: rgba(255,255,255,0.05);
-       color: #fff;
-       cursor: pointer;
-       transition: all 0.2s;
-       backdrop-filter: blur(10px);
-   }
-   .swm-duration-btn:active { transform: scale(0.96); }
-   .swm-duration-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
-   .swm-duration-btn.active {
-       border-color: var(--accent);
-       background: var(--accent);
-       color: var(--accent-contrast);
-       box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
-   }
-   .swm-duration-custom { display: none; margin-top: 12px; }
-   .swm-duration-custom.show { display: block; animation: swmFadeIn 0.2s; }
-   @keyframes swmFadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-
-   .swm-start-btn {
-       width: 100%;
-       border: 0;
-       border-radius: 16px;
-       padding: 18px 24px;
-       font-size: 17px;
-       font-weight: 800;
-       background: var(--accent);
-       color: var(--accent-contrast);
-       cursor: pointer;
-       margin-top: 8px;
-       display: inline-flex;
-       align-items: center;
-       justify-content: center;
-       gap: 10px;
-       transition: transform 0.15s, box-shadow 0.2s;
-   }
-   .swm-start-btn:active { transform: scale(0.97); }
-   .swm-start-btn:hover { box-shadow: 0 8px 30px color-mix(in srgb, var(--accent) 40%, transparent); }
-
-   /* Active Session Screen */
-   .swm-session-content { text-align: center; }
-   .swm-session-header {
-       display: flex;
-       align-items: center;
-       justify-content: space-between;
-       margin-bottom: 32px;
-   }
-   .swm-session-info { text-align: left; }
-   .swm-session-subject {
-       font-size: 20px;
-       font-weight: 800;
-       color: #fff;
-       margin-bottom: 4px;
-   }
-   .swm-session-goal-text {
-       font-size: 14px;
-       color: rgba(255,255,255,0.5);
-       font-weight: 500;
-       white-space: nowrap;
-       overflow: hidden;
-       text-overflow: ellipsis;
-       max-width: 280px;
-   }
-   .swm-session-streak {
-       display: flex;
-       align-items: center;
-       gap: 8px;
-       background: rgba(255,255,255,0.08);
-       padding: 8px 16px;
-       border-radius: 24px;
-       font-size: 13px;
-       font-weight: 700;
-       color: var(--accent);
-       border: 1px solid rgba(255,255,255,0.1);
-       backdrop-filter: blur(10px);
-   }
-   .swm-session-streak-emoji { font-size: 16px; }
-
-   /* Timer Ring */
-   .swm-timer-center { margin: 16px 0 24px; }
-   .swm-timer-ring { position: relative; display: inline-flex; }
-   .swm-timer-svg { width: 280px; height: 280px; transform: rotate(-90deg); }
-   .swm-timer-track {
-       fill: none;
-       stroke: rgba(255,255,255,0.1);
-       stroke-width: 8;
-   }
-   .swm-timer-progress {
-       fill: none;
-       stroke: var(--accent);
-       stroke-width: 8;
-       stroke-linecap: round;
-       stroke-dasharray: 754;
-       stroke-dashoffset: 0;
-       transition: stroke-dashoffset 1s linear, stroke 0.3s;
-       filter: drop-shadow(0 0 12px var(--accent));
-   }
-   .swm-timer-display {
-       position: absolute;
-       inset: 0;
-       display: flex;
-       align-items: center;
-       justify-content: center;
-       flex-direction: column;
-       pointer-events: none;
-   }
-   .swm-session-timer {
-       font-size: 72px;
-       font-weight: 850;
-       font-variant-numeric: tabular-nums;
-       letter-spacing: -3px;
-       line-height: 1;
-       color: #fff;
-       text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 60%, transparent);
-   }
-
-   /* Session Controls */
-   .swm-session-controls {
-       display: flex;
-       gap: 12px;
-       justify-content: center;
-       flex-wrap: wrap;
-   }
-   .swm-control-btn {
-       border: none;
-       border-radius: 16px;
-       padding: 16px 24px;
-       font-size: 15px;
-       font-weight: 700;
-       cursor: pointer;
-       display: inline-flex;
-       align-items: center;
-       gap: 10px;
-       transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
-       min-width: 130px;
-       justify-content: center;
-   }
-   .swm-control-btn:active { transform: scale(0.96); }
-   .swm-control-label { display: none; }
-   @media (min-width: 480px) {
-       .swm-control-label { display: inline; }
-   }
-   .swm-control-primary {
-       background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-       color: #fff;
-       border: 1px solid rgba(255,255,255,0.2);
-       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-   }
-   .swm-control-primary:hover { background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1)); }
-   .swm-control-finish {
-       background: linear-gradient(135deg, #2e8b57, #247247);
-       color: #fff;
-       box-shadow: 0 4px 20px rgba(46, 139, 87, 0.4);
-   }
-   .swm-control-finish:hover { box-shadow: 0 6px 28px rgba(46, 139, 87, 0.5); }
-   .swm-control-secondary {
-       background: rgba(255,255,255,0.06);
-       color: rgba(255,255,255,0.9);
-       border: 1px solid rgba(255,255,255,0.12);
-   }
-   .swm-control-secondary:hover { background: rgba(255,255,255,0.12); }
-
-   /* Break Screen */
-   .swm-break-content { text-align: center; padding: 20px 0; }
-   .swm-break-icon { font-size: 64px; margin-bottom: 16px; animation: swmFloat 3s ease-in-out infinite; }
-   @keyframes swmFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-   .swm-break-title {
-       font-size: 28px;
-       font-weight: 850;
-       color: #fff;
-       margin-bottom: 6px;
-   }
-   .swm-break-subtitle {
-       font-size: 15px;
-       color: rgba(255,255,255,0.5);
-       margin-bottom: 24px;
-   }
-   .swm-break-timer {
-       font-size: 64px;
-       font-weight: 850;
-       font-variant-numeric: tabular-nums;
-       letter-spacing: -2px;
-       line-height: 1;
-       color: #fff;
-       margin: 16px 0 32px;
-   }
-   .swm-break-options { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
-   .swm-break-btn {
-       border: 1px solid rgba(255,255,255,0.15);
-       border-radius: 14px;
-       padding: 14px 24px;
-       font-size: 14px;
-       font-weight: 700;
-       background: rgba(255,255,255,0.05);
-       color: #fff;
-       cursor: pointer;
-       transition: all 0.2s;
-       backdrop-filter: blur(10px);
-   }
-   .swm-break-btn:active { transform: scale(0.96); }
-   .swm-break-btn.active { border-color: var(--accent); background: var(--accent); color: var(--accent-contrast); }
-   .swm-break-start {
-       width: 100%; max-width: 320px;
-       border: 0; border-radius: 16px; padding: 18px;
-       font-size: 16px; font-weight: 800;
-       background: var(--accent); color: var(--accent-contrast);
-       cursor: pointer; margin-bottom: 12px;
-   }
-   .swm-break-skip {
-       background: transparent; color: rgba(255,255,255,0.5);
-       border: 0; font-size: 14px; font-weight: 600; padding: 12px; cursor: pointer;
-   }
-
-   /* Completion Screen */
-   .swm-complete-content { text-align: center; padding: 20px 0; }
-   .swm-complete-icon { font-size: 72px; margin-bottom: 16px; animation: swmPopIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-   @keyframes swmPopIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-   .swm-complete-title { font-size: 28px; font-weight: 850; color: #fff; margin-bottom: 6px; }
-   .swm-complete-subtitle { font-size: 15px; color: rgba(255,255,255,0.5); margin-bottom: 32px; }
-   .swm-complete-stats { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
-   .swm-complete-stat {
-       display: flex; align-items: center; justify-content: space-between;
-       padding: 16px 20px;
-       background: rgba(255,255,255,0.06);
-       border-radius: 16px;
-       border: 1px solid rgba(255,255,255,0.08);
-       backdrop-filter: blur(10px);
-   }
-   .swm-complete-stat-label { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.7); }
-   .swm-complete-stat-value { font-size: 20px; font-weight: 850; color: var(--accent); }
-   .swm-complete-goal { text-align: left; margin-bottom: 20px; padding: 16px; background: rgba(46,139,87,0.15); border-radius: 14px; border: 1px solid rgba(46,139,87,0.3); }
-   .swm-complete-goal.not-completed { background: rgba(217,149,43,0.15); border-color: rgba(217,149,43,0.3); }
-   .swm-complete-goal-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
-   .swm-complete-goal-text { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 10px; }
-   .swm-complete-goal-status { font-size: 13px; font-weight: 700; }
-   .swm-complete-goal-status.completed { color: #2e8b57; }
-   .swm-complete-goal-status.not-completed { color: #d9952b; }
-   .swm-complete-notes { text-align: left; margin-bottom: 20px; }
-   .swm-complete-notes-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; color: rgba(255,255,255,0.5); margin-bottom: 8px; display: block; }
-   .swm-complete-notes-textarea { width: 100%; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 14px; font-size: 14px; background: rgba(255,255,255,0.05); color: #fff; font-family: inherit; min-height: 80px; resize: vertical; margin-bottom: 12px; }
-   .swm-complete-notes-textarea:focus { outline: none; border-color: var(--accent); }
-   .swm-complete-actions { display: flex; gap: 12px; }
-   .swm-complete-btn {
-       flex: 1; border: 0; border-radius: 16px; padding: 18px; font-size: 15px; font-weight: 800; cursor: pointer;
-       transition: transform 0.15s, box-shadow 0.2s;
-   }
-   .swm-complete-btn:active { transform: scale(0.97); }
-   .swm-complete-study-again { background: var(--accent); color: var(--accent-contrast); }
-   .swm-complete-done { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
-
-   /* History Screen */
-   .swm-history-content { }
-   .swm-history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-   .swm-history-title { font-size: 22px; font-weight: 850; color: #fff; }
-   .swm-history-summary { display: flex; gap: 12px; margin-bottom: 24px; }
-   .swm-history-stat { flex: 1; min-width: 90px; background: rgba(255,255,255,0.06); border-radius: 14px; padding: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.08); }
-   .swm-history-stat-value { font-size: 22px; font-weight: 850; color: var(--accent); }
-   .swm-history-stat-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
-   .swm-history-list { display: flex; flex-direction: column; gap: 10px; }
-   .swm-history-day-group { margin-bottom: 20px; }
-   .swm-history-day-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.4); margin-bottom: 10px; padding-left: 4px; }
-   .swm-history-session {
-       display: flex; align-items: center; gap: 14px;
-       padding: 14px 16px;
-       background: rgba(255,255,255,0.04);
-       border-radius: 14px;
-       border: 1px solid rgba(255,255,255,0.05);
-   }
-   .swm-history-session-icon { font-size: 22px; flex-shrink: 0; }
-   .swm-history-session-info { flex: 1; min-width: 0; }
-   .swm-history-session-subject { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-   .swm-history-session-meta { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-   .swm-history-session-xp { font-size: 14px; font-weight: 800; color: var(--accent); flex-shrink: 0; }
-   .swm-history-empty { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.4); }
-   .swm-history-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
-
-   /* Notes Panel (slides from right) */
-   .swm-notes-panel {
-       position: absolute;
-       top: 0; right: 0; bottom: 0;
-       width: 100%; max-width: 360px;
-       background: linear-gradient(180deg, rgba(15,15,25,0.98) 0%, rgba(10,10,15,0.99) 100%);
-       border-left: 1px solid rgba(255,255,255,0.08);
-       z-index: 20;
-       display: flex;
-       flex-direction: column;
-       transform: translateX(100%);
-       transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-       backdrop-filter: blur(20px);
-   }
-   .swm-notes-panel.open { transform: translateX(0); }
-   .swm-notes-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-   .swm-notes-header h3 { font-size: 17px; font-weight: 800; color: #fff; }
-   .swm-notes-close { width: 40px; height: 40px; border: none; border-radius: 12px; background: rgba(255,255,255,0.06); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
-   .swm-notes-close:active { transform: scale(0.9); }
-   .swm-notes-close:hover { background: rgba(255,255,255,0.12); }
-   .swm-notes-textarea { flex: 1; border: none; border-radius: 0; padding: 20px; font-size: 15px; background: transparent; color: #fff; font-family: inherit; resize: none; line-height: 1.6; }
-   .swm-notes-textarea:focus { outline: none; }
-   .swm-notes-textarea::placeholder { color: rgba(255,255,255,0.3); }
-   .swm-notes-actions { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-   .swm-notes-save { width: 100%; border: 0; border-radius: 14px; padding: 16px; font-size: 15px; font-weight: 800; background: var(--accent); color: var(--accent-contrast); cursor: pointer; }
-
-   /* Ambient Panel */
-   .swm-ambient-panel {
-       position: absolute;
-       top: 0; right: 0; bottom: 0;
-       width: 100%; max-width: 340px;
-       background: linear-gradient(180deg, rgba(15,15,25,0.98) 0%, rgba(10,10,15,0.99) 100%);
-       border-left: 1px solid rgba(255,255,255,0.08);
-       z-index: 20;
-       display: flex;
-       flex-direction: column;
-       transform: translateX(100%);
-       transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-       backdrop-filter: blur(20px);
-   }
-   .swm-ambient-panel.open { transform: translateX(0); }
-   .swm-ambient-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-   .swm-ambient-header h3 { font-size: 17px; font-weight: 800; color: #fff; }
-   .swm-ambient-close { width: 40px; height: 40px; border: none; border-radius: 12px; background: rgba(255,255,255,0.06); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
-   .swm-ambient-close:hover { background: rgba(255,255,255,0.12); }
-   .swm-ambient-options { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px; }
-   .swm-ambient-btn { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; background: rgba(255,255,255,0.04); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: left; }
-   .swm-ambient-btn:active { transform: scale(0.98); }
-   .swm-ambient-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
-   .swm-ambient-btn.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 20%, transparent); }
-   .swm-ambient-icon { font-size: 22px; width: 40px; text-align: center; }
-   .swm-ambient-volume { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-   .swm-ambient-volume label { display: block; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-   .swm-ambient-volume-slider { width: 100%; accent-color: var(--accent); }
-
-   /* Mobile responsive */
-   @media (max-width: 480px) {
-       .swm-clock { font-size: 24px; }
-       .swm-date { font-size: 12px; }
-       .swm-setup-title { font-size: 24px; }
-       .swm-timer-svg { width: 240px; height: 240px; }
-       .swm-session-timer { font-size: 56px; }
-       .swm-session-subject { font-size: 18px; }
-       .swm-break-timer { font-size: 52px; }
-       .swm-break-title { font-size: 24px; }
-       .swm-complete-icon { font-size: 60px; }
-       .swm-complete-title { font-size: 24px; }
-       .swm-control-btn { min-width: 110px; padding: 14px 18px; font-size: 14px; }
-   }
-
         .study-timer-music-row {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             margin: -2px 0 14px; font-size: 13px; color: #888;
@@ -5489,285 +5170,6 @@
             </div>
 
 
-            <!-- STUDY WITH ME V1 - Full Screen Immersive -->
-            <button
-                class="swm-launch-card"
-                id="swmLaunchCard"
-                type="button"
-            >
-                <span class="swm-launch-icon">📚</span>
-                <div class="swm-launch-content">
-                    <div class="swm-launch-title" id="swmLaunchTitle">Study With Me</div>
-                    <div class="swm-launch-desc" id="swmLaunchDesc">Start a focused study session</div>
-                </div>
-                <span class="swm-launch-arrow">›</span>
-            </button>
-
-            <!-- Study With Me Full-Screen Environment -->
-            <div class="swm-immersive" id="swmImmersive" role="dialog" aria-modal="true" aria-label="Study With Me">
-                <!-- Immersive Background -->
-                <div class="swm-bg">
-                    <div class="swm-bg-gradient"></div>
-                    <div class="swm-bg-particles" id="swmBgParticles"></div>
-                    <div class="swm-bg-glow"></div>
-                </div>
-
-                <!-- Top Bar: Clock & Date -->
-                <header class="swm-top-bar">
-                    <div class="swm-clock-wrap">
-                        <div class="swm-clock" id="swmClock">11:47 PM</div>
-                        <div class="swm-date" id="swmDate">Monday, October 5</div>
-                    </div>
-                    <button class="swm-exit-btn" id="swmExitBtn" type="button" aria-label="Exit Study With Me">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </header>
-
-                <!-- Main Study Area -->
-                <main class="swm-main">
-                    <!-- Setup Screen -->
-                    <div class="swm-screen active" id="swmSetupScreen" data-screen="setup">
-                        <div class="swm-setup-content">
-                            <h1 class="swm-setup-title" id="swmSetupTitle">Study With Me</h1>
-                            <p class="swm-setup-subtitle" id="swmSetupSubtitle">Enter a focused study session</p>
-
-                            <div class="swm-field">
-                                <label class="swm-field-label" id="swmSubjectLabel">What are you studying?</label>
-                                <select class="swm-subject-select" id="swmSubjectSelect">
-                                    <option value="">Choose or type a subject</option>
-                                </select>
-                            </div>
-
-                            <div class="swm-field">
-                                <label class="swm-field-label" id="swmDurationLabel">Duration</label>
-                                <div class="swm-duration-options" id="swmDurationOptions">
-                                    <button class="swm-duration-btn active" data-min="25" type="button">25 min</button>
-                                    <button class="swm-duration-btn" data-min="50" type="button">50 min</button>
-                                    <button class="swm-duration-btn" data-min="0" type="button">Custom</button>
-                                </div>
-                                <div class="swm-duration-custom" id="swmDurationCustom">
-                                    <input type="number" class="swm-duration-custom-input" id="swmCustomMin" min="1" max="300" placeholder="Minutes" />
-                                </div>
-                            </div>
-
-                            <div class="swm-field">
-                                <label class="swm-field-label" id="swmGoalLabel">Session Goal (optional)</label>
-                                <input type="text" class="swm-goal-input" id="swmGoalInput" placeholder="e.g. Finish Chapter 4, Review 20 words..." />
-                            </div>
-
-                            <div class="swm-field">
-                                <label class="swm-field-label" id="swmNotesLabel">Notes (optional)</label>
-                                <textarea class="swm-notes-textarea" id="swmNotesInput" placeholder="Add notes during or after your session..."></textarea>
-                            </div>
-
-                            <button class="swm-start-btn" id="swmStartBtn" type="button">
-                                <span>Start Session</span>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Active Session Screen -->
-                    <div class="swm-screen" id="swmSessionScreen" data-screen="session">
-                        <div class="swm-session-content">
-                            <div class="swm-session-header">
-                                <div class="swm-session-info">
-                                    <div class="swm-session-subject" id="swmSessionSubject">Subject</div>
-                                    <div class="swm-session-goal-text" id="swmSessionGoalText"></div>
-                                </div>
-                                <div class="swm-session-streak">
-                                    <span class="swm-session-streak-emoji">🔥</span>
-                                    <span id="swmSessionStreakCount">0</span>
-                                    <span id="swmSessionStreakLabel">days</span>
-                                </div>
-                            </div>
-
-                            <div class="swm-timer-center">
-                                <div class="swm-timer-ring">
-                                    <svg class="swm-timer-svg" viewBox="0 0 280 280">
-                                        <circle class="swm-timer-track" cx="140" cy="140" r="120"></circle>
-                                        <circle class="swm-timer-progress" id="swmTimerProgress" cx="140" cy="140" r="120"></circle>
-                                    </svg>
-                                    <div class="swm-timer-display" id="swmSessionTimer">25:00</div>
-                                </div>
-                            </div>
-
-                            <div class="swm-session-controls">
-                                <button class="swm-control-btn swm-control-secondary" id="swmNotesBtn" type="button" aria-label="Notes">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14 2 14 8 20 8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <line x1="10" y1="9" x2="8" y2="9"></line>
-                                    </svg>
-                                </button>
-                                <button class="swm-control-btn swm-control-primary" id="swmPauseBtn" type="button">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <rect x="6" y="4" width="4" height="16"></rect>
-                                        <rect x="14" y="4" width="4" height="16"></rect>
-                                    </svg>
-                                    <span class="swm-control-label" id="swmPauseLabel">Pause</span>
-                                </button>
-                                <button class="swm-control-btn swm-control-finish" id="swmFinishBtn" type="button">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                        <polyline points="7 3 7 8 15 8"></polyline>
-                                    </svg>
-                                    <span class="swm-control-label">Finish</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Break Screen -->
-                    <div class="swm-screen" id="swmBreakScreen" data-screen="break">
-                        <div class="swm-break-content">
-                            <div class="swm-break-icon">☕</div>
-                            <h2 class="swm-break-title" id="swmBreakTitle">Break Time</h2>
-                            <p class="swm-break-subtitle" id="swmBreakSubtitle">You've earned a break</p>
-                            <div class="swm-break-timer" id="swmBreakTimer">05:00</div>
-                            <div class="swm-break-options" id="swmBreakOptions">
-                                <button class="swm-break-btn active" data-min="5" type="button">5 min</button>
-                                <button class="swm-break-btn" data-min="10" type="button">10 min</button>
-                                <button class="swm-break-btn" data-min="0" type="button">Custom</button>
-                            </div>
-                            <button class="swm-break-start" id="swmBreakStartBtn" type="button">Start Break</button>
-                            <button class="swm-break-skip" id="swmBreakSkipBtn" type="button">Skip Break</button>
-                        </div>
-                    </div>
-
-                    <!-- Completion Screen -->
-                    <div class="swm-screen" id="swmCompleteScreen" data-screen="complete">
-                        <div class="swm-complete-content">
-                            <div class="swm-complete-icon">🎉</div>
-                            <h2 class="swm-complete-title" id="swmCompleteTitle">Session Complete!</h2>
-                            <p class="swm-complete-subtitle" id="swmCompleteSubtitle">Great focus session</p>
-
-                            <div class="swm-complete-stats">
-                                <div class="swm-complete-stat">
-                                    <span class="swm-complete-stat-label" id="swmCompleteTimeLabel">Time Studied</span>
-                                    <span class="swm-complete-stat-value" id="swmCompleteTimeValue">25 min</span>
-                                </div>
-                                <div class="swm-complete-stat">
-                                    <span class="swm-complete-stat-label" id="swmCompleteXPLabel">XP Earned</span>
-                                    <span class="swm-complete-stat-value" id="swmCompleteXPValue">+25 XP</span>
-                                </div>
-                                <div class="swm-complete-stat">
-                                    <span class="swm-complete-stat-label" id="swmCompleteStreakLabel">Focus Streak</span>
-                                    <span class="swm-complete-stat-value" id="swmCompleteStreakValue">1 day</span>
-                                </div>
-                            </div>
-
-                            <div class="swm-complete-goal" id="swmCompleteGoal" style="display:none;">
-                                <div class="swm-complete-goal-label" id="swmCompleteGoalLabel">Goal</div>
-                                <div class="swm-complete-goal-text" id="swmCompleteGoalText"></div>
-                                <div class="swm-complete-goal-status" id="swmCompleteGoalStatus"></div>
-                            </div>
-
-                            <div class="swm-complete-notes" id="swmCompleteNotes" style="display:none;">
-                                <div class="swm-complete-notes-label" id="swmCompleteNotesLabel">Notes</div>
-                                <textarea class="swm-complete-notes-textarea" id="swmCompleteNotesInput" placeholder="Add a note..."></textarea>
-                                <button class="setting-button" id="swmSaveNoteBtn" type="button" style="width:100%;">Save</button>
-                            </div>
-
-                            <div class="swm-complete-actions">
-                                <button class="swm-complete-btn swm-complete-study-again" id="swmStudyAgainBtn" type="button">Study Again</button>
-                                <button class="swm-complete-btn swm-complete-done" id="swmDoneBtn" type="button">Done</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- History Screen -->
-                    <div class="swm-screen" id="swmHistoryScreen" data-screen="history">
-                        <div class="swm-history-content">
-                            <div class="swm-history-header">
-                                <h2 class="swm-history-title" id="swmHistoryTitle">Session History</h2>
-                                <button class="icon-button" id="swmHistoryBackBtn" type="button" aria-label="Back">←</button>
-                            </div>
-                            <div class="swm-history-summary">
-                                <div class="swm-history-stat">
-                                    <div class="swm-history-stat-value" id="swmHistoryToday">0 min</div>
-                                    <div class="swm-history-stat-label" id="swmHistoryTodayLabel">Today</div>
-                                </div>
-                                <div class="swm-history-stat">
-                                    <div class="swm-history-stat-value" id="swmHistoryWeek">0 min</div>
-                                    <div class="swm-history-stat-label" id="swmHistoryWeekLabel">This Week</div>
-                                </div>
-                                <div class="swm-history-stat">
-                                    <div class="swm-history-stat-value" id="swmHistoryTotal">0 min</div>
-                                    <div class="swm-history-stat-label" id="swmHistoryTotalLabel">Total</div>
-                                </div>
-                            </div>
-                            <div class="swm-history-list" id="swmHistoryList"></div>
-                        </div>
-                    </div>
-                </main>
-
-                <!-- Notes Panel (slides in from right) -->
-                <aside class="swm-notes-panel" id="swmNotesPanel" aria-label="Session Notes">
-                    <div class="swm-notes-header">
-                        <h3 id="swmNotesPanelTitle">Session Notes</h3>
-                        <button class="swm-notes-close" id="swmNotesCloseBtn" type="button" aria-label="Close notes">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-                    <textarea class="swm-notes-textarea" id="swmSessionNotesInput" placeholder="Write your thoughts..."></textarea>
-                    <div class="swm-notes-actions">
-                        <button class="swm-notes-save" id="swmSessionNotesSaveBtn" type="button">Save</button>
-                    </div>
-                </aside>
-
-                <!-- Ambient Sound Panel -->
-                <aside class="swm-ambient-panel" id="swmAmbientPanel" aria-label="Ambient Sounds">
-                    <div class="swm-ambient-header">
-                        <h3 id="swmAmbientPanelTitle">Ambience</h3>
-                        <button class="swm-ambient-close" id="swmAmbientCloseBtn" type="button" aria-label="Close ambience">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="swm-ambient-options" id="swmAmbientOptions">
-                        <button class="swm-ambient-btn" data-sound="none" type="button">
-                            <span class="swm-ambient-icon">🔇</span>
-                            <span class="swm-ambient-name" id="swmAmbientNone">None</span>
-                        </button>
-                        <button class="swm-ambient-btn" data-sound="rain" type="button">
-                            <span class="swm-ambient-icon">🌧️</span>
-                            <span class="swm-ambient-name" id="swmAmbientRain">Rain</span>
-                        </button>
-                        <button class="swm-ambient-btn" data-sound="fire" type="button">
-                            <span class="swm-ambient-icon">🔥</span>
-                            <span class="swm-ambient-name" id="swmAmbientFire">Fireplace</span>
-                        </button>
-                        <button class="swm-ambient-btn" data-sound="ocean" type="button">
-                            <span class="swm-ambient-icon">🌊</span>
-                            <span class="swm-ambient-name" id="swmAmbientOcean">Ocean</span>
-                        </button>
-                        <button class="swm-ambient-btn" data-sound="white" type="button">
-                            <span class="swm-ambient-icon">📻</span>
-                            <span class="swm-ambient-name" id="swmAmbientWhite">White Noise</span>
-                        </button>
-                    </div>
-                    <div class="swm-ambient-volume">
-                        <label id="swmAmbientVolumeLabel">Volume</label>
-                        <input type="range" class="swm-ambient-volume-slider" id="swmAmbientVolume" min="0" max="100" value="50" />
-                    </div>
-                </aside>
-            </div>
-
-
             <!-- MINI PLAYER (shown inside Study when Music view is closed but a track is loaded) -->
             <button
                 class="study-mini-player"
@@ -5790,6 +5192,23 @@
                     tabindex="0"
                     aria-label="Play or pause"
                 >▶</span>
+            </button>
+
+
+            <!-- STUDY WITH ME -->
+            <button
+                class="study-with-me-launch"
+                id="studyWithMeLaunch"
+                type="button"
+            >
+                <span class="study-with-me-launch-left">
+                    <span class="study-with-me-launch-icon">🌙</span>
+                    <span>
+                        <span class="study-with-me-launch-title" id="studyWithMeLaunchTitle">Study With Me</span>
+                        <span class="study-with-me-launch-sub" id="studyWithMeLaunchSub">Enter a calm full-screen focus session</span>
+                    </span>
+                </span>
+                <span class="study-with-me-launch-arrow">›</span>
             </button>
 
 
@@ -5985,6 +5404,40 @@
             </div>
 
         </section>
+
+
+        <!-- STUDY WITH ME FULL-SCREEN SESSION -->
+        <div id="studyWithMeOverlay" aria-hidden="true">
+            <div class="swm-bg"></div>
+
+            <div class="swm-topbar">
+                <button class="swm-icon-btn" id="studyWithMeClose" type="button" aria-label="Leave session">×</button>
+                <div class="swm-clock" id="studyWithMeClock">--:--</div>
+                <div class="swm-top-spacer" aria-hidden="true"></div>
+            </div>
+
+            <div class="swm-main">
+                <div class="swm-eyebrow" id="studyWithMeEyebrow">STUDY WITH ME</div>
+                <div class="swm-subject" id="studyWithMeSubject">Focus Session</div>
+                <div class="swm-timer" id="studyWithMeTimer">25:00</div>
+                <div class="swm-status" id="studyWithMeStatus">Ready to focus</div>
+
+                <div class="swm-progress" aria-hidden="true">
+                    <div class="swm-progress-fill" id="studyWithMeProgress"></div>
+                </div>
+
+                <div class="swm-music" id="studyWithMeMusic"></div>
+
+                <div class="swm-controls">
+                    <button class="swm-control primary" id="studyWithMePause" type="button">Pause</button>
+                    <button class="swm-control danger" id="studyWithMeFinish" type="button">Finish Session</button>
+                </div>
+            </div>
+
+            <div class="swm-bottom">
+                <div class="swm-tip" id="studyWithMeTip">Stay focused. You can leave this screen and your timer will keep running.</div>
+            </div>
+        </div>
 
 
         <!-- STUDY STATISTICS -->
@@ -8750,60 +8203,6 @@
                 timerDone: "Session saved!",
                 timerSubject: "Subject",
                 timerNone: "None",
-
-                // Study With Me V1
-                studyWithMe: "📚 Study With Me",
-                studyWithMeDesc: "Start a focused study session",
-                swmSubject: "What are you studying?",
-                swmSubjectPlaceholder: "Choose or type a subject",
-                swmDuration: "Duration",
-                swmGoal: "Session Goal (optional)",
-                swmGoalPlaceholder: "e.g. Finish Chapter 4, Review 20 words...",
-                swmNotes: "Notes (optional)",
-                swmNotesPlaceholder: "Add notes during or after your session...",
-                swmStart: "Start Session",
-                swmPause: "Pause",
-                swmResume: "Resume",
-                swmFinish: "Finish",
-                swmCancel: "Cancel",
-                swmBreak: "Break",
-                swmSkipBreak: "Skip Break",
-                swmBreakOptions: "Break Duration",
-                swmBreak5: "5 min",
-                swmBreak10: "10 min",
-                swmBreakCustom: "Custom",
-                swmSessionComplete: "🎉 Session Complete!",
-                swmBreakComplete: "☕ Break Finished!",
-                swmTimeStudied: "Time Studied",
-                swmXPEarned: "XP Earned",
-                swmFocusStreak: "Focus Streak",
-                swmDays: "days",
-                swmDay: "day",
-                swmHistory: "Session History",
-                swmToday: "Today",
-                swmYesterday: "Yesterday",
-                swmThisWeek: "This Week",
-                swmTotalTime: "Total Study Time",
-                swmNoSessions: "No sessions yet. Start your first session!",
-                swmAddNote: "Add a note...",
-                swmSaveNote: "Save",
-                swmStudyAgain: "Study Again",
-                swmDone: "Done",
-                swmMinutes: "min",
-                swmSessionGoal: "Goal",
-                swmGoalCompleted: "Goal completed!",
-                swmGoalNotCompleted: "Goal not completed",
-                swmStreakDesc: "Consecutive days with at least one session",
-                swmBreakSubtitle: "You've earned a break",
-                swmCompleteSubtitle: "Great focus session",
-                swmConfirmExit: "You have an active session. Exit anyway?",
-                swmSetupSubtitle: "Enter a focused study session",
-                swmAmbientNone: "None",
-                swmAmbientRain: "Rain",
-                swmAmbientFire: "Fireplace",
-                swmAmbientOcean: "Ocean",
-                swmAmbientWhite: "White Noise",
-                swmAmbientVolumeLabel: "Volume",
                 musicTitle: "Study Music",
                 musicSub: "Focus sounds and calm loops for deep work.",
                 musicCatAll: "All",
@@ -8854,6 +8253,16 @@
                 statsByDay: "By Day",
                 statsByMonthDay: "By Day of Month",
                 statsByMonth: "By Month",                statsLaunchText: "Study Statistics",
+                studyWithMe: "Study With Me",
+                studyWithMeSub: "Enter a calm full-screen focus session",
+                studyWithMeEyebrow: "STUDY WITH ME",
+                studyWithMeReady: "Ready to focus",
+                studyWithMePaused: "Paused",
+                studyWithMeRunning: "Focusing",
+                studyWithMePause: "Pause",
+                studyWithMeResume: "Resume",
+                studyWithMeFinish: "Finish Session",
+                studyWithMeTip: "Stay focused. You can leave this screen and your timer will keep running.",
                 statsSubjects: "Subjects",
                 statsMostStudied: "Most Studied",
                 statsOther: "Other",
@@ -9240,61 +8649,6 @@ done: "تەواو",
                 timerDone: "قۆناغ پاشەکراوە!",
                 timerSubject: "بابەت",
                 timerNone: "هیچ",
-
-                // Study With Me V1
-                studyWithMe: "📚 خوێندن بەگەڵ من",
-                studyWithMeDesc: "دەستپێکردنی قۆناغێکی تەرکێزبوو بۆ خوێندن",
-                swmSubject: "چی خوێنێیت؟",
-                swmSubjectPlaceholder: "بابەتێک هەڵبژێرە یان بنووسە",
-                swmDuration: "ماوە",
-                swmGoal: "بەرھەمی قۆناغ (بێجگە)",
-                swmGoalPlaceholder: "بۆ نموونە: کۆتایی هەوڵی ٤، دووبارەخستنەوەی ٢٠ ووشە...",
-                swmNotes: "نووتەکان (بێجگە)",
-                swmNotesPlaceholder: "نووتە زیاد بکە لە کاتی قۆناغەکە یان دوای...",
-                swmStart: "دەستپێکردنی قۆناغ",
-                swmPause: "وەستان",
-                swmResume: "بەردەوامبوون",
-                swmFinish: "تەواوکردن",
-                swmCancel: "پاشگەزبوون",
-                swmBreak: "بەرھەم",
-                swmSkipBreak: "جێبەجێکردنی بەرھەم",
-                swmBreakOptions: "ماوەی بەرھەم",
-                swmBreak5: "٥ خولەک",
-                swmBreak10: "١٠ خولەک",
-                swmBreakCustom: "شێوازی تایبەت",
-                swmSessionComplete: "🎉 قۆناغ تەواو بوو!",
-                swmBreakComplete: "☕ بەرھەم تەواو بوو!",
-                swmTimeStudied: "کاتی خوێندن",
-                swmXPEarned: "XP وەرگرتوو",
-                swmFocusStreak: "زنجیرەی تەرکیزبوون",
-                swmDays: "ڕۆژ",
-                swmDay: "ڕۆژ",
-                swmHistory: "مێژووی قۆناغەکان",
-                swmToday: "ئەمڕۆ",
-                swmYesterday: "دوایین",
-                swmThisWeek: "ئەم هەفتانە",
-                swmTotalTime: "کۆی کاتی خوێندن",
-                swmNoSessions: "هێشتا قۆناغێک نییە. یەکەم قۆناغەکەت دەستپێ بکە!",
-                swmAddNote: "نووتە زیاد بکە...",
-                swmSaveNote: "پاشەکردن",
-                swmStudyAgain: "دووبارە خوێندن",
-                swmDone: "تەواو",
-                swmMinutes: "خولەک",
-                swmSessionGoal: "بەرھەم",
-                swmGoalCompleted: "بەرھەم تەواو بوو!",
-                swmGoalNotCompleted: "بەرھەم نەبووەتەوە",
-                swmStreakDesc: "ڕۆژە بەرێوبەرەکان بە کەمێک قۆناغ",
-                swmBreakSubtitle: "تۆ بەرھەم وەرگرتووە",
-                swmCompleteSubtitle: "قۆناغێکی باشی تەرکیزبوو",
-                swmConfirmExit: "تۆ قۆناغێکی چالاکت هەیە. ھەر لەبەر دەچیت؟",
-                swmSetupSubtitle: "دەستپێکردنی قۆناغێکی تەرکێزبوو",
-                swmAmbientNone: "هیچ",
-                swmAmbientRain: "باران",
-                swmAmbientFire: "باڵا",
-                swmAmbientOcean: "دەریا",
-                swmAmbientWhite: "دەنگی سپی",
-                swmAmbientVolumeLabel: "دەنگ",
-
                 musicTitle: "مۆسیقای خوێندن",
                 musicSub: "دەنگی ئارام بۆ تەرکیز لە کاتی خوێندن.",
                 musicCatAll: "هەموو",
@@ -9730,61 +9084,6 @@ done: "تەواو",
                 timerDone: "تم حفظ الجلسة!",
                 timerSubject: "المادة",
                 timerNone: "بدون",
-
-                // Study With Me V1
-                studyWithMe: "📚 ادرس معي",
-                studyWithMeDesc: "ابدأ جلسة دراسة مركزة",
-                swmSubject: "ماذا تدرس؟",
-                swmSubjectPlaceholder: "اختر أو اكتب مادة",
-                swmDuration: "المدة",
-                swmGoal: "هدف الجلسة (اختياري)",
-                swmGoalPlaceholder: "مثال: إنهاء الفصل ٤، مراجعة ٢٠ كلمة...",
-                swmNotes: "ملاحظات (اختياري)",
-                swmNotesPlaceholder: "أضف ملاحظات أثناء أو بعد الجلسة...",
-                swmStart: "بدء الجلسة",
-                swmPause: "إيقاف",
-                swmResume: "استئناف",
-                swmFinish: "إنهاء",
-                swmCancel: "إلغاء",
-                swmBreak: "استراحة",
-                swmSkipBreak: "تخطي الاستراحة",
-                swmBreakOptions: "مدة الاستراحة",
-                swmBreak5: "٥ دقائق",
-                swmBreak10: "١٠ دقائق",
-                swmBreakCustom: "مخصص",
-                swmSessionComplete: "🎉 اكتملت الجلسة!",
-                swmBreakComplete: "☕ انتهت الاستراحة!",
-                swmTimeStudied: "وقت الدراسة",
-                swmXPEarned: "XP مكتسب",
-                swmFocusStreak: "سلسلة التركيز",
-                swmDays: "أيام",
-                swmDay: "يوم",
-                swmHistory: "سجل الجلسات",
-                swmToday: "اليوم",
-                swmYesterday: "أمس",
-                swmThisWeek: "هذا الأسبوع",
-                swmTotalTime: "إجمالي وقت الدراسة",
-                swmNoSessions: "لا توجد جلسات بعد. ابدأ جلستك الأولى!",
-                swmAddNote: "أضف ملاحظة...",
-                swmSaveNote: "حفظ",
-                swmStudyAgain: "ادرس مرة أخرى",
-                swmDone: "تم",
-                swmMinutes: "دقيقة",
-                swmSessionGoal: "الهدف",
-                swmGoalCompleted: "تم تحقيق الهدف!",
-                swmGoalNotCompleted: "لم يتحقق الهدف",
-                swmStreakDesc: "أيام متتالية مع جلسة واحدة على الأقل",
-                swmBreakSubtitle: "لقد استحقيت استراحة",
-                swmCompleteSubtitle: "جلسة تركيز رائعة",
-                swmConfirmExit: "لديك جلسة نشطة. هل تريد الخروج على أي حال؟",
-                swmSetupSubtitle: "ابدأ جلسة دراسة مركزة",
-                swmAmbientNone: "بدون",
-                swmAmbientRain: "مطر",
-                swmAmbientFire: "مدفأة",
-                swmAmbientOcean: "محيط",
-                swmAmbientWhite: "ضجيج أبيض",
-                swmAmbientVolumeLabel: "مستوى الصوت",
-
                 musicTitle: "موسيقى المذاكرة",
                 musicSub: "أصوات هادئة للتركيز أثناء المذاكرة.",
                 musicCatAll: "الكل",
@@ -9836,6 +9135,16 @@ done: "تەواو",
                 statsByMonthDay: "بأيام الشهر",
                 statsByMonth: "بالشهر",
                 statsLaunchText: "إحصائيات الدراسة",
+                studyWithMe: "ادرس معي",
+                studyWithMeSub: "ادخل جلسة تركيز هادئة بملء الشاشة",
+                studyWithMeEyebrow: "ادرس معي",
+                studyWithMeReady: "جاهز للتركيز",
+                studyWithMePaused: "متوقف مؤقتًا",
+                studyWithMeRunning: "جاري التركيز",
+                studyWithMePause: "إيقاف مؤقت",
+                studyWithMeResume: "استئناف",
+                studyWithMeFinish: "إنهاء الجلسة",
+                studyWithMeTip: "ابقَ مركزًا. يمكنك مغادرة هذه الشاشة وسيستمر المؤقت.",
                 statsSubjects: "المواد الدراسية",
                 statsMostStudied: "الأكثر دراسة",
                 statsOther: "أخرى",
@@ -10677,6 +9986,22 @@ done: "تەواو",
                 refreshTasks();
             }
 
+            // Refresh Study With Me labels when the language changes.
+            try {
+                const swmLaunchTitle = document.getElementById("studyWithMeLaunchTitle");
+                const swmLaunchSub = document.getElementById("studyWithMeLaunchSub");
+                const swmEyebrow = document.getElementById("studyWithMeEyebrow");
+                const swmPause = document.getElementById("studyWithMePause");
+                const swmFinish = document.getElementById("studyWithMeFinish");
+                const swmTip = document.getElementById("studyWithMeTip");
+                if (swmLaunchTitle) swmLaunchTitle.textContent = t("studyWithMe");
+                if (swmLaunchSub) swmLaunchSub.textContent = t("studyWithMeSub");
+                if (swmEyebrow) swmEyebrow.textContent = t("studyWithMeEyebrow");
+                if (swmFinish) swmFinish.textContent = t("studyWithMeFinish");
+                if (swmTip) swmTip.textContent = t("studyWithMeTip");
+                if (typeof window._renderStudyWithMe === "function") window._renderStudyWithMe();
+            } catch (e) {}
+
             // Re-render study stats page if it's currently active
             if (document.getElementById("studyStats")?.classList.contains("active")) {
                 document.getElementById("studyStatsLaunchText").textContent = t("statsLaunchText");
@@ -10689,10 +10014,6 @@ done: "تەواو",
             // Re-render study music labels if the music module is loaded
             if (typeof window._musicApplyLanguage === "function") {
                 try { window._musicApplyLanguage(); } catch (e) {}
-            }
-            // Re-render Study With Me labels if the module is loaded
-            if (typeof window._swmApplyLanguage === "function") {
-                try { window._swmApplyLanguage(); } catch (e) {}
             }
         }
 
@@ -17169,19 +16490,10 @@ document.documentElement.classList.toggle(
 
             if (goal === 0 && subjects.length === 0) {
                 dashStudyContent.innerHTML =
-                    '<div class="dashboard-text-medium" style="margin-bottom:14px;">' + t('swmNoSessions') + '</div>' +
-                    '<button class="setting-button" id="dashSetStudyBtn" style="width:100%; margin-bottom:8px;">' + t('swmStart') + ' \u2192</button>' +
-                    '<button class="setting-button" id="dashSwmBtn" style="width:100%; border:1px solid var(--accent); background:transparent; color:var(--accent);">' + t('studyWithMe') + '</button>';
+                    '<div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>' +
+                    '<button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal \u2192</button>';
                 document.getElementById("dashSetStudyBtn")
                     ?.addEventListener("click", () => showSection("study"));
-                document.getElementById("dashSwmBtn")
-                    ?.addEventListener("click", () => {
-                        showSection("study");
-                        setTimeout(() => {
-                            const launchCard = document.getElementById('swmLaunchCard');
-                            if (launchCard) launchCard.click();
-                        }, 100);
-                    });
                 return;
             }
 
@@ -17208,7 +16520,7 @@ document.documentElement.classList.toggle(
                 html += '</div>';
             }
 
-            html += '<button class="setting-button" id="dashSetStudyBtn" style="width:100%; margin-top:12px;">' + t('study') + ' \u2192</button>';
+            html += '<button class="setting-button" id="dashSetStudyBtn" style="width:100%; margin-top:12px;">Study \u2192</button>';
 
             dashStudyContent.innerHTML = html;
 
@@ -19120,6 +18432,14 @@ document.documentElement.classList.toggle(
             if (window.Haptics) window.Haptics.completion();
             timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
             timerDoneMsg.style.display = "block";
+
+            // If this timer was running inside Study With Me, close the
+            // full-screen session after the existing save/statistics logic.
+            try {
+                if (typeof window.studyWithMeFinishCleanup === "function") {
+                    window.studyWithMeFinishCleanup();
+                }
+            } catch (e) {}
         }
 
         function timerReset() {
@@ -19197,1743 +18517,202 @@ document.documentElement.classList.toggle(
 
 
         /* ============================================================
-           STUDY WITH ME V1 - IMMERSIVE FULL-SCREEN ENVIRONMENT
+           STUDY WITH ME — FULL-SCREEN SESSION CONTROLLER
+           Reuses the existing Study Timer so sessions continue to save
+           to the same study minutes/statistics system.
            ============================================================ */
+        (function initStudyWithMe() {
+            const overlay = document.getElementById("studyWithMeOverlay");
+            const launch = document.getElementById("studyWithMeLaunch");
+            const closeBtn = document.getElementById("studyWithMeClose");
+            const pauseBtn = document.getElementById("studyWithMePause");
+            const finishBtn = document.getElementById("studyWithMeFinish");
+            const clockEl = document.getElementById("studyWithMeClock");
+            const timerEl = document.getElementById("studyWithMeTimer");
+            const subjectEl = document.getElementById("studyWithMeSubject");
+            const statusEl = document.getElementById("studyWithMeStatus");
+            const progressEl = document.getElementById("studyWithMeProgress");
+            const musicEl = document.getElementById("studyWithMeMusic");
+            const launchTitle = document.getElementById("studyWithMeLaunchTitle");
+            const launchSub = document.getElementById("studyWithMeLaunchSub");
+            const eyebrowEl = document.getElementById("studyWithMeEyebrow");
+            const tipEl = document.getElementById("studyWithMeTip");
 
-// Study With Me state
-let swmState = 'setup'; // setup | session | break | complete | history
-let swmSessionData = {
-    subject: '',
-    duration: 25 * 60,
-    goal: '',
-    notes: '',
-    startTime: 0,
-    pausedRemaining: 0,
-    elapsed: 0,
-    xpEarned: 0
-};
-let swmBreakData = {
-    duration: 5 * 60,
-    pausedRemaining: 0
-};
-let swmInterval = null;
-let swmBreakInterval = null;
-let swmClockInterval = null;
-let swmAmbientAudio = null;
-let swmActiveSound = 'none';
-let swmAudioContext = null;
+            if (!overlay || !launch) return;
 
-// DOM elements - Immersive
-const swmImmersive = document.getElementById('swmImmersive');
-const swmLaunchCard = document.getElementById('swmLaunchCard');
-const swmExitBtn = document.getElementById('swmExitBtn');
-const swmClock = document.getElementById('swmClock');
-const swmDate = document.getElementById('swmDate');
+            let clockInterval = null;
+            let uiInterval = null;
+            let isOpen = false;
 
-// Screens
-const swmSetupScreen = document.getElementById('swmSetupScreen');
-const swmSessionScreen = document.getElementById('swmSessionScreen');
-const swmBreakScreen = document.getElementById('swmBreakScreen');
-const swmCompleteScreen = document.getElementById('swmCompleteScreen');
-const swmHistoryScreen = document.getElementById('swmHistoryScreen');
-
-// Setup elements
-const swmSubjectSelect = document.getElementById('swmSubjectSelect');
-const swmDurationOptions = document.getElementById('swmDurationOptions');
-const swmDurationCustom = document.getElementById('swmDurationCustom');
-const swmCustomMin = document.getElementById('swmCustomMin');
-const swmGoalInput = document.getElementById('swmGoalInput');
-const swmNotesInput = document.getElementById('swmNotesInput');
-const swmStartBtn = document.getElementById('swmStartBtn');
-
-// Session elements
-const swmSessionSubject = document.getElementById('swmSessionSubject');
-const swmSessionStreakCount = document.getElementById('swmSessionStreakCount');
-const swmSessionStreakLabel = document.getElementById('swmSessionStreakLabel');
-const swmSessionTimer = document.getElementById('swmSessionTimer');
-const swmSessionGoalText = document.getElementById('swmSessionGoalText');
-const swmPauseBtn = document.getElementById('swmPauseBtn');
-const swmPauseLabel = document.getElementById('swmPauseLabel');
-const swmFinishBtn = document.getElementById('swmFinishBtn');
-const swmNotesBtn = document.getElementById('swmNotesBtn');
-const swmTimerProgress = document.getElementById('swmTimerProgress');
-
-// Break elements
-const swmBreakTimer = document.getElementById('swmBreakTimer');
-const swmBreakOptions = document.getElementById('swmBreakOptions');
-const swmBreakStartBtn = document.getElementById('swmBreakStartBtn');
-const swmBreakSkipBtn = document.getElementById('swmBreakSkipBtn');
-
-// Completion elements
-const swmCompleteTimeValue = document.getElementById('swmCompleteTimeValue');
-const swmCompleteXPValue = document.getElementById('swmCompleteXPValue');
-const swmCompleteStreakValue = document.getElementById('swmCompleteStreakValue');
-const swmCompleteGoal = document.getElementById('swmCompleteGoal');
-const swmCompleteGoalText = document.getElementById('swmCompleteGoalText');
-const swmCompleteGoalStatus = document.getElementById('swmCompleteGoalStatus');
-const swmCompleteNotes = document.getElementById('swmCompleteNotes');
-const swmCompleteNotesInput = document.getElementById('swmCompleteNotesInput');
-const swmSaveNoteBtn = document.getElementById('swmSaveNoteBtn');
-const swmStudyAgainBtn = document.getElementById('swmStudyAgainBtn');
-const swmDoneBtn = document.getElementById('swmDoneBtn');
-
-// History elements
-const swmHistoryList = document.getElementById('swmHistoryList');
-const swmHistoryToday = document.getElementById('swmHistoryToday');
-const swmHistoryWeek = document.getElementById('swmHistoryWeek');
-const swmHistoryTotal = document.getElementById('swmHistoryTotal');
-const swmHistoryBackBtn = document.getElementById('swmHistoryBackBtn');
-
-// Notes panel
-const swmNotesPanel = document.getElementById('swmNotesPanel');
-const swmNotesCloseBtn = document.getElementById('swmNotesCloseBtn');
-const swmSessionNotesInput = document.getElementById('swmSessionNotesInput');
-const swmSessionNotesSaveBtn = document.getElementById('swmSessionNotesSaveBtn');
-
-// Ambient panel
-const swmAmbientPanel = document.getElementById('swmAmbientPanel');
-const swmAmbientCloseBtn = document.getElementById('swmAmbientCloseBtn');
-const swmAmbientOptions = document.getElementById('swmAmbientOptions');
-const swmAmbientVolume = document.getElementById('swmAmbientVolume');
-
-        /* Labels need refreshing when the app language changes. */
-        window._swmApplyLanguage = function () {
-            // Launch card
-            const launchTitle = document.getElementById('swmLaunchTitle');
-            const launchDesc = document.getElementById('swmLaunchDesc');
-            if (launchTitle) launchTitle.textContent = t('studyWithMe');
-            if (launchDesc) launchDesc.textContent = t('studyWithMeDesc');
-
-            // Setup screen
-            const setupTitle = document.getElementById('swmSetupTitle');
-            const subjectLabel = document.getElementById('swmSubjectLabel');
-            const durationLabel = document.getElementById('swmDurationLabel');
-            const goalLabel = document.getElementById('swmGoalLabel');
-            const notesLabel = document.getElementById('swmNotesLabel');
-            const startBtn = document.getElementById('swmStartBtn');
-            if (setupTitle) setupTitle.textContent = t('studyWithMe');
-            if (subjectLabel) subjectLabel.textContent = t('swmSubject');
-            if (durationLabel) durationLabel.textContent = t('swmDuration');
-            if (goalLabel) goalLabel.textContent = t('swmGoal');
-            if (notesLabel) notesLabel.textContent = t('swmNotes');
-            if (startBtn) startBtn.textContent = t('swmStart');
-
-            // Subject select placeholder
-            if (swmSubjectSelect && swmSubjectSelect.options.length > 0) {
-                swmSubjectSelect.options[0].textContent = t('swmSubjectPlaceholder');
-            }
-
-            // Goal input placeholder
-            if (swmGoalInput) swmGoalInput.placeholder = t('swmGoalPlaceholder');
-
-            // Notes input placeholder
-            if (swmNotesInput) swmNotesInput.placeholder = t('swmNotesPlaceholder');
-
-            // Session screen
-            const sessionStreakLabel = document.getElementById('swmSessionStreakLabel');
-            const pauseBtn = document.getElementById('swmPauseBtn');
-            const finishBtn = document.getElementById('swmFinishBtn');
-            const cancelBtn = document.getElementById('swmCancelBtn');
-            const sessionGoalLabel = document.getElementById('swmSessionGoalLabel');
-            if (sessionStreakLabel) sessionStreakLabel.textContent = getFocusStreak() === 1 ? t('swmDay') : t('swmDays');
-            if (pauseBtn) pauseBtn.textContent = t('swmPause');
-            if (finishBtn) finishBtn.textContent = t('swmFinish');
-            if (cancelBtn) cancelBtn.textContent = t('swmCancel');
-            if (sessionGoalLabel) sessionGoalLabel.textContent = t('swmSessionGoal');
-
-            // Break screen
-            const breakTitle = document.getElementById('swmBreakTitle');
-            const breakSubtitle = document.getElementById('swmBreakSubtitle');
-            const breakStartBtn = document.getElementById('swmBreakStartBtn');
-            const breakSkipBtn = document.getElementById('swmBreakSkipBtn');
-            if (breakTitle) breakTitle.textContent = t('swmBreak');
-            if (breakSubtitle) breakSubtitle.textContent = t('swmBreakSubtitle') || 'You\'ve earned a break';
-            if (breakStartBtn) breakStartBtn.textContent = t('swmBreak') + ' ' + t('swmStart').toLowerCase();
-            if (breakSkipBtn) breakSkipBtn.textContent = t('swmSkipBreak');
-
-            // Completion screen
-            const completeTitle = document.getElementById('swmCompleteTitle');
-            const completeSubtitle = document.getElementById('swmCompleteSubtitle');
-            const completeTimeLabel = document.getElementById('swmCompleteTimeLabel');
-            const completeXPLabel = document.getElementById('swmCompleteXPLabel');
-            const completeStreakLabel = document.getElementById('swmCompleteStreakLabel');
-            const completeGoalLabel = document.getElementById('swmCompleteGoalLabel');
-            const completeNotesLabel = document.getElementById('swmCompleteNotesLabel');
-            const completeNotesInput = document.getElementById('swmCompleteNotesInput');
-            const saveNoteBtn = document.getElementById('swmSaveNoteBtn');
-            const studyAgainBtn = document.getElementById('swmStudyAgainBtn');
-            const doneBtn = document.getElementById('swmDoneBtn');
-            if (completeTitle) completeTitle.textContent = t('swmSessionComplete');
-            if (completeSubtitle) completeSubtitle.textContent = t('swmCompleteSubtitle') || 'Great focus session';
-            if (completeTimeLabel) completeTimeLabel.textContent = t('swmTimeStudied');
-            if (completeXPLabel) completeXPLabel.textContent = t('swmXPEarned');
-            if (completeStreakLabel) completeStreakLabel.textContent = t('swmFocusStreak');
-            if (completeGoalLabel) completeGoalLabel.textContent = t('swmSessionGoal');
-            if (completeNotesLabel) completeNotesLabel.textContent = t('swmNotes');
-            if (completeNotesInput) completeNotesInput.placeholder = t('swmAddNote');
-            if (saveNoteBtn) saveNoteBtn.textContent = t('swmSaveNote');
-            if (studyAgainBtn) studyAgainBtn.textContent = t('swmStudyAgain');
-            if (doneBtn) doneBtn.textContent = t('swmDone');
-
-            // History screen
-            const historyTitle = document.getElementById('swmHistoryTitle');
-            const historyTodayLabel = document.getElementById('swmHistoryTodayLabel');
-            const historyWeekLabel = document.getElementById('swmHistoryWeekLabel');
-            const historyTotalLabel = document.getElementById('swmHistoryTotalLabel');
-            if (historyTitle) historyTitle.textContent = t('swmHistory');
-            if (historyTodayLabel) historyTodayLabel.textContent = t('swmToday');
-            if (historyWeekLabel) historyWeekLabel.textContent = t('swmThisWeek');
-            if (historyTotalLabel) historyTotalLabel.textContent = t('swmTotalTime');
-
-            // Notes panel
-            const notesPanelTitle = document.getElementById('swmNotesPanelTitle');
-            if (notesPanelTitle) notesPanelTitle.textContent = t('swmNotes');
-
-            // Ambient panel
-            const ambientPanelTitle = document.getElementById('swmAmbientPanelTitle');
-            if (ambientPanelTitle) ambientPanelTitle.textContent = t('swmAmbientVolumeLabel');
-
-            // Re-render history to update day labels
-            renderHistory();
-        };
-
-        // Focus streak functions
-        function loadFocusStreak() {
-            try {
-                const data = JSON.parse(localStorage.getItem('dailykrd_focus_streak') || '{}');
-                return data;
-            } catch (e) {
-                return { currentStreak: 0, lastSessionDate: null };
-            }
-        }
-
-        function saveFocusStreak(data) {
-            localStorage.setItem('dailykrd_focus_streak', JSON.stringify(data));
-        }
-
-        function updateFocusStreak() {
-            const streakData = loadFocusStreak();
-            const todayKey = getTodayKey();
-
-            if (streakData.lastSessionDate === todayKey) {
-                // Already counted today
-                return streakData.currentStreak;
-            }
-
-            const lastDate = streakData.lastSessionDate;
-            let newStreak = streakData.currentStreak;
-
-            if (lastDate) {
-                const last = parseDateKey(lastDate);
-                const today = parseDateKey(todayKey);
-                const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
-
-                if (diffDays === 1) {
-                    // Consecutive day
-                    newStreak += 1;
-                } else if (diffDays > 1) {
-                    // Streak broken
-                    newStreak = 1;
+            function getRemaining() {
+                if (timerState === "running") {
+                    return Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
                 }
-                // If diffDays === 0, already handled above
-            } else {
-                // First session ever
-                newStreak = 1;
+                if (timerState === "paused") return Math.max(0, timerPausedRemaining);
+                return Math.max(0, timerDuration);
             }
 
-            streakData.currentStreak = newStreak;
-            streakData.lastSessionDate = todayKey;
-            saveFocusStreak(streakData);
-
-            // Sync to Firestore if authenticated
-            if (currentUser) {
-                try {
-                    const ref = doc(db, 'users', currentUser.uid, 'study', 'streak');
-                    setDoc(ref, streakData, { merge: true }).catch(() => {});
-                } catch (e) {}
+            function escapeHtml(value) {
+                return String(value ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
             }
 
-            return newStreak;
-        }
-
-        function getFocusStreak() {
-            const streakData = loadFocusStreak();
-            return streakData.currentStreak;
-        }
-
-        // XP functions
-        function loadXP() {
-            try {
-                return parseInt(localStorage.getItem('dailykrd_xp') || '0', 10);
-            } catch (e) {
-                return 0;
-            }
-        }
-
-        function saveXP(xp) {
-            localStorage.setItem('dailykrd_xp', String(xp));
-            // Sync to Firestore if authenticated
-            if (currentUser) {
-                try {
-                    const ref = doc(db, 'users', currentUser.uid, 'profile', 'xp');
-                    setDoc(ref, { xp: xp, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-                } catch (e) {}
-            }
-        }
-
-        function addXP(amount) {
-            const currentXP = loadXP();
-            const newXP = currentXP + amount;
-            saveXP(newXP);
-            return newXP;
-        }
-
-        // Study sessions storage
-        function loadStudySessions() {
-            try {
-                return JSON.parse(localStorage.getItem('dailykrd_study_sessions_v2') || '[]');
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function saveStudySessions(sessions) {
-            localStorage.setItem('dailykrd_study_sessions_v2', JSON.stringify(sessions));
-            // Sync to Firestore if authenticated
-            if (currentUser) {
-                try {
-                    const ref = doc(db, 'users', currentUser.uid, 'study', 'sessions_v2');
-                    setDoc(ref, { sessions: sessions }, { merge: true }).catch(() => {});
-                } catch (e) {}
-            }
-        }
-
-        function addStudySession(session) {
-            const sessions = loadStudySessions();
-            sessions.push(session);
-            saveStudySessions(sessions);
-        }
-
-        // Format time as MM:SS
-        function swmFormatTime(seconds) {
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
-            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        }
-
-        // Populate subject select
-        function swmPopulateSubjects() {
-            const subjects = loadStudySubjects();
-            swmSubjectSelect.innerHTML = '<option value="">' + t('swmSubjectPlaceholder') + '</option>' +
-                subjects.map(s => '<option value="' + s.replace(/"/g, '"') + '">' + s.replace(/</g, '<') + '</option>').join('');
-        }
-
-        // Show a specific screen
-        function swmShowScreen(screenName) {
-            document.querySelectorAll('.swm-view-screen').forEach(el => el.classList.remove('active'));
-            document.getElementById('swm' + screenName.charAt(0).toUpperCase() + screenName.slice(1) + 'Screen').classList.add('active');
-            swmState = screenName;
-        }
-
-        // Initialize Study With Me
-        function swmInit() {
-            swmPopulateSubjects();
-            swmUpdateLaunchCard();
-            renderHistory();
-
-            // Event listeners
-            swmLaunchCard.addEventListener('click', () => {
-                swmView.style.display = 'block';
-                swmShowScreen('setup');
-                swmLaunchCard.style.display = 'none';
-            });
-
-            swmDurationOptions.querySelectorAll('.swm-duration-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (window.Haptics) window.Haptics.selection();
-                    swmDurationOptions.querySelectorAll('.swm-duration-btn').forEach(b => b.classList.remove('active', 'custom-active'));
-                    btn.classList.add('active');
-                    const min = parseInt(btn.dataset.min, 10);
-                    if (min === 0) {
-                        swmDurationCustom.classList.add('show');
-                        btn.classList.add('custom-active');
-                        swmCustomMin.focus();
-                    } else {
-                        swmDurationCustom.classList.remove('show');
-                        swmSessionData.duration = min * 60;
-                    }
+            function updateClock() {
+                if (!clockEl) return;
+                const now = new Date();
+                clockEl.textContent = now.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
                 });
-            });
+            }
 
-            swmCustomMin.addEventListener('change', () => {
-                const v = parseInt(swmCustomMin.value, 10);
-                if (v > 0 && v <= 300) {
-                    swmSessionData.duration = v * 60;
+            function updateMusicLabel() {
+                if (!musicEl) return;
+                const musicSelect = document.getElementById("studyTimerMusic");
+                const option = musicSelect?.selectedOptions?.[0];
+                const label = option?.textContent?.trim() || "";
+                musicEl.textContent = label && label.toLowerCase() !== "none"
+                    ? "♪ " + label
+                    : "";
+            }
+
+            function render() {
+                if (!isOpen) return;
+
+                const remaining = getRemaining();
+                const total = Math.max(1, timerDuration);
+                const ratio = Math.max(0, Math.min(1, remaining / total));
+
+                timerEl.textContent = timerFormat(remaining);
+                progressEl.style.transform = "scaleX(" + ratio + ")";
+
+                const subject = timerSubjectSel.value?.trim() || "Focus Session";
+                subjectEl.textContent = subject;
+
+                if (timerState === "running") {
+                    statusEl.textContent = t("studyWithMeRunning");
+                    pauseBtn.textContent = t("studyWithMePause");
+                } else if (timerState === "paused") {
+                    statusEl.textContent = t("studyWithMePaused");
+                    pauseBtn.textContent = t("studyWithMeResume");
+                } else {
+                    statusEl.textContent = t("studyWithMeReady");
+                    pauseBtn.textContent = t("studyWithMeResume");
                 }
-            });
 
-            swmCustomMin.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    swmCustomMin.blur();
-                }
-            });
+                updateMusicLabel();
+            }
 
-            swmStartBtn.addEventListener('click', swmStartSession);
-
-            swmPauseBtn.addEventListener('click', swmTogglePause);
-            swmFinishBtn.addEventListener('click', swmFinishSession);
-            swmCancelBtn.addEventListener('click', swmCancelSession);
-
-            swmBreakOptions.querySelectorAll('.swm-break-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (window.Haptics) window.Haptics.selection();
-                    swmBreakOptions.querySelectorAll('.swm-break-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const min = parseInt(btn.dataset.min, 10);
-                    if (min > 0) {
-                        swmBreakData.duration = min * 60;
-                        swmBreakTimer.textContent = swmFormatTime(swmBreakData.duration);
-                    }
-                });
-            });
-
-            swmBreakStartBtn.addEventListener('click', swmStartBreak);
-            swmBreakSkipBtn.addEventListener('click', swmSkipBreak);
-
-            swmStudyAgainBtn.addEventListener('click', () => {
-                swmShowScreen('setup');
-                swmGoalInput.value = '';
-                swmNotesInput.value = '';
-            });
-
-            swmDoneBtn.addEventListener('click', () => {
-                swmView.style.display = 'none';
-                swmLaunchCard.style.display = 'flex';
-                swmShowScreen('setup');
-            });
-
-            swmHistoryBackBtn.addEventListener('click', () => {
-                swmShowScreen('setup');
-            });
-
-            swmSaveNoteBtn.addEventListener('click', () => {
-                const note = swmCompleteNotesInput.value.trim();
-                if (note) {
-                    // Update the last session with notes
-                    const sessions = loadStudySessions();
-                    if (sessions.length > 0) {
-                        sessions[sessions.length - 1].notes = note;
-                        saveStudySessions(sessions);
-                    }
-                }
-                swmCompleteNotes.style.display = 'none';
+            function openSession() {
                 if (window.Haptics) window.Haptics.success();
-            });
-        }
 
-        function swmUpdateLaunchCard() {
-            const streak = getFocusStreak();
-            const streakLabel = document.getElementById('swmLaunchDesc');
-            if (streakLabel) {
-                streakLabel.textContent = streak > 0
-                    ? t('swmStreakDesc').replace('{days}', streak) || (streak + ' ' + (streak === 1 ? t('swmDay') : t('swmDays')) + ' streak')
-                    : t('studyWithMeDesc');
-            }
-        }
+                isOpen = true;
+                overlay.classList.add("open");
+                overlay.setAttribute("aria-hidden", "false");
+                document.body.style.overflow = "hidden";
 
-        function swmStartSession() {
-            if (window.Haptics) window.Haptics.success();
+                // Make sure the timer's subject list is current.
+                try { timerPopulateSubject(); } catch (e) {}
 
-            swmSessionData.subject = swmSubjectSelect.value || '';
-            swmSessionData.goal = swmGoalInput.value.trim();
-            swmSessionData.notes = swmNotesInput.value.trim();
-            swmSessionData.startTime = Date.now();
-            swmSessionData.pausedRemaining = swmSessionData.duration;
-            swmSessionData.elapsed = 0;
-
-            // If custom subject entered, add to subjects list
-            if (swmSessionData.subject && !loadStudySubjects().includes(swmSessionData.subject)) {
-                const subjects = loadStudySubjects();
-                subjects.push(swmSessionData.subject);
-                saveStudySubjects(subjects);
-                swmPopulateSubjects();
-                timerPopulateSubject();
-            }
-
-            swmSessionSubject.textContent = swmSessionData.subject || t('timerNone');
-            if (swmSessionData.goal) {
-                swmSessionGoal.style.display = 'block';
-                swmSessionGoalText.textContent = swmSessionData.goal;
-            } else {
-                swmSessionGoal.style.display = 'none';
-            }
-
-            const streak = getFocusStreak();
-            swmSessionStreakCount.textContent = streak;
-            swmSessionStreakLabel.textContent = streak === 1 ? t('swmDay') : t('swmDays');
-
-            swmSessionTimer.textContent = swmFormatTime(swmSessionData.duration);
-            document.title = swmFormatTime(swmSessionData.duration) + ' - Daily.KRD';
-
-            // Start music if selected
-            try {
-                const musicChoice = document.getElementById('studyTimerMusic')?.value || '';
-                window._musicHooks && window._musicHooks.forTimerStart(musicChoice);
-            } catch (e) {}
-
-            swmShowScreen('session');
-
-            // Start timer
-            swmInterval = setInterval(() => {
-                swmSessionData.pausedRemaining = Math.max(0, swmSessionData.pausedRemaining - 1);
-                swmSessionData.elapsed = swmSessionData.duration - swmSessionData.pausedRemaining;
-                swmSessionTimer.textContent = swmFormatTime(swmSessionData.pausedRemaining);
-                document.title = swmFormatTime(swmSessionData.pausedRemaining) + ' - Daily.KRD';
-
-                if (swmSessionData.pausedRemaining <= 0) {
-                    swmSessionComplete();
+                // If there is no active timer, start the selected timer immediately.
+                // This is the key integration: Study With Me uses the existing timer
+                // instead of creating a second competing timer.
+                if (timerState === "idle") {
+                    timerStart();
                 }
-            }, 1000);
-        }
 
-        function swmTogglePause() {
-            if (swmState !== 'session') return;
+                updateClock();
+                updateMusicLabel();
+                render();
 
-            if (swmPauseBtn.textContent === t('swmPause')) {
-                // Pause
-                clearInterval(swmInterval);
-                swmInterval = null;
-                swmPauseBtn.textContent = t('swmResume');
-                swmPauseBtn.classList.remove('swm-session-pause');
-                swmPauseBtn.classList.add('swm-session-finish');
-                swmPauseBtn.style.background = 'var(--accent)';
-                swmPauseBtn.style.color = 'var(--accent-contrast)';
-                try { window._musicHooks && window._musicHooks.forTimerPause(); } catch (e) {}
+                clearInterval(clockInterval);
+                clearInterval(uiInterval);
+                clockInterval = setInterval(updateClock, 1000);
+                uiInterval = setInterval(render, 250);
+            }
+
+            function closeSession() {
+                isOpen = false;
+                overlay.classList.remove("open");
+                overlay.setAttribute("aria-hidden", "true");
+                document.body.style.overflow = "";
+
+                clearInterval(clockInterval);
+                clearInterval(uiInterval);
+                clockInterval = null;
+                uiInterval = null;
+            }
+
+            function pauseOrResume() {
+                if (timerState === "idle") {
+                    timerStart();
+                } else {
+                    timerStart();
+                }
+                render();
                 if (window.Haptics) window.Haptics.tap();
-            } else {
-                // Resume
-                swmPauseBtn.textContent = t('swmPause');
-                swmPauseBtn.classList.add('swm-session-pause');
-                swmPauseBtn.classList.remove('swm-session-finish');
-                swmPauseBtn.style.background = '#f0b64c';
-                swmPauseBtn.style.color = '#111';
-                try { window._musicHooks && window._musicHooks.forTimerResume(); } catch (e) {}
-                if (window.Haptics) window.Haptics.tap();
-
-                swmInterval = setInterval(() => {
-                    swmSessionData.pausedRemaining = Math.max(0, swmSessionData.pausedRemaining - 1);
-                    swmSessionData.elapsed = swmSessionData.duration - swmSessionData.pausedRemaining;
-                    swmSessionTimer.textContent = swmFormatTime(swmSessionData.pausedRemaining);
-                    document.title = swmFormatTime(swmSessionData.pausedRemaining) + ' - Daily.KRD';
-
-                    if (swmSessionData.pausedRemaining <= 0) {
-                        swmSessionComplete();
-                    }
-                }, 1000);
-            }
-        }
-
-        function swmSessionComplete() {
-            clearInterval(swmInterval);
-            swmInterval = null;
-
-            try { window._musicHooks && window._musicHooks.forTimerStop(); } catch (e) {}
-
-            const mins = Math.round(swmSessionData.elapsed / 60);
-            swmSessionData.xpEarned = mins; // 1 XP per minute
-
-            // Add XP
-            const newXP = addXP(swmSessionData.xpEarned);
-
-            // Update focus streak
-            const streak = updateFocusStreak();
-
-            // Save session
-            const sessionRecord = {
-                id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2, 8),
-                date: getTodayKey(),
-                startTime: swmSessionData.startTime,
-                duration: mins,
-                subject: swmSessionData.subject,
-                goal: swmSessionData.goal,
-                notes: swmSessionData.notes,
-                completed: true,
-                xpEarned: swmSessionData.xpEarned
-            };
-            addStudySession(sessionRecord);
-
-            // Update study minutes (for existing progress bar)
-            const studyMinutesData = JSON.parse(localStorage.getItem('dailykrd_study_minutes') || '{}');
-            const todayKey = getTodayKey();
-            studyMinutesData[todayKey] = (studyMinutesData[todayKey] || 0) + mins;
-            localStorage.setItem('dailykrd_study_minutes', JSON.stringify(studyMinutesData));
-
-            // Send push notification
-            fetch('https://dailypush.younismuhammed121.workers.dev/api/push/study-complete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deviceId: localStorage.getItem('dailykrd_device_id') })
-            }).catch(() => {});
-
-            // Show completion screen
-            swmCompleteTimeValue.textContent = mins + ' ' + t('swmMinutes');
-            swmCompleteXPValue.textContent = '+' + swmSessionData.xpEarned + ' XP';
-            swmCompleteStreakValue.textContent = streak + ' ' + (streak === 1 ? t('swmDay') : t('swmDays'));
-
-            if (swmSessionData.goal) {
-                swmCompleteGoal.style.display = 'block';
-                swmCompleteGoalText.textContent = swmSessionData.goal;
-                const goalCompleted = swmSessionData.elapsed >= swmSessionData.duration * 0.9; // 90% completion
-                swmCompleteGoal.className = 'swm-complete-goal ' + (goalCompleted ? 'completed' : 'not-completed');
-                swmCompleteGoalStatus.textContent = goalCompleted ? t('swmGoalCompleted') : t('swmGoalNotCompleted');
-                swmCompleteGoalStatus.className = 'swm-complete-goal-status ' + (goalCompleted ? 'completed' : 'not-completed');
-            } else {
-                swmCompleteGoal.style.display = 'none';
             }
 
-            if (swmSessionData.notes) {
-                swmCompleteNotes.style.display = 'block';
-                swmCompleteNotesInput.value = swmSessionData.notes;
-            } else {
-                swmCompleteNotes.style.display = 'block';
-                swmCompleteNotesInput.value = '';
+            function finishSession() {
+                if (timerState === "idle") {
+                    closeSession();
+                    return;
+                }
+
+                // Convert the currently-running timer into a paused state first.
+                // timerFinishSession() already owns all saving, Firestore sync,
+                // progress updates, push notification, and statistics recording.
+                if (timerState === "running") {
+                    timerPausedRemaining = Math.max(
+                        0,
+                        Math.ceil((timerEndAt - Date.now()) / 1000)
+                    );
+                    timerState = "paused";
+                }
+
+                timerFinishSession();
+                closeSession();
+                if (window.Haptics) window.Haptics.completion();
             }
 
-            if (window.Haptics) window.Haptics.completion();
-            document.title = 'Daily.KRD';
+            launch.addEventListener("click", openSession);
+            closeBtn?.addEventListener("click", closeSession);
+            pauseBtn?.addEventListener("click", pauseOrResume);
+            finishBtn?.addEventListener("click", finishSession);
 
-            swmShowScreen('complete');
-            renderStudy();
-            renderHistory();
-            swmUpdateLaunchCard();
-        }
+            // Escape leaves the full-screen view without stopping the timer.
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && isOpen) closeSession();
+            });
 
-        function swmFinishSession() {
-            if (swmState !== 'session') return;
-            if (window.Haptics) window.Haptics.tap();
-
-            // Calculate elapsed time
-            swmSessionData.elapsed = swmSessionData.duration - swmSessionData.pausedRemaining;
-
-            if (swmSessionData.elapsed < 60) {
-                // Less than 1 minute - treat as cancelled
-                swmCancelSession();
-                return;
-            }
-
-            // Complete the session
-            clearInterval(swmInterval);
-            swmInterval = null;
-            swmSessionComplete();
-        }
-
-        function swmCancelSession() {
-            if (swmInterval) {
-                clearInterval(swmInterval);
-                swmInterval = null;
-            }
-            try { window._musicHooks && window._musicHooks.forTimerStop(); } catch (e) {}
-
-            // Reset state
-            swmSessionData = {
-                subject: '',
-                duration: 25 * 60,
-                goal: '',
-                notes: '',
-                startTime: 0,
-                pausedRemaining: 0,
-                elapsed: 0,
-                xpEarned: 0
+            // Called by the existing timer when a session naturally completes.
+            window.studyWithMeFinishCleanup = function () {
+                if (isOpen) {
+                    closeSession();
+                }
             };
 
-            swmShowScreen('setup');
-            document.title = 'Daily.KRD';
-            if (window.Haptics) window.Haptics.tap();
-        }
-
-        function swmStartBreak() {
-            if (window.Haptics) window.Haptics.success();
-
-            swmBreakData.pausedRemaining = swmBreakData.duration;
-            swmBreakTimer.textContent = swmFormatTime(swmBreakData.duration);
-            document.title = swmFormatTime(swmBreakData.duration) + ' - Daily.KRD';
-
-            swmShowScreen('break');
-
-            swmBreakInterval = setInterval(() => {
-                swmBreakData.pausedRemaining = Math.max(0, swmBreakData.pausedRemaining - 1);
-                swmBreakTimer.textContent = swmFormatTime(swmBreakData.pausedRemaining);
-                document.title = swmFormatTime(swmBreakData.pausedRemaining) + ' - Daily.KRD';
-
-                if (swmBreakData.pausedRemaining <= 0) {
-                    swmBreakComplete();
-                }
-            }, 1000);
-        }
-
-        function swmBreakComplete() {
-            clearInterval(swmBreakInterval);
-            swmBreakInterval = null;
-
-            // Send break complete notification
-            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(t('swmBreakComplete'), {
-                        body: t('swmBreakComplete') + ' - ' + (currentLanguage === 'ku' ? 'مستعەدیت بۆ تەرکیزی دووبارە؟' : currentLanguage === 'ar' ? 'مستعد للتركيز مرة أخرى؟' : 'Ready to focus again?'),
-                        icon: 'icons/icon-192.png',
-                        tag: 'swm-break-complete'
-                    }).catch(() => {});
-                });
-            }
-
-            // Show completion screen again or go to setup
-            swmShowScreen('complete');
-            document.title = 'Daily.KRD';
-        }
-
-        function swmSkipBreak() {
-            if (swmBreakInterval) {
-                clearInterval(swmBreakInterval);
-                swmBreakInterval = null;
-            }
-            swmShowScreen('complete');
-            document.title = 'Daily.KRD';
-            if (window.Haptics) window.Haptics.tap();
-        }
-
-        function renderHistory() {
-            const sessions = loadStudySessions();
-            const todayKey = getTodayKey();
-            const today = new Date(todayKey);
-
-            // Calculate stats
-            let todayTotal = 0;
-            let weekTotal = 0;
-            let totalTime = 0;
-
-            const weekAgo = new Date(today);
-            weekAgo.setDate(today.getDate() - 6);
-
-            sessions.forEach(session => {
-                const sessionDate = parseDateKey(session.date);
-                totalTime += session.duration;
-                if (session.date === todayKey) {
-                    todayTotal += session.duration;
-                }
-                if (sessionDate >= weekAgo && sessionDate <= today) {
-                    weekTotal += session.duration;
-                }
-            });
-
-            swmHistoryToday.textContent = todayTotal + ' ' + t('swmMinutes');
-            swmHistoryWeek.textContent = weekTotal + ' ' + t('swmMinutes');
-            swmHistoryTotal.textContent = totalTime + ' ' + t('swmMinutes');
-
-            // Group by day
-            const sessionsByDay = {};
-            sessions.forEach(session => {
-                if (!sessionsByDay[session.date]) {
-                    sessionsByDay[session.date] = [];
-                }
-                sessionsByDay[session.date].push(session);
-            });
-
-            // Sort days descending
-            const sortedDays = Object.keys(sessionsByDay).sort((a, b) => b.localeCompare(a));
-
-            if (sortedDays.length === 0) {
-                swmHistoryList.innerHTML = `
-                    <div class="swm-history-empty">
-                        <div class="swm-history-empty-icon">📚</div>
-                        <div>${t('swmNoSessions')}</div>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            sortedDays.forEach(dayKey => {
-                const daySessions = sessionsByDay[dayKey];
-                const dayDate = parseDateKey(dayKey);
-                const isToday = dayKey === todayKey;
-                const isYesterday = dayDate.getTime() === new Date(today.getTime() - 24*60*60*1000).setHours(0,0,0,0);
-
-                let dayLabel = '';
-                if (isToday) dayLabel = t('swmToday');
-                else if (isYesterday) dayLabel = t('swmYesterday');
-                else dayLabel = formatDateKey(dayKey);
-
-                html += '<div class="swm-history-day-group">';
-                html += '<div class="swm-history-day-label">' + dayLabel + '</div>';
-
-                daySessions.forEach(session => {
-                    const sessionTime = session.duration + ' ' + t('swmMinutes');
-                    const xpText = '+' + (session.xpEarned || session.duration) + ' XP';
-                    const sessionStart = session.startTime ? new Date(session.startTime) : null;
-                    const timeStr = sessionStart ? sessionStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-
-                    html += '<div class="swm-history-session">';
-                    html += '<span class="swm-history-session-icon">📚</span>';
-                    html += '<div class="swm-history-session-info">';
-                    html += '<div class="swm-history-session-subject">' + (session.subject || t('timerNone')) + '</div>';
-                    html += '<div class="swm-history-session-meta">' + sessionTime + (timeStr ? ' • ' + timeStr : '') + '</div>';
-                    html += '</div>';
-                    html += '<span class="swm-history-session-xp">' + xpText + '</span>';
-                    html += '</div>';
-                });
-
-                html += '</div>';
-            });
-
-            swmHistoryList.innerHTML = html;
-        }
-
-        // ============================================================
-        // STUDY WITH ME V1 - IMMERSIVE FULL-SCREEN ENVIRONMENT
-        // ============================================================
-
-        // Study With Me state
-        let swmState = 'setup'; // setup | session | break | complete | history
-        let swmSessionData = {
-            subject: '',
-            duration: 25 * 60,
-            goal: '',
-            notes: '',
-            startTime: 0,
-            pausedRemaining: 0,
-            elapsed: 0,
-            xpEarned: 0
-        };
-        let swmBreakData = {
-            duration: 5 * 60,
-            pausedRemaining: 0
-        };
-        let swmInterval = null;
-        let swmBreakInterval = null;
-        let swmClockInterval = null;
-        let swmAmbientAudio = null;
-        let swmActiveSound = 'none';
-
-        // DOM elements - Immersive
-        const swmImmersive = document.getElementById('swmImmersive');
-        const swmLaunchCard = document.getElementById('swmLaunchCard');
-        const swmExitBtn = document.getElementById('swmExitBtn');
-        const swmClock = document.getElementById('swmClock');
-        const swmDate = document.getElementById('swmDate');
-
-        // Screens
-        const swmSetupScreen = document.getElementById('swmSetupScreen');
-        const swmSessionScreen = document.getElementById('swmSessionScreen');
-        const swmBreakScreen = document.getElementById('swmBreakScreen');
-        const swmCompleteScreen = document.getElementById('swmCompleteScreen');
-        const swmHistoryScreen = document.getElementById('swmHistoryScreen');
-
-        // Setup elements
-        const swmSubjectSelect = document.getElementById('swmSubjectSelect');
-        const swmDurationOptions = document.getElementById('swmDurationOptions');
-        const swmDurationCustom = document.getElementById('swmDurationCustom');
-        const swmCustomMin = document.getElementById('swmCustomMin');
-        const swmGoalInput = document.getElementById('swmGoalInput');
-        const swmNotesInput = document.getElementById('swmNotesInput');
-        const swmStartBtn = document.getElementById('swmStartBtn');
-
-        // Session elements
-        const swmSessionSubject = document.getElementById('swmSessionSubject');
-        const swmSessionStreakCount = document.getElementById('swmSessionStreakCount');
-        const swmSessionStreakLabel = document.getElementById('swmSessionStreakLabel');
-        const swmSessionTimer = document.getElementById('swmSessionTimer');
-        const swmSessionGoalText = document.getElementById('swmSessionGoalText');
-        const swmPauseBtn = document.getElementById('swmPauseBtn');
-        const swmPauseLabel = document.getElementById('swmPauseLabel');
-        const swmFinishBtn = document.getElementById('swmFinishBtn');
-        const swmNotesBtn = document.getElementById('swmNotesBtn');
-        const swmTimerProgress = document.getElementById('swmTimerProgress');
-
-        // Break elements
-        const swmBreakTimer = document.getElementById('swmBreakTimer');
-        const swmBreakOptions = document.getElementById('swmBreakOptions');
-        const swmBreakStartBtn = document.getElementById('swmBreakStartBtn');
-        const swmBreakSkipBtn = document.getElementById('swmBreakSkipBtn');
-
-        // Completion elements
-        const swmCompleteTimeValue = document.getElementById('swmCompleteTimeValue');
-        const swmCompleteXPValue = document.getElementById('swmCompleteXPValue');
-        const swmCompleteStreakValue = document.getElementById('swmCompleteStreakValue');
-        const swmCompleteGoal = document.getElementById('swmCompleteGoal');
-        const swmCompleteGoalText = document.getElementById('swmCompleteGoalText');
-        const swmCompleteGoalStatus = document.getElementById('swmCompleteGoalStatus');
-        const swmCompleteNotes = document.getElementById('swmCompleteNotes');
-        const swmCompleteNotesInput = document.getElementById('swmCompleteNotesInput');
-        const swmSaveNoteBtn = document.getElementById('swmSaveNoteBtn');
-        const swmStudyAgainBtn = document.getElementById('swmStudyAgainBtn');
-        const swmDoneBtn = document.getElementById('swmDoneBtn');
-
-        // History elements
-        const swmHistoryList = document.getElementById('swmHistoryList');
-        const swmHistoryToday = document.getElementById('swmHistoryToday');
-        const swmHistoryWeek = document.getElementById('swmHistoryWeek');
-        const swmHistoryTotal = document.getElementById('swmHistoryTotal');
-        const swmHistoryBackBtn = document.getElementById('swmHistoryBackBtn');
-
-        // Notes panel
-        const swmNotesPanel = document.getElementById('swmNotesPanel');
-        const swmNotesCloseBtn = document.getElementById('swmNotesCloseBtn');
-        const swmSessionNotesInput = document.getElementById('swmSessionNotesInput');
-        const swmSessionNotesSaveBtn = document.getElementById('swmSessionNotesSaveBtn');
-
-        // Ambient panel
-        const swmAmbientPanel = document.getElementById('swmAmbientPanel');
-        const swmAmbientCloseBtn = document.getElementById('swmAmbientCloseBtn');
-        const swmAmbientOptions = document.getElementById('swmAmbientOptions');
-        const swmAmbientVolume = document.getElementById('swmAmbientVolume');
-
-        // Focus streak functions
-        function loadFocusStreak() {
-            try {
-                const data = JSON.parse(localStorage.getItem('dailykrd_focus_streak') || '{}');
-                return data;
-            } catch (e) {
-                return { currentStreak: 0, lastSessionDate: null };
-            }
-        }
-
-        function saveFocusStreak(data) {
-            localStorage.setItem('dailykrd_focus_streak', JSON.stringify(data));
-        }
-
-        function updateFocusStreak() {
-            const streakData = loadFocusStreak();
-            const todayKey = getTodayKey();
-
-            if (streakData.lastSessionDate === todayKey) {
-                return streakData.currentStreak;
-            }
-
-            const lastDate = streakData.lastSessionDate;
-            let newStreak = streakData.currentStreak;
-
-            if (lastDate) {
-                const last = parseDateKey(lastDate);
-                const today = parseDateKey(todayKey);
-                const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
-
-                if (diffDays === 1) {
-                    newStreak += 1;
-                } else if (diffDays > 1) {
-                    newStreak = 1;
-                }
-            } else {
-                newStreak = 1;
-            }
-
-            streakData.currentStreak = newStreak;
-            streakData.lastSessionDate = todayKey;
-            saveFocusStreak(streakData);
-
-            if (currentUser) {
-                try {
-                    const ref = doc(db, 'users', currentUser.uid, 'study', 'streak');
-                    setDoc(ref, streakData, { merge: true }).catch(() => {});
-                } catch (e) {}
-            }
-
-            return newStreak;
-        }
-
-        function getFocusStreak() {
-            const streakData = loadFocusStreak();
-            return streakData.currentStreak;
-        }
-
-        // XP functions
-        function loadXP() {
-            try {
-                return parseInt(localStorage.getItem('dailykrd_xp') || '0', 10);
-            } catch (e) {
-                return 0;
-            }
-        }
-
-        function saveXP(xp) {
-            localStorage.setItem('dailykrd_xp', String(xp));
-            if (currentUser) {
-                try {
-                    const ref = doc(db, 'users', currentUser.uid, 'profile', 'xp');
-                    setDoc(ref, { xp: xp, updatedAt: Date.now() }, { merge: true }).catch(() => {});
-                } catch (e) {}
-            }
-        }
-
-        function addXP(amount) {
-            const currentXP = loadXP();
-            const newXP = currentXP + amount;
-            saveXP(newXP);
-            return newXP;
-        }
-
-        // Study sessions storage
-        function loadStudySessions() {
-            try {
-                return JSON.parse(localStorage.getItem('dailykrd_study_sessions_v2') || '[]');
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function saveStudySessions(sessions) {
-            localStorage.setItem('dailykrd_study_sessions_v2', JSON.stringify(sessions));
-            if (currentUser) {
-                try {
-                    const ref = doc(db, 'users', currentUser.uid, 'study', 'sessions_v2');
-                    setDoc(ref, { sessions: sessions }, { merge: true }).catch(() => {});
-                } catch (e) {}
-            }
-        }
-
-        function addStudySession(session) {
-            const sessions = loadStudySessions();
-            sessions.push(session);
-            saveStudySessions(sessions);
-        }
-
-        // Format time as MM:SS
-        function swmFormatTime(seconds) {
-            const m = Math.floor(seconds / 60);
-            const s = seconds % 60;
-            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        }
-
-        // Timer ring progress
-        const SWM_TIMER_RING_CIRCUMFERENCE = 2 * Math.PI * 120; // 754
-        function swmUpdateTimerRing(remaining, total) {
-            if (swmTimerProgress) {
-                const progress = total > 0 ? 1 - (remaining / total) : 0;
-                const offset = SWM_TIMER_RING_CIRCUMFERENCE * (1 - progress);
-                swmTimerProgress.style.strokeDashoffset = offset;
-            }
-        }
-
-        // Show a specific screen
-        function swmShowScreen(screenName) {
-            document.querySelectorAll('.swm-screen').forEach(el => el.classList.remove('active'));
-            const targetScreen = document.getElementById('swm' + screenName.charAt(0).toUpperCase() + screenName.slice(1) + 'Screen');
-            if (targetScreen) targetScreen.classList.add('active');
-            swmState = screenName;
-        }
-
-        // Clock update
-        function swmUpdateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString(currentLanguage === 'ku' ? 'ku-IQ' : currentLanguage === 'ar' ? 'ar-IQ' : 'en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
-            const dateStr = now.toLocaleDateString(currentLanguage === 'ku' ? 'ku-IQ' : currentLanguage === 'ar' ? 'ar-IQ' : 'en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric'
-            });
-            if (swmClock) swmClock.textContent = timeStr;
-            if (swmDate) swmDate.textContent = dateStr;
-        }
-
-        // Populate subject select
-        function swmPopulateSubjects() {
-            const subjects = loadStudySubjects();
-            if (swmSubjectSelect) {
-                swmSubjectSelect.innerHTML = '<option value="">' + t('swmSubjectPlaceholder') + '</option>' +
-                    subjects.map(s => '<option value="' + s.replace(/"/g, '"') + '">' + s.replace(/</g, '<') + '</option>').join('');
-            }
-            // Also update timer subject select
-            timerPopulateSubject();
-        }
-
-        // Update launch card streak
-        function swmUpdateLaunchCard() {
-            const streak = getFocusStreak();
-            const streakLabel = document.getElementById('swmLaunchDesc');
-            if (streakLabel) {
-                streakLabel.textContent = streak > 0
-                    ? (streak + ' ' + (streak === 1 ? t('swmDay') : t('swmDays')) + ' streak')
-                    : t('studyWithMeDesc');
-            }
-        }
-
-        // Initialize Study With Me
-        function swmInit() {
-            swmPopulateSubjects();
-            swmUpdateLaunchCard();
-            renderHistory();
-
-            // Event listeners
-            swmLaunchCard.addEventListener('click', () => {
-                if (window.Haptics) window.Haptics.success();
-                swmImmersive.classList.add('active');
-                swmShowScreen('setup');
-                swmLaunchCard.style.display = 'none';
-                // Start clock
-                swmUpdateClock();
-                swmClockInterval = setInterval(swmUpdateClock, 1000);
-                // Create background particles
-                swmCreateParticles();
-            });
-
-            // Exit button
-            swmExitBtn.addEventListener('click', () => {
-                if (swmState === 'session' && swmInterval) {
-                    // Active session - confirm
-                    const confirmExit = confirm(t('swmConfirmExit') || 'You have an active session. Exit anyway?');
-                    if (!confirmExit) return;
-                    swmCancelSession();
-                }
-                swmCloseImmersive();
-            });
-
-            // Duration buttons
-            swmDurationOptions.querySelectorAll('.swm-duration-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (window.Haptics) window.Haptics.selection();
-                    swmDurationOptions.querySelectorAll('.swm-duration-btn').forEach(b => b.classList.remove('active', 'custom-active'));
-                    btn.classList.add('active');
-                    const min = parseInt(btn.dataset.min, 10);
-                    if (min === 0) {
-                        swmDurationCustom.classList.add('show');
-                        btn.classList.add('custom-active');
-                        swmCustomMin.focus();
-                    } else {
-                        swmDurationCustom.classList.remove('show');
-                        swmSessionData.duration = min * 60;
-                    }
-                });
-            });
-
-            swmCustomMin.addEventListener('change', () => {
-                const v = parseInt(swmCustomMin.value, 10);
-                if (v > 0 && v <= 300) {
-                    swmSessionData.duration = v * 60;
-                }
-            });
-
-            swmCustomMin.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') swmCustomMin.blur();
-            });
-
-            swmStartBtn.addEventListener('click', swmStartSession);
-
-            swmPauseBtn.addEventListener('click', swmTogglePause);
-            swmFinishBtn.addEventListener('click', swmFinishSession);
-            swmNotesBtn.addEventListener('click', swmToggleNotes);
-
-            swmBreakOptions.querySelectorAll('.swm-break-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (window.Haptics) window.Haptics.selection();
-                    swmBreakOptions.querySelectorAll('.swm-break-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const min = parseInt(btn.dataset.min, 10);
-                    if (min > 0) {
-                        swmBreakData.duration = min * 60;
-                        swmBreakTimer.textContent = swmFormatTime(swmBreakData.duration);
-                    }
-                });
-            });
-
-            swmBreakStartBtn.addEventListener('click', swmStartBreak);
-            swmBreakSkipBtn.addEventListener('click', swmSkipBreak);
-
-            swmStudyAgainBtn.addEventListener('click', () => {
-                swmShowScreen('setup');
-                swmGoalInput.value = '';
-                swmNotesInput.value = '';
-            });
-
-            swmDoneBtn.addEventListener('click', () => {
-                swmCloseImmersive();
-            });
-
-            swmHistoryBackBtn.addEventListener('click', () => {
-                swmShowScreen('setup');
-            });
-
-            swmSaveNoteBtn.addEventListener('click', () => {
-                const note = swmCompleteNotesInput.value.trim();
-                if (note) {
-                    const sessions = loadStudySessions();
-                    if (sessions.length > 0) {
-                        sessions[sessions.length - 1].notes = note;
-                        saveStudySessions(sessions);
-                    }
-                }
-                swmCompleteNotes.style.display = 'none';
-                if (window.Haptics) window.Haptics.success();
-            });
-
-            // Notes panel
-            swmNotesCloseBtn.addEventListener('click', () => swmNotesPanel.classList.remove('open'));
-            swmSessionNotesSaveBtn.addEventListener('click', () => {
-                const note = swmSessionNotesInput.value.trim();
-                if (note) {
-                    swmSessionData.notes = note;
-                    if (window.Haptics) window.Haptics.success();
-                }
-                swmNotesPanel.classList.remove('open');
-            });
-
-            // Ambient panel
-            swmAmbientCloseBtn.addEventListener('click', () => swmAmbientPanel.classList.remove('open'));
-            swmAmbientOptions.querySelectorAll('.swm-ambient-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const sound = btn.dataset.sound;
-                    swmSetAmbientSound(sound);
-                });
-            });
-            swmAmbientVolume.addEventListener('input', () => {
-                if (swmAmbientAudio) {
-                    swmAmbientAudio.volume = swmAmbientVolume.value / 100;
-                }
-            });
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (!swmImmersive.classList.contains('active')) return;
-                if (e.key === 'Escape') {
-                    if (swmNotesPanel.classList.contains('open')) {
-                        swmNotesPanel.classList.remove('open');
-                    } else if (swmAmbientPanel.classList.contains('open')) {
-                        swmAmbientPanel.classList.remove('open');
-                    } else if (swmState === 'session') {
-                        swmExitBtn.click();
-                    }
-                } else if (e.key === ' ' && swmState === 'session') {
-                    e.preventDefault();
-                    swmTogglePause();
-                } else if (e.key === 'n' && swmState === 'session') {
-                    swmToggleNotes();
-                }
-            });
-        }
-
-        function swmCloseImmersive() {
-            swmImmersive.classList.remove('active');
-            swmLaunchCard.style.display = 'flex';
-            swmShowScreen('setup');
-            if (swmClockInterval) {
-                clearInterval(swmClockInterval);
-                swmClockInterval = null;
-            }
-            swmNotesPanel.classList.remove('open');
-            swmAmbientPanel.classList.remove('open');
-        }
-
-        function swmCreateParticles() {
-            const container = document.getElementById('swmBgParticles');
-            if (!container) return;
-            container.innerHTML = '';
-            const particleCount = 30;
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'swm-bg-particle';
-                const size = Math.random() * 4 + 2;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                particle.style.opacity = Math.random() * 0.3 + 0.1;
-                container.appendChild(particle);
-            }
-        }
-
-        function swmStartSession() {
-            if (window.Haptics) window.Haptics.success();
-
-            swmSessionData.subject = swmSubjectSelect.value || '';
-            swmSessionData.goal = swmGoalInput.value.trim();
-            swmSessionData.notes = swmNotesInput.value.trim();
-            swmSessionData.startTime = Date.now();
-            swmSessionData.pausedRemaining = swmSessionData.duration;
-            swmSessionData.elapsed = 0;
-
-            // If custom subject entered, add to subjects list
-            if (swmSessionData.subject && !loadStudySubjects().includes(swmSessionData.subject)) {
-                const subjects = loadStudySubjects();
-                subjects.push(swmSessionData.subject);
-                saveStudySubjects(subjects);
-                swmPopulateSubjects();
-            }
-
-            swmSessionSubject.textContent = swmSessionData.subject || t('timerNone');
-            if (swmSessionData.goal) {
-                swmSessionGoalText.textContent = swmSessionData.goal;
-            } else {
-                swmSessionGoalText.textContent = '';
-            }
-
-            const streak = getFocusStreak();
-            swmSessionStreakCount.textContent = streak;
-            swmSessionStreakLabel.textContent = streak === 1 ? t('swmDay') : t('swmDays');
-
-            swmSessionTimer.textContent = swmFormatTime(swmSessionData.duration);
-            swmUpdateTimerRing(swmSessionData.duration, swmSessionData.duration);
-            document.title = swmFormatTime(swmSessionData.duration) + ' - Daily.KRD';
-
-            // Start music if selected
-            try {
-                const musicChoice = document.getElementById('studyTimerMusic')?.value || '';
-                window._musicHooks && window._musicHooks.forTimerStart(musicChoice);
-            } catch (e) {}
-
-            swmShowScreen('session');
-
-            // Start timer
-            swmInterval = setInterval(() => {
-                swmSessionData.pausedRemaining = Math.max(0, swmSessionData.pausedRemaining - 1);
-                swmSessionData.elapsed = swmSessionData.duration - swmSessionData.pausedRemaining;
-                swmSessionTimer.textContent = swmFormatTime(swmSessionData.pausedRemaining);
-                swmUpdateTimerRing(swmSessionData.pausedRemaining, swmSessionData.duration);
-                document.title = swmFormatTime(swmSessionData.pausedRemaining) + ' - Daily.KRD';
-
-                if (swmSessionData.pausedRemaining <= 0) {
-                    swmSessionComplete();
-                }
-            }, 1000);
-        }
-
-        function swmTogglePause() {
-            if (swmState !== 'session') return;
-
-            if (swmPauseLabel.textContent === t('swmPause')) {
-                // Pause
-                clearInterval(swmInterval);
-                swmInterval = null;
-                swmPauseLabel.textContent = t('swmResume');
-                swmPauseBtn.classList.remove('swm-control-primary');
-                swmPauseBtn.classList.add('swm-control-finish');
-                swmPauseBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></svg><span class="swm-control-label" id="swmPauseLabel">' + t('swmResume') + '</span>';
-                try { window._musicHooks && window._musicHooks.forTimerPause(); } catch (e) {}
-                if (window.Haptics) window.Haptics.tap();
-            } else {
-                // Resume
-                swmPauseLabel.textContent = t('swmPause');
-                swmPauseBtn.classList.add('swm-control-primary');
-                swmPauseBtn.classList.remove('swm-control-finish');
-                swmPauseBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg><span class="swm-control-label" id="swmPauseLabel">' + t('swmPause') + '</span>';
-                try { window._musicHooks && window._musicHooks.forTimerResume(); } catch (e) {}
-                if (window.Haptics) window.Haptics.tap();
-
-                swmInterval = setInterval(() => {
-                    swmSessionData.pausedRemaining = Math.max(0, swmSessionData.pausedRemaining - 1);
-                    swmSessionData.elapsed = swmSessionData.duration - swmSessionData.pausedRemaining;
-                    swmSessionTimer.textContent = swmFormatTime(swmSessionData.pausedRemaining);
-                    swmUpdateTimerRing(swmSessionData.pausedRemaining, swmSessionData.duration);
-                    document.title = swmFormatTime(swmSessionData.pausedRemaining) + ' - Daily.KRD';
-
-                    if (swmSessionData.pausedRemaining <= 0) {
-                        swmSessionComplete();
-                    }
-                }, 1000);
-            }
-        }
-
-        function swmSessionComplete() {
-            clearInterval(swmInterval);
-            swmInterval = null;
-
-            try { window._musicHooks && window._musicHooks.forTimerStop(); } catch (e) {}
-
-            const mins = Math.round(swmSessionData.elapsed / 60);
-            swmSessionData.xpEarned = mins;
-
-            // Add XP
-            const newXP = addXP(swmSessionData.xpEarned);
-
-            // Update focus streak
-            const streak = updateFocusStreak();
-
-            // Save session
-            const sessionRecord = {
-                id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2, 8),
-                date: getTodayKey(),
-                startTime: swmSessionData.startTime,
-                duration: mins,
-                subject: swmSessionData.subject,
-                goal: swmSessionData.goal,
-                notes: swmSessionData.notes,
-                completed: true,
-                xpEarned: swmSessionData.xpEarned
-            };
-            addStudySession(sessionRecord);
-
-            // Update study minutes (for existing progress bar)
-            const studyMinutesData = JSON.parse(localStorage.getItem('dailykrd_study_minutes') || '{}');
-            const todayKey = getTodayKey();
-            studyMinutesData[todayKey] = (studyMinutesData[todayKey] || 0) + mins;
-            localStorage.setItem('dailykrd_study_minutes', JSON.stringify(studyMinutesData));
-
-            // Send push notification
-            fetch('https://dailypush.younismuhammed121.workers.dev/api/push/study-complete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deviceId: localStorage.getItem('dailykrd_device_id') })
-            }).catch(() => {});
-
-            // Show completion screen
-            swmCompleteTimeValue.textContent = mins + ' ' + t('swmMinutes');
-            swmCompleteXPValue.textContent = '+' + swmSessionData.xpEarned + ' XP';
-            swmCompleteStreakValue.textContent = streak + ' ' + (streak === 1 ? t('swmDay') : t('swmDays'));
-
-            if (swmSessionData.goal) {
-                swmCompleteGoal.style.display = 'block';
-                swmCompleteGoalText.textContent = swmSessionData.goal;
-                const goalCompleted = swmSessionData.elapsed >= swmSessionData.duration * 0.9;
-                swmCompleteGoal.className = 'swm-complete-goal ' + (goalCompleted ? 'completed' : 'not-completed');
-                swmCompleteGoalStatus.textContent = goalCompleted ? t('swmGoalCompleted') : t('swmGoalNotCompleted');
-                swmCompleteGoalStatus.className = 'swm-complete-goal-status ' + (goalCompleted ? 'completed' : 'not-completed');
-            } else {
-                swmCompleteGoal.style.display = 'none';
-            }
-
-            if (swmSessionData.notes) {
-                swmCompleteNotes.style.display = 'block';
-                swmCompleteNotesInput.value = swmSessionData.notes;
-            } else {
-                swmCompleteNotes.style.display = 'block';
-                swmCompleteNotesInput.value = '';
-            }
-
-            if (window.Haptics) window.Haptics.completion();
-            document.title = 'Daily.KRD';
-
-            swmShowScreen('complete');
-            renderStudy();
-            renderHistory();
-            swmUpdateLaunchCard();
-        }
-
-        function swmFinishSession() {
-            if (swmState !== 'session') return;
-            if (window.Haptics) window.Haptics.tap();
-
-            swmSessionData.elapsed = swmSessionData.duration - swmSessionData.pausedRemaining;
-
-            if (swmSessionData.elapsed < 60) {
-                swmCancelSession();
-                return;
-            }
-
-            clearInterval(swmInterval);
-            swmInterval = null;
-            swmSessionComplete();
-        }
-
-        function swmCancelSession() {
-            if (swmInterval) {
-                clearInterval(swmInterval);
-                swmInterval = null;
-            }
-            try { window._musicHooks && window._musicHooks.forTimerStop(); } catch (e) {}
-
-            swmSessionData = {
-                subject: '',
-                duration: 25 * 60,
-                goal: '',
-                notes: '',
-                startTime: 0,
-                pausedRemaining: 0,
-                elapsed: 0,
-                xpEarned: 0
-            };
-
-            swmShowScreen('setup');
-            document.title = 'Daily.KRD';
-            if (window.Haptics) window.Haptics.tap();
-        }
-
-        function swmToggleNotes() {
-            swmSessionNotesInput.value = swmSessionData.notes || '';
-            swmNotesPanel.classList.add('open');
-        }
-
-        function swmStartBreak() {
-            if (window.Haptics) window.Haptics.success();
-
-            swmBreakData.pausedRemaining = swmBreakData.duration;
-            swmBreakTimer.textContent = swmFormatTime(swmBreakData.duration);
-            document.title = swmFormatTime(swmBreakData.duration) + ' - Daily.KRD';
-
-            swmShowScreen('break');
-
-            swmBreakInterval = setInterval(() => {
-                swmBreakData.pausedRemaining = Math.max(0, swmBreakData.pausedRemaining - 1);
-                swmBreakTimer.textContent = swmFormatTime(swmBreakData.pausedRemaining);
-                document.title = swmFormatTime(swmBreakData.pausedRemaining) + ' - Daily.KRD';
-
-                if (swmBreakData.pausedRemaining <= 0) {
-                    swmBreakComplete();
-                }
-            }, 1000);
-        }
-
-        function swmBreakComplete() {
-            clearInterval(swmBreakInterval);
-            swmBreakInterval = null;
-
-            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(t('swmBreakComplete') || 'Break Finished!', {
-                        body: currentLanguage === 'ku' ? 'مستعەدیت بۆ تەرکیزی دووبارە؟' : currentLanguage === 'ar' ? 'مستعد للتركيز مرة أخرى؟' : 'Ready to focus again?',
-                        icon: 'icons/icon-192.png',
-                        tag: 'swm-break-complete'
-                    }).catch(() => {});
-                });
-            }
-
-            swmShowScreen('complete');
-            document.title = 'Daily.KRD';
-        }
-
-        function swmSkipBreak() {
-            if (swmBreakInterval) {
-                clearInterval(swmBreakInterval);
-                swmBreakInterval = null;
-            }
-            swmShowScreen('complete');
-            document.title = 'Daily.KRD';
-            if (window.Haptics) window.Haptics.tap();
-        }
-
-        // Ambient sounds
-        function swmSetAmbientSound(sound) {
-            if (swmAmbientAudio) {
-                swmAmbientAudio.pause();
-                swmAmbientAudio = null;
-            }
-            swmActiveSound = sound;
-
-            // Update UI
-            swmAmbientOptions.querySelectorAll('.swm-ambient-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.sound === sound);
-            });
-
-            if (sound === 'none') return;
-
-            // Create audio context for generated sounds
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    const ctx = new AudioContext();
-                    swmAmbientAudio = swmGenerateAmbientSound(ctx, sound);
-                    swmAmbientAudio.volume = swmAmbientVolume.value / 100;
-                }
-            } catch (e) {
-                console.warn('Ambient sound not available:', e);
-            }
-        }
-
-        function swmGenerateAmbientSound(ctx, type) {
-            // Generate procedural ambient sounds using Web Audio API
-            const gainNode = ctx.createGain();
-            gainNode.connect(ctx.destination);
-
-            let oscillator, noiseBuffer, noiseSource, filter;
-
-            if (type === 'rain') {
-                // Rain: filtered white noise with occasional drops
-                const bufferSize = ctx.sampleRate * 2;
-                noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = (Math.random() * 2 - 1) * 0.1;
-                }
-                noiseSource = ctx.createBufferSource();
-                noiseSource.buffer = noiseBuffer;
-                noiseSource.loop = true;
-                filter = ctx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.value = 800;
-                noiseSource.connect(filter);
-                filter.connect(gainNode);
-                noiseSource.start();
-            } else if (type === 'fire') {
-                // Fire: brown noise with crackle
-                const bufferSize = ctx.sampleRate * 2;
-                noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = noiseBuffer.getChannelData(0);
-                let lastOut = 0;
-                for (let i = 0; i < bufferSize; i++) {
-                    const white = Math.random() * 2 - 1;
-                    data[i] = (lastOut + 0.02 * white) / 1.02;
-                    lastOut = data[i];
-                    data[i] *= 0.15;
-                }
-                noiseSource = ctx.createBufferSource();
-                noiseSource.buffer = noiseBuffer;
-                noiseSource.loop = true;
-                filter = ctx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.value = 400;
-                noiseSource.connect(filter);
-                filter.connect(gainNode);
-                noiseSource.start();
-
-                // Add occasional crackle
-                const scheduleCrackle = () => {
-                    if (!swmAmbientAudio || swmActiveSound !== 'fire') return;
-                    const osc = ctx.createOscillator();
-                    const crackleGain = ctx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.value = Math.random() * 200 + 50;
-                    crackleGain.gain.value = Math.random() * 0.05 + 0.01;
-                    osc.connect(crackleGain);
-                    crackleGain.connect(ctx.destination);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.05);
-                    setTimeout(scheduleCrackle, Math.random() * 2000 + 500);
-                };
-                setTimeout(scheduleCrackle, 1000);
-            } else if (type === 'ocean') {
-                // Ocean: very low frequency filtered noise
-                const bufferSize = ctx.sampleRate * 4;
-                noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = noiseBuffer.getChannelData(0);
-                let lastOut = 0;
-                for (let i = 0; i < bufferSize; i++) {
-                    const white = Math.random() * 2 - 1;
-                    data[i] = (lastOut + 0.01 * white) / 1.01;
-                    lastOut = data[i];
-                    data[i] *= 0.1;
-                }
-                noiseSource = ctx.createBufferSource();
-                noiseSource.buffer = noiseBuffer;
-                noiseSource.loop = true;
-                filter = ctx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.value = 200;
-                filter.Q.value = 2;
-                noiseSource.connect(filter);
-                filter.connect(gainNode);
-                noiseSource.start();
-
-                // Modulate filter for wave effect
-                const lfo = ctx.createOscillator();
-                const lfoGain = ctx.createGain();
-                lfo.type = 'sine';
-                lfo.frequency.value = 0.05;
-                lfoGain.gain.value = 100;
-                lfo.connect(lfoGain);
-                lfoGain.connect(filter.frequency);
-                lfo.start();
-            } else if (type === 'white') {
-                // White noise
-                const bufferSize = ctx.sampleRate;
-                noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = (Math.random() * 2 - 1) * 0.08;
-                }
-                noiseSource = ctx.createBufferSource();
-                noiseSource.buffer = noiseBuffer;
-                noiseSource.loop = true;
-                noiseSource.connect(gainNode);
-                noiseSource.start();
-            }
-
-            return {
-                pause: () => {
-                    if (noiseSource) noiseSource.stop();
-                    if (lfo) lfo.stop();
-                },
-                get volume() { return gainNode.gain.value; },
-                set volume(v) { gainNode.gain.value = v; }
-            };
-        }
-
-        function renderHistory() {
-            const sessions = loadStudySessions();
-            const todayKey = getTodayKey();
-            const today = new Date(todayKey);
-
-            let todayTotal = 0;
-            let weekTotal = 0;
-            let totalTime = 0;
-
-            const weekAgo = new Date(today);
-            weekAgo.setDate(today.getDate() - 6);
-
-            sessions.forEach(session => {
-                const sessionDate = parseDateKey(session.date);
-                totalTime += session.duration;
-                if (session.date === todayKey) {
-                    todayTotal += session.duration;
-                }
-                if (sessionDate >= weekAgo && sessionDate <= today) {
-                    weekTotal += session.duration;
-                }
-            });
-
-            if (swmHistoryToday) swmHistoryToday.textContent = todayTotal + ' ' + t('swmMinutes');
-            if (swmHistoryWeek) swmHistoryWeek.textContent = weekTotal + ' ' + t('swmMinutes');
-            if (swmHistoryTotal) swmHistoryTotal.textContent = totalTime + ' ' + t('swmMinutes');
-
-            const sessionsByDay = {};
-            sessions.forEach(session => {
-                if (!sessionsByDay[session.date]) sessionsByDay[session.date] = [];
-                sessionsByDay[session.date].push(session);
-            });
-
-            const sortedDays = Object.keys(sessionsByDay).sort((a, b) => b.localeCompare(a));
-
-            if (!swmHistoryList) return;
-
-            if (sortedDays.length === 0) {
-                swmHistoryList.innerHTML = `
-                    <div class="swm-history-empty">
-                        <div class="swm-history-empty-icon">📚</div>
-                        <div>${t('swmNoSessions')}</div>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            sortedDays.forEach(dayKey => {
-                const daySessions = sessionsByDay[dayKey];
-                const dayDate = parseDateKey(dayKey);
-                const isToday = dayKey === todayKey;
-                const isYesterday = dayDate.getTime() === new Date(today.getTime() - 24*60*60*1000).setHours(0,0,0,0);
-
-                let dayLabel = '';
-                if (isToday) dayLabel = t('swmToday');
-                else if (isYesterday) dayLabel = t('swmYesterday');
-                else dayLabel = formatDateKey(dayKey);
-
-                html += '<div class="swm-history-day-group">';
-                html += '<div class="swm-history-day-label">' + dayLabel + '</div>';
-
-                daySessions.forEach(session => {
-                    const sessionTime = session.duration + ' ' + t('swmMinutes');
-                    const xpText = '+' + (session.xpEarned || session.duration) + ' XP';
-                    const sessionStart = session.startTime ? new Date(session.startTime) : null;
-                    const timeStr = sessionStart ? sessionStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-
-                    html += '<div class="swm-history-session">';
-                    html += '<span class="swm-history-session-icon">📚</span>';
-                    html += '<div class="swm-history-session-info">';
-                    html += '<div class="swm-history-session-subject">' + (session.subject || t('timerNone')) + '</div>';
-                    html += '<div class="swm-history-session-meta">' + sessionTime + (timeStr ? ' • ' + timeStr : '') + '</div>';
-                    html += '</div>';
-                    html += '<span class="swm-history-session-xp">' + xpText + '</span>';
-                    html += '</div>';
-                });
-
-                html += '</div>';
-            });
-
-            swmHistoryList.innerHTML = html;
-        }
-
-        // Initialize Study With Me
-        swmInit();
+            // Existing timer completion calls this hook after saving the session.
+            const originalTimerFinishSession = timerFinishSession;
+            window._studyWithMeOriginalFinish = originalTimerFinishSession;
+
+            // We cannot redeclare the existing function, so wrap calls through
+            // timerTick by listening for the timer returning to idle.
+            const originalTimerTick = timerTick;
+            window._studyWithMeTimerTick = originalTimerTick;
+
+            // The overlay can be opened again after a completed session.
+            if (launchTitle) launchTitle.textContent = t("studyWithMe");
+            if (launchSub) launchSub.textContent = t("studyWithMeSub");
+            if (eyebrowEl) eyebrowEl.textContent = t("studyWithMeEyebrow");
+            if (tipEl) tipEl.textContent = t("studyWithMeTip");
+
+            window._renderStudyWithMe = render;
+        })();
 
 
         /* FLASHCARDS */
