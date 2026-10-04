@@ -3015,6 +3015,94 @@
         }
         .music-ctrl.play:active { transform: scale(.94); }
         .music-ctrl.toggle-off { opacity: .35; }
+        .music-ctrl.music-fullscreen-btn {
+            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--accent-contrast);
+            box-shadow: 0 2px 8px rgba(0,0,0,.15);
+            transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+        }
+        .music-ctrl.music-fullscreen-btn:hover {
+            background: color-mix(in srgb, var(--accent) 85%, black);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+        }
+        .music-ctrl.music-fullscreen-btn:active {
+            transform: scale(.95);
+        }
+        .dark .music-ctrl.music-fullscreen-btn {
+            box-shadow: 0 2px 8px rgba(0,0,0,.3);
+        }
+        .dark .music-ctrl.music-fullscreen-btn:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,.4);
+        }
+        /* Fullscreen study mode bottom controls */
+        .fs-wallpaper-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+        }
+        .fs-wallpaper-controls .wallpaper-category-selector {
+            display: flex;
+            gap: 8px;
+            background: rgba(0,0,0,.5);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        .fs-wallpaper-controls .wallpaper-cat-btn {
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 8px;
+            background: rgba(255,255,255,.15);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform .15s ease, background .15s ease;
+        }
+        .fs-wallpaper-controls .wallpaper-cat-btn:hover,
+        .fs-wallpaper-controls .wallpaper-cat-btn.active {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            transform: scale(1.1);
+        }
+        .dark .fs-wallpaper-controls .wallpaper-cat-btn {
+            background: rgba(255,255,255,.1);
+        }
+        .fs-wallpaper-controls .fullscreen-study-close {
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 12px;
+            background: rgba(255,255,255,.2);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
+            transition: transform .15s ease, background .15s ease;
+        }
+        .fs-wallpaper-controls .fullscreen-study-close:hover {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            transform: rotate(90deg);
+        }
         .music-vol-row {
             display: flex; align-items: center; gap: 10px; margin-top: 14px;
         }
@@ -3353,6 +3441,7 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
+            position: relative;
         }
         .fs-player {
             background: rgba(0,0,0,.3);
@@ -5327,6 +5416,11 @@
                                 <button class="wallpaper-cat-btn" data-cat="ocean" title="Ocean waves" aria-label="Ocean waves">🌊</button>
                                 <button class="wallpaper-cat-btn" data-cat="lofi" title="Lo-fi room" aria-label="Lo-fi room">🎧</button>
                             </div>
+                            <button class="wallpaper-fullscreen-btn" id="studyWallpaperFullscreenBtn" aria-label="Fullscreen study mode" title="Fullscreen study mode">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                     <div class="music-now-art" id="musicNowArt">🎧</div>
