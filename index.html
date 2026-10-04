@@ -3086,6 +3086,337 @@
             direction: ltr;
         }
 
+        /* ============================================================
+           LIVE WALLPAPER (Study Music Background)
+           ============================================================ */
+        .live-wallpaper {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            border-radius: 18px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .wallpaper-video-wrap {
+            position: absolute;
+            inset: 0;
+        }
+        .wallpaper-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .wallpaper-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,.15), rgba(0,0,0,.25));
+        }
+        .wallpaper-controls {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            left: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: auto;
+            z-index: 2;
+        }
+        .wallpaper-category-selector {
+            display: flex;
+            gap: 6px;
+        }
+        .wallpaper-cat-btn {
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 10px;
+            background: rgba(255,255,255,.9);
+            color: #333;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+            transition: transform .15s ease, background .15s ease;
+        }
+        .wallpaper-cat-btn:hover,
+        .wallpaper-cat-btn.active {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            transform: scale(1.08);
+        }
+        .dark .wallpaper-cat-btn {
+            background: rgba(255,255,255,.15);
+            color: #eee;
+        }
+        .wallpaper-fullscreen-btn {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 12px;
+            background: rgba(255,255,255,.95);
+            color: #111;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,.15);
+            transition: transform .15s ease, background .15s ease;
+        }
+        .wallpaper-fullscreen-btn:hover {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            transform: scale(1.05);
+        }
+        .dark .wallpaper-fullscreen-btn {
+            background: rgba(255,255,255,.15);
+            color: #fff;
+        }
+
+        /* ============================================================
+           FULLSCREEN STUDY MODE (Study with me style)
+           ============================================================ */
+        .fullscreen-study {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+        }
+        .fullscreen-study.open { display: flex; }
+        .fullscreen-study-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+        .fs-wallpaper-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .fullscreen-study-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
+        }
+        .fullscreen-study-close {
+            position: absolute;
+            top: env(safe-area-inset-top, 16px);
+            right: 16px;
+            z-index: 10;
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 14px;
+            background: rgba(255,255,255,.95);
+            color: #111;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,.2);
+            transition: transform .15s ease, background .15s ease;
+        }
+        .fullscreen-study-close:hover {
+            background: var(--accent);
+            color: var(--accent-contrast);
+            transform: rotate(90deg);
+        }
+        .dark .fullscreen-study-close {
+            background: rgba(255,255,255,.15);
+            color: #fff;
+        }
+        .fullscreen-study-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: clamp(16px, 3vw, 32px);
+            gap: clamp(16px, 2vw, 24px);
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .fs-left-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: clamp(12px, 2vh, 20px);
+        }
+        .fs-time {
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 850;
+            font-variant-numeric: tabular-nums;
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0,0,0,.4);
+            line-height: 1;
+        }
+        .fs-date {
+            font-size: clamp(14px, 2vw, 18px);
+            color: rgba(255,255,255,.85);
+            font-weight: 500;
+        }
+        .fs-subjects {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 100%;
+        }
+        .fs-subject-item {
+            background: rgba(255,255,255,.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: clamp(13px, 1.8vw, 16px);
+            font-weight: 600;
+            transition: background .2s ease, transform .2s ease;
+        }
+        .fs-subject-item.completed {
+            opacity: .6;
+            text-decoration: line-through;
+        }
+        .fs-timer {
+            background: rgba(0,0,0,.25);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 20px;
+            padding: 20px 28px;
+            text-align: center;
+        }
+        .fs-timer-display {
+            font-size: clamp(48px, 6vw, 80px);
+            font-weight: 850;
+            font-variant-numeric: tabular-nums;
+            color: #fff;
+            margin-bottom: 16px;
+            font-family: 'SF Mono', 'Monospace', monospace;
+        }
+        .fs-timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        .fs-timer-btn {
+            width: 56px;
+            height: 56px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,.15);
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s ease, transform .15s ease;
+        }
+        .fs-timer-btn:hover {
+            background: var(--accent);
+            transform: scale(1.08);
+        }
+        .fs-right-panel {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .fs-player {
+            background: rgba(0,0,0,.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 20px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            max-width: 480px;
+            width: 100%;
+        }
+        .fs-player-art {
+            width: 72px;
+            height: 72px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        .fs-player-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .fs-player-title {
+            font-size: clamp(16px, 2.2vw, 20px);
+            font-weight: 800;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .fs-player-cat {
+            font-size: clamp(12px, 1.5vw, 14px);
+            color: rgba(255,255,255,.7);
+            margin-top: 4px;
+        }
+        .fs-player-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .fs-player-btn {
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,.15);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s ease, transform .15s ease;
+        }
+        .fs-player-btn:hover {
+            background: var(--accent);
+            transform: scale(1.08);
+        }
+        .fs-player-btn-main {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            background: var(--accent);
+        }
+        .fs-player-btn-main:hover {
+            background: var(--accent);
+            transform: scale(1.05);
+        }
+
+        /* Responsive: stack panels on mobile */
+        @media (max-width: 768px) {
+            .fullscreen-study-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                padding: 16px;
+                gap: 16px;
+            }
+            .fs-right-panel {
+                justify-content: center;
+            }
+            .fs-player {
+                max-width: 100%;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .wallpaper-video,
+            .fs-wallpaper-video {
+                animation: none;
+            }
+        }
+
 
 
 
@@ -4922,6 +5253,26 @@
 
                 <!-- NOW PLAYING -->
                 <div class="music-player-card" id="musicPlayerCard" style="margin-top:16px;">
+                    <!-- Live Wallpaper Background -->
+                    <div class="live-wallpaper" id="liveWallpaper">
+                        <div class="wallpaper-video-wrap">
+                            <video class="wallpaper-video" id="wallpaperVideo" autoplay muted loop playsinline></video>
+                            <div class="wallpaper-overlay"></div>
+                        </div>
+                        <div class="wallpaper-controls">
+                            <div class="wallpaper-category-selector" id="wallpaperCategorySelector">
+                                <button class="wallpaper-cat-btn active" data-cat="cafe" title="Café ambience">☕</button>
+                                <button class="wallpaper-cat-btn" data-cat="desk" title="Desk study">📝</button>
+                                <button class="wallpaper-cat-btn" data-cat="nature" title="Nature">🌿</button>
+                                <button class="wallpaper-cat-btn" data-cat="forest" title="Forest">🌲</button>
+                            </div>
+                            <button class="wallpaper-fullscreen-btn" id="wallpaperFullscreenBtn" aria-label="Fullscreen study mode" title="Fullscreen study mode">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                     <div class="music-now-art" id="musicNowArt">🎧</div>
                     <div class="music-now-title" id="musicNowTitle">—</div>
                     <div class="music-now-cat" id="musicNowCat"></div>
@@ -5683,6 +6034,48 @@
             </div>
 
         </section>
+
+    <!-- FULLSCREEN STUDY MODE (Study with me style) -->
+    <div class="fullscreen-study" id="fullscreenStudy" role="dialog" aria-modal="true" aria-label="Fullscreen study mode">
+        <div class="fullscreen-study-bg">
+            <video class="fs-wallpaper-video" id="fsWallpaperVideo" autoplay muted loop playsinline></video>
+            <div class="fullscreen-study-overlay"></div>
+        </div>
+        <button class="fullscreen-study-close" id="fullscreenStudyClose" aria-label="Exit fullscreen study mode">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+        </button>
+        <div class="fullscreen-study-content">
+            <div class="fs-left-panel">
+                <div class="fs-time" id="fsTime">00:00</div>
+                <div class="fs-date" id="fsDate">Monday, January 15</div>
+                <div class="fs-subjects" id="fsSubjects"></div>
+                <div class="fs-timer" id="fsTimer">
+                    <div class="fs-timer-display" id="fsTimerDisplay">25:00</div>
+                    <div class="fs-timer-controls">
+                        <button class="fs-timer-btn" id="fsTimerStart" aria-label="Start timer">▶</button>
+                        <button class="fs-timer-btn" id="fsTimerPause" aria-label="Pause timer" style="display:none;">⏸</button>
+                        <button class="fs-timer-btn" id="fsTimerReset" aria-label="Reset timer">↺</button>
+                    </div>
+                </div>
+            </div>
+            <div class="fs-right-panel">
+                <div class="fs-player" id="fsPlayer">
+                    <div class="fs-player-art" id="fsPlayerArt">🎧</div>
+                    <div class="fs-player-info">
+                        <div class="fs-player-title" id="fsPlayerTitle">—</div>
+                        <div class="fs-player-cat" id="fsPlayerCat">—</div>
+                    </div>
+                    <div class="fs-player-controls">
+                        <button class="fs-player-btn" id="fsPlayerPrev" aria-label="Previous">⏮</button>
+                        <button class="fs-player-btn fs-player-btn-main" id="fsPlayerPlay" aria-label="Play">▶</button>
+                        <button class="fs-player-btn" id="fsPlayerNext" aria-label="Next">⏭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     </main>
 
@@ -17901,6 +18294,333 @@ document.documentElement.classList.toggle(
         };
 
         window._musicApplyLanguage();
+
+
+        /* ============================================================
+           LIVE WALLPAPER & FULLSCREEN STUDY MODE
+           ============================================================ */
+
+        // Live wallpaper video sources for each category
+        // Using high-quality ambient videos from coverr.co / pexels / pixabay
+        // These are direct links to MP4 files that support range requests
+        const WALLPAPER_VIDEOS = {
+            cafe: [
+                "https://assets.coverr.co/videos/cozy-cafe-atmosphere-1080.mp4",
+                "https://assets.coverr.co/videos/coffee-shop-morning-vibes-1080.mp4"
+            ],
+            desk: [
+                "https://assets.coverr.co/videos/study-desk-ambient-1080.mp4",
+                "https://assets.coverr.co/videos/productive-workspace-1080.mp4"
+            ],
+            nature: [
+                "https://assets.coverr.co/videos/peaceful-nature-stream-1080.mp4",
+                "https://assets.coverr.co/videos/gentle-river-flow-1080.mp4"
+            ],
+            forest: [
+                "https://assets.coverr.co/videos/misty-forest-morning-1080.mp4",
+                "https://assets.coverr.co/videos/forest-sunlight-rays-1080.mp4"
+            ]
+        };
+
+        let currentWallpaperCat = 'cafe';
+        let wallpaperVideoIndex = 0;
+
+        function setWallpaperVideo(category) {
+            const videos = WALLPAPER_VIDEOS[category] || WALLPAPER_VIDEOS.cafe;
+            wallpaperVideoIndex = 0;
+
+            const playerVideo = document.getElementById('wallpaperVideo');
+            const fsVideo = document.getElementById('fsWallpaperVideo');
+
+            function setSource(videoEl, src) {
+                videoEl.pause();
+                videoEl.src = src;
+                videoEl.load();
+                videoEl.play().catch(() => {});
+            }
+
+            setSource(playerVideo, videos[0]);
+            setSource(fsVideo, videos[0]);
+
+            // Auto-advance to next video when one ends
+            playerVideo.onended = () => {
+                wallpaperVideoIndex = (wallpaperVideoIndex + 1) % videos.length;
+                setSource(playerVideo, videos[wallpaperVideoIndex]);
+            };
+            fsVideo.onended = () => {
+                wallpaperVideoIndex = (wallpaperVideoIndex + 1) % videos.length;
+                setSource(fsVideo, videos[wallpaperVideoIndex]);
+            };
+        }
+
+        // Initialize wallpaper with default category
+        setWallpaperVideo(currentWallpaperCat);
+
+        // Wallpaper category selector
+        document.querySelectorAll('.wallpaper-cat-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.wallpaper-cat-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentWallpaperCat = btn.dataset.cat;
+                setWallpaperVideo(currentWallpaperCat);
+                if (window.Haptics) window.Haptics.selection();
+            });
+        });
+
+        // Fullscreen study mode
+        const fsStudy = document.getElementById('fullscreenStudy');
+        const fsCloseBtn = document.getElementById('fullscreenStudyClose');
+        const fsFullscreenBtn = document.getElementById('wallpaperFullscreenBtn');
+
+        // Sync fullscreen study timer with main study timer
+        let fsTimerState = 'idle';
+        let fsTimerDuration = 25 * 60;
+        let fsTimerEndAt = 0;
+        let fsTimerInterval = null;
+        let fsTimerPausedRemaining = 0;
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = s % 60;
+            return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+        }
+
+        function renderFSTimer() {
+            let remaining;
+            if (fsTimerState === 'running') {
+                remaining = Math.max(0, Math.ceil((fsTimerEndAt - Date.now()) / 1000));
+            } else if (fsTimerState === 'paused') {
+                remaining = fsTimerPausedRemaining;
+            } else {
+                remaining = fsTimerDuration;
+            }
+            document.getElementById('fsTimerDisplay').textContent = formatTime(remaining);
+        }
+
+        function fsTimerStart() {
+            if (fsTimerState === 'running') {
+                fsTimerPausedRemaining = Math.max(0, Math.ceil((fsTimerEndAt - Date.now()) / 1000));
+                fsTimerState = 'paused';
+                clearInterval(fsTimerInterval);
+                fsTimerInterval = null;
+                document.getElementById('fsTimerStart').style.display = 'inline-flex';
+                document.getElementById('fsTimerPause').style.display = 'none';
+                renderFSTimer();
+                if (window.Haptics) window.Haptics.tap();
+                return;
+            }
+            if (fsTimerState === 'paused') {
+                fsTimerEndAt = Date.now() + fsTimerPausedRemaining * 1000;
+                fsTimerState = 'running';
+                if (window.Haptics) window.Haptics.tap();
+            } else {
+                fsTimerEndAt = Date.now() + fsTimerDuration * 1000;
+                fsTimerState = 'running';
+                if (window.Haptics) window.Haptics.success();
+            }
+            document.getElementById('fsTimerStart').style.display = 'none';
+            document.getElementById('fsTimerPause').style.display = 'inline-flex';
+            renderFSTimer();
+            fsTimerInterval = setInterval(() => {
+                renderFSTimer();
+                if (fsTimerState === 'running' && Date.now() >= fsTimerEndAt) {
+                    fsTimerFinish();
+                }
+            }, 500);
+            if (window.Haptics) window.Haptics.tap();
+        }
+
+        function fsTimerPause() {
+            if (fsTimerState !== 'running') return;
+            fsTimerPausedRemaining = Math.max(0, Math.ceil((fsTimerEndAt - Date.now()) / 1000));
+            fsTimerState = 'paused';
+            clearInterval(fsTimerInterval);
+            fsTimerInterval = null;
+            document.getElementById('fsTimerStart').style.display = 'inline-flex';
+            document.getElementById('fsTimerPause').style.display = 'none';
+            renderFSTimer();
+            if (window.Haptics) window.Haptics.tap();
+        }
+
+        function fsTimerReset() {
+            clearInterval(fsTimerInterval);
+            fsTimerInterval = null;
+            fsTimerState = 'idle';
+            fsTimerPausedRemaining = 0;
+            document.getElementById('fsTimerStart').style.display = 'inline-flex';
+            document.getElementById('fsTimerPause').style.display = 'none';
+            renderFSTimer();
+            if (window.Haptics) window.Haptics.tap();
+        }
+
+        function fsTimerFinish() {
+            clearInterval(fsTimerInterval);
+            fsTimerInterval = null;
+            fsTimerState = 'idle';
+            document.getElementById('fsTimerStart').style.display = 'inline-flex';
+            document.getElementById('fsTimerPause').style.display = 'none';
+            renderFSTimer();
+            if (window.Haptics) window.Haptics.completion();
+            // Also finish main timer if running
+            if (window.timerFinishSession) window.timerFinishSession();
+        }
+
+        // Open fullscreen study mode
+        function openFullscreenStudy() {
+            fsStudy.classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            // Sync time and date
+            updateFSTime();
+            setInterval(updateFSTime, 1000);
+
+            // Sync subjects
+            renderFSSubjects();
+
+            // Sync music player
+            syncFSPlayer();
+
+            // Start fullscreen video
+            const fsVideo = document.getElementById('fsWallpaperVideo');
+            fsVideo.play().catch(() => {});
+
+            if (window.Haptics) window.Haptics.success();
+        }
+
+        function closeFullscreenStudy() {
+            fsStudy.classList.remove('open');
+            document.body.style.overflow = '';
+            if (window.Haptics) window.Haptics.tap();
+        }
+
+        function updateFSTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('fsTime').textContent = timeStr;
+            document.getElementById('fsDate').textContent = dateStr;
+        }
+
+        function renderFSSubjects() {
+            const container = document.getElementById('fsSubjects');
+            const subjects = loadStudySubjects();
+            const completed = JSON.parse(localStorage.getItem('dailykrd_study_completed') || '{}');
+            const todayKey = getStudyTodayKey();
+            const todayCompleted = completed[todayKey] || [];
+
+            if (subjects.length === 0) {
+                container.innerHTML = '<div style="color:rgba(255,255,255,.5); font-size:14px; text-align:center; padding:20px;">No subjects yet. Add some in Study →</div>';
+                return;
+            }
+
+            container.innerHTML = subjects.map(s => {
+                const isCompleted = todayCompleted.includes(s);
+                return '<div class="fs-subject-item' + (isCompleted ? ' completed' : '') + '">' + s.replace(/</g, '<') + '</div>';
+            }).join('');
+        }
+
+        function syncFSPlayer() {
+            if (!musicCurrentTrackId) return;
+            const track = musicTrackById(musicCurrentTrackId);
+            if (!track) return;
+
+            document.getElementById('fsPlayerTitle').textContent = track.title;
+            document.getElementById('fsPlayerCat').textContent = musicCategoryLabel(track.category);
+            document.getElementById('fsPlayerArt').textContent = '🎧';
+
+            // Sync play state
+            const audio = musicGetAudio();
+            const playBtn = document.getElementById('fsPlayerPlay');
+            if (audio && !audio.paused) {
+                playBtn.textContent = '⏸';
+                playBtn.setAttribute('aria-label', 'Pause');
+            } else {
+                playBtn.textContent = '▶';
+                playBtn.setAttribute('aria-label', 'Play');
+            }
+        }
+
+        // Fullscreen study event listeners
+        if (fsFullscreenBtn) {
+            fsFullscreenBtn.addEventListener('click', () => {
+                if (window.Haptics) window.Haptics.success();
+                openFullscreenStudy();
+            });
+        }
+
+        if (fsCloseBtn) {
+            fsCloseBtn.addEventListener('click', closeFullscreenStudy);
+        }
+
+        // FS Timer controls
+        document.getElementById('fsTimerStart')?.addEventListener('click', fsTimerStart);
+        document.getElementById('fsTimerPause')?.addEventListener('click', fsTimerPause);
+        document.getElementById('fsTimerReset')?.addEventListener('click', fsTimerReset);
+
+        // FS Player controls
+        document.getElementById('fsPlayerPlay')?.addEventListener('click', () => {
+            if (window.Haptics) window.Haptics.tap();
+            musicPlayPause();
+            setTimeout(syncFSPlayer, 100);
+        });
+
+        document.getElementById('fsPlayerPrev')?.addEventListener('click', () => {
+            if (window.Haptics) window.Haptics.selection();
+            musicStep(-1, false);
+            setTimeout(syncFSPlayer, 100);
+        });
+
+        document.getElementById('fsPlayerNext')?.addEventListener('click', () => {
+            if (window.Haptics) window.Haptics.selection();
+            musicStep(1, false);
+            setTimeout(syncFSPlayer, 100);
+        });
+
+        // Sync FS player when main player changes
+        const origMusicUpdatePlayBtn = musicUpdatePlayBtn;
+        musicUpdatePlayBtn = function() {
+            origMusicUpdatePlayBtn.apply(this, arguments);
+            syncFSPlayer();
+        };
+
+        // Sync FS timer with main timer
+        const origTimerStart = timerStart;
+        timerStart = function() {
+            origTimerStart.apply(this, arguments);
+            if (fsStudy.classList.contains('open')) {
+                // Sync timer state
+                if (timerState === 'running') {
+                    fsTimerState = 'running';
+                    fsTimerDuration = timerDuration;
+                    fsTimerEndAt = timerEndAt;
+                    fsTimerPausedRemaining = timerPausedRemaining;
+                    if (!fsTimerInterval) {
+                        fsTimerInterval = setInterval(() => {
+                            renderFSTimer();
+                            if (fsTimerState === 'running' && Date.now() >= fsTimerEndAt) {
+                                fsTimerFinish();
+                            }
+                        }, 500);
+                    }
+                }
+                renderFSTimer();
+            }
+        };
+
+        const origTimerFinishSession = timerFinishSession;
+        timerFinishSession = function() {
+            origTimerFinishSession.apply(this, arguments);
+            if (fsStudy.classList.contains('open')) {
+                fsTimerFinish();
+            }
+        };
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && fsStudy.classList.contains('open')) {
+                closeFullscreenStudy();
+            }
+        });
 
 
         /* STUDY TIMER */
