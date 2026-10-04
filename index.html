@@ -19197,78 +19197,104 @@ document.documentElement.classList.toggle(
 
 
         /* ============================================================
-           STUDY WITH ME V1
-           Extends the existing study timer with immersive session features
+           STUDY WITH ME V1 - IMMERSIVE FULL-SCREEN ENVIRONMENT
            ============================================================ */
 
-        // Study With Me state
-        let swmState = 'setup'; // setup | session | break | complete | history
-        let swmSessionData = {
-            subject: '',
-            duration: 25 * 60,
-            goal: '',
-            notes: '',
-            startTime: 0,
-            pausedRemaining: 0,
-            elapsed: 0,
-            xpEarned: 0
-        };
-        let swmBreakData = {
-            duration: 5 * 60,
-            pausedRemaining: 0
-        };
-        let swmInterval = null;
-        let swmBreakInterval = null;
+// Study With Me state
+let swmState = 'setup'; // setup | session | break | complete | history
+let swmSessionData = {
+    subject: '',
+    duration: 25 * 60,
+    goal: '',
+    notes: '',
+    startTime: 0,
+    pausedRemaining: 0,
+    elapsed: 0,
+    xpEarned: 0
+};
+let swmBreakData = {
+    duration: 5 * 60,
+    pausedRemaining: 0
+};
+let swmInterval = null;
+let swmBreakInterval = null;
+let swmClockInterval = null;
+let swmAmbientAudio = null;
+let swmActiveSound = 'none';
+let swmAudioContext = null;
 
-        // DOM elements
-        const swmLaunchCard = document.getElementById('swmLaunchCard');
-        const swmView = document.getElementById('swmView');
-        const swmSetupScreen = document.getElementById('swmSetupScreen');
-        const swmSessionScreen = document.getElementById('swmSessionScreen');
-        const swmBreakScreen = document.getElementById('swmBreakScreen');
-        const swmCompleteScreen = document.getElementById('swmCompleteScreen');
-        const swmHistoryScreen = document.getElementById('swmHistoryScreen');
+// DOM elements - Immersive
+const swmImmersive = document.getElementById('swmImmersive');
+const swmLaunchCard = document.getElementById('swmLaunchCard');
+const swmExitBtn = document.getElementById('swmExitBtn');
+const swmClock = document.getElementById('swmClock');
+const swmDate = document.getElementById('swmDate');
 
-        const swmSubjectSelect = document.getElementById('swmSubjectSelect');
-        const swmDurationOptions = document.getElementById('swmDurationOptions');
-        const swmDurationCustom = document.getElementById('swmDurationCustom');
-        const swmCustomMin = document.getElementById('swmCustomMin');
-        const swmGoalInput = document.getElementById('swmGoalInput');
-        const swmNotesInput = document.getElementById('swmNotesInput');
-        const swmStartBtn = document.getElementById('swmStartBtn');
+// Screens
+const swmSetupScreen = document.getElementById('swmSetupScreen');
+const swmSessionScreen = document.getElementById('swmSessionScreen');
+const swmBreakScreen = document.getElementById('swmBreakScreen');
+const swmCompleteScreen = document.getElementById('swmCompleteScreen');
+const swmHistoryScreen = document.getElementById('swmHistoryScreen');
 
-        const swmSessionSubject = document.getElementById('swmSessionSubject');
-        const swmSessionStreakCount = document.getElementById('swmSessionStreakCount');
-        const swmSessionStreakLabel = document.getElementById('swmSessionStreakLabel');
-        const swmSessionTimer = document.getElementById('swmSessionTimer');
-        const swmSessionGoal = document.getElementById('swmSessionGoal');
-        const swmSessionGoalText = document.getElementById('swmSessionGoalText');
-        const swmPauseBtn = document.getElementById('swmPauseBtn');
-        const swmFinishBtn = document.getElementById('swmFinishBtn');
-        const swmCancelBtn = document.getElementById('swmCancelBtn');
+// Setup elements
+const swmSubjectSelect = document.getElementById('swmSubjectSelect');
+const swmDurationOptions = document.getElementById('swmDurationOptions');
+const swmDurationCustom = document.getElementById('swmDurationCustom');
+const swmCustomMin = document.getElementById('swmCustomMin');
+const swmGoalInput = document.getElementById('swmGoalInput');
+const swmNotesInput = document.getElementById('swmNotesInput');
+const swmStartBtn = document.getElementById('swmStartBtn');
 
-        const swmBreakTimer = document.getElementById('swmBreakTimer');
-        const swmBreakOptions = document.getElementById('swmBreakOptions');
-        const swmBreakStartBtn = document.getElementById('swmBreakStartBtn');
-        const swmBreakSkipBtn = document.getElementById('swmBreakSkipBtn');
+// Session elements
+const swmSessionSubject = document.getElementById('swmSessionSubject');
+const swmSessionStreakCount = document.getElementById('swmSessionStreakCount');
+const swmSessionStreakLabel = document.getElementById('swmSessionStreakLabel');
+const swmSessionTimer = document.getElementById('swmSessionTimer');
+const swmSessionGoalText = document.getElementById('swmSessionGoalText');
+const swmPauseBtn = document.getElementById('swmPauseBtn');
+const swmPauseLabel = document.getElementById('swmPauseLabel');
+const swmFinishBtn = document.getElementById('swmFinishBtn');
+const swmNotesBtn = document.getElementById('swmNotesBtn');
+const swmTimerProgress = document.getElementById('swmTimerProgress');
 
-        const swmCompleteTimeValue = document.getElementById('swmCompleteTimeValue');
-        const swmCompleteXPValue = document.getElementById('swmCompleteXPValue');
-        const swmCompleteStreakValue = document.getElementById('swmCompleteStreakValue');
-        const swmCompleteGoal = document.getElementById('swmCompleteGoal');
-        const swmCompleteGoalText = document.getElementById('swmCompleteGoalText');
-        const swmCompleteGoalStatus = document.getElementById('swmCompleteGoalStatus');
-        const swmCompleteNotes = document.getElementById('swmCompleteNotes');
-        const swmCompleteNotesInput = document.getElementById('swmCompleteNotesInput');
-        const swmSaveNoteBtn = document.getElementById('swmSaveNoteBtn');
-        const swmStudyAgainBtn = document.getElementById('swmStudyAgainBtn');
-        const swmDoneBtn = document.getElementById('swmDoneBtn');
+// Break elements
+const swmBreakTimer = document.getElementById('swmBreakTimer');
+const swmBreakOptions = document.getElementById('swmBreakOptions');
+const swmBreakStartBtn = document.getElementById('swmBreakStartBtn');
+const swmBreakSkipBtn = document.getElementById('swmBreakSkipBtn');
 
-        const swmHistoryList = document.getElementById('swmHistoryList');
-        const swmHistoryToday = document.getElementById('swmHistoryToday');
-        const swmHistoryWeek = document.getElementById('swmHistoryWeek');
-        const swmHistoryTotal = document.getElementById('swmHistoryTotal');
-        const swmHistoryBackBtn = document.getElementById('swmHistoryBackBtn');
+// Completion elements
+const swmCompleteTimeValue = document.getElementById('swmCompleteTimeValue');
+const swmCompleteXPValue = document.getElementById('swmCompleteXPValue');
+const swmCompleteStreakValue = document.getElementById('swmCompleteStreakValue');
+const swmCompleteGoal = document.getElementById('swmCompleteGoal');
+const swmCompleteGoalText = document.getElementById('swmCompleteGoalText');
+const swmCompleteGoalStatus = document.getElementById('swmCompleteGoalStatus');
+const swmCompleteNotes = document.getElementById('swmCompleteNotes');
+const swmCompleteNotesInput = document.getElementById('swmCompleteNotesInput');
+const swmSaveNoteBtn = document.getElementById('swmSaveNoteBtn');
+const swmStudyAgainBtn = document.getElementById('swmStudyAgainBtn');
+const swmDoneBtn = document.getElementById('swmDoneBtn');
+
+// History elements
+const swmHistoryList = document.getElementById('swmHistoryList');
+const swmHistoryToday = document.getElementById('swmHistoryToday');
+const swmHistoryWeek = document.getElementById('swmHistoryWeek');
+const swmHistoryTotal = document.getElementById('swmHistoryTotal');
+const swmHistoryBackBtn = document.getElementById('swmHistoryBackBtn');
+
+// Notes panel
+const swmNotesPanel = document.getElementById('swmNotesPanel');
+const swmNotesCloseBtn = document.getElementById('swmNotesCloseBtn');
+const swmSessionNotesInput = document.getElementById('swmSessionNotesInput');
+const swmSessionNotesSaveBtn = document.getElementById('swmSessionNotesSaveBtn');
+
+// Ambient panel
+const swmAmbientPanel = document.getElementById('swmAmbientPanel');
+const swmAmbientCloseBtn = document.getElementById('swmAmbientCloseBtn');
+const swmAmbientOptions = document.getElementById('swmAmbientOptions');
+const swmAmbientVolume = document.getElementById('swmAmbientVolume');
 
         /* Labels need refreshing when the app language changes. */
         window._swmApplyLanguage = function () {
@@ -19358,6 +19384,14 @@ document.documentElement.classList.toggle(
             if (historyTodayLabel) historyTodayLabel.textContent = t('swmToday');
             if (historyWeekLabel) historyWeekLabel.textContent = t('swmThisWeek');
             if (historyTotalLabel) historyTotalLabel.textContent = t('swmTotalTime');
+
+            // Notes panel
+            const notesPanelTitle = document.getElementById('swmNotesPanelTitle');
+            if (notesPanelTitle) notesPanelTitle.textContent = t('swmNotes');
+
+            // Ambient panel
+            const ambientPanelTitle = document.getElementById('swmAmbientPanelTitle');
+            if (ambientPanelTitle) ambientPanelTitle.textContent = t('swmAmbientVolumeLabel');
 
             // Re-render history to update day labels
             renderHistory();
