@@ -6,7 +6,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     >
 
     <meta name="theme-color" content="#f5f5f7">
@@ -334,7 +334,6 @@
             min-height: 100%;
             overscroll-behavior: none;
             touch-action: manipulation;
-            -webkit-text-size-adjust: 100%;
             font-family:
                 -apple-system,
                 BlinkMacSystemFont,
@@ -342,11 +341,6 @@
                 "Segoe UI",
                 Arial,
                 sans-serif;
-        }
-
-        /* Prevent double-tap zoom on iOS */
-        * {
-            -webkit-tap-highlight-color: transparent;
         }
         body {
             color: #111;
@@ -1001,236 +995,34 @@
             transform: rotate(45deg);
         }
 
-        /* === COMPLETION ANIMATION (Eye-catching minimalist) === */
-.task.just-completed,
-.prayer.just-checked,
-.study-subject.just-completed,
-.dash-study-subject.just-completed {
-    animation: completionBurst 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.task.just-completed .task-check,
-.prayer.just-checked .prayer-check,
-.study-subject.just-completed .dash-study-check,
-.dash-study-subject.just-completed .dash-study-check {
-    animation: checkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.task.just-completed .task-check::after,
-.prayer.just-checked .prayer-check::after,
-.study-subject.just-completed .dash-study-check::after,
-.dash-study-subject.just-completed .dash-study-check::after {
-    animation: checkDraw 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.task.just-completed .task-text {
-    animation: textStrike 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.prayer.just-checked .prayer-name,
-.study-subject.just-completed .study-subject-name,
-.dash-study-subject.just-completed .dash-study-subject-name,
-.dash-study-subject.just-completed .study-subject-name {
-    animation: textStrike 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes completionBurst {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 var(--accent);
-    }
-    15% {
-        transform: scale(1.03);
-        box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 30%, transparent);
-    }
-    30% {
-        transform: scale(0.98);
-        box-shadow: 0 0 0 12px color-mix(in srgb, var(--accent) 20%, transparent);
-    }
-    50% {
-        transform: scale(1.01);
-        box-shadow: 0 0 0 16px transparent;
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 transparent;
-    }
-}
-
-@keyframes checkPop {
-    0% { transform: scale(1) rotate(-10deg); }
-    25% { transform: scale(1.3) rotate(5deg); }
-    50% { transform: scale(1.15) rotate(-3deg); }
-    75% { transform: scale(1.05) rotate(1deg); }
-    100% { transform: scale(1) rotate(0deg); }
-}
-
-@keyframes checkDraw {
-    0% {
-        stroke-dashoffset: 20;
-        opacity: 0;
-        transform: scale(0.5);
-    }
-    50% {
-        stroke-dashoffset: 0;
-        opacity: 1;
-        transform: scale(1.1);
-    }
-    100% {
-        stroke-dashoffset: 0;
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes textStrike {
-    0% {
-        opacity: 1;
-        color: inherit;
-        text-decoration-color: transparent;
-    }
-    40% {
-        opacity: 0.6;
-        color: var(--accent);
-        text-decoration-color: var(--accent);
-    }
-    100% {
-        opacity: 0.45;
-        color: inherit;
-        text-decoration-color: var(--accent);
-    }
-}
-
-        /* === MINIMALISTIC UI ANIMATIONS === */
-
-        /* Item entrance - slide up + fade */
-        @keyframes itemEnter {
-            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
+        .task.just-completed .task-check {
+            animation: checkPop .4s ease;
         }
 
-        /* Item exit - slide down + fade */
-        @keyframes itemExit {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+        .task.just-completed .task-check::after {
+            animation: checkDraw .32s ease;
         }
 
-        /* Button press - subtle scale */
-        @keyframes pressDown {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.95); }
-            100% { transform: scale(1); }
+        .task.just-completed .task-text {
+            animation: taskFade .4s ease;
         }
 
-        /* Toggle switch - smooth slide */
-        @keyframes toggleSlide {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(var(--toggle-distance, 20px)); }
-        }
-
-        /* Checkbox check - pop + draw */
         @keyframes checkPop {
             0% { transform: scale(1); }
-            40% { transform: scale(1.25); }
+            40% { transform: scale(1.35); }
             100% { transform: scale(1); }
         }
 
         @keyframes checkDraw {
-            0% { stroke-dashoffset: 16; opacity: 0; }
-            100% { stroke-dashoffset: 0; opacity: 1; }
+            0% { height: 0; opacity: 0; }
+            50% { height: 11px; opacity: 1; }
+            100% { height: 11px; opacity: 1; }
         }
 
-        /* Radio/select - ripple */
-        @keyframes ripple {
-            0% { transform: scale(0); opacity: 0.3; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
-
-        /* Play button - pulse */
-        @keyframes playPulse {
-            0% { box-shadow: 0 0 0 0 var(--accent); }
-            70% { box-shadow: 0 0 0 12px transparent; }
-            100% { box-shadow: 0 0 0 0 transparent; }
-        }
-
-        /* Card/row hover/tap lift */
-        @keyframes liftTap {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(-2px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* Delete - shrink + rotate */
-        @keyframes deleteShrink {
-            0% { opacity: 1; transform: translateX(0) rotate(0); }
-            100% { opacity: 0; transform: translateX(-20px) rotate(-15deg) scale(0.9); }
-        }
-
-        /* Toast/notification - slide in */
-        @keyframes toastIn {
-            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* Staggered list item entrance */
-        .animate-stagger > * {
-            animation: itemEnter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-        }
-        .animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
-        .animate-stagger > *:nth-child(2) { animation-delay: 40ms; }
-        .animate-stagger > *:nth-child(3) { animation-delay: 80ms; }
-        .animate-stagger > *:nth-child(4) { animation-delay: 120ms; }
-        .animate-stagger > *:nth-child(5) { animation-delay: 160ms; }
-        .animate-stagger > *:nth-child(6) { animation-delay: 200ms; }
-        .animate-stagger > *:nth-child(7) { animation-delay: 240ms; }
-        .animate-stagger > *:nth-child(8) { animation-delay: 280ms; }
-
-        /* Utility classes */
-        .animate-enter { animation: itemEnter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .animate-exit { animation: itemExit 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .animate-press { animation: pressDown 0.12s ease; }
-        .animate-lift { animation: liftTap 0.15s ease; }
-        .animate-pulse { animation: playPulse 0.6s ease; }
-        .animate-ripple::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: inherit;
-            background: currentColor;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .animate-ripple:active::after { animation: ripple 0.4s ease; }
-
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            .animate-enter,
-            .animate-exit,
-            .animate-press,
-            .animate-lift,
-            .animate-pulse,
-            .animate-stagger > *,
-            .task-check,
-            .prayer-check,
-            .dash-study-check,
-            .repeat-day,
-            .accent-swatch,
-            .theme-option,
-            .icon-style-option,
-            .music-track,
-            .flashcard-deck,
-            .cal-event-item,
-            .study-subject,
-            .task {
-                animation: none !important;
-                transition: none !important;
-            }
-            .task.just-completed .task-check,
-            .task.just-completed .task-check::after,
-            .task.just-completed .task-text,
-            .prayer.just-checked .prayer-check {
-                animation: none !important;
-            }
+        @keyframes taskFade {
+            0% { opacity: 1; }
+            35% { opacity: .35; }
+            100% { opacity: .45; }
         }
 
         /* PRIORITY */
@@ -2283,32 +2075,17 @@
             justify-content: space-between;
             align-items: center;
             gap: 15px;
-            padding: 12px 0;
+            padding: 10px 0;
         }
 
         .setting-label {
             font-weight: 650;
-            flex: 1;
-            min-width: 0;
         }
 
         .setting-description {
             color: #888;
-            font-size: 12px;
-            margin-top: 2px;
-            line-height: 1.3;
-        }
-
-        .setting-row > div:first-child {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .setting-row > *:last-child {
-            flex-shrink: 0;
-            margin-left: auto;
+            font-size: 13px;
+            margin-top: 3px;
         }
 
         .setting-button {
@@ -6066,7 +5843,7 @@
             "dailykrd_music_prefs",
             "dailykrd_push_settings",
             "dailykrd_welcomed",
-            "dailykrd_haptic_enabled"
+            "dailykrd_haptic_settings"
         ];
 
         const SYNCED_KEY_SET =
@@ -6074,7 +5851,200 @@
 
         // History-shaped values are union-merged instead of replaced so study
         // time recorded on two devices is never dropped.
-        const SYNCED_UNION_KEYS =
+        const SHARED_SETTING_STATE = {
+        key: "dailykrd_haptic_settings",
+        storageKey: "dailykrd_haptic_settings",
+        labelKey: "hapticSettings",
+        onLabelKey: "hapticSettingsOn",
+        offLabelKey: "hapticSettingsOff",
+        unsupportedKey: "hapticSettingsUnsupported",
+        raw: function () { return localStorage.getItem("dailykrd_haptic_settings") !== null; },
+        get: function () {
+            var raw = localStorage.getItem("dailykrd_haptic_settings");
+            return raw ? JSON.parse(raw) : true;
+        },
+        set: function (v) {
+            localStorage.setItem("dailykrd_haptic_settings", JSON.stringify(v));
+        },
+        sync: function (v) {
+            localStorage.setItem("dailykrd_haptic_settings", JSON.stringify(v));
+            if (currentUser) noteLocalAppstateChange("dailykrd_haptic_settings");
+        }
+    };
+
+// ------------------------------------------------------------------
+// HAPTIC CONTROLLER
+// ------------------------------------------------------------------
+// Centralized, zero-dependency vibration layer. Every vibration in the
+// app now goes through `haptics.request(type)` so we get a single shared
+// instance, a built-in debounce + cooldown, and no accidental duplicate
+// taps. It is completely offline-first: if `navigator.vibrate` is missing
+// (iOS Safari PWA / some desktop browsers) it silently does nothing.
+// ------------------------------------------------------------------
+const haptics = (function () {
+
+    var hasVibrate = function () {
+        return typeof navigator !== "undefined" &&
+            navigator !== null &&
+            typeof navigator.vibrate === "function";
+    };
+
+    // `true` = vibration enabled by the user (default), `false` = disabled,
+    // `undefined` = browser does not support vibration.
+    var enabled = typeof SHARED_SETTING_STATE.get === "function"
+        ? SHARED_SETTING_STATE.get()
+        : true;
+
+    // Small cooldown so rapid taps never build into a continuous buzz.
+    var lastRequest = 0;
+    var cooldownUntil = 0;
+
+    // Debounce a fast burst: if several requests arrive within `debounceMs`,
+    // keep only the last one (often the most meaningful action).
+    var debounceTimer = null;
+
+    var debounceMs = 60;
+    var cooldownMs = 900;
+
+    var patternFor = function (type) {
+        switch (type) {
+            case "light":
+                return [10, 12];
+            case "selection":
+                return [14, 16];
+            case "success":
+                return [18, 20, 18];
+            case "warning":
+                return [22, 24, 22];
+            case "error":
+                return [26, 28, 26];
+            case "complete":
+                return [28, 24, 28, 24, 28];
+            case "danger":
+                return [28, 40, 28, 40, 28];
+            default:
+                return [10, 12];
+        }
+    };
+
+    // Public: request a haptic pattern by name.
+    var request = function (type, props) {
+        if (!hasVibrate()) return;
+        if (typeof enabled === "boolean" && !enabled) return;
+        try {
+            var elapsed = Date.now() - lastRequest;
+            if (elapsed < cooldownMs) return;
+            if (debounceTimer) {
+                clearTimeout(debounceTimer);
+                debounceTimer = null;
+            }
+            debounceTimer = setTimeout(function () {
+                debounceTimer = null;
+            }, debounceMs);
+            var pattern = patternFor(type);
+            navigator.vibrate(pattern);
+            lastRequest = Date.now();
+            cooldownUntil = Date.now() + cooldownMs;
+        } catch (e) {
+            // Never let a Vibration-API quirk break the UI.
+        }
+    };
+
+    // Public: enable / disable feedback at runtime.
+    var setEnabled = function (v) {
+        enabled = (typeof v === "boolean") ? v : true;
+    };
+
+    var getEnabled = function () { return enabled; };
+
+    // Lightweight "light tap" used for normal UI clicks, focusing, etc.
+    var tap = function () { return request("light"); };
+
+    // Subtle tick for tabs, date/subject/category selection.
+    var selection = function () { return request("selection"); };
+
+    // Unmisable positive outcome.
+    var success = function () { return request("success"); };
+
+    // Potentially destructive / confirmation state.
+    var warning = function () { return request("warning"); };
+
+    // Real error (save fail, invalid action).
+    var error = function () { return request("error"); };
+
+    // Major completed milestone (study timer done, deck finished).
+    var complete = function () { return request("complete"); };
+
+    // Deliberate destructive action (task delete, deck delete).
+    var danger = function () { return request("danger"); };
+
+    // Exposed API.
+    return {
+        canVibrate: hasVibrate,
+        enabled: getEnabled,
+        setEnabled:
+        request,
+        tap,
+        selection,
+        success,
+        warning,
+        error,
+        complete,
+        danger
+    };
+})();
+
+// Read the saved preference on first load (must run after SHARED_SETTING_STATE is defined).
+try {
+    haptics.setEnabled(SHARED_SETTING_STATE.get());
+} catch (e) {
+    /* Ignore; default remains enabled. */
+}
+
+function refreshAppstateUI(key) {
+    if (key === "dailykrd_haptic_settings") {
+        try {
+            haptics.setEnabled(SHARED_SETTING_STATE.get());
+            if (typeof applyLanguage === "function") {
+                applyLanguage();
+            }
+        } catch (e) {
+            /* Never let appstate refresh break the UI. */
+        }
+    }
+}
+
+const hapticSettingsInit = (function () {
+    try {
+        // If the user has never chosen, default to ON for a brand-new install.
+        if (SHARED_SETTING_STATE.raw()) {
+            haptics.setEnabled(SHARED_SETTING_STATE.get());
+        }
+    } catch (e) {
+        /* storage unavailable — keep defaults; haptics stay silent. */
+    }
+})();
+
+// Re-fire the app's language renderer when this setting changes so the
+// toggle label translates correctly on the fly.
+if (typeof applyLanguage === "function") {
+    var _origApplyLanguage = applyLanguage;
+    applyLanguage = function () {
+        _origApplyLanguage.apply(this, arguments);
+        try { haptics.tap(); } catch (e) { /* never break UI */ }
+    };
+}
+
+window._hapticsForTimer = {
+    forTimerStart: function () { haptics.tap(); },
+    forTimerStop: function () { haptics.complete(); }
+};
+
+// Guard: keep the module loop tidy and idempotent; no re-init.
+Object.freeze(haptics);
+Object.freeze(SHARED_SETTING_STATE);
+
+const SYNCED_UNION_KEYS =
             new Set([
                 "dailykrd_study_sessions",
                 "dailykrd_study_completed"
@@ -9208,7 +9178,18 @@ done: "تەواو",
                 "welcomeSubtitle"
 ).textContent = t("welcomeSubtitle");
 
-            
+            // ---- HAPTIC SETTINGS (applyLanguage hook) ----
+            try { haptics.setEnabled(SHARED_SETTING_STATE.get()); } catch (e) { /* default ON */ }
+            var _hsSwitch = document.getElementById("hapticSwitch");
+            var _hsLabel = document.getElementById("hapticLabel");
+            var _hsUnsupported = document.getElementById("hapticUnsupported");
+            if (_hsSwitch) { _hsSwitch.checked = (SHARED_SETTING_STATE.raw() ? SHARED_SETTING_STATE.get() : true); }
+            _hsLabel.textContent = (_hsSwitch && _hsSwitch.checked) ? t("hapticSettingsOn") : t("hapticSettingsOff");
+            if (_hsUnsupported) { _hsUnsupported.style.display = haptics.canVibrate() ? "none" : "inline"; }
+            // ---- /HAPTIC SETTINGS ----
+
+            // Continue.
+
             document.getElementById(
                 "welcomeSignIn"
             ).textContent =
@@ -11616,10 +11597,6 @@ done: "تەواو",
                     "change",
                     async () => {
 
-                        // Press animation on checkbox
-                        checkbox.classList.add('animate-press');
-                        setTimeout(() => checkbox.classList.remove('animate-press'), 120);
-
                         if (checkbox.checked) {
 
                             justCompletedTaskIds.add(
@@ -11764,17 +11741,16 @@ done: "تەواو",
                         // Warning haptic for delete action
                         if (window.Haptics) window.Haptics.warning();
 
-                        // Animate delete
-                        row.style.animation = 'deleteShrink 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards';
-
                         try {
-                            // Wait for animation to complete before actually deleting
-                            await new Promise(r => setTimeout(r, 200));
-                            await deleteTask(task);
+
+                            await deleteTask(
+                                task
+                            );
+
                         } catch (error) {
+
                             console.error("Task delete error:", error);
-                            // Revert animation on error
-                            row.style.animation = '';
+
                         }
 
                     }
@@ -12149,14 +12125,6 @@ done: "تەواو",
 
             input.value = "";
             document.getElementById("taskTimeInput").value = "";
-
-            // Animate new task entry
-            setTimeout(() => {
-                const newTaskRow = document.querySelector('.task:first-child');
-                if (newTaskRow) {
-                    newTaskRow.classList.add('animate-enter');
-                }
-            }, 0);
 
 
             document.getElementById(
@@ -13501,10 +13469,6 @@ document.documentElement.classList.toggle(
                     checkbox.addEventListener(
                         "change",
                         async () => {
-
-                            // Press animation on checkbox
-                            checkbox.classList.add('animate-press');
-                            setTimeout(() => checkbox.classList.remove('animate-press'), 120);
 
                             const desired =
                                 checkbox.checked;
@@ -15703,23 +15667,6 @@ document.documentElement.classList.toggle(
         syncThemeColorMeta();
 
 
-        /* ===================================================================== */
-
-        renderCalendar();
-
-        loadPrayerTimes();
-
-        updateStats();
-
-        checkIOSNotificationEnvironment();
-        
-        renderPushSettingsUI();
-
-        // Initial sync of settings to worker
-        if (pushSettings.masterEnabled) {
-            syncPushPreferences();
-        }
-
         /* HAPTIC FEEDBACK SYSTEM */
         /* ===================================================================== */
 
@@ -15727,17 +15674,7 @@ document.documentElement.classList.toggle(
             const HAPTIC_STORAGE_KEY = "dailykrd_haptic_enabled";
 
             // Check if vibration is supported
-            const hasVibrateAPI = "vibrate" in navigator;
-            const vibrateFn = navigator.vibrate;
-            const isSupported = hasVibrateAPI && typeof vibrateFn === "function";
-
-            // Debug: log support status
-            console.log("[Haptics] Detection:", {
-                hasVibrateAPI,
-                vibrateFnType: typeof vibrateFn,
-                isSupported,
-                userAgent: navigator.userAgent.slice(0, 80)
-            });
+            const isSupported = "vibrate" in navigator;
 
             // Load saved preference (default: true)
             let hapticsEnabled = localStorage.getItem(HAPTIC_STORAGE_KEY) !== "false";
@@ -15812,7 +15749,7 @@ document.documentElement.classList.toggle(
             const toggleBtn = document.getElementById("hapticToggleBtn");
             if (toggleBtn) {
                 toggleBtn.addEventListener("click", () => {
-                    window.Haptics.setEnabled(!window.Haptics.isEnabled());
+                    window.Haptics.setEnabled(!hapticsEnabled);
                     window.Haptics.tap(); // Immediate feedback on toggle
                 });
             }
@@ -15853,47 +15790,27 @@ document.documentElement.classList.toggle(
 
             autoAttachHaptics();
 
-            // Auto-attach press animations to interactive elements (event delegation)
-            function autoAttachAnimations() {
-                document.addEventListener("click", (e) => {
-                    // Skip if reduced motion
-                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-                    const target = e.target;
-
-                    // Skip inputs, textareas, sliders, and content areas
-                    if (target.matches("input, textarea, select, [contenteditable]")) return;
-
-                    // Button-like elements get press animation
-                    if (target.matches("button, .tab, .icon-button, .setting-button, .accent-swatch, .theme-option, .icon-style-option, .prayer-stats-tab, .cal-filter-pill, .music-cat, .music-track, .flashcard-deck, .flashcard-mini-study, .cal-event-item, .study-subject-delete, .dash-study-check, .repeat-day")) {
-                        target.classList.add('animate-press');
-                        setTimeout(() => target.classList.remove('animate-press'), 120);
-                        return;
-                    }
-
-                    // Checkboxes get press animation
-                    if (target.matches('input[type="checkbox"]')) {
-                        target.classList.add('animate-press');
-                        setTimeout(() => target.classList.remove('animate-press'), 120);
-                        return;
-                    }
-
-                    // Links in nav/headers
-                    if (target.closest(".header-actions, .tabs, .settings-card")) {
-                        target.classList.add('animate-press');
-                        setTimeout(() => target.classList.remove('animate-press'), 120);
-                    }
-                }, { passive: true });
-            }
-
-            autoAttachAnimations();
-
             // Expose render function for language changes
             window._renderHapticUI = renderHapticToggleUI;
 
         })();
 
         /* ===================================================================== */
+
+        renderCalendar();
+
+        loadPrayerTimes();
+
+        updateStats();
+
+        checkIOSNotificationEnvironment();
+        
+        renderPushSettingsUI();
+        
+        // Initial sync of settings to worker
+        if (pushSettings.masterEnabled) {
+            syncPushPreferences();
+        }
 
         requestAnimationFrame(() => {
 
@@ -16022,12 +15939,6 @@ document.documentElement.classList.toggle(
                             allCompleted[todayKey].push(subjectName);
                         }
                         if (window.Haptics) window.Haptics.success();
-                        // Trigger completion animation on the subject row
-                        const subjectRow = cb.closest('.study-subject');
-                        if (subjectRow) {
-                            subjectRow.classList.add('just-completed');
-                            setTimeout(() => subjectRow.classList.remove('just-completed'), 600);
-                        }
                     } else {
                         allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
                         if (window.Haptics) window.Haptics.tap();
@@ -16145,12 +16056,6 @@ document.documentElement.classList.toggle(
                             allCompleted[todayKey].push(subjectName);
                         }
                         if (window.Haptics) window.Haptics.success();
-                        // Trigger completion animation on the subject row
-                        const subjectRow = cb.closest('.dash-study-subject');
-                        if (subjectRow) {
-                            subjectRow.classList.add('just-completed');
-                            setTimeout(() => subjectRow.classList.remove('just-completed'), 600);
-                        }
                     } else {
                         allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
                         if (window.Haptics) window.Haptics.tap();
@@ -16594,45 +16499,7 @@ document.documentElement.classList.toggle(
             musicAudio.addEventListener("playing", () => {
                 musicClearAutoplayBanner();
                 musicUpdatePlayBtn();
-                setMediaSessionMetadata();
             });
-
-            // Also try on 'play' event for iOS
-            musicAudio.addEventListener("play", () => {
-                setMediaSessionMetadata();
-            });
-
-            function setMediaSessionMetadata() {
-                if (!("mediaSession" in navigator) || !musicCurrentTrackId) return;
-                const track = musicTrackById(musicCurrentTrackId);
-                if (!track) return;
-
-                // Use the actual app icons referenced in the HTML head
-                // These are the actual app logo files (apple-touch-icon.png, icon-192.png)
-                const iconUrls = [
-                    'icons/icon-192.png',
-                    'icons/apple-touch-icon.png',
-                    'icons/icon-512.png'
-                ];
-
-                console.log("[MediaSession] Setting metadata for:", track.title);
-
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title,
-                    artist: track.layerText || musicCategoryLabel(track.category),
-                    artwork: [
-                        { src: iconUrls[0], sizes: '192x192', type: 'image/png' },
-                        { src: iconUrls[1], sizes: '180x180', type: 'image/png' },
-                        { src: iconUrls[2], sizes: '512x512', type: 'image/png' }
-                    ]
-                });
-
-                // Set action handlers for lock screen controls
-                navigator.mediaSession.setActionHandler('play', () => musicAudio.play().catch(() => {}));
-                navigator.mediaSession.setActionHandler('pause', () => musicAudio.pause());
-                navigator.mediaSession.setActionHandler('previoustrack', () => musicStep(-1, false));
-                navigator.mediaSession.setActionHandler('nexttrack', () => musicStep(1, false));
-            }
 
             musicAudio.addEventListener("pause", () => {
                 musicUpdatePlayBtn();
@@ -16959,10 +16826,6 @@ document.documentElement.classList.toggle(
             musicRenderPlayer("loading");
             musicUpdateMini();
 
-            // Set Media Session metadata when playback ACTUALLY starts (not on load)
-// iOS only shows artwork if metadata is set during/after "playing" event
-// This will be handled in the "playing" event listener below
-
             try {
 
                 audio.pause();
@@ -17064,7 +16927,7 @@ document.documentElement.classList.toggle(
             musicRenderProgress();
         }
 
-        function musicPlayPause(playBtn) {
+        function musicPlayPause() {
 
             if (!musicCurrentTrackId) {
 
@@ -17080,12 +16943,6 @@ document.documentElement.classList.toggle(
             }
 
             const audio = musicGetAudio();
-
-            // Pulse animation on play button
-            if (playBtn) {
-                playBtn.classList.add('animate-pulse');
-                setTimeout(() => playBtn.classList.remove('animate-pulse'), 600);
-            }
 
             if (audio.paused) {
 
@@ -17535,7 +17392,7 @@ document.documentElement.classList.toggle(
                 "click",
                 () => {
                     if (window.Haptics) window.Haptics.tap();
-                    musicPlayPause(musicEls.playBtn);
+                    musicPlayPause();
                 }
             );
         }
@@ -17544,8 +17401,6 @@ document.documentElement.classList.toggle(
 
             musicEls.prevBtn.addEventListener("click", () => {
                 if (window.Haptics) window.Haptics.selection();
-                musicEls.prevBtn.classList.add('animate-press');
-                setTimeout(() => musicEls.prevBtn.classList.remove('animate-press'), 120);
                 musicStep(-1, false);
             });
         }
@@ -17554,8 +17409,6 @@ document.documentElement.classList.toggle(
 
             musicEls.nextBtn.addEventListener("click", () => {
                 if (window.Haptics) window.Haptics.selection();
-                musicEls.nextBtn.classList.add('animate-press');
-                setTimeout(() => musicEls.nextBtn.classList.remove('animate-press'), 120);
                 musicStep(1, false);
             });
         }
@@ -17570,8 +17423,6 @@ document.documentElement.classList.toggle(
             musicEls.shuffleBtn.addEventListener("click", () => {
 
                 if (window.Haptics) window.Haptics.selection();
-                musicEls.shuffleBtn.classList.add('animate-press');
-                setTimeout(() => musicEls.shuffleBtn.classList.remove('animate-press'), 120);
                 musicPrefs.shuffle = !musicPrefs.shuffle;
                 musicEls.shuffleBtn.classList.toggle(
                     "toggle-off",
@@ -17600,8 +17451,6 @@ document.documentElement.classList.toggle(
             musicEls.repeatBtn.addEventListener("click", () => {
 
                 if (window.Haptics) window.Haptics.selection();
-                musicEls.repeatBtn.classList.add('animate-press');
-                setTimeout(() => musicEls.repeatBtn.classList.remove('animate-press'), 120);
                 musicPrefs.repeat = !musicPrefs.repeat;
                 musicEls.repeatBtn.classList.toggle(
                     "toggle-off",
