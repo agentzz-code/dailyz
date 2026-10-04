@@ -631,135 +631,14 @@
         /* SECTIONS */
 
         .section {
-            position: relative;
             display: none;
             max-width: 700px;
             margin: 0 auto;
             padding-bottom: 40px;
-            background: transparent;
         }
 
         .section.active {
             display: block;
-        }
-
-        /* Study section - contains live wallpaper background */
-        #study.section {
-            overflow: hidden;
-            background: transparent !important;
-        }
-        #study.section .study-wallpaper {
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            overflow: hidden;
-            pointer-events: none;
-        }
-        #study.section .study-wallpaper .wallpaper-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        #study.section .study-wallpaper .wallpaper-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(0,0,0,.15), rgba(0,0,0,.3));
-        }
-        #study.section .study-wallpaper .wallpaper-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            left: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            pointer-events: auto;
-            z-index: 2;
-        }
-        #study.section .study-wallpaper .wallpaper-cat-btn {
-            width: 40px;
-            height: 40px;
-            border: 0;
-            border-radius: 12px;
-            background: rgba(255,255,255,.95);
-            color: #333;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 2px 12px rgba(0,0,0,.15);
-            transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
-        }
-        #study.section .study-wallpaper .wallpaper-cat-btn:hover,
-        #study.section .study-wallpaper .wallpaper-cat-btn.active {
-            background: var(--accent);
-            color: var(--accent-contrast);
-            transform: scale(1.1);
-            box-shadow: 0 4px 16px rgba(0,0,0,.2);
-        }
-        .dark #study.section .study-wallpaper .wallpaper-cat-btn {
-            background: rgba(255,255,255,.2);
-            color: #f0f0f0;
-        }
-        .dark #study.section .study-wallpaper .wallpaper-cat-btn:hover,
-        .dark #study.section .study-wallpaper .wallpaper-cat-btn.active {
-            box-shadow: 0 4px 20px rgba(0,0,0,.3);
-        }
-        #study.section .study-wallpaper .wallpaper-fullscreen-btn {
-            width: 48px;
-            height: 48px;
-            border: 0;
-            border-radius: 14px;
-            background: rgba(255,255,255,.95);
-            color: #111;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 24px rgba(0,0,0,.2);
-            transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
-        }
-        #study.section .study-wallpaper .wallpaper-fullscreen-btn:hover {
-            background: var(--accent);
-            color: var(--accent-contrast);
-            transform: scale(1.05);
-            box-shadow: 0 8px 28px rgba(0,0,0,.25);
-        }
-        .dark #study.section .study-wallpaper .wallpaper-fullscreen-btn {
-            background: rgba(255,255,255,.2);
-            color: #fff;
-        }
-        .dark #study.section .study-wallpaper .wallpaper-fullscreen-btn:hover {
-            box-shadow: 0 8px 28px rgba(0,0,0,.4);
-        }
-
-        /* Ensure study section content sits above wallpaper */
-        #study.section > *:not(.study-wallpaper) {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Study goal/progress/timer cards - subtle glassmorphism over wallpaper */
-        #study.section .study-goal-card,
-        #study.section .study-progress-card,
-        #study.section .study-timer-card,
-        #study.section .study-progress-card,
-        #study.section .study-subject-list .study-subject,
-        #study.section .study-music-launch,
-        #study.section .study-mini-player,
-        #study.section .study-stats-launch {
-            background: rgba(255,255,255,.85) !important;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,.2);
-        }
-        .dark #study.section .study-goal-card,
-        .dark #study.section .study-progress-card,
-        .dark #study.section .study-timer-card,
-        .dark #study.section .study-progress-card,
-        .dark #study.section .study-subject-list .study-subject,
-        .dark #study.section .study-music-launch,
-        .dark #study.section .study-mini-player,
-        .dark #study.section .study-stats-launch {
-            background: rgba(30,30,30,.9) !important;
-            border: 1px solid rgba(255,255,255,.1);
         }
 
         /* TODAY DASHBOARD STYLES */
@@ -3062,99 +2941,10 @@
 
         /* Now playing / player card */
         .music-player-card {
-            position: relative;
             background: rgba(255,255,255,.92);
             border-radius: 18px;
             padding: 18px;
             margin-bottom: 15px;
-            overflow: hidden;
-        }
-        .dark .music-player-card { background: #222; }
-
-        /* Study section live wallpaper */
-        .study-wallpaper {
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            border-radius: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-        .study-wallpaper .wallpaper-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .study-wallpaper .wallpaper-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(0,0,0,.1), rgba(0,0,0,.2));
-        }
-        .study-wallpaper .wallpaper-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            left: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            pointer-events: auto;
-            z-index: 2;
-        }
-        .study-wallpaper .wallpaper-cat-btn {
-            width: 40px;
-            height: 40px;
-            border: 0;
-            border-radius: 12px;
-            background: rgba(255,255,255,.9);
-            color: #333;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 2px 12px rgba(0,0,0,.15);
-            transition: transform .15s ease, background .15s ease;
-        }
-        .study-wallpaper .wallpaper-cat-btn:hover,
-        .study-wallpaper .wallpaper-cat-btn.active {
-            background: var(--accent);
-            color: var(--accent-contrast);
-            transform: scale(1.1);
-        }
-        .dark .study-wallpaper .wallpaper-cat-btn {
-            background: rgba(255,255,255,.15);
-            color: #eee;
-        }
-        .study-wallpaper .wallpaper-fullscreen-btn {
-            width: 48px;
-            height: 48px;
-            border: 0;
-            border-radius: 14px;
-            background: rgba(255,255,255,.95);
-            color: #111;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 6px 24px rgba(0,0,0,.2);
-            transition: transform .15s ease, background .15s ease;
-        }
-        .study-wallpaper .wallpaper-fullscreen-btn:hover {
-            background: var(--accent);
-            color: var(--accent-contrast);
-            transform: scale(1.05);
-        }
-        .dark .study-wallpaper .wallpaper-fullscreen-btn {
-            background: rgba(255,255,255,.15);
-            color: #fff;
-        }
-
-        /* Now playing / player card */
-        .music-player-card {
-            position: relative;
-            background: rgba(255,255,255,.92);
-            border-radius: 18px;
-            padding: 18px;
-            margin-bottom: 15px;
-            overflow: hidden;
         }
         .dark .music-player-card { background: #222; }
         .music-now-art {
@@ -5335,27 +5125,6 @@
             id="study"
         >
 
-            <!-- Live Wallpaper Background for Study Section -->
-            <div class="study-wallpaper" id="studyWallpaper">
-                <div class="wallpaper-video-wrap">
-                    <video class="wallpaper-video" id="studyWallpaperVideo" autoplay muted loop playsinline></video>
-                    <div class="wallpaper-overlay"></div>
-                </div>
-                <div class="wallpaper-controls study-wallpaper-controls">
-                    <div class="wallpaper-category-selector" id="studyWallpaperCategorySelector">
-                        <button class="wallpaper-cat-btn active" data-cat="cafe" title="Café ambience">☕</button>
-                        <button class="wallpaper-cat-btn" data-cat="desk" title="Desk study">📝</button>
-                        <button class="wallpaper-cat-btn" data-cat="nature" title="Nature">🌿</button>
-                        <button class="wallpaper-cat-btn" data-cat="forest" title="Forest">🌲</button>
-                    </div>
-                    <button class="wallpaper-fullscreen-btn" id="studyWallpaperFullscreenBtn" aria-label="Fullscreen study mode" title="Fullscreen study mode">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
             <!-- STUDY GOAL -->
 
             <div class="study-goal-card">
@@ -5484,6 +5253,26 @@
 
                 <!-- NOW PLAYING -->
                 <div class="music-player-card" id="musicPlayerCard" style="margin-top:16px;">
+                    <!-- Live Wallpaper Background -->
+                    <div class="live-wallpaper" id="liveWallpaper">
+                        <div class="wallpaper-video-wrap">
+                            <video class="wallpaper-video" id="wallpaperVideo" autoplay muted loop playsinline></video>
+                            <div class="wallpaper-overlay"></div>
+                        </div>
+                        <div class="wallpaper-controls">
+                            <div class="wallpaper-category-selector" id="wallpaperCategorySelector">
+                                <button class="wallpaper-cat-btn active" data-cat="cafe" title="Café ambience">☕</button>
+                                <button class="wallpaper-cat-btn" data-cat="desk" title="Desk study">📝</button>
+                                <button class="wallpaper-cat-btn" data-cat="nature" title="Nature">🌿</button>
+                                <button class="wallpaper-cat-btn" data-cat="forest" title="Forest">🌲</button>
+                            </div>
+                            <button class="wallpaper-fullscreen-btn" id="wallpaperFullscreenBtn" aria-label="Fullscreen study mode" title="Fullscreen study mode">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                     <div class="music-now-art" id="musicNowArt">🎧</div>
                     <div class="music-now-title" id="musicNowTitle">—</div>
                     <div class="music-now-cat" id="musicNowCat"></div>
@@ -18674,53 +18463,6 @@ document.documentElement.classList.toggle(
             if (window.Haptics) window.Haptics.completion();
             // Also finish main timer if running
             if (window.timerFinishSession) window.timerFinishSession();
-        }
-
-        // Study section wallpaper (background for Study section)
-        const studyWallpaperVideo = document.getElementById('studyWallpaperVideo');
-        const studyWallpaperCategorySelector = document.getElementById('studyWallpaperCategorySelector');
-        const studyWallpaperFullscreenBtn = document.getElementById('studyWallpaperFullscreenBtn');
-
-        function setStudyWallpaperVideo(category) {
-            const videos = WALLPAPER_VIDEOS[category] || WALLPAPER_VIDEOS.cafe;
-            let videoIndex = 0;
-
-            function setSource(videoEl, src) {
-                videoEl.pause();
-                videoEl.src = src;
-                videoEl.load();
-                videoEl.play().catch(() => {});
-            }
-
-            setSource(studyWallpaperVideo, videos[0]);
-
-            studyWallpaperVideo.onended = () => {
-                videoIndex = (videoIndex + 1) % videos.length;
-                setSource(studyWallpaperVideo, videos[videoIndex]);
-            };
-        }
-
-        // Initialize study wallpaper
-        setStudyWallpaperVideo('cafe');
-
-        // Study wallpaper category selector
-        if (studyWallpaperCategorySelector) {
-            studyWallpaperCategorySelector.querySelectorAll('.wallpaper-cat-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    studyWallpaperCategorySelector.querySelectorAll('.wallpaper-cat-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    setStudyWallpaperVideo(btn.dataset.cat);
-                    if (window.Haptics) window.Haptics.selection();
-                });
-            });
-        }
-
-        // Study wallpaper fullscreen button
-        if (studyWallpaperFullscreenBtn) {
-            studyWallpaperFullscreenBtn.addEventListener('click', () => {
-                if (window.Haptics) window.Haptics.success();
-                openFullscreenStudy();
-            });
         }
 
         // Open fullscreen study mode
