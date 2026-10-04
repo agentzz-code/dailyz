@@ -1233,43 +1233,6 @@
             }
         }
 
-        /* Immersive Study With Me room — intentionally independent of page cards. */
-        #studyWithMeOverlay { padding: max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left)); }
-        #studyWithMeOverlay.break-mode .swm-bg { filter:hue-rotate(34deg) saturate(.75); }
-        #studyWithMeOverlay.complete-mode .swm-bg { filter:hue-rotate(-22deg) brightness(1.12); }
-        .swm-topbar { min-height:56px; }
-        .swm-date { text-align:center; font-size:12px; opacity:.62; margin-top:3px; }
-        .swm-exit { display:flex; align-items:center; gap:7px; width:auto; padding:0 13px; font-size:12px; font-weight:750; }
-        .swm-main { gap:15px; max-width:760px; }
-        .swm-session-icon { font-size:28px; line-height:1; filter:drop-shadow(0 7px 18px rgba(0,0,0,.25)); }
-        .swm-goal { font-size:14px; opacity:.67; min-height:20px; max-width:90%; }
-        .swm-info { display:flex; justify-content:center; gap:18px; flex-wrap:wrap; font-size:12px; opacity:.67; }
-        .swm-info span { white-space:nowrap; }
-        .swm-controls { margin-top:8px; }
-        .swm-utility { position:absolute; bottom:max(18px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:3; }
-        .swm-utility button { min-width:46px; height:44px; padding:0 12px; border-radius:15px; border:1px solid rgba(255,255,255,.13); background:rgba(12,16,28,.34); color:#fff; font-size:16px; backdrop-filter:blur(14px); }
-        .swm-panel { position:absolute; z-index:8; right:max(18px,env(safe-area-inset-right)); bottom:76px; width:min(350px,calc(100vw - 36px)); padding:18px; border:1px solid rgba(255,255,255,.16); border-radius:22px; background:rgba(15,18,30,.78); box-shadow:0 20px 70px rgba(0,0,0,.35); backdrop-filter:blur(24px); display:none; }
-        .swm-panel.open { display:block; animation:swmPanelIn .2s ease-out; }
-        .swm-panel h3 { margin:0 0 11px; font-size:15px; }
-        .swm-notes { display:block; width:100%; min-height:150px; resize:vertical; box-sizing:border-box; border:1px solid rgba(255,255,255,.14); border-radius:14px; padding:12px; background:rgba(255,255,255,.08); color:#fff; font:inherit; line-height:1.5; }
-        .swm-panel-close { float:right; border:0; background:transparent; color:#fff; font-size:19px; }
-        .swm-sound-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-        .swm-sound-options button { border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px; color:#fff; background:rgba(255,255,255,.08); font:inherit; text-align:left; }
-        .swm-sound-options button.active { background:rgba(255,255,255,.92); color:#10131c; }
-        .swm-overlay { position:absolute; inset:0; z-index:10; display:none; place-items:center; padding:20px; background:rgba(5,7,13,.38); backdrop-filter:blur(9px); }
-        .swm-overlay.open { display:grid; }
-        .swm-dialog { width:min(430px,100%); text-align:center; padding:32px 25px; border:1px solid rgba(255,255,255,.18); border-radius:28px; background:rgba(20,24,38,.85); box-shadow:0 24px 80px rgba(0,0,0,.38); }
-        .swm-dialog-icon { font-size:42px; margin-bottom:10px; }
-        .swm-dialog h2 { margin:0; font-size:23px; letter-spacing:-.5px; }
-        .swm-dialog p { opacity:.72; line-height:1.5; }
-        .swm-dialog-time { font-size:56px; font-weight:850; font-variant-numeric:tabular-nums; margin:10px 0; }
-        .swm-dialog-actions { display:flex; justify-content:center; gap:10px; margin-top:21px; }
-        .swm-dialog-actions button { min-height:48px; border:0; border-radius:15px; padding:0 17px; font-weight:800; }
-        .swm-dialog-actions .primary { background:#fff; color:#10131c; }
-        .swm-dialog-actions .soft { background:rgba(255,255,255,.12); color:#fff; }
-        @keyframes swmPanelIn { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:none; } }
-        @media (max-width:480px) { .swm-clock { font-size:13px; } .swm-exit span { display:none; } .swm-main { margin:auto; } .swm-info { gap:10px; } .swm-utility { width:calc(100% - 36px); justify-content:center; } .swm-utility button { flex:1; max-width:76px; } }
-
         /* PRIORITY */
 
         .priority-select {
@@ -3589,49 +3552,6 @@
             opacity: .45;
         }
 
-        /* Disabled duplicate source retained for the surrounding CSS layout.
-        /* Immersive Study With Me room. This is presentation only: timerStart,
-           timerFinishSession, session storage and Firestore remain the source of truth. * /
-        (function immersiveStudyRoom() {
-            const $ = id => document.getElementById(id);
-            const overlay = $("studyWithMeOverlay"), launch = $("studyWithMeLaunch"), dialog = $("studyWithMeDialog"), dialogContent = $("studyWithMeDialogContent");
-            if (!overlay || !launch) return;
-            const els = { close:$("studyWithMeClose"), clock:$("studyWithMeClock"), date:$("studyWithMeDate"), time:$("studyWithMeTimer"), subject:$("studyWithMeSubject"), goal:$("studyWithMeGoal"), status:$("studyWithMeStatus"), progress:$("studyWithMeProgress"), pause:$("studyWithMePause"), finish:$("studyWithMeFinish"), duration:$("studyWithMeDuration"), streak:$("studyWithMeStreak"), icon:$("studyWithMeIcon"), notes:$("studyWithMeNotesPanel"), notesText:$("studyWithMeNotesText"), sound:$("studyWithMeSoundPanel"), music:$("studyWithMeMusic") };
-            let open = false, tick = null, clockTick = null, phase = "focus", manualFinish = false, savedFocusDuration = 0, atmosphere = 0;
-            const noteKey = "dailykrd_study_room_notes";
-            const labels = { exit:"Exit", confirmExit:"Leave the study room?", keep:"Keep studying", leave:"Leave room", complete:"Session complete", studyAgain:"Study again", done:"Done", break:"Break time", skipBreak:"Skip break", ready:"Ready to focus again?", startFocus:"Start focus", finished:"Break finished", goal:"Today’s goal", duration:"Session", focus:"Focus session" };
-            function locale() { return currentLanguage === "ku" ? "ar-IQ" : currentLanguage === "ar" ? "ar-IQ" : "en-US"; }
-            function remaining() { return timerState === "running" ? Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)) : timerState === "paused" ? timerPausedRemaining : timerDuration; }
-            function activeTimerStart() { if (timerState === "idle") timerStart(); else if (timerState === "paused" || timerState === "running") timerStart(); }
-            function updateClock() { const now=new Date(); els.clock.textContent=now.toLocaleTimeString(locale(),{hour:"2-digit",minute:"2-digit"}); els.date.textContent=typeof formatDateKey === "function" ? formatDateKey(getTodayKey()) : now.toLocaleDateString(locale(),{weekday:"long",month:"long",day:"numeric"}); }
-            function studyStreak() { const data=JSON.parse(localStorage.getItem("dailykrd_study_minutes")||"{}"); let n=0,d=new Date(); while (n<365 && data[d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")]>0) { n++; d.setDate(d.getDate()-1); } return n; }
-            function render() { if (!open) return; const left=remaining(), total=Math.max(1,timerDuration); els.time.textContent=timerFormat(left); els.progress.style.transform="scaleX("+Math.max(0,Math.min(1,left/total))+")"; if (phase === "break") { els.icon.textContent="☕"; els.subject.textContent=labels.break; els.goal.textContent="Relax for a few minutes."; els.status.textContent=timerState === "paused" ? t("studyWithMePaused") : labels.break; els.duration.textContent="☕ 5 min"; els.streak.textContent=""; }
-                else { const subject=timerSubjectSel.value?.trim() || labels.focus, goal=loadStudyGoal(); els.icon.textContent="📚"; els.subject.textContent=subject; els.goal.textContent=goal>0?"🎯 "+labels.goal+": "+goal+" min":""; els.status.textContent=timerState === "running" ? t("studyWithMeRunning") : timerState === "paused" ? t("studyWithMePaused") : t("studyWithMeReady"); els.duration.textContent="⏱️ "+labels.duration+": "+timerFormat(timerDuration); els.streak.textContent="🔥 "+studyStreak()+" day streak"; }
-                els.pause.textContent=timerState === "running" ? t("studyWithMePause") : t("studyWithMeResume"); const opt=document.getElementById("studyTimerMusic")?.selectedOptions?.[0]; els.music.textContent=opt&&opt.value?"♪ "+opt.textContent.trim():""; }
-            function showDialog(html) { dialogContent.innerHTML=html; dialog.classList.add("open"); }
-            function hideDialog() { dialog.classList.remove("open"); }
-            function openRoom() { open=true; phase="focus"; overlay.classList.add("open"); overlay.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden"; els.notesText.value=localStorage.getItem(noteKey)||""; updateClock(); render(); clearInterval(tick); clearInterval(clockTick); tick=setInterval(render,250); clockTick=setInterval(updateClock,1000); }
-            function closeRoom() { open=false; overlay.classList.remove("open","break-mode","complete-mode"); overlay.setAttribute("aria-hidden","true"); document.body.style.overflow=""; clearInterval(tick); clearInterval(clockTick); hideDialog(); els.notes.classList.remove("open"); els.sound.classList.remove("open"); }
-            function requestExit() { if (timerState === "running" || timerState === "paused") showDialog('<div class="swm-dialog-icon">🌙</div><h2>'+labels.confirmExit+'</h2><p>Your timer will keep running in Daily.KRD.</p><div class="swm-dialog-actions"><button class="soft" data-room-action="keep">'+labels.keep+'</button><button class="primary" data-room-action="leave">'+labels.leave+'</button></div>'); else closeRoom(); }
-            function startBreak() { phase="break"; overlay.classList.add("break-mode"); timerDuration=5*60; timerPausedRemaining=0; timerState="idle"; timerStart(); render(); }
-            function finishOverlay() { const mins=Math.max(0,Math.round(savedFocusDuration/60)); overlay.classList.add("complete-mode"); showDialog('<div class="swm-dialog-icon">🎉</div><h2>'+labels.complete+'</h2><div class="swm-dialog-time">'+timerFormat(savedFocusDuration)+'</div><p>'+((timerSubjectSel.value||labels.focus))+'<br>🎯 '+(loadStudyGoal()||"—")+' min '+labels.goal+'</p><p>⭐ +'+mins+' XP &nbsp; 🔥 '+studyStreak()+' Day Streak</p><div class="swm-dialog-actions"><button class="soft" data-room-action="again">'+labels.studyAgain+'</button><button class="primary" data-room-action="done">'+labels.done+'</button></div>'); }
-            window.studyWithMeHandleTimerCompletion = function() { if (!open || phase !== "break") return false; clearInterval(timerInterval); timerInterval=null; timerState="idle"; timerPausedRemaining=0; timerDuration=savedFocusDuration||25*60; document.title="Daily.KRD"; showDialog('<div class="swm-dialog-icon">☕</div><h2>'+labels.finished+'</h2><p>'+labels.ready+'</p><div class="swm-dialog-actions"><button class="primary" data-room-action="focus">'+labels.startFocus+'</button><button class="soft" data-room-action="done">'+labels.done+'</button></div>'); return true; };
-            window.studyWithMeFinishCleanup = function() { if (!open) return; savedFocusDuration=timerDuration; if (manualFinish) { manualFinish=false; finishOverlay(); } else startBreak(); };
-            launch.addEventListener("click",()=>{ if (timerState === "idle") { savedFocusDuration=timerDuration; } openRoom(); if (timerState === "idle") timerStart(); });
-            els.close.addEventListener("click",requestExit); els.pause.addEventListener("click",()=>{ activeTimerStart(); render(); });
-            els.finish.addEventListener("click",()=>{ if (timerState === "idle") return requestExit(); if (timerState === "running") { timerPausedRemaining=remaining(); timerState="paused"; } manualFinish=true; savedFocusDuration=timerDuration; timerFinishSession(); });
-            $("studyWithMeNotes").addEventListener("click",()=>{ els.sound.classList.remove("open"); els.notes.classList.toggle("open"); if (els.notes.classList.contains("open")) els.notesText.focus(); });
-            $("studyWithMeSound").addEventListener("click",()=>{ els.notes.classList.remove("open"); els.sound.classList.toggle("open"); });
-            $("studyWithMeTheme").addEventListener("click",()=>{ atmosphere=(atmosphere+1)%3; overlay.style.setProperty("--swm-tone",atmosphere); overlay.style.filter=atmosphere===1?"hue-rotate(24deg)":atmosphere===2?"hue-rotate(-25deg)":""; });
-            els.notesText.addEventListener("input",()=>localStorage.setItem(noteKey,els.notesText.value));
-            overlay.querySelectorAll("[data-swm-close]").forEach(b=>b.addEventListener("click",()=>{ els.notes.classList.remove("open"); els.sound.classList.remove("open"); }));
-            $("studyWithMeSoundOptions").addEventListener("click",e=>{ const b=e.target.closest("button[data-sound]"); if(!b)return; const sel=document.getElementById("studyTimerMusic"), choice=b.dataset.sound; if(sel){ const match=[...sel.options].find(o=>o.value.toLowerCase().includes(choice)||o.textContent.toLowerCase().includes(choice)); sel.value=choice&&match?match.value:""; sel.dispatchEvent(new Event("change")); if(choice && window._musicHooks) window._musicHooks.forTimerStart(sel.value); if(!choice && window._musicHooks) window._musicHooks.forTimerStop(); } els.sound.querySelectorAll("button").forEach(x=>x.classList.remove("active")); b.classList.add("active"); render(); });
-            dialog.addEventListener("click",e=>{ const a=e.target.closest("[data-room-action]")?.dataset.roomAction; if(!a)return; if(a==="keep")hideDialog(); if(a==="leave"||a==="done")closeRoom(); if(a==="again"||a==="focus"){ hideDialog(); overlay.classList.remove("complete-mode","break-mode"); phase="focus"; timerDuration=savedFocusDuration||25*60; timerPausedRemaining=0; timerState="idle"; timerStart(); render(); } });
-            document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&open) requestExit(); });
-            window._renderStudyWithMe=render;
-        })();
-
-        */
         /* FLASHCARDS */
         .flashcard-deck {
             display: flex;
@@ -5491,16 +5411,14 @@
             <div class="swm-bg"></div>
 
             <div class="swm-topbar">
-                <button class="swm-icon-btn swm-exit" id="studyWithMeClose" type="button" aria-label="Leave session">× <span>Exit</span></button>
-                <div><div class="swm-clock" id="studyWithMeClock">--:--</div><div class="swm-date" id="studyWithMeDate"></div></div>
+                <button class="swm-icon-btn" id="studyWithMeClose" type="button" aria-label="Leave session">×</button>
+                <div class="swm-clock" id="studyWithMeClock">--:--</div>
                 <div class="swm-top-spacer" aria-hidden="true"></div>
             </div>
 
             <div class="swm-main">
                 <div class="swm-eyebrow" id="studyWithMeEyebrow">STUDY WITH ME</div>
-                <div class="swm-session-icon" id="studyWithMeIcon">📚</div>
                 <div class="swm-subject" id="studyWithMeSubject">Focus Session</div>
-                <div class="swm-goal" id="studyWithMeGoal"></div>
                 <div class="swm-timer" id="studyWithMeTimer">25:00</div>
                 <div class="swm-status" id="studyWithMeStatus">Ready to focus</div>
 
@@ -5509,7 +5427,6 @@
                 </div>
 
                 <div class="swm-music" id="studyWithMeMusic"></div>
-                <div class="swm-info"><span id="studyWithMeDuration"></span><span id="studyWithMeStreak"></span></div>
 
                 <div class="swm-controls">
                     <button class="swm-control primary" id="studyWithMePause" type="button">Pause</button>
@@ -5520,14 +5437,6 @@
             <div class="swm-bottom">
                 <div class="swm-tip" id="studyWithMeTip">Stay focused. You can leave this screen and your timer will keep running.</div>
             </div>
-            <div class="swm-utility" aria-label="Study room controls">
-                <button id="studyWithMeSound" type="button" title="Ambience">🔊</button>
-                <button id="studyWithMeTheme" type="button" title="Change atmosphere">🌙</button>
-                <button id="studyWithMeNotes" type="button" title="Notes">📝</button>
-            </div>
-            <aside class="swm-panel" id="studyWithMeNotesPanel" aria-label="Session notes"><button class="swm-panel-close" data-swm-close="notes" type="button">×</button><h3>📝 Notes</h3><textarea class="swm-notes" id="studyWithMeNotesText" placeholder="Review chapter 5 later."></textarea></aside>
-            <aside class="swm-panel" id="studyWithMeSoundPanel" aria-label="Ambience"><button class="swm-panel-close" data-swm-close="sound" type="button">×</button><h3>🔊 Ambience</h3><div class="swm-sound-options" id="studyWithMeSoundOptions"><button data-sound="">🔇 None</button><button data-sound="rain">🌧️ Rain</button><button data-sound="ambient">🌌 Ambient</button><button data-sound="nature">🌿 Nature</button></div></aside>
-            <div class="swm-overlay" id="studyWithMeDialog" role="dialog" aria-modal="true"><div class="swm-dialog" id="studyWithMeDialogContent"></div></div>
         </div>
 
 
@@ -18475,11 +18384,6 @@ document.documentElement.classList.toggle(
         }
 
         function timerFinishSession() {
-            /* A Study With Me break uses this same countdown state, but is not
-               a study session and therefore must never be written to stats. */
-            try {
-                if (typeof window.studyWithMeHandleTimerCompletion === "function" && window.studyWithMeHandleTimerCompletion()) return;
-            } catch (e) {}
             clearInterval(timerInterval);
             timerInterval = null;
             const elapsed = Math.round(timerDuration - timerPausedRemaining);
@@ -18635,9 +18539,6 @@ document.documentElement.classList.toggle(
             const tipEl = document.getElementById("studyWithMeTip");
 
             if (!overlay || !launch) return;
-            /* Superseded by the immersive room controller below. Kept here so
-               legacy integrations remain in the file without a second timer. */
-            return;
 
             let clockInterval = null;
             let uiInterval = null;
@@ -20688,32 +20589,5 @@ document.documentElement.classList.toggle(
         });
     </script>
 
-<script>
-/* Final Study With Me room controller. It intentionally calls the existing timer
-   functions, so completed focus sessions retain the app's existing save path. */
-(() => {
- const q=id=>document.getElementById(id), o=q('studyWithMeOverlay'), launch=q('studyWithMeLaunch'); if(!o||!launch)return;
- const e={close:q('studyWithMeClose'),clock:q('studyWithMeClock'),date:q('studyWithMeDate'),time:q('studyWithMeTimer'),subject:q('studyWithMeSubject'),goal:q('studyWithMeGoal'),status:q('studyWithMeStatus'),progress:q('studyWithMeProgress'),pause:q('studyWithMePause'),finish:q('studyWithMeFinish'),duration:q('studyWithMeDuration'),streak:q('studyWithMeStreak'),icon:q('studyWithMeIcon'),notes:q('studyWithMeNotesPanel'),notesText:q('studyWithMeNotesText'),sound:q('studyWithMeSoundPanel'),music:q('studyWithMeMusic'),dialog:q('studyWithMeDialog'),dialogContent:q('studyWithMeDialogContent')};
- let open=false,phase='focus',manual=false,focusDuration=0,clockInt,renderInt;
- const noteKey='dailykrd_study_room_notes', L={focus:'Focus session',break:'Break time',goal:'Today’s goal',complete:'Session complete',again:'Study again',done:'Done',exit:'Leave the study room?',keep:'Keep studying',leave:'Leave room',ready:'Ready to focus again?',start:'Start focus',breakDone:'Break finished'};
- const left=()=>timerState==='running'?Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)):timerState==='paused'?timerPausedRemaining:timerDuration;
- const locale=()=>currentLanguage==='en'?'en-US':'ar-IQ';
- function streak(){const x=JSON.parse(localStorage.getItem('dailykrd_study_minutes')||'{}');let n=0,d=new Date;while(n<365&&x[d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')]>0){n++;d.setDate(d.getDate()-1)}return n}
- function clock(){const d=new Date;e.clock.textContent=d.toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit'});e.date.textContent=typeof formatDateKey==='function'?formatDateKey(getTodayKey()):d.toLocaleDateString(locale(),{weekday:'long',month:'long',day:'numeric'})}
- function render(){if(!open)return;const r=left(),total=Math.max(1,timerDuration);e.time.textContent=timerFormat(r);e.progress.style.transform='scaleX('+Math.max(0,Math.min(1,r/total))+')';if(phase==='break'){e.icon.textContent='☕';e.subject.textContent=L.break;e.goal.textContent='Relax for a few minutes.';e.status.textContent=timerState==='paused'?t('studyWithMePaused'):L.break;e.duration.textContent='☕ 5 min';e.streak.textContent=''}else{const g=loadStudyGoal();e.icon.textContent='📚';e.subject.textContent=timerSubjectSel.value?.trim()||L.focus;e.goal.textContent=g?'🎯 '+L.goal+': '+g+' min':'';e.status.textContent=timerState==='running'?t('studyWithMeRunning'):timerState==='paused'?t('studyWithMePaused'):t('studyWithMeReady');e.duration.textContent='⏱️ Session: '+timerFormat(timerDuration);e.streak.textContent='🔥 '+streak()+' day streak'}e.pause.textContent=timerState==='running'?t('studyWithMePause'):t('studyWithMeResume')}
- function show(html){e.dialogContent.innerHTML=html;e.dialog.classList.add('open')} function hide(){e.dialog.classList.remove('open')}
- function openRoom(){open=true;phase='focus';o.classList.add('open');o.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';e.notesText.value=localStorage.getItem(noteKey)||'';clock();render();clearInterval(clockInt);clearInterval(renderInt);clockInt=setInterval(clock,1000);renderInt=setInterval(render,250)}
- function close(){open=false;o.classList.remove('open','break-mode','complete-mode');o.setAttribute('aria-hidden','true');document.body.style.overflow='';clearInterval(clockInt);clearInterval(renderInt);hide();e.notes.classList.remove('open');e.sound.classList.remove('open')}
- function exit(){if(timerState==='running'||timerState==='paused')show('<div class="swm-dialog-icon">🌙</div><h2>'+L.exit+'</h2><p>Your timer keeps running in Daily.KRD.</p><div class="swm-dialog-actions"><button class="soft" data-a="keep">'+L.keep+'</button><button class="primary" data-a="leave">'+L.leave+'</button></div>');else close()}
- function beginBreak(){phase='break';o.classList.add('break-mode');timerDuration=300;timerPausedRemaining=0;timerState='idle';timerStart();render()}
- function completion(){const m=Math.round(focusDuration/60);o.classList.add('complete-mode');show('<div class="swm-dialog-icon">🎉</div><h2>'+L.complete+'</h2><div class="swm-dialog-time">'+timerFormat(focusDuration)+'</div><p>'+((timerSubjectSel.value)||L.focus)+'<br>🎯 '+(loadStudyGoal()||'—')+' min '+L.goal+'</p><p>⭐ +'+m+' XP &nbsp; 🔥 '+streak()+' Day Streak</p><div class="swm-dialog-actions"><button class="soft" data-a="again">'+L.again+'</button><button class="primary" data-a="done">'+L.done+'</button></div>')}
- window.studyWithMeHandleTimerCompletion=()=>{if(!open||phase!=='break')return false;clearInterval(timerInterval);timerInterval=null;timerState='idle';timerPausedRemaining=0;timerDuration=focusDuration||1500;document.title='Daily.KRD';show('<div class="swm-dialog-icon">☕</div><h2>'+L.breakDone+'</h2><p>'+L.ready+'</p><div class="swm-dialog-actions"><button class="primary" data-a="focus">'+L.start+'</button><button class="soft" data-a="done">'+L.done+'</button></div>');return true};
- window.studyWithMeFinishCleanup=()=>{if(!open)return;focusDuration=timerDuration;if(manual){manual=false;completion()}else beginBreak()};
- launch.addEventListener('click',()=>{if(timerState==='idle')focusDuration=timerDuration;openRoom();if(timerState==='idle')timerStart()}); e.close.onclick=exit;e.pause.onclick=()=>{timerStart();render()};e.finish.onclick=()=>{if(timerState==='idle')return exit();if(timerState==='running'){timerPausedRemaining=left();timerState='paused'}manual=true;focusDuration=timerDuration;timerFinishSession()};
- q('studyWithMeNotes').onclick=()=>{e.sound.classList.remove('open');e.notes.classList.toggle('open');if(e.notes.classList.contains('open'))e.notesText.focus()};q('studyWithMeSound').onclick=()=>{e.notes.classList.remove('open');e.sound.classList.toggle('open')};q('studyWithMeTheme').onclick=()=>{o.classList.toggle('complete-mode')};e.notesText.oninput=()=>localStorage.setItem(noteKey,e.notesText.value);o.querySelectorAll('[data-swm-close]').forEach(b=>b.onclick=()=>{e.notes.classList.remove('open');e.sound.classList.remove('open')});
- q('studyWithMeSoundOptions').onclick=ev=>{const b=ev.target.closest('[data-sound]');if(!b)return;const s=q('studyTimerMusic'),v=b.dataset.sound;if(s){const x=[...s.options].find(a=>a.value.toLowerCase().includes(v)||a.textContent.toLowerCase().includes(v));s.value=v&&x?x.value:'';s.dispatchEvent(new Event('change'));if(v)window._musicHooks?.forTimerStart(s.value);else window._musicHooks?.forTimerStop()}e.sound.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active')};
- e.dialog.onclick=ev=>{const a=ev.target.closest('[data-a]')?.dataset.a;if(!a)return;if(a==='keep')hide();if(a==='leave'||a==='done')close();if(a==='again'||a==='focus'){hide();o.classList.remove('complete-mode','break-mode');phase='focus';timerDuration=focusDuration||1500;timerPausedRemaining=0;timerState='idle';timerStart();render()}};document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&open)exit()});window._renderStudyWithMe=render;
-})();
-</script>
 </body>
 </html>
