@@ -3201,6 +3201,18 @@
             pointer-events: none;
             z-index: 1;
         }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
         .wallpaper-controls {
             position: absolute;
             top: 12px;
@@ -3211,6 +3223,14 @@
             align-items: flex-start;
             pointer-events: auto;
             z-index: 2;
+        }
+        .wallpaper-fullscreen-btn {
+            pointer-events: auto;
+            z-index: 3;
+        }
+        .wallpaper-category-selector {
+            pointer-events: auto;
+            z-index: 3;
         }
         .wallpaper-category-selector {
             display: flex;
@@ -3343,6 +3363,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            pointer-events: none;
         }
         .fullscreen-study-overlay {
             position: absolute;
@@ -3350,6 +3371,129 @@
             background: linear-gradient(135deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
             pointer-events: none;
             z-index: 1;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-overlay {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-overlay {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-overlay {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-overlay {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        /* Ensure video elements never block interactions */
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-overlay {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-video {
+            pointer-events: none;
+        }
+        .wallpaper-overlay {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        /* Ensure video elements never block interactions */
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        /* Ensure video elements never block interactions */
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        /* Ensure video elements never block interactions */
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        /* Ensure fullscreen study content is above overlay */
+        .fullscreen-study-content {
+            position: relative;
+            z-index: 2;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        /* Ensure video elements never block interactions */
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
+        }
+        .fs-wallpaper-video {
+            pointer-events: none;
+        }
+        .fullscreen-study-bg video,
+        .study-wallpaper .wallpaper-video {
+            pointer-events: none;
         }
                 .fullscreen-study-content {
             flex: 1;
@@ -3448,6 +3592,9 @@
             align-items: stretch;
             position: relative;
             min-height: 100%;
+        }
+        .fs-player {
+            position: relative;
         }
         .fs-player {
             background: rgba(0,0,0,.3);
@@ -5257,8 +5404,8 @@
             <!-- Live Wallpaper Background for Study Section -->
             <div class="study-wallpaper" id="studyWallpaper">
                 <div class="wallpaper-video-wrap">
-                    <video class="wallpaper-video" id="studyWallpaperVideo" autoplay muted loop playsinline></video>
-                    <div class="wallpaper-overlay"></div>
+                    <video class="wallpaper-video" id="studyWallpaperVideo" autoplay muted loop playsinline style="pointer-events: none;"></video>
+                    <div class="wallpaper-overlay" style="pointer-events: none;"></div>
                 </div>
                 <div class="wallpaper-controls study-wallpaper-controls">
                     <div class="wallpaper-category-selector" id="studyWallpaperCategorySelector">
@@ -5410,7 +5557,7 @@
                     <div class="live-wallpaper" id="liveWallpaper">
                         <div class="wallpaper-video-wrap">
                             <video class="wallpaper-video" id="wallpaperVideo" autoplay muted loop playsinline style="pointer-events: none;"></video>
-                            <div class="wallpaper-overlay"></div>
+                            <div class="wallpaper-overlay" style="pointer-events: none;"></div>
                         </div>
                         <div class="wallpaper-controls">
                             <div class="wallpaper-category-selector" id="wallpaperCategorySelector">
@@ -5422,12 +5569,22 @@
                                 <button class="wallpaper-cat-btn" data-cat="ocean" title="Ocean waves" aria-label="Ocean waves">🌊</button>
                                 <button class="wallpaper-cat-btn" data-cat="lofi" title="Lo-fi room" aria-label="Lo-fi room">🎧</button>
                             </div>
-                            <button class="wallpaper-fullscreen-btn" id="studyWallpaperFullscreenBtn" aria-label="Fullscreen study mode" title="Fullscreen study mode">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                                </svg>
-                            </button>
                         </div>
+                    </div>
+                    <!-- Top bar with logo and fullscreen button -->
+                    <div class="music-player-topbar" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                        <div class="music-player-logo" style="font-weight:800; font-size:18px; letter-spacing:.5px;">Daily.KRD</div>
+                        <button
+                            class="music-ctrl music-fullscreen-btn"
+                            id="musicFullscreenBtn"
+                            type="button"
+                            aria-label="Fullscreen study mode"
+                            title="Fullscreen study mode"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                            </svg>
+                        </button>
                     </div>
                     <div class="music-now-art" id="musicNowArt">🎧</div>
                     <div class="music-now-title" id="musicNowTitle">—</div>
@@ -5483,19 +5640,7 @@
                             aria-label="Repeat"
                             aria-pressed="false"
             >🔁</button>
-                        <button
-                            class="music-ctrl"
-                            id="musicFullscreenBtn"
-                            type="button"
-                            aria-label="Fullscreen study mode"
-                            title="Fullscreen study mode"
-                            style="margin-left: 8px;"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                            </svg>
-                        </button>
-                    </div>
+                        </div>
 
                     <div class="music-vol-row">
                         <button
@@ -6206,11 +6351,16 @@
     <!-- FULLSCREEN STUDY MODE (Study with me style) -->
     <div class="fullscreen-study" id="fullscreenStudy" role="dialog" aria-modal="true" aria-label="Fullscreen study mode">
         <div class="fullscreen-study-bg">
-            <video class="fs-wallpaper-video" id="fsWallpaperVideo" autoplay muted loop playsinline></video>
-            <div class="fullscreen-study-overlay"></div>
+            <video class="fs-wallpaper-video" id="fsWallpaperVideo" autoplay muted loop playsinline style="pointer-events: none;"></video>
+            <div class="fullscreen-study-overlay" style="pointer-events: none;"></div>
         </div>
 
         <div class="fullscreen-study-content">
+            <!-- Top bar with logo -->
+            <div class="fs-topbar" style="position: absolute; top: 20px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: space-between; z-index: 10; pointer-events: auto;">
+                <div class="fs-logo" style="font-weight: 800; font-size: 20px; letter-spacing: .5px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.5);">Daily.KRD</div>
+            </div>
+
             <!-- Left panel: Time, Date, Subjects, Timer -->
             <div class="fs-left-panel">
                 <div class="fs-time" id="fsTime">00:00</div>
@@ -6227,7 +6377,7 @@
             </div>
 
             <!-- Right panel: Music Player -->
-            <div class="fs-right-panel">
+            <div class="fs-right-panel" style="position: relative;">
                 <div class="fs-player" id="fsPlayer">
                     <div class="fs-player-art" id="fsPlayerArt">🎧</div>
                     <div class="fs-player-info">
@@ -18740,6 +18890,15 @@ document.documentElement.classList.toggle(
             });
         }
 
+        // Study section fullscreen button
+        const studyWallpaperFullscreenBtn = document.getElementById('studyWallpaperFullscreenBtn');
+        if (studyWallpaperFullscreenBtn) {
+            studyWallpaperFullscreenBtn.addEventListener('click', () => {
+                if (window.Haptics) window.Haptics.success();
+                openFullscreenStudy();
+            });
+        }
+
         if (fsCloseBtn) {
             fsCloseBtn.addEventListener('click', closeFullscreenStudy);
         }
@@ -18751,6 +18910,25 @@ document.documentElement.classList.toggle(
                 btn.addEventListener('click', () => {
                     fsWallpaperCategorySelector.querySelectorAll('.wallpaper-cat-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    setWallpaperVideo(btn.dataset.cat);
+                    if (window.Haptics) window.Haptics.selection();
+                });
+            });
+        }
+
+        // Study section wallpaper category selector (sync with fullscreen)
+        const studyWallpaperCategorySelector = document.getElementById('studyWallpaperCategorySelector');
+        if (studyWallpaperCategorySelector) {
+            studyWallpaperCategorySelector.querySelectorAll('.wallpaper-cat-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    studyWallpaperCategorySelector.querySelectorAll('.wallpaper-cat-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    // Also sync fullscreen selector
+                    if (fsWallpaperCategorySelector) {
+                        fsWallpaperCategorySelector.querySelectorAll('.wallpaper-cat-btn').forEach(b => {
+                            b.classList.toggle('active', b.dataset.cat === btn.dataset.cat);
+                        });
+                    }
                     setWallpaperVideo(btn.dataset.cat);
                     if (window.Haptics) window.Haptics.selection();
                 });
