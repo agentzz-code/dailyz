@@ -16320,53 +16320,23 @@ document.documentElement.classList.toggle(
                 const track = musicTrackById(musicCurrentTrackId);
                 if (!track) return;
 
-                // Create a proper Daily.KRD logo as PNG data URL (no roundRect for iOS compatibility)
-                const canvas = document.createElement('canvas');
-                canvas.width = 512;
-                canvas.height = 512;
-                const ctx = canvas.getContext('2d');
-                // Gradient background
-                const grad = ctx.createLinearGradient(0, 0, 512, 512);
-                grad.addColorStop(0, '#111');
-                grad.addColorStop(1, '#666');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, 512, 512);
-                // Manual rounded corners (compatible with all iOS versions)
-                ctx.globalCompositeOperation = 'destination-in';
-                ctx.beginPath();
-                const r = 64;
-                ctx.moveTo(r, 0);
-                ctx.lineTo(512 - r, 0);
-                ctx.quadraticCurveTo(512, 0, 512, r);
-                ctx.lineTo(512, 512 - r);
-                ctx.quadraticCurveTo(512, 512, 512 - r, 512);
-                ctx.lineTo(r, 512);
-                ctx.quadraticCurveTo(0, 512, 0, 512 - r);
-                ctx.lineTo(0, r);
-                ctx.quadraticCurveTo(0, 0, r, 0);
-                ctx.closePath();
-                ctx.fill();
-                ctx.globalCompositeOperation = 'source-over';
-                // Text
-                ctx.fillStyle = 'white';
-                ctx.font = '800 180px system-ui, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('Daily.KRD', 256, 270);
-                const logoDataUrl = canvas.toDataURL('image/png');
+                // Use the actual app icons referenced in the HTML head
+                // These are the actual app logo files (apple-touch-icon.png, icon-192.png)
+                const iconUrls = [
+                    'icons/icon-192.png',
+                    'icons/apple-touch-icon.png',
+                    'icons/icon-512.png'
+                ];
 
-                console.log("[MediaSession] Setting metadata for:", track.title, "logo length:", logoDataUrl.length);
+                console.log("[MediaSession] Setting metadata for:", track.title);
 
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: track.title,
                     artist: track.layerText || musicCategoryLabel(track.category),
                     artwork: [
-                        { src: logoDataUrl, sizes: '96x96', type: 'image/png' },
-                        { src: logoDataUrl, sizes: '128x128', type: 'image/png' },
-                        { src: logoDataUrl, sizes: '192x192', type: 'image/png' },
-                        { src: logoDataUrl, sizes: '256x256', type: 'image/png' },
-                        { src: logoDataUrl, sizes: '384x384', type: 'image/png' },
-                        { src: logoDataUrl, sizes: '512x512', type: 'image/png' }
+                        { src: iconUrls[0], sizes: '192x192', type: 'image/png' },
+                        { src: iconUrls[1], sizes: '180x180', type: 'image/png' },
+                        { src: iconUrls[2], sizes: '512x512', type: 'image/png' }
                     ]
                 });
 
