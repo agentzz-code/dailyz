@@ -3197,16 +3197,18 @@
         .wallpaper-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(0,0,0,.15), rgba(0,0,0,.25));
+            background: linear-gradient(135deg, rgba(0,0,0,.08), rgba(0,0,0,.15));
+            pointer-events: none;
+            z-index: 1;
         }
         .wallpaper-controls {
             position: absolute;
-            bottom: 12px;
+            top: 12px;
             right: 12px;
             left: 12px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: flex-start;
             pointer-events: auto;
             z-index: 2;
         }
@@ -3346,6 +3348,8 @@
             position: absolute;
             inset: 0;
             background: linear-gradient(135deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
+            pointer-events: none;
+            z-index: 1;
         }
                 .fullscreen-study-content {
             flex: 1;
@@ -3439,9 +3443,11 @@
         }
         .fs-right-panel {
             display: flex;
-            justify-content: flex-end;
-            align-items: center;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
             position: relative;
+            min-height: 100%;
         }
         .fs-player {
             background: rgba(0,0,0,.3);
@@ -5403,7 +5409,7 @@
                     <!-- Live Wallpaper Background -->
                     <div class="live-wallpaper" id="liveWallpaper">
                         <div class="wallpaper-video-wrap">
-                            <video class="wallpaper-video" id="wallpaperVideo" autoplay muted loop playsinline></video>
+                            <video class="wallpaper-video" id="wallpaperVideo" autoplay muted loop playsinline style="pointer-events: none;"></video>
                             <div class="wallpaper-overlay"></div>
                         </div>
                         <div class="wallpaper-controls">
