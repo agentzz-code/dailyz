@@ -5319,16 +5319,14 @@
                         </div>
                         <div class="wallpaper-controls">
                             <div class="wallpaper-category-selector" id="wallpaperCategorySelector">
-                                <button class="wallpaper-cat-btn active" data-cat="cafe" title="Café ambience">☕</button>
-                                <button class="wallpaper-cat-btn" data-cat="desk" title="Desk study">📝</button>
-                                <button class="wallpaper-cat-btn" data-cat="nature" title="Nature">🌿</button>
-                                <button class="wallpaper-cat-btn" data-cat="forest" title="Forest">🌲</button>
+                                <button class="wallpaper-cat-btn active" data-cat="cafe" title="Café ambience" aria-label="Café ambience">☕</button>
+                                <button class="wallpaper-cat-btn" data-cat="desk" title="Desk study" aria-label="Desk study">📝</button>
+                                <button class="wallpaper-cat-btn" data-cat="rain" title="Rain ambience" aria-label="Rain ambience">🌧️</button>
+                                <button class="wallpaper-cat-btn" data-cat="fireplace" title="Fireplace ambience" aria-label="Fireplace ambience">🔥</button>
+                                <button class="wallpaper-cat-btn" data-cat="library" title="Library ambience" aria-label="Library ambience">📚</button>
+                                <button class="wallpaper-cat-btn" data-cat="ocean" title="Ocean waves" aria-label="Ocean waves">🌊</button>
+                                <button class="wallpaper-cat-btn" data-cat="lofi" title="Lo-fi room" aria-label="Lo-fi room">🎧</button>
                             </div>
-                            <button class="wallpaper-fullscreen-btn" id="wallpaperFullscreenBtn" aria-label="Fullscreen study mode" title="Fullscreen study mode">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                                </svg>
-                            </button>
                         </div>
                     </div>
                     <div class="music-now-art" id="musicNowArt">🎧</div>
@@ -5385,6 +5383,18 @@
                             aria-label="Repeat"
                             aria-pressed="false"
             >🔁</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicFullscreenBtn"
+                            type="button"
+                            aria-label="Fullscreen study mode"
+                            title="Fullscreen study mode"
+                            style="margin-left: 8px;"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                            </svg>
+                        </button>
                     </div>
 
                     <div class="music-vol-row">
@@ -6100,24 +6110,54 @@
             <div class="fullscreen-study-overlay"></div>
         </div>
 
-        <!-- Fullscreen wallpaper controls (top right) -->
-        <div class="fs-wallpaper-controls">
-            <div class="wallpaper-category-selector" id="fsWallpaperCategorySelector">
-                <button class="wallpaper-cat-btn active" data-cat="cafe" title="Café ambience" aria-label="Café ambience">☕</button>
-                <button class="wallpaper-cat-btn" data-cat="desk" title="Desk study" aria-label="Desk study">📝</button>
-                <button class="wallpaper-cat-btn" data-cat="rain" title="Rain ambience" aria-label="Rain ambience">🌧️</button>
-                <button class="wallpaper-cat-btn" data-cat="fireplace" title="Fireplace ambience" aria-label="Fireplace ambience">🔥</button>
-                <button class="wallpaper-cat-btn" data-cat="library" title="Library ambience" aria-label="Library ambience">📚</button>
-                <button class="wallpaper-cat-btn" data-cat="ocean" title="Ocean waves" aria-label="Ocean waves">🌊</button>
-                <button class="wallpaper-cat-btn" data-cat="lofi" title="Lo-fi room" aria-label="Lo-fi room">🎧</button>
-            </div>
-            <button class="fullscreen-study-close" id="fullscreenStudyClose" aria-label="Exit fullscreen study mode">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"></path>
-                </svg>
-            </button>
-        </div>
         <div class="fullscreen-study-content">
+            <!-- Left panel: Time, Date, Subjects, Timer -->
+            <div class="fs-left-panel">
+                <div class="fs-time" id="fsTime">00:00</div>
+                <div class="fs-date" id="fsDate">Monday, January 15</div>
+                <div class="fs-subjects" id="fsSubjects"></div>
+                <div class="fs-timer" id="fsTimer">
+                    <div class="fs-timer-display" id="fsTimerDisplay">25:00</div>
+                    <div class="fs-timer-controls">
+                        <button class="fs-timer-btn" id="fsTimerStart" aria-label="Start timer">▶</button>
+                        <button class="fs-timer-btn" id="fsTimerPause" aria-label="Pause timer" style="display:none;">⏸</button>
+                        <button class="fs-timer-btn" id="fsTimerReset" aria-label="Reset timer">↺</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right panel: Music Player -->
+            <div class="fs-right-panel">
+                <div class="fs-player" id="fsPlayer">
+                    <div class="fs-player-art" id="fsPlayerArt">🎧</div>
+                    <div class="fs-player-info">
+                        <div class="fs-player-title" id="fsPlayerTitle">—</div>
+                        <div class="fs-player-cat" id="fsPlayerCat">—</div>
+                    </div>
+                    <div class="fs-player-controls">
+                        <button class="fs-player-btn" id="fsPlayerPrev" aria-label="Previous">⏮</button>
+                        <button class="fs-player-btn fs-player-btn-main" id="fsPlayerPlay" aria-label="Play">▶</button>
+                        <button class="fs-player-btn" id="fsPlayerNext" aria-label="Next">⏭</button>
+                    </div>
+                </div>
+
+                <!-- Wallpaper category selector & close button (bottom, near player controls) -->
+                <div class="fs-wallpaper-controls" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 12px; pointer-events: auto;">
+                    <div class="wallpaper-category-selector" id="fsWallpaperCategorySelector" style="display: flex; gap: 8px; background: rgba(0,0,0,.5); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,.1);">
+                        <button class="wallpaper-cat-btn active" data-cat="cafe" title="Café ambience" aria-label="Café ambience">☕</button>
+                        <button class="wallpaper-cat-btn" data-cat="desk" title="Desk study" aria-label="Desk study">📝</button>
+                        <button class="wallpaper-cat-btn" data-cat="rain" title="Rain ambience" aria-label="Rain ambience">🌧️</button>
+                        <button class="wallpaper-cat-btn" data-cat="fireplace" title="Fireplace ambience" aria-label="Fireplace ambience">🔥</button>
+                        <button class="wallpaper-cat-btn" data-cat="library" title="Library ambience" aria-label="Library ambience">📚</button>
+                        <button class="wallpaper-cat-btn" data-cat="ocean" title="Ocean waves" aria-label="Ocean waves">🌊</button>
+                        <button class="wallpaper-cat-btn" data-cat="lofi" title="Lo-fi room" aria-label="Lo-fi room">🎧</button>
+                    </div>
+                    <button class="fullscreen-study-close" id="fullscreenStudyClose" aria-label="Exit fullscreen study mode" style="width: 48px; height: 48px; border: 0; border-radius: 50%; background: rgba(255,255,255,.2); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,.3); transition: transform .15s ease, background .15s ease;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
 
 
     <!-- WELCOME -->
@@ -18422,7 +18462,7 @@ document.documentElement.classList.toggle(
         // Fullscreen study mode
         const fsStudy = document.getElementById('fullscreenStudy');
         const fsCloseBtn = document.getElementById('fullscreenStudyClose');
-        const fsFullscreenBtn = document.getElementById('wallpaperFullscreenBtn');
+        const fsFullscreenBtn = document.getElementById('musicFullscreenBtn');
 
         // Sync fullscreen study timer with main study timer
         let fsTimerState = 'idle';
