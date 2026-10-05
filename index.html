@@ -6,7 +6,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual"
     >
 
     <meta name="theme-color" content="#f5f5f7">
@@ -334,6 +334,7 @@
             min-height: 100%;
             overscroll-behavior: none;
             touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
             font-family:
                 -apple-system,
                 BlinkMacSystemFont,
@@ -341,6 +342,11 @@
                 "Segoe UI",
                 Arial,
                 sans-serif;
+        }
+
+        /* Prevent double-tap zoom on iOS */
+        * {
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             color: #111;
@@ -995,34 +1001,236 @@
             transform: rotate(45deg);
         }
 
-        .task.just-completed .task-check {
-            animation: checkPop .4s ease;
+        /* === COMPLETION ANIMATION (Eye-catching minimalist) === */
+.task.just-completed,
+.prayer.just-checked,
+.study-subject.just-completed,
+.dash-study-subject.just-completed {
+    animation: completionBurst 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.task.just-completed .task-check,
+.prayer.just-checked .prayer-check,
+.study-subject.just-completed .dash-study-check,
+.dash-study-subject.just-completed .dash-study-check {
+    animation: checkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.task.just-completed .task-check::after,
+.prayer.just-checked .prayer-check::after,
+.study-subject.just-completed .dash-study-check::after,
+.dash-study-subject.just-completed .dash-study-check::after {
+    animation: checkDraw 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.task.just-completed .task-text {
+    animation: textStrike 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.prayer.just-checked .prayer-name,
+.study-subject.just-completed .study-subject-name,
+.dash-study-subject.just-completed .dash-study-subject-name,
+.dash-study-subject.just-completed .study-subject-name {
+    animation: textStrike 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes completionBurst {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 var(--accent);
+    }
+    15% {
+        transform: scale(1.03);
+        box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+    30% {
+        transform: scale(0.98);
+        box-shadow: 0 0 0 12px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+    50% {
+        transform: scale(1.01);
+        box-shadow: 0 0 0 16px transparent;
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+
+@keyframes checkPop {
+    0% { transform: scale(1) rotate(-10deg); }
+    25% { transform: scale(1.3) rotate(5deg); }
+    50% { transform: scale(1.15) rotate(-3deg); }
+    75% { transform: scale(1.05) rotate(1deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes checkDraw {
+    0% {
+        stroke-dashoffset: 20;
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes textStrike {
+    0% {
+        opacity: 1;
+        color: inherit;
+        text-decoration-color: transparent;
+    }
+    40% {
+        opacity: 0.6;
+        color: var(--accent);
+        text-decoration-color: var(--accent);
+    }
+    100% {
+        opacity: 0.45;
+        color: inherit;
+        text-decoration-color: var(--accent);
+    }
+}
+
+        /* === MINIMALISTIC UI ANIMATIONS === */
+
+        /* Item entrance - slide up + fade */
+        @keyframes itemEnter {
+            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .task.just-completed .task-check::after {
-            animation: checkDraw .32s ease;
+        /* Item exit - slide down + fade */
+        @keyframes itemExit {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
         }
 
-        .task.just-completed .task-text {
-            animation: taskFade .4s ease;
+        /* Button press - subtle scale */
+        @keyframes pressDown {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
         }
 
+        /* Toggle switch - smooth slide */
+        @keyframes toggleSlide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(var(--toggle-distance, 20px)); }
+        }
+
+        /* Checkbox check - pop + draw */
         @keyframes checkPop {
             0% { transform: scale(1); }
-            40% { transform: scale(1.35); }
+            40% { transform: scale(1.25); }
             100% { transform: scale(1); }
         }
 
         @keyframes checkDraw {
-            0% { height: 0; opacity: 0; }
-            50% { height: 11px; opacity: 1; }
-            100% { height: 11px; opacity: 1; }
+            0% { stroke-dashoffset: 16; opacity: 0; }
+            100% { stroke-dashoffset: 0; opacity: 1; }
         }
 
-        @keyframes taskFade {
-            0% { opacity: 1; }
-            35% { opacity: .35; }
-            100% { opacity: .45; }
+        /* Radio/select - ripple */
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 0.3; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        /* Play button - pulse */
+        @keyframes playPulse {
+            0% { box-shadow: 0 0 0 0 var(--accent); }
+            70% { box-shadow: 0 0 0 12px transparent; }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+
+        /* Card/row hover/tap lift */
+        @keyframes liftTap {
+            0% { transform: translateY(0); }
+            30% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Delete - shrink + rotate */
+        @keyframes deleteShrink {
+            0% { opacity: 1; transform: translateX(0) rotate(0); }
+            100% { opacity: 0; transform: translateX(-20px) rotate(-15deg) scale(0.9); }
+        }
+
+        /* Toast/notification - slide in */
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Staggered list item entrance */
+        .animate-stagger > * {
+            animation: itemEnter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+        .animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+        .animate-stagger > *:nth-child(2) { animation-delay: 40ms; }
+        .animate-stagger > *:nth-child(3) { animation-delay: 80ms; }
+        .animate-stagger > *:nth-child(4) { animation-delay: 120ms; }
+        .animate-stagger > *:nth-child(5) { animation-delay: 160ms; }
+        .animate-stagger > *:nth-child(6) { animation-delay: 200ms; }
+        .animate-stagger > *:nth-child(7) { animation-delay: 240ms; }
+        .animate-stagger > *:nth-child(8) { animation-delay: 280ms; }
+
+        /* Utility classes */
+        .animate-enter { animation: itemEnter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .animate-exit { animation: itemExit 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .animate-press { animation: pressDown 0.12s ease; }
+        .animate-lift { animation: liftTap 0.15s ease; }
+        .animate-pulse { animation: playPulse 0.6s ease; }
+        .animate-ripple::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: inherit;
+            background: currentColor;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .animate-ripple:active::after { animation: ripple 0.4s ease; }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-enter,
+            .animate-exit,
+            .animate-press,
+            .animate-lift,
+            .animate-pulse,
+            .animate-stagger > *,
+            .task-check,
+            .prayer-check,
+            .dash-study-check,
+            .repeat-day,
+            .accent-swatch,
+            .theme-option,
+            .icon-style-option,
+            .music-track,
+            .flashcard-deck,
+            .cal-event-item,
+            .study-subject,
+            .task {
+                animation: none !important;
+                transition: none !important;
+            }
+            .task.just-completed .task-check,
+            .task.just-completed .task-check::after,
+            .task.just-completed .task-text,
+            .prayer.just-checked .prayer-check {
+                animation: none !important;
+            }
         }
 
         /* PRIORITY */
@@ -1975,7 +2183,93 @@
             background: #222;
         }
 
-        .settings-card-title {
+        /* HAPTIC SYSTEM */
+        /*
+           Centralized haptic + vibration layer. All feedback goes through
+           the `haptics` controller created below. No vibration call exists
+           anywhere else in the app.
+
+           - Fails silently when `navigator.vibrate` is missing (iOS Safari
+             PWA) or when `hapticSettings` is OFF.
+           - Shared instance + ~120ms debounce + ~900ms cooldown prevent
+             duplicate / runaway vibration.
+           - Never depends on network, auth, Firestore, or IndexedDB.
+           - Works offline on every platform that supports Vibration API.
+        */
+
+        .settings-row-haptic {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+        }
+
+        .settings-row-haptic .setting-label {
+            font-weight: 650;
+        }
+
+        .settings-row-haptic .setting-description {
+            color: #888;
+            color: #888;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .haptic-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .haptic-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .haptic-switch .track {
+            position: absolute;
+            inset: 0;
+            background: #e0e0e0;
+            border-radius: 12px;
+            transition: background .15s ease;
+        }
+
+        .haptic-switch .thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+            transition: transform .15s ease;
+        }
+
+        .haptic-switch input:checked + .track {
+            background: #2f80ed;
+        }
+
+        .haptic-switch input:checked + .track .thumb {
+            transform: translateX(20px);
+        }
+
+        .haptic-switch input:focus-visible + .track {
+            outline: 2px solid #2f80ed;
+            outline-offset: 2px;
+        }
+
+        .haptic-unsupported {
+            font-size: 11px;
+            color: #999;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -1989,17 +2283,32 @@
             justify-content: space-between;
             align-items: center;
             gap: 15px;
-            padding: 10px 0;
+            padding: 12px 0;
         }
 
         .setting-label {
             font-weight: 650;
+            flex: 1;
+            min-width: 0;
         }
 
         .setting-description {
             color: #888;
-            font-size: 13px;
-            margin-top: 3px;
+            font-size: 12px;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+
+        .setting-row > div:first-child {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .setting-row > *:last-child {
+            flex-shrink: 0;
+            margin-left: auto;
         }
 
         .setting-button {
@@ -2401,6 +2710,313 @@
         }
 
         /* STUDY TIMER */
+
+        /* ============================================================
+           STUDY WITH ME — FULL-SCREEN FOCUS SESSION
+           ============================================================ */
+        #studyWithMeOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99990;
+            display: none;
+            overflow: hidden;
+            isolation: isolate;
+            background: #0b0d12;
+            color: #fff;
+            padding:
+                max(22px, env(safe-area-inset-top))
+                max(22px, env(safe-area-inset-right))
+                max(22px, env(safe-area-inset-bottom))
+                max(22px, env(safe-area-inset-left));
+        }
+
+        #studyWithMeOverlay.open {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .swm-bg,
+        .swm-bg::before,
+        .swm-bg::after {
+            position: absolute;
+            inset: -15%;
+            pointer-events: none;
+        }
+
+        .swm-bg {
+            z-index: -3;
+            background:
+                radial-gradient(circle at 18% 20%, rgba(104, 130, 255, .24), transparent 34%),
+                radial-gradient(circle at 82% 26%, rgba(130, 93, 210, .22), transparent 32%),
+                radial-gradient(circle at 52% 90%, rgba(55, 177, 180, .16), transparent 36%),
+                linear-gradient(145deg, #080a0f, #111522 48%, #090b11);
+            animation: swmBackgroundDrift 18s ease-in-out infinite alternate;
+        }
+
+        .swm-bg::before {
+            content: "";
+            z-index: -2;
+            background:
+                radial-gradient(circle at 30% 35%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+                radial-gradient(circle at 70% 65%, rgba(255,255,255,.06) 0 1px, transparent 2px);
+            background-size: 90px 90px, 130px 130px;
+            opacity: .45;
+            animation: swmStars 24s linear infinite;
+        }
+
+        .swm-bg::after {
+            content: "";
+            z-index: -1;
+            background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.045) 48%, transparent 68%);
+            transform: translateX(-30%);
+            animation: swmSheen 12s ease-in-out infinite;
+        }
+
+        @keyframes swmBackgroundDrift {
+            0% { transform: scale(1) translate3d(-1%, -1%, 0); }
+            100% { transform: scale(1.08) translate3d(2%, 1%, 0); }
+        }
+
+        @keyframes swmStars {
+            from { transform: translate3d(0,0,0); }
+            to { transform: translate3d(70px, 45px, 0); }
+        }
+
+        @keyframes swmSheen {
+            0%, 30% { transform: translateX(-35%); opacity: 0; }
+            48% { opacity: .8; }
+            70%, 100% { transform: translateX(35%); opacity: 0; }
+        }
+
+        .swm-topbar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .swm-icon-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 15px;
+            background: rgba(255,255,255,.08);
+            color: #fff;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            font-size: 18px;
+        }
+
+        .swm-clock {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            opacity: .82;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .swm-top-spacer {
+            width: 44px;
+            height: 44px;
+        }
+
+        .swm-main {
+            width: min(680px, 100%);
+            margin: auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .swm-eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: .55;
+        }
+
+        .swm-subject {
+            font-size: clamp(28px, 8vw, 48px);
+            line-height: 1.05;
+            font-weight: 850;
+            letter-spacing: -1.5px;
+            max-width: 92%;
+            word-break: break-word;
+        }
+
+        .swm-timer {
+            font-size: clamp(68px, 18vw, 128px);
+            line-height: .95;
+            font-weight: 800;
+            letter-spacing: -4px;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 12px 50px rgba(0,0,0,.28);
+        }
+
+        .swm-status {
+            min-height: 20px;
+            font-size: 13px;
+            opacity: .62;
+        }
+
+        .swm-progress {
+            width: min(430px, 78vw);
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.12);
+            overflow: hidden;
+        }
+
+        .swm-progress-fill {
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            background: rgba(255,255,255,.86);
+            transform-origin: left center;
+            transition: transform .5s linear;
+        }
+
+        .swm-music {
+            min-height: 20px;
+            max-width: 85%;
+            font-size: 12px;
+            opacity: .58;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .swm-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .swm-control {
+            min-width: 118px;
+            height: 48px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 16px;
+            font-weight: 800;
+            background: rgba(255,255,255,.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.12);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .swm-control.primary {
+            background: #fff;
+            color: #0b0d12;
+            border-color: transparent;
+        }
+
+        .swm-control.danger {
+            background: rgba(255,255,255,.07);
+            color: #fff;
+        }
+
+        .swm-bottom {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .swm-tip {
+            font-size: 11px;
+            opacity: .42;
+            text-align: center;
+        }
+
+        .study-with-me-launch {
+            width: 100%;
+            border: 0;
+            border-radius: 20px;
+            padding: 17px 18px;
+            margin: 0 0 15px;
+            background: linear-gradient(135deg, #171b28, #272e43);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            text-align: left;
+            box-shadow: 0 12px 30px rgba(0,0,0,.12);
+        }
+
+        .dark .study-with-me-launch {
+            background: linear-gradient(135deg, #171b28, #272e43);
+        }
+
+        .study-with-me-launch-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-width: 0;
+        }
+
+        .study-with-me-launch-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: rgba(255,255,255,.12);
+            font-size: 21px;
+            flex-shrink: 0;
+        }
+
+        .study-with-me-launch-title {
+            font-weight: 850;
+            font-size: 15px;
+        }
+
+        .study-with-me-launch-sub {
+            display: block;
+            margin-top: 3px;
+            font-size: 11px;
+            opacity: .62;
+        }
+
+        .study-with-me-launch-arrow {
+            font-size: 25px;
+            opacity: .7;
+        }
+
+        @media (max-width: 480px) {
+            .swm-controls {
+                width: 100%;
+            }
+            .swm-control {
+                flex: 1;
+                min-width: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .swm-bg,
+            .swm-bg::before,
+            .swm-bg::after {
+                animation: none !important;
+            }
+        }
+
         .study-timer-card {
             background: rgba(255,255,255,.92);
             border-radius: 18px;
@@ -2467,6 +3083,314 @@
         .study-timer-done-msg {
             display: none; padding: 12px; font-weight: 700;
             color: #2e8b57; font-size: 14px;
+        }
+        .study-timer-music-row {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin: -2px 0 14px; font-size: 13px; color: #888;
+        }
+        .study-timer-music-row .study-timer-music-select { min-width: 130px; }
+
+
+        /* ============================================================
+           STUDY MUSIC
+           Reuses existing cards, radii and theme variables. The player
+           inherits --accent / card tokens so all themes + dark mode work
+           without any theme-specific rules here.
+           ============================================================ */
+        .study-music-launch {
+            background: rgba(255,255,255,.92);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform .15s ease, opacity .15s ease;
+            border: 0;
+            width: 100%;
+            color: inherit;
+            font: inherit;
+            text-align: inherit;
+        }
+        .dark .study-music-launch { background: #222; }
+        .study-music-launch:active { transform: scale(.97); opacity: .8; }
+        .study-music-launch-left { display: flex; align-items: center; gap: 12px; }
+        .study-music-launch-icon { font-size: 28px; }
+        .study-music-launch-text { font-weight: 800; font-size: 16px; }
+        .study-music-launch-sub {
+            display: block;
+            color: #888;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .study-music-launch-arrow { font-size: 18px; color: #888; }
+
+        /* Mini player (visible inside Study when Music view is hidden
+           while something is playing or paused mid-track) */
+        .study-mini-player {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,.92);
+            border-radius: 16px;
+            padding: 10px 14px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: 0;
+            width: 100%;
+            color: inherit;
+            font: inherit;
+        }
+        .dark .study-mini-player { background: #222; }
+        .study-mini-player.visible { display: flex; }
+        .study-mini-player:active { transform: scale(.98); }
+        .study-mini-art {
+            width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            background: var(--accent);
+            color: var(--accent-contrast);
+            overflow: hidden;
+        }
+        .study-mini-art img { width: 100%; height: 100%; object-fit: cover; }
+        .study-mini-info { flex: 1; min-width: 0; text-align: start; }
+        .study-mini-title {
+            font-weight: 700; font-size: 13px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .study-mini-sub {
+            color: #888; font-size: 11px; margin-top: 1px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .study-mini-progress {
+            height: 3px; background: #eee; border-radius: 2px;
+            overflow: hidden; margin-top: 5px;
+        }
+        .dark .study-mini-progress { background: #3a3a3a; }
+        .study-mini-progress-fill {
+            height: 100%; background: var(--accent);
+            border-radius: 2px; width: 0%;
+            transition: width .5s linear;
+        }
+        .study-mini-btn {
+            border: 0; background: transparent; color: inherit;
+            font-size: 19px; padding: 6px 8px; flex-shrink: 0; cursor: pointer;
+        }
+        .study-mini-btn:active { opacity: .6; }
+
+        /* Music view: header + back */
+        .music-back-btn {
+            border: 0; background: transparent; color: var(--accent);
+            font-size: 15px; font-weight: 650; padding: 8px 0; margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .music-back-btn:active { opacity: .6; }
+        .music-page-title { font-size: 22px; font-weight: 850; }
+        .music-page-sub { color: #888; font-size: 13px; margin: 2px 0 14px; }
+
+        /* Categories */
+        .music-cats {
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+            margin-bottom: 16px; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .music-cats::-webkit-scrollbar { display: none; }
+        .music-cat {
+            border: 0; border-radius: 12px; padding: 9px 14px;
+            font-weight: 700; font-size: 13px; white-space: nowrap;
+            background: rgba(230,230,235,.9); color: #666;
+            cursor: pointer; flex-shrink: 0;
+            transition: background .2s ease, color .2s ease;
+        }
+        .dark .music-cat { background: #242424; color: #aaa; }
+        .music-cat.active { background: var(--accent); color: var(--accent-contrast); }
+
+        /* Track list */
+        .music-track-list { display: flex; flex-direction: column; gap: 9px; }
+        .music-track {
+            display: flex; align-items: center; gap: 11px;
+            background: rgba(255,255,255,.92);
+            border-radius: 14px; padding: 12px 14px;
+            cursor: pointer; border: 0; width: 100%; color: inherit;
+            font: inherit; text-align: start;
+            transition: background .2s ease, opacity .2s ease;
+        }
+        .dark .music-track { background: #222; }
+        .music-track:active { opacity: .8; }
+        .music-track.active {
+            box-shadow: inset 0 0 0 2px var(--accent);
+        }
+        .music-track-art {
+            width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            background: rgba(0,0,0,.06);
+            overflow: hidden;
+        }
+        .dark .music-track-art { background: rgba(255,255,255,.08); }
+        .music-track-art img { width: 100%; height: 100%; object-fit: cover; }
+        .music-track-info { flex: 1; min-width: 0; }
+        .music-track-title {
+            font-weight: 700; font-size: 14px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .music-track-sub {
+            color: #888; font-size: 12px; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .music-track-state {
+            flex-shrink: 0; font-size: 16px; color: #888;
+            min-width: 22px; text-align: center;
+        }
+        .music-track.active .music-track-state { color: var(--accent); }
+
+        /* Now playing / player card */
+        .music-player-card {
+            background: rgba(255,255,255,.92);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+        .dark .music-player-card { background: #222; }
+        .music-now-art {
+            width: 100%; aspect-ratio: 2 / 1;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 52px;
+            background: linear-gradient(135deg, rgba(0,0,0,.05), rgba(0,0,0,.09));
+            margin-bottom: 14px;
+            overflow: hidden;
+            position: relative;
+        }
+        .dark .music-now-art {
+            background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.1));
+        }
+        .music-now-art img {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .music-now-art.loading { animation: musicPulse 1.4s ease-in-out infinite; }
+        .music-now-art.error {
+            animation: none;
+            opacity: .85;
+        }
+        @keyframes musicPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .55; }
+        }
+        .music-now-title {
+            font-size: 19px; font-weight: 850; text-align: center;
+        }
+        .music-now-cat {
+            text-align: center; color: #888; font-size: 12px;
+            font-weight: 650; margin-top: 3px; letter-spacing: .3px;
+        }
+        .music-progress {
+            height: 6px; background: #eee; border-radius: 3px;
+            overflow: hidden; margin: 16px 0 6px;
+        }
+        .dark .music-progress { background: #3a3a3a; }
+        .music-progress-fill {
+            height: 100%; background: var(--accent);
+            border-radius: 3px; width: 0%;
+        }
+        .music-progress-fill.dragging { transition: none; }
+        .music-time-row {
+            display: flex; justify-content: space-between;
+            font-size: 11px; color: #888;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 12px;
+        }
+        .music-controls {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px;
+        }
+        .music-ctrl {
+            border: 0; background: transparent; color: inherit;
+            font-size: 20px; padding: 10px 12px; cursor: pointer;
+            border-radius: 12px; flex-shrink: 0;
+        }
+        .music-ctrl:active { opacity: .6; }
+        .music-ctrl.play {
+            width: 62px; height: 62px; border-radius: 50%;
+            background: var(--accent); color: var(--accent-contrast);
+            font-size: 24px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,.18);
+        }
+        .music-ctrl.play:active { transform: scale(.94); }
+        .music-ctrl.toggle-off { opacity: .35; }
+        .music-vol-row {
+            display: flex; align-items: center; gap: 10px; margin-top: 14px;
+        }
+        .music-vol-btn {
+            border: 0; background: transparent; color: inherit;
+            font-size: 18px; padding: 6px; cursor: pointer; flex-shrink: 0;
+        }
+        .music-vol-btn:active { opacity: .6; }
+        .music-vol {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1; height: 5px; border-radius: 3px;
+            background: #eee;
+            outline: none;
+            cursor: pointer;
+        }
+        .dark .music-vol { background: #3a3a3a; }
+        .music-vol::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--accent); cursor: pointer;
+            border: none;
+        }
+        .music-vol::-moz-range-thumb {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--accent); cursor: pointer; border: none;
+        }
+
+        /* Status banners (loading / error / offline / autoplay) */
+        .music-status {
+            display: none;
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-weight: 650;
+            margin-bottom: 12px;
+            line-height: 1.45;
+        }
+        .music-status.show { display: block; }
+        .music-status.info { background: rgba(0,0,0,.05); color: #555; }
+        .dark .music-status.info { background: rgba(255,255,255,.08); color: #ccc; }
+        .music-status.error { background: rgba(224,92,92,.1); color: #c0392b; }
+        .dark .music-status.error { color: #ff8a80; }
+        .music-status.warn { background: rgba(240,182,76,.14); color: #9a6b10; }
+        .dark .music-status.warn { color: #f0b64c; }
+        .music-status.autoplay {
+            background: rgba(46,139,87,.12); color: #1f7a44;
+        }
+        .dark .music-status.autoplay { color: #5cb882; }
+
+        /* Keep visible focus outlines for keyboard users */
+        .music-track:focus-visible,
+        .music-ctrl:focus-visible,
+        .music-vol-btn:focus-visible,
+        .music-vol:focus-visible,
+        .music-cat:focus-visible,
+        .study-mini-player:focus-visible,
+        .study-music-launch:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* RTL mirrors for music UI */
+        [dir="rtl"] .music-track,
+        [dir="rtl"] .study-mini-player {
+            direction: rtl;
+        }
+        [dir="rtl"] .music-time-row {
+            direction: ltr;
         }
 
 
@@ -4230,11 +5154,172 @@
                     <span id="studyTimerSubjectLabel"></span>
                     <select class="study-timer-subject-select" id="studyTimerSubject"></select>
                 </div>
+                <div class="study-timer-music-row" id="studyTimerMusicRow">
+                    <span id="studyTimerMusicLabel">Music</span>
+                    <select
+                        class="study-timer-music-select"
+                        id="studyTimerMusic"
+                        aria-label="Music for this session"
+                    ></select>
+                </div>
                 <div class="study-timer-btns" id="studyTimerBtns">
                     <button class="study-timer-start" id="studyTimerStart" type="button"></button>
                     <button class="study-timer-reset" id="studyTimerReset" type="button" style="display:none;"></button>
                 </div>
                 <div class="study-timer-done-msg" id="studyTimerDoneMsg"></div>
+            </div>
+
+
+            <!-- MINI PLAYER (shown inside Study when Music view is closed but a track is loaded) -->
+            <button
+                class="study-mini-player"
+                id="studyMiniPlayer"
+                type="button"
+                aria-label="Open Study Music"
+            >
+                <span class="study-mini-art" id="studyMiniArt">🎧</span>
+                <span class="study-mini-info">
+                    <span class="study-mini-title" id="studyMiniTitle"></span>
+                    <span class="study-mini-sub" id="studyMiniSub"></span>
+                    <span class="study-mini-progress">
+                        <span class="study-mini-progress-fill" id="studyMiniProgress"></span>
+                    </span>
+                </span>
+                <span
+                    class="study-mini-btn"
+                    id="studyMiniPlayBtn"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Play or pause"
+                >▶</span>
+            </button>
+
+
+            <!-- STUDY WITH ME -->
+            <button
+                class="study-with-me-launch"
+                id="studyWithMeLaunch"
+                type="button"
+            >
+                <span class="study-with-me-launch-left">
+                    <span class="study-with-me-launch-icon">🌙</span>
+                    <span>
+                        <span class="study-with-me-launch-title" id="studyWithMeLaunchTitle">Study With Me</span>
+                        <span class="study-with-me-launch-sub" id="studyWithMeLaunchSub">Enter a calm full-screen focus session</span>
+                    </span>
+                </span>
+                <span class="study-with-me-launch-arrow">›</span>
+            </button>
+
+
+            <!-- STUDY MUSIC LAUNCH -->
+            <button
+                class="study-music-launch" id="studyMusicLaunch"
+                type="button"
+            >
+                <span class="study-music-launch-left">
+                    <span class="study-music-launch-icon">🎧</span>
+                    <span>
+                        <span class="study-music-launch-text" id="studyMusicLaunchText">Study Music</span>
+                        <span class="study-music-launch-sub" id="studyMusicLaunchSub"></span>
+                    </span>
+                </span>
+                <span class="study-music-launch-arrow">›</span>
+            </button>
+
+
+            <!-- STUDY MUSIC VIEW (lives inside the Study section) -->
+            <div id="studyMusicView" style="display:none;">
+                <button class="music-back-btn" id="studyMusicBackBtn" type="button">← <span id="studyMusicBackLabel">Back</span></button>
+                <div class="music-page-title" id="studyMusicTitle">Study Music</div>
+                <div class="music-page-sub" id="studyMusicSub"></div>
+
+                <div
+                    class="music-status"
+                    id="musicStatusBanner"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+
+                <div class="music-cats" id="musicCats"></div>
+                <div class="music-track-list" id="musicTrackList"></div>
+
+                <!-- NOW PLAYING -->
+                <div class="music-player-card" id="musicPlayerCard" style="margin-top:16px;">
+                    <div class="music-now-art" id="musicNowArt">🎧</div>
+                    <div class="music-now-title" id="musicNowTitle">—</div>
+                    <div class="music-now-cat" id="musicNowCat"></div>
+
+                    <div
+                        class="music-progress"
+                        id="musicProgressBar"
+                        role="slider"
+                        tabindex="0"
+                        aria-label="Seek"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                    >
+                        <div class="music-progress-fill" id="musicProgressFill"></div>
+                    </div>
+                    <div class="music-time-row">
+                        <span id="musicTimeCur">0:00</span>
+                        <span id="musicTimeDur">0:00</span>
+                    </div>
+
+                    <div class="music-controls">
+                        <button
+                            class="music-ctrl"
+                            id="musicShuffleBtn"
+                            type="button"
+                            aria-label="Shuffle"
+                            aria-pressed="false"
+                        >🔀</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicPrevBtn"
+                            type="button"
+                            aria-label="Previous track"
+                        >⏮</button>
+                        <button
+                            class="music-ctrl play"
+                            id="musicPlayBtn"
+            type="button"
+                            aria-label="Play"
+                        >▶</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicNextBtn"
+                            type="button"
+                            aria-label="Next track"
+                        >⏭</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicRepeatBtn"
+                            type="button"
+                            aria-label="Repeat"
+                            aria-pressed="false"
+            >🔁</button>
+                    </div>
+
+                    <div class="music-vol-row">
+                        <button
+                            class="music-vol-btn"
+                            id="musicMuteBtn"
+                            type="button"
+                            aria-label="Mute"
+                        >🔊</button>
+                        <input
+                            type="range"
+                            class="music-vol"
+                            id="musicVolume"
+                            min="0"
+                            max="100"
+                            value="70"
+                            aria-label="Volume"
+                        />
+                    </div>
+                </div>
             </div>
 
 
@@ -4319,6 +5404,40 @@
             </div>
 
         </section>
+
+
+        <!-- STUDY WITH ME FULL-SCREEN SESSION -->
+        <div id="studyWithMeOverlay" aria-hidden="true">
+            <div class="swm-bg"></div>
+
+            <div class="swm-topbar">
+                <button class="swm-icon-btn" id="studyWithMeClose" type="button" aria-label="Leave session">×</button>
+                <div class="swm-clock" id="studyWithMeClock">--:--</div>
+                <div class="swm-top-spacer" aria-hidden="true"></div>
+            </div>
+
+            <div class="swm-main">
+                <div class="swm-eyebrow" id="studyWithMeEyebrow">STUDY WITH ME</div>
+                <div class="swm-subject" id="studyWithMeSubject">Focus Session</div>
+                <div class="swm-timer" id="studyWithMeTimer">25:00</div>
+                <div class="swm-status" id="studyWithMeStatus">Ready to focus</div>
+
+                <div class="swm-progress" aria-hidden="true">
+                    <div class="swm-progress-fill" id="studyWithMeProgress"></div>
+                </div>
+
+                <div class="swm-music" id="studyWithMeMusic"></div>
+
+                <div class="swm-controls">
+                    <button class="swm-control primary" id="studyWithMePause" type="button">Pause</button>
+                    <button class="swm-control danger" id="studyWithMeFinish" type="button">Finish Session</button>
+                </div>
+            </div>
+
+            <div class="swm-bottom">
+                <div class="swm-tip" id="studyWithMeTip">Stay focused. You can leave this screen and your timer will keep running.</div>
+            </div>
+        </div>
 
 
         <!-- STUDY STATISTICS -->
@@ -4647,6 +5766,50 @@
                         </div>
 
                     </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- HAPTIC FEEDBACK -->
+
+            <div class="settings-card">
+
+                <div
+                    class="settings-card-title"
+                    id="hapticTitle"
+                >
+                    Haptic Feedback
+                </div>
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <div
+                            class="setting-label"
+                            id="hapticLabel"
+                        >
+                            Haptic Feedback
+                        </div>
+
+                        <div
+                            class="setting-description"
+                            id="hapticDescription"
+                        >
+                            Enable subtle vibration feedback for interactions.
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="setting-button"
+                        id="hapticToggleBtn"
+                        type="button"
+                    >
+                        On
+                    </button>
 
                 </div>
 
@@ -5258,8 +6421,10 @@
             "dailykrd_study_subjects",
             "dailykrd_study_completed",
             "dailykrd_study_sessions",
+            "dailykrd_music_prefs",
             "dailykrd_push_settings",
-            "dailykrd_welcomed"
+            "dailykrd_welcomed",
+            "dailykrd_haptic_enabled"
         ];
 
         const SYNCED_KEY_SET =
@@ -6048,6 +7213,21 @@
                     return;
                 }
 
+                if (key === "dailykrd_music_prefs") {
+
+                    // Cross-device music preferences arrived (or changed).
+                    // The music module reads prefs on demand and its own
+                    // guard flag prevents re-applying its own writes.
+                    if (
+                        typeof window._musicApplyRemotePrefs === "function"
+                    ) {
+
+                        window._musicApplyRemotePrefs();
+                    }
+
+                    return;
+                }
+
                 if (key === "dailykrd_push_settings") {
 
                     try {
@@ -6810,6 +7990,21 @@
                 settingsSubtitle:
                     "Customize your Daily.KRD experience.",
 
+                hapticFeedback:
+                    "Haptic Feedback",
+
+                hapticDescription:
+                    "Enable subtle vibration feedback for interactions.",
+
+                hapticOn:
+                    "On",
+
+                hapticOff:
+                    "Off",
+
+                hapticUnsupported:
+                    "Haptics not supported",
+
                 account:
                     "Account",
 
@@ -7008,6 +8203,38 @@
                 timerDone: "Session saved!",
                 timerSubject: "Subject",
                 timerNone: "None",
+                musicTitle: "Study Music",
+                musicSub: "Focus sounds and calm loops for deep work.",
+                musicCatAll: "All",
+                musicCatLofi: "Lo-fi",
+                musicCatFocus: "Deep Focus",
+                musicCatPiano: "Piano",
+                musicCatAmbient: "Ambient",
+                musicCatRain: "Rain",
+                musicCatNature: "Nature",
+                musicCatCafe: "Café",
+                musicCatGame: "Game Ambience",
+                musicNone: "None",
+                musicShuffle: "Shuffle",
+                musicRepeat: "Repeat",
+                musicPrev: "Previous track",
+                musicNext: "Next track",
+                musicPlay: "Play",
+                musicPause: "Pause",
+                musicVolume: "Volume",
+                musicMute: "Mute",
+                musicUnmute: "Unmute",
+                musicSeek: "Seek",
+                musicOpen: "Open Study Music",
+                musicEmpty: "No tracks in this category yet. Add royalty-free audio files to the music/ folder and list them in MUSIC_TRACKS.",
+                musicLoading: "Loading…",
+                musicErrorLoad: "This track could not be loaded.",
+                musicErrorOffline: "You're offline — music needs a connection.",
+                musicTapToStart: "Tap Play to start music",
+                musicNowPlaying: "Now playing",
+                musicPaused: "Paused",
+                musicLaunchSub: "Lo-fi · Rain · Ambient",
+                musicTimerLabel: "Music",
                 statsTitle: "Study Statistics",
                 statsBack: "← Back",
                 statsDaily: "Daily",
@@ -7026,6 +8253,16 @@
                 statsByDay: "By Day",
                 statsByMonthDay: "By Day of Month",
                 statsByMonth: "By Month",                statsLaunchText: "Study Statistics",
+                studyWithMe: "Study With Me",
+                studyWithMeSub: "Enter a calm full-screen focus session",
+                studyWithMeEyebrow: "STUDY WITH ME",
+                studyWithMeReady: "Ready to focus",
+                studyWithMePaused: "Paused",
+                studyWithMeRunning: "Focusing",
+                studyWithMePause: "Pause",
+                studyWithMeResume: "Resume",
+                studyWithMeFinish: "Finish Session",
+                studyWithMeTip: "Stay focused. You can leave this screen and your timer will keep running.",
                 statsSubjects: "Subjects",
                 statsMostStudied: "Most Studied",
                 statsOther: "Other",
@@ -7198,6 +8435,21 @@
 
                 settingsSubtitle:
                     "ئەزموونی Daily.KRD ـەکەت بە دڵی خۆت ڕێکبخە.",
+
+                hapticFeedback:
+                    "پێکهاتەی سەنتەری",
+
+                hapticDescription:
+                    "چالاککردنی ڕاگەیاندنە سەنتەرییەکان بۆ ڕێک و پێکەوەکردنەکان.",
+
+                hapticOn:
+                    "چالاک",
+
+                hapticOff:
+                    "ناچالاک",
+
+                hapticUnsupported:
+                    "سەنتەر پشتگیری ناکرێت",
 
                 account:
                     "هەژمار",
@@ -7397,6 +8649,38 @@ done: "تەواو",
                 timerDone: "قۆناغ پاشەکراوە!",
                 timerSubject: "بابەت",
                 timerNone: "هیچ",
+                musicTitle: "مۆسیقای خوێندن",
+                musicSub: "دەنگی ئارام بۆ تەرکیز لە کاتی خوێندن.",
+                musicCatAll: "هەموو",
+                musicCatLofi: "لۆفای",
+                musicCatFocus: "تەرکیزی قووڵ",
+                musicCatPiano: "پیانۆ",
+                musicCatAmbient: "ئامبیێنت",
+                musicCatRain: "باران",
+                musicCatNature: "سروشت",
+                musicCatCafe: "کافێ",
+                musicCatGame: "دەنگی یاری",
+                musicNone: "هیچ",
+                musicShuffle: "تێکەڵکردن",
+                musicRepeat: "دووبارەکردنەوە",
+                musicPrev: "تراکی پێشوو",
+                musicNext: "تراکی داهاتوو",
+                musicPlay: "لێدان",
+                musicPause: "وەستان",
+                musicVolume: "دەنگ",
+                musicMute: "بێدەنگکردن",
+                musicUnmute: "گەڕانەوەی دەنگ",
+                musicSeek: "گۆڕین",
+                musicOpen: "کردنەوەی مۆسیقا",
+                musicEmpty: "هیچ تراکێک لەم بەشەدا نییە. فایلی ئاودیۆ زیاد بکە بۆ فۆڵدەری music/ و لە MUSIC_TRACKS بنووسە.",
+                musicLoading: "بارکردن…",
+                musicErrorLoad: "ئەم تراکە بار نەکرا.",
+                musicErrorOffline: "تۆ لە دەرەوەی ئینتەرنێت — مۆسیقا پێویستی بە ئینتەرنێت هەیە.",
+                musicTapToStart: "گرتە لەسەر لێدان بۆ دەستپێکردنی مۆسیقا",
+                musicNowPlaying: "ئێستا لێدەدرێت",
+                musicPaused: "وەستاوە",
+                musicLaunchSub: "لۆفای · باران · ئارام",
+                musicTimerLabel: "مۆسیقا",
                 statsTitle: "ئاماری خوێندن",
                 statsBack: "← گەڕانەوە",
                 statsDaily: "ڕۆژانە",
@@ -7586,6 +8870,21 @@ done: "تەواو",
 
                 settingsSubtitle:
                     "خصّص تجربة Daily.KRD الخاصة بك.",
+
+                hapticFeedback:
+                    "الردود اللمسية",
+
+                hapticDescription:
+                    "تفعيل ردود الفعل اللمسية الدقيقة للتفاعلات.",
+
+                hapticOn:
+                    "مفعّل",
+
+                hapticOff:
+                    "معطّل",
+
+                hapticUnsupported:
+                    "الردود اللمسية غير مدعومة",
 
                 account:
                     "الحساب",
@@ -7785,6 +9084,38 @@ done: "تەواو",
                 timerDone: "تم حفظ الجلسة!",
                 timerSubject: "المادة",
                 timerNone: "بدون",
+                musicTitle: "موسيقى المذاكرة",
+                musicSub: "أصوات هادئة للتركيز أثناء المذاكرة.",
+                musicCatAll: "الكل",
+                musicCatLofi: "لو-فاي",
+                musicCatFocus: "تركيز عميق",
+                musicCatPiano: "بيانو",
+                musicCatAmbient: "أمبينت",
+                musicCatRain: "مطر",
+                musicCatNature: "طبيعة",
+                musicCatCafe: "مقهى",
+                musicCatGame: "أجواء الألعاب",
+                musicNone: "بدون",
+                musicShuffle: "خلط",
+                musicRepeat: "تكرار",
+                musicPrev: "المقطع السابق",
+                musicNext: "المقطع التالي",
+                musicPlay: "تشغيل",
+                musicPause: "إيقاف مؤقت",
+                musicVolume: "مستوى الصوت",
+                musicMute: "كتم",
+                musicUnmute: "إلغاء الكتم",
+                musicSeek: "تنقل",
+                musicOpen: "افتح الموسيقى",
+                musicEmpty: "لا توجد مقاطع في هذه الفئة بعد. أضف ملفات صوتية مرخّصة إلى مجلد music/ وأدرجها في MUSIC_TRACKS.",
+                musicLoading: "جارٍ التحميل…",
+                musicErrorLoad: "تعذر تحميل هذا المقطع.",
+                musicErrorOffline: "أنت غير متصل — الموسيقى تحتاج اتصالاً بالإنترنت.",
+                musicTapToStart: "اضغط تشغيل لبدء الموسيقى",
+                musicNowPlaying: "قيد التشغيل",
+                musicPaused: "متوقف مؤقتاً",
+                musicLaunchSub: "لو-فاي · مطر · أمبينت",
+                musicTimerLabel: "الموسيقى",
                 statsTitle: "إحصائيات الدراسة",
                 statsBack: "← رجوع",
                 statsDaily: "يومي",
@@ -7804,6 +9135,16 @@ done: "تەواو",
                 statsByMonthDay: "بأيام الشهر",
                 statsByMonth: "بالشهر",
                 statsLaunchText: "إحصائيات الدراسة",
+                studyWithMe: "ادرس معي",
+                studyWithMeSub: "ادخل جلسة تركيز هادئة بملء الشاشة",
+                studyWithMeEyebrow: "ادرس معي",
+                studyWithMeReady: "جاهز للتركيز",
+                studyWithMePaused: "متوقف مؤقتًا",
+                studyWithMeRunning: "جاري التركيز",
+                studyWithMePause: "إيقاف مؤقت",
+                studyWithMeResume: "استئناف",
+                studyWithMeFinish: "إنهاء الجلسة",
+                studyWithMeTip: "ابقَ مركزًا. يمكنك مغادرة هذه الشاشة وسيستمر المؤقت.",
                 statsSubjects: "المواد الدراسية",
                 statsMostStudied: "الأكثر دراسة",
                 statsOther: "أخرى",
@@ -8243,10 +9584,9 @@ done: "تەواو",
 
             document.getElementById(
                 "welcomeSubtitle"
-            ).textContent =
-                t("welcomeSubtitle");
+).textContent = t("welcomeSubtitle");
 
-
+            
             document.getElementById(
                 "welcomeSignIn"
             ).textContent =
@@ -8444,6 +9784,24 @@ done: "تەواو",
 
 
             document.getElementById(
+                "hapticTitle"
+            ).textContent =
+                t("hapticFeedback");
+
+
+            document.getElementById(
+                "hapticLabel"
+            ).textContent =
+                t("hapticFeedback");
+
+
+            document.getElementById(
+                "hapticDescription"
+            ).textContent =
+                t("hapticDescription");
+
+
+            document.getElementById(
                 "languageTitle"
             ).textContent =
                 t("language");
@@ -8628,6 +9986,22 @@ done: "تەواو",
                 refreshTasks();
             }
 
+            // Refresh Study With Me labels when the language changes.
+            try {
+                const swmLaunchTitle = document.getElementById("studyWithMeLaunchTitle");
+                const swmLaunchSub = document.getElementById("studyWithMeLaunchSub");
+                const swmEyebrow = document.getElementById("studyWithMeEyebrow");
+                const swmPause = document.getElementById("studyWithMePause");
+                const swmFinish = document.getElementById("studyWithMeFinish");
+                const swmTip = document.getElementById("studyWithMeTip");
+                if (swmLaunchTitle) swmLaunchTitle.textContent = t("studyWithMe");
+                if (swmLaunchSub) swmLaunchSub.textContent = t("studyWithMeSub");
+                if (swmEyebrow) swmEyebrow.textContent = t("studyWithMeEyebrow");
+                if (swmFinish) swmFinish.textContent = t("studyWithMeFinish");
+                if (swmTip) swmTip.textContent = t("studyWithMeTip");
+                if (typeof window._renderStudyWithMe === "function") window._renderStudyWithMe();
+            } catch (e) {}
+
             // Re-render study stats page if it's currently active
             if (document.getElementById("studyStats")?.classList.contains("active")) {
                 document.getElementById("studyStatsLaunchText").textContent = t("statsLaunchText");
@@ -8636,6 +10010,10 @@ done: "تەواو",
             // Re-render calendar events if calendar is active
             if (document.getElementById("calendar")?.classList.contains("active")) {
                 if (typeof window._renderCalEvents === "function") window._renderCalEvents();
+            }
+            // Re-render study music labels if the music module is loaded
+            if (typeof window._musicApplyLanguage === "function") {
+                try { window._musicApplyLanguage(); } catch (e) {}
             }
         }
 
@@ -9611,6 +10989,13 @@ done: "تەواو",
 
                     try {
 
+                        /* Pause music so audio does not keep playing after
+                           signing out; local prefs remain on this device. */
+                        try {
+                            window._musicHooks &&
+                                window._musicHooks.forTimerStop();
+                        } catch (e) {}
+
                         await signOut(auth);
 
                     } catch (error) {
@@ -9737,6 +11122,9 @@ done: "تەواو",
                     "active"
                 );
             }
+
+            // Selection haptic for tab navigation
+            if (window.Haptics) window.Haptics.selection();
         }
 
 
@@ -10622,6 +12010,10 @@ done: "تەواو",
                     "change",
                     async () => {
 
+                        // Press animation on checkbox
+                        checkbox.classList.add('animate-press');
+                        setTimeout(() => checkbox.classList.remove('animate-press'), 120);
+
                         if (checkbox.checked) {
 
                             justCompletedTaskIds.add(
@@ -10631,6 +12023,9 @@ done: "تەواو",
                             row.classList.add(
                                 "just-completed"
                             );
+
+                            // Success haptic for completing a task
+                            if (window.Haptics) window.Haptics.success();
 
 
                             setTimeout(
@@ -10647,6 +12042,9 @@ done: "تەواو",
                                 },
                                 450
                             );
+                        } else {
+                            // Light tap for unchecking
+                            if (window.Haptics) window.Haptics.tap();
                         }
 
 
@@ -10757,16 +12155,20 @@ done: "تەواو",
                     "click",
                     async () => {
 
+                        // Warning haptic for delete action
+                        if (window.Haptics) window.Haptics.warning();
+
+                        // Animate delete
+                        row.style.animation = 'deleteShrink 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+
                         try {
-
-                            await deleteTask(
-                                task
-                            );
-
+                            // Wait for animation to complete before actually deleting
+                            await new Promise(r => setTimeout(r, 200));
+                            await deleteTask(task);
                         } catch (error) {
-
                             console.error("Task delete error:", error);
-
+                            // Revert animation on error
+                            row.style.animation = '';
                         }
 
                     }
@@ -11142,6 +12544,14 @@ done: "تەواو",
             input.value = "";
             document.getElementById("taskTimeInput").value = "";
 
+            // Animate new task entry
+            setTimeout(() => {
+                const newTaskRow = document.querySelector('.task:first-child');
+                if (newTaskRow) {
+                    newTaskRow.classList.add('animate-enter');
+                }
+            }, 0);
+
 
             document.getElementById(
                 "repeatSelect"
@@ -11187,7 +12597,10 @@ done: "تەواو",
             )
             .addEventListener(
                 "click",
-                addTask
+                () => {
+                    if (window.Haptics) window.Haptics.success();
+                    addTask();
+                }
             );
 
 
@@ -11206,6 +12619,7 @@ done: "تەواو",
 
                         event.preventDefault();
 
+                        if (window.Haptics) window.Haptics.success();
                         addTask();
                     }
 
@@ -11450,6 +12864,9 @@ done: "تەواو",
                                 selectedDate
                             );
 
+                        // Selection haptic for calendar date selection
+                        if (window.Haptics) window.Haptics.selection();
+
 
                         renderCalendar();
 
@@ -11480,6 +12897,9 @@ done: "تەواو",
 
                     renderCalendar();
 
+                    // Selection haptic for month navigation
+                    if (window.Haptics) window.Haptics.selection();
+
                 }
             );
 
@@ -11497,6 +12917,9 @@ done: "تەواو",
                     );
 
                     renderCalendar();
+
+                    // Selection haptic for month navigation
+                    if (window.Haptics) window.Haptics.selection();
 
                 }
             );
@@ -11535,6 +12958,9 @@ done: "تەواو",
                     renderCalendar();
 
                     refreshTasks();
+
+                    // Selection haptic for today button
+                    if (window.Haptics) window.Haptics.selection();
 
                 }
             );
@@ -11670,7 +13096,10 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                toggleTheme
+                () => {
+                    if (window.Haptics) window.Haptics.tap();
+                    toggleTheme();
+                }
             );
 
 
@@ -11680,7 +13109,10 @@ document.documentElement.classList.toggle(
             )
             .addEventListener(
                 "click",
-                toggleTheme
+                () => {
+                    if (window.Haptics) window.Haptics.tap();
+                    toggleTheme();
+                }
             );
 
 
@@ -12464,6 +13896,10 @@ document.documentElement.classList.toggle(
                         "change",
                         async () => {
 
+                            // Press animation on checkbox
+                            checkbox.classList.add('animate-press');
+                            setTimeout(() => checkbox.classList.remove('animate-press'), 120);
+
                             const desired =
                                 checkbox.checked;
 
@@ -12473,6 +13909,9 @@ document.documentElement.classList.toggle(
                                 row.classList.add(
                                     "just-checked"
                                 );
+
+                                // Success haptic for completing a prayer
+                                if (window.Haptics) window.Haptics.success();
 
 
                                 setTimeout(
@@ -12485,6 +13924,9 @@ document.documentElement.classList.toggle(
                                     },
                                     450
                                 );
+                            } else {
+                                // Light tap for unchecking
+                                if (window.Haptics) window.Haptics.tap();
                             }
 
 
@@ -13134,20 +14576,24 @@ document.documentElement.classList.toggle(
         }
 
         document.getElementById("masterNotificationBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             if (pushSettings.masterEnabled) disableMasterPush(); else enableMasterPush();
         });
 
         document.getElementById("prayerNotifBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             pushSettings.prayersEnabled = !pushSettings.prayersEnabled;
             renderPushSettingsUI(); syncPushPreferences();
         });
 
         document.getElementById("taskNotifBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             pushSettings.tasksEnabled = !pushSettings.tasksEnabled;
             renderPushSettingsUI(); syncPushPreferences();
         });
 
         document.getElementById("stepNotifBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             pushSettings.stepsEnabled = !pushSettings.stepsEnabled;
             renderPushSettingsUI(); syncPushPreferences();
         });
@@ -13159,6 +14605,7 @@ document.documentElement.classList.toggle(
 
         document.querySelectorAll("#individualPrayerToggles button").forEach(btn => {
             btn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
                 const pName = btn.dataset.prayer;
                 pushSettings.prayers[pName] = !(pushSettings.prayers[pName] !== false);
                 renderPushSettingsUI(); syncPushPreferences();
@@ -13166,6 +14613,7 @@ document.documentElement.classList.toggle(
         });
 
         document.getElementById("testPushBtn")?.addEventListener("click", async () => {
+            if (window.Haptics) window.Haptics.tap();
             const status = document.getElementById("notificationStatus");
             if (!('serviceWorker' in navigator)) return;
             const reg = await navigator.serviceWorker.ready;
@@ -13939,6 +15387,7 @@ document.documentElement.classList.toggle(
                             null;
 
                         renderPrayerCalendarBody();
+                        if (window.Haptics) window.Haptics.selection();
                     }
                 );
 
@@ -13962,6 +15411,7 @@ document.documentElement.classList.toggle(
                             null;
 
                         renderPrayerCalendarBody();
+                        if (window.Haptics) window.Haptics.selection();
                     }
                 );
 
@@ -13981,6 +15431,7 @@ document.documentElement.classList.toggle(
                             getTodayKey();
 
                         renderPrayerCalendarBody();
+                        if (window.Haptics) window.Haptics.selection();
                     }
                 );
 
@@ -14646,6 +16097,8 @@ document.documentElement.classList.toggle(
         syncThemeColorMeta();
 
 
+        /* ===================================================================== */
+
         renderCalendar();
 
         loadPrayerTimes();
@@ -14655,11 +16108,186 @@ document.documentElement.classList.toggle(
         checkIOSNotificationEnvironment();
         
         renderPushSettingsUI();
-        
+
         // Initial sync of settings to worker
         if (pushSettings.masterEnabled) {
             syncPushPreferences();
         }
+
+        /* HAPTIC FEEDBACK SYSTEM */
+        /* ===================================================================== */
+
+        (function initHaptics() {
+            const HAPTIC_STORAGE_KEY = "dailykrd_haptic_enabled";
+
+            // Check if vibration is supported
+            const hasVibrateAPI = "vibrate" in navigator;
+            const vibrateFn = navigator.vibrate;
+            const isSupported = hasVibrateAPI && typeof vibrateFn === "function";
+
+            // Debug: log support status
+            console.log("[Haptics] Detection:", {
+                hasVibrateAPI,
+                vibrateFnType: typeof vibrateFn,
+                isSupported,
+                userAgent: navigator.userAgent.slice(0, 80)
+            });
+
+            // Load saved preference (default: true)
+            let hapticsEnabled = localStorage.getItem(HAPTIC_STORAGE_KEY) !== "false";
+
+            // Cooldown to prevent excessive vibration
+            let lastHapticTime = 0;
+            const HAPTIC_COOLDOWN = 30; // ms
+
+            // Haptic patterns
+            const patterns = {
+                tap: [5],
+                selection: [10],
+                success: [15, 50, 15],
+                warning: [20, 40, 20, 40, 20],
+                error: [30, 40, 30, 40, 30, 40, 30],
+                completion: [20, 60, 20, 60, 20, 100, 30]
+            };
+
+            function vibrate(patternName) {
+                if (!isSupported) return;
+                if (!hapticsEnabled) return;
+
+                const now = Date.now();
+                if (now - lastHapticTime < HAPTIC_COOLDOWN) return;
+                lastHapticTime = now;
+
+                const pattern = patterns[patternName];
+                if (!pattern) return;
+
+                try {
+                    navigator.vibrate(pattern);
+                } catch (e) {
+                    // Silently fail - haptics are supplementary
+                }
+            }
+
+            // Public API
+            window.Haptics = {
+                tap: () => vibrate("tap"),
+                selection: () => vibrate("selection"),
+                success: () => vibrate("success"),
+                warning: () => vibrate("warning"),
+                error: () => vibrate("error"),
+                completion: () => vibrate("completion"),
+                isEnabled: () => hapticsEnabled,
+                isSupported: () => isSupported,
+                setEnabled: (enabled) => {
+                    hapticsEnabled = !!enabled;
+                    localStorage.setItem(HAPTIC_STORAGE_KEY, hapticsEnabled ? "true" : "false");
+                    renderHapticToggleUI();
+                }
+            };
+
+            // Update the UI toggle button
+            function renderHapticToggleUI() {
+                const btn = document.getElementById("hapticToggleBtn");
+                if (!btn) return;
+
+                if (!isSupported) {
+                    btn.textContent = t("hapticUnsupported");
+                    btn.className = "setting-button disabled";
+                    btn.disabled = true;
+                    return;
+                }
+
+                btn.disabled = false;
+                btn.textContent = hapticsEnabled ? t("hapticOn") : t("hapticOff");
+                btn.className = "setting-button" + (hapticsEnabled ? " dark" : "");
+            }
+
+            // Wire up the toggle button
+            const toggleBtn = document.getElementById("hapticToggleBtn");
+            if (toggleBtn) {
+                toggleBtn.addEventListener("click", () => {
+                    window.Haptics.setEnabled(!window.Haptics.isEnabled());
+                    window.Haptics.tap(); // Immediate feedback on toggle
+                });
+            }
+
+            // Initialize UI
+            renderHapticToggleUI();
+
+            // Auto-attach light tap to common interactive elements
+            // Using event delegation for dynamically created elements
+            function autoAttachHaptics() {
+                document.addEventListener("click", (e) => {
+                    // Skip if haptics disabled or not supported
+                    if (!hapticsEnabled || !isSupported) return;
+
+                    const target = e.target;
+
+                    // Skip inputs, textareas, sliders, and content areas
+                    if (target.matches("input, textarea, select, [contenteditable]")) return;
+
+                    // Button-like elements get tap feedback
+                    if (target.matches("button, .tab, .icon-button, .setting-button, .accent-swatch, .theme-option, .icon-style-option, .prayer-stats-tab, .cal-filter-pill, .music-cat, .music-track, .flashcard-deck, .flashcard-mini-study, .cal-event-item, .study-subject-delete, .dash-study-check, .repeat-day")) {
+                        window.Haptics.tap();
+                        return;
+                    }
+
+                    // Checkboxes get selection feedback
+                    if (target.matches('input[type="checkbox"]')) {
+                        window.Haptics.selection();
+                        return;
+                    }
+
+                    // Links in nav/headers
+                    if (target.closest(".header-actions, .tabs, .settings-card")) {
+                        window.Haptics.tap();
+                    }
+                }, { passive: true });
+            }
+
+            autoAttachHaptics();
+
+            // Auto-attach press animations to interactive elements (event delegation)
+            function autoAttachAnimations() {
+                document.addEventListener("click", (e) => {
+                    // Skip if reduced motion
+                    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                    const target = e.target;
+
+                    // Skip inputs, textareas, sliders, and content areas
+                    if (target.matches("input, textarea, select, [contenteditable]")) return;
+
+                    // Button-like elements get press animation
+                    if (target.matches("button, .tab, .icon-button, .setting-button, .accent-swatch, .theme-option, .icon-style-option, .prayer-stats-tab, .cal-filter-pill, .music-cat, .music-track, .flashcard-deck, .flashcard-mini-study, .cal-event-item, .study-subject-delete, .dash-study-check, .repeat-day")) {
+                        target.classList.add('animate-press');
+                        setTimeout(() => target.classList.remove('animate-press'), 120);
+                        return;
+                    }
+
+                    // Checkboxes get press animation
+                    if (target.matches('input[type="checkbox"]')) {
+                        target.classList.add('animate-press');
+                        setTimeout(() => target.classList.remove('animate-press'), 120);
+                        return;
+                    }
+
+                    // Links in nav/headers
+                    if (target.closest(".header-actions, .tabs, .settings-card")) {
+                        target.classList.add('animate-press');
+                        setTimeout(() => target.classList.remove('animate-press'), 120);
+                    }
+                }, { passive: true });
+            }
+
+            autoAttachAnimations();
+
+            // Expose render function for language changes
+            window._renderHapticUI = renderHapticToggleUI;
+
+        })();
+
+        /* ===================================================================== */
 
         requestAnimationFrame(() => {
 
@@ -14787,8 +16415,16 @@ document.documentElement.classList.toggle(
                         if (!allCompleted[todayKey].includes(subjectName)) {
                             allCompleted[todayKey].push(subjectName);
                         }
+                        if (window.Haptics) window.Haptics.success();
+                        // Trigger completion animation on the subject row
+                        const subjectRow = cb.closest('.study-subject');
+                        if (subjectRow) {
+                            subjectRow.classList.add('just-completed');
+                            setTimeout(() => subjectRow.classList.remove('just-completed'), 600);
+                        }
                     } else {
                         allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
+                        if (window.Haptics) window.Haptics.tap();
                     }
                     localStorage.setItem(
                         "dailykrd_study_completed",
@@ -14802,6 +16438,7 @@ document.documentElement.classList.toggle(
         }
 
         studyGoalBtn.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             const current = loadStudyGoal();
             const input = prompt(
                 "Set today's study goal (minutes):",
@@ -14816,6 +16453,7 @@ document.documentElement.classList.toggle(
         });
 
         studyAddBtn.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             const name = prompt("Subject name:");
             if (!name || !name.trim()) return;
             const subjects = loadStudySubjects();
@@ -14827,6 +16465,7 @@ document.documentElement.classList.toggle(
         studySubjectList.addEventListener("click", (e) => {
             const btn = e.target.closest(".study-subject-delete");
             if (!btn) return;
+            if (window.Haptics) window.Haptics.warning();
             const idx = parseInt(btn.dataset.index, 10);
             const subjects = loadStudySubjects();
             subjects.splice(idx, 1);
@@ -14899,8 +16538,16 @@ document.documentElement.classList.toggle(
                         if (!allCompleted[todayKey].includes(subjectName)) {
                             allCompleted[todayKey].push(subjectName);
                         }
+                        if (window.Haptics) window.Haptics.success();
+                        // Trigger completion animation on the subject row
+                        const subjectRow = cb.closest('.dash-study-subject');
+                        if (subjectRow) {
+                            subjectRow.classList.add('just-completed');
+                            setTimeout(() => subjectRow.classList.remove('just-completed'), 600);
+                        }
                     } else {
                         allCompleted[todayKey] = allCompleted[todayKey].filter(x => x !== subjectName);
+                        if (window.Haptics) window.Haptics.tap();
                     }
                     localStorage.setItem(
                         "dailykrd_study_completed",
@@ -14912,6 +16559,1742 @@ document.documentElement.classList.toggle(
         }
 
         renderDashStudy();
+
+
+        /* STUDY TIMER */
+
+        /* ============================================================
+           STUDY MUSIC
+           - One shared, lazily created <audio> element (no duplicates).
+           - Catalog (MUSIC_TRACKS) is separate from player logic.
+           - Prefs live in localStorage 'dailykrd_music_prefs' and ride the
+             existing appstate sync when signed in (no audio in Firestore).
+           - Nothing is preloaded; a source is set only when requested.
+           ============================================================ */
+
+        const MUSIC_PREFS_KEY =
+            "dailykrd_music_prefs";
+
+        /* TRACK CATALOG — royalty-free / properly licensed sources only.
+           Add entries here (or point audioUrl at any licensed direct URL):
+           {
+               id: "lofi-01",
+               title: "Midnight Focus",
+               category: "lofi",
+               audioUrl: "music/<your-file>.mp3",
+               artwork: "",
+               duration: 0
+           }
+           "layerText" is an optional short description shown in lists. */
+        const MUSIC_TRACKS = [
+            {
+                id: "tokyo-lofi",
+                title: "Tokyo Lo-fi",
+                layerText: "Chill night-time lo-fi beat",
+                category: "lofi",
+                audioUrl: "music/tokyo-lofi.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "lofi-chill",
+                title: "Lofi Chill",
+                layerText: "Mellow lo-fi groove",
+                category: "lofi",
+                audioUrl: "music/lofi-chill.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "calm-piano",
+                title: "Calm Piano",
+                layerText: "Soft solo piano",
+                category: "piano",
+                audioUrl: "music/calm-piano.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "piano-notes",
+                title: "Gentle Piano",
+                layerText: "Sparse piano notes",
+                category: "piano",
+                audioUrl: "music/piano-notes.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "ambient-horizon",
+                title: "Ambient Horizon",
+                layerText: "Wide, slow ambient pad",
+                category: "ambient",
+                audioUrl: "music/ambient-horizon.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "ambient-drift",
+                title: "Ambient Drift",
+                layerText: "Floating ambient textures",
+                category: "ambient",
+                audioUrl: "music/ambient-drift.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "cozy-rain",
+                title: "Cozy Rain",
+                layerText: "Rain & soft indoor ambience",
+                category: "rain",
+                audioUrl: "music/cozy-rain.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "rain-and-thunder",
+                title: "Rain & Thunder",
+                layerText: "Rain with distant thunder",
+                category: "rain",
+                audioUrl: "music/rain-and-thunder.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "mountain-forest-birds",
+                title: "Mountain Forest",
+                layerText: "Birdsong in mountain forest",
+                category: "nature",
+                audioUrl: "music/mountain-forest-birds.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "deep-forest-birds",
+                title: "Deep Forest",
+                layerText: "Birdsong deep in the woods",
+                category: "nature",
+                audioUrl: "music/deep-forest-birds.mp3",
+                artwork: "",
+                duration: 0
+            },
+            {
+                id: "cafe-ambience",
+                title: "Café Ambience",
+                layerText: "Café music & soft chatter",
+                category: "cafe",
+                audioUrl: "music/cafe-ambience.mp3",
+                artwork: "",
+                duration: 0
+            }
+        ];
+
+        const MUSIC_CATEGORIES = [
+            { id: "all", labelKey: "musicCatAll" },
+            { id: "lofi", labelKey: "musicCatLofi" },
+            { id: "focus", labelKey: "musicCatFocus" },
+            { id: "piano", labelKey: "musicCatPiano" },
+            { id: "ambient", labelKey: "musicCatAmbient" },
+            { id: "rain", labelKey: "musicCatRain" },
+            { id: "nature", labelKey: "musicCatNature" },
+            { id: "cafe", labelKey: "musicCatCafe" },
+            { id: "game", labelKey: "musicCatGame" }
+        ];
+
+        const MUSIC_CATEGORY_KEYS = {
+            lofi: "musicCatLofi",
+            focus: "musicCatFocus",
+            piano: "musicCatPiano",
+            ambient: "musicCatAmbient",
+            rain: "musicCatRain",
+            nature: "musicCatNature",
+            cafe: "musicCatCafe",
+            game: "musicCatGame"
+        };
+
+        const musicEls = {
+            view: document.getElementById("studyMusicView"),
+            backBtn: document.getElementById("studyMusicBackBtn"),
+            backLabel: document.getElementById("studyMusicBackLabel"),
+            title: document.getElementById("studyMusicTitle"),
+            sub: document.getElementById("studyMusicSub"),
+            launch: document.getElementById("studyMusicLaunch"),
+            launchText: document.getElementById("studyMusicLaunchText"),
+            launchSub: document.getElementById("studyMusicLaunchSub"),
+            mini: document.getElementById("studyMiniPlayer"),
+            miniArt: document.getElementById("studyMiniArt"),
+            miniTitle: document.getElementById("studyMiniTitle"),
+            miniSub: document.getElementById("studyMiniSub"),
+            miniProgress: document.getElementById("studyMiniProgress"),
+            miniPlay: document.getElementById("studyMiniPlayBtn"),
+            banner: document.getElementById("musicStatusBanner"),
+            cats: document.getElementById("musicCats"),
+            list: document.getElementById("musicTrackList"),
+            playerCard: document.getElementById("musicPlayerCard"),
+            nowArt: document.getElementById("musicNowArt"),
+            nowTitle: document.getElementById("musicNowTitle"),
+            nowCat: document.getElementById("musicNowCat"),
+            progress: document.getElementById("musicProgressBar"),
+            progressFill: document.getElementById("musicProgressFill"),
+            timeCur: document.getElementById("musicTimeCur"),
+            timeDur: document.getElementById("musicTimeDur"),
+            playBtn: document.getElementById("musicPlayBtn"),
+            prevBtn: document.getElementById("musicPrevBtn"),
+            nextBtn: document.getElementById("musicNextBtn"),
+            shuffleBtn: document.getElementById("musicShuffleBtn"),
+            repeatBtn: document.getElementById("musicRepeatBtn"),
+            vol: document.getElementById("musicVolume"),
+            muteBtn: document.getElementById("musicMuteBtn"),
+            timerMusicSel: document.getElementById("studyTimerMusic"),
+            timerMusicLabel: document.getElementById("studyTimerMusicLabel")
+        };
+
+        const MUSIC_STATE_VERSION = 1;
+        let musicCurrentTrackId = null;
+        let musicWasPlaying = false;
+        let musicPlayPromise = null;
+        let musicPendingTrackId = null; /* waiting for a user tap (autoplay blocked) */
+        let musicAutoplayNotified = false;
+        let musicDragTime = null;
+        let musicPrefsLoaded = false;
+        let musicApplyingRemote = false;
+        let musicLastWrittenPrefs = "";
+        let musicCategory = "all";
+        let musicPrefs = {
+            version: MUSIC_STATE_VERSION,
+            lastCategory: "all",
+            lastTrackId: null,
+            volume: 0.7,
+            muted: false,
+            shuffle: false,
+            repeat: false
+        };
+        let musicAudio = null; /* the single shared <audio> element */
+        let musicLoadToken = 0;
+
+        function musicLoadPrefs() {
+
+            if (musicPrefsLoaded) return;
+            musicPrefsLoaded = true;
+
+            try {
+
+                const raw =
+                    localStorage.getItem(MUSIC_PREFS_KEY);
+
+                if (raw) {
+
+                    const parsed =
+                        JSON.parse(raw);
+
+                    if (parsed && typeof parsed === "object") {
+
+                        musicPrefs = {
+                            ...musicPrefs,
+                            ...parsed,
+                            version: MUSIC_STATE_VERSION
+                        };
+                    }
+                }
+
+            } catch (error) {
+
+                /* Corrupt prefs: keep defaults. */
+            }
+
+            if (
+                typeof musicPrefs.volume !== "number" ||
+                isNaN(musicPrefs.volume)
+            ) {
+                musicPrefs.volume = 0.7;
+            }
+
+            musicPrefs.volume =
+                Math.min(1, Math.max(0, musicPrefs.volume));
+
+            musicPrefs.muted =
+                musicPrefs.muted === true;
+
+            musicPrefs.shuffle =
+                musicPrefs.shuffle === true;
+
+            musicPrefs.repeat =
+                musicPrefs.repeat === true;
+
+            musicCategory =
+                MUSIC_CATEGORIES.some(c => c.id === musicPrefs.lastCategory)
+                    ? musicPrefs.lastCategory
+                    : "all";
+        }
+
+        function musicSavePrefsLocalOnly() {
+
+            try {
+
+                const json =
+                    JSON.stringify({
+                        ...musicPrefs,
+                        lastCategory: musicCategory
+                    });
+
+                localStorage.setItem(MUSIC_PREFS_KEY, json);
+                musicLastWrittenPrefs = json;
+
+            } catch (error) {
+                /* Storage full / unavailable: prefs just stay in memory. */
+            }
+        }
+
+        function musicSavePrefs() {
+
+            musicSavePrefsLocalOnly();
+
+            /* Ride the existing cross-device sync when signed in. */
+            if (currentUser) {
+                try {
+                    noteLocalAppstateChange(MUSIC_PREFS_KEY);
+                } catch (error) {
+                    /* Sync layer not ready; local prefs are already saved. */
+                }
+            }
+        }
+
+        /* ===== Track helpers ===== */
+
+        function musicTrackById(id) {
+            return MUSIC_TRACKS.find(tr => tr.id === id) || null;
+        }
+
+        function musicTracksForCategory(catId) {
+            if (!catId || catId === "all") return MUSIC_TRACKS.slice();
+            return MUSIC_TRACKS.filter(tr => tr.category === catId);
+        }
+
+        function musicCategoryLabel(catId) {
+            return t(MUSIC_CATEGORY_KEYS[catId] || "musicCatAll");
+        }
+
+        function musicTrackSub(tr) {
+            if (tr.layerText) return tr.layerText;
+            if (tr.duration > 0) return musicFormatTime(tr.duration);
+            return musicCategoryLabel(tr.category);
+        }
+
+        function musicFormatTime(s) {
+            if (
+                !isFinite(s) ||
+                s < 0
+            ) return "0:00";
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return m + ":" + String(sec).padStart(2, "0");
+        }
+
+        function musicEscape(str) {
+            return String(str == null ? "" : str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        /* ===== Status banner ===== */
+
+        function musicShowBanner(text, kind) {
+
+            if (!musicEls.banner) return;
+
+            musicEls.banner.className =
+                "music-status show " + (kind || "info");
+
+            musicEls.banner.textContent = text;
+        }
+
+        function musicClearBanner() {
+
+            if (!musicEls.banner) return;
+
+            musicEls.banner.className = "music-status";
+            musicEls.banner.textContent = "";
+        }
+
+        /* ===== The single audio element ===== */
+
+        function musicGetAudio() {
+
+            if (musicAudio) return musicAudio;
+
+            musicAudio = new Audio();
+            musicAudio.preload = "metadata";
+            musicApplyPrefsToAudio();
+
+            musicAudio.addEventListener("timeupdate", () => {
+                musicTick();
+            });
+
+            musicAudio.addEventListener("durationchange", () => {
+                musicRenderProgress();
+                musicRenderPlayer();
+                musicUpdateMini();
+            });
+
+            musicAudio.addEventListener("ended", () => {
+
+                const token = musicLoadToken;
+                const track = musicTrackById(musicCurrentTrackId);
+
+                if (musicPrefs.repeat && track) {
+
+                    try {
+                        musicAudio.currentTime = 0;
+                        const p = musicAudio.play();
+                        if (p && p.catch) p.catch(() => {});
+                    } catch (error) {
+                        /* Ignore restart failures. */
+                    }
+
+                    return;
+                }
+
+                musicWasPlaying = false;
+                musicUpdatePlayBtn();
+                musicRenderProgress();
+                musicUpdateMini();
+
+                if (token === musicLoadToken) {
+                    musicStep(1, true);
+                }
+            });
+
+            musicAudio.addEventListener("error", () => {
+
+                const token = musicLoadToken;
+
+                if (token !== musicLoadToken) return;
+                if (!musicCurrentTrackId) return;
+
+                musicWasPlaying = false;
+                musicUpdatePlayBtn();
+                musicRenderPlayer("error");
+                musicUpdateMini();
+
+                musicShowBanner(
+                    !navigator.onLine
+                        ? t("musicErrorOffline")
+                        : t("musicErrorLoad"),
+                    "error"
+                );
+            });
+
+            musicAudio.addEventListener("playing", () => {
+                musicClearAutoplayBanner();
+                musicUpdatePlayBtn();
+                setMediaSessionMetadata();
+            });
+
+            // Also try on 'play' event for iOS
+            musicAudio.addEventListener("play", () => {
+                setMediaSessionMetadata();
+            });
+
+            function setMediaSessionMetadata() {
+                if (!("mediaSession" in navigator) || !musicCurrentTrackId) return;
+                const track = musicTrackById(musicCurrentTrackId);
+                if (!track) return;
+
+                // Use the actual app icons referenced in the HTML head
+                // These are the actual app logo files (apple-touch-icon.png, icon-192.png)
+                const iconUrls = [
+                    'icons/icon-192.png',
+                    'icons/apple-touch-icon.png',
+                    'icons/icon-512.png'
+                ];
+
+                console.log("[MediaSession] Setting metadata for:", track.title);
+
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: track.layerText || musicCategoryLabel(track.category),
+                    artwork: [
+                        { src: iconUrls[0], sizes: '192x192', type: 'image/png' },
+                        { src: iconUrls[1], sizes: '180x180', type: 'image/png' },
+                        { src: iconUrls[2], sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+
+                // Set action handlers for lock screen controls
+                navigator.mediaSession.setActionHandler('play', () => musicAudio.play().catch(() => {}));
+                navigator.mediaSession.setActionHandler('pause', () => musicAudio.pause());
+                navigator.mediaSession.setActionHandler('previoustrack', () => musicStep(-1, false));
+                navigator.mediaSession.setActionHandler('nexttrack', () => musicStep(1, false));
+            }
+
+            musicAudio.addEventListener("pause", () => {
+                musicUpdatePlayBtn();
+                musicUpdateMini();
+            });
+
+            return musicAudio;
+        }
+
+        function musicApplyPrefsToAudio() {
+
+            if (!musicAudio) return;
+
+            musicAudio.volume = musicPrefs.volume;
+            musicAudio.muted = musicPrefs.muted;
+        }
+
+        /* ===== Visibility helpers ===== */
+
+        function musicPlayerVisible() {
+            return !!musicEls.view &&
+                musicEls.view.style.display !== "none";
+        }
+
+        function musicShowPlayer() {
+
+            if (!musicEls.view) return;
+
+            musicEls.view.style.display = "";
+            musicUpdateMiniVisibility();
+            musicRenderCats();
+            musicRenderList();
+            musicRenderPlayer();
+            musicRenderProgress();
+        }
+
+        function musicHidePlayer() {
+
+            if (!musicEls.view) return;
+
+            musicEls.view.style.display = "none";
+            musicUpdateMiniVisibility();
+        }
+
+        function musicUpdateMiniVisibility() {
+
+            if (!musicEls.mini) return;
+
+            const show =
+                !musicPlayerVisible() &&
+                !!musicCurrentTrackId;
+
+            musicEls.mini.classList.toggle("visible", show);
+        }
+
+        /* ===== Rendering ===== */
+
+        function musicRenderCats() {
+
+            if (!musicEls.cats) return;
+
+            musicEls.cats.innerHTML = MUSIC_CATEGORIES
+                .map(cat =>
+                    '<button type="button" class="music-cat' +
+                    (cat.id === musicCategory ? " active" : "") +
+                    '" data-cat="' + cat.id + '">' +
+                    musicEscape(t(cat.labelKey)) +
+                    '</button>'
+                )
+                .join("");
+
+            musicEls.cats.querySelectorAll(".music-cat")
+                .forEach(btn => {
+
+                    btn.addEventListener("click", () => {
+
+                        musicCategory = btn.dataset.cat;
+                        musicPrefs.lastCategory = musicCategory;
+                        musicSavePrefs();
+                        musicRenderCats();
+                        musicRenderList();
+                    });
+                });
+        }
+
+        function musicRenderList() {
+
+            if (!musicEls.list) return;
+
+            const tracks =
+                musicTracksForCategory(musicCategory);
+
+            if (tracks.length === 0) {
+
+                musicEls.list.innerHTML =
+                    '<div class="study-empty">' +
+                    musicEscape(t("musicEmpty")) +
+                    '</div>';
+
+                return;
+            }
+
+            musicEls.list.innerHTML = tracks
+                .map(tr => {
+
+                    const art = tr.artwork
+                        ? '<img src="' + musicEscape(tr.artwork) +
+                          '" alt="" loading="lazy">'
+                        : "🎧";
+
+                    const state =
+                        tr.id === musicCurrentTrackId
+                            ? (musicAudio && !musicAudio.paused
+                                ? "❚❚"
+                                : "▶")
+                            : "";
+
+                    return '<button type="button" class="music-track' +
+                        (tr.id === musicCurrentTrackId ? " active" : "") +
+                        '" data-id="' + musicEscape(tr.id) + '">' +
+                        '<span class="music-track-art">' + art + '</span>' +
+                        '<span class="music-track-info">' +
+                        '<span class="music-track-title">' +
+                        musicEscape(tr.title) + '</span>' +
+                        '<span class="music-track-sub">' +
+                        musicEscape(musicTrackSub(tr)) + '</span>' +
+                        '</span>' +
+                        '<span class="music-track-state">' + state + '</span>' +
+                        '</button>';
+                })
+                .join("");
+
+            musicEls.list.querySelectorAll(".music-track")
+                .forEach(btn => {
+
+                    btn.addEventListener("click", () => {
+                        musicSelectTrack(btn.dataset.id, true);
+                    });
+                });
+        }
+
+        function musicRenderPlayer(state) {
+
+            const track =
+                musicTrackById(musicCurrentTrackId);
+
+            if (!track) return;
+
+            if (musicEls.nowTitle) {
+                musicEls.nowTitle.textContent = track.title;
+            }
+
+            if (musicEls.nowCat) {
+                musicEls.nowCat.textContent =
+                    musicCategoryLabel(track.category);
+            }
+
+            if (musicEls.nowArt) {
+
+                if (state === "error") {
+
+                    musicEls.nowArt.classList.remove("loading");
+                    musicEls.nowArt.classList.add("error");
+                    musicEls.nowArt.innerHTML = "⚠️";
+
+                } else if (state === "loading") {
+
+                    musicEls.nowArt.classList.add("loading");
+                    musicEls.nowArt.classList.remove("error");
+                    musicEls.nowArt.innerHTML =
+                        track.artwork
+                            ? '<img src="' + musicEscape(track.artwork) + '" alt="">'
+                            : "🎧";
+
+                } else {
+
+                    musicEls.nowArt.classList.remove("loading");
+                    musicEls.nowArt.classList.remove("error");
+                    musicEls.nowArt.innerHTML =
+                        track.artwork
+                            ? '<img src="' + musicEscape(track.artwork) + '" alt="">'
+                            : "🎧";
+                }
+            }
+
+            if (musicEls.launchSub) {
+                musicEls.launchSub.textContent =
+                    t("musicNowPlaying") + " · " + track.title;
+            }
+        }
+
+        function musicRenderProgress() {
+
+            if (!musicAudio) return;
+
+            const dur = musicAudio.duration;
+            const cur = musicDragTime != null
+                ? musicDragTime
+                : (musicAudio.currentTime || 0);
+
+            const pct =
+                isFinite(dur) && dur > 0
+                    ? Math.min(100, (cur / dur) * 100)
+                    : 0;
+
+            if (musicEls.progressFill) {
+                musicEls.progressFill.style.width = pct + "%";
+            }
+
+            if (musicEls.progress) {
+                musicEls.progress.setAttribute(
+                    "aria-valuenow",
+                    String(Math.round(pct))
+                );
+            }
+
+            if (musicEls.timeCur) {
+                musicEls.timeCur.textContent =
+                    musicFormatTime(cur);
+            }
+
+            if (musicEls.timeDur) {
+                musicEls.timeDur.textContent =
+                    musicFormatTime(isFinite(dur) ? dur : 0);
+            }
+
+            if (musicEls.miniProgress) {
+                musicEls.miniProgress.style.width = pct + "%";
+            }
+        }
+
+        function musicTick() {
+            musicRenderProgress();
+        }
+
+        function musicUpdatePlayBtn() {
+
+            const playing =
+                !!musicAudio && !musicAudio.paused && !musicAudio.ended;
+
+            const icon = playing ? "❚❚" : "▶";
+            const label = playing
+                ? t("musicPause")
+                : t("musicPlay");
+
+            if (musicEls.playBtn) {
+                musicEls.playBtn.textContent = icon;
+                musicEls.playBtn.setAttribute("aria-label", label);
+            }
+
+            if (musicEls.miniPlay) {
+                musicEls.miniPlay.textContent = icon;
+                musicEls.miniPlay.setAttribute("aria-label", label);
+            }
+
+            musicRenderListState();
+        }
+
+        function musicRenderListState() {
+
+            if (!musicEls.list) return;
+
+            const playing =
+                !!musicAudio && !musicAudio.paused && !musicAudio.ended;
+
+            musicEls.list.querySelectorAll(".music-track")
+                .forEach(btn => {
+
+                    const isCurrent =
+                        btn.dataset.id === musicCurrentTrackId;
+
+                    btn.classList.toggle("active", isCurrent);
+
+                    const state = btn.querySelector(".music-track-state");
+
+                    if (state) {
+                        state.textContent =
+                            isCurrent ? (playing ? "❚❚" : "▶") : "";
+                    }
+                });
+        }
+
+        function musicUpdateMini() {
+
+            musicUpdateMiniVisibility();
+
+            const track =
+                musicTrackById(musicCurrentTrackId);
+
+            if (!track || !musicEls.miniTitle) return;
+
+            musicEls.miniTitle.textContent = track.title;
+
+            if (musicEls.miniSub) {
+
+                musicEls.miniSub.textContent =
+                    (musicAudio && !musicAudio.paused && !musicAudio.ended
+                        ? t("musicNowPlaying")
+                        : t("musicPaused")) +
+                    " · " + musicCategoryLabel(track.category);
+            }
+
+            if (musicEls.miniArt) {
+
+                musicEls.miniArt.innerHTML =
+                    track.artwork
+                        ? '<img src="' + musicEscape(track.artwork) + '" alt="">'
+                        : "🎧";
+            }
+        }
+
+        /* ===== Loading & playback ===== */
+
+        function musicLoadAndPlay(track) {
+
+            const audio = musicGetAudio();
+            const token = ++musicLoadToken;
+
+            musicPendingTrackId = null;
+            musicWasPlaying = true;
+            musicClearBanner();
+            musicAutoplayNotified = false;
+
+            musicRenderPlayer("loading");
+            musicUpdateMini();
+
+            // Set Media Session metadata when playback ACTUALLY starts (not on load)
+// iOS only shows artwork if metadata is set during/after "playing" event
+// This will be handled in the "playing" event listener below
+
+            try {
+
+                audio.pause();
+                audio.src = track.audioUrl;
+                audio.load();
+
+                const p = audio.play();
+
+                if (p && p.then) {
+
+                    musicPlayPromise = p;
+
+                    p.then(() => {
+
+                        if (token !== musicLoadToken) return;
+                        musicPlayPromise = null;
+                        musicWasPlaying = true;
+                        musicUpdatePlayBtn();
+                        musicUpdateMini();
+
+                    }).catch(err => {
+
+                        if (token !== musicLoadToken) return;
+                        musicPlayPromise = null;
+
+                        const name =
+                            err && err.name ? err.name : "";
+
+                        if (
+                            name === "NotAllowedError" ||
+                            name === "SecurityError"
+                        ) {
+                            /* Autoplay blocked: wait for an explicit user
+                               tap. Deliberately no automatic retries. */
+                            musicWasPlaying = false;
+                            musicPendingTrackId = track.id;
+                            musicUpdatePlayBtn();
+                            musicUpdateMini();
+                            musicShowBanner(
+                                t("musicTapToStart"),
+                                "autoplay"
+                            );
+
+                        } else {
+
+                            musicWasPlaying = false;
+                            musicUpdatePlayBtn();
+                            musicUpdateMini();
+                            musicShowBanner(
+                                !navigator.onLine
+                                    ? t("musicErrorOffline")
+                                    : t("musicErrorLoad"),
+                                "error"
+                            );
+                        }
+                    });
+                }
+
+            } catch (error) {
+
+                musicWasPlaying = false;
+                musicUpdatePlayBtn();
+                musicUpdateMini();
+                musicShowBanner(t("musicErrorLoad"), "error");
+            }
+        }
+
+        function musicSelectTrack(id, andPlay) {
+
+            const track = musicTrackById(id);
+
+            if (!track) return;
+
+            const isNew = id !== musicCurrentTrackId;
+
+            musicCurrentTrackId = id;
+            musicPrefs.lastTrackId = id;
+            musicSavePrefs();
+
+            if (andPlay) {
+
+                musicLoadAndPlay(track);
+
+            } else {
+
+                musicWasPlaying =
+                    !!musicAudio && !musicAudio.paused;
+            }
+
+            if (isNew) {
+                musicRenderList();
+                musicRenderPlayer(
+                    andPlay ? "loading" : undefined
+                );
+            }
+
+            musicUpdatePlayBtn();
+            musicUpdateMini();
+            musicRenderProgress();
+        }
+
+        function musicPlayPause(playBtn) {
+
+            if (!musicCurrentTrackId) {
+
+                /* Nothing selected yet: pick the first visible track. */
+                const tracks =
+                    musicTracksForCategory(musicCategory);
+
+                if (tracks.length > 0) {
+                    musicSelectTrack(tracks[0].id, true);
+                }
+
+                return;
+            }
+
+            const audio = musicGetAudio();
+
+            // Pulse animation on play button
+            if (playBtn) {
+                playBtn.classList.add('animate-pulse');
+                setTimeout(() => playBtn.classList.remove('animate-pulse'), 600);
+            }
+
+            if (audio.paused) {
+
+                musicClearAutoplayBanner();
+                musicPendingTrackId = null;
+
+                /* Track restored from prefs but never loaded yet. */
+                if (!audio.src) {
+
+                    const track =
+                        musicTrackById(musicCurrentTrackId);
+
+                    if (track) {
+                        musicLoadAndPlay(track);
+                        return;
+                    }
+                }
+
+                try {
+
+                    const p = audio.play();
+
+                    if (p && p.catch) {
+                        p.catch(err => {
+
+                            if (
+                                err &&
+                                (err.name === "NotAllowedError" ||
+                                    err.name === "SecurityError")
+                            ) {
+                                musicPendingTrackId =
+                                    musicCurrentTrackId;
+                                musicShowBanner(
+                                    t("musicTapToStart"),
+                                    "autoplay"
+                                );
+                            }
+                        });
+                    }
+
+                } catch (error) {
+                    /* Ignore; error listener handles real failures. */
+                }
+
+            } else {
+
+                musicWasPlaying = false;
+
+                try {
+                    audio.pause();
+                } catch (error) {
+                    /* Ignore. */
+                }
+            }
+
+            musicUpdatePlayBtn();
+            musicUpdateMini();
+        }
+
+        function musicClearAutoplayBanner() {
+
+            if (!musicAutoplayNotified) {
+
+                musicAutoplayNotified = true;
+                musicClearBanner();
+                return;
+            }
+
+            if (
+                musicEls.banner &&
+                musicEls.banner.classList.contains("autoplay")
+            ) {
+                musicClearBanner();
+            }
+        }
+
+        function musicStep(dir, fromEnded) {
+
+            const tracks =
+                musicTracksForCategory(musicCategory);
+
+            const pool = tracks.length > 0
+                ? tracks
+                : MUSIC_TRACKS;
+
+            if (pool.length === 0) return;
+
+            let nextId = null;
+
+            if (musicPrefs.shuffle && pool.length > 1) {
+
+                do {
+                    nextId = pool[
+                        Math.floor(Math.random() * pool.length)
+                    ].id;
+                } while (
+                    nextId === musicCurrentTrackId
+                );
+
+            } else {
+
+                const idx = pool.findIndex(
+                    tr => tr.id === musicCurrentTrackId
+                );
+
+                let next = idx + dir;
+
+                if (next >= pool.length) next = 0;
+                if (next < 0) next = pool.length - 1;
+
+                nextId = pool[next].id;
+            }
+
+            musicSelectTrack(nextId, true);
+        }
+
+        /* ===== Seek (pointer + keyboard) ===== */
+
+        function musicSeekFromEvent(event) {
+
+            if (!musicEls.progress || !musicAudio) return;
+            if (!isFinite(musicAudio.duration)) return;
+
+            const rect =
+                musicEls.progress.getBoundingClientRect();
+
+            const clientX =
+                event.touches && event.touches.length > 0
+                    ? event.touches[0].clientX
+                    : event.clientX;
+
+            const ratio =
+                Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+
+            musicDragTime = ratio * musicAudio.duration;
+            musicRenderProgress();
+        }
+
+        function musicSeekCommit() {
+
+            if (!musicAudio || musicDragTime == null) return;
+
+            try {
+                musicAudio.currentTime = musicDragTime;
+            } catch (error) {
+                /* Seek before metadata: ignore. */
+            }
+
+            musicDragTime = null;
+            musicRenderProgress();
+        }
+
+        /* ===== Timer select population ===== */
+
+        function musicPopulateTimerSelect() {
+
+            if (!musicEls.timerMusicSel) return;
+
+            const sel = musicEls.timerMusicSel;
+            const prev = sel.value;
+
+            /* Offer every category that actually has tracks, so the
+               timer never shows a selection that would stay silent. */
+            const availableCats = [];
+
+            MUSIC_TRACKS.forEach(tr => {
+                if (!availableCats.includes(tr.category)) {
+                    availableCats.push(tr.category);
+                }
+            });
+
+            let html =
+                '<option value="">' +
+                musicEscape(t("musicNone")) +
+                '</option>';
+
+            availableCats.forEach(catId => {
+
+                html +=
+                    '<option value="cat:' + musicEscape(catId) + '">' +
+                    musicEscape(musicCategoryLabel(catId)) +
+                    '</option>';
+            });
+
+            MUSIC_TRACKS.forEach(tr => {
+
+                html +=
+                    '<option value="track:' + musicEscape(tr.id) + '">' +
+                    musicEscape(tr.title) +
+                    '</option>';
+            });
+
+            sel.innerHTML = html;
+
+            if (
+                prev &&
+                sel.querySelector('option[value="' + prev + '"]')
+            ) {
+                sel.value = prev;
+            }
+        }
+
+        function musicStartForTimer(choice) {
+
+            if (!choice) return;
+
+            if (choice.indexOf("track:") === 0) {
+
+                const id = choice.slice(6);
+
+                if (musicTrackById(id)) {
+                    musicCategory = musicTrackById(id).category;
+                    musicPrefs.lastCategory = musicCategory;
+                    musicSavePrefsLocalOnly();
+                    musicSelectTrack(id, true);
+                }
+
+                return;
+            }
+
+            if (choice.indexOf("cat:") === 0) {
+
+                const catId = choice.slice(4);
+                const tracks = musicTracksForCategory(catId);
+
+                if (tracks.length > 0) {
+
+                    musicCategory = catId;
+                    musicPrefs.lastCategory = musicCategory;
+                    musicSavePrefsLocalOnly();
+
+                    const track =
+                        musicPrefs.lastTrackId &&
+                        tracks.some(tr => tr.id === musicPrefs.lastTrackId)
+                            ? musicTrackById(musicPrefs.lastTrackId)
+                            : tracks[0];
+
+                    musicSelectTrack(track.id, true);
+                }
+            }
+        }
+
+        /* Music reactions to the existing Study Timer lifecycle.
+           Called from timerStart / timerFinishSession via window hooks. */
+
+        window._musicHooks = {
+
+            forTimerStart: function (choice) {
+
+                musicLoadPrefs();
+
+                if (!choice) {
+
+                    /* Session started with "None": keep any already-playing
+                       music as-is (user may have started it manually), but
+                       do not start anything new. */
+                    return;
+                }
+
+                musicStartForTimer(choice);
+            },
+
+            forTimerPause: function () {
+
+                if (
+                    musicAudio &&
+                    !musicAudio.paused &&
+                    musicCurrentTrackId
+                ) {
+                    musicWasPlaying = true;
+
+                    try {
+                        musicAudio.pause();
+                    } catch (error) {
+                        /* Ignore. */
+                    }
+
+                    musicUpdatePlayBtn();
+                    musicUpdateMini();
+                }
+            },
+
+            forTimerResume: function () {
+
+                if (
+                    musicAudio &&
+                    musicAudio.paused &&
+                    musicCurrentTrackId &&
+                    musicWasPlaying &&
+                    !musicPendingTrackId
+                ) {
+                    try {
+
+                        const p = musicAudio.play();
+
+                        if (p && p.catch) {
+                            p.catch(err => {
+
+                                if (
+                                    err &&
+                                    err.name === "NotAllowedError"
+                                ) {
+                                    musicPendingTrackId =
+                                        musicCurrentTrackId;
+                                    musicShowBanner(
+                                        t("musicTapToStart"),
+                                        "autoplay"
+                                    );
+                                }
+                            });
+                        }
+
+                    } catch (error) {
+                        /* Ignore. */
+                    }
+                }
+            },
+
+            forTimerStop: function () {
+
+                if (
+                    !musicAudio ||
+                    musicAudio.paused ||
+                    !musicCurrentTrackId
+                ) return;
+
+                musicWasPlaying = false;
+
+                const audio = musicAudio;
+                const startVol = audio.volume;
+
+                /* Gentle ~1.2s fade-out; a hard stop is the fallback. */
+                try {
+
+                    const steps = 12;
+                    let i = 0;
+
+                    const iv = setInterval(() => {
+
+                        i++;
+
+                        try {
+                            audio.volume =
+                                Math.max(0, startVol * (1 - i / steps));
+                        } catch (error) {
+                            /* Ignore. */
+                        }
+
+                        if (i >= steps) {
+
+                            clearInterval(iv);
+
+                            try {
+                                audio.pause();
+                            } catch (error2) {
+                                /* Ignore. */
+                            }
+
+                            try {
+                                audio.volume = startVol;
+                            } catch (error3) {
+                                /* Ignore. */
+                            }
+                        }
+
+                    }, 100);
+
+                } catch (error) {
+
+                    try {
+                        audio.pause();
+                    } catch (error2) {
+                        /* Ignore. */
+                    }
+                }
+
+                musicUpdatePlayBtn();
+                musicUpdateMini();
+            }
+        };
+
+        /* ===== Wiring ===== */
+
+        musicLoadPrefs();
+
+        if (musicEls.launch) {
+
+            musicEls.launch.addEventListener("click", () => {
+
+                musicShowPlayer();
+
+                if (!musicCurrentTrackId && musicPrefs.lastTrackId) {
+
+                    const last = musicTrackById(musicPrefs.lastTrackId);
+
+                    if (last) {
+                        musicSelectTrack(last.id, false);
+                    }
+                }
+            });
+        }
+
+        if (musicEls.backBtn) {
+
+            musicEls.backBtn.addEventListener(
+                "click",
+                musicHidePlayer
+            );
+        }
+
+        if (musicEls.mini) {
+
+            musicEls.mini.addEventListener("click", e => {
+
+                if (
+                    e.target &&
+                    e.target.closest &&
+                    e.target.closest("#studyMiniPlayBtn")
+                ) return; /* handled by its own listener */
+
+                musicShowPlayer();
+            });
+        }
+
+        if (musicEls.miniPlay) {
+
+            musicEls.miniPlay.addEventListener("click", e => {
+
+                e.stopPropagation();
+                musicPlayPause();
+            });
+
+            musicEls.miniPlay.addEventListener("keydown", e => {
+
+                if (e.key === "Enter" || e.key === " ") {
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    musicPlayPause();
+                }
+            });
+        }
+
+        if (musicEls.playBtn) {
+
+            musicEls.playBtn.addEventListener(
+                "click",
+                () => {
+                    if (window.Haptics) window.Haptics.tap();
+                    musicPlayPause(musicEls.playBtn);
+                }
+            );
+        }
+
+        if (musicEls.prevBtn) {
+
+            musicEls.prevBtn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
+                musicEls.prevBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.prevBtn.classList.remove('animate-press'), 120);
+                musicStep(-1, false);
+            });
+        }
+
+        if (musicEls.nextBtn) {
+
+            musicEls.nextBtn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
+                musicEls.nextBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.nextBtn.classList.remove('animate-press'), 120);
+                musicStep(1, false);
+            });
+        }
+
+        if (musicEls.shuffleBtn) {
+
+            musicEls.shuffleBtn.classList.toggle(
+                "toggle-off",
+                !musicPrefs.shuffle
+            );
+
+            musicEls.shuffleBtn.addEventListener("click", () => {
+
+                if (window.Haptics) window.Haptics.selection();
+                musicEls.shuffleBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.shuffleBtn.classList.remove('animate-press'), 120);
+                musicPrefs.shuffle = !musicPrefs.shuffle;
+                musicEls.shuffleBtn.classList.toggle(
+                    "toggle-off",
+                    !musicPrefs.shuffle
+                );
+                musicEls.shuffleBtn.setAttribute(
+                    "aria-pressed",
+                    String(musicPrefs.shuffle)
+                );
+                musicSavePrefs();
+            });
+
+            musicEls.shuffleBtn.setAttribute(
+                "aria-pressed",
+                String(musicPrefs.shuffle)
+            );
+        }
+
+        if (musicEls.repeatBtn) {
+
+            musicEls.repeatBtn.classList.toggle(
+                "toggle-off",
+                !musicPrefs.repeat
+            );
+
+            musicEls.repeatBtn.addEventListener("click", () => {
+
+                if (window.Haptics) window.Haptics.selection();
+                musicEls.repeatBtn.classList.add('animate-press');
+                setTimeout(() => musicEls.repeatBtn.classList.remove('animate-press'), 120);
+                musicPrefs.repeat = !musicPrefs.repeat;
+                musicEls.repeatBtn.classList.toggle(
+                    "toggle-off",
+                    !musicPrefs.repeat
+                );
+                musicEls.repeatBtn.setAttribute(
+                    "aria-pressed",
+                    String(musicPrefs.repeat)
+                );
+                musicSavePrefs();
+            });
+
+            musicEls.repeatBtn.setAttribute(
+                "aria-pressed",
+                String(musicPrefs.repeat)
+            );
+        }
+
+        if (musicEls.vol) {
+
+            musicEls.vol.value =
+                String(Math.round(musicPrefs.volume * 100));
+
+            musicEls.vol.addEventListener("input", () => {
+
+                musicPrefs.volume =
+                    Math.min(1, Math.max(0, Number(musicEls.vol.value) / 100));
+
+                if (musicPrefs.volume > 0 && musicPrefs.muted) {
+
+                    musicPrefs.muted = false;
+
+                    if (musicEls.muteBtn) {
+                        musicEls.muteBtn.textContent = "🔊";
+                        musicEls.muteBtn.setAttribute(
+                            "aria-label",
+                            t("musicMute")
+                        );
+                    }
+                }
+
+                musicApplyPrefsToAudio();
+                musicSavePrefs();
+            });
+        }
+
+        if (musicEls.muteBtn) {
+
+            musicEls.muteBtn.textContent =
+                musicPrefs.muted ? "🔇" : "🔊";
+
+            musicEls.muteBtn.addEventListener("click", () => {
+
+                musicPrefs.muted = !musicPrefs.muted;
+                musicEls.muteBtn.textContent =
+                    musicPrefs.muted ? "🔇" : "🔊";
+                musicEls.muteBtn.setAttribute(
+                    "aria-label",
+                    musicPrefs.muted
+                        ? t("musicUnmute")
+                        : t("musicMute")
+                );
+
+                musicApplyPrefsToAudio();
+                musicSavePrefs();
+            });
+        }
+
+        if (musicEls.progress) {
+
+            musicEls.progress.addEventListener("pointerdown", e => {
+
+                if (!musicAudio) return;
+
+                musicEls.progress.classList.add("dragging");
+                musicSeekFromEvent(e);
+
+                const move = ev => musicSeekFromEvent(ev);
+                const up = () => {
+
+                    musicSeekCommit();
+                    musicEls.progress.classList.remove("dragging");
+
+                    window.removeEventListener("pointermove", move);
+                    window.removeEventListener("pointerup", up);
+                };
+
+                window.addEventListener("pointermove", move);
+                window.addEventListener("pointerup", up);
+            });
+
+            musicEls.progress.addEventListener("keydown", e => {
+
+                if (
+                    !musicAudio ||
+                    !isFinite(musicAudio.duration)
+                ) return;
+
+                if (e.key === "ArrowRight") {
+
+                    e.preventDefault();
+                    musicAudio.currentTime =
+                        Math.min(
+                            musicAudio.duration,
+                            musicAudio.currentTime + 5
+                        );
+
+                } else if (e.key === "ArrowLeft") {
+
+                    e.preventDefault();
+                    musicAudio.currentTime =
+                        Math.max(
+                            0,
+                            musicAudio.currentTime - 5
+                        );
+                }
+            });
+        }
+
+        /* Restore last track metadata (without playing) so the mini player
+           can show it right after a reload. */
+        if (musicPrefs.lastTrackId && musicTrackById(musicPrefs.lastTrackId)) {
+            musicCurrentTrackId = musicPrefs.lastTrackId;
+        }
+
+        musicUpdatePlayBtn();
+        musicUpdateMini();
+        musicPopulateTimerSelect();
+
+        /* Returning to the tab: resume transparently if the browser paused
+           us; if autoplay is denied, surface the tap-to-start banner once. */
+        document.addEventListener("visibilitychange", () => {
+
+            if (document.hidden) return;
+
+            if (
+                musicAudio &&
+                musicWasPlaying &&
+                musicAudio.paused &&
+                musicCurrentTrackId &&
+                !musicPendingTrackId &&
+                musicAudio.src
+            ) {
+                try {
+
+                    const p = musicAudio.play();
+
+                    if (p && p.catch) {
+                        p.catch(err => {
+
+                            if (
+                                err &&
+                                err.name === "NotAllowedError"
+                            ) {
+                                musicPendingTrackId =
+                                    musicCurrentTrackId;
+                                musicShowBanner(
+                                    t("musicTapToStart"),
+                                    "autoplay"
+                                );
+                            }
+                        });
+                    }
+
+                } catch (error) {
+                    /* Ignore. */
+                }
+            }
+        });
+
+        /* Remote prefs arrived through the existing appstate sync. */
+        window._musicApplyRemotePrefs = function () {
+
+            if (musicApplyingRemote) return;
+
+            try {
+
+                const raw =
+                    localStorage.getItem(MUSIC_PREFS_KEY);
+
+                if (!raw || raw === musicLastWrittenPrefs) return;
+
+                musicApplyingRemote = true;
+
+                const parsed = JSON.parse(raw);
+
+                if (parsed && typeof parsed === "object") {
+
+                    musicPrefs = {
+                        ...musicPrefs,
+                        ...parsed,
+                        version: MUSIC_STATE_VERSION
+                    };
+
+                    musicCategory =
+                        MUSIC_CATEGORIES.some(
+                            c => c.id === musicPrefs.lastCategory
+                        )
+                            ? musicPrefs.lastCategory
+                            : "all";
+
+                    if (musicEls.vol) {
+                        musicEls.vol.value = String(
+                            Math.round(musicPrefs.volume * 100)
+                        );
+                    }
+
+                    if (musicEls.muteBtn) {
+                        musicEls.muteBtn.textContent =
+                            musicPrefs.muted ? "🔇" : "🔊";
+                    }
+
+                    if (musicEls.shuffleBtn) {
+                        musicEls.shuffleBtn.classList.toggle(
+                            "toggle-off",
+                            !musicPrefs.shuffle
+                        );
+                        musicEls.shuffleBtn.setAttribute(
+                            "aria-pressed",
+                            String(musicPrefs.shuffle)
+                        );
+                    }
+
+                    if (musicEls.repeatBtn) {
+                        musicEls.repeatBtn.classList.toggle(
+                            "toggle-off",
+                            !musicPrefs.repeat
+                        );
+                        musicEls.repeatBtn.setAttribute(
+                            "aria-pressed",
+                            String(musicPrefs.repeat)
+                        );
+                    }
+
+                    musicApplyPrefsToAudio();
+
+                    if (
+                        musicPlayerVisible() ||
+                        musicEls.cats
+                    ) {
+                        musicRenderCats();
+                        musicRenderList();
+                    }
+                }
+
+            } catch (error) {
+                /* Corrupt remote value: ignore. */
+
+            } finally {
+                musicApplyingRemote = false;
+            }
+        };
+
+        /* Labels need refreshing when the app language changes. */
+        window._musicApplyLanguage = function () {
+
+            if (musicEls.title) {
+                musicEls.title.textContent = t("musicTitle");
+            }
+
+            if (musicEls.sub) {
+                musicEls.sub.textContent = t("musicSub");
+            }
+
+            if (musicEls.backLabel) {
+                musicEls.backLabel.textContent = t("statsBack").replace(/^←\s*/, "");
+            }
+
+            if (musicEls.launchText) {
+                musicEls.launchText.textContent = t("musicTitle");
+            }
+
+            if (musicEls.launchSub && !musicCurrentTrackId) {
+                musicEls.launchSub.textContent = t("musicLaunchSub");
+            }
+
+            if (musicEls.timerMusicLabel) {
+                musicEls.timerMusicLabel.textContent =
+                    t("musicTimerLabel") + ":";
+            }
+
+            if (musicEls.playerCard) {
+                musicEls.playerCard.setAttribute(
+                    "aria-label",
+                    t("musicNowPlaying")
+                );
+            }
+
+            musicPopulateTimerSelect();
+
+            if (musicPlayerVisible()) {
+                musicRenderCats();
+                musicRenderList();
+                musicUpdatePlayBtn();
+                musicUpdateMini();
+            }
+        };
+
+        window._musicApplyLanguage();
 
 
         /* STUDY TIMER */
@@ -14968,6 +18351,8 @@ document.documentElement.classList.toggle(
                 timerInterval = null;
                 timerStartBtn.textContent = t("timerResume");
                 timerStartBtn.className = "study-timer-start";
+                try { window._musicHooks && window._musicHooks.forTimerPause(); } catch (e) {}
+                if (window.Haptics) window.Haptics.tap();
                 timerRender();
                 return;
             }
@@ -14975,10 +18360,20 @@ document.documentElement.classList.toggle(
                 /* Resume */
                 timerEndAt = Date.now() + timerPausedRemaining * 1000;
                 timerState = "running";
+                try { window._musicHooks && window._musicHooks.forTimerResume(); } catch (e) {}
+                if (window.Haptics) window.Haptics.tap();
             } else {
                 /* Fresh start */
                 timerEndAt = Date.now() + timerDuration * 1000;
                 timerState = "running";
+                /* Start the music chosen for this session, if any. If the
+                   browser blocks autoplay, the music module shows a clear
+                   "tap Play" banner instead of retrying. */
+                try {
+                    const musicChoice = document.getElementById("studyTimerMusic")?.value || "";
+                    window._musicHooks && window._musicHooks.forTimerStart(musicChoice);
+                } catch (e) {}
+                if (window.Haptics) window.Haptics.success();
             }
             timerDoneMsg.style.display = "none";
             timerStartBtn.textContent = t("timerPause");
@@ -15001,6 +18396,10 @@ document.documentElement.classList.toggle(
             timerResetBtn.style.display = "none";
             timerRender();
             document.title = "Daily.KRD";
+
+            /* Gently fade out any session music. Timer completion behavior
+               and notifications below are unchanged. */
+            try { window._musicHooks && window._musicHooks.forTimerStop(); } catch (e) {}
 
             /* Save session */
             const mins = Math.round(elapsed / 60);
@@ -15029,8 +18428,18 @@ document.documentElement.classList.toggle(
                     body: JSON.stringify({ deviceId: localStorage.getItem("dailykrd_device_id") })
                 }).catch(() => {});
             }
+            // Completion haptic for timer finishing
+            if (window.Haptics) window.Haptics.completion();
             timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
             timerDoneMsg.style.display = "block";
+
+            // If this timer was running inside Study With Me, close the
+            // full-screen session after the existing save/statistics logic.
+            try {
+                if (typeof window.studyWithMeFinishCleanup === "function") {
+                    window.studyWithMeFinishCleanup();
+                }
+            } catch (e) {}
         }
 
         function timerReset() {
@@ -15055,12 +18464,16 @@ document.documentElement.classList.toggle(
 
         function timerInit() {
             timerPopulateSubject();
+            try {
+                window._musicApplyLanguage && window._musicApplyLanguage();
+            } catch (e) {}
             timerStartBtn.textContent = t("timerStart");
             timerRender();
         }
 
         timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(btn => {
             btn.addEventListener("click", () => {
+                if (window.Haptics) window.Haptics.selection();
                 if (timerState !== "idle") return;
                 timerPresetsEl.querySelectorAll(".study-timer-preset").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
@@ -15077,6 +18490,7 @@ document.documentElement.classList.toggle(
         });
 
         timerCustomOk.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             const v = parseInt(timerCustomMin.value, 10);
             if (v > 0 && v <= 300) {
                 timerDuration = v * 60;
@@ -15090,13 +18504,215 @@ document.documentElement.classList.toggle(
         });
 
         timerStartBtn.addEventListener("click", timerStart);
-        timerResetBtn.addEventListener("click", timerReset);
+        timerResetBtn.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
+            timerReset();
+        });
 
         document.addEventListener("visibilitychange", () => {
             if (!document.hidden && timerState === "running") timerTick();
         });
 
         timerInit();
+
+
+        /* ============================================================
+           STUDY WITH ME — FULL-SCREEN SESSION CONTROLLER
+           Reuses the existing Study Timer so sessions continue to save
+           to the same study minutes/statistics system.
+           ============================================================ */
+        (function initStudyWithMe() {
+            const overlay = document.getElementById("studyWithMeOverlay");
+            const launch = document.getElementById("studyWithMeLaunch");
+            const closeBtn = document.getElementById("studyWithMeClose");
+            const pauseBtn = document.getElementById("studyWithMePause");
+            const finishBtn = document.getElementById("studyWithMeFinish");
+            const clockEl = document.getElementById("studyWithMeClock");
+            const timerEl = document.getElementById("studyWithMeTimer");
+            const subjectEl = document.getElementById("studyWithMeSubject");
+            const statusEl = document.getElementById("studyWithMeStatus");
+            const progressEl = document.getElementById("studyWithMeProgress");
+            const musicEl = document.getElementById("studyWithMeMusic");
+            const launchTitle = document.getElementById("studyWithMeLaunchTitle");
+            const launchSub = document.getElementById("studyWithMeLaunchSub");
+            const eyebrowEl = document.getElementById("studyWithMeEyebrow");
+            const tipEl = document.getElementById("studyWithMeTip");
+
+            if (!overlay || !launch) return;
+
+            let clockInterval = null;
+            let uiInterval = null;
+            let isOpen = false;
+
+            function getRemaining() {
+                if (timerState === "running") {
+                    return Math.max(0, Math.ceil((timerEndAt - Date.now()) / 1000));
+                }
+                if (timerState === "paused") return Math.max(0, timerPausedRemaining);
+                return Math.max(0, timerDuration);
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function updateClock() {
+                if (!clockEl) return;
+                const now = new Date();
+                clockEl.textContent = now.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+            }
+
+            function updateMusicLabel() {
+                if (!musicEl) return;
+                const musicSelect = document.getElementById("studyTimerMusic");
+                const option = musicSelect?.selectedOptions?.[0];
+                const label = option?.textContent?.trim() || "";
+                musicEl.textContent = label && label.toLowerCase() !== "none"
+                    ? "♪ " + label
+                    : "";
+            }
+
+            function render() {
+                if (!isOpen) return;
+
+                const remaining = getRemaining();
+                const total = Math.max(1, timerDuration);
+                const ratio = Math.max(0, Math.min(1, remaining / total));
+
+                timerEl.textContent = timerFormat(remaining);
+                progressEl.style.transform = "scaleX(" + ratio + ")";
+
+                const subject = timerSubjectSel.value?.trim() || "Focus Session";
+                subjectEl.textContent = subject;
+
+                if (timerState === "running") {
+                    statusEl.textContent = t("studyWithMeRunning");
+                    pauseBtn.textContent = t("studyWithMePause");
+                } else if (timerState === "paused") {
+                    statusEl.textContent = t("studyWithMePaused");
+                    pauseBtn.textContent = t("studyWithMeResume");
+                } else {
+                    statusEl.textContent = t("studyWithMeReady");
+                    pauseBtn.textContent = t("studyWithMeResume");
+                }
+
+                updateMusicLabel();
+            }
+
+            function openSession() {
+                if (window.Haptics) window.Haptics.success();
+
+                isOpen = true;
+                overlay.classList.add("open");
+                overlay.setAttribute("aria-hidden", "false");
+                document.body.style.overflow = "hidden";
+
+                // Make sure the timer's subject list is current.
+                try { timerPopulateSubject(); } catch (e) {}
+
+                // If there is no active timer, start the selected timer immediately.
+                // This is the key integration: Study With Me uses the existing timer
+                // instead of creating a second competing timer.
+                if (timerState === "idle") {
+                    timerStart();
+                }
+
+                updateClock();
+                updateMusicLabel();
+                render();
+
+                clearInterval(clockInterval);
+                clearInterval(uiInterval);
+                clockInterval = setInterval(updateClock, 1000);
+                uiInterval = setInterval(render, 250);
+            }
+
+            function closeSession() {
+                isOpen = false;
+                overlay.classList.remove("open");
+                overlay.setAttribute("aria-hidden", "true");
+                document.body.style.overflow = "";
+
+                clearInterval(clockInterval);
+                clearInterval(uiInterval);
+                clockInterval = null;
+                uiInterval = null;
+            }
+
+            function pauseOrResume() {
+                if (timerState === "idle") {
+                    timerStart();
+                } else {
+                    timerStart();
+                }
+                render();
+                if (window.Haptics) window.Haptics.tap();
+            }
+
+            function finishSession() {
+                if (timerState === "idle") {
+                    closeSession();
+                    return;
+                }
+
+                // Convert the currently-running timer into a paused state first.
+                // timerFinishSession() already owns all saving, Firestore sync,
+                // progress updates, push notification, and statistics recording.
+                if (timerState === "running") {
+                    timerPausedRemaining = Math.max(
+                        0,
+                        Math.ceil((timerEndAt - Date.now()) / 1000)
+                    );
+                    timerState = "paused";
+                }
+
+                timerFinishSession();
+                closeSession();
+                if (window.Haptics) window.Haptics.completion();
+            }
+
+            launch.addEventListener("click", openSession);
+            closeBtn?.addEventListener("click", closeSession);
+            pauseBtn?.addEventListener("click", pauseOrResume);
+            finishBtn?.addEventListener("click", finishSession);
+
+            // Escape leaves the full-screen view without stopping the timer.
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && isOpen) closeSession();
+            });
+
+            // Called by the existing timer when a session naturally completes.
+            window.studyWithMeFinishCleanup = function () {
+                if (isOpen) {
+                    closeSession();
+                }
+            };
+
+            // Existing timer completion calls this hook after saving the session.
+            const originalTimerFinishSession = timerFinishSession;
+            window._studyWithMeOriginalFinish = originalTimerFinishSession;
+
+            // We cannot redeclare the existing function, so wrap calls through
+            // timerTick by listening for the timer returning to idle.
+            const originalTimerTick = timerTick;
+            window._studyWithMeTimerTick = originalTimerTick;
+
+            // The overlay can be opened again after a completed session.
+            if (launchTitle) launchTitle.textContent = t("studyWithMe");
+            if (launchSub) launchSub.textContent = t("studyWithMeSub");
+            if (eyebrowEl) eyebrowEl.textContent = t("studyWithMeEyebrow");
+            if (tipEl) tipEl.textContent = t("studyWithMeTip");
+
+            window._renderStudyWithMe = render;
+        })();
 
 
         /* FLASHCARDS */
@@ -15367,6 +18983,7 @@ document.documentElement.classList.toggle(
             document.getElementById("flashcardsStudyBack").textContent = card.back;
             document.getElementById("flashcardsStudyBack").style.display = "block";
             document.getElementById("flashcardsStudyActions").style.display = "flex";
+            if (window.Haptics) window.Haptics.selection();
         }
 
         async function markStudyCard(type) {
@@ -15374,9 +18991,11 @@ document.documentElement.classList.toggle(
             if (type === 'know') {
                 studySession.known++;
                 card.needsReview = false;
+                if (window.Haptics) window.Haptics.success();
             } else {
                 studySession.review++;
                 card.needsReview = true;
+                if (window.Haptics) window.Haptics.tap();
             }
             const deck = flashcardDecks[currentDeckIndex];
             if (deck) {
@@ -15393,6 +19012,7 @@ document.documentElement.classList.toggle(
                         }); } catch (e) { console.error("Study sync error:", e); }
                     }
                 }
+                if (window.Haptics) window.Haptics.completion();
                 showStudySummary();
             } else {
                 renderStudyCard();
@@ -15514,17 +19134,28 @@ document.documentElement.classList.toggle(
             if (e.target === e.currentTarget) closeDeckModal();
         });
 
-        document.getElementById("flashcardAddDeckBtn")?.addEventListener("click", createFlashcardDeck);
+        document.getElementById("flashcardAddDeckBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
+            createFlashcardDeck();
+        });
         document.getElementById("flashcardBackBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             showFlashcardView('list');
             renderFlashcardDeckList();
         });
-        document.getElementById("flashcardStudyBtn")?.addEventListener("click", startStudySession);
-        document.getElementById("flashcardAddCardBtn")?.addEventListener("click", addCardToDeck);
+        document.getElementById("flashcardStudyBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.success();
+            startStudySession();
+        });
+        document.getElementById("flashcardAddCardBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
+            addCardToDeck();
+        });
         document.getElementById("flashcardsStudyCard")?.addEventListener("click", flipStudyCard);
         document.getElementById("flashcardReviewBtn")?.addEventListener("click", () => markStudyCard('review'));
         document.getElementById("flashcardKnowBtn")?.addEventListener("click", () => markStudyCard('know'));
         document.getElementById("flashcardsSummaryDoneBtn")?.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
             showFlashcardView('list');
             renderFlashcardDeckList();
         });
