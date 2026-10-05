@@ -3449,15 +3449,37 @@
         }
 
         .study-subject-name {
+            flex: 1;
+            min-width: 0;
             font-weight: 700;
             font-size: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
+        .study-subject-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .study-subject-edit,
         .study-subject-delete {
             border: 0;
             background: transparent;
             color: #999;
-            font-size: 20px;
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .study-subject-edit:active,
+        .study-subject-delete:active {
+            background: rgba(0,0,0,.06);
         }
 
         .study-empty {
@@ -3755,7 +3777,15 @@
         }
         .study-stats-back:active { opacity: .6; }
         .study-stats-page-title {
-            font-size: 22px; font-weight: 850;
+            font-size: 22px; font-weight: 850; flex: 1;
+        }
+        .study-stats-reset {
+            border: 0; border-radius: 12px; background: #ef4444; color: #fff;
+            padding: 9px 12px; font-size: 13px; font-weight: 800; cursor: pointer;
+            flex-shrink: 0;
+        }
+        .study-stats-reset:active {
+            transform: scale(.97); opacity: .85;
         }
 
         .study-stats-periods {
@@ -4496,7 +4526,8 @@
         .swm-main { z-index:2; margin:auto; transform:translateY(5vh); gap:10px; pointer-events:none; }.swm-eyebrow,.swm-subject,.swm-status,.swm-progress,.swm-music{display:none}.swm-background-panel{position:absolute;z-index:4;top:84px;right:22px;width:268px}.swm-panel-close{border:0;background:transparent;color:#fff;font-size:20px}.swm-scene-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.swm-scene-tabs button{border:0;border-radius:100px;background:#050505;color:#fff;padding:5px 8px;font-size:10px;font-weight:700}.swm-scene-tabs button.active{background:#fff;color:#1e1815}.swm-scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.swm-scene-grid button{height:65px;border:2px solid transparent;border-radius:8px;color:#fff;overflow:hidden;background:linear-gradient(145deg,#e5a4b9,#7db8e6 48%,#b7eced);font-size:0}.swm-scene-grid button:nth-child(2){background:radial-gradient(circle at 35% 20%,#ffdc8a 0 2%,transparent 3%),linear-gradient(145deg,#102346,#27355d 55%,#091323)}.swm-scene-grid button:nth-child(3){background:linear-gradient(145deg,#6b2d4b,#e58b55 50%,#382220)}.swm-scene-grid button.active{border-color:#fff}.swm-volume{display:grid;gap:6px;margin-top:15px;font-size:11px;font-weight:700}.swm-volume input{accent-color:#fff;width:100%}.swm-bottom{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:4;min-height:auto}.swm-tip{font-size:10px;color:#fff;opacity:.65;background:rgba(0,0,0,.28);padding:6px 10px;border-radius:20px;white-space:nowrap}
         #studyWithMeOverlay.scene-night .swm-bg { background:linear-gradient(rgba(8,13,25,.5),rgba(6,8,15,.8)),radial-gradient(ellipse at 50% 40%,rgba(38,77,147,.46),transparent 45%),#101426; } #studyWithMeOverlay.scene-sunset .swm-bg { background:linear-gradient(rgba(48,18,13,.33),rgba(20,11,10,.72)),radial-gradient(ellipse at 54% 43%,rgba(255,164,75,.54),transparent 42%),linear-gradient(120deg,#572939,#e17c45 48%,#39242d); }
         .swm-subject-row{display:flex;align-items:center;gap:6px;margin:-2px 0 10px;font-size:10px}.swm-subject-row select,.swm-music-row select{min-width:0;flex:1;border:1px solid rgba(255,255,255,.25);border-radius:7px;background:#201a17;color:#fff;padding:7px;font-size:10px}.swm-subject-row button{width:27px;height:27px;border:0;border-radius:7px;background:rgba(255,255,255,.14);color:#fff;font-size:17px}.swm-sound-panel{padding-top:13px;padding-bottom:13px}.swm-music-row{display:flex;align-items:center;gap:8px;margin-top:10px}.swm-sound-toggle{width:34px;height:31px;border:0;border-radius:8px;background:#bf7541;color:#fff;font-size:13px;font-weight:800}
-        @media (max-width: 700px){ #studyWithMeOverlay{padding:8px 10px;overflow-y:auto;overflow-x:hidden;align-items:stretch}.swm-topbar{position:sticky;top:0;z-index:7;padding-bottom:5px}.swm-left-column{position:relative;left:auto;top:auto;width:100%;margin:3px 0 48px;gap:9px}.swm-background-panel{display:none}.swm-brand{min-width:90px;padding:6px;font-size:9px}.swm-top-actions{gap:4px}.swm-icon-btn{width:36px;height:36px}.swm-window{left:4vw;width:92vw}.swm-desk{bottom:0}.swm-goals-panel{max-height:none}.swm-panel{padding:14px 15px}.swm-goal-list{max-height:170px}.swm-main{display:none}.swm-bottom{position:fixed;bottom:5px;z-index:8}.swm-tip{max-width:90vw;white-space:normal;text-align:center}.swm-top-actions .swm-icon-btn:not(.swm-close-top){display:none} }
+        @media (max-width: 700px){ #studyWithMeOverlay{padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 72px);overflow-y:auto;overflow-x:hidden;align-items:stretch;display:block}.swm-topbar{position:sticky;top:0;z-index:7;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;padding:0 0 8px;align-items:stretch}.swm-left-column{position:relative;left:auto;top:auto;width:100%;margin:3px 0 0;gap:9px}.swm-background-panel{display:none}.swm-brand{min-width:0;padding:7px 6px;border-radius:12px;font-size:9px;line-height:1.05;overflow:hidden}.swm-brand span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.swm-brand b{font-size:13px;line-height:1.05}.swm-goal-pill{min-width:0}.swm-top-actions{margin-left:0;gap:4px;justify-content:flex-end}.swm-icon-btn{width:34px;height:34px;border-radius:9px}.swm-window{left:4vw;width:92vw;top:0;min-height:250px;height:45vh}.swm-desk{bottom:0}.swm-goals-panel{max-height:none}.swm-panel{padding:22px 22px;border-radius:24px}.swm-panel-head strong{font-size:22px;line-height:1.1}.swm-panel-head span{font-size:15px}.swm-panel-time{font-size:42px;line-height:1;margin:22px 0}.swm-subject-row{align-items:stretch;gap:8px;font-size:15px;flex-wrap:wrap}.swm-subject-row label{width:100%;font-weight:800}.swm-subject-row select,.swm-music-row select{font-size:15px;padding:12px;border-radius:10px}.swm-subject-row button{width:52px;height:46px;border-radius:13px;font-size:24px}.swm-panel-controls{gap:10px;flex-wrap:wrap}.swm-square{width:auto;min-width:54px;height:45px;padding:0 12px;font-size:17px;font-weight:800}.swm-add-goal{gap:10px}.swm-add-goal input{font-size:16px;padding:16px 18px;border-radius:17px}.swm-add-goal button{width:64px;border-radius:17px;font-size:33px}.swm-goal-summary{padding:18px 20px;border-radius:17px;font-size:15px;grid-template-columns:auto 1fr 1px auto 1fr}.swm-goal-summary b{font-size:32px}.swm-goal-list{max-height:190px}.swm-goal-item{font-size:15px;padding:12px}.swm-music-row{gap:12px}.swm-sound-toggle{width:52px;height:46px;border-radius:12px;font-size:16px}.swm-main{display:none}.swm-bottom{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:8}.swm-tip{max-width:90vw;white-space:normal;text-align:center;font-size:13px;padding:10px 18px}.swm-top-actions .swm-icon-btn:not(.swm-close-top){display:none} }
+        @media (max-width: 380px){ .swm-panel{padding:18px 20px}.swm-panel-head strong{font-size:19px}.swm-panel-time{font-size:38px}.swm-add-goal input{font-size:15px;padding:14px}.swm-add-goal button{width:58px}.swm-goal-summary{font-size:13px;padding:16px}.swm-goal-summary b{font-size:28px}.study-stats-header{flex-wrap:wrap}.study-stats-page-title{font-size:20px}.study-stats-reset{padding:8px 10px} }
     </style>
 </head>
 
@@ -16505,7 +16536,10 @@ document.documentElement.classList.toggle(
                     ' style="margin-right:4px;">' +
                     '<div class="study-subject-name' + nameClass + '">' +
                     s.replace(/</g, "&lt;") + '</div>' +
-                    '<button class="study-subject-delete" data-index="' + i + '" type="button">×</button>' +
+                    '<div class="study-subject-actions">' +
+                    '<button class="study-subject-edit" data-index="' + i + '" type="button" aria-label="Edit subject">✎</button>' +
+                    '<button class="study-subject-delete" data-index="' + i + '" type="button" aria-label="Delete subject">×</button>' +
+                    '</div>' +
                     '</div>';
             }).join("");
 
@@ -16569,6 +16603,55 @@ document.documentElement.classList.toggle(
         });
 
         studySubjectList.addEventListener("click", (e) => {
+            const editBtn = e.target.closest(".study-subject-edit");
+            if (editBtn) {
+                if (window.Haptics) window.Haptics.tap();
+                const idx = parseInt(editBtn.dataset.index, 10);
+                const subjects = loadStudySubjects();
+                const oldName = subjects[idx];
+                if (!oldName) return;
+                const name = prompt("Edit subject name:", oldName);
+                if (name === null) return;
+                const clean = name.trim();
+                if (!clean || clean === oldName) return;
+                if (subjects.some((subject, index) => index !== idx && subject.toLowerCase() === clean.toLowerCase())) {
+                    alert("That subject already exists.");
+                    return;
+                }
+                subjects[idx] = clean;
+                saveStudySubjects(subjects);
+
+                const completed = JSON.parse(localStorage.getItem("dailykrd_study_completed") || "{}");
+                Object.keys(completed).forEach(key => {
+                    if (Array.isArray(completed[key])) {
+                        completed[key] = completed[key].map(subject => subject === oldName ? clean : subject);
+                    }
+                });
+                localStorage.setItem("dailykrd_study_completed", JSON.stringify(completed));
+
+                const sessions = JSON.parse(localStorage.getItem("dailykrd_study_sessions") || "[]");
+                if (Array.isArray(sessions)) {
+                    sessions.forEach(session => {
+                        if (session && session.subject === oldName) session.subject = clean;
+                    });
+                    localStorage.setItem("dailykrd_study_sessions", JSON.stringify(sessions));
+                }
+
+                try {
+                    const goalSets = JSON.parse(localStorage.getItem("dailykrd_session_goals_by_subject") || "{}");
+                    if (goalSets && goalSets[oldName] && !goalSets[clean]) {
+                        goalSets[clean] = goalSets[oldName];
+                        delete goalSets[oldName];
+                        localStorage.setItem("dailykrd_session_goals_by_subject", JSON.stringify(goalSets));
+                    }
+                } catch (err) {}
+
+                if (typeof timerPopulateSubject === "function") timerPopulateSubject();
+                if (typeof window._syncFocusRoomSubjects === "function") window._syncFocusRoomSubjects(clean);
+                if (typeof window._renderStudyStatsPage === "function") window._renderStudyStatsPage();
+                renderStudy();
+                return;
+            }
             const btn = e.target.closest(".study-subject-delete");
             if (!btn) return;
             if (window.Haptics) window.Haptics.warning();
