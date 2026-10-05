@@ -4484,19 +4484,6 @@
             --tp-logo1: #FAE8F0; --tp-logo2: #F4A3C4; --tp-logo3: #FAE8F0;
         }
 
-        /* Focus room visual refresh */
-        #studyWithMeOverlay { padding: 10px 18px 18px; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #17120f; }
-        .swm-bg { inset: 0; background: linear-gradient(rgba(18,12,10,.46),rgba(12,9,8,.7)), radial-gradient(ellipse at 45% 42%, rgba(180,104,46,.42), transparent 43%), linear-gradient(110deg,#17120f 0%,#59321d 46%,#1d1511 100%); animation: none; }
-        .swm-bg::before { inset:0; opacity:.7; background: repeating-linear-gradient(90deg, transparent 0 12%,rgba(0,0,0,.17) 12.3% 12.65%,transparent 12.9% 25%), repeating-linear-gradient(0deg, transparent 0 23%,rgba(0,0,0,.19) 23.4% 24%,transparent 24.2% 48%); animation:none; }
-        .swm-bg::after { inset:0; opacity:.35; background: radial-gradient(circle at 8% 17%,#ffce71 0 1px,transparent 2px),radial-gradient(circle at 20% 27%,#fff1a5 0 2px,transparent 3px),radial-gradient(circle at 36% 12%,#e48c3f 0 2px,transparent 4px),radial-gradient(circle at 68% 24%,#ffdd75 0 2px,transparent 4px),radial-gradient(circle at 80% 38%,#ffb657 0 2px,transparent 4px); background-size:180px 140px; animation: swmStars 20s linear infinite; }
-        .swm-room { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:-1; }.swm-window { position:absolute; width:71vw; height:52vh; min-height:330px; top:5vh; left:14vw; border:12px solid rgba(23,15,11,.83); box-shadow:0 0 0 4px rgba(107,62,35,.45), inset 0 0 90px rgba(0,0,0,.42); background:linear-gradient(180deg,rgba(10,17,30,.4),rgba(98,50,30,.13)); }.swm-window:before,.swm-window:after { content:""; position:absolute; background:rgba(24,16,12,.85); }.swm-window:before{width:9px;inset:0 33% 0 auto}.swm-window:after{height:9px;inset:48% 0 auto 0}.swm-desk { position:absolute; left:-5%; right:-5%; bottom:8vh; height:19vh; background:linear-gradient(#4a2918,#1b100b 13%,#341b0d 17%,#120b08); box-shadow:0 -18px 36px rgba(245,171,94,.13); transform:perspective(600px) rotateX(8deg); }
-        .swm-topbar { z-index:5; align-items:flex-start; justify-content:flex-start; gap:8px; }.swm-brand,.swm-panel { background:rgba(26,22,20,.89); border:1px solid rgba(255,255,255,.06); box-shadow:0 12px 34px rgba(0,0,0,.29); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); }.swm-brand { border-radius:0 0 10px 10px; min-width:118px; padding:8px 12px; display:grid; gap:2px; text-align:center; font-size:10px; font-weight:700; }.swm-brand b { font-size:12px; font-variant-numeric:tabular-nums; }.swm-goal-pill{min-width:100px}.swm-top-actions{margin-left:auto;display:flex;gap:8px}.swm-icon-btn{width:46px;height:46px;border-radius:10px;background:rgba(25,20,18,.9);border:1px solid rgba(255,255,255,.06);font-weight:800}.swm-close-top{color:#ff8479;font-size:24px}
-        .swm-left-column { position:absolute; z-index:4; top:84px; left:20px; width:268px; display:grid; gap:12px; }.swm-panel{border-radius:17px;padding:17px 18px;color:#fff}.swm-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}.swm-panel-head strong{font-size:13px}.swm-panel-head span{opacity:.76;font-size:11px}.swm-timer-panel{padding-bottom:15px}.swm-panel-time{font-size:30px;font-weight:850;letter-spacing:1px;font-variant-numeric:tabular-nums;margin:12px 0 11px}.swm-panel-controls{display:flex;gap:10px}.swm-square{width:34px;height:30px;border:0;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;font-size:14px}.swm-square:hover,.swm-add-goal button:hover{background:#bf7541}
-        .swm-add-goal{display:flex;gap:9px;margin:13px 0}.swm-add-goal input{min-width:0;flex:1;padding:10px 12px;border-radius:11px;border:2px solid rgba(255,255,255,.83);background:rgba(0,0,0,.14);color:#fff;font-size:12px;outline:0}.swm-add-goal input::placeholder{color:#d3ccc8}.swm-add-goal button{width:42px;border:0;border-radius:11px;background:rgba(255,255,255,.12);color:#fff;font-size:23px}.swm-goal-summary{display:grid;grid-template-columns:auto 1fr 1px auto 1fr;align-items:center;gap:6px;border-radius:11px;background:rgba(0,0,0,.29);padding:11px 13px;font-size:10px}.swm-goal-summary b{font-size:24px}.swm-goal-summary b:last-of-type{color:#84bf4b}.swm-goal-summary em{height:36px;background:rgba(255,255,255,.28)}.swm-goal-list{display:grid;gap:7px;margin-top:11px;max-height:135px;overflow:auto}.swm-goal-item{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border-radius:10px;padding:9px 10px;font-size:11px}.swm-goal-item input{accent-color:#8fc951}.swm-goal-item.done span{text-decoration:line-through;opacity:.55}.swm-goal-item button{margin-left:auto;border:0;background:transparent;color:#fff;opacity:.6}
-        .swm-main { z-index:2; margin:auto; transform:translateY(5vh); gap:10px; pointer-events:none; }.swm-eyebrow,.swm-subject,.swm-status,.swm-progress,.swm-music{display:none}.swm-background-panel{position:absolute;z-index:4;top:84px;right:22px;width:268px}.swm-panel-close{border:0;background:transparent;color:#fff;font-size:20px}.swm-scene-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.swm-scene-tabs button{border:0;border-radius:100px;background:#050505;color:#fff;padding:5px 8px;font-size:10px;font-weight:700}.swm-scene-tabs button.active{background:#fff;color:#1e1815}.swm-scene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.swm-scene-grid button{height:65px;border:2px solid transparent;border-radius:8px;color:#fff;overflow:hidden;background:linear-gradient(145deg,#e5a4b9,#7db8e6 48%,#b7eced);font-size:0}.swm-scene-grid button:nth-child(2){background:radial-gradient(circle at 35% 20%,#ffdc8a 0 2%,transparent 3%),linear-gradient(145deg,#102346,#27355d 55%,#091323)}.swm-scene-grid button:nth-child(3){background:linear-gradient(145deg,#6b2d4b,#e58b55 50%,#382220)}.swm-scene-grid button.active{border-color:#fff}.swm-volume{display:grid;gap:6px;margin-top:15px;font-size:11px;font-weight:700}.swm-volume input{accent-color:#fff;width:100%}.swm-bottom{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:4;min-height:auto}.swm-tip{font-size:10px;color:#fff;opacity:.65;background:rgba(0,0,0,.28);padding:6px 10px;border-radius:20px;white-space:nowrap}
-        #studyWithMeOverlay.scene-night .swm-bg { background:linear-gradient(rgba(8,13,25,.5),rgba(6,8,15,.8)),radial-gradient(ellipse at 50% 40%,rgba(38,77,147,.46),transparent 45%),#101426; } #studyWithMeOverlay.scene-sunset .swm-bg { background:linear-gradient(rgba(48,18,13,.33),rgba(20,11,10,.72)),radial-gradient(ellipse at 54% 43%,rgba(255,164,75,.54),transparent 42%),linear-gradient(120deg,#572939,#e17c45 48%,#39242d); }
-        .swm-sound-panel{padding-top:13px;padding-bottom:13px}.swm-sound-choices{display:flex;gap:6px;margin:10px 0}.swm-sound-choices button{flex:1;border:1px solid rgba(255,255,255,.17);border-radius:8px;background:rgba(0,0,0,.23);color:#fff;padding:7px 3px;font-size:10px;font-weight:700}.swm-sound-choices button.active{background:#bf7541;border-color:#eeb075}.swm-sound-row{display:flex;align-items:center;gap:9px}.swm-sound-toggle{border:0;border-radius:8px;background:rgba(255,255,255,.15);color:#fff;padding:8px 9px;font-size:10px;font-weight:800;white-space:nowrap}.swm-sound-row label{display:grid;gap:2px;flex:1;font-size:9px}.swm-sound-row input{width:100%;accent-color:#e9a15c}
-        @media (max-width: 700px){ #studyWithMeOverlay{padding:8px 10px;overflow-y:auto;overflow-x:hidden;align-items:stretch}.swm-topbar{position:sticky;top:0;z-index:7;padding-bottom:5px}.swm-left-column{position:relative;left:auto;top:auto;width:100%;margin:3px 0 48px;gap:9px}.swm-background-panel{display:none}.swm-brand{min-width:90px;padding:6px;font-size:9px}.swm-top-actions{gap:4px}.swm-icon-btn{width:36px;height:36px}.swm-window{left:4vw;width:92vw}.swm-desk{bottom:0}.swm-goals-panel{max-height:none}.swm-panel{padding:14px 15px}.swm-goal-list{max-height:170px}.swm-main{display:none}.swm-bottom{position:fixed;bottom:5px;z-index:8}.swm-tip{max-width:90vw;white-space:normal;text-align:center}.swm-top-actions .swm-icon-btn:not(.swm-close-top){display:none} }
     </style>
 </head>
 
@@ -5422,53 +5409,34 @@
         <!-- STUDY WITH ME FULL-SCREEN SESSION -->
         <div id="studyWithMeOverlay" aria-hidden="true">
             <div class="swm-bg"></div>
-            <div class="swm-room" aria-hidden="true"><div class="swm-city"></div><div class="swm-window"><i></i><i></i><i></i></div><div class="swm-desk"></div></div>
 
             <div class="swm-topbar">
-                <div class="swm-brand"><span>◉ Personal timer</span><b id="studyWithMeClock">--:--</b></div>
-                <div class="swm-brand swm-goal-pill">◎ Session goals <b id="swmGoalCount">0/0</b></div>
-                <div class="swm-top-actions"><button class="swm-icon-btn" type="button" title="Music">♫</button><button class="swm-icon-btn" type="button" title="Fullscreen" onclick="document.getElementById('studyWithMeOverlay').requestFullscreen?.()">↗</button><button class="swm-icon-btn swm-close-top" id="studyWithMeClose" type="button" aria-label="Leave session">×</button></div>
+                <button class="swm-icon-btn" id="studyWithMeClose" type="button" aria-label="Leave session">×</button>
+                <div class="swm-clock" id="studyWithMeClock">--:--</div>
+                <div class="swm-top-spacer" aria-hidden="true"></div>
             </div>
 
-            <aside class="swm-left-column">
-                <section class="swm-panel swm-timer-panel">
-                    <div class="swm-panel-head"><strong>◉ Personal timer</strong><span>◖</span></div>
-                    <div class="swm-panel-time" id="studyWithMeTimer">25:00</div>
-                    <div class="swm-panel-controls"><button class="swm-square" id="studyWithMePause" type="button" title="Pause / resume">Ⅱ</button><button class="swm-square" id="studyWithMeFinish" type="button" title="Finish session">■</button></div>
-                </section>
-                <section class="swm-panel swm-goals-panel">
-                    <div class="swm-panel-head"><strong>◎ Session goals</strong><span id="swmGoalStats">0 completed</span></div>
-                    <form class="swm-add-goal" id="swmGoalForm"><input id="swmGoalInput" maxlength="70" placeholder="Type a goal..." aria-label="New session goal"><button type="submit">＋</button></form>
-                    <div class="swm-goal-summary"><b id="swmGoalTotal">0</b><span>Goals</span><em></em><b id="swmGoalDone">0</b><span>Completed</span></div>
-                    <div class="swm-goal-list" id="swmGoalList"></div>
-                </section>
-                <section class="swm-panel swm-sound-panel" aria-label="Session sound">
-                    <div class="swm-panel-head"><strong>♫ Focus sound</strong><span id="swmSoundStatus">Off</span></div>
-                    <div class="swm-sound-choices" role="group" aria-label="Choose a focus sound">
-                        <button type="button" data-sound="lofi">Lo-fi</button>
-                        <button type="button" data-sound="piano">Piano</button>
-                        <button type="button" data-sound="rain">Rain</button>
-                    </div>
-                    <div class="swm-sound-row"><button class="swm-sound-toggle" id="swmSoundToggle" type="button">▶ Play sound</button><label>Volume <input id="swmFocusVolume" type="range" min="0" max="100" value="38"></label></div>
-                </section>
-            </aside>
-
-            <main class="swm-main">
+            <div class="swm-main">
                 <div class="swm-eyebrow" id="studyWithMeEyebrow">STUDY WITH ME</div>
                 <div class="swm-subject" id="studyWithMeSubject">Focus Session</div>
+                <div class="swm-timer" id="studyWithMeTimer">25:00</div>
                 <div class="swm-status" id="studyWithMeStatus">Ready to focus</div>
-                <div class="swm-progress" aria-hidden="true"><div class="swm-progress-fill" id="studyWithMeProgress"></div></div>
+
+                <div class="swm-progress" aria-hidden="true">
+                    <div class="swm-progress-fill" id="studyWithMeProgress"></div>
+                </div>
+
                 <div class="swm-music" id="studyWithMeMusic"></div>
-            </main>
 
-            <aside class="swm-panel swm-background-panel">
-                <div class="swm-panel-head"><strong>▣ Background</strong><button class="swm-panel-close" type="button" aria-label="Hide background panel">×</button></div>
-                <div class="swm-scene-tabs" role="group" aria-label="Choose a scene"><button class="active" data-scene="rain" type="button">☂ Rainy room</button><button data-scene="night" type="button">✦ Night city</button><button data-scene="sunset" type="button">☀ Sunset</button></div>
-                <div class="swm-scene-grid"><button class="active" data-scene="rain" type="button"><span>Rainy room</span></button><button data-scene="night" type="button"><span>Night city</span></button><button data-scene="sunset" type="button"><span>Sunset desk</span></button></div>
-                <label class="swm-volume">♫ Ambient sound <input id="swmAmbientVolume" type="range" min="0" max="100" value="45"></label>
-            </aside>
+                <div class="swm-controls">
+                    <button class="swm-control primary" id="studyWithMePause" type="button">Pause</button>
+                    <button class="swm-control danger" id="studyWithMeFinish" type="button">Finish Session</button>
+                </div>
+            </div>
 
-            <div class="swm-bottom"><div class="swm-tip" id="studyWithMeTip">Stay focused. You can leave this screen and your timer will keep running.</div></div>
+            <div class="swm-bottom">
+                <div class="swm-tip" id="studyWithMeTip">Stay focused. You can leave this screen and your timer will keep running.</div>
+            </div>
         </div>
 
 
@@ -20697,74 +20665,6 @@ document.documentElement.classList.toggle(
         document.getElementById("aiToggle").addEventListener("click", () => {
             document.getElementById("aiBox").classList.toggle("open");
         });
-    </script>
-    <script>
-        /* Small, local session-goal layer for the focus-room controls. */
-        (function () {
-            const overlay = document.getElementById('studyWithMeOverlay');
-            const form = document.getElementById('swmGoalForm');
-            const input = document.getElementById('swmGoalInput');
-            const list = document.getElementById('swmGoalList');
-            const total = document.getElementById('swmGoalTotal');
-            const done = document.getElementById('swmGoalDone');
-            const pill = document.getElementById('swmGoalCount');
-            const stats = document.getElementById('swmGoalStats');
-            const subjectSelect = document.getElementById('studyTimerSubject');
-            let goalSets = {};
-            try { goalSets = JSON.parse(localStorage.getItem('dailykrd_session_goals_by_subject') || '{}'); } catch (e) { goalSets = {}; }
-            if (!goalSets || Array.isArray(goalSets) || typeof goalSets !== 'object') goalSets = {};
-            function subjectKey() { return subjectSelect && subjectSelect.value ? subjectSelect.value : '__general__'; }
-            function subjectName() { return subjectSelect && subjectSelect.value ? subjectSelect.value : 'General'; }
-            function currentGoals() { const key = subjectKey(); if (!Array.isArray(goalSets[key])) goalSets[key] = []; return goalSets[key]; }
-            function save() { localStorage.setItem('dailykrd_session_goals_by_subject', JSON.stringify(goalSets)); }
-            function render() {
-                const goals = currentGoals();
-                const completed = goals.filter(goal => goal.done).length;
-                total.textContent = goals.length;
-                done.textContent = completed;
-                pill.textContent = completed + '/' + goals.length;
-                stats.textContent = subjectName() + ' · ' + completed + ' completed';
-                list.innerHTML = goals.map((goal, index) => '<label class="swm-goal-item ' + (goal.done ? 'done' : '') + '"><input type="checkbox" data-index="' + index + '" ' + (goal.done ? 'checked' : '') + '><span></span><button type="button" data-remove="' + index + '" aria-label="Remove goal">×</button></label>').join('');
-                goals.forEach((goal, index) => { const label = list.children[index]; if (label) label.querySelector('span').textContent = goal.text; });
-            }
-            form.addEventListener('submit', function (event) { event.preventDefault(); const text = input.value.trim(); if (!text) return; currentGoals().push({ text: text, done: false }); input.value = ''; save(); render(); });
-            list.addEventListener('change', function (event) { const goals = currentGoals(); const index = Number(event.target.dataset.index); if (!Number.isNaN(index) && goals[index]) { goals[index].done = event.target.checked; save(); render(); } });
-            list.addEventListener('click', function (event) { const goals = currentGoals(); const index = Number(event.target.dataset.remove); if (!Number.isNaN(index)) { goals.splice(index, 1); save(); render(); } });
-            subjectSelect && subjectSelect.addEventListener('change', render);
-            document.querySelectorAll('[data-scene]').forEach(button => button.addEventListener('click', function () { const scene = button.dataset.scene; overlay.classList.remove('scene-night', 'scene-sunset'); if (scene !== 'rain') overlay.classList.add('scene-' + scene); document.querySelectorAll('[data-scene]').forEach(item => item.classList.toggle('active', item.dataset.scene === scene)); }));
-            document.querySelector('.swm-panel-close').addEventListener('click', function () { document.querySelector('.swm-background-panel').style.display = 'none'; });
-            /* Built-in Web Audio focus sounds: reliable even when the optional
-               music/ folder has not been deployed alongside the HTML. */
-            const soundButtons = Array.from(document.querySelectorAll('[data-sound]'));
-            const soundToggle = document.getElementById('swmSoundToggle');
-            const soundStatus = document.getElementById('swmSoundStatus');
-            const volume = document.getElementById('swmFocusVolume');
-            let soundKind = 'lofi', soundContext, soundGain, soundNodes = [], soundTimer = null;
-            function stopSound() { soundNodes.forEach(node => { try { node.stop ? node.stop() : node.disconnect(); } catch (e) {} }); soundNodes = []; if (soundTimer) clearInterval(soundTimer); soundTimer = null; if (soundGain) soundGain.disconnect(); soundGain = null; soundStatus.textContent = 'Off'; soundToggle.textContent = '▶ Play sound'; }
-            function level() { return (Number(volume.value) / 100) * .22; }
-            function startSound() {
-                stopSound();
-                soundContext = soundContext || new (window.AudioContext || window.webkitAudioContext)();
-                soundContext.resume(); soundGain = soundContext.createGain(); soundGain.gain.value = level(); soundGain.connect(soundContext.destination);
-                const now = soundContext.currentTime;
-                if (soundKind === 'rain') {
-                    const buffer = soundContext.createBuffer(1, soundContext.sampleRate * 2, soundContext.sampleRate); const data = buffer.getChannelData(0); for (let i=0;i<data.length;i++) data[i] = Math.random()*2-1;
-                    const source = soundContext.createBufferSource(), filter = soundContext.createBiquadFilter(); source.buffer=buffer; source.loop=true; filter.type='bandpass'; filter.frequency.value=1350; filter.Q.value=.55; source.connect(filter).connect(soundGain); source.start(); soundNodes.push(source, filter);
-                } else {
-                    const notes = soundKind === 'piano' ? [261.63,329.63,392,523.25] : [130.81,155.56,196,233.08]; let step=0;
-                    const playNote = () => { const osc=soundContext.createOscillator(), gain=soundContext.createGain(); osc.type=soundKind === 'piano' ? 'sine' : 'triangle'; osc.frequency.value=notes[step++ % notes.length]; gain.gain.setValueAtTime(0, soundContext.currentTime); gain.gain.linearRampToValueAtTime(soundKind === 'piano' ? .16 : .09, soundContext.currentTime+.025); gain.gain.exponentialRampToValueAtTime(.001, soundContext.currentTime+(soundKind === 'piano'?1.7:1.1)); osc.connect(gain).connect(soundGain); osc.start(); osc.stop(soundContext.currentTime+2); soundNodes.push(osc); };
-                    playNote(); soundTimer=setInterval(playNote, soundKind === 'piano' ? 1100 : 720);
-                }
-                soundStatus.textContent = soundKind === 'lofi' ? 'Lo-fi playing' : soundKind[0].toUpperCase()+soundKind.slice(1)+' playing'; soundToggle.textContent = 'Ⅱ Pause sound';
-            }
-            soundButtons.forEach(button => button.addEventListener('click', () => { soundKind=button.dataset.sound; soundButtons.forEach(item=>item.classList.toggle('active',item===button)); if (soundGain) startSound(); }));
-            soundToggle.addEventListener('click', () => soundGain ? stopSound() : startSound());
-            volume.addEventListener('input', () => { if (soundGain) soundGain.gain.value=level(); });
-            document.getElementById('studyWithMeClose').addEventListener('click', stopSound);
-            new MutationObserver(() => { if (!overlay.classList.contains('open')) stopSound(); }).observe(overlay, { attributes: true, attributeFilter: ['class'] });
-            soundButtons[0].classList.add('active');
-            render();
-        })();
     </script>
 
 </body>
