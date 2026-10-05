@@ -6365,6 +6365,12 @@
 
         let todaySteps = null;
 
+        // Global flags / caches for fixes
+        let pushRegistration = null;
+        let pushSyncTimer = null;
+        window.compassActive = false;
+        const syncLayoutForced = localStorage.getItem('dailykrd_sync_layout') === 'profile';
+
 
         /* ==========================================================================
            CROSS-DEVICE APP-STATE SYNC
@@ -7284,8 +7290,9 @@
 
            The layout that worked is remembered per device. */
 
+        // Determine sync layout: if forced profile layout flag exists, use profile; otherwise use stored path
         let appstateSyncPath =
-            rawStorageRead("dailykrd_sync_path") === "profile"
+            (rawStorageRead("dailykrd_sync_layout") === "profile" || rawStorageRead("dailykrd_sync_path") === "profile")
                 ? "profile"
                 : "collection";
 
@@ -7345,6 +7352,12 @@
 
             rawStorageWrite(
                 "dailykrd_sync_path",
+                "profile"
+            );
+
+            // Force all devices to use profile layout by writing a flag
+            rawStorageWrite(
+                "dailykrd_sync_layout",
                 "profile"
             );
 
@@ -10964,6 +10977,27 @@ done: "تەواو",
 
                     try {
 
+                        /* Pause music so audio does not keep playing after
+                           signing out; local prefs remain on this device. */
+                        try {
+                            window._musicHooks &&
+                                window._musicHooks.forTimerStop();
+                        } catch (e) {}
+
+                        // Clean up music audio element completely
+                        if (window.musicAudio) {
+                            window.musicAudio.pause();
+                            window.musicAudio.src = '';
+                            window.musicAudio = null;
+                        }
+
+                        // Stop compass listeners
+                        if (window.compassActive) {
+                            window.removeEventListener("deviceorientationabsolute", window.handleOrientationEvent, true);
+                            window.removeEventListener("deviceorientation", window.handleOrientationEvent, true);
+                            window.compassActive = false;
+                        }
+
                         await signOut(auth);
 
                     } catch (error) {
@@ -10995,6 +11029,20 @@ done: "تەواو",
                             window._musicHooks &&
                                 window._musicHooks.forTimerStop();
                         } catch (e) {}
+
+                        // Clean up music audio element completely
+                        if (window.musicAudio) {
+                            window.musicAudio.pause();
+                            window.musicAudio.src = '';
+                            window.musicAudio = null;
+                        }
+
+                        // Stop compass listeners
+                        if (window.compassActive) {
+                            window.removeEventListener("deviceorientationabsolute", window.handleOrientationEvent, true);
+                            window.removeEventListener("deviceorientation", window.handleOrientationEvent, true);
+                            window.compassActive = false;
+                        }
 
                         await signOut(auth);
 
@@ -11632,8 +11680,12 @@ done: "تەواو",
             text.textContent =
                 `${done}/${total}`;
 
-
-            const radius = 24;
+            // Use actual SVG circle radius if available
+            let radius = 24;
+            if (fill && fill.tagName === 'circle') {
+                const rAttr = fill.getAttribute('r');
+                if (rAttr) radius = parseFloat(rAttr);
+            }
 
             const circumference =
                 2 * Math.PI * radius;
@@ -11816,12 +11868,10 @@ done: "تەواو",
             const dashPercent = document.getElementById("dashProgressPercent");
             const dashFill = document.getElementById("dashProgressFill");
             const dashTasks = document.getElementById("dashTasksScore");
-            const dashTasksTitle = document.getElementById("dashTasksCompleted");
 
             if (dashPercent) dashPercent.textContent = percent + "%";
             if (dashFill) dashFill.style.width = percent + "%";
             if (dashTasks) dashTasks.textContent = `${done}/${total}`;
-            if (dashTasksTitle) dashTasksTitle.textContent = `${done} of ${total} completed`;
 
             // ⚡ What should I do now?
             const nextActionText = document.getElementById("nextActionText");
@@ -13678,6 +13728,11 @@ document.documentElement.classList.toggle(
             const status =
                 document.getElementById("compassStatus");
 
+            // Guard against multiple calls
+            if (compassActive) {
+                status.textContent = t("compassEnabled");
+                return;
+            }
 
             if (
                 typeof DeviceOrientationEvent !== "undefined" &&
@@ -13736,7 +13791,7 @@ document.documentElement.classList.toggle(
                 true
             );
 
-
+            compassActive = true;
             status.textContent =
                 t("compassEnabled");
         }
@@ -14418,9 +14473,12 @@ document.documentElement.classList.toggle(
         }
 
         function triggerPushSync() {
-            if (pushSettings && pushSettings.masterEnabled) {
+            if (!pushSettings || !pushSettings.masterEnabled) return;
+            if (pushSyncTimer) clearTimeout(pushSyncTimer);
+            pushSyncTimer = setTimeout(() => {
                 syncPushPreferences();
-            }
+                pushSyncTimer = null;
+            }, 300);
         }
 
         function urlBase64ToUint8Array(base64String) {
@@ -14450,7 +14508,7 @@ document.documentElement.classList.toggle(
             try {
                 if (status) status.textContent = "Requesting permission...";
                 const permission = await Notification.requestPermission();
-                
+
                 if (permission !== "granted") {
                     pushSettings.masterEnabled = false;
                     renderPushSettingsUI();
@@ -14459,30 +14517,41 @@ document.documentElement.classList.toggle(
                 }
 
                 if (status) status.textContent = "Registering worker...";
-                
-                // FORCE EXPLICIT REGISTRATION TO CATCH 404 FILE ERRORS
+
+                // Register service worker once, reuse if already registered
                 let reg;
-                try {
-                    reg = await navigator.serviceWorker.register('./sw.js');
-                    reg = await navigator.serviceWorker.ready;
-                } catch (swErr) {
-                    throw new Error("sw.js file error: " + swErr.message);
+                if (!pushRegistration) {
+                    try {
+                        pushRegistration = await navigator.serviceWorker.register('./sw.js');
+                    } catch (swErr) {
+                        console.warn("sw.js registration failed:", swErr);
+                        // Continue without SW; push will not work offline but we can still subscribe if supported
+                        pushRegistration = null;
+                    }
                 }
-                
+                if (pushRegistration) {
+                    try {
+                        reg = await pushRegistration.ready;
+                    } catch (e) {
+                        reg = pushRegistration;
+                    }
+                } else {
+                    // No service worker, but we can still try to subscribe (will not work for background push)
+                    reg = { pushManager: navigator.serviceWorker ? await navigator.serviceWorker.ready : null };
+                }
+
                 if (status) status.textContent = "Subscribing to push...";
-                
-                const subscribePromise = reg.pushManager.getSubscription().then(async (existingSub) => {
+
+                const subscribePromise = (reg && reg.pushManager ? reg.pushManager.getSubscription() : Promise.resolve(null)).then(async (existingSub) => {
                     if (existingSub) {
-                        // Don't blindly reuse an old subscription: if it was
-                        // created under a previous VAPID key, the push
-                        // service will reject every future send with
-                        // "VapidPkHashMismatch" and there is no way to
-                        // recover except unsubscribing first.
                         try {
                             await existingSub.unsubscribe();
                         } catch (unsubError) {
                             console.warn("Could not unsubscribe stale push subscription:", unsubError);
                         }
+                    }
+                    if (!reg || !reg.pushManager) {
+                        throw new Error("PushManager not available");
                     }
                     return await reg.pushManager.subscribe({
                         userVisibleOnly: true,
@@ -14490,7 +14559,7 @@ document.documentElement.classList.toggle(
                     });
                 });
 
-                const timeoutPromise = new Promise((_, reject) => 
+                const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(() => reject(new Error("Subscription timed out. Try reopening.")), 8000)
                 );
 
@@ -14502,9 +14571,6 @@ document.documentElement.classList.toggle(
                 const syncResult = await syncPushPreferences();
 
                 if (syncResult && syncResult.ok === false) {
-                    // The device subscription is valid, but the Worker never
-                    // confirmed storing it — no push will actually arrive.
-                    // Don't report success in that case.
                     pushSettings.masterEnabled = false;
                     renderPushSettingsUI();
                     if (status) status.textContent =
@@ -15477,54 +15543,62 @@ document.documentElement.classList.toggle(
                 ["calendar", t("prayerStats.calendar")]
             ];
 
-            wrap.innerHTML = "";
+            // Only rebuild if tabs don't exist yet
+            if (wrap.children.length === 0) {
+                wrap.innerHTML = "";
 
-            definitions.forEach(
-                ([period, label]) => {
+                definitions.forEach(
+                    ([period, label]) => {
 
-                    const button =
-                        document.createElement(
-                            "button"
+                        const button =
+                            document.createElement(
+                                "button"
+                            );
+
+                        button.type = "button";
+
+                        button.className =
+                            "prayer-stats-tab" +
+                            (prayerStatsPeriod ===
+                                period
+                                ? " active"
+                                : "");
+
+                        button.dataset.pstat =
+                            period;
+
+                        button.textContent =
+                            label;
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                if (
+                                    prayerStatsPeriod ===
+                                    period
+                                ) {
+                                    return;
+                                }
+
+                                prayerStatsPeriod =
+                                    period;
+
+                                renderPrayerStatsTabs();
+
+                                renderPrayerStatsBody();
+                            }
                         );
 
-                    button.type = "button";
-
-                    button.className =
-                        "prayer-stats-tab" +
-                        (prayerStatsPeriod ===
-                            period
-                            ? " active"
-                            : "");
-
-                    button.dataset.pstat =
-                        period;
-
-                    button.textContent =
-                        label;
-
-                    button.addEventListener(
-                        "click",
-                        () => {
-
-                            if (
-                                prayerStatsPeriod ===
-                                period
-                            ) {
-                                return;
-                            }
-
-                            prayerStatsPeriod =
-                                period;
-
-                            renderPrayerStatsTabs();
-
-                            renderPrayerStatsBody();
-                        }
-                    );
-
-                    wrap.appendChild(button);
-                }
-            );
+                        wrap.appendChild(button);
+                    }
+                );
+            } else {
+                // Just update active class
+                wrap.querySelectorAll(".prayer-stats-tab").forEach(btn => {
+                    btn.classList.toggle("active", btn.dataset.pstat === prayerStatsPeriod);
+                });
+            }
         }
 
 
@@ -16226,6 +16300,9 @@ document.documentElement.classList.toggle(
                     // Skip inputs, textareas, sliders, and content areas
                     if (target.matches("input, textarea, select, [contenteditable]")) return;
 
+                    // Check if haptic was already handled manually
+                    if (e._hapticHandled) return;
+
                     // Button-like elements get tap feedback
                     if (target.matches("button, .tab, .icon-button, .setting-button, .accent-swatch, .theme-option, .icon-style-option, .prayer-stats-tab, .cal-filter-pill, .music-cat, .music-track, .flashcard-deck, .flashcard-mini-study, .cal-event-item, .study-subject-delete, .dash-study-check, .repeat-day")) {
                         window.Haptics.tap();
@@ -16924,6 +17001,7 @@ document.documentElement.classList.toggle(
             if (musicAudio) return musicAudio;
 
             musicAudio = new Audio();
+            window.musicAudio = musicAudio; // expose for cleanup on sign-out
             musicAudio.preload = "metadata";
             musicApplyPrefsToAudio();
 
