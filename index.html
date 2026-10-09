@@ -14,10 +14,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- AI Chat: Markdown rendering & sanitization (lightweight, no build step) -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" integrity="sha256-+5v0yU5O4K8eZ1qM+K1Q7hLzJ8vY5X2N8mP9wR6tA=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js" integrity="sha256-qVxhLdgG2k4f4gN3hT5jK7yU9bV2cX1mP9wR6tA=" crossorigin="anonymous"></script>
-
     <script>
         (function () {
             try {
@@ -123,33 +119,241 @@
             color: #fff;
             font-size: 22px;
             box-shadow: 0 6px 18px rgba(0,0,0,.25);
+            transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease;
         }
+
+        #aiToggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0,0,0,.3);
+        }
+
+        #aiToggle:active { transform: scale(.92); }
 
         .dark #aiToggle {
             background: #fff;
             color: #111;
         }
 
+        /* Panel: themed through local --ai-* tokens so dark mode and the
+           full-palette themes both map in without extra rules. */
+
         #aiBox {
+            --ai-panel: rgba(255,255,255,.97);
+            --ai-panel-2: rgba(248,248,250,.98);
+            --ai-brd: rgba(0,0,0,.08);
+            --ai-ink: #111;
+            --ai-muted: #86868b;
+            --ai-chip: rgba(230,230,235,.9);
+            --ai-btn: #111;
+            --ai-btn-ink: #fff;
+            --ai-user: #111;
+            --ai-user-ink: #fff;
+            --ai-code-bg: rgba(0,0,0,.05);
+            --ai-shadow: 0 12px 36px rgba(0,0,0,.18);
+
             position: fixed;
             right: 18px;
             bottom: calc(82px + env(safe-area-inset-bottom));
             z-index: 500;
-            width: min(340px, calc(100vw - 36px));
-            max-height: min(480px, 65vh);
+            width: min(360px, calc(100vw - 24px));
+            max-height: min(520px, 70vh);
             display: none;
             flex-direction: column;
-            background: rgba(255,255,255,.97);
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,.18);
+            background: var(--ai-panel);
+            border: 1px solid var(--ai-brd);
+            border-radius: 20px;
+            box-shadow: var(--ai-shadow);
             overflow: hidden;
+            overscroll-behavior: contain;
         }
 
-        #aiBox.open { display: flex; }
+        #aiBox.open {
+            display: flex;
+            animation: aiPanelIn .22s cubic-bezier(.2,.8,.2,1);
+        }
 
         .dark #aiBox {
-            background: #1c1c1c;
+            --ai-panel: rgba(28,28,28,.98);
+            --ai-panel-2: rgba(34,34,34,.98);
+            --ai-brd: rgba(255,255,255,.1);
+            --ai-ink: #fff;
+            --ai-muted: #98989e;
+            --ai-chip: #2c2c2c;
+            --ai-btn: #fff;
+            --ai-btn-ink: #111;
+            --ai-user: #fff;
+            --ai-user-ink: #111;
+            --ai-code-bg: rgba(255,255,255,.07);
+            --ai-shadow: 0 12px 36px rgba(0,0,0,.4);
         }
+
+        .theme-palette #aiBox {
+            --ai-panel: var(--tp-modal);
+            --ai-panel-2: var(--tp-card);
+            --ai-brd: var(--tp-brd);
+            --ai-ink: var(--tp-ink);
+            --ai-muted: var(--tp-muted);
+            --ai-chip: var(--tp-chip);
+            --ai-btn: var(--tp-btn);
+            --ai-btn-ink: var(--tp-btn-text);
+            --ai-user: var(--tp-btn);
+            --ai-user-ink: var(--tp-btn-text);
+            --ai-code-bg: var(--tp-bar);
+        }
+
+        @keyframes aiPanelIn {
+            from { opacity: 0; transform: translateY(14px) scale(.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes aiPanelOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(10px) scale(.97); }
+        }
+
+        /* Full-screen mode — same DOM, same conversation, just expanded. */
+
+        #aiBox.full {
+            inset: 0;
+            width: 100%;
+            max-height: none;
+            border-radius: 0;
+            border: 0;
+            z-index: 9500;
+            padding-top: env(safe-area-inset-top);
+            box-shadow: none;
+            animation: aiFullIn .3s cubic-bezier(.2,.8,.2,1);
+        }
+
+        #aiBox.ai-collapsing {
+            animation: aiPanelOut .26s cubic-bezier(.4,0,.6,1) forwards;
+        }
+
+        @keyframes aiFullIn {
+            from { opacity: .35; transform: scale(.94) translateY(26px); border-radius: 26px; }
+            to { opacity: 1; transform: scale(1) translateY(0); border-radius: 0; }
+        }
+
+        /* Header */
+
+        #aiHeader {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 12px 11px 14px;
+            border-bottom: 1px solid var(--ai-brd);
+            background: var(--ai-panel-2);
+            flex-shrink: 0;
+        }
+
+        .ai-head-emoji { font-size: 20px; line-height: 1; }
+
+        .ai-head-text { flex: 1; min-width: 0; }
+
+        #aiTitle {
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: -.2px;
+            color: var(--ai-ink);
+        }
+
+        #aiHeaderSub {
+            font-size: 11px;
+            color: var(--ai-muted);
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ai-head-actions { display: flex; gap: 3px; flex-shrink: 0; }
+
+        .aiHeadBtn {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 11px;
+            background: transparent;
+            color: var(--ai-muted);
+            font-size: 15px;
+            display: grid;
+            place-items: center;
+            transition: background .15s ease, color .15s ease, transform .12s ease;
+        }
+
+        .aiHeadBtn:hover { background: var(--ai-chip); color: var(--ai-ink); }
+        .aiHeadBtn:active { transform: scale(.9); }
+
+        /* Conversation area */
+
+        .ai-convo {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #aiBox.full .ai-convo,
+        #aiBox.full .aiInput,
+        #aiBox.full #aiImagePreviewWrap,
+        #aiBox.full #aiVoiceBar {
+            width: min(760px, 100%);
+            margin-inline: auto;
+        }
+
+        #aiBox.full .aiInput {
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        }
+
+        #aiWelcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 26px 18px;
+            text-align: center;
+            color: var(--ai-muted);
+        }
+
+        #aiWelcome.hide { display: none; }
+
+        .ai-welcome-emoji { font-size: 34px; }
+
+        .ai-welcome-title {
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--ai-ink);
+        }
+
+        .ai-welcome-sub {
+            font-size: 12.5px;
+            max-width: 270px;
+            line-height: 1.5;
+        }
+
+        .ai-suggest-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 4px;
+        }
+
+        .ai-suggest {
+            border: 1px solid var(--ai-brd);
+            background: var(--ai-chip);
+            color: var(--ai-ink);
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 650;
+            transition: transform .12s ease, opacity .15s ease;
+        }
+
+        .ai-suggest:active { transform: scale(.95); opacity: .8; }
 
         #aiMessages {
             flex: 1;
@@ -157,23 +361,36 @@
             padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            font-size: 13px;
+            gap: 10px;
+            font-size: 13.5px;
+            line-height: 1.55;
+            color: var(--ai-ink);
+            scrollbar-gutter: stable;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .user-message,
         .ai-message {
-            padding: 9px 12px;
-            border-radius: 13px;
-            max-width: 85%;
-            line-height: 1.4;
+            padding: 10px 13px;
+            border-radius: 16px;
+            max-width: 88%;
+            line-height: 1.55;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            animation: aiMsgIn .22s cubic-bezier(.2,.8,.2,1);
+        }
+
+        @keyframes aiMsgIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .user-message {
             align-self: flex-end;
-            background: #111;
-            color: #fff;
-            border-bottom-right-radius: 4px;
+            background: var(--ai-user);
+            color: var(--ai-user-ink);
+            border-end-end-radius: 5px;
         }
 
         .dark .user-message {
@@ -183,763 +400,514 @@
 
         .ai-message {
             align-self: flex-start;
-            background: rgba(230,230,235,.9);
-            color: #111;
-            border-bottom-left-radius: 4px;
+            background: var(--ai-chip);
+            color: var(--ai-ink);
+            border-end-start-radius: 5px;
         }
 
-        .ai-source {
-            align-self: flex-start;
-            font-size: 10px;
-            opacity: .55;
-            margin: -4px 0 2px 4px;
-            letter-spacing: .02em;
+        .ai-message.ai-error {
+            background: rgba(224,92,92,.12);
+            color: #c0392b;
         }
 
-        .dark .ai-source { opacity: .5; }
-
-        .dark .ai-message {
-            background: #2c2c2c;
-            color: #fff;
+        .dark .ai-message.ai-error {
+            background: rgba(224,92,92,.2);
+            color: #ff8a80;
         }
 
-        .aiInput {
-            display: flex;
-            gap: 8px;
-            padding: 10px;
-            border-top: 1px solid rgba(0,0,0,.08);
-        }
-
-        .dark .aiInput {
-            border-top-color: rgba(255,255,255,.1);
-        }
-
-        .aiInput input {
-            flex: 1;
-            border: 1px solid rgba(0,0,0,.12);
-            border-radius: 10px;
-            padding: 9px 11px;
-            background: transparent;
-            color: inherit;
-        }
-
-        .dark .aiInput input {
-            border-color: rgba(255,255,255,.18);
-        }
-
-        .aiInput button {
-            width: 38px;
-            border: 0;
-            border-radius: 10px;
-            background: #111;
-            color: #fff;
-            font-size: 16px;
-        }
-
-        .dark .aiInput button {
-            background: #fff;
-            color: #111;
-        }
-
-        .aiImageBtn {
-            width: 38px;
-            flex-shrink: 0;
-            border: 1px solid rgba(0,0,0,.12);
-            border-radius: 10px;
-            background: transparent;
-            color: inherit;
-            font-size: 16px;
-        }
-
-        .dark .aiImageBtn {
-            border-color: rgba(255,255,255,.18);
-        }
-
-        #aiImagePreviewWrap {
-            display: none;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 10px 0;
-        }
-
-        #aiImagePreviewWrap.show {
-            display: flex;
-        }
-
-        #aiImagePreviewThumb {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 1px solid rgba(0,0,0,.12);
-        }
-
-        .dark #aiImagePreviewThumb {
-            border-color: rgba(255,255,255,.18);
-        }
-
-        #aiImageRemoveBtn {
-            border: 0;
-            background: rgba(0,0,0,.08);
-            color: inherit;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 11px;
-            line-height: 1;
-        }
-
-        .dark #aiImageRemoveBtn {
-            background: rgba(255,255,255,.15);
-        }
-
-        .user-message img {
+        .user-message img,
+        .ai-message img {
             display: block;
             max-width: 100%;
             border-radius: 10px;
             margin-bottom: 6px;
         }
 
-        /* ========================================================
-           UPGRADED AI CHAT STYLES
-           ======================================================== */
+        /* Markdown inside AI messages */
 
-        /* Message content rendering */
-        .ai-message .message-content {
-            line-height: 1.65;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
+        .ai-md > *:first-child { margin-top: 0; }
+        .ai-md > *:last-child { margin-bottom: 0; }
+        .ai-md p { margin: 0 0 8px; }
 
-        .ai-message .message-content p {
-            margin: 0.6em 0;
-        }
-
-        .ai-message .message-content h1,
-        .ai-message .message-content h2,
-        .ai-message .message-content h3 {
-            margin: 1em 0 0.5em;
-            font-weight: 700;
+        .ai-md h1,
+        .ai-md h2,
+        .ai-md h3,
+        .ai-md h4 {
+            margin: 12px 0 6px;
             line-height: 1.3;
-        }
-        .ai-message .message-content h1 { font-size: 1.35em; }
-        .ai-message .message-content h2 { font-size: 1.2em; }
-        .ai-message .message-content h3 { font-size: 1.1em; }
-
-        .ai-message .message-content ul,
-        .ai-message .message-content ol {
-            margin: 0.6em 0;
-            padding-left: 1.5em;
-        }
-        .ai-message .message-content li { margin: 0.3em 0; }
-        .ai-message .message-content li::marker { color: inherit; opacity: 0.7; }
-
-        .ai-message .message-content blockquote {
-            margin: 0.8em 0;
-            padding: 0.5em 1em;
-            border-left: 3px solid var(--accent);
-            background: rgba(0,0,0,0.04);
-            border-radius: 0 8px 8px 0;
-            font-style: italic;
-            opacity: 0.9;
-        }
-        .dark .ai-message .message-content blockquote {
-            background: rgba(255,255,255,0.06);
+            font-weight: 800;
         }
 
-        .ai-message .message-content code {
-            font-family: 'SF Mono', 'Fira Code', 'Monaco', monospace;
-            font-size: 0.88em;
-            background: rgba(0,0,0,0.06);
-            padding: 0.15em 0.4em;
-            border-radius: 4px;
-        }
-        .dark .ai-message .message-content code {
-            background: rgba(255,255,255,0.12);
+        .ai-md h1 { font-size: 16px; }
+        .ai-md h2 { font-size: 15px; }
+        .ai-md h3 { font-size: 14px; }
+        .ai-md h4 { font-size: 13.5px; }
+
+        .ai-md ul,
+        .ai-md ol {
+            margin: 4px 0 8px;
+            padding-inline-start: 20px;
         }
 
-        .ai-message .message-content pre {
-            margin: 0.8em 0;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            background: #1e1e1e;
-        }
-        .dark .ai-message .message-content pre {
-            background: #1a1a1a;
-        }
-        .ai-message .message-content pre code {
-            background: transparent;
-            padding: 0;
-            font-size: 0.82em;
-            line-height: 1.55;
-            display: block;
-            padding: 1em;
-            overflow-x: auto;
-            color: #e0e0e0;
-        }
-        .ai-message .message-content .code-block-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5em 1em;
-            background: rgba(0,0,0,0.15);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.75em;
-            color: #aaa;
-            font-family: inherit;
-        }
-        .dark .ai-message .message-content .code-block-header {
-            background: rgba(255,255,255,0.08);
-        }
-        .ai-message .message-content .copy-code-btn {
-            border: 0;
-            background: transparent;
-            color: inherit;
-            opacity: 0.6;
-            cursor: pointer;
-            padding: 0.3em 0.6em;
-            border-radius: 4px;
-            font-size: 0.85em;
-            transition: opacity 0.15s, background 0.15s;
-        }
-        .ai-message .message-content .copy-code-btn:hover {
-            opacity: 1;
-            background: rgba(255,255,255,0.1);
-        }
-        .ai-message .message-content .copy-code-btn.copied {
-            opacity: 1;
-            color: #4ade80;
+        .ai-md li { margin: 2px 0; }
+        .ai-md ul { list-style: disc; }
+        .ai-md ol { list-style: decimal; }
+
+        .ai-md blockquote {
+            margin: 6px 0;
+            padding: 6px 10px;
+            border-inline-start: 3px solid var(--ai-brd);
+            color: var(--ai-muted);
+            background: var(--ai-code-bg);
+            border-radius: 8px;
         }
 
-        .ai-message .message-content a {
-            color: var(--accent);
+        .ai-md a {
+            color: var(--ai-ink);
             text-decoration: underline;
             text-underline-offset: 2px;
         }
-        .dark .ai-message .message-content a {
-            color: var(--accent);
-        }
-        .ai-message .message-content table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 0.8em 0;
-            font-size: 0.9em;
-            overflow-x: auto;
-            display: block;
-        }
-        .ai-message .message-content th,
-        .ai-message .message-content td {
-            border: 1px solid rgba(0,0,0,0.1);
-            padding: 0.5em 0.75em;
-            text-align: left;
-        }
-        .dark .ai-message .message-content th,
-        .dark .ai-message .message-content td {
-            border-color: rgba(255,255,255,0.15);
-        }
-        .ai-message .message-content th {
-            background: rgba(0,0,0,0.04);
-            font-weight: 600;
-        }
-        .dark .ai-message .message-content th {
-            background: rgba(255,255,255,0.06);
-        }
 
-        /* RTL support for Arabic/Sorani */
-        .ai-message.rtl .message-content,
-        .user-message.rtl {
-            direction: rtl;
-            text-align: right;
-        }
-        .ai-message.rtl .message-content ul,
-        .ai-message.rtl .message-content ol {
-            padding-right: 1.5em;
-            padding-left: 0;
-        }
-        .ai-message.rtl .message-content blockquote {
-            border-left: none;
-            border-right: 3px solid var(--accent);
-            border-radius: 8px 0 0 8px;
-        }
-        .ai-message.rtl .message-content th,
-        .ai-message.rtl .message-content td {
-            text-align: right;
-        }
-
-        /* Copy response button */
-        .ai-message .message-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-            padding-top: 6px;
-            border-top: 1px solid rgba(0,0,0,0.06);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .dark .ai-message .message-actions {
-            border-top-color: rgba(255,255,255,0.08);
-        }
-        .ai-message:hover .message-actions,
-        .ai-message:focus-within .message-actions {
-            opacity: 1;
-        }
-        .ai-message .copy-response-btn {
+        .ai-md hr {
             border: 0;
-            background: transparent;
-            color: inherit;
-            opacity: 0.55;
-            cursor: pointer;
-            padding: 0.35em 0.7em;
+            border-top: 1px solid var(--ai-brd);
+            margin: 10px 0;
+        }
+
+        .ai-md code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12px;
+            background: var(--ai-code-bg);
+            padding: 1px 5px;
             border-radius: 6px;
-            font-size: 0.75em;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: opacity 0.15s, background 0.15s;
-        }
-        .ai-message .copy-response-btn:hover {
-            opacity: 1;
-            background: rgba(0,0,0,0.06);
-        }
-        .dark .ai-message .copy-response-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        .ai-message .copy-response-btn.copied {
-            opacity: 1;
-            color: #4ade80;
+            direction: ltr;
+            unicode-bidi: embed;
         }
 
-        /* Streaming indicator */
-        .ai-message.streaming .message-content::after {
-            content: "";
-            display: inline-block;
-            width: 8px;
-            height: 1em;
-            background: currentColor;
-            margin-left: 2px;
-            opacity: 0.6;
-            animation: blink 1s infinite;
-            vertical-align: text-bottom;
-        }
-        @keyframes blink {
-            0%, 50% { opacity: 0.6; }
-            51%, 100% { opacity: 0; }
+        .aiCode {
+            margin: 8px 0;
+            border: 1px solid var(--ai-brd);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--ai-code-bg);
+            direction: ltr;
         }
 
-        /* Thinking/loading state */
-        .ai-message.thinking {
-            opacity: 0.7;
-        }
-        .ai-message.thinking .thinking-indicator {
-            display: inline-flex;
-            gap: 3px;
-            padding: 0.2em 0;
-        }
-        .ai-message.thinking .thinking-indicator span {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-            opacity: 0.5;
-            animation: thinkingBounce 1.2s infinite ease-in-out;
-        }
-        .ai-message.thinking .thinking-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .ai-message.thinking .thinking-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes thinkingBounce {
-            0%, 80%, 100% { transform: scale(1); opacity: 0.4; }
-            40% { transform: scale(1.3); opacity: 1; }
-        }
-
-        /* Error state */
-        .ai-message.error {
-            background: #fee2e2 !important;
-            color: #991b1b !important;
-            border: 1px solid #fecaca;
-        }
-        .dark .ai-message.error {
-            background: #7f1d1d !important;
-            color: #fca5a5 !important;
-            border-color: #991b1b;
-        }
-        .ai-message.error .retry-btn {
-            margin-top: 8px;
-            padding: 6px 12px;
-            border: 0;
-            border-radius: 6px;
-            background: #dc2626;
-            color: white;
-            font-size: 0.8em;
-            cursor: pointer;
-        }
-        .dark .ai-message.error .retry-btn {
-            background: #ef4444;
-        }
-
-        /* Image message styling */
-        .ai-message .message-content img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin: 0.5em 0;
-        }
-
-        /* Mini-chat specific */
-        #aiBox.mini .ai-message .message-content {
-            font-size: 0.92em;
-        }
-        #aiBox.mini .ai-message .message-content pre code {
-            font-size: 0.75em;
-        }
-
-        /* Full-screen chat styles */
-        #aiFullscreen {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            background: #f5f5f7;
-        }
-        #aiFullscreen.open { display: flex; }
-        .dark #aiFullscreen { background: #101010; }
-
-        #aiFullscreenHeader {
+        .aiCodeHead {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.95);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .dark #aiFullscreenHeader {
-            background: rgba(28,28,28,0.95);
-            border-bottom-color: rgba(255,255,255,0.08);
-        }
-        #aiFullscreenHeader h2 {
-            margin: 0;
-            font-size: 1.1em;
+            padding: 5px 6px 5px 12px;
+            border-bottom: 1px solid var(--ai-brd);
+            font-size: 10.5px;
+            color: var(--ai-muted);
             font-weight: 700;
         }
-        #aiFullscreenHeader .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-        #aiFullscreenHeader .icon-btn {
-            width: 38px;
-            height: 38px;
-            border: 0;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.06);
-            color: inherit;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .dark #aiFullscreenHeader .icon-btn {
-            background: rgba(255,255,255,0.1);
-        }
-        #aiFullscreenHeader .icon-btn:hover {
-            background: rgba(0,0,0,0.1);
-        }
-        .dark #aiFullscreenHeader .icon-btn:hover {
-            background: rgba(255,255,255,0.15);
-        }
 
-        #aiFullscreenMessages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        #aiFullscreenMessages .user-message,
-        #aiFullscreenMessages .ai-message {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        #aiFullscreenMessages .user-message {
-            align-self: flex-end;
-            background: #111;
-            color: #fff;
-            border-bottom-right-radius: 6px;
-        }
-        .dark #aiFullscreenMessages .user-message {
-            background: #fff;
-            color: #111;
-        }
-        #aiFullscreenMessages .ai-message {
-            align-self: flex-start;
-            background: rgba(230,230,235,0.9);
-            color: #111;
-            border-bottom-left-radius: 6px;
-        }
-        .dark #aiFullscreenMessages .ai-message {
-            background: #2c2c2c;
-            color: #fff;
-        }
-        #aiFullscreenMessages .ai-message .message-content {
-            line-height: 1.7;
-        }
-
-        #aiFullscreenComposer {
-            padding: 16px;
-            background: rgba(255,255,255,0.95);
-            border-top: 1px solid rgba(0,0,0,0.06);
-            position: sticky;
-            bottom: 0;
-        }
-        .dark #aiFullscreenComposer {
-            background: rgba(28,28,28,0.95);
-            border-top-color: rgba(255,255,255,0.08);
-        }
-        #aiFullscreenComposer .composer-row {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        #aiFullscreenComposer .composer-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        #aiFullscreenComposer .composer-btn {
-            width: 42px;
-            height: 42px;
+        .aiCodeCopy {
             border: 0;
-            border-radius: 12px;
-            background: rgba(0,0,0,0.06);
-            color: inherit;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .dark #aiFullscreenComposer .composer-btn {
-            background: rgba(255,255,255,0.1);
-        }
-        #aiFullscreenComposer .composer-btn:hover {
-            background: rgba(0,0,0,0.1);
-        }
-        .dark #aiFullscreenComposer .composer-btn:hover {
-            background: rgba(255,255,255,0.15);
-        }
-        #aiFullscreenComposer .composer-btn.active {
-            background: var(--accent);
-            color: var(--accent-contrast);
-        }
-        #aiFullscreenComposer textarea {
-            flex: 1;
-            min-height: 48px;
-            max-height: 180px;
-            border: 1px solid rgba(0,0,0,0.12);
-            border-radius: 12px;
-            padding: 12px 14px;
             background: transparent;
-            color: inherit;
-            resize: none;
-            font-size: 15px;
-            line-height: 1.5;
-            font-family: inherit;
-        }
-        .dark #aiFullscreenComposer textarea {
-            border-color: rgba(255,255,255,0.18);
-        }
-        #aiFullscreenComposer .send-btn {
-            width: 48px;
-            height: 48px;
-            border: 0;
-            border-radius: 12px;
-            background: var(--accent);
-            color: var(--accent-contrast);
-            font-size: 20px;
-            cursor: pointer;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s;
-        }
-        #aiFullscreenComposer .send-btn:active {
-            transform: scale(0.95);
-        }
-        #aiFullscreenComposer .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Model selector dropdown */
-        .model-selector {
-            position: relative;
-        }
-        .model-selector-btn {
-            width: 42px;
-            height: 42px;
-            border: 0;
-            border-radius: 12px;
-            background: rgba(0,0,0,0.06);
-            color: inherit;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .dark .model-selector-btn {
-            background: rgba(255,255,255,0.1);
-        }
-        .model-selector-btn:hover {
-            background: rgba(0,0,0,0.1);
-        }
-        .dark .model-selector-btn:hover {
-            background: rgba(255,255,255,0.15);
-        }
-        .model-dropdown {
-            position: absolute;
-            bottom: 100%;
-            right: 0;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.98);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            padding: 8px;
-            min-width: 180px;
-            display: none;
-            z-index: 20;
-        }
-        .dark .model-dropdown {
-            background: rgba(36,36,36,0.98);
-        }
-        .model-dropdown.open { display: block; }
-        .model-option {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border: 0;
+            color: var(--ai-muted);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
             border-radius: 8px;
-            background: transparent;
-            color: inherit;
-            font-size: 14px;
-            cursor: pointer;
-            text-align: left;
-            transition: background 0.15s;
+            transition: background .15s ease, color .15s ease;
         }
-        .model-option:hover {
-            background: rgba(0,0,0,0.06);
-        }
-        .dark .model-option:hover {
-            background: rgba(255,255,255,0.08);
-        }
-        .model-option.selected {
-            background: rgba(0,0,0,0.08);
-        }
-        .dark .model-option.selected {
-            background: rgba(255,255,255,0.12);
-        }
-        .model-option .model-name { font-weight: 600; }
-        .model-option .model-desc { font-size: 0.75em; opacity: 0.6; margin-left: auto; }
 
-        /* Voice recording indicator */
-        .voice-recording {
+        .aiCodeCopy:hover { background: var(--ai-chip); color: var(--ai-ink); }
+        .aiCodeCopy.done { color: #2e8b57; }
+
+        .ai-streaming .aiCodeCopy { display: none; }
+
+        .aiCode pre {
+            margin: 0;
+            padding: 10px 12px;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .aiCode pre code {
+            background: none;
+            padding: 0;
+            font-size: 12px;
+            direction: ltr;
+        }
+
+        /* Streaming caret + thinking dots */
+
+        .aiCaret {
+            display: inline-block;
+            width: 7px;
+            height: 14px;
+            margin-inline-start: 2px;
+            vertical-align: -2px;
+            border-radius: 2px;
+            background: var(--ai-muted);
+            animation: aiCaretBlink 1s steps(2) infinite;
+        }
+
+        @keyframes aiCaretBlink { 50% { opacity: 0; } }
+
+        .ai-typing {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 12px;
-            background: #dc2626;
-            color: white;
-            border-radius: 20px;
-            font-size: 0.8em;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        .voice-wave {
-            display: inline-flex;
-            gap: 2px;
-        }
-        .voice-wave span {
-            width: 3px;
-            height: 12px;
-            background: currentColor;
-            border-radius: 2px;
-            animation: wave 0.8s infinite ease-in-out;
-        }
-        .voice-wave span:nth-child(2) { animation-delay: 0.1s; height: 16px; }
-        .voice-wave span:nth-child(3) { animation-delay: 0.2s; height: 10px; }
-        .voice-wave span:nth-child(4) { animation-delay: 0.3s; height: 18px; }
-        .voice-wave span:nth-child(5) { animation-delay: 0.4s; height: 12px; }
-        @keyframes wave {
-            0%, 100% { transform: scaleY(0.4); }
-            50% { transform: scaleY(1); }
         }
 
-        /* Image preview in fullscreen */
-        #aiFullscreenImagePreview {
+        .ai-typing-dots { display: inline-flex; gap: 4px; }
+
+        .ai-typing-dots i {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--ai-muted);
+            animation: aiDot 1.2s ease-in-out infinite;
+        }
+
+        .ai-typing-dots i:nth-child(2) { animation-delay: .15s; }
+        .ai-typing-dots i:nth-child(3) { animation-delay: .3s; }
+
+        @keyframes aiDot {
+            0%, 60%, 100% { transform: translateY(0); opacity: .4; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        .ai-typing-label {
+            font-size: 12px;
+            color: var(--ai-muted);
+            font-weight: 650;
+        }
+
+        /* Per-message actions (source + copy) */
+
+        .ai-msg-actions {
+            align-self: flex-start;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: -5px 0 0 4px;
+        }
+
+        .ai-source {
+            font-size: 10px;
+            opacity: .55;
+            letter-spacing: .02em;
+            color: var(--ai-ink);
+        }
+
+        .ai-copy-btn {
+            border: 0;
+            background: transparent;
+            color: var(--ai-muted);
+            font-size: 11px;
+            font-weight: 650;
+            padding: 3px 8px;
+            border-radius: 8px;
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .ai-copy-btn:hover { background: var(--ai-chip); color: var(--ai-ink); }
+        .ai-copy-btn.done { color: #2e8b57; }
+
+        .ai-restored {
+            align-self: center;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            color: var(--ai-muted);
+            background: var(--ai-code-bg);
+            border-radius: 999px;
+            padding: 4px 11px;
+        }
+
+        /* Jump to latest */
+
+        #aiScrollBottom {
+            position: absolute;
+            inset-inline: 0;
+            bottom: 8px;
+            margin-inline: auto;
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--ai-brd);
+            border-radius: 50%;
+            background: var(--ai-panel);
+            color: var(--ai-ink);
+            font-size: 15px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.15);
+            opacity: 0;
+            transform: translateY(6px);
+            pointer-events: none;
+            transition: opacity .2s ease, transform .2s ease;
+            z-index: 3;
+        }
+
+        #aiScrollBottom.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Voice dictation bar (only shown while recording) */
+
+        #aiVoiceBar {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 14px;
+            border-top: 1px solid var(--ai-brd);
+            background: var(--ai-code-bg);
+            flex-shrink: 0;
+            font-size: 12.5px;
+            color: var(--ai-ink);
+        }
+
+        #aiVoiceBar[hidden] { display: none; }
+
+        .ai-voice-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e05c5c;
+            animation: aiVoicePulse 1.1s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes aiVoicePulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.35); opacity: .5; }
+        }
+
+        #aiVoiceText {
+            flex: 1;
+            font-weight: 650;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .aiVoiceBtn {
+            border: 0;
+            border-radius: 9px;
+            padding: 6px 10px;
+            font-size: 11.5px;
+            font-weight: 700;
+            background: var(--ai-chip);
+            color: var(--ai-ink);
+            flex-shrink: 0;
+        }
+
+        .aiVoiceBtn.stop { background: #e05c5c; color: #fff; }
+
+        /* Image preview */
+
+        #aiImagePreviewWrap {
             display: none;
             align-items: center;
             gap: 10px;
-            padding: 8px 16px;
-            background: rgba(0,0,0,0.03);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 10px 14px 0;
+            flex-shrink: 0;
         }
-        .dark #aiFullscreenImagePreview {
-            background: rgba(255,255,255,0.03);
-            border-bottom-color: rgba(255,255,255,0.08);
-        }
-        #aiFullscreenImagePreview.show { display: flex; }
-        #aiFullscreenImagePreview img {
-            width: 56px;
-            height: 56px;
+
+        #aiImagePreviewWrap.show { display: flex; }
+
+        #aiImagePreviewThumb {
+            width: 46px;
+            height: 46px;
             border-radius: 10px;
             object-fit: cover;
+            border: 1px solid var(--ai-brd);
         }
-        #aiFullscreenImagePreview .remove-btn {
-            border: 0;
-            background: transparent;
-            color: inherit;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.6;
-            padding: 4px;
-        }
-        #aiFullscreenImagePreview .remove-btn:hover { opacity: 1; }
 
-        /* Responsive */
+        #aiImageRemoveBtn {
+            border: 0;
+            background: var(--ai-chip);
+            color: var(--ai-ink);
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+            line-height: 1;
+        }
+
+        /* Composer */
+
+        .aiInput {
+            display: flex;
+            gap: 7px;
+            padding: 10px;
+            border-top: 1px solid var(--ai-brd);
+            background: var(--ai-panel-2);
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .aiInput input#aiInput {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid var(--ai-brd);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: transparent;
+            color: var(--ai-ink);
+            font-size: 13.5px;
+            outline: none;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .aiInput input#aiInput::placeholder { color: var(--ai-muted); }
+
+        .aiInput input#aiInput:focus {
+            border-color: var(--ai-btn);
+            box-shadow: 0 0 0 3px var(--ai-code-bg);
+        }
+
+        #aiSendBtn {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border: 0;
+            border-radius: 12px;
+            background: var(--ai-btn);
+            color: var(--ai-btn-ink);
+            font-size: 15px;
+            display: grid;
+            place-items: center;
+            transition: transform .12s ease, opacity .15s ease;
+        }
+
+        #aiSendBtn:active { transform: scale(.9); }
+        #aiSendBtn:disabled { opacity: .55; }
+
+        #aiSendBtn .aiSendSpin {
+            display: none;
+            width: 15px;
+            height: 15px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: aiSpin .7s linear infinite;
+        }
+
+        #aiSendBtn.busy .aiSendIcon { display: none; }
+        #aiSendBtn.busy .aiSendSpin { display: block; }
+
+        @keyframes aiSpin { to { transform: rotate(360deg); } }
+
+        /* Ghost buttons (image / mic) — kept transparent even in palette
+           themes where ".theme-palette .aiInput button" would recolor them. */
+        #aiBox #aiSendBtn { display: grid; }
+
+        #aiBox .aiGhostBtn {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border: 1px solid var(--ai-brd);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--ai-ink);
+            font-size: 16px;
+            display: grid;
+            place-items: center;
+            transition: background .15s ease, transform .12s ease, border-color .15s ease;
+        }
+
+        #aiBox .aiGhostBtn:hover { background: var(--ai-chip); }
+        #aiBox .aiGhostBtn:active { transform: scale(.9); }
+        #aiBox .aiGhostBtn:disabled { opacity: .5; }
+
+        #aiBox .aiMicBtn.recording {
+            border-color: #e05c5c;
+            color: #e05c5c;
+            animation: aiVoicePulse 1.1s ease-in-out infinite;
+        }
+
+        /* Accessibility */
+
+        #aiBox button:focus-visible,
+        #aiBox input:focus-visible {
+            outline: 2px solid var(--ai-btn);
+            outline-offset: 2px;
+        }
+
+        #aiToggle:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 3px;
+        }
+
+        .ai-sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* RTL */
+
+        [dir="rtl"] .aiCode,
+        [dir="rtl"] .ai-md code {
+            direction: ltr;
+            text-align: left;
+        }
+
+        [dir="rtl"] #aiSendBtn .aiSendIcon { transform: scaleX(-1); }
+
+        /* Mobile */
+
         @media (max-width: 480px) {
-            #aiFullscreenMessages .user-message,
-            #aiFullscreenMessages .ai-message {
-                max-width: 92%;
+            #aiToggle {
+                right: 14px;
+                width: 50px;
+                height: 50px;
             }
-            #aiFullscreenComposer .composer-row {
-                padding: 0 4px;
+            #aiBox {
+                right: 12px;
+                width: calc(100vw - 24px);
+                max-height: min(500px, 72vh);
             }
+            #aiMessages {
+                padding: 12px;
+                font-size: 14px;
+            }
+            .user-message,
+            .ai-message { max-width: 92%; }
+            #aiHeader { padding: 10px 8px 10px 12px; }
         }
 
         /* Reduced motion */
+
         @media (prefers-reduced-motion: reduce) {
-            .ai-message.streaming .message-content::after { animation: none; }
-            .ai-message.thinking .thinking-indicator span { animation: none; }
-            .voice-recording { animation: none; }
-            .voice-wave span { animation: none; }
+            #aiBox.open,
+            #aiBox.full,
+            #aiBox.ai-collapsing,
+            .user-message,
+            .ai-message,
+            .ai-typing-dots i,
+            .aiCaret,
+            .ai-voice-dot,
+            #aiBox .aiMicBtn.recording,
+            #aiSendBtn .aiSendSpin {
+                animation: none !important;
+            }
+            #aiToggle,
+            .aiHeadBtn,
+            #aiSendBtn,
+            #aiBox .aiGhostBtn,
+            #aiScrollBottom {
+                transition: none;
+            }
         }
+
     </style>
 
     <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
@@ -19378,11 +19346,6 @@ document.documentElement.classList.toggle(
 
             if (!overlay || !launch) return;
 
-            // Ensure overlay is closed on initialization (in case it was left open)
-            overlay.classList.remove("open");
-            overlay.setAttribute("aria-hidden", "true");
-            document.body.style.overflow = "";
-
             let clockInterval = null;
             let uiInterval = null;
             let isOpen = false;
@@ -19539,12 +19502,6 @@ document.documentElement.classList.toggle(
                 if (isOpen) {
                     closeSession();
                 }
-            };
-
-            // Global escape hatch: allows closing the session from anywhere
-            // (e.g., from console, or if user gets stuck)
-            window.closeStudyWithMe = function () {
-                closeSession();
             };
 
             // Existing timer completion calls this hook after saving the session.
@@ -21012,10 +20969,75 @@ document.documentElement.classList.toggle(
 
     <!-- DAILY AI -->
 
-    <button id="aiToggle" type="button" aria-label="Daily AI">💬</button>
+    <button id="aiToggle" type="button" aria-label="Daily AI" aria-expanded="false">💬</button>
 
-    <div id="aiBox" class="mini">
-        <div id="aiMessages"></div>
+    <div id="aiBox" role="dialog" aria-label="Daily AI">
+        <div id="aiHeader">
+            <div class="ai-head-emoji" aria-hidden="true">✨</div>
+            <div class="ai-head-text">
+                <div id="aiTitle">Daily AI</div>
+                <div id="aiHeaderSub">Ask anything</div>
+            </div>
+            <div class="ai-head-actions">
+                <button
+                    type="button"
+                    id="aiNewBtn"
+                    class="aiHeadBtn"
+                    aria-label="Clear conversation"
+                    title="New chat"
+                >🧹</button>
+                <button
+                    type="button"
+                    id="aiExpandBtn"
+                    class="aiHeadBtn"
+                    aria-label="Full screen"
+                    title="Full screen"
+                >🗖</button>
+                <button
+                    type="button"
+                    id="aiCloseBtn"
+                    class="aiHeadBtn"
+                    aria-label="Close"
+                    title="Close"
+                >✕</button>
+            </div>
+        </div>
+
+        <div class="ai-convo">
+            <div id="aiWelcome">
+                <div class="ai-welcome-emoji" aria-hidden="true">✨</div>
+                <div class="ai-welcome-title" id="aiWelcomeTitle">Hi! I'm Daily AI 👋</div>
+                <div class="ai-welcome-sub" id="aiWelcomeSub">
+                    Ask me anything — study help, summaries, translations and more.
+                </div>
+                <div class="ai-suggest-row">
+                    <button type="button" class="ai-suggest" data-ai-suggest="1">Give me study tips</button>
+                    <button type="button" class="ai-suggest" data-ai-suggest="2">Summarize a topic</button>
+                    <button type="button" class="ai-suggest" data-ai-suggest="3">Help me write a note</button>
+                </div>
+            </div>
+
+            <div
+                id="aiMessages"
+                role="log"
+                aria-live="off"
+                aria-label="Daily AI conversation"
+            ></div>
+
+            <button
+                type="button"
+                id="aiScrollBottom"
+                aria-label="Jump to latest"
+                title="Jump to latest"
+            >↓</button>
+        </div>
+
+        <div id="aiVoiceBar" hidden>
+            <span class="ai-voice-dot" aria-hidden="true"></span>
+            <span id="aiVoiceText">Listening…</span>
+            <button type="button" id="aiVoiceCancelBtn" class="aiVoiceBtn">✕ Cancel</button>
+            <button type="button" id="aiVoiceStopBtn" class="aiVoiceBtn stop">⏹ Stop</button>
+        </div>
 
         <div id="aiImagePreviewWrap">
             <img id="aiImagePreviewThumb" alt="Selected image preview" />
@@ -21031,234 +21053,492 @@ document.documentElement.classList.toggle(
             />
             <button
                 type="button"
-                class="aiImageBtn"
+                class="aiImageBtn aiGhostBtn"
                 id="aiImageBtn"
                 aria-label="Add image"
                 title="Add image"
             >📷</button>
+            <button
+                type="button"
+                class="aiMicBtn aiGhostBtn"
+                id="aiMicBtn"
+                aria-label="Dictate by voice"
+                title="Dictate by voice"
+            >🎤</button>
             <input
                 id="aiInput"
                 type="text"
                 placeholder="Ask Daily AI..."
+                aria-label="Ask Daily AI"
+                autocomplete="off"
             />
-            <button type="button" onclick="sendAI()">➤</button>
+            <button
+                type="button"
+                id="aiSendBtn"
+                onclick="sendAI()"
+                aria-label="Send"
+                title="Send"
+            >
+                <span class="aiSendIcon" aria-hidden="true">➤</span>
+                <span class="aiSendSpin" aria-hidden="true"></span>
+            </button>
         </div>
-    </div>
 
-    <!-- FULL-SCREEN AI CHAT -->
-    <div id="aiFullscreen">
-        <header id="aiFullscreenHeader">
-            <h2>Daily AI</h2>
-            <div class="header-actions">
-                <div class="model-selector">
-                    <button type="button" class="model-selector-btn" id="fsModelBtn" aria-label="Select model" title="Select model">🤖</button>
-                    <div class="model-dropdown" id="fsModelDropdown">
-                        <button type="button" class="model-option" data-model="auto">
-                            <span class="model-name">Auto</span>
-                            <span class="model-desc">Best available</span>
-                        </button>
-                        <button type="button" class="model-option" data-model="gemini-2.5-flash">
-                            <span class="model-name">Gemini 2.5 Flash</span>
-                            <span class="model-desc">Fast & capable</span>
-                        </button>
-                        <button type="button" class="model-option" data-model="gemini-2.5-flash-lite">
-                            <span class="model-name">Gemini 2.5 Flash Lite</span>
-                            <span class="model-desc">Faster responses</span>
-                        </button>
-                        <button type="button" class="model-option" data-model="gemini-2.0-flash">
-                            <span class="model-name">Gemini 2.0 Flash</span>
-                            <span class="model-desc">Legacy fallback</span>
-                        </button>
-                    </div>
-                </div>
-                <button type="button" class="icon-btn" id="fsMinimizeBtn" aria-label="Minimize" title="Minimize">⛶</button>
-                <button type="button" class="icon-btn" id="fsCloseBtn" aria-label="Close" title="Close">✕</button>
-            </div>
-        </header>
-        <div id="aiFullscreenImagePreview">
-            <img id="aiFullscreenImageThumb" alt="Selected image preview" />
-            <span id="aiFullscreenImageName"></span>
-            <button type="button" class="remove-btn" id="aiFullscreenImageRemove" aria-label="Remove image">✕</button>
-        </div>
-        <div id="aiFullscreenMessages"></div>
-        <div id="aiFullscreenComposer">
-            <div class="composer-row">
-                <div class="composer-actions">
-                    <button type="button" class="composer-btn" id="fsImageBtn" aria-label="Add image" title="Add image">📷</button>
-                    <button type="button" class="composer-btn" id="fsVoiceBtn" aria-label="Voice input" title="Voice input">🎤</button>
-                </div>
-                <textarea id="fsInput" placeholder="Message Daily AI..." aria-label="Message Daily AI" rows="1"></textarea>
-                <button type="button" class="send-btn" id="fsSendBtn" aria-label="Send message">➤</button>
-            </div>
-        </div>
+        <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
     </div>
-
-    <input type="file" id="fsImageFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" hidden />
 
     <script>
-        // =========================================================
-        // CONFIGURATION
-        // =========================================================
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_HISTORY_LIMIT = 15;
+        const AI_HISTORY_LIMIT = 10;
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
-        const AI_PERSISTENT_HISTORY_KEY = "dailyKrdAiPersistentHistory";
+        const AI_LANG_STORAGE_KEY = "dailykrd_language";
 
-        // Supported models (must match Worker allowlist)
-        const SUPPORTED_MODELS = {
-            "auto": { label: "Auto", desc: "Best available" },
-            "gemini-3.8-flash": { label: "Gemini 3.8 Flash", desc: "Fast & capable" },
-            "gemini-2.5-flash": { label: "Gemini 2.5 Flash", desc: "Balanced" },
-            "gemini-2.5-flash-lite": { label: "Gemini 2.5 Flash Lite", desc: "Fastest" }
+        /* =====================================================
+           LOCALIZATION
+           The main app's t()/translations are module-scoped and
+           not reachable from this classic script, so the widget
+           ships its own small string table and re-applies itself
+           whenever <html lang/dir> changes (applyLanguage()).
+           ===================================================== */
+
+        const AI_STRINGS = {
+            en: {
+                dir: "ltr",
+                title: "Daily AI",
+                subtitle: "Ask anything",
+                placeholder: "Ask Daily AI...",
+                send: "Send",
+                attach: "Add image",
+                removeImage: "Remove image",
+                dictate: "Dictate by voice",
+                listening: "Listening…",
+                stop: "Stop",
+                cancel: "Cancel",
+                newChat: "New chat",
+                newChatConfirm: "Clear this conversation and start a new chat?",
+                expand: "Full screen",
+                minimize: "Minimize",
+                close: "Close",
+                copy: "Copy",
+                copied: "Copied!",
+                jump: "Jump to latest",
+                thinking: "Thinking…",
+                connectError: "Couldn't connect to Daily AI.",
+                genericError: "Something went wrong.",
+                imageError:
+                    "Sorry, that image couldn't be used. Please try a different photo.",
+                welcomeTitle: "Hi! How can I help? 👋",
+                welcomeSub:
+                    "Ask me anything — study help, daily planning, translations and more.",
+                suggestions: [
+                    "Help me plan my day",
+                    "Explain a topic simply",
+                    "Help me write a note"
+                ],
+                restored: "Conversation restored"
+            },
+            ar: {
+                dir: "rtl",
+                title: "ذكاء ديلي",
+                subtitle: "اسأل أي شيء",
+                placeholder: "اسأل ذكاء ديلي...",
+                send: "إرسال",
+                attach: "إضافة صورة",
+                removeImage: "إزالة الصورة",
+                dictate: "إملاء صوتي",
+                listening: "جارٍ الاستماع…",
+                stop: "إيقاف",
+                cancel: "إلغاء",
+                newChat: "محادثة جديدة",
+                newChatConfirm: "هل تريد مسح هذه المحادثة وبدء محادثة جديدة؟",
+                expand: "ملء الشاشة",
+                minimize: "تصغير",
+                close: "إغلاق",
+                copy: "نسخ",
+                copied: "تم النسخ!",
+                jump: "الانتقال إلى آخر رسالة",
+                thinking: "أفكر…",
+                connectError: "تعذر الاتصال بذكاء ديلي.",
+                genericError: "حدث خطأ ما.",
+                imageError: "عذراً، تعذر استخدام هذه الصورة. جرّب صورة أخرى.",
+                welcomeTitle: "مرحباً! كيف يمكنني مساعدتك؟ 👋",
+                welcomeSub: "اسألني أي شيء — دراسة، تخطيط يوم، ترجمات والمزيد.",
+                suggestions: [
+                    "ساعدني في تخطيط يومي",
+                    "اشرح لي موضوعاً ببساطة",
+                    "ساعدني في كتابة مذكرة"
+                ],
+                restored: "تمت استعادة المحادثة"
+            },
+            ku: {
+                dir: "rtl",
+                title: "دەیلی ئێدی",
+                subtitle: "هەرچی بپرسە",
+                placeholder: "بۆ دەیلی ئێدی بپرسە...",
+                send: "ناردن",
+                attach: "زیادکردنی وێنە",
+                removeImage: "سڕینەوەی وێنە",
+                dictate: "بڵاوکردنەوەی دەنگ",
+                listening: "گوێگرتن…",
+                stop: "وەستان",
+                cancel: "هەڵوەشاندنەوە",
+                newChat: "چاتی نوێ",
+                newChatConfirm: "دەتەوێت ئەم قسەکانە بسڕیتەوە و چاتی نوێ دەست پێبکەت؟",
+                expand: "پڕ بەرەڵاسەوە",
+                minimize: "کەمکردنەوە",
+                close: "داخستن",
+                copy: "لەبەرگرتنەوە",
+                copied: "لەبەرگرایەوە!",
+                jump: "بڕۆ بۆ دوایین",
+                thinking: "بیردەکرێتەوە…",
+                connectError: "نەتوانرا پەیوەست بکرێت بۆ دەیلی ئێدی.",
+                genericError: "هەڵەیەک ڕوویدا.",
+                imageError: "ببورە، نەتوانرا ئەم وێنەیە بەکاربهێنرێت. تاقیکردنەوەی وێنەیەکی تر بکە.",
+                welcomeTitle: "سڵاو! چۆن دەتوانم یارمەتیت بدەم؟ 👋",
+                welcomeSub: "هەرچی بپرسە — خوێندن، ڕێکخستنی ڕۆژ، وەرگێڕان و زیاتر.",
+                suggestions: [
+                    "یارمەتیم بدە ڕۆژەکەم ڕێکبخەم",
+                    "بابەتێک بە سادەیی شرۆڤە بکە",
+                    "یارمەتیم بدە تێدۆکیمنتێک بنووسە"
+                ],
+                restored: "چاتەکە گەڕاندراوەتەوە"
+            }
         };
 
-        // =========================================================
-        // MARKDOWN RENDERER SETUP
-        // =========================================================
-        function setupMarkdownRenderer() {
-            if (typeof marked !== "undefined") {
-                marked.setOptions({
-                    breaks: true,
-                    gfm: true,
-                    headerIds: false,
-                    mangle: false
-                });
+        let aiLang = "en";
+        let aiFullOpen = false;
+        let aiBusy = false;
+        let aiPinned = true;
+
+        function aiT(key) {
+            const pack = AI_STRINGS[aiLang] || AI_STRINGS.en;
+            return pack[key] !== undefined ? pack[key] : AI_STRINGS.en[key];
+        }
+
+        function aiDetectLang() {
+            let stored = "";
+            try {
+                stored = (localStorage.getItem(AI_LANG_STORAGE_KEY) || "").toLowerCase();
+            } catch (e) {}
+            if (stored && AI_STRINGS[stored]) return stored;
+            const docLang = (document.documentElement.lang || "").toLowerCase();
+            if (docLang.indexOf("ar") === 0) return "ar";
+            if (docLang.indexOf("ku") === 0 || docLang.indexOf("ckb") === 0) return "ku";
+            return "en";
+        }
+
+        function aiSpeechLang() {
+            if (aiLang === "ar") return "ar-SA";
+            if (aiLang === "ku") return "ar-IQ"; /* Sorani has no Web Speech pack */
+            return "en-US";
+        }
+
+        function aiApplyLanguage() {
+            aiLang = aiDetectLang();
+
+            const input = document.getElementById("aiInput");
+            const status = document.getElementById("aiStatus");
+            if (input) {
+                input.placeholder = aiT("placeholder");
+                input.setAttribute("aria-label", aiT("placeholder"));
             }
-            if (typeof DOMPurify !== "undefined") {
-                DOMPurify.setConfig({
-                    ALLOWED_TAGS: ["p","br","strong","em","u","s","code","pre","blockquote","ul","ol","li","h1","h2","h3","h4","h5","h6","a","img","table","thead","tbody","tr","th","td","hr"],
-                    ALLOWED_ATTR: ["href","src","alt","title","target","rel","class","style"],
-                    ALLOW_DATA_ATTR: false,
-                    KEEP_CONTENT: true
+            if (status) status.setAttribute("aria-label", aiT("title"));
+
+            setLabel("aiSendBtn", aiT("send"));
+            setLabel("aiImageBtn", aiT("attach"));
+            setLabel("aiImageRemoveBtn", aiT("removeImage"));
+            setLabel("aiMicBtn", aiT("dictate"));
+            setLabel("aiNewBtn", aiT("newChat"));
+            setLabel("aiScrollBottom", aiT("jump"));
+            setLabel("aiVoiceStopBtn", aiT("stop"));
+            setLabel("aiVoiceCancelBtn", aiT("cancel"));
+            setLabel("aiCloseBtn", aiT("close"));
+
+            const expandBtn = document.getElementById("aiExpandBtn");
+            if (expandBtn) {
+                const label = aiFullOpen ? aiT("minimize") : aiT("expand");
+                expandBtn.setAttribute("aria-label", label);
+                expandBtn.title = label;
+                expandBtn.textContent = aiFullOpen ? "🗕" : "🗖";
+            }
+
+            const toggle = document.getElementById("aiToggle");
+            if (toggle) {
+                toggle.setAttribute("aria-label", aiT("title"));
+                toggle.title = aiT("title");
+            }
+
+            const title = document.getElementById("aiTitle");
+            const sub = document.getElementById("aiHeaderSub");
+            if (title) title.textContent = aiT("title");
+            if (sub) sub.textContent = aiT("subtitle");
+
+            const box = document.getElementById("aiBox");
+            if (box) box.setAttribute("aria-label", aiT("title"));
+
+            const wTitle = document.getElementById("aiWelcomeTitle");
+            const wSub = document.getElementById("aiWelcomeSub");
+            if (wTitle) wTitle.textContent = aiT("welcomeTitle");
+            if (wSub) wSub.textContent = aiT("welcomeSub");
+            document.querySelectorAll("#aiWelcome .ai-suggest").forEach((btn, i) => {
+                const text = aiT("suggestions")[i];
+                if (text) btn.textContent = text;
+            });
+
+            const vText = document.getElementById("aiVoiceText");
+            if (vText) vText.textContent = aiT("listening");
+
+            /* re-render assistant bubbles so restored history follows the language */
+            document
+                .querySelectorAll("#aiMessages .ai-message[data-ai-raw]")
+                .forEach((el) => {
+                    el.innerHTML = aiRenderMarkdown(el.getAttribute("data-ai-raw"));
                 });
+        }
+
+        function setLabel(id, text) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.setAttribute("aria-label", text);
+                el.title = text;
             }
         }
 
-        function renderMarkdown(text) {
-            if (typeof marked === "undefined") {
-                // Fallback: escape and preserve line breaks
-                const div = document.createElement("div");
-                div.textContent = text;
-                return div.innerHTML.replace(/\n/g, "<br>");
-            }
-            const html = marked.parse(text);
-            if (typeof DOMPurify !== "undefined") {
-                return DOMPurify.sanitize(html);
-            }
-            return html;
+        function aiAnnounce(text) {
+            const status = document.getElementById("aiStatus");
+            if (status) status.textContent = text || "";
         }
 
-        // =========================================================
-        // UTILITIES
-        // =========================================================
         function aiEscape(str) {
             const div = document.createElement("div");
             div.textContent = str;
             return div.innerHTML;
         }
 
-        function detectTextDirection(text) {
-            // Check for Arabic/Sorani characters (Arabic script ranges)
-            const rtlChars = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(text);
-            const latinChars = /[A-Za-z]/.test(text);
-            // If mostly RTL script, use RTL
-            if (rtlChars && !latinChars) return "rtl";
-            // Mixed: check ratio
-            if (rtlChars && latinChars) {
-                const rtlCount = (text.match(/[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/g) || []).length;
-                const latinCount = (text.match(/[A-Za-z]/g) || []).length;
-                return rtlCount > latinCount ? "rtl" : "ltr";
-            }
-            return "ltr";
-        }
+        /* =====================================================
+           MARKDOWN RENDERER
+           Escapes first, then converts headings, lists, quotes,
+           links, inline code and fenced code blocks. Safe by
+           construction — no raw HTML from the model survives.
+           ===================================================== */
 
-        function formatTime(date) {
-            return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        }
-
-        function createMessageElement(role, content, options = {}) {
-            const { isStreaming = false, isThinking = false, isError = false, direction = "ltr", imagePreview = null, timestamp = new Date() } = options;
-            const div = document.createElement("div");
-            div.className = `${role}-message`;
-            if (direction === "rtl") div.classList.add("rtl");
-            if (isStreaming) div.classList.add("streaming");
-            if (isThinking) div.classList.add("thinking");
-            if (isError) div.classList.add("error");
-
-            let innerHTML = "";
-            if (role === "user") {
-                if (imagePreview) {
-                    innerHTML += `<img src="${imagePreview}" alt="Uploaded image" />`;
-                }
-                innerHTML += `<div class="message-content">${aiEscape(content)}</div>`;
-            } else {
-                if (isThinking) {
-                    innerHTML += `<div class="message-content"><span class="thinking-indicator"><span></span><span></span><span></span></span></div>`;
-                } else {
-                    const rendered = renderMarkdown(content);
-                    innerHTML += `<div class="message-content" dir="${direction}">${rendered}</div>`;
-                    // Add copy button for assistant messages
-                    innerHTML += `
-                        <div class="message-actions">
-                            <button type="button" class="copy-response-btn" aria-label="Copy response" title="Copy response">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                <span>Copy</span>
-                            </button>
-                        </div>
-                    `;
-                }
-                if (isError) {
-                    innerHTML += `<button type="button" class="retry-btn" aria-label="Retry">Retry</button>`;
-                }
-            }
-            div.innerHTML = innerHTML;
-            return div;
-        }
-
-        function setupCopyButtons(container) {
-            container.querySelectorAll(".copy-response-btn").forEach(btn => {
-                btn.addEventListener("click", async () => {
-                    const messageEl = btn.closest(".ai-message");
-                    const contentEl = messageEl?.querySelector(".message-content");
-                    if (contentEl) {
-                        try {
-                            await navigator.clipboard.writeText(contentEl.innerText);
-                            btn.classList.add("copied");
-                            btn.querySelector("span").textContent = "Copied!";
-                            setTimeout(() => {
-                                btn.classList.remove("copied");
-                                btn.querySelector("span").textContent = "Copy";
-                            }, 2000);
-                        } catch (e) {
-                            console.warn("Copy failed:", e);
-                        }
-                    }
-                });
+        function aiRenderInline(text) {
+            let out = text;
+            /* inline code (protect from other inline rules) */
+            const codeSpans = [];
+            out = out.replace(/`([^`\n]+)`/g, (m, code) => {
+                codeSpans.push(code);
+                return "\u0000C" + (codeSpans.length - 1) + "\u0000";
             });
-            container.querySelectorAll(".copy-code-btn").forEach(btn => {
-                btn.addEventListener("click", async () => {
-                    const pre = btn.closest("pre");
-                    const code = pre?.querySelector("code");
-                    if (code) {
-                        try {
-                            await navigator.clipboard.writeText(code.innerText);
-                            btn.classList.add("copied");
-                            btn.textContent = "Copied!";
-                            setTimeout(() => {
-                                btn.classList.remove("copied");
-                                btn.textContent = "Copy";
-                            }, 2000);
-                        } catch (e) {
-                            console.warn("Copy code failed:", e);
-                        }
-                    }
-                });
-            });
+            /* bold then italic */
+            out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+            out = out.replace(/(^|[\s(])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+            out = out.replace(/(^|[\s(])_([^_\n]+)_/g, "$1<em>$2</em>");
+            /* links — http(s) only, quotes stripped to block attribute injection */
+            out = out.replace(
+                /\[([^\]\n]+)\]\((https?:\/\/[^\s<>"')]+)\)/g,
+                (m, label, url) =>
+                    '<a href="' +
+                    url +
+                    '" target="_blank" rel="noopener noreferrer">' +
+                    label +
+                    "</a>"
+            );
+            /* restore code spans */
+            out = out.replace(/\u0000C(\d+)\u0000/g, (m, i) => "<code>" + codeSpans[+i] + "</code>");
+            return out;
         }
 
-        // =========================================================
-        // HISTORY MANAGEMENT
-        // =========================================================
+        function aiRenderMarkdown(raw) {
+            if (!raw) return "";
+            const text = aiEscape(String(raw));
+
+            /* fenced code blocks → placeholders */
+            const codeBlocks = [];
+            const withPlaceholders = text.replace(
+                /```([A-Za-z0-9_+-]*)[ \t]*\n([\s\S]*?)(?:```|$)/g,
+                (m, lang, code) => {
+                    const idx = codeBlocks.length;
+                    codeBlocks.push({ lang: lang || "", code: code.replace(/\n+$/, "") });
+                    return "\u0000B" + idx + "\u0000";
+                }
+            );
+
+            const lines = withPlaceholders.split("\n");
+            const out = [];
+            let paragraph = [];
+            let listType = null; /* "ul" | "ol" | null */
+            let quote = [];
+
+            function flushParagraph() {
+                if (paragraph.length) {
+                    out.push("<p>" + aiRenderInline(paragraph.join("<br>")) + "</p>");
+                    paragraph = [];
+                }
+            }
+            function flushList() {
+                if (listType) {
+                    out.push(listType === "ul" ? "</ul>" : "</ol>");
+                    listType = null;
+                }
+            }
+            function flushQuote() {
+                if (quote.length) {
+                    out.push(
+                        "<blockquote><p>" +
+                            aiRenderInline(quote.join("<br>")) +
+                            "</p></blockquote>"
+                    );
+                    quote = [];
+                }
+            }
+            function flushAll() {
+                flushParagraph();
+                flushList();
+                flushQuote();
+            }
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                /* code block placeholder line */
+                const blockMatch = line.match(/^\u0000B(\d+)\u0000$/);
+                if (blockMatch) {
+                    flushAll();
+                    const block = codeBlocks[+blockMatch[1]];
+                    out.push(
+                        '<div class="aiCode" dir="ltr">' +
+                            '<div class="aiCodeHead">' +
+                            "<span>" +
+                            aiEscape(block.lang || "code") +
+                            "</span>" +
+                            '<button type="button" class="aiCodeCopy" data-ai-code-copy="1">' +
+                            aiEscape(aiT("copy")) +
+                            "</button>" +
+                            "</div>" +
+                            "<pre><code>" +
+                            block.code +
+                            "</code></pre>" +
+                            "</div>"
+                    );
+                    continue;
+                }
+
+                if (!line.trim()) {
+                    flushAll();
+                    continue;
+                }
+
+                const heading = line.match(/^(#{1,6})\s+(.*)$/);
+                if (heading) {
+                    flushAll();
+                    const level = Math.min(Math.max(heading[1].length, 1), 4);
+                    out.push(
+                        "<h" + level + ">" + aiRenderInline(heading[2]) + "</h" + level + ">"
+                    );
+                    continue;
+                }
+
+                if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+                    flushAll();
+                    out.push("<hr>");
+                    continue;
+                }
+
+                const quoteMatch = line.match(/^&gt;\s?(.*)$/) || line.match(/^>\s?(.*)$/);
+                if (quoteMatch) {
+                    flushParagraph();
+                    flushList();
+                    quote.push(quoteMatch[1]);
+                    continue;
+                }
+
+                const ulMatch = line.match(/^\s*[-*+]\s+(.*)$/);
+                if (ulMatch) {
+                    flushParagraph();
+                    flushQuote();
+                    if (listType !== "ul") {
+                        flushList();
+                        out.push("<ul>");
+                        listType = "ul";
+                    }
+                    out.push("<li>" + aiRenderInline(ulMatch[1]) + "</li>");
+                    continue;
+                }
+
+                const olMatch = line.match(/^\s*\d+[.)]\s+(.*)$/);
+                if (olMatch) {
+                    flushParagraph();
+                    flushQuote();
+                    if (listType !== "ol") {
+                        flushList();
+                        out.push("<ol>");
+                        listType = "ol";
+                    }
+                    out.push("<li>" + aiRenderInline(olMatch[1]) + "</li>");
+                    continue;
+                }
+
+                flushList();
+                flushQuote();
+                paragraph.push(line);
+            }
+            flushAll();
+
+            /* standalone code placeholders that ended up mid-paragraph */
+            let html = out.join("");
+            html = html.replace(/\u0000B(\d+)\u0000/g, (m, i) => {
+                const block = codeBlocks[+i];
+                return (
+                    '<div class="aiCode" dir="ltr"><div class="aiCodeHead"><span>' +
+                    aiEscape(block.lang || "code") +
+                    '</span><button type="button" class="aiCodeCopy" data-ai-code-copy="1">' +
+                    aiEscape(aiT("copy")) +
+                    "</button></div><pre><code>" +
+                    block.code +
+                    "</code></pre></div>"
+                );
+            });
+
+            return html || "<p>" + aiRenderInline(text) + "</p>";
+        }
+
+        /* =====================================================
+           SCROLL PINNING
+           Auto-scroll only when the user is already near the
+           bottom; otherwise show a "jump to latest" button so
+           older messages are never yanked away.
+           ===================================================== */
+
+        function aiMessagesEl() {
+            return document.getElementById("aiMessages");
+        }
+
+        function aiScrollToBottom() {
+            const m = aiMessagesEl();
+            if (m) m.scrollTop = m.scrollHeight;
+        }
+
+        function aiMaybeScroll(force) {
+            const jump = document.getElementById("aiScrollBottom");
+            const m = aiMessagesEl();
+            if (!m) return;
+            if (force || aiPinned) aiScrollToBottom();
+            if (jump) jump.classList.toggle("show", !aiPinned);
+        }
+
+        function aiUpdatePin() {
+            const m = aiMessagesEl();
+            const jump = document.getElementById("aiScrollBottom");
+            if (!m) return;
+            aiPinned = m.scrollHeight - m.scrollTop - m.clientHeight < 60;
+            if (jump) jump.classList.toggle("show", !aiPinned);
+        }
+
+        /* =====================================================
+           CHAT HISTORY (sessionStorage, same key + format)
+           ===================================================== */
+
         function aiLoadHistory() {
             try {
                 const raw = sessionStorage.getItem(AI_HISTORY_STORAGE_KEY);
@@ -21271,76 +21551,190 @@ document.documentElement.classList.toggle(
         function aiSaveHistory(history) {
             try {
                 sessionStorage.setItem(AI_HISTORY_STORAGE_KEY, JSON.stringify(history));
-            } catch (e) {}
-        }
-
-        function aiLoadPersistentHistory() {
-            try {
-                const raw = localStorage.getItem(AI_PERSISTENT_HISTORY_KEY);
-                return raw ? JSON.parse(raw) : [];
             } catch (e) {
-                return [];
+                /* storage unavailable — ignore, chat still works */
             }
         }
 
-        function aiSavePersistentHistory(history) {
-            try {
-                localStorage.setItem(AI_PERSISTENT_HISTORY_KEY, JSON.stringify(history));
-            } catch (e) {}
+        let aiConversationHistory = aiLoadHistory();
+
+        /* =====================================================
+           UI STATE HELPERS
+           ===================================================== */
+
+        function aiSetInputDisabled(disabled) {
+            const input = document.getElementById("aiInput");
+            const sendBtn = document.getElementById("aiSendBtn");
+            const imageBtn = document.getElementById("aiImageBtn");
+            const micBtn = document.getElementById("aiMicBtn");
+            if (input) input.disabled = disabled;
+            if (sendBtn) {
+                sendBtn.disabled = disabled;
+                sendBtn.classList.toggle("busy", disabled);
+            }
+            if (imageBtn) imageBtn.disabled = disabled;
+            if (micBtn) micBtn.disabled = disabled;
         }
 
-        let aiConversationHistory = aiLoadHistory();
-        let aiPersistentHistory = aiLoadPersistentHistory();
-        let aiCurrentMode = "mini"; // "mini" or "full"
-        let aiSelectedModel = "auto";
-        let aiSelectedImage = null;
-        let aiAbortController = null;
-        let aiIsStreaming = false;
-        let aiLastUserMessage = null;
-        let aiLastPendingImage = null;
-        let aiFullscreenMessages = [];
+        function aiShowWelcome(show) {
+            const welcome = document.getElementById("aiWelcome");
+            if (welcome) welcome.classList.toggle("hide", show ? false : true);
+        }
 
-        // =========================================================
-        // IMAGE HANDLING
-        // =========================================================
+        function aiShowThinking() {
+            const messages = aiMessagesEl();
+            if (!messages) return null;
+            const el = document.createElement("div");
+            el.className = "ai-message ai-typing";
+            el.id = "aiLoading";
+            el.innerHTML =
+                '<span class="ai-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
+                '<span class="ai-typing-label"></span>';
+            el.querySelector(".ai-typing-label").textContent = aiT("thinking");
+            messages.appendChild(el);
+            aiMaybeScroll(true);
+            return el;
+        }
+
+        function aiAppendUserMessage(text, imageDataUrl) {
+            const messages = aiMessagesEl();
+            if (!messages) return null;
+            const el = document.createElement("div");
+            el.className = "user-message";
+            if (imageDataUrl) {
+                const img = document.createElement("img");
+                img.src = imageDataUrl;
+                img.alt = "Uploaded image";
+                el.appendChild(img);
+            }
+            if (text) el.appendChild(document.createTextNode(text));
+            messages.appendChild(el);
+            return el;
+        }
+
+        function aiAppendTextMessage(text, isError) {
+            const messages = aiMessagesEl();
+            if (!messages) return null;
+            const el = document.createElement("div");
+            el.className = "ai-message" + (isError ? " ai-error" : "");
+            el.textContent = text;
+            messages.appendChild(el);
+            return el;
+        }
+
+        function aiAppendMessageActions(messageEl, rawText) {
+            const messages = aiMessagesEl();
+            if (!messages || !messageEl) return;
+            const actions = document.createElement("div");
+            actions.className = "ai-msg-actions";
+            const copyBtn = document.createElement("button");
+            copyBtn.type = "button";
+            copyBtn.className = "ai-copy-btn";
+            copyBtn.textContent = aiT("copy");
+            copyBtn.addEventListener("click", () =>
+                aiCopyText(rawText, copyBtn, aiT("copy"))
+            );
+            actions.appendChild(copyBtn);
+            messageEl.insertAdjacentElement("afterend", actions);
+        }
+
+        function aiCopyText(text, btn, label) {
+            if (!text) return;
+            const done = () => {
+                if (btn) {
+                    btn.textContent = aiT("copied");
+                    btn.classList.add("done");
+                    setTimeout(() => {
+                        btn.textContent = label || aiT("copy");
+                        btn.classList.remove("done");
+                    }, 1400);
+                }
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done, () => {
+                    aiCopyFallback(text);
+                    done();
+                });
+            } else {
+                aiCopyFallback(text);
+                done();
+            }
+        }
+
+        function aiCopyFallback(text) {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand("copy");
+            } catch (e) {}
+            document.body.removeChild(ta);
+        }
+
+        /* delegated: code-block copy buttons */
+        document.getElementById("aiMessages")?.addEventListener("click", (e) => {
+            const btn = e.target.closest("[data-ai-code-copy]");
+            if (!btn) return;
+            const codeEl = btn.closest(".aiCode")?.querySelector("code");
+            if (!codeEl) return;
+            aiCopyText(codeEl.textContent, btn, aiT("copy"));
+        });
+
+        /* =====================================================
+           IMAGE UPLOAD / PREVIEW
+           ===================================================== */
+
         const AI_MAX_IMAGE_SOURCE_BYTES = 15 * 1024 * 1024;
         const AI_IMAGE_DIRECT_THRESHOLD_BYTES = 300 * 1024;
         const AI_IMAGE_MAX_DIMENSION = 1600;
         const AI_IMAGE_JPEG_QUALITY = 0.82;
-        const AI_DEFAULT_IMAGE_PROMPT = "Please analyze this image and tell me what you can see.";
+        const AI_DEFAULT_IMAGE_PROMPT =
+            "Please analyze this image and tell me what you can see.";
+
+        let aiSelectedImage = null;
+
+        function aiReadFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () =>
+                    reject(reader.error || new Error("File read failed"));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function aiLoadImageElement(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error("Image decode failed"));
+                img.src = dataUrl;
+            });
+        }
 
         async function aiPrepareImage(file) {
             if (!file.type || !file.type.startsWith("image/")) {
                 throw new Error("Unsupported file type");
             }
             if (file.size > AI_MAX_IMAGE_SOURCE_BYTES) {
-                throw new Error("Image is too large (max 15MB)");
+                throw new Error("Image is too large");
             }
 
-            const originalDataUrl = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(reader.error || new Error("File read failed"));
-                reader.readAsDataURL(file);
-            });
+            const originalDataUrl = await aiReadFileAsDataUrl(file);
 
             if (file.size <= AI_IMAGE_DIRECT_THRESHOLD_BYTES) {
                 return {
                     mimeType: file.type,
                     data: originalDataUrl.split(",")[1],
-                    previewUrl: originalDataUrl,
-                    name: file.name,
-                    size: file.size
+                    previewUrl: originalDataUrl
                 };
             }
 
-            const img = await new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error("Image decode failed"));
-                img.src = originalDataUrl;
-            });
-
+            const img = await aiLoadImageElement(originalDataUrl);
             let width = img.naturalWidth || img.width;
             let height = img.naturalHeight || img.height;
 
@@ -21360,391 +21754,290 @@ document.documentElement.classList.toggle(
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
 
-            const compressedDataUrl = canvas.toDataURL("image/jpeg", AI_IMAGE_JPEG_QUALITY);
+            const compressedDataUrl = canvas.toDataURL(
+                "image/jpeg",
+                AI_IMAGE_JPEG_QUALITY
+            );
 
             return {
                 mimeType: "image/jpeg",
                 data: compressedDataUrl.split(",")[1],
-                previewUrl: compressedDataUrl,
-                name: file.name,
-                size: file.size
+                previewUrl: compressedDataUrl
             };
         }
 
-        function aiShowImagePreview(previewUrl, fileName, isFullscreen = false) {
-            if (isFullscreen) {
-                const wrap = document.getElementById("aiFullscreenImagePreview");
-                const thumb = document.getElementById("aiFullscreenImageThumb");
-                const nameEl = document.getElementById("aiFullscreenImageName");
-                if (!wrap || !thumb) return;
-                thumb.src = previewUrl;
-                nameEl.textContent = fileName || "Image";
-                wrap.classList.add("show");
-            } else {
-                const wrap = document.getElementById("aiImagePreviewWrap");
-                const thumb = document.getElementById("aiImagePreviewThumb");
-                if (!wrap || !thumb) return;
-                thumb.src = previewUrl;
-                wrap.classList.add("show");
-            }
+        function aiShowImagePreview(previewUrl) {
+            const wrap = document.getElementById("aiImagePreviewWrap");
+            const thumb = document.getElementById("aiImagePreviewThumb");
+            if (!wrap || !thumb) return;
+            thumb.src = previewUrl;
+            wrap.classList.add("show");
         }
 
-        function aiClearSelectedImage(isFullscreen = false) {
+        function aiClearSelectedImage() {
             aiSelectedImage = null;
-            if (isFullscreen) {
-                const wrap = document.getElementById("aiFullscreenImagePreview");
-                const thumb = document.getElementById("aiFullscreenImageThumb");
-                const nameEl = document.getElementById("aiFullscreenImageName");
-                const fileInput = document.getElementById("fsImageFileInput");
-                if (wrap) wrap.classList.remove("show");
-                if (thumb) thumb.src = "";
-                if (nameEl) nameEl.textContent = "";
-                if (fileInput) fileInput.value = "";
-            } else {
-                const wrap = document.getElementById("aiImagePreviewWrap");
-                const thumb = document.getElementById("aiImagePreviewThumb");
-                const fileInput = document.getElementById("aiImageFileInput");
-                if (wrap) wrap.classList.remove("show");
-                if (thumb) thumb.src = "";
-                if (fileInput) fileInput.value = "";
-            }
+            const wrap = document.getElementById("aiImagePreviewWrap");
+            const thumb = document.getElementById("aiImagePreviewThumb");
+            const fileInput = document.getElementById("aiImageFileInput");
+            if (wrap) wrap.classList.remove("show");
+            if (thumb) thumb.src = "";
+            if (fileInput) fileInput.value = "";
         }
 
-        // =========================================================
-        // VOICE INPUT
-        // =========================================================
-        let aiVoiceRecognition = null;
-        let aiVoiceListening = false;
+        document.getElementById("aiImageBtn")?.addEventListener("click", () => {
+            document.getElementById("aiImageFileInput")?.click();
+        });
 
-        function initVoiceRecognition() {
-            if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-                return null;
-            }
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = true;
-            recognition.lang = "en-US"; // Default, will be updated per message
-            return recognition;
-        }
+        document
+            .getElementById("aiImageFileInput")
+            ?.addEventListener("change", async (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
 
-        function startVoiceInput(targetInput, isFullscreen = false) {
-            if (aiVoiceListening) return;
-            const recognition = initVoiceRecognition();
-            if (!recognition) {
-                alert("Voice input is not supported in this browser.");
+                try {
+                    aiSelectedImage = await aiPrepareImage(file);
+                    aiShowImagePreview(aiSelectedImage.previewUrl);
+                } catch (error) {
+                    aiClearSelectedImage();
+                    aiShowWelcome(false);
+                    aiAppendTextMessage(aiT("imageError"), true);
+                    aiMaybeScroll(true);
+                }
+            });
+
+        document
+            .getElementById("aiImageRemoveBtn")
+            ?.addEventListener("click", () => {
+                aiClearSelectedImage();
+            });
+
+        /* =====================================================
+           VOICE DICTATION (Web Speech API, client-side only)
+           Dictates into #aiInput; the existing send pipeline is
+           untouched. Hidden entirely when unsupported.
+           ===================================================== */
+
+        const AI_SpeechAPI =
+            window.SpeechRecognition || window.webkitSpeechRecognition || null;
+        let aiRecognition = null;
+        let aiVoiceActive = false;
+        let aiVoiceBase = "";
+
+        function aiInitVoice() {
+            const micBtn = document.getElementById("aiMicBtn");
+            if (!AI_SpeechAPI) {
+                if (micBtn) micBtn.hidden = true;
                 return;
             }
-            aiVoiceRecognition = recognition;
-            aiVoiceListening = true;
-
-            // Update UI to show recording state
-            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : document.getElementById("aiVoiceBtn");
-            if (voiceBtn) {
-                voiceBtn.classList.add("active");
-                voiceBtn.innerHTML = '<span class="voice-recording"><span class="voice-wave"><span></span><span></span><span></span><span></span><span></span></span> Listening...</span>';
+            try {
+                aiRecognition = new AI_SpeechAPI();
+            } catch (e) {
+                if (micBtn) micBtn.hidden = true;
+                return;
             }
+            aiRecognition.lang = aiSpeechLang();
+            aiRecognition.interimResults = true;
+            aiRecognition.continuous = true;
 
-            let finalTranscript = "";
-            let interimTranscript = "";
-
-            recognition.onresult = (event) => {
-                interimTranscript = "";
+            aiRecognition.onresult = (event) => {
+                let interim = "";
+                let final = "";
                 for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript;
-                    } else {
-                        interimTranscript += transcript;
-                    }
+                    const res = event.results[i];
+                    if (res.isFinal) final += res[0].transcript;
+                    else interim += res[0].transcript;
                 }
-                targetInput.value = finalTranscript + interimTranscript;
-                // Auto-resize textarea if fullscreen
-                if (isFullscreen && targetInput.tagName === "TEXTAREA") {
-                    targetInput.style.height = "auto";
-                    targetInput.style.height = Math.min(targetInput.scrollHeight, 180) + "px";
-                }
+                const input = document.getElementById("aiInput");
+                if (input) input.value = aiVoiceBase + final + interim;
             };
-
-            recognition.onerror = (event) => {
-                console.warn("Speech recognition error:", event.error);
-                stopVoiceInput(isFullscreen);
-                if (event.error === "not-allowed") {
-                    alert("Microphone permission denied. Please allow microphone access in browser settings.");
-                } else if (event.error === "no-speech") {
-                    // Silent, no alert needed
-                } else {
-                    alert("Voice input error: " + event.error);
-                }
+            aiRecognition.onerror = () => {
+                aiStopVoice(false);
             };
-
-            recognition.onend = () => {
-                stopVoiceInput(isFullscreen);
+            aiRecognition.onend = () => {
+                if (aiVoiceActive) aiStopVoice(false);
             };
-
-            recognition.start();
         }
 
-        function stopVoiceInput(isFullscreen = false) {
-            if (aiVoiceRecognition) {
-                aiVoiceRecognition.stop();
-                aiVoiceRecognition = null;
+        function aiStartVoice() {
+            if (!aiRecognition || aiVoiceActive || aiBusy) return;
+            const input = document.getElementById("aiInput");
+            const bar = document.getElementById("aiVoiceBar");
+            const micBtn = document.getElementById("aiMicBtn");
+            aiVoiceBase = input ? input.value : "";
+            if (aiVoiceBase && !/\s$/.test(aiVoiceBase)) aiVoiceBase += " ";
+            try {
+                aiRecognition.lang = aiSpeechLang();
+                aiRecognition.start();
+            } catch (e) {
+                return;
             }
-            aiVoiceListening = false;
-            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : document.getElementById("aiVoiceBtn");
-            if (voiceBtn) {
-                voiceBtn.classList.remove("active");
-                voiceBtn.innerHTML = "🎤";
+            aiVoiceActive = true;
+            if (bar) bar.hidden = false;
+            if (micBtn) micBtn.classList.add("recording");
+            aiAnnounce(aiT("listening"));
+        }
+
+        function aiStopVoice(cancel) {
+            const bar = document.getElementById("aiVoiceBar");
+            const micBtn = document.getElementById("aiMicBtn");
+            const input = document.getElementById("aiInput");
+            if (cancel && input) input.value = "";
+            aiVoiceBase = "";
+            if (!aiVoiceActive) {
+                if (bar) bar.hidden = true;
+                if (micBtn) micBtn.classList.remove("recording");
+                return;
             }
-        }
-
-        // =========================================================
-        // VOICE OUTPUT (TTS)
-        // =========================================================
-        let aiSpeechSynthesis = null;
-        let aiCurrentUtterance = null;
-
-        function speakText(text, lang = "en-US") {
-            if (!("speechSynthesis" in window)) return;
-            stopSpeech();
-            aiSpeechSynthesis = window.speechSynthesis;
-            aiCurrentUtterance = new SpeechSynthesisUtterance(text);
-            aiCurrentUtterance.lang = lang;
-            aiCurrentUtterance.rate = 1;
-            aiCurrentUtterance.pitch = 1;
-            aiCurrentUtterance.volume = 1;
-            // Try to find a good voice
-            const voices = aiSpeechSynthesis.getVoices();
-            const preferredVoice = voices.find(v => v.lang.startsWith(lang.split("-")[0]) && v.name.includes("Natural")) ||
-                                  voices.find(v => v.lang.startsWith(lang.split("-")[0]));
-            if (preferredVoice) aiCurrentUtterance.voice = preferredVoice;
-            aiSpeechSynthesis.speak(aiCurrentUtterance);
-        }
-
-        function stopSpeech() {
-            if (aiSpeechSynthesis) {
-                aiSpeechSynthesis.cancel();
+            aiVoiceActive = false;
+            if (aiRecognition) {
+                try {
+                    aiRecognition.stop();
+                } catch (e) {}
             }
-            aiCurrentUtterance = null;
+            if (bar) bar.hidden = true;
+            if (micBtn) micBtn.classList.remove("recording");
+            aiAnnounce("");
+            if (input) input.focus();
         }
 
-        // =========================================================
-        // MODE SELECTION
-        // =========================================================
-        function setupModelSelector() {
-            const btn = document.getElementById("fsModelBtn");
-            const dropdown = document.getElementById("fsModelDropdown");
-            if (!btn || !dropdown) return;
+        document.getElementById("aiMicBtn")?.addEventListener("click", () => {
+            if (aiVoiceActive) aiStopVoice(false);
+            else aiStartVoice();
+        });
+        document
+            .getElementById("aiVoiceStopBtn")
+            ?.addEventListener("click", () => aiStopVoice(false));
+        document
+            .getElementById("aiVoiceCancelBtn")
+            ?.addEventListener("click", () => aiStopVoice(true));
 
-            btn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                dropdown.classList.toggle("open");
-            });
+        /* =====================================================
+           MINI <-> FULLSCREEN
+           Same #aiBox, same #aiMessages DOM — conversation is
+           preserved automatically by the CSS-only expansion.
+           ===================================================== */
 
-            dropdown.querySelectorAll(".model-option").forEach(opt => {
-                opt.addEventListener("click", () => {
-                    const model = opt.dataset.model;
-                    if (SUPPORTED_MODELS[model]) {
-                        aiSelectedModel = model;
-                        dropdown.querySelectorAll(".model-option").forEach(o => o.classList.remove("selected"));
-                        opt.classList.add("selected");
-                        // Persist preference
-                        localStorage.setItem("dailykrd_ai_model", model);
-                    }
-                    dropdown.classList.remove("open");
-                });
-            });
-
-            document.addEventListener("click", () => dropdown.classList.remove("open"));
-
-            // Load saved preference
-            const saved = localStorage.getItem("dailykrd_ai_model");
-            if (saved && SUPPORTED_MODELS[saved]) {
-                aiSelectedModel = saved;
-                dropdown.querySelectorAll(".model-option").forEach(o => o.classList.toggle("selected", o.dataset.model === saved));
-            }
-        }
-
-        // =========================================================
-        // MODE SWITCHING (Mini <-> Fullscreen)
-        // =========================================================
-        function openFullscreen() {
-            const fs = document.getElementById("aiFullscreen");
+        function aiSetFullscreen(on) {
             const box = document.getElementById("aiBox");
-            if (!fs || !box) return;
+            if (!box || aiFullOpen === on) return;
+            aiFullOpen = on;
+            box.classList.toggle("full", on);
+            document.body.style.overflow = on ? "hidden" : "";
 
-            aiCurrentMode = "full";
-            fs.classList.add("open");
-            box.classList.remove("open");
-
-            // Sync messages from mini to fullscreen
-            syncMessagesToFullscreen();
-
-            // Focus input
-            setTimeout(() => {
-                const input = document.getElementById("fsInput");
-                if (input) input.focus();
-            }, 100);
-
-            // Load saved model preference
-            setupModelSelector();
+            const expandBtn = document.getElementById("aiExpandBtn");
+            if (expandBtn) {
+                const label = on ? aiT("minimize") : aiT("expand");
+                expandBtn.setAttribute("aria-label", label);
+                expandBtn.title = label;
+                expandBtn.textContent = on ? "🗕" : "🗖";
+            }
+            setTimeout(() => aiMaybeScroll(true), on ? 320 : 280);
         }
 
-        function closeFullscreen() {
-            const fs = document.getElementById("aiFullscreen");
-            if (!fs) return;
-            fs.classList.remove("open");
-            aiCurrentMode = "mini";
-        }
-
-        function minimizeFullscreen() {
-            const fs = document.getElementById("aiFullscreen");
+        function aiSetOpen(open) {
             const box = document.getElementById("aiBox");
-            if (!fs || !box) return;
-            fs.classList.remove("open");
-            box.classList.add("open");
-            aiCurrentMode = "mini";
-        }
-
-        function syncMessagesToFullscreen() {
-            const fsMessages = document.getElementById("aiFullscreenMessages");
-            const miniMessages = document.getElementById("aiMessages");
-            if (!fsMessages || !miniMessages) return;
-
-            // Clone messages from mini to fullscreen
-            fsMessages.innerHTML = "";
-            miniMessages.querySelectorAll(".user-message, .ai-message").forEach(el => {
-                const clone = el.cloneNode(true);
-                // Remove streaming/thinking classes from clones
-                clone.classList.remove("streaming", "thinking");
-                fsMessages.appendChild(clone);
-            });
-            setupCopyButtons(fsMessages);
-            fsMessages.scrollTop = fsMessages.scrollHeight;
-        }
-
-        function syncMessageToBoth(role, content, options = {}) {
-            const { isStreaming = false, isThinking = false, isError = false, imagePreview = null, timestamp = new Date() } = options;
-            const direction = detectTextDirection(content);
-            const miniMessages = document.getElementById("aiMessages");
-            const fsMessages = document.getElementById("aiFullscreenMessages");
-
-            const miniEl = createMessageElement(role, content, { isStreaming, isThinking, isError, direction, imagePreview, timestamp });
-            const fsEl = createMessageElement(role, content, { isStreaming, isThinking, isError, direction, imagePreview, timestamp });
-
-            if (miniMessages) miniMessages.appendChild(miniEl);
-            if (fsMessages && aiCurrentMode === "full") fsMessages.appendChild(fsEl);
-
-            setupCopyButtons(miniMessages);
-            setupCopyButtons(fsMessages);
-
-            // Auto-scroll if near bottom
-            autoScrollIfNearBottom(miniMessages);
-            autoScrollIfNearBottom(fsMessages);
-
-            return { mini: miniEl, full: fsEl };
-        }
-
-        function autoScrollIfNearBottom(container) {
-            if (!container) return;
-            const threshold = 50;
-            const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
-            if (isNearBottom) {
-                container.scrollTop = container.scrollHeight;
+            const toggle = document.getElementById("aiToggle");
+            if (!box) return;
+            box.classList.toggle("open", open);
+            if (toggle) toggle.setAttribute("aria-expanded", open ? "true" : "false");
+            if (!open) {
+                if (aiFullOpen) aiSetFullscreen(false);
+                aiStopVoice(false);
+            } else {
+                aiMaybeScroll(true);
             }
         }
 
-        function updateLastAssistantMessage(content, options = {}) {
-            const { isStreaming = false, isThinking = false, isError = false, direction = "ltr", final = false } = options;
-            const miniMessages = document.getElementById("aiMessages");
-            const fsMessages = document.getElementById("aiFullscreenMessages");
-
-            [miniMessages, fsMessages].forEach(container => {
-                if (!container) return;
-                const lastMsg = container.querySelector(".ai-message:last-child");
-                if (!lastMsg) return;
-                lastMsg.classList.toggle("streaming", isStreaming && !final);
-                lastMsg.classList.toggle("thinking", isThinking);
-                lastMsg.classList.toggle("error", isError);
-                if (direction === "rtl") lastMsg.classList.add("rtl"); else lastMsg.classList.remove("rtl");
-
-                const contentEl = lastMsg.querySelector(".message-content");
-                if (contentEl) {
-                    if (isThinking) {
-                        contentEl.innerHTML = '<span class="thinking-indicator"><span></span><span></span><span></span></span>';
-                    } else if (final) {
-                        contentEl.innerHTML = renderMarkdown(content);
-                        contentEl.dir = direction;
-                        // Re-setup copy buttons for new code blocks
-                        setupCopyButtons(lastMsg);
-                    } else if (isStreaming) {
-                        // For streaming, append text content (will be replaced by final render)
-                        contentEl.textContent = content;
-                    }
-                }
-
-                // Handle error retry button
-                if (isError) {
-                    let retryBtn = lastMsg.querySelector(".retry-btn");
-                    if (!retryBtn) {
-                        retryBtn = document.createElement("button");
-                        retryBtn.type = "button";
-                        retryBtn.className = "retry-btn";
-                        retryBtn.textContent = "Retry";
-                        retryBtn.addEventListener("click", () => retryLastMessage());
-                        lastMsg.appendChild(retryBtn);
-                    }
-                } else {
-                    const retryBtn = lastMsg.querySelector(".retry-btn");
-                    if (retryBtn) retryBtn.remove();
-                }
-            });
+        function aiClearChat() {
+            if (aiBusy) return;
+            if (!window.confirm(aiT("newChatConfirm"))) return;
+            aiStopVoice(false);
+            aiConversationHistory = [];
+            aiSaveHistory(aiConversationHistory);
+            const messages = aiMessagesEl();
+            if (messages) messages.innerHTML = "";
+            aiClearSelectedImage();
+            aiShowWelcome(true);
+            aiPinned = true;
+            aiMaybeScroll(true);
+            const input = document.getElementById("aiInput");
+            if (input) input.focus();
         }
 
-        // =========================================================
-        // CORE SEND FUNCTION
-        // =========================================================
-        async function sendAI(isFullscreen = false) {
-            const input = isFullscreen ? document.getElementById("fsInput") : document.getElementById("aiInput");
-            const messages = isFullscreen ? document.getElementById("aiFullscreenMessages") : document.getElementById("aiMessages");
-            const sendBtn = isFullscreen ? document.getElementById("fsSendBtn") : document.querySelector("#aiBox .aiInput button");
-            const imageBtn = isFullscreen ? document.getElementById("fsImageBtn") : document.getElementById("aiImageBtn");
-            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : null;
+        /* =====================================================
+           SEND — request body + streaming parser preserved
+           exactly; rendering upgraded to throttled markdown.
+           ===================================================== */
+
+        async function sendAI() {
+            if (aiBusy) return;
+            const input = document.getElementById("aiInput");
+            if (!input) return;
 
             const message = input.value.trim();
             const pendingImage = aiSelectedImage;
 
             if (!message && !pendingImage) return;
 
-            const effectiveMessage = message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : "");
-            const direction = detectTextDirection(effectiveMessage);
+            const effectiveMessage =
+                message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : "");
 
-            // Add user message to both views
-            syncMessageToBoth("user", effectiveMessage, { imagePreview: pendingImage?.previewUrl, direction });
-
-            // Store for retry
-            aiLastUserMessage = message;
-            aiLastPendingImage = pendingImage;
+            aiShowWelcome(false);
+            aiAppendUserMessage(message, pendingImage ? pendingImage.previewUrl : null);
 
             input.value = "";
-            if (input.tagName === "TEXTAREA") input.style.height = "auto";
-            aiClearSelectedImage(isFullscreen);
-            setInputDisabled(true, isFullscreen);
-            if (messages) messages.scrollTop = messages.scrollHeight;
+            aiClearSelectedImage();
+            aiSetInputDisabled(true);
+            aiBusy = true;
+            aiPinned = true;
+            aiMaybeScroll(true);
 
-            // Add thinking indicator
-            const { mini: miniAiMsg, full: fsAiMsg } = syncMessageToBoth("assistant", "", { isThinking: true });
+            aiShowThinking();
+            aiAnnounce(aiT("thinking"));
 
             let assistantText = "";
+            let sourceLabel = null;
+            let messageEl = null;
             let sawAnyContent = false;
             let connectFailed = false;
-            let streamError = null;
+            let renderScheduled = false;
+
+            function scheduleRender() {
+                if (renderScheduled || !messageEl) return;
+                renderScheduled = true;
+                requestAnimationFrame(() => {
+                    renderScheduled = false;
+                    if (!messageEl) return;
+                    messageEl.innerHTML = aiRenderMarkdown(assistantText);
+                    aiMaybeScroll(false);
+                });
+            }
+
+            function ensureMessageEl() {
+                if (!messageEl) {
+                    document.getElementById("aiLoading")?.remove();
+                    const messages = aiMessagesEl();
+                    messageEl = document.createElement("div");
+                    messageEl.className = "ai-message ai-md ai-streaming";
+                    if (messages) messages.appendChild(messageEl);
+                }
+                return messageEl;
+            }
 
             function appendDelta(piece) {
                 if (!piece) return;
                 sawAnyContent = true;
                 assistantText += piece;
-                updateLastAssistantMessage(assistantText, { isStreaming: true, direction });
+                ensureMessageEl();
+                scheduleRender();
+            }
+
+            function setFullText(text) {
+                if (!text) return;
+                sawAnyContent = true;
+                assistantText = text;
+                ensureMessageEl();
+                scheduleRender();
             }
 
             function handleParsedObject(obj) {
@@ -21756,24 +22049,29 @@ document.documentElement.classList.toggle(
                 if (typeof obj.delta === "string") {
                     appendDelta(obj.delta);
                 } else if (typeof obj.response === "string") {
-                    sawAnyContent = true;
-                    assistantText = obj.response;
-                    updateLastAssistantMessage(assistantText, { isStreaming: false, direction, final: true });
+                    setFullText(obj.response);
                 }
-                if (obj.type === "metadata") {
-                    // Handle metadata from new Worker format
+
+                if (obj.source === "local") {
+                    sourceLabel = "Local AI";
+                } else if (obj.source === "gemini") {
+                    sourceLabel = "Cloud AI";
                 }
             }
 
             function handleLine(rawLine) {
                 let line = String(rawLine).trim();
                 if (!line) return;
+
                 if (line.startsWith(":")) return;
                 if (line.startsWith("event:")) return;
+
                 if (line.startsWith("data:")) {
                     line = line.slice(5).trim();
                 }
+
                 if (!line || line === "[DONE]") return;
+
                 try {
                     handleParsedObject(JSON.parse(line));
                 } catch (e) {
@@ -21784,9 +22082,7 @@ document.documentElement.classList.toggle(
             try {
                 const requestBody = {
                     message: effectiveMessage,
-                    history: aiConversationHistory.slice(-AI_HISTORY_LIMIT * 2),
-                    selectedModel: aiSelectedModel,
-                    mode: isFullscreen ? "full" : "mini"
+                    history: aiConversationHistory.slice(-AI_HISTORY_LIMIT * 2)
                 };
 
                 if (pendingImage) {
@@ -21796,12 +22092,12 @@ document.documentElement.classList.toggle(
                     };
                 }
 
-                aiAbortController = new AbortController();
                 const response = await fetch(AI_ENDPOINT, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(requestBody),
-                    signal: aiAbortController.signal
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
@@ -21815,8 +22111,10 @@ document.documentElement.classList.toggle(
 
                     while (true) {
                         const { done, value } = await reader.read();
+
                         if (value) {
                             buffer += decoder.decode(value, { stream: true });
+
                             let newlineIndex;
                             while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
                                 const line = buffer.slice(0, newlineIndex);
@@ -21824,9 +22122,12 @@ document.documentElement.classList.toggle(
                                 handleLine(line);
                             }
                         }
+
                         if (done) {
                             buffer += decoder.decode();
-                            if (buffer.trim()) handleLine(buffer);
+                            if (buffer.trim()) {
+                                handleLine(buffer);
+                            }
                             break;
                         }
                     }
@@ -21834,180 +22135,169 @@ document.documentElement.classList.toggle(
                     const text = await response.text();
                     text.split("\n").forEach(handleLine);
                 }
-
             } catch (error) {
-                if (error.name === "AbortError") {
-                    // User cancelled, don't show error
-                    return;
-                }
                 if (!sawAnyContent) {
                     connectFailed = true;
-                    streamError = error.message;
-                } else {
-                    streamError = error.message;
                 }
             }
 
-            if (sawAnyContent) {
-                // Finalize message
-                updateLastAssistantMessage(assistantText, { isStreaming: false, direction, final: true });
+            document.getElementById("aiLoading")?.remove();
 
-                // Save to session history
+            if (sawAnyContent) {
+                if (!messageEl) ensureMessageEl();
+                messageEl.classList.remove("ai-streaming");
+                messageEl.setAttribute("data-ai-raw", assistantText);
+                messageEl.innerHTML = aiRenderMarkdown(assistantText);
+                if (sourceLabel) {
+                    const src = document.createElement("div");
+                    src.className = "ai-source";
+                    src.textContent = sourceLabel;
+                    messageEl.insertAdjacentElement("afterend", src);
+                    aiAppendMessageActions(src, assistantText);
+                } else {
+                    aiAppendMessageActions(messageEl, assistantText);
+                }
+
                 aiConversationHistory.push(
-                    { role: "user", content: pendingImage ? "[User uploaded an image and asked: " + effectiveMessage + "]" : message },
+                    {
+                        role: "user",
+                        content: pendingImage
+                            ? "[User uploaded an image and asked: " + effectiveMessage + "]"
+                            : message
+                    },
                     { role: "assistant", content: assistantText }
                 );
                 if (aiConversationHistory.length > AI_HISTORY_LIMIT * 2) {
-                    aiConversationHistory = aiConversationHistory.slice(-AI_HISTORY_LIMIT * 2);
+                    aiConversationHistory = aiConversationHistory.slice(
+                        -AI_HISTORY_LIMIT * 2
+                    );
                 }
                 aiSaveHistory(aiConversationHistory);
-
-                // If fullscreen mode, also save to persistent history
-                if (isFullscreen) {
-                    aiPersistentHistory.push(
-                        { role: "user", content: pendingImage ? "[User uploaded an image and asked: " + effectiveMessage + "]" : message, timestamp: Date.now() },
-                        { role: "assistant", content: assistantText, timestamp: Date.now() }
-                    );
-                    aiSavePersistentHistory(aiPersistentHistory);
-                }
-
+                aiAnnounce("");
             } else if (connectFailed) {
-                updateLastAssistantMessage(
-                    "Couldn't connect to Daily AI. Please check your connection.",
-                    { isError: true, direction, final: true }
-                );
-            } else if (streamError) {
-                updateLastAssistantMessage(
-                    "Something went wrong: " + streamError,
-                    { isError: true, direction, final: true }
-                );
-            }
-
-            setInputDisabled(false, isFullscreen);
-            input.focus();
-            if (messages) messages.scrollTop = messages.scrollHeight;
-        }
-
-        function retryLastMessage() {
-            if (aiLastUserMessage !== null || aiLastPendingImage !== null) {
-                const isFullscreen = aiCurrentMode === "full";
-                // Re-send with stored message/image
-                const input = isFullscreen ? document.getElementById("fsInput") : document.getElementById("aiInput");
-                if (aiLastUserMessage) input.value = aiLastUserMessage;
-                aiSelectedImage = aiLastPendingImage;
-                if (aiLastPendingImage) {
-                    aiShowImagePreview(aiLastPendingImage.previewUrl, aiLastPendingImage.name, isFullscreen);
-                }
-                sendAI(isFullscreen);
-            }
-        }
-
-        function setInputDisabled(disabled, isFullscreen) {
-            const input = isFullscreen ? document.getElementById("fsInput") : document.getElementById("aiInput");
-            const sendBtn = isFullscreen ? document.getElementById("fsSendBtn") : document.querySelector("#aiBox .aiInput button");
-            const imageBtn = isFullscreen ? document.getElementById("fsImageBtn") : document.getElementById("aiImageBtn");
-            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : null;
-            if (input) input.disabled = disabled;
-            if (sendBtn) sendBtn.disabled = disabled;
-            if (imageBtn) imageBtn.disabled = disabled;
-            if (voiceBtn) voiceBtn.disabled = disabled;
-        }
-
-        // =========================================================
-        // EVENT LISTENERS
-        // =========================================================
-
-        // Mini-chat toggle
-        document.getElementById("aiToggle").addEventListener("click", () => {
-            document.getElementById("aiBox").classList.toggle("open");
-        });
-
-        // Mini-chat input
-        document.getElementById("aiInput").addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendAI(false);
-            }
-        });
-
-        // Fullscreen toggle
-        document.getElementById("fsMinimizeBtn")?.addEventListener("click", minimizeFullscreen);
-        document.getElementById("fsCloseBtn")?.addEventListener("click", closeFullscreen);
-
-        // Fullscreen input
-        const fsInput = document.getElementById("fsInput");
-        fsInput?.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendAI(true);
-            }
-        });
-        fsInput?.addEventListener("input", () => {
-            fsInput.style.height = "auto";
-            fsInput.style.height = Math.min(fsInput.scrollHeight, 180) + "px";
-        });
-
-        // Fullscreen send button
-        document.getElementById("fsSendBtn")?.addEventListener("click", () => sendAI(true));
-
-        // Image buttons
-        document.getElementById("aiImageBtn")?.addEventListener("click", () => {
-            document.getElementById("aiImageFileInput")?.click();
-        });
-        document.getElementById("fsImageBtn")?.addEventListener("click", () => {
-            document.getElementById("fsImageFileInput")?.click();
-        });
-
-        document.getElementById("aiImageFileInput")?.addEventListener("change", async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            try {
-                aiSelectedImage = await aiPrepareImage(file);
-                aiShowImagePreview(aiSelectedImage.previewUrl, aiSelectedImage.name, false);
-            } catch (error) {
-                aiClearSelectedImage(false);
-                const messages = document.getElementById("aiMessages");
-                if (messages) {
-                    messages.appendChild(createMessageElement("assistant", "Sorry, that image couldn't be used. Please try a different photo.", { isError: true }));
-                    messages.scrollTop = messages.scrollHeight;
-                }
-            }
-        });
-
-        document.getElementById("fsImageFileInput")?.addEventListener("change", async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            try {
-                aiSelectedImage = await aiPrepareImage(file);
-                aiShowImagePreview(aiSelectedImage.previewUrl, aiSelectedImage.name, true);
-            } catch (error) {
-                aiClearSelectedImage(true);
-                const messages = document.getElementById("aiFullscreenMessages");
-                if (messages) {
-                    messages.appendChild(createMessageElement("assistant", "Sorry, that image couldn't be used. Please try a different photo.", { isError: true }));
-                    messages.scrollTop = messages.scrollHeight;
-                }
-            }
-        });
-
-        document.getElementById("aiImageRemoveBtn")?.addEventListener("click", () => aiClearSelectedImage(false));
-        document.getElementById("aiFullscreenImageRemove")?.addEventListener("click", () => aiClearSelectedImage(true));
-
-        // Voice button
-        document.getElementById("fsVoiceBtn")?.addEventListener("click", () => {
-            if (aiVoiceListening) {
-                stopVoiceInput(true);
+                aiAppendTextMessage(aiT("connectError"), true);
             } else {
-                startVoiceInput(document.getElementById("fsInput"), true);
+                aiAppendTextMessage(aiT("genericError"), true);
             }
+
+            aiBusy = false;
+            aiSetInputDisabled(false);
+            aiMaybeScroll(true);
+            input.focus();
+        }
+
+        /* =====================================================
+           WIDGET CONTROLS
+           ===================================================== */
+
+        document.getElementById("aiInput")?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.isComposing) sendAI();
         });
 
-        // Initialize
-        setupMarkdownRenderer();
+        document.getElementById("aiToggle")?.addEventListener("click", () => {
+            const box = document.getElementById("aiBox");
+            aiSetOpen(!box.classList.contains("open"));
+        });
 
-        // Load voices for TTS
-        if ("speechSynthesis" in window) {
-            window.speechSynthesis.onvoiceschanged = () => {};
+        document.getElementById("aiCloseBtn")?.addEventListener("click", () => {
+            aiSetOpen(false);
+        });
+
+        document.getElementById("aiExpandBtn")?.addEventListener("click", () => {
+            aiSetFullscreen(!aiFullOpen);
+        });
+
+        document.getElementById("aiNewBtn")?.addEventListener("click", () => {
+            aiClearChat();
+        });
+
+        document.getElementById("aiScrollBottom")?.addEventListener("click", () => {
+            aiPinned = true;
+            aiMaybeScroll(true);
+        });
+
+        document.getElementById("aiMessages")?.addEventListener("scroll", () => {
+            aiUpdatePin();
+        }, { passive: true });
+
+        document.querySelectorAll("#aiWelcome .ai-suggest").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const input = document.getElementById("aiInput");
+                if (!input) return;
+                input.value = btn.textContent.trim();
+                input.focus();
+            });
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key !== "Escape") return;
+            const box = document.getElementById("aiBox");
+            if (!box || !box.classList.contains("open")) return;
+            if (aiVoiceActive) {
+                aiStopVoice(true);
+                return;
+            }
+            if (aiFullOpen) aiSetFullscreen(false);
+            else aiSetOpen(false);
+        });
+
+        /* =====================================================
+           INIT
+           ===================================================== */
+
+        (function aiInit() {
+            aiApplyLanguage();
+            aiInitVoice();
+
+            /* restore this session's conversation into the UI */
+            const valid = (Array.isArray(aiConversationHistory) ? aiConversationHistory : [])
+                .filter((e) => e && (e.role === "user" || e.role === "assistant") && typeof e.content === "string");
+            aiConversationHistory = valid;
+            if (valid.length) {
+                aiShowWelcome(false);
+                const messages = aiMessagesEl();
+                if (messages) {
+                    const chip = document.createElement("div");
+                    chip.className = "ai-restored";
+                    chip.textContent = aiT("restored");
+                    messages.appendChild(chip);
+                    valid.forEach((entry) => {
+                        if (entry.role === "user") {
+                            aiAppendUserMessage(entry.content, null);
+                        } else {
+                            const el = document.createElement("div");
+                            el.className = "ai-message ai-md";
+                            el.setAttribute("data-ai-raw", entry.content);
+                            el.innerHTML = aiRenderMarkdown(entry.content);
+                            messages.appendChild(el);
+                        }
+                    });
+                }
+                aiMaybeScroll(true);
+            }
+
+            /* follow the app language (applyLanguage() mutates <html lang>) */
+            try {
+                const observer = new MutationObserver(() => {
+                    const next = aiDetectLang();
+                    if (next !== aiLang) {
+                        aiApplyLanguage();
+                        aiInitVoiceLang();
+                    }
+                });
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ["lang", "dir"]
+                });
+            } catch (e) {}
+        })();
+
+        function aiInitVoiceLang() {
+            if (aiRecognition) {
+                try {
+                    aiRecognition.lang = aiSpeechLang();
+                } catch (e) {}
+            }
         }
     </script>
     <script>
