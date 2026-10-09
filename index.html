@@ -14,6 +14,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+    <!-- AI Chat: Markdown rendering & sanitization (lightweight, no build step) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" integrity="sha256-+5v0yU5O4K8eZ1qM+K1Q7hLzJ8vY5X2N8mP9wR6tA=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js" integrity="sha256-qVxhLdgG2k4f4gN3hT5jK7yU9bV2cX1mP9wR6tA=" crossorigin="anonymous"></script>
+
     <script>
         (function () {
             try {
@@ -294,6 +298,647 @@
             max-width: 100%;
             border-radius: 10px;
             margin-bottom: 6px;
+        }
+
+        /* ========================================================
+           UPGRADED AI CHAT STYLES
+           ======================================================== */
+
+        /* Message content rendering */
+        .ai-message .message-content {
+            line-height: 1.65;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .ai-message .message-content p {
+            margin: 0.6em 0;
+        }
+
+        .ai-message .message-content h1,
+        .ai-message .message-content h2,
+        .ai-message .message-content h3 {
+            margin: 1em 0 0.5em;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .ai-message .message-content h1 { font-size: 1.35em; }
+        .ai-message .message-content h2 { font-size: 1.2em; }
+        .ai-message .message-content h3 { font-size: 1.1em; }
+
+        .ai-message .message-content ul,
+        .ai-message .message-content ol {
+            margin: 0.6em 0;
+            padding-left: 1.5em;
+        }
+        .ai-message .message-content li { margin: 0.3em 0; }
+        .ai-message .message-content li::marker { color: inherit; opacity: 0.7; }
+
+        .ai-message .message-content blockquote {
+            margin: 0.8em 0;
+            padding: 0.5em 1em;
+            border-left: 3px solid var(--accent);
+            background: rgba(0,0,0,0.04);
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            opacity: 0.9;
+        }
+        .dark .ai-message .message-content blockquote {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .ai-message .message-content code {
+            font-family: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+            font-size: 0.88em;
+            background: rgba(0,0,0,0.06);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+        }
+        .dark .ai-message .message-content code {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .ai-message .message-content pre {
+            margin: 0.8em 0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            background: #1e1e1e;
+        }
+        .dark .ai-message .message-content pre {
+            background: #1a1a1a;
+        }
+        .ai-message .message-content pre code {
+            background: transparent;
+            padding: 0;
+            font-size: 0.82em;
+            line-height: 1.55;
+            display: block;
+            padding: 1em;
+            overflow-x: auto;
+            color: #e0e0e0;
+        }
+        .ai-message .message-content .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5em 1em;
+            background: rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.75em;
+            color: #aaa;
+            font-family: inherit;
+        }
+        .dark .ai-message .message-content .code-block-header {
+            background: rgba(255,255,255,0.08);
+        }
+        .ai-message .message-content .copy-code-btn {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            opacity: 0.6;
+            cursor: pointer;
+            padding: 0.3em 0.6em;
+            border-radius: 4px;
+            font-size: 0.85em;
+            transition: opacity 0.15s, background 0.15s;
+        }
+        .ai-message .message-content .copy-code-btn:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
+        }
+        .ai-message .message-content .copy-code-btn.copied {
+            opacity: 1;
+            color: #4ade80;
+        }
+
+        .ai-message .message-content a {
+            color: var(--accent);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .dark .ai-message .message-content a {
+            color: var(--accent);
+        }
+        .ai-message .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0.8em 0;
+            font-size: 0.9em;
+            overflow-x: auto;
+            display: block;
+        }
+        .ai-message .message-content th,
+        .ai-message .message-content td {
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 0.5em 0.75em;
+            text-align: left;
+        }
+        .dark .ai-message .message-content th,
+        .dark .ai-message .message-content td {
+            border-color: rgba(255,255,255,0.15);
+        }
+        .ai-message .message-content th {
+            background: rgba(0,0,0,0.04);
+            font-weight: 600;
+        }
+        .dark .ai-message .message-content th {
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* RTL support for Arabic/Sorani */
+        .ai-message.rtl .message-content,
+        .user-message.rtl {
+            direction: rtl;
+            text-align: right;
+        }
+        .ai-message.rtl .message-content ul,
+        .ai-message.rtl .message-content ol {
+            padding-right: 1.5em;
+            padding-left: 0;
+        }
+        .ai-message.rtl .message-content blockquote {
+            border-left: none;
+            border-right: 3px solid var(--accent);
+            border-radius: 8px 0 0 8px;
+        }
+        .ai-message.rtl .message-content th,
+        .ai-message.rtl .message-content td {
+            text-align: right;
+        }
+
+        /* Copy response button */
+        .ai-message .message-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .dark .ai-message .message-actions {
+            border-top-color: rgba(255,255,255,0.08);
+        }
+        .ai-message:hover .message-actions,
+        .ai-message:focus-within .message-actions {
+            opacity: 1;
+        }
+        .ai-message .copy-response-btn {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            opacity: 0.55;
+            cursor: pointer;
+            padding: 0.35em 0.7em;
+            border-radius: 6px;
+            font-size: 0.75em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: opacity 0.15s, background 0.15s;
+        }
+        .ai-message .copy-response-btn:hover {
+            opacity: 1;
+            background: rgba(0,0,0,0.06);
+        }
+        .dark .ai-message .copy-response-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .ai-message .copy-response-btn.copied {
+            opacity: 1;
+            color: #4ade80;
+        }
+
+        /* Streaming indicator */
+        .ai-message.streaming .message-content::after {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 1em;
+            background: currentColor;
+            margin-left: 2px;
+            opacity: 0.6;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 0.6; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Thinking/loading state */
+        .ai-message.thinking {
+            opacity: 0.7;
+        }
+        .ai-message.thinking .thinking-indicator {
+            display: inline-flex;
+            gap: 3px;
+            padding: 0.2em 0;
+        }
+        .ai-message.thinking .thinking-indicator span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.5;
+            animation: thinkingBounce 1.2s infinite ease-in-out;
+        }
+        .ai-message.thinking .thinking-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .ai-message.thinking .thinking-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes thinkingBounce {
+            0%, 80%, 100% { transform: scale(1); opacity: 0.4; }
+            40% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* Error state */
+        .ai-message.error {
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+            border: 1px solid #fecaca;
+        }
+        .dark .ai-message.error {
+            background: #7f1d1d !important;
+            color: #fca5a5 !important;
+            border-color: #991b1b;
+        }
+        .ai-message.error .retry-btn {
+            margin-top: 8px;
+            padding: 6px 12px;
+            border: 0;
+            border-radius: 6px;
+            background: #dc2626;
+            color: white;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .dark .ai-message.error .retry-btn {
+            background: #ef4444;
+        }
+
+        /* Image message styling */
+        .ai-message .message-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 0.5em 0;
+        }
+
+        /* Mini-chat specific */
+        #aiBox.mini .ai-message .message-content {
+            font-size: 0.92em;
+        }
+        #aiBox.mini .ai-message .message-content pre code {
+            font-size: 0.75em;
+        }
+
+        /* Full-screen chat styles */
+        #aiFullscreen {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            background: #f5f5f7;
+        }
+        #aiFullscreen.open { display: flex; }
+        .dark #aiFullscreen { background: #101010; }
+
+        #aiFullscreenHeader {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.95);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .dark #aiFullscreenHeader {
+            background: rgba(28,28,28,0.95);
+            border-bottom-color: rgba(255,255,255,0.08);
+        }
+        #aiFullscreenHeader h2 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+        #aiFullscreenHeader .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        #aiFullscreenHeader .icon-btn {
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.06);
+            color: inherit;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .dark #aiFullscreenHeader .icon-btn {
+            background: rgba(255,255,255,0.1);
+        }
+        #aiFullscreenHeader .icon-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        .dark #aiFullscreenHeader .icon-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        #aiFullscreenMessages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #aiFullscreenMessages .user-message,
+        #aiFullscreenMessages .ai-message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        #aiFullscreenMessages .user-message {
+            align-self: flex-end;
+            background: #111;
+            color: #fff;
+            border-bottom-right-radius: 6px;
+        }
+        .dark #aiFullscreenMessages .user-message {
+            background: #fff;
+            color: #111;
+        }
+        #aiFullscreenMessages .ai-message {
+            align-self: flex-start;
+            background: rgba(230,230,235,0.9);
+            color: #111;
+            border-bottom-left-radius: 6px;
+        }
+        .dark #aiFullscreenMessages .ai-message {
+            background: #2c2c2c;
+            color: #fff;
+        }
+        #aiFullscreenMessages .ai-message .message-content {
+            line-height: 1.7;
+        }
+
+        #aiFullscreenComposer {
+            padding: 16px;
+            background: rgba(255,255,255,0.95);
+            border-top: 1px solid rgba(0,0,0,0.06);
+            position: sticky;
+            bottom: 0;
+        }
+        .dark #aiFullscreenComposer {
+            background: rgba(28,28,28,0.95);
+            border-top-color: rgba(255,255,255,0.08);
+        }
+        #aiFullscreenComposer .composer-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #aiFullscreenComposer .composer-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        #aiFullscreenComposer .composer-btn {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.06);
+            color: inherit;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dark #aiFullscreenComposer .composer-btn {
+            background: rgba(255,255,255,0.1);
+        }
+        #aiFullscreenComposer .composer-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        .dark #aiFullscreenComposer .composer-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        #aiFullscreenComposer .composer-btn.active {
+            background: var(--accent);
+            color: var(--accent-contrast);
+        }
+        #aiFullscreenComposer textarea {
+            flex: 1;
+            min-height: 48px;
+            max-height: 180px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: transparent;
+            color: inherit;
+            resize: none;
+            font-size: 15px;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+        .dark #aiFullscreenComposer textarea {
+            border-color: rgba(255,255,255,0.18);
+        }
+        #aiFullscreenComposer .send-btn {
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--accent);
+            color: var(--accent-contrast);
+            font-size: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+        #aiFullscreenComposer .send-btn:active {
+            transform: scale(0.95);
+        }
+        #aiFullscreenComposer .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Model selector dropdown */
+        .model-selector {
+            position: relative;
+        }
+        .model-selector-btn {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.06);
+            color: inherit;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dark .model-selector-btn {
+            background: rgba(255,255,255,0.1);
+        }
+        .model-selector-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        .dark .model-selector-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .model-dropdown {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.98);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 8px;
+            min-width: 180px;
+            display: none;
+            z-index: 20;
+        }
+        .dark .model-dropdown {
+            background: rgba(36,36,36,0.98);
+        }
+        .model-dropdown.open { display: block; }
+        .model-option {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.15s;
+        }
+        .model-option:hover {
+            background: rgba(0,0,0,0.06);
+        }
+        .dark .model-option:hover {
+            background: rgba(255,255,255,0.08);
+        }
+        .model-option.selected {
+            background: rgba(0,0,0,0.08);
+        }
+        .dark .model-option.selected {
+            background: rgba(255,255,255,0.12);
+        }
+        .model-option .model-name { font-weight: 600; }
+        .model-option .model-desc { font-size: 0.75em; opacity: 0.6; margin-left: auto; }
+
+        /* Voice recording indicator */
+        .voice-recording {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #dc2626;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8em;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .voice-wave {
+            display: inline-flex;
+            gap: 2px;
+        }
+        .voice-wave span {
+            width: 3px;
+            height: 12px;
+            background: currentColor;
+            border-radius: 2px;
+            animation: wave 0.8s infinite ease-in-out;
+        }
+        .voice-wave span:nth-child(2) { animation-delay: 0.1s; height: 16px; }
+        .voice-wave span:nth-child(3) { animation-delay: 0.2s; height: 10px; }
+        .voice-wave span:nth-child(4) { animation-delay: 0.3s; height: 18px; }
+        .voice-wave span:nth-child(5) { animation-delay: 0.4s; height: 12px; }
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.4); }
+            50% { transform: scaleY(1); }
+        }
+
+        /* Image preview in fullscreen */
+        #aiFullscreenImagePreview {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.03);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .dark #aiFullscreenImagePreview {
+            background: rgba(255,255,255,0.03);
+            border-bottom-color: rgba(255,255,255,0.08);
+        }
+        #aiFullscreenImagePreview.show { display: flex; }
+        #aiFullscreenImagePreview img {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        #aiFullscreenImagePreview .remove-btn {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.6;
+            padding: 4px;
+        }
+        #aiFullscreenImagePreview .remove-btn:hover { opacity: 1; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            #aiFullscreenMessages .user-message,
+            #aiFullscreenMessages .ai-message {
+                max-width: 92%;
+            }
+            #aiFullscreenComposer .composer-row {
+                padding: 0 4px;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .ai-message.streaming .message-content::after { animation: none; }
+            .ai-message.thinking .thinking-indicator span { animation: none; }
+            .voice-recording { animation: none; }
+            .voice-wave span { animation: none; }
         }
     </style>
 
@@ -20358,7 +21003,7 @@ document.documentElement.classList.toggle(
 
     <button id="aiToggle" type="button" aria-label="Daily AI">💬</button>
 
-    <div id="aiBox">
+    <div id="aiBox" class="mini">
         <div id="aiMessages"></div>
 
         <div id="aiImagePreviewWrap">
@@ -20389,17 +21034,220 @@ document.documentElement.classList.toggle(
         </div>
     </div>
 
-    <script>
-        const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_HISTORY_LIMIT = 10;
-        const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
+    <!-- FULL-SCREEN AI CHAT -->
+    <div id="aiFullscreen">
+        <header id="aiFullscreenHeader">
+            <h2>Daily AI</h2>
+            <div class="header-actions">
+                <div class="model-selector">
+                    <button type="button" class="model-selector-btn" id="fsModelBtn" aria-label="Select model" title="Select model">🤖</button>
+                    <div class="model-dropdown" id="fsModelDropdown">
+                        <button type="button" class="model-option" data-model="auto">
+                            <span class="model-name">Auto</span>
+                            <span class="model-desc">Best available</span>
+                        </button>
+                        <button type="button" class="model-option" data-model="gemini-2.5-flash">
+                            <span class="model-name">Gemini 2.5 Flash</span>
+                            <span class="model-desc">Fast & capable</span>
+                        </button>
+                        <button type="button" class="model-option" data-model="gemini-2.5-flash-lite">
+                            <span class="model-name">Gemini 2.5 Flash Lite</span>
+                            <span class="model-desc">Faster responses</span>
+                        </button>
+                        <button type="button" class="model-option" data-model="gemini-2.0-flash">
+                            <span class="model-name">Gemini 2.0 Flash</span>
+                            <span class="model-desc">Legacy fallback</span>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="icon-btn" id="fsMinimizeBtn" aria-label="Minimize" title="Minimize">⛶</button>
+                <button type="button" class="icon-btn" id="fsCloseBtn" aria-label="Close" title="Close">✕</button>
+            </div>
+        </header>
+        <div id="aiFullscreenImagePreview">
+            <img id="aiFullscreenImageThumb" alt="Selected image preview" />
+            <span id="aiFullscreenImageName"></span>
+            <button type="button" class="remove-btn" id="aiFullscreenImageRemove" aria-label="Remove image">✕</button>
+        </div>
+        <div id="aiFullscreenMessages"></div>
+        <div id="aiFullscreenComposer">
+            <div class="composer-row">
+                <div class="composer-actions">
+                    <button type="button" class="composer-btn" id="fsImageBtn" aria-label="Add image" title="Add image">📷</button>
+                    <button type="button" class="composer-btn" id="fsVoiceBtn" aria-label="Voice input" title="Voice input">🎤</button>
+                </div>
+                <textarea id="fsInput" placeholder="Message Daily AI..." aria-label="Message Daily AI" rows="1"></textarea>
+                <button type="button" class="send-btn" id="fsSendBtn" aria-label="Send message">➤</button>
+            </div>
+        </div>
+    </div>
 
+    <input type="file" id="fsImageFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" hidden />
+
+    <script>
+        // =========================================================
+        // CONFIGURATION
+        // =========================================================
+        const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
+        const AI_HISTORY_LIMIT = 15;
+        const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
+        const AI_PERSISTENT_HISTORY_KEY = "dailyKrdAiPersistentHistory";
+
+        // Supported models (must match Worker allowlist)
+        const SUPPORTED_MODELS = {
+            "auto": { label: "Auto", desc: "Best available" },
+            "gemini-3.8-flash": { label: "Gemini 3.8 Flash", desc: "Fast & capable" },
+            "gemini-2.5-flash": { label: "Gemini 2.5 Flash", desc: "Balanced" },
+            "gemini-2.5-flash-lite": { label: "Gemini 2.5 Flash Lite", desc: "Fastest" }
+        };
+
+        // =========================================================
+        // MARKDOWN RENDERER SETUP
+        // =========================================================
+        function setupMarkdownRenderer() {
+            if (typeof marked !== "undefined") {
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    headerIds: false,
+                    mangle: false
+                });
+            }
+            if (typeof DOMPurify !== "undefined") {
+                DOMPurify.setConfig({
+                    ALLOWED_TAGS: ["p","br","strong","em","u","s","code","pre","blockquote","ul","ol","li","h1","h2","h3","h4","h5","h6","a","img","table","thead","tbody","tr","th","td","hr"],
+                    ALLOWED_ATTR: ["href","src","alt","title","target","rel","class","style"],
+                    ALLOW_DATA_ATTR: false,
+                    KEEP_CONTENT: true
+                });
+            }
+        }
+
+        function renderMarkdown(text) {
+            if (typeof marked === "undefined") {
+                // Fallback: escape and preserve line breaks
+                const div = document.createElement("div");
+                div.textContent = text;
+                return div.innerHTML.replace(/\n/g, "<br>");
+            }
+            const html = marked.parse(text);
+            if (typeof DOMPurify !== "undefined") {
+                return DOMPurify.sanitize(html);
+            }
+            return html;
+        }
+
+        // =========================================================
+        // UTILITIES
+        // =========================================================
         function aiEscape(str) {
             const div = document.createElement("div");
             div.textContent = str;
             return div.innerHTML;
         }
 
+        function detectTextDirection(text) {
+            // Check for Arabic/Sorani characters (Arabic script ranges)
+            const rtlChars = /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(text);
+            const latinChars = /[A-Za-z]/.test(text);
+            // If mostly RTL script, use RTL
+            if (rtlChars && !latinChars) return "rtl";
+            // Mixed: check ratio
+            if (rtlChars && latinChars) {
+                const rtlCount = (text.match(/[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/g) || []).length;
+                const latinCount = (text.match(/[A-Za-z]/g) || []).length;
+                return rtlCount > latinCount ? "rtl" : "ltr";
+            }
+            return "ltr";
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function createMessageElement(role, content, options = {}) {
+            const { isStreaming = false, isThinking = false, isError = false, direction = "ltr", imagePreview = null, timestamp = new Date() } = options;
+            const div = document.createElement("div");
+            div.className = `${role}-message`;
+            if (direction === "rtl") div.classList.add("rtl");
+            if (isStreaming) div.classList.add("streaming");
+            if (isThinking) div.classList.add("thinking");
+            if (isError) div.classList.add("error");
+
+            let innerHTML = "";
+            if (role === "user") {
+                if (imagePreview) {
+                    innerHTML += `<img src="${imagePreview}" alt="Uploaded image" />`;
+                }
+                innerHTML += `<div class="message-content">${aiEscape(content)}</div>`;
+            } else {
+                if (isThinking) {
+                    innerHTML += `<div class="message-content"><span class="thinking-indicator"><span></span><span></span><span></span></span></div>`;
+                } else {
+                    const rendered = renderMarkdown(content);
+                    innerHTML += `<div class="message-content" dir="${direction}">${rendered}</div>`;
+                    // Add copy button for assistant messages
+                    innerHTML += `
+                        <div class="message-actions">
+                            <button type="button" class="copy-response-btn" aria-label="Copy response" title="Copy response">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                <span>Copy</span>
+                            </button>
+                        </div>
+                    `;
+                }
+                if (isError) {
+                    innerHTML += `<button type="button" class="retry-btn" aria-label="Retry">Retry</button>`;
+                }
+            }
+            div.innerHTML = innerHTML;
+            return div;
+        }
+
+        function setupCopyButtons(container) {
+            container.querySelectorAll(".copy-response-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const messageEl = btn.closest(".ai-message");
+                    const contentEl = messageEl?.querySelector(".message-content");
+                    if (contentEl) {
+                        try {
+                            await navigator.clipboard.writeText(contentEl.innerText);
+                            btn.classList.add("copied");
+                            btn.querySelector("span").textContent = "Copied!";
+                            setTimeout(() => {
+                                btn.classList.remove("copied");
+                                btn.querySelector("span").textContent = "Copy";
+                            }, 2000);
+                        } catch (e) {
+                            console.warn("Copy failed:", e);
+                        }
+                    }
+                });
+            });
+            container.querySelectorAll(".copy-code-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const pre = btn.closest("pre");
+                    const code = pre?.querySelector("code");
+                    if (code) {
+                        try {
+                            await navigator.clipboard.writeText(code.innerText);
+                            btn.classList.add("copied");
+                            btn.textContent = "Copied!";
+                            setTimeout(() => {
+                                btn.classList.remove("copied");
+                                btn.textContent = "Copy";
+                            }, 2000);
+                        } catch (e) {
+                            console.warn("Copy code failed:", e);
+                        }
+                    }
+                });
+            });
+        }
+
+        // =========================================================
+        // HISTORY MANAGEMENT
+        // =========================================================
         function aiLoadHistory() {
             try {
                 const raw = sessionStorage.getItem(AI_HISTORY_STORAGE_KEY);
@@ -20411,77 +21259,77 @@ document.documentElement.classList.toggle(
 
         function aiSaveHistory(history) {
             try {
-                sessionStorage.setItem(
-                    AI_HISTORY_STORAGE_KEY,
-                    JSON.stringify(history)
-                );
+                sessionStorage.setItem(AI_HISTORY_STORAGE_KEY, JSON.stringify(history));
+            } catch (e) {}
+        }
+
+        function aiLoadPersistentHistory() {
+            try {
+                const raw = localStorage.getItem(AI_PERSISTENT_HISTORY_KEY);
+                return raw ? JSON.parse(raw) : [];
             } catch (e) {
-                /* storage unavailable — ignore, chat still works */
+                return [];
             }
         }
 
-        let aiConversationHistory = aiLoadHistory();
-
-        function aiSetInputDisabled(disabled) {
-            const input = document.getElementById("aiInput");
-            const sendBtn = document.querySelector("#aiBox .aiInput button");
-            const imageBtn = document.getElementById("aiImageBtn");
-            input.disabled = disabled;
-            if (sendBtn) sendBtn.disabled = disabled;
-            if (imageBtn) imageBtn.disabled = disabled;
+        function aiSavePersistentHistory(history) {
+            try {
+                localStorage.setItem(AI_PERSISTENT_HISTORY_KEY, JSON.stringify(history));
+            } catch (e) {}
         }
 
-        // =====================================================
-        // IMAGE UPLOAD / PREVIEW
-        // =====================================================
+        let aiConversationHistory = aiLoadHistory();
+        let aiPersistentHistory = aiLoadPersistentHistory();
+        let aiCurrentMode = "mini"; // "mini" or "full"
+        let aiSelectedModel = "auto";
+        let aiSelectedImage = null;
+        let aiAbortController = null;
+        let aiIsStreaming = false;
+        let aiLastUserMessage = null;
+        let aiLastPendingImage = null;
+        let aiFullscreenMessages = [];
 
+        // =========================================================
+        // IMAGE HANDLING
+        // =========================================================
         const AI_MAX_IMAGE_SOURCE_BYTES = 15 * 1024 * 1024;
         const AI_IMAGE_DIRECT_THRESHOLD_BYTES = 300 * 1024;
         const AI_IMAGE_MAX_DIMENSION = 1600;
         const AI_IMAGE_JPEG_QUALITY = 0.82;
-        const AI_DEFAULT_IMAGE_PROMPT =
-            "Please analyze this image and tell me what you can see.";
-
-        let aiSelectedImage = null;
-
-        function aiReadFileAsDataUrl(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () =>
-                    reject(reader.error || new Error("File read failed"));
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function aiLoadImageElement(dataUrl) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error("Image decode failed"));
-                img.src = dataUrl;
-            });
-        }
+        const AI_DEFAULT_IMAGE_PROMPT = "Please analyze this image and tell me what you can see.";
 
         async function aiPrepareImage(file) {
             if (!file.type || !file.type.startsWith("image/")) {
                 throw new Error("Unsupported file type");
             }
             if (file.size > AI_MAX_IMAGE_SOURCE_BYTES) {
-                throw new Error("Image is too large");
+                throw new Error("Image is too large (max 15MB)");
             }
 
-            const originalDataUrl = await aiReadFileAsDataUrl(file);
+            const originalDataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error || new Error("File read failed"));
+                reader.readAsDataURL(file);
+            });
 
             if (file.size <= AI_IMAGE_DIRECT_THRESHOLD_BYTES) {
                 return {
                     mimeType: file.type,
                     data: originalDataUrl.split(",")[1],
-                    previewUrl: originalDataUrl
+                    previewUrl: originalDataUrl,
+                    name: file.name,
+                    size: file.size
                 };
             }
 
-            const img = await aiLoadImageElement(originalDataUrl);
+            const img = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error("Image decode failed"));
+                img.src = originalDataUrl;
+            });
+
             let width = img.naturalWidth || img.width;
             let height = img.naturalHeight || img.height;
 
@@ -20501,131 +21349,391 @@ document.documentElement.classList.toggle(
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
 
-            const compressedDataUrl = canvas.toDataURL(
-                "image/jpeg",
-                AI_IMAGE_JPEG_QUALITY
-            );
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", AI_IMAGE_JPEG_QUALITY);
 
             return {
                 mimeType: "image/jpeg",
                 data: compressedDataUrl.split(",")[1],
-                previewUrl: compressedDataUrl
+                previewUrl: compressedDataUrl,
+                name: file.name,
+                size: file.size
             };
         }
 
-        function aiShowImagePreview(previewUrl) {
-            const wrap = document.getElementById("aiImagePreviewWrap");
-            const thumb = document.getElementById("aiImagePreviewThumb");
-            if (!wrap || !thumb) return;
-            thumb.src = previewUrl;
-            wrap.classList.add("show");
+        function aiShowImagePreview(previewUrl, fileName, isFullscreen = false) {
+            if (isFullscreen) {
+                const wrap = document.getElementById("aiFullscreenImagePreview");
+                const thumb = document.getElementById("aiFullscreenImageThumb");
+                const nameEl = document.getElementById("aiFullscreenImageName");
+                if (!wrap || !thumb) return;
+                thumb.src = previewUrl;
+                nameEl.textContent = fileName || "Image";
+                wrap.classList.add("show");
+            } else {
+                const wrap = document.getElementById("aiImagePreviewWrap");
+                const thumb = document.getElementById("aiImagePreviewThumb");
+                if (!wrap || !thumb) return;
+                thumb.src = previewUrl;
+                wrap.classList.add("show");
+            }
         }
 
-        function aiClearSelectedImage() {
+        function aiClearSelectedImage(isFullscreen = false) {
             aiSelectedImage = null;
-            const wrap = document.getElementById("aiImagePreviewWrap");
-            const thumb = document.getElementById("aiImagePreviewThumb");
-            const fileInput = document.getElementById("aiImageFileInput");
-            if (wrap) wrap.classList.remove("show");
-            if (thumb) thumb.src = "";
-            if (fileInput) fileInput.value = "";
+            if (isFullscreen) {
+                const wrap = document.getElementById("aiFullscreenImagePreview");
+                const thumb = document.getElementById("aiFullscreenImageThumb");
+                const nameEl = document.getElementById("aiFullscreenImageName");
+                const fileInput = document.getElementById("fsImageFileInput");
+                if (wrap) wrap.classList.remove("show");
+                if (thumb) thumb.src = "";
+                if (nameEl) nameEl.textContent = "";
+                if (fileInput) fileInput.value = "";
+            } else {
+                const wrap = document.getElementById("aiImagePreviewWrap");
+                const thumb = document.getElementById("aiImagePreviewThumb");
+                const fileInput = document.getElementById("aiImageFileInput");
+                if (wrap) wrap.classList.remove("show");
+                if (thumb) thumb.src = "";
+                if (fileInput) fileInput.value = "";
+            }
         }
 
-        document.getElementById("aiImageBtn")?.addEventListener("click", () => {
-            document.getElementById("aiImageFileInput")?.click();
-        });
+        // =========================================================
+        // VOICE INPUT
+        // =========================================================
+        let aiVoiceRecognition = null;
+        let aiVoiceListening = false;
 
-        document
-            .getElementById("aiImageFileInput")
-            ?.addEventListener("change", async (e) => {
-                const file = e.target.files && e.target.files[0];
-                if (!file) return;
+        function initVoiceRecognition() {
+            if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+                return null;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = "en-US"; // Default, will be updated per message
+            return recognition;
+        }
 
-                try {
-                    aiSelectedImage = await aiPrepareImage(file);
-                    aiShowImagePreview(aiSelectedImage.previewUrl);
-                } catch (error) {
-                    aiClearSelectedImage();
-                    const messages = document.getElementById("aiMessages");
-                    messages.innerHTML += `
-                        <div class="ai-message">
-                            Sorry, that image couldn't be used. Please try a
-                            different photo.
-                        </div>
-                    `;
-                    messages.scrollTop = messages.scrollHeight;
+        function startVoiceInput(targetInput, isFullscreen = false) {
+            if (aiVoiceListening) return;
+            const recognition = initVoiceRecognition();
+            if (!recognition) {
+                alert("Voice input is not supported in this browser.");
+                return;
+            }
+            aiVoiceRecognition = recognition;
+            aiVoiceListening = true;
+
+            // Update UI to show recording state
+            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : document.getElementById("aiVoiceBtn");
+            if (voiceBtn) {
+                voiceBtn.classList.add("active");
+                voiceBtn.innerHTML = '<span class="voice-recording"><span class="voice-wave"><span></span><span></span><span></span><span></span><span></span></span> Listening...</span>';
+            }
+
+            let finalTranscript = "";
+            let interimTranscript = "";
+
+            recognition.onresult = (event) => {
+                interimTranscript = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                targetInput.value = finalTranscript + interimTranscript;
+                // Auto-resize textarea if fullscreen
+                if (isFullscreen && targetInput.tagName === "TEXTAREA") {
+                    targetInput.style.height = "auto";
+                    targetInput.style.height = Math.min(targetInput.scrollHeight, 180) + "px";
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.warn("Speech recognition error:", event.error);
+                stopVoiceInput(isFullscreen);
+                if (event.error === "not-allowed") {
+                    alert("Microphone permission denied. Please allow microphone access in browser settings.");
+                } else if (event.error === "no-speech") {
+                    // Silent, no alert needed
+                } else {
+                    alert("Voice input error: " + event.error);
+                }
+            };
+
+            recognition.onend = () => {
+                stopVoiceInput(isFullscreen);
+            };
+
+            recognition.start();
+        }
+
+        function stopVoiceInput(isFullscreen = false) {
+            if (aiVoiceRecognition) {
+                aiVoiceRecognition.stop();
+                aiVoiceRecognition = null;
+            }
+            aiVoiceListening = false;
+            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : document.getElementById("aiVoiceBtn");
+            if (voiceBtn) {
+                voiceBtn.classList.remove("active");
+                voiceBtn.innerHTML = "🎤";
+            }
+        }
+
+        // =========================================================
+        // VOICE OUTPUT (TTS)
+        // =========================================================
+        let aiSpeechSynthesis = null;
+        let aiCurrentUtterance = null;
+
+        function speakText(text, lang = "en-US") {
+            if (!("speechSynthesis" in window)) return;
+            stopSpeech();
+            aiSpeechSynthesis = window.speechSynthesis;
+            aiCurrentUtterance = new SpeechSynthesisUtterance(text);
+            aiCurrentUtterance.lang = lang;
+            aiCurrentUtterance.rate = 1;
+            aiCurrentUtterance.pitch = 1;
+            aiCurrentUtterance.volume = 1;
+            // Try to find a good voice
+            const voices = aiSpeechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.lang.startsWith(lang.split("-")[0]) && v.name.includes("Natural")) ||
+                                  voices.find(v => v.lang.startsWith(lang.split("-")[0]));
+            if (preferredVoice) aiCurrentUtterance.voice = preferredVoice;
+            aiSpeechSynthesis.speak(aiCurrentUtterance);
+        }
+
+        function stopSpeech() {
+            if (aiSpeechSynthesis) {
+                aiSpeechSynthesis.cancel();
+            }
+            aiCurrentUtterance = null;
+        }
+
+        // =========================================================
+        // MODE SELECTION
+        // =========================================================
+        function setupModelSelector() {
+            const btn = document.getElementById("fsModelBtn");
+            const dropdown = document.getElementById("fsModelDropdown");
+            if (!btn || !dropdown) return;
+
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle("open");
+            });
+
+            dropdown.querySelectorAll(".model-option").forEach(opt => {
+                opt.addEventListener("click", () => {
+                    const model = opt.dataset.model;
+                    if (SUPPORTED_MODELS[model]) {
+                        aiSelectedModel = model;
+                        dropdown.querySelectorAll(".model-option").forEach(o => o.classList.remove("selected"));
+                        opt.classList.add("selected");
+                        // Persist preference
+                        localStorage.setItem("dailykrd_ai_model", model);
+                    }
+                    dropdown.classList.remove("open");
+                });
+            });
+
+            document.addEventListener("click", () => dropdown.classList.remove("open"));
+
+            // Load saved preference
+            const saved = localStorage.getItem("dailykrd_ai_model");
+            if (saved && SUPPORTED_MODELS[saved]) {
+                aiSelectedModel = saved;
+                dropdown.querySelectorAll(".model-option").forEach(o => o.classList.toggle("selected", o.dataset.model === saved));
+            }
+        }
+
+        // =========================================================
+        // MODE SWITCHING (Mini <-> Fullscreen)
+        // =========================================================
+        function openFullscreen() {
+            const fs = document.getElementById("aiFullscreen");
+            const box = document.getElementById("aiBox");
+            if (!fs || !box) return;
+
+            aiCurrentMode = "full";
+            fs.classList.add("open");
+            box.classList.remove("open");
+
+            // Sync messages from mini to fullscreen
+            syncMessagesToFullscreen();
+
+            // Focus input
+            setTimeout(() => {
+                const input = document.getElementById("fsInput");
+                if (input) input.focus();
+            }, 100);
+
+            // Load saved model preference
+            setupModelSelector();
+        }
+
+        function closeFullscreen() {
+            const fs = document.getElementById("aiFullscreen");
+            if (!fs) return;
+            fs.classList.remove("open");
+            aiCurrentMode = "mini";
+        }
+
+        function minimizeFullscreen() {
+            const fs = document.getElementById("aiFullscreen");
+            const box = document.getElementById("aiBox");
+            if (!fs || !box) return;
+            fs.classList.remove("open");
+            box.classList.add("open");
+            aiCurrentMode = "mini";
+        }
+
+        function syncMessagesToFullscreen() {
+            const fsMessages = document.getElementById("aiFullscreenMessages");
+            const miniMessages = document.getElementById("aiMessages");
+            if (!fsMessages || !miniMessages) return;
+
+            // Clone messages from mini to fullscreen
+            fsMessages.innerHTML = "";
+            miniMessages.querySelectorAll(".user-message, .ai-message").forEach(el => {
+                const clone = el.cloneNode(true);
+                // Remove streaming/thinking classes from clones
+                clone.classList.remove("streaming", "thinking");
+                fsMessages.appendChild(clone);
+            });
+            setupCopyButtons(fsMessages);
+            fsMessages.scrollTop = fsMessages.scrollHeight;
+        }
+
+        function syncMessageToBoth(role, content, options = {}) {
+            const { isStreaming = false, isThinking = false, isError = false, imagePreview = null, timestamp = new Date() } = options;
+            const direction = detectTextDirection(content);
+            const miniMessages = document.getElementById("aiMessages");
+            const fsMessages = document.getElementById("aiFullscreenMessages");
+
+            const miniEl = createMessageElement(role, content, { isStreaming, isThinking, isError, direction, imagePreview, timestamp });
+            const fsEl = createMessageElement(role, content, { isStreaming, isThinking, isError, direction, imagePreview, timestamp });
+
+            if (miniMessages) miniMessages.appendChild(miniEl);
+            if (fsMessages && aiCurrentMode === "full") fsMessages.appendChild(fsEl);
+
+            setupCopyButtons(miniMessages);
+            setupCopyButtons(fsMessages);
+
+            // Auto-scroll if near bottom
+            autoScrollIfNearBottom(miniMessages);
+            autoScrollIfNearBottom(fsMessages);
+
+            return { mini: miniEl, full: fsEl };
+        }
+
+        function autoScrollIfNearBottom(container) {
+            if (!container) return;
+            const threshold = 50;
+            const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+            if (isNearBottom) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        function updateLastAssistantMessage(content, options = {}) {
+            const { isStreaming = false, isThinking = false, isError = false, direction = "ltr", final = false } = options;
+            const miniMessages = document.getElementById("aiMessages");
+            const fsMessages = document.getElementById("aiFullscreenMessages");
+
+            [miniMessages, fsMessages].forEach(container => {
+                if (!container) return;
+                const lastMsg = container.querySelector(".ai-message:last-child");
+                if (!lastMsg) return;
+                lastMsg.classList.toggle("streaming", isStreaming && !final);
+                lastMsg.classList.toggle("thinking", isThinking);
+                lastMsg.classList.toggle("error", isError);
+                if (direction === "rtl") lastMsg.classList.add("rtl"); else lastMsg.classList.remove("rtl");
+
+                const contentEl = lastMsg.querySelector(".message-content");
+                if (contentEl) {
+                    if (isThinking) {
+                        contentEl.innerHTML = '<span class="thinking-indicator"><span></span><span></span><span></span></span>';
+                    } else if (final) {
+                        contentEl.innerHTML = renderMarkdown(content);
+                        contentEl.dir = direction;
+                        // Re-setup copy buttons for new code blocks
+                        setupCopyButtons(lastMsg);
+                    } else if (isStreaming) {
+                        // For streaming, append text content (will be replaced by final render)
+                        contentEl.textContent = content;
+                    }
+                }
+
+                // Handle error retry button
+                if (isError) {
+                    let retryBtn = lastMsg.querySelector(".retry-btn");
+                    if (!retryBtn) {
+                        retryBtn = document.createElement("button");
+                        retryBtn.type = "button";
+                        retryBtn.className = "retry-btn";
+                        retryBtn.textContent = "Retry";
+                        retryBtn.addEventListener("click", () => retryLastMessage());
+                        lastMsg.appendChild(retryBtn);
+                    }
+                } else {
+                    const retryBtn = lastMsg.querySelector(".retry-btn");
+                    if (retryBtn) retryBtn.remove();
                 }
             });
+        }
 
-        document
-            .getElementById("aiImageRemoveBtn")
-            ?.addEventListener("click", () => {
-                aiClearSelectedImage();
-            });
-
-        async function sendAI() {
-            const input = document.getElementById("aiInput");
-            const messages = document.getElementById("aiMessages");
+        // =========================================================
+        // CORE SEND FUNCTION
+        // =========================================================
+        async function sendAI(isFullscreen = false) {
+            const input = isFullscreen ? document.getElementById("fsInput") : document.getElementById("aiInput");
+            const messages = isFullscreen ? document.getElementById("aiFullscreenMessages") : document.getElementById("aiMessages");
+            const sendBtn = isFullscreen ? document.getElementById("fsSendBtn") : document.querySelector("#aiBox .aiInput button");
+            const imageBtn = isFullscreen ? document.getElementById("fsImageBtn") : document.getElementById("aiImageBtn");
+            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : null;
 
             const message = input.value.trim();
             const pendingImage = aiSelectedImage;
 
             if (!message && !pendingImage) return;
 
-            const effectiveMessage =
-                message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : "");
+            const effectiveMessage = message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : "");
+            const direction = detectTextDirection(effectiveMessage);
 
-            messages.innerHTML += `
-                <div class="user-message">
-                    ${
-                        pendingImage
-                            ? `<img src="${pendingImage.previewUrl}" alt="Uploaded image" />`
-                            : ""
-                    }
-                    ${message ? aiEscape(message) : ""}
-                </div>
-            `;
+            // Add user message to both views
+            syncMessageToBoth("user", effectiveMessage, { imagePreview: pendingImage?.previewUrl, direction });
+
+            // Store for retry
+            aiLastUserMessage = message;
+            aiLastPendingImage = pendingImage;
 
             input.value = "";
-            aiClearSelectedImage();
-            aiSetInputDisabled(true);
-            messages.scrollTop = messages.scrollHeight;
+            if (input.tagName === "TEXTAREA") input.style.height = "auto";
+            aiClearSelectedImage(isFullscreen);
+            setInputDisabled(true, isFullscreen);
+            if (messages) messages.scrollTop = messages.scrollHeight;
 
-            messages.innerHTML += `
-                <div class="ai-message" id="aiLoading">Thinking...</div>
-            `;
-            messages.scrollTop = messages.scrollHeight;
+            // Add thinking indicator
+            const { mini: miniAiMsg, full: fsAiMsg } = syncMessageToBoth("assistant", "", { isThinking: true });
 
             let assistantText = "";
-            let sourceLabel = null;
-            let messageEl = null;
             let sawAnyContent = false;
             let connectFailed = false;
-
-            function ensureMessageEl() {
-                if (!messageEl) {
-                    document.getElementById("aiLoading")?.remove();
-                    messageEl = document.createElement("div");
-                    messageEl.className = "ai-message";
-                    messages.appendChild(messageEl);
-                }
-                return messageEl;
-            }
+            let streamError = null;
 
             function appendDelta(piece) {
                 if (!piece) return;
                 sawAnyContent = true;
                 assistantText += piece;
-                ensureMessageEl().textContent = assistantText;
-                messages.scrollTop = messages.scrollHeight;
-            }
-
-            function setFullText(text) {
-                if (!text) return;
-                sawAnyContent = true;
-                assistantText = text;
-                ensureMessageEl().textContent = assistantText;
-                messages.scrollTop = messages.scrollHeight;
+                updateLastAssistantMessage(assistantText, { isStreaming: true, direction });
             }
 
             function handleParsedObject(obj) {
@@ -20637,29 +21745,24 @@ document.documentElement.classList.toggle(
                 if (typeof obj.delta === "string") {
                     appendDelta(obj.delta);
                 } else if (typeof obj.response === "string") {
-                    setFullText(obj.response);
+                    sawAnyContent = true;
+                    assistantText = obj.response;
+                    updateLastAssistantMessage(assistantText, { isStreaming: false, direction, final: true });
                 }
-
-                if (obj.source === "local") {
-                    sourceLabel = "Local AI";
-                } else if (obj.source === "gemini") {
-                    sourceLabel = "Cloud AI";
+                if (obj.type === "metadata") {
+                    // Handle metadata from new Worker format
                 }
             }
 
             function handleLine(rawLine) {
                 let line = String(rawLine).trim();
                 if (!line) return;
-
                 if (line.startsWith(":")) return;
                 if (line.startsWith("event:")) return;
-
                 if (line.startsWith("data:")) {
                     line = line.slice(5).trim();
                 }
-
                 if (!line || line === "[DONE]") return;
-
                 try {
                     handleParsedObject(JSON.parse(line));
                 } catch (e) {
@@ -20670,9 +21773,9 @@ document.documentElement.classList.toggle(
             try {
                 const requestBody = {
                     message: effectiveMessage,
-                    history: aiConversationHistory.slice(
-                        -AI_HISTORY_LIMIT * 2
-                    )
+                    history: aiConversationHistory.slice(-AI_HISTORY_LIMIT * 2),
+                    selectedModel: aiSelectedModel,
+                    mode: isFullscreen ? "full" : "mini"
                 };
 
                 if (pendingImage) {
@@ -20682,12 +21785,12 @@ document.documentElement.classList.toggle(
                     };
                 }
 
+                aiAbortController = new AbortController();
                 const response = await fetch(AI_ENDPOINT, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(requestBody)
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestBody),
+                    signal: aiAbortController.signal
                 });
 
                 if (!response.ok) {
@@ -20701,10 +21804,8 @@ document.documentElement.classList.toggle(
 
                     while (true) {
                         const { done, value } = await reader.read();
-
                         if (value) {
                             buffer += decoder.decode(value, { stream: true });
-
                             let newlineIndex;
                             while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
                                 const line = buffer.slice(0, newlineIndex);
@@ -20712,12 +21813,9 @@ document.documentElement.classList.toggle(
                                 handleLine(line);
                             }
                         }
-
                         if (done) {
                             buffer += decoder.decode();
-                            if (buffer.trim()) {
-                                handleLine(buffer);
-                            }
+                            if (buffer.trim()) handleLine(buffer);
                             break;
                         }
                     }
@@ -20727,61 +21825,179 @@ document.documentElement.classList.toggle(
                 }
 
             } catch (error) {
+                if (error.name === "AbortError") {
+                    // User cancelled, don't show error
+                    return;
+                }
                 if (!sawAnyContent) {
                     connectFailed = true;
+                    streamError = error.message;
+                } else {
+                    streamError = error.message;
                 }
             }
 
-            document.getElementById("aiLoading")?.remove();
-
             if (sawAnyContent) {
-                if (sourceLabel) {
-                    messages.innerHTML += `
-                        <div class="ai-source">${sourceLabel}</div>
-                    `;
-                }
+                // Finalize message
+                updateLastAssistantMessage(assistantText, { isStreaming: false, direction, final: true });
 
+                // Save to session history
                 aiConversationHistory.push(
-                    {
-                        role: "user",
-                        content: pendingImage
-                            ? "[User uploaded an image and asked: " +
-                              effectiveMessage +
-                              "]"
-                            : message
-                    },
+                    { role: "user", content: pendingImage ? "[User uploaded an image and asked: " + effectiveMessage + "]" : message },
                     { role: "assistant", content: assistantText }
                 );
                 if (aiConversationHistory.length > AI_HISTORY_LIMIT * 2) {
-                    aiConversationHistory = aiConversationHistory.slice(
-                        -AI_HISTORY_LIMIT * 2
-                    );
+                    aiConversationHistory = aiConversationHistory.slice(-AI_HISTORY_LIMIT * 2);
                 }
                 aiSaveHistory(aiConversationHistory);
+
+                // If fullscreen mode, also save to persistent history
+                if (isFullscreen) {
+                    aiPersistentHistory.push(
+                        { role: "user", content: pendingImage ? "[User uploaded an image and asked: " + effectiveMessage + "]" : message, timestamp: Date.now() },
+                        { role: "assistant", content: assistantText, timestamp: Date.now() }
+                    );
+                    aiSavePersistentHistory(aiPersistentHistory);
+                }
+
             } else if (connectFailed) {
-                messages.innerHTML += `
-                    <div class="ai-message">
-                        Couldn't connect to Daily AI.
-                    </div>
-                `;
-            } else {
-                messages.innerHTML += `
-                    <div class="ai-message">Something went wrong.</div>
-                `;
+                updateLastAssistantMessage(
+                    "Couldn't connect to Daily AI. Please check your connection.",
+                    { isError: true, direction, final: true }
+                );
+            } else if (streamError) {
+                updateLastAssistantMessage(
+                    "Something went wrong: " + streamError,
+                    { isError: true, direction, final: true }
+                );
             }
 
-            aiSetInputDisabled(false);
+            setInputDisabled(false, isFullscreen);
             input.focus();
-            messages.scrollTop = messages.scrollHeight;
+            if (messages) messages.scrollTop = messages.scrollHeight;
         }
 
-        document.getElementById("aiInput").addEventListener("keydown", (e) => {
-            if (e.key === "Enter") sendAI();
-        });
+        function retryLastMessage() {
+            if (aiLastUserMessage !== null || aiLastPendingImage !== null) {
+                const isFullscreen = aiCurrentMode === "full";
+                // Re-send with stored message/image
+                const input = isFullscreen ? document.getElementById("fsInput") : document.getElementById("aiInput");
+                if (aiLastUserMessage) input.value = aiLastUserMessage;
+                aiSelectedImage = aiLastPendingImage;
+                if (aiLastPendingImage) {
+                    aiShowImagePreview(aiLastPendingImage.previewUrl, aiLastPendingImage.name, isFullscreen);
+                }
+                sendAI(isFullscreen);
+            }
+        }
 
+        function setInputDisabled(disabled, isFullscreen) {
+            const input = isFullscreen ? document.getElementById("fsInput") : document.getElementById("aiInput");
+            const sendBtn = isFullscreen ? document.getElementById("fsSendBtn") : document.querySelector("#aiBox .aiInput button");
+            const imageBtn = isFullscreen ? document.getElementById("fsImageBtn") : document.getElementById("aiImageBtn");
+            const voiceBtn = isFullscreen ? document.getElementById("fsVoiceBtn") : null;
+            if (input) input.disabled = disabled;
+            if (sendBtn) sendBtn.disabled = disabled;
+            if (imageBtn) imageBtn.disabled = disabled;
+            if (voiceBtn) voiceBtn.disabled = disabled;
+        }
+
+        // =========================================================
+        // EVENT LISTENERS
+        // =========================================================
+
+        // Mini-chat toggle
         document.getElementById("aiToggle").addEventListener("click", () => {
             document.getElementById("aiBox").classList.toggle("open");
         });
+
+        // Mini-chat input
+        document.getElementById("aiInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendAI(false);
+            }
+        });
+
+        // Fullscreen toggle
+        document.getElementById("fsMinimizeBtn")?.addEventListener("click", minimizeFullscreen);
+        document.getElementById("fsCloseBtn")?.addEventListener("click", closeFullscreen);
+
+        // Fullscreen input
+        const fsInput = document.getElementById("fsInput");
+        fsInput?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendAI(true);
+            }
+        });
+        fsInput?.addEventListener("input", () => {
+            fsInput.style.height = "auto";
+            fsInput.style.height = Math.min(fsInput.scrollHeight, 180) + "px";
+        });
+
+        // Fullscreen send button
+        document.getElementById("fsSendBtn")?.addEventListener("click", () => sendAI(true));
+
+        // Image buttons
+        document.getElementById("aiImageBtn")?.addEventListener("click", () => {
+            document.getElementById("aiImageFileInput")?.click();
+        });
+        document.getElementById("fsImageBtn")?.addEventListener("click", () => {
+            document.getElementById("fsImageFileInput")?.click();
+        });
+
+        document.getElementById("aiImageFileInput")?.addEventListener("change", async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            try {
+                aiSelectedImage = await aiPrepareImage(file);
+                aiShowImagePreview(aiSelectedImage.previewUrl, aiSelectedImage.name, false);
+            } catch (error) {
+                aiClearSelectedImage(false);
+                const messages = document.getElementById("aiMessages");
+                if (messages) {
+                    messages.appendChild(createMessageElement("assistant", "Sorry, that image couldn't be used. Please try a different photo.", { isError: true }));
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            }
+        });
+
+        document.getElementById("fsImageFileInput")?.addEventListener("change", async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            try {
+                aiSelectedImage = await aiPrepareImage(file);
+                aiShowImagePreview(aiSelectedImage.previewUrl, aiSelectedImage.name, true);
+            } catch (error) {
+                aiClearSelectedImage(true);
+                const messages = document.getElementById("aiFullscreenMessages");
+                if (messages) {
+                    messages.appendChild(createMessageElement("assistant", "Sorry, that image couldn't be used. Please try a different photo.", { isError: true }));
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            }
+        });
+
+        document.getElementById("aiImageRemoveBtn")?.addEventListener("click", () => aiClearSelectedImage(false));
+        document.getElementById("aiFullscreenImageRemove")?.addEventListener("click", () => aiClearSelectedImage(true));
+
+        // Voice button
+        document.getElementById("fsVoiceBtn")?.addEventListener("click", () => {
+            if (aiVoiceListening) {
+                stopVoiceInput(true);
+            } else {
+                startVoiceInput(document.getElementById("fsInput"), true);
+            }
+        });
+
+        // Initialize
+        setupMarkdownRenderer();
+
+        // Load voices for TTS
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.onvoiceschanged = () => {};
+        }
     </script>
     <script>
         /* Small, local session-goal layer for the focus-room controls. */
