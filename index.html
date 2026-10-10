@@ -5286,8 +5286,21 @@
     </style>
 
     <style id="dailyWeatherStyles">
-        #dailyWeatherCard { overflow: hidden; }
-        .daily-weather-heading { margin-bottom: 12px; }
+        #dailyWeatherCard { overflow: hidden; padding-bottom: 14px; }
+        .daily-weather-heading { margin-bottom: 8px; }
+        .daily-weather-heading-actions { display:flex; align-items:center; gap:5px; }
+        .daily-weather-expand-btn { padding:7px 10px; min-height:32px; font-size:12px; white-space:nowrap; }
+        .daily-weather-summary { display:flex; align-items:center; gap:10px; min-width:0; }
+        #dailyWeatherSummaryIcon { font-size:29px; line-height:1; }
+        #dailyWeatherSummaryTemp { font-size:28px; letter-spacing:-.8px; line-height:1; }
+        .daily-weather-summary-text { display:flex; flex-direction:column; gap:3px; min-width:0; }
+        #dailyWeatherSummaryCondition { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        #dailyWeatherSummaryPlace { font-size:11px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .daily-weather-expanded-content { margin-top:8px; }
+        #dailyWeatherCard:not(.weather-expanded) .daily-weather-expanded-content { display:none !important; }
+        #dailyWeatherCard.weather-expanded .daily-weather-summary { display:none; }
+        #dailyWeatherSettingsCard .daily-weather-controls { margin:12px 0 8px; }
+        #dailyWeatherSettingsCard .daily-weather-suggestions { margin-bottom:0; }
         .daily-weather-icon-btn { border: 0; background: transparent; color: inherit; font-size: 22px; padding: 3px 8px; border-radius: 10px; cursor: pointer; }
         .daily-weather-icon-btn:active { transform: scale(.94); }
         .daily-weather-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-bottom: 10px; }
@@ -5485,51 +5498,6 @@
                 <div class="dashboard-date" id="dashDate"></div>
             </div>
 
-            <!-- WEATHER DASHBOARD (isolated feature; no existing app behavior changed) -->
-            <section class="dashboard-card" id="dailyWeatherCard" aria-labelledby="dailyWeatherTitle">
-                <div class="dashboard-title daily-weather-heading">
-                    <span id="dailyWeatherTitle">🌦️ Weather</span>
-                    <button type="button" class="daily-weather-icon-btn" id="dailyWeatherRefresh" aria-label="Refresh weather" title="Refresh">↻</button>
-                </div>
-                <div class="daily-weather-controls">
-                    <label class="daily-weather-search-label" for="dailyWeatherCityInput" id="dailyWeatherCityLabel">City</label>
-                    <div class="daily-weather-search-row">
-                        <input id="dailyWeatherCityInput" type="search" autocomplete="off" maxlength="100" placeholder="Search a city" aria-label="Search a city">
-                        <button type="button" class="setting-button daily-weather-search-btn" id="dailyWeatherSearch">Search</button>
-                    </div>
-                    <button type="button" class="setting-button daily-weather-location-btn" id="dailyWeatherUseLocation">⌖ Use my location</button>
-                </div>
-                <div id="dailyWeatherSuggestions" class="daily-weather-suggestions" role="listbox" aria-label="City search results" hidden></div>
-                <div id="dailyWeatherStatus" class="daily-weather-status" role="status" aria-live="polite">Choose a city to see the forecast.</div>
-                <div id="dailyWeatherContent" hidden>
-                    <div class="daily-weather-current">
-                        <div class="daily-weather-current-main">
-                            <div id="dailyWeatherIcon" class="daily-weather-big-icon" aria-hidden="true">🌤️</div>
-                            <div>
-                                <div id="dailyWeatherTemperature" class="daily-weather-temperature">--°</div>
-                                <div id="dailyWeatherCondition" class="daily-weather-condition">—</div>
-                                <div id="dailyWeatherFeels" class="daily-weather-muted">Feels like --°</div>
-                            </div>
-                        </div>
-                        <div class="daily-weather-details">
-                            <div><span id="dailyWeatherHighLabel">High</span><strong id="dailyWeatherHigh">--°</strong></div>
-                            <div><span id="dailyWeatherLowLabel">Low</span><strong id="dailyWeatherLow">--°</strong></div>
-                            <div><span id="dailyWeatherWindLabel">Wind</span><strong id="dailyWeatherWind">-- km/h</strong></div>
-                        </div>
-                    </div>
-                    <div class="daily-weather-section">
-                        <div class="daily-weather-section-title" id="dailyWeatherHourlyTitle">Hourly forecast</div>
-                        <div id="dailyWeatherHourly" class="daily-weather-hourly"></div>
-                    </div>
-                    <div class="daily-weather-section">
-                        <div class="daily-weather-section-title" id="dailyWeatherWeeklyTitle">7-day forecast</div>
-                        <div id="dailyWeatherDaily" class="daily-weather-daily"></div>
-                    </div>
-                    <div id="dailyWeatherUpdated" class="daily-weather-updated"></div>
-                    <div class="daily-weather-attribution">Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></div>
-                </div>
-            </section>
-
             <!-- PROACTIVE AI (Daily AI briefing + one suggestion) -->
             <div class="dashboard-card" id="paCard" style="display:none;">
                 <div class="dashboard-title">
@@ -5571,6 +5539,49 @@
                 </div>
                 <button class="setting-button" id="dashViewPrayersBtn" style="width:100%;">View prayers →</button>
             </div>
+
+            <!-- WEATHER DASHBOARD: compact by default; forecasts expand on demand -->
+            <section class="dashboard-card" id="dailyWeatherCard" aria-labelledby="dailyWeatherTitle">
+                <div class="dashboard-title daily-weather-heading">
+                    <span id="dailyWeatherTitle">🌦️ Weather</span>
+                    <span class="daily-weather-heading-actions">
+                        <button type="button" class="daily-weather-icon-btn" id="dailyWeatherRefresh" aria-label="Refresh weather" title="Refresh">↻</button>
+                        <button type="button" class="setting-button daily-weather-expand-btn" id="dailyWeatherExpand" aria-expanded="false">Show forecast ↓</button>
+                    </span>
+                </div>
+                <div class="daily-weather-summary" id="dailyWeatherSummary">
+                    <span id="dailyWeatherSummaryIcon" aria-hidden="true">🌤️</span>
+                    <strong id="dailyWeatherSummaryTemp">--°</strong>
+                    <span class="daily-weather-summary-text"><strong id="dailyWeatherSummaryCondition">Set location in Settings</strong><small id="dailyWeatherSummaryPlace">Weather</small></span>
+                </div>
+                <div id="dailyWeatherContent" class="daily-weather-expanded-content" hidden>
+                    <div class="daily-weather-current">
+                        <div class="daily-weather-current-main">
+                            <div id="dailyWeatherIcon" class="daily-weather-big-icon" aria-hidden="true">🌤️</div>
+                            <div>
+                                <div id="dailyWeatherTemperature" class="daily-weather-temperature">--°</div>
+                                <div id="dailyWeatherCondition" class="daily-weather-condition">—</div>
+                                <div id="dailyWeatherFeels" class="daily-weather-muted">Feels like --°</div>
+                            </div>
+                        </div>
+                        <div class="daily-weather-details">
+                            <div><span id="dailyWeatherHighLabel">High</span><strong id="dailyWeatherHigh">--°</strong></div>
+                            <div><span id="dailyWeatherLowLabel">Low</span><strong id="dailyWeatherLow">--°</strong></div>
+                            <div><span id="dailyWeatherWindLabel">Wind</span><strong id="dailyWeatherWind">-- km/h</strong></div>
+                        </div>
+                    </div>
+                    <div class="daily-weather-section">
+                        <div class="daily-weather-section-title" id="dailyWeatherHourlyTitle">Hourly forecast</div>
+                        <div id="dailyWeatherHourly" class="daily-weather-hourly"></div>
+                    </div>
+                    <div class="daily-weather-section">
+                        <div class="daily-weather-section-title" id="dailyWeatherWeeklyTitle">7-day forecast</div>
+                        <div id="dailyWeatherDaily" class="daily-weather-daily"></div>
+                    </div>
+                    <div id="dailyWeatherUpdated" class="daily-weather-updated"></div>
+                    <div class="daily-weather-attribution">Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></div>
+                </div>
+            </section>
 
             <!-- 4. STUDY -->
             <div class="dashboard-card">
@@ -6875,6 +6886,22 @@
 
             </div>
 
+
+            <!-- WEATHER SETTINGS -->
+            <div class="settings-card" id="dailyWeatherSettingsCard">
+                <div class="settings-card-title" id="dailyWeatherSettingsTitle">Weather Location</div>
+                <div class="setting-description" id="dailyWeatherSettingsDescription">Choose a city or use your device location for the forecast shown on Today.</div>
+                <div class="daily-weather-controls">
+                    <label class="daily-weather-search-label" for="dailyWeatherCityInput" id="dailyWeatherCityLabel">City</label>
+                    <div class="daily-weather-search-row">
+                        <input id="dailyWeatherCityInput" type="search" autocomplete="off" maxlength="100" placeholder="Search a city" aria-label="Search a city">
+                        <button type="button" class="setting-button daily-weather-search-btn" id="dailyWeatherSearch">Search</button>
+                    </div>
+                    <button type="button" class="setting-button daily-weather-location-btn" id="dailyWeatherUseLocation">⌖ Use my location</button>
+                </div>
+                <div id="dailyWeatherSuggestions" class="daily-weather-suggestions" role="listbox" aria-label="City search results" hidden></div>
+                <div id="dailyWeatherStatus" class="daily-weather-status" role="status" aria-live="polite" hidden></div>
+            </div>
 
             <!-- NOTIFICATIONS -->
 
@@ -24192,7 +24219,7 @@ document.documentElement.classList.toggle(
             const $ = id => document.getElementById(id);
             const copy = {
                 en: {
-                    title: '🌦️ Weather', city: 'City', searchPlaceholder: 'Search a city', search: 'Search', useLocation: '⌖ Use my location',
+                    title: '🌦️ Weather', city: 'City', searchPlaceholder: 'Search a city', search: 'Search', useLocation: '⌖ Use my location', expand: 'Show forecast ↓', collapse: 'Hide forecast ↑', settingsTitle: 'Weather Location', settingsDescription: 'Choose a city or use your device location for the forecast shown on Today.', setLocation: 'Set location in Settings',
                     choose: 'Choose a city to see the forecast.', searching: 'Searching for cities…', loading: 'Loading weather…',
                     noCities: 'No matching cities found. Try another spelling.', cityError: 'Enter a city name first.',
                     unavailable: 'Weather could not be loaded. Check your connection and try again.', offline: 'Offline — showing the last saved forecast.',
@@ -24205,7 +24232,7 @@ document.documentElement.classList.toggle(
                     refresh: 'Refresh weather', chooseResult: 'Select a city'
                 },
                 ku: {
-                    title: '🌦️ کەشوهەوا', city: 'شار', searchPlaceholder: 'گەڕان بەدوای شارێکدا', search: 'گەڕان', useLocation: '⌖ شوێنی من',
+                    title: '🌦️ کەشوهەوا', city: 'شار', searchPlaceholder: 'گەڕان بەدوای شارێکدا', search: 'گەڕان', useLocation: '⌖ شوێنی من', expand: 'پێشبینی پیشان بدە ↓', collapse: 'پێشبینی بشارەوە ↑', settingsTitle: 'شوێنی کەشوهەوا', settingsDescription: 'شارێک هەڵبژێرە یان شوێنی ئامێرەکەت بەکاربهێنە.', setLocation: 'شوێن لە ڕێکخستنەکان دیاری بکە',
                     choose: 'شارێک هەڵبژێرە بۆ بینینی پێشبینی کەشوهەوا.', searching: 'گەڕان بەدوای شارەکاندا…', loading: 'بارکردنی کەشوهەوا…',
                     noCities: 'هیچ شارێک نەدۆزرایەوە. ناوێکی تر تاقی بکەرەوە.', cityError: 'سەرەتا ناوی شارێک بنووسە.',
                     unavailable: 'نەتوانرا کەشوهەوا باربکرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و دووبارە هەوڵ بدەرەوە.', offline: 'بێ ئینتەرنێت — دوا پێشبینی پاشەکەوتکراو پیشان دەدرێت.',
@@ -24217,7 +24244,7 @@ document.documentElement.classList.toggle(
                     heavyShowers: 'ڕژانی زۆری باران', snowShowers: 'ڕژانی بەفر', thunderstorm: 'زریان', thunderHail: 'زریان لەگەڵ تەگەرگ', refresh: 'نوێکردنەوەی کەشوهەوا', chooseResult: 'شارێک هەڵبژێرە'
                 },
                 ar: {
-                    title: '🌦️ الطقس', city: 'المدينة', searchPlaceholder: 'ابحث عن مدينة', search: 'بحث', useLocation: '⌖ استخدام موقعي',
+                    title: '🌦️ الطقس', city: 'المدينة', searchPlaceholder: 'ابحث عن مدينة', search: 'بحث', useLocation: '⌖ استخدام موقعي', expand: 'عرض التوقعات ↓', collapse: 'إخفاء التوقعات ↑', settingsTitle: 'موقع الطقس', settingsDescription: 'اختر مدينة أو استخدم موقع جهازك لعرض الطقس في اليوم.', setLocation: 'حدد الموقع من الإعدادات',
                     choose: 'اختر مدينة لعرض توقعات الطقس.', searching: 'جارٍ البحث عن المدن…', loading: 'جارٍ تحميل الطقس…',
                     noCities: 'لم يتم العثور على مدن مطابقة. جرّب كتابة الاسم بطريقة أخرى.', cityError: 'أدخل اسم المدينة أولاً.',
                     unavailable: 'تعذّر تحميل الطقس. تحقق من الاتصال وحاول مرة أخرى.', offline: 'غير متصل — يتم عرض آخر توقعات محفوظة.',
@@ -24319,6 +24346,10 @@ document.documentElement.classList.toggle(
                 $('dailyWeatherHigh').textContent = number((daily.temperature_2m_max || [])[0]) + '°';
                 $('dailyWeatherLow').textContent = number((daily.temperature_2m_min || [])[0]) + '°';
                 $('dailyWeatherWind').textContent = number(current.wind_speed_10m) + ' ' + tr('kmh');
+                $('dailyWeatherSummaryIcon').textContent = info.icon;
+                $('dailyWeatherSummaryTemp').textContent = number(current.temperature_2m) + '°';
+                $('dailyWeatherSummaryCondition').textContent = info.text;
+                $('dailyWeatherSummaryPlace').textContent = place.name ? [place.name, place.admin1, place.country].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', ') : tr('location');
                 $('dailyWeatherContent').hidden = false;
                 hideStatus();
 
@@ -24443,15 +24474,24 @@ document.documentElement.classList.toggle(
                 $('dailyWeatherSearch').textContent = tr('search');
                 $('dailyWeatherUseLocation').textContent = tr('useLocation');
                 $('dailyWeatherRefresh').setAttribute('aria-label', tr('refresh'));
+                $('dailyWeatherExpand').textContent = $('dailyWeatherCard').classList.contains('weather-expanded') ? tr('collapse') : tr('expand');
+                $('dailyWeatherSettingsTitle').textContent = tr('settingsTitle');
+                $('dailyWeatherSettingsDescription').textContent = tr('settingsDescription');
                 if (forecast) renderForecast();
             }
             function init() {
                 if (!$('dailyWeatherCard')) return;
+                $('dailyWeatherExpand').addEventListener('click', function () {
+                    const expanded = $('dailyWeatherCard').classList.toggle('weather-expanded');
+                    $('dailyWeatherExpand').setAttribute('aria-expanded', String(expanded));
+                    $('dailyWeatherExpand').textContent = expanded ? tr('collapse') : tr('expand');
+                });
                 $('dailyWeatherSearch').addEventListener('click', searchCity);
                 $('dailyWeatherCityInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchCity(); } });
                 $('dailyWeatherUseLocation').addEventListener('click', useLocation);
                 $('dailyWeatherRefresh').addEventListener('click', () => {
-                    if (place) fetchForecast(place, true); else searchCity();
+                    if (place) fetchForecast(place, true);
+                    else showStatus(tr('setLocation'), true);
                 });
                 const cached = loadCache();
                 if (!cached) {
@@ -24463,8 +24503,11 @@ document.documentElement.classList.toggle(
                     else {
                         // A useful city default avoids requesting location permission on startup.
                         $('dailyWeatherCityInput').value = 'Erbil';
+                        $('dailyWeatherSummaryCondition').textContent = tr('setLocation');
+                        $('dailyWeatherSummaryPlace').textContent = tr('settingsTitle');
                         showStatus(tr('choose'));
-                        searchCity();
+                        // Keep location selection in Settings; don't open a city-results list on Today.
+
                     }
                 } else if (navigator.onLine && Date.now() - lastFetched >= CACHE_MAX_AGE && place) {
                     fetchForecast(place, true);
