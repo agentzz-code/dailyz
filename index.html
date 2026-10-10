@@ -1028,6 +1028,12 @@
 
         /* Reduced motion */
 
+        @media (max-width: 700px) {
+            #studyWithMeOverlay .swm-background-panel { display: block; position: relative; top: auto; right: auto; width: 100%; margin: 10px 0 0; }
+            #studyWithMeOverlay.video-background-active .swm-background-panel { background: rgba(12,14,20,.78); }
+            .swm-video-controls input { font-size: 16px; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             #aiBox.open,
             #aiBox.full,
@@ -3551,6 +3557,42 @@
             animation: swmBackgroundDrift 18s ease-in-out infinite alternate;
         }
 
+        .swm-video-background {
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            display: none;
+            overflow: hidden;
+            pointer-events: none;
+            background: #080a0f;
+        }
+        .swm-video-background.active { display: block; }
+        .swm-video-background video,
+        .swm-video-background iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            inset: 0;
+            border: 0;
+            object-fit: cover;
+            pointer-events: none;
+        }
+        .swm-video-background::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.18) 40%, rgba(0,0,0,.5));
+        }
+        #studyWithMeOverlay.video-background-active .swm-bg,
+        #studyWithMeOverlay.video-background-active .swm-room { opacity: 0; }
+        #aiBox.study-ai-on-top { z-index: 100010 !important; }
+        #aiToggle.study-ai-on-top { z-index: 100011 !important; }
+        .swm-video-controls { display: grid; gap: 8px; margin-top: 12px; }
+        .swm-video-controls label { font-size: 11px; font-weight: 700; }
+        .swm-video-controls input { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid rgba(255,255,255,.15); border-radius: 10px; background: rgba(0,0,0,.25); color: #fff; padding: 10px; font-size: 12px; }
+        .swm-video-actions { display: flex; gap: 7px; }
+        .swm-video-actions button { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; padding: 9px 7px; background: rgba(255,255,255,.1); color: #fff; font-size: 11px; font-weight: 800; }
+        #swmVideoStatus { font-size: 10px; line-height: 1.4; opacity: .68; }
         .swm-bg::before {
             content: "";
             z-index: -2;
@@ -5325,6 +5367,11 @@
         #studyWithMeOverlay.scene-night .swm-bg { background:linear-gradient(rgba(8,13,25,.5),rgba(6,8,15,.8)),radial-gradient(ellipse at 50% 40%,rgba(38,77,147,.46),transparent 45%),#101426; } #studyWithMeOverlay.scene-sunset .swm-bg { background:linear-gradient(rgba(48,18,13,.33),rgba(20,11,10,.72)),radial-gradient(ellipse at 54% 43%,rgba(255,164,75,.54),transparent 42%),linear-gradient(120deg,#572939,#e17c45 48%,#39242d); }
         .swm-subject-row{display:flex;align-items:center;gap:6px;margin:-2px 0 10px;font-size:10px}.swm-subject-row select,.swm-music-row select{min-width:0;flex:1;border:1px solid rgba(255,255,255,.25);border-radius:7px;background:#201a17;color:#fff;padding:7px;font-size:10px}.swm-subject-row button{width:27px;height:27px;border:0;border-radius:7px;background:rgba(255,255,255,.14);color:#fff;font-size:17px}.swm-sound-panel{padding-top:13px;padding-bottom:13px}.swm-music-row{display:flex;align-items:center;gap:8px;margin-top:10px}.swm-sound-toggle{width:34px;height:31px;border:0;border-radius:8px;background:#bf7541;color:#fff;font-size:13px;font-weight:800}
         @media (max-width: 700px){ #studyWithMeOverlay.open{padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 72px);overflow-y:auto;overflow-x:hidden;align-items:stretch;display:block}.swm-topbar{position:sticky;top:0;z-index:7;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;padding:0 0 8px;align-items:stretch}.swm-left-column{position:relative;left:auto;top:auto;width:100%;margin:3px 0 0;gap:9px}.swm-background-panel{display:none}.swm-brand{min-width:0;padding:7px 6px;border-radius:12px;font-size:9px;line-height:1.05;overflow:hidden}.swm-brand span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.swm-brand b{font-size:13px;line-height:1.05}.swm-goal-pill{min-width:0}.swm-top-actions{margin-left:0;gap:4px;justify-content:flex-end}.swm-icon-btn{width:34px;height:34px;border-radius:9px}.swm-window{left:4vw;width:92vw;top:0;min-height:250px;height:45vh}.swm-desk{bottom:0}.swm-goals-panel{max-height:none}.swm-panel{padding:22px 22px;border-radius:24px}.swm-panel-head strong{font-size:22px;line-height:1.1}.swm-panel-head span{font-size:15px}.swm-panel-time{font-size:42px;line-height:1;margin:22px 0}.swm-subject-row{align-items:stretch;gap:8px;font-size:15px;flex-wrap:wrap}.swm-subject-row label{width:100%;font-weight:800}.swm-subject-row select,.swm-music-row select{font-size:15px;padding:12px;border-radius:10px}.swm-subject-row button{width:52px;height:46px;border-radius:13px;font-size:24px}.swm-panel-controls{gap:10px;flex-wrap:wrap}.swm-square{width:auto;min-width:54px;height:45px;padding:0 12px;font-size:17px;font-weight:800}.swm-add-goal{gap:10px}.swm-add-goal input{font-size:16px;padding:16px 18px;border-radius:17px}.swm-add-goal button{width:64px;border-radius:17px;font-size:33px}.swm-goal-summary{padding:18px 20px;border-radius:17px;font-size:15px;grid-template-columns:auto 1fr 1px auto 1fr}.swm-goal-summary b{font-size:32px}.swm-goal-list{max-height:190px}.swm-goal-item{font-size:15px;padding:12px}.swm-music-row{gap:12px}.swm-sound-toggle{width:52px;height:46px;border-radius:12px;font-size:16px}.swm-main{display:none}.swm-bottom{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:8}.swm-tip{max-width:90vw;white-space:normal;text-align:center;font-size:13px;padding:10px 18px}.swm-top-actions .swm-icon-btn:not(.swm-close-top){display:none} }
+        @media (max-width: 700px) {
+            #studyWithMeOverlay .swm-background-panel { display: block !important; position: relative !important; top: auto !important; right: auto !important; width: 100% !important; margin: 10px 0 0 !important; }
+            #studyWithMeOverlay .swm-top-actions #swmOpenAI { display: inline-flex !important; align-items: center; justify-content: center; }
+            #studyWithMeOverlay .swm-video-controls input { font-size: 16px; }
+        }
         @media (max-width: 380px){ .swm-panel{padding:18px 20px}.swm-panel-head strong{font-size:19px}.swm-panel-time{font-size:38px}.swm-add-goal input{font-size:15px;padding:14px}.swm-add-goal button{width:58px}.swm-goal-summary{font-size:13px;padding:16px}.swm-goal-summary b{font-size:28px}.study-stats-header{flex-wrap:wrap}.study-stats-page-title{font-size:20px}.study-stats-reset{padding:8px 10px} }
     </style>
 
@@ -6385,12 +6432,13 @@
         <!-- STUDY WITH ME FULL-SCREEN SESSION -->
         <div id="studyWithMeOverlay" aria-hidden="true">
             <div class="swm-bg"></div>
+            <div class="swm-video-background" id="swmVideoBackground" aria-hidden="true"></div>
             <div class="swm-room" aria-hidden="true"><div class="swm-city"></div><div class="swm-window"><i></i><i></i><i></i></div><div class="swm-desk"></div></div>
 
             <div class="swm-topbar">
                 <div class="swm-brand"><span>◉ Personal timer</span><b id="studyWithMeClock">--:--</b></div>
                 <div class="swm-brand swm-goal-pill">◎ Session goals <b id="swmGoalCount">0/0</b></div>
-                <div class="swm-top-actions"><button class="swm-icon-btn" type="button" title="Music">♫</button><button class="swm-icon-btn" type="button" title="Fullscreen" onclick="document.getElementById('studyWithMeOverlay').requestFullscreen?.()">↗</button><button class="swm-icon-btn swm-close-top" id="studyWithMeClose" type="button" aria-label="Leave session">×</button></div>
+                <div class="swm-top-actions"><button class="swm-icon-btn" id="swmOpenAI" type="button" title="Open Daily AI" aria-label="Open Daily AI">✦</button><button class="swm-icon-btn" type="button" title="Music">♫</button><button class="swm-icon-btn" type="button" title="Fullscreen" onclick="document.getElementById('studyWithMeOverlay').requestFullscreen?.()">↗</button><button class="swm-icon-btn swm-close-top" id="studyWithMeClose" type="button" aria-label="Leave session">×</button></div>
             </div>
 
             <aside class="swm-left-column">
@@ -6424,6 +6472,12 @@
                 <div class="swm-panel-head"><strong>▣ Background</strong><button class="swm-panel-close" type="button" aria-label="Hide background panel">×</button></div>
                 <div class="swm-scene-tabs" role="group" aria-label="Choose a scene"><button class="active" data-scene="rain" type="button">☂ Rainy room</button><button data-scene="night" type="button">✦ Night city</button><button data-scene="sunset" type="button">☀ Sunset</button></div>
                 <div class="swm-scene-grid"><button class="active" data-scene="rain" type="button"><span>Rainy room</span></button><button data-scene="night" type="button"><span>Night city</span></button><button data-scene="sunset" type="button"><span>Sunset desk</span></button></div>
+                <div class="swm-video-controls">
+                    <label for="swmVideoUrl">Video background URL</label>
+                    <input id="swmVideoUrl" type="url" inputmode="url" placeholder="Paste YouTube or MP4 URL" autocomplete="url">
+                    <div class="swm-video-actions"><button id="swmApplyVideo" type="button">Use video</button><button id="swmClearVideo" type="button">Remove</button></div>
+                    <div id="swmVideoStatus" role="status" aria-live="polite">Supports YouTube, Vimeo, and direct MP4/WebM links.</div>
+                </div>
                 <label class="swm-volume">♫ Ambient sound <input id="swmAmbientVolume" type="range" min="0" max="100" value="45"></label>
             </aside>
 
@@ -23360,6 +23414,100 @@ document.documentElement.classList.toggle(
             roomMusic.addEventListener('change', () => { timerMusic.value = roomMusic.value; timerMusic.dispatchEvent(new Event('change')); syncMusic(); });
             timerMusic.addEventListener('change', syncMusic);
             musicPlay.addEventListener('click', () => { if (!roomMusic.value) { musicStatus.textContent = 'Choose a track first'; return; } const audio = window.musicAudio; if (audio && !audio.paused) { audio.pause(); musicPlay.textContent = '▶'; musicStatus.textContent = 'Paused'; return; } window._musicHooks && window._musicHooks.forTimerStart(roomMusic.value); musicPlay.textContent = 'Ⅱ'; const option = roomMusic.selectedOptions[0]; musicStatus.textContent = option ? option.textContent.trim() : 'Playing'; });
+            // Open the existing Daily AI widget above the full-screen study overlay.
+            const openAIButton = document.getElementById('swmOpenAI');
+            const aiBox = document.getElementById('aiBox');
+            const aiToggle = document.getElementById('aiToggle');
+            function clearStudyAiLayer() {
+                aiBox && aiBox.classList.remove('study-ai-on-top');
+                aiToggle && aiToggle.classList.remove('study-ai-on-top');
+            }
+            openAIButton && openAIButton.addEventListener('click', function () {
+                if (aiBox) aiBox.classList.add('study-ai-on-top');
+                if (aiToggle) aiToggle.classList.add('study-ai-on-top');
+                if (typeof aiSetOpen === 'function') aiSetOpen(true);
+                else if (aiToggle) aiToggle.click();
+            });
+            document.getElementById('aiCloseBtn')?.addEventListener('click', clearStudyAiLayer);
+            document.getElementById('aiToggle')?.addEventListener('click', function () {
+                // When toggled from elsewhere, restore normal stacking after closing.
+                setTimeout(function () { if (!aiBox || !aiBox.classList.contains('open')) clearStudyAiLayer(); }, 0);
+            });
+
+            // Video backgrounds are kept local to this device; no Firebase/task data is changed.
+            const videoWrap = document.getElementById('swmVideoBackground');
+            const videoUrlInput = document.getElementById('swmVideoUrl');
+            const videoStatus = document.getElementById('swmVideoStatus');
+            const videoApply = document.getElementById('swmApplyVideo');
+            const videoClear = document.getElementById('swmClearVideo');
+            const VIDEO_PREF_KEY = 'dailykrd_study_video_background_v1';
+            function videoMessage(message) { if (videoStatus) videoStatus.textContent = message; }
+            function normalizeVideoUrl(raw) {
+                let url;
+                try { url = new URL(String(raw || '').trim()); } catch (e) { return null; }
+                if (!['https:', 'http:'].includes(url.protocol)) return null;
+                const host = url.hostname.toLowerCase().replace(/^www\./, '');
+                let id = '';
+                if (host === 'youtu.be') id = url.pathname.split('/').filter(Boolean)[0] || '';
+                else if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+                    id = url.searchParams.get('v') || ((url.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/) || [])[1] || '');
+                }
+                if (id && /^[A-Za-z0-9_-]{6,20}$/.test(id)) return { type: 'youtube', id: id };
+                if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+                    const match = url.pathname.match(/(?:video\/)?(\d{5,})/);
+                    if (match) return { type: 'vimeo', id: match[1] };
+                }
+                if (/\.(mp4|webm|ogv)(?:$)/i.test(url.pathname)) return { type: 'direct', url: url.href };
+                return null;
+            }
+            function clearVideoBackground(save) {
+                if (videoWrap) { videoWrap.innerHTML = ''; videoWrap.classList.remove('active'); }
+                overlay.classList.remove('video-background-active');
+                if (videoUrlInput) videoUrlInput.value = '';
+                if (save) { try { localStorage.removeItem(VIDEO_PREF_KEY); } catch (e) {} }
+                videoMessage('Animated room background restored.');
+            }
+            function applyVideoBackground(raw, save) {
+                const parsed = normalizeVideoUrl(raw);
+                if (!parsed) { videoMessage('Paste a valid YouTube, Vimeo, or direct MP4/WebM URL.'); return false; }
+                if (!videoWrap) return false;
+                videoWrap.innerHTML = '';
+                if (parsed.type === 'direct') {
+                    const video = document.createElement('video');
+                    video.src = parsed.url;
+                    video.autoplay = true;
+                    video.muted = true;
+                    video.loop = true;
+                    video.playsInline = true;
+                    video.setAttribute('playsinline', '');
+                    video.addEventListener('error', function () { videoMessage('Could not load this video. Check the direct video link and try again.'); }, { once: true });
+                    videoWrap.appendChild(video);
+                    video.play().catch(function () { videoMessage('Tap Use video again if playback was blocked.'); });
+                } else {
+                    const frame = document.createElement('iframe');
+                    frame.title = 'Study background video';
+                    frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+                    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+                    frame.tabIndex = -1;
+                    if (parsed.type === 'youtube') frame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(parsed.id) + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + encodeURIComponent(parsed.id) + '&playsinline=1&rel=0';
+                    else frame.src = 'https://player.vimeo.com/video/' + encodeURIComponent(parsed.id) + '?autoplay=1&muted=1&loop=1&background=1';
+                    videoWrap.appendChild(frame);
+                }
+                videoWrap.classList.add('active');
+                overlay.classList.add('video-background-active');
+                if (videoUrlInput) videoUrlInput.value = raw.trim();
+                videoMessage('Video background enabled. Playback is muted so it stays behind your study session.');
+                if (save) { try { localStorage.setItem(VIDEO_PREF_KEY, raw.trim()); } catch (e) {} }
+                return true;
+            }
+            videoApply && videoApply.addEventListener('click', function () { applyVideoBackground(videoUrlInput && videoUrlInput.value, true); });
+            videoUrlInput && videoUrlInput.addEventListener('keydown', function (event) { if (event.key === 'Enter') { event.preventDefault(); applyVideoBackground(videoUrlInput.value, true); } });
+            videoClear && videoClear.addEventListener('click', function () { clearVideoBackground(true); });
+            try {
+                const savedVideoUrl = localStorage.getItem(VIDEO_PREF_KEY);
+                if (savedVideoUrl && videoUrlInput) { videoUrlInput.value = savedVideoUrl; applyVideoBackground(savedVideoUrl, false); }
+            } catch (e) {}
+
             syncSubjects();
             syncMusic();
             window._syncFocusRoomSubjects = syncSubjects;
