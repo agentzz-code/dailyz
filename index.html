@@ -5538,6 +5538,13 @@
                         <label id="timeLabel">Time</label>
                         <input class="task-date-input" id="taskTimeInput" type="time">
                     </div>
+                    <div class="option-row">
+                        <label id="deadlineLabel" for="taskDeadlineInput">Deadline (optional)</label>
+                        <input class="task-date-input" id="taskDeadlineInput" type="datetime-local" aria-describedby="deadlineHelp">
+                    </div>
+                    <div class="setting-description" id="deadlineHelp" style="margin:-4px 0 10px;">
+                        Set when this task must be finished. This is separate from its scheduled date and reminder time.
+                    </div>
 
                     <div class="option-row">
 
@@ -6828,6 +6835,28 @@
                             <div class="setting-description" id="stepNotifDesc">Evening reminder if you're below goal.</div>
                         </div>
                         <button class="setting-button" id="stepNotifBtn" type="button">On</button>
+                    </div>
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label" id="deadlineWarningsLabel">Deadline Warnings</div>
+                            <div class="setting-description" id="deadlineWarningsDesc">Warn before deadlines and once when overdue.</div>
+                        </div>
+                        <button class="setting-button" id="deadlineWarningsBtn" type="button">On</button>
+                    </div>
+                    <div class="option-row" style="margin-top:8px;">
+                        <label id="deadlineOffsetsLabel" for="deadlineOffsetsSelect" style="min-width:110px;">Warning schedule</label>
+                        <select class="task-date-input" id="deadlineOffsetsSelect">
+                            <option value="1440,60">24 hours and 1 hour before</option>
+                            <option value="1440,180,30">1 day, 3 hours, and 30 minutes before</option>
+                            <option value="180,30">3 hours and 30 minutes before</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label" id="studyNudgesLabel">Smart Study Nudges</div>
+                            <div class="setting-description" id="studyNudgesDesc">Suggest a focus session for study-related deadlines.</div>
+                        </div>
+                        <button class="setting-button" id="studyNudgesBtn" type="button">On</button>
                     </div>
                     
                     <div class="option-row" style="margin-top:8px;">
@@ -10543,6 +10572,52 @@ done: "تەواو",
             ).textContent =
                 t("date");
 
+            const deadlineLabels = {
+                en: {
+                    label: "Deadline (optional)",
+                    help: "Set when this task must be finished. Separate from the scheduled date and reminder time.",
+                    warnings: "Deadline Warnings",
+                    warningsDesc: "Warn before deadlines and once when overdue.",
+                    offsets: "Warning schedule",
+                    study: "Smart Study Nudges",
+                    studyDesc: "Suggest a focus session for study-related deadlines.",
+                    options: ["24 hours and 1 hour before", "1 day, 3 hours, and 30 minutes before", "3 hours and 30 minutes before"]
+                },
+                ku: {
+                    label: "کاتی کۆتایی (ئارەزوومەندانە)",
+                    help: "کاتی تەواوکردنی ئەرکەکە دیاری بکە؛ جیاوازە لە بەرواری ئەرک و کاتی بیرخستنەوە.",
+                    warnings: "بیرخستنەوەی کاتی کۆتایی",
+                    warningsDesc: "پێش کاتی کۆتایی ئاگادارت دەکاتەوە و جارێکیش دوای تێپەڕبوونی.",
+                    offsets: "کاتی بیرخستنەوە",
+                    study: "بیرخستنەوەی خوێندنی زیرەک",
+                    studyDesc: "بۆ کاتی کۆتایی ئەرکی خوێندن پێشنیاری دانیشتنێکی خوێندن دەکات.",
+                    options: ["٢٤ کاتژمێر و ١ کاتژمێر پێشتر", "١ ڕۆژ، ٣ کاتژمێر و ٣٠ خولەک پێشتر", "٣ کاتژمێر و ٣٠ خولەک پێشتر"]
+                },
+                ar: {
+                    label: "الموعد النهائي (اختياري)",
+                    help: "حدد متى يجب إنهاء المهمة. هذا منفصل عن تاريخ المهمة ووقت التذكير.",
+                    warnings: "تنبيهات المواعيد النهائية",
+                    warningsDesc: "تنبيه قبل الموعد وتنبيه واحد بعد تجاوزه.",
+                    offsets: "جدول التنبيهات",
+                    study: "تذكيرات الدراسة الذكية",
+                    studyDesc: "اقتراح جلسة تركيز للمهام المرتبطة بالدراسة.",
+                    options: ["قبل 24 ساعة وقبل ساعة", "قبل يوم و3 ساعات و30 دقيقة", "قبل 3 ساعات و30 دقيقة"]
+                }
+            }[currentLanguage] || null;
+            if (deadlineLabels) {
+                document.getElementById("deadlineLabel").textContent = deadlineLabels.label;
+                document.getElementById("deadlineHelp").textContent = deadlineLabels.help;
+                document.getElementById("deadlineWarningsLabel").textContent = deadlineLabels.warnings;
+                document.getElementById("deadlineWarningsDesc").textContent = deadlineLabels.warningsDesc;
+                document.getElementById("deadlineOffsetsLabel").textContent = deadlineLabels.offsets;
+                document.getElementById("studyNudgesLabel").textContent = deadlineLabels.study;
+                document.getElementById("studyNudgesDesc").textContent = deadlineLabels.studyDesc;
+                const offsetSelect = document.getElementById("deadlineOffsetsSelect");
+                if (offsetSelect) Array.from(offsetSelect.options).forEach((option, index) => {
+                    if (deadlineLabels.options[index]) option.textContent = deadlineLabels.options[index];
+                });
+            }
+
 
             document.getElementById(
                 "repeatLabel"
@@ -12001,6 +12076,13 @@ done: "تەواو",
             if (window.Haptics) window.Haptics.selection();
         }
 
+        let deadlineDeepLinkTaskId = new URLSearchParams(window.location.search).get("deadlineTask");
+        const startupDeepLinks = new URLSearchParams(window.location.search);
+        if (startupDeepLinks.get("openStudyTimer") === "1") {
+            showSection("study");
+        } else if (deadlineDeepLinkTaskId) {
+            showSection("tasks");
+        }
 
         document
             .querySelectorAll(
@@ -12746,6 +12828,11 @@ done: "تەواو",
 
         function renderTasks(tasks) {
 
+            if (deadlineDeepLinkTaskId && Array.isArray(tasks)) {
+                const linkedTask = tasks.find(task => String(task?.id || "") === deadlineDeepLinkTaskId);
+                if (linkedTask?.date) selectedDate = linkedTask.date;
+            }
+
             const list =
                 document.getElementById(
                     "taskList"
@@ -12826,6 +12913,7 @@ done: "تەواو",
 
                 row.className =
                     "task";
+                row.dataset.taskId = String(task.id || "");
 
 
                 if (
@@ -12986,6 +13074,105 @@ done: "تەواو",
                     title
                 );
 
+                if (!task.deadlineAt) {
+                    const setDeadlineButton = document.createElement("button");
+                    setDeadlineButton.type = "button";
+                    setDeadlineButton.className = "setting-button";
+                    setDeadlineButton.style.marginTop = "6px";
+                    setDeadlineButton.textContent = currentLanguage === "ku" ? "کاتی کۆتایی زیاد بکە" : currentLanguage === "ar" ? "تحديد موعد نهائي" : "Set deadline";
+                    setDeadlineButton.addEventListener("click", async () => {
+                        const suggested = new Date(Date.now() + 86400000);
+                        suggested.setMinutes(suggested.getMinutes() - suggested.getTimezoneOffset());
+                        const initialValue = suggested.toISOString().slice(0, 16);
+                        const newDeadline = prompt(
+                            currentLanguage === "ku" ? "کاتی کۆتایی (YYYY-MM-DDTHH:mm)" : currentLanguage === "ar" ? "الموعد النهائي (YYYY-MM-DDTHH:mm)" : "Deadline (YYYY-MM-DDTHH:mm)",
+                            initialValue
+                        );
+                        if (newDeadline === null) return;
+                        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(newDeadline) || !Number.isFinite(new Date(newDeadline).getTime()) || new Date(newDeadline).getTime() <= Date.now()) {
+                            alert(currentLanguage === "ku" ? "تکایە کاتێکی داهاتووی دروست بنووسە." : currentLanguage === "ar" ? "أدخل موعداً مستقبلياً صالحاً." : "Enter a valid future deadline.");
+                            return;
+                        }
+                        if (!confirm(currentLanguage === "ku" ? "کاتی کۆتایی زیاد بکرێت؟" : currentLanguage === "ar" ? "هل تريد إضافة الموعد النهائي؟" : "Add this deadline to the task?")) return;
+                        try {
+                            if (currentUser) {
+                                await updateDoc(doc(db, "users", currentUser.uid, "tasks", task.id), { deadlineAt: newDeadline });
+                            } else {
+                                const guestTask = guestTasks.find(item => item.id === task.id);
+                                if (!guestTask) return;
+                                guestTask.deadlineAt = newDeadline;
+                                localStorage.setItem("dailykrd_guest_tasks", JSON.stringify(guestTasks));
+                            }
+                            refreshTasks();
+                            triggerPushSync();
+                        } catch (error) {
+                            console.error("Deadline update failed:", error);
+                            alert(currentLanguage === "ku" ? "زیادکردنی کاتی کۆتایی سەرکەوتوو نەبوو." : currentLanguage === "ar" ? "تعذر إضافة الموعد النهائي." : "Could not add the deadline.");
+                        }
+                    });
+                    content.appendChild(setDeadlineButton);
+                }
+
+                if (task.deadlineAt) {
+                    const deadlineMeta = document.createElement("div");
+                    deadlineMeta.className = "task-meta";
+                    const deadlineDate = new Date(task.deadlineAt);
+                    const formattedDeadline = Number.isNaN(deadlineDate.getTime())
+                        ? String(task.deadlineAt)
+                        : deadlineDate.toLocaleString(
+                            currentLanguage === "ku" ? "ku-Arab" : currentLanguage === "ar" ? "ar-IQ" : "en-US",
+                            { dateStyle: "medium", timeStyle: "short" }
+                        );
+                    deadlineMeta.textContent =
+                        currentLanguage === "ku" ? "کاتی کۆتایی: " + formattedDeadline :
+                        currentLanguage === "ar" ? "الموعد النهائي: " + formattedDeadline :
+                        "Deadline: " + formattedDeadline;
+                    content.appendChild(deadlineMeta);
+
+                    const deadlineMillis = new Date(task.deadlineAt).getTime();
+                    const isCompletedForDeadline = task.repeat && task.repeat !== "once"
+                        ? !!task.completedDates?.includes(String(task.deadlineAt).slice(0, 10))
+                        : !!task.completed;
+                    if (Number.isFinite(deadlineMillis) && deadlineMillis < Date.now() && !isCompletedForDeadline) {
+                        const rescheduleButton = document.createElement("button");
+                        rescheduleButton.type = "button";
+                        rescheduleButton.className = "setting-button";
+                        rescheduleButton.style.marginTop = "6px";
+                        rescheduleButton.textContent = currentLanguage === "ku" ? "دووبارە کات دیاری بکە" : currentLanguage === "ar" ? "إعادة جدولة" : "Reschedule";
+                        rescheduleButton.addEventListener("click", async () => {
+                            const suggested = new Date(Date.now() + 86400000);
+                            suggested.setMinutes(suggested.getMinutes() - suggested.getTimezoneOffset());
+                            const initialValue = suggested.toISOString().slice(0, 16);
+                            const newDeadline = prompt(
+                                currentLanguage === "ku" ? "کاتی نوێی کۆتایی (YYYY-MM-DDTHH:mm)" : currentLanguage === "ar" ? "الموعد الجديد (YYYY-MM-DDTHH:mm)" : "New deadline (YYYY-MM-DDTHH:mm)",
+                                initialValue
+                            );
+                            if (newDeadline === null) return;
+                            if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(newDeadline) || !Number.isFinite(new Date(newDeadline).getTime()) || new Date(newDeadline).getTime() <= Date.now()) {
+                                alert(currentLanguage === "ku" ? "تکایە کاتێکی داهاتووی دروست بنووسە." : currentLanguage === "ar" ? "أدخل موعداً مستقبلياً صالحاً." : "Enter a valid future deadline.");
+                                return;
+                            }
+                            if (!confirm(currentLanguage === "ku" ? "کاتی کۆتایی بگۆڕدرێت؟" : currentLanguage === "ar" ? "هل تريد تغيير الموعد النهائي؟" : "Change this task's deadline?")) return;
+                            try {
+                                if (currentUser) {
+                                    await updateDoc(doc(db, "users", currentUser.uid, "tasks", task.id), { deadlineAt: newDeadline });
+                                } else {
+                                    const guestTask = guestTasks.find(item => item.id === task.id);
+                                    if (!guestTask) return;
+                                    guestTask.deadlineAt = newDeadline;
+                                    localStorage.setItem("dailykrd_guest_tasks", JSON.stringify(guestTasks));
+                                }
+                                refreshTasks();
+                                triggerPushSync();
+                            } catch (error) {
+                                console.error("Deadline reschedule failed:", error);
+                                alert(currentLanguage === "ku" ? "گۆڕینی کات سەرکەوتوو نەبوو." : currentLanguage === "ar" ? "تعذر تغيير الموعد." : "Could not reschedule the deadline.");
+                            }
+                        });
+                        content.appendChild(rescheduleButton);
+                    }
+                }
+
 
                 if (
                     task.repeat &&
@@ -13077,6 +13264,14 @@ done: "تەواو",
                 list.appendChild(
                     row
                 );
+
+                if (deadlineDeepLinkTaskId && String(task.id || "") === deadlineDeepLinkTaskId) {
+                    row.scrollIntoView({ behavior: "smooth", block: "center" });
+                    deadlineDeepLinkTaskId = null;
+                    try {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    } catch (_) {}
+                }
 
             });
         }
@@ -13335,6 +13530,8 @@ done: "تەواو",
                     
                 reminderTime: reminderTime,
 
+                deadlineAt: document.getElementById("taskDeadlineInput").value || null,
+
                 repeat,
 
                 days:
@@ -13422,6 +13619,7 @@ done: "تەواو",
 
             input.value = "";
             document.getElementById("taskTimeInput").value = "";
+            document.getElementById("taskDeadlineInput").value = "";
 
             // Animate new task entry
             setTimeout(() => {
@@ -15224,8 +15422,14 @@ document.documentElement.classList.toggle(
             prayers: { fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true },
             tasksEnabled: true,
             stepsEnabled: true,
-            stepGoal: 10000
+            stepGoal: 10000,
+            deadlineWarningsEnabled: true,
+            deadlineOffsetsMinutes: [1440, 60],
+            studyNudgesEnabled: true
         }));
+        if (!Array.isArray(pushSettings.deadlineOffsetsMinutes)) pushSettings.deadlineOffsetsMinutes = [1440, 60];
+        if (typeof pushSettings.deadlineWarningsEnabled !== "boolean") pushSettings.deadlineWarningsEnabled = true;
+        if (typeof pushSettings.studyNudgesEnabled !== "boolean") pushSettings.studyNudgesEnabled = true;
 
         function isIOSStandalone() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -15261,8 +15465,10 @@ document.documentElement.classList.toggle(
                 settings: pushSettings,
                 language: currentLanguage || 'en',
                 timezone: getUserCoords().timezone,
+                deadlineTimezone: -new Date().getTimezoneOffset() / 60,
                 prayerTimes: prayerTimes,
                 tasks: currentUser ? currentTasksCache : guestTasks,
+                studySubjects: typeof loadStudySubjects === "function" ? loadStudySubjects() : [],
                 todaySteps: todaySteps || 0
             };
 
@@ -15412,6 +15618,22 @@ document.documentElement.classList.toggle(
             const taskBtn = document.getElementById("taskNotifBtn");
             const stepBtn = document.getElementById("stepNotifBtn");
             const stepInput = document.getElementById("stepGoalInput");
+            const deadlineWarningsBtn = document.getElementById("deadlineWarningsBtn");
+            const deadlineOffsetsSelect = document.getElementById("deadlineOffsetsSelect");
+            const studyNudgesBtn = document.getElementById("studyNudgesBtn");
+
+            if (deadlineWarningsBtn) {
+                deadlineWarningsBtn.textContent = pushSettings.deadlineWarningsEnabled ? t("on") : t("off");
+                deadlineWarningsBtn.className = "setting-button" + (pushSettings.deadlineWarningsEnabled ? " dark" : "");
+            }
+            if (deadlineOffsetsSelect) {
+                const selectedOffsets = (pushSettings.deadlineOffsetsMinutes || [1440, 60]).join(",");
+                deadlineOffsetsSelect.value = ["1440,60", "1440,180,30", "180,30"].includes(selectedOffsets) ? selectedOffsets : "1440,60";
+            }
+            if (studyNudgesBtn) {
+                studyNudgesBtn.textContent = pushSettings.studyNudgesEnabled ? t("on") : t("off");
+                studyNudgesBtn.className = "setting-button" + (pushSettings.studyNudgesEnabled ? " dark" : "");
+            }
 
             if (masterBtn) {
                 masterBtn.textContent = pushSettings.masterEnabled ? "On" : "Off";
@@ -15469,6 +15691,25 @@ document.documentElement.classList.toggle(
             if (window.Haptics) window.Haptics.tap();
             pushSettings.stepsEnabled = !pushSettings.stepsEnabled;
             renderPushSettingsUI(); syncPushPreferences();
+        });
+
+        document.getElementById("deadlineWarningsBtn")?.addEventListener("click", () => {
+            pushSettings.deadlineWarningsEnabled = !pushSettings.deadlineWarningsEnabled;
+            renderPushSettingsUI();
+            syncPushPreferences();
+        });
+
+        document.getElementById("deadlineOffsetsSelect")?.addEventListener("change", (event) => {
+            const parsed = String(event.target.value).split(",").map(Number).filter(n => Number.isFinite(n) && n > 0 && n <= 10080);
+            pushSettings.deadlineOffsetsMinutes = [...new Set(parsed)].sort((a, b) => b - a);
+            renderPushSettingsUI();
+            syncPushPreferences();
+        });
+
+        document.getElementById("studyNudgesBtn")?.addEventListener("click", () => {
+            pushSettings.studyNudgesEnabled = !pushSettings.studyNudgesEnabled;
+            renderPushSettingsUI();
+            syncPushPreferences();
         });
 
         document.getElementById("stepGoalInput")?.addEventListener("change", (e) => {
