@@ -6446,9 +6446,23 @@
                     <button class="flashcard-back-btn" id="flashcardBackBtn" type="button"></button>
                     <div class="flashcard-detail-name" id="flashcardDetailName"></div>
                     <div class="flashcard-detail-count" id="flashcardDetailCount"></div>
-                    <div class="flashcard-detail-actions">
-                        <button class="study-add-btn" id="flashcardStudyBtn" type="button" style="flex:1;"></button>
-                        <button class="setting-button" id="flashcardAddCardBtn" type="button" style="flex:1;"></button>
+                    <div class="flashcard-detail-actions" style="flex-wrap:wrap;">
+                        <button class="study-add-btn" id="flashcardStudyBtn" type="button" style="flex:1;min-width:130px;">Classic</button>
+                        <button class="setting-button" id="flashcardQuizBtn" type="button" style="flex:1;min-width:130px;">🧠 Start quiz</button>
+                        <button class="setting-button" id="flashcardAddCardBtn" type="button" style="flex:1;min-width:130px;"></button>
+                    </div>
+                    <div id="flashcardModePicker" style="display:none;margin:0 0 16px;padding:14px;border:1px solid var(--border-color,rgba(128,128,128,.25));border-radius:14px;">
+                        <div style="font-weight:750;margin-bottom:8px;">Choose a study mode</div>
+                        <label style="display:block;font-size:13px;margin-bottom:6px;">Mode</label>
+                        <select id="flashcardModeSelect" style="width:100%;padding:11px;border-radius:10px;margin-bottom:10px;">
+                            <option value="mixed">✨ Mixed quiz (all suitable types)</option><option value="custom">Custom selection</option><option value="multiple">Multiple choice</option><option value="classic">Classic flashcards</option><option value="matching">Matching</option><option value="truefalse">True or false</option><option value="blank">Fill in the blank</option>
+                        </select>
+                        <label style="display:block;font-size:13px;margin-bottom:6px;">Question types (for custom mode)</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px;margin-bottom:10px;">
+                            <label><input type="checkbox" class="flashcard-mode-type" value="multiple" checked> Multiple choice</label><label><input type="checkbox" class="flashcard-mode-type" value="matching" checked> Matching</label><label><input type="checkbox" class="flashcard-mode-type" value="truefalse" checked> True/false</label><label><input type="checkbox" class="flashcard-mode-type" value="blank" checked> Fill blank</label>
+                        </div>
+                        <label style="display:block;font-size:13px;margin-bottom:6px;">Difficulty</label><select id="flashcardQuizDifficulty" style="width:100%;padding:11px;border-radius:10px;margin-bottom:10px;"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select>
+                        <button type="button" class="study-add-btn" id="flashcardStartModeBtn" style="width:100%;padding:12px;">Start studying</button>
                     </div>
                     <div id="flashcardCardList"></div>
                 </div>
@@ -6463,6 +6477,17 @@
                         <button class="flashcard-action-btn flashcard-review-btn" id="flashcardReviewBtn" type="button">❌ <span id="flashcardReviewLabel"></span></button>
                         <button class="flashcard-action-btn flashcard-know-btn" id="flashcardKnowBtn" type="button">✅ <span id="flashcardKnowLabel"></span></button>
                     </div>
+                </div>
+                <div id="flashcardsQuizView" style="display:none;">
+                    <button type="button" class="flashcard-back-btn" id="flashcardQuizExit">← Exit quiz</button>
+                    <div class="flashcard-study-progress" id="flashcardQuizProgress"></div>
+                    <div class="flashcard-study-card" style="cursor:default;">
+                        <div id="flashcardQuizType" style="font-size:12px;color:var(--text-secondary,#888);margin-bottom:10px;"></div>
+                        <div id="flashcardQuizQuestion" style="font-size:19px;font-weight:750;line-height:1.45;"></div>
+                        <div id="flashcardQuizChoices" style="display:grid;gap:9px;margin-top:18px;"></div>
+                        <div id="flashcardQuizFeedback" style="display:none;margin-top:14px;font-size:14px;line-height:1.5;"></div>
+                    </div>
+                    <button type="button" class="study-add-btn" id="flashcardQuizNext" style="display:none;width:100%;padding:14px;margin-top:12px;">Next question</button>
                 </div>
                 <div id="flashcardsSummaryView" style="display:none;">
                     <div class="flashcard-summary-card">
@@ -6494,6 +6519,9 @@
                     <input type="text" id="flashcardAiTitle" autocomplete="off" placeholder="e.g. Biology — Cell Structure" style="width:100%;box-sizing:border-box;margin-bottom:12px;" />
                     <label for="flashcardAiPhotos" style="display:block;font-size:13px;margin-bottom:5px;">Study photos (you can select multiple)</label>
                     <input type="file" id="flashcardAiPhotos" accept="image/*" multiple style="width:100%;margin-bottom:12px;" />
+                    <label for="flashcardAiMode" style="display:block;font-size:13px;margin-bottom:5px;">Default study mode</label>
+                    <select id="flashcardAiMode" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;"><option value="auto" selected>Automatic — recommend a mixed quiz</option><option value="custom">Custom — choose available study modes</option></select>
+                    <div id="flashcardAiCustomTypes" style="display:none;margin-bottom:12px;font-size:13px;gap:10px;flex-wrap:wrap;"><label><input type="checkbox" value="multiple" checked> Multiple choice</label><label><input type="checkbox" value="classic" checked> Classic</label><label><input type="checkbox" value="matching" checked> Matching</label><label><input type="checkbox" value="truefalse" checked> True/false</label><label><input type="checkbox" value="blank" checked> Fill in blank</label></div>
                     <label for="flashcardAiCount" style="display:block;font-size:13px;margin-bottom:5px;">Approximate cards per photo</label>
                     <select id="flashcardAiCount" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;"><option value="4">4 — Quick review</option><option value="6" selected>6 — Balanced</option><option value="10">10 — Detailed</option></select>
                     <div id="flashcardAiStatus" role="status" aria-live="polite" style="font-size:13px;margin:8px 0;white-space:pre-wrap;"></div>
@@ -20454,7 +20482,9 @@ document.documentElement.classList.toggle(
                 if (!cards.length) throw new Error("Each card needs a question (front) and answer (back).");
                 if (cards.length > 60) throw new Error("A deck can contain up to 60 generated cards at once.");
             } catch (error) { flashcardAiStatus.textContent = "Please fix the card JSON: " + error.message; return; }
-            const deck = { id: generateFlashcardId(), name: name, createdAt: Date.now(), cards: cards, createdWithAI: true };
+            const aiMode = document.getElementById("flashcardAiMode")?.value || "auto";
+            const aiTypes = Array.from(document.querySelectorAll("#flashcardAiCustomTypes input:checked")).map(x=>x.value);
+            const deck = { id: generateFlashcardId(), name: name, createdAt: Date.now(), cards: cards, createdWithAI: true, generationMode: aiMode, preferredQuestionTypes: aiMode === "custom" ? aiTypes : ["multiple","classic","matching","truefalse","blank"] };
             flashcardDecks.push(deck);
             saveGuestFlashcards();
             renderFlashcardDeckList();
@@ -20778,7 +20808,9 @@ document.documentElement.classList.toggle(
             currentFlashcardView = view;
             document.getElementById("flashcardsDeckListView").style.display = view === 'list' ? '' : 'none';
             document.getElementById("flashcardsDetailView").style.display = view === 'detail' ? '' : 'none';
+            if (view !== 'detail') { const modePicker=document.getElementById("flashcardModePicker"); if(modePicker) modePicker.style.display="none"; }
             document.getElementById("flashcardsStudyView").style.display = view === 'study' ? '' : 'none';
+            document.getElementById("flashcardsQuizView").style.display = view === 'quiz' ? '' : 'none';
             document.getElementById("flashcardsSummaryView").style.display = view === 'summary' ? '' : 'none';
         }
 
@@ -20868,6 +20900,82 @@ document.documentElement.classList.toggle(
             });
         }
 
+        let flashcardQuizSession = null;
+        function openFlashcardModePicker() {
+            const picker = document.getElementById("flashcardModePicker");
+            picker.style.display = picker.style.display === "none" ? "block" : "none";
+        }
+        function buildFlashcardQuiz(deck, mode, customTypes, difficulty) {
+            const cards = shuffleFlashcardArray((deck.cards || []).filter(c => c.front && c.back));
+            const types = mode === "mixed" ? ["multiple", "matching", "truefalse", "blank"] : mode === "classic" ? ["classic"] : mode === "multiple" ? ["multiple"] : mode === "matching" ? ["matching"] : mode === "truefalse" ? ["truefalse"] : mode === "blank" ? ["blank"] : customTypes;
+            const questions = [];
+            cards.forEach((card, i) => {
+                const type = types[i % Math.max(1, types.length)] || "multiple";
+                if (type === "classic") { questions.push({type, card}); return; }
+                if (type === "multiple") {
+                    const wrong = shuffleFlashcardArray(cards.filter(c => c.id !== card.id && c.back.trim() !== card.back.trim())).slice(0,3).map(c=>c.back);
+                    if (!wrong.length) { questions.push({type:"classic",card}); return; }
+                    const choices = shuffleFlashcardArray([card.back, ...wrong]);
+                    questions.push({type, card, choices, answer:card.back});
+                } else if (type === "matching") {
+                    const others = shuffleFlashcardArray(cards.filter(c => c.id !== card.id)).slice(0,3); const pairs = shuffleFlashcardArray([card, ...others]).slice(0,4);
+                    if (pairs.length < 2) { questions.push({type:"classic",card}); return; }
+                    questions.push({type, card, pairs, answer:card.back});
+                } else if (type === "truefalse") {
+                    const wrong = shuffleFlashcardArray(cards.filter(c=>c.id!==card.id && c.back.trim()!==card.back.trim()))[0];
+                    const isTrue = !wrong || Math.random() > .35;
+                    questions.push({type, card, shownAnswer:isTrue?card.back:wrong.back, answer:isTrue?"true":"false"});
+                } else if (type === "blank") {
+                    const words = card.back.trim().split(/\s+/); const candidates = words.map((w,j)=>({w,j})).filter(x=>x.w.length>3);
+                    if (!candidates.length) { questions.push({type:"classic",card}); return; }
+                    const target = candidates[Math.floor(Math.random()*candidates.length)]; words[target.j] = "______";
+                    questions.push({type, card, prompt:words.join(" "), answer:target.w.replace(/[.,;:!?]+$/," ").trim()});
+                }
+            });
+            return shuffleFlashcardArray(questions).slice(0, Math.min(questions.length, difficulty === "easy" ? 10 : difficulty === "hard" ? 30 : 20));
+        }
+        function startSelectedFlashcardMode() {
+            const deck = flashcardDecks[currentDeckIndex]; if (!deck || !deck.cards?.length) return;
+            const mode = document.getElementById("flashcardModeSelect").value;
+            const custom = Array.from(document.querySelectorAll(".flashcard-mode-type:checked")).map(x=>x.value);
+            const difficulty = document.getElementById("flashcardQuizDifficulty").value;
+            if (mode === "custom" && !custom.length) { alert("Choose at least one question type."); return; }
+            if (mode === "classic") { document.getElementById("flashcardModePicker").style.display="none"; startStudySession(); return; }
+            flashcardQuizSession = {questions:buildFlashcardQuiz(deck, mode, custom, difficulty), index:0, score:0, answered:false};
+            document.getElementById("flashcardModePicker").style.display="none";
+            showFlashcardView("quiz"); renderFlashcardQuizQuestion();
+        }
+        function renderFlashcardQuizQuestion() {
+            const q=flashcardQuizSession?.questions[flashcardQuizSession.index]; if(!q) return showFlashcardQuizSummary();
+            flashcardQuizSession.answered=false;
+            document.getElementById("flashcardQuizProgress").textContent=(flashcardQuizSession.index+1)+" / "+flashcardQuizSession.questions.length+" · Score "+flashcardQuizSession.score;
+            const labels={multiple:"Multiple choice",matching:"Matching",truefalse:"True or false",blank:"Fill in the blank",classic:"Classic"};
+            document.getElementById("flashcardQuizType").textContent=labels[q.type]||"Quiz";
+            document.getElementById("flashcardQuizQuestion").textContent=q.type==="blank"?q.prompt:q.type==="matching"?"Match each term with its definition":q.card.front;
+            const choices=document.getElementById("flashcardQuizChoices"); choices.innerHTML="";
+            const addChoice=(label,value,correct)=>{const b=document.createElement("button");b.type="button";b.className="setting-button";b.style.cssText="text-align:left;padding:12px;border-radius:12px;white-space:normal;";b.textContent=label;b.addEventListener("click",()=>answerFlashcardQuiz(value,correct,b));choices.appendChild(b);};
+            if(q.type==="multiple") q.choices.forEach(x=>addChoice(x,x,x===q.answer));
+            else if(q.type==="truefalse") ["true","false"].forEach(x=>addChoice(x==="true"?"True":"False",x,x===q.answer));
+            else if(q.type==="matching") q.pairs.forEach(pair=>addChoice(pair.front+"  →  "+pair.back,pair.back,pair.id===q.card.id));
+            else if(q.type==="blank") {const input=document.createElement("input");input.type="text";input.placeholder="Type your answer";input.style.cssText="width:100%;box-sizing:border-box;padding:12px;border-radius:10px;";choices.appendChild(input);const b=document.createElement("button");b.type="button";b.className="study-add-btn";b.textContent="Check answer";b.style.padding="12px";b.addEventListener("click",()=>answerFlashcardQuiz(input.value,input.value.trim().toLowerCase()===q.answer.toLowerCase(),b));choices.appendChild(b);}
+            else addChoice("Reveal answer",q.card.back,false);
+            document.getElementById("flashcardQuizFeedback").style.display="none";document.getElementById("flashcardQuizNext").style.display="none";
+        }
+        function answerFlashcardQuiz(value,correct,button) {
+            if(flashcardQuizSession.answered)return; flashcardQuizSession.answered=true;
+            const q=flashcardQuizSession.questions[flashcardQuizSession.index]; if(correct)flashcardQuizSession.score++;
+            document.querySelectorAll("#flashcardQuizChoices button").forEach(b=>b.disabled=true);
+            const fb=document.getElementById("flashcardQuizFeedback");fb.style.display="block";fb.textContent=(correct?"✓ Correct. ":"Review this one. ")+"Answer: "+(q.type==="truefalse"?q.shownAnswer:q.type==="blank"?q.card.back:q.card.back);
+            document.getElementById("flashcardQuizProgress").textContent=(flashcardQuizSession.index+1)+" / "+flashcardQuizSession.questions.length+" · Score "+flashcardQuizSession.score;
+            document.getElementById("flashcardQuizNext").style.display="block";
+        }
+        function showFlashcardQuizSummary() {
+            showFlashcardView("summary"); const total=flashcardQuizSession.questions.length, score=flashcardQuizSession.score;
+            document.getElementById("flashcardsSummaryTitle").textContent="Quiz complete";
+            document.getElementById("flashcardsSummaryStats").innerHTML='<div class="flashcard-summary-stat"><span>Score</span><span>'+score+' / '+total+'</span></div><div class="flashcard-summary-stat"><span>Accuracy</span><span>'+Math.round(score/Math.max(1,total)*100)+'%</span></div>';
+            document.getElementById("flashcardsSummaryDoneBtn").textContent="Back to deck";
+        }
+
         document.getElementById("flashcardDeckModalCancel")?.addEventListener("click", closeDeckModal);
         document.getElementById("flashcardDeckModalConfirm")?.addEventListener("click", confirmCreateDeck);
         document.getElementById("flashcardDeckModalInput")?.addEventListener("keydown", (e) => {
@@ -20883,6 +20991,11 @@ document.documentElement.classList.toggle(
             createFlashcardDeck();
         });
         document.getElementById("flashcardAiCreateBtn")?.addEventListener("click", openFlashcardAiModal);
+        document.getElementById("flashcardQuizBtn")?.addEventListener("click", openFlashcardModePicker);
+        document.getElementById("flashcardStartModeBtn")?.addEventListener("click", startSelectedFlashcardMode);
+        document.getElementById("flashcardQuizNext")?.addEventListener("click",()=>{if(flashcardQuizSession){flashcardQuizSession.index++;renderFlashcardQuizQuestion();}});
+        document.getElementById("flashcardQuizExit")?.addEventListener("click",()=>showFlashcardView("detail"));
+        document.getElementById("flashcardAiMode")?.addEventListener("change",e=>{document.getElementById("flashcardAiCustomTypes").style.display=e.target.value==="custom"?"flex":"none";});
         document.getElementById("flashcardAiCancel")?.addEventListener("click", closeFlashcardAiModal);
         document.getElementById("flashcardAiGenerate")?.addEventListener("click", generateFlashcardsFromPhotos);
         document.getElementById("flashcardAiSave")?.addEventListener("click", saveAiFlashcardDeck);
