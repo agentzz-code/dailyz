@@ -1028,6 +1028,12 @@
 
         /* Reduced motion */
 
+        @media (max-width: 700px) {
+            #studyWithMeOverlay .swm-background-panel { display: block; position: relative; top: auto; right: auto; width: 100%; margin: 10px 0 0; }
+            #studyWithMeOverlay.video-background-active .swm-background-panel { background: rgba(12,14,20,.78); }
+            .swm-video-controls input { font-size: 16px; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             #aiBox.open,
             #aiBox.full,
@@ -1049,47 +1055,6 @@
                 transition: none;
             }
         }
-
-    
-
-        /* CUSTOMIZABLE TODAY DASHBOARD — additive styles only */
-        .dashboard-customize-toolbar { display:flex; justify-content:flex-end; margin:0 0 14px; }
-        .dashboard-customize-button { width:auto; min-height:38px; padding:9px 13px; font-size:13px; }
-        .dashboard-customize-panel { background:rgba(255,255,255,.96); border:1px solid rgba(128,128,128,.22); border-radius:18px; padding:16px; margin:0 0 18px; box-shadow:0 8px 24px rgba(0,0,0,.05); }
-        .dark .dashboard-customize-panel { background:#202020; }
-        .dashboard-customize-panel[hidden] { display:none !important; }
-        .dashboard-customize-panel-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
-        .dashboard-layout-label { display:block; font-size:12px; color:#888; margin:0 0 6px; }
-        .dashboard-layout-select { width:100%; min-height:42px; border-radius:10px; border:1px solid rgba(128,128,128,.35); padding:8px 10px; background:transparent; color:inherit; font:inherit; }
-        .dashboard-layout-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
-        .dashboard-layout-actions .setting-button { flex:1 1 auto; min-height:36px; padding:7px 9px; font-size:12px; }
-        .dashboard-edit-hint { color:#888; font-size:12px; line-height:1.5; margin:13px 0 10px; }
-        .dashboard-widget-settings { display:flex; flex-direction:column; gap:8px; }
-        .dashboard-widget-setting { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; padding:10px; border:1px solid rgba(128,128,128,.18); border-radius:12px; }
-        .dashboard-widget-setting-label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:650; }
-        .dashboard-widget-setting label { display:flex; align-items:center; gap:7px; }
-        .dashboard-widget-setting input[type="checkbox"] { accent-color:var(--accent); width:17px; height:17px; }
-        .dashboard-widget-setting select { max-width:120px; min-height:34px; border-radius:8px; border:1px solid rgba(128,128,128,.35); padding:5px; background:transparent; color:inherit; }
-        .dashboard-widget-grid { display:flex; flex-direction:column; min-width:0; }
-        .dashboard-widget-grid > [data-dashboard-widget] { position:relative; min-width:0; }
-        .dashboard-widget-grid.dashboard-editing > [data-dashboard-widget] { outline:1px dashed rgba(128,128,128,.5); outline-offset:2px; }
-        .dashboard-drag-handle { display:none; position:absolute; top:9px; inset-inline-end:9px; z-index:3; width:34px; height:34px; border:1px solid rgba(128,128,128,.3); border-radius:10px; background:rgba(128,128,128,.12); color:inherit; font-size:19px; line-height:1; cursor:grab; touch-action:none; user-select:none; }
-        .dashboard-editing .dashboard-drag-handle { display:block; }
-        .dashboard-widget-grid.dashboard-editing [data-dashboard-widget] { padding-top:48px; }
-        .dashboard-widget-grid.dashboard-editing [data-dashboard-widget].dashboard-user-hidden { display:none !important; }
-        .dashboard-widget-grid [data-dashboard-widget].dashboard-user-hidden { display:none !important; }
-        .dashboard-widget-grid [data-dashboard-size="compact"] { padding-top:12px; padding-bottom:12px; }
-        .dashboard-widget-grid [data-dashboard-size="compact"] .dashboard-title { margin-bottom:8px; }
-        .dashboard-widget-grid [data-dashboard-size="compact"] .dashboard-text-large { font-size:17px; }
-        .dashboard-widget-grid [data-dashboard-size="expanded"] { padding-top:25px; padding-bottom:25px; }
-        .dashboard-widget-grid [data-dashboard-size="expanded"] .dashboard-title { margin-bottom:19px; }
-        .dashboard-widget-grid [data-dashboard-size="expanded"] .dashboard-text-large { font-size:23px; }
-        .dashboard-dragging { opacity:.45; transform:scale(.99); }
-        .dashboard-drop-before { box-shadow:inset 0 3px 0 var(--accent); }
-        .dashboard-drop-after { box-shadow:inset 0 -3px 0 var(--accent); }
-        .dashboard-timer-time { font-size:32px; font-weight:850; letter-spacing:-1px; font-variant-numeric:tabular-nums; margin:-2px 0 14px; }
-        .dashboard-timer-status { font-size:11px; text-transform:none; letter-spacing:0; color:#888; font-weight:650; }
-        @media (prefers-reduced-motion: reduce) { .dashboard-dragging { transform:none; } }
 
     </style>
 
@@ -1520,6 +1485,49 @@
         }
         .dashboard-breakdown span {
             color: #888;
+        }
+        .dashboard-progress-category {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .dashboard-progress-category-label {
+            flex: 1;
+        }
+        .dashboard-progress-category-score {
+            min-width: 72px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .dashboard-streak {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(245, 158, 11, 0.10);
+        }
+        .dashboard-streak-icon {
+            font-size: 25px;
+            line-height: 1;
+        }
+        .dashboard-streak-copy {
+            flex: 1;
+            min-width: 0;
+        }
+        .dashboard-streak-title {
+            font-weight: 800;
+        }
+        .dashboard-streak-note {
+            color: #888;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+        .dashboard-streak-count {
+            font-size: 21px;
+            font-weight: 850;
+            font-variant-numeric: tabular-nums;
         }
         .dashboard-flex-row {
             display: flex;
@@ -3549,6 +3557,42 @@
             animation: swmBackgroundDrift 18s ease-in-out infinite alternate;
         }
 
+        .swm-video-background {
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            display: none;
+            overflow: hidden;
+            pointer-events: none;
+            background: #080a0f;
+        }
+        .swm-video-background.active { display: block; }
+        .swm-video-background video,
+        .swm-video-background iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            inset: 0;
+            border: 0;
+            object-fit: cover;
+            pointer-events: none;
+        }
+        .swm-video-background::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.18) 40%, rgba(0,0,0,.5));
+        }
+        #studyWithMeOverlay.video-background-active .swm-bg,
+        #studyWithMeOverlay.video-background-active .swm-room { opacity: 0; }
+        #aiBox.study-ai-on-top { z-index: 100010 !important; }
+        #aiToggle.study-ai-on-top { z-index: 100011 !important; }
+        .swm-video-controls { display: grid; gap: 8px; margin-top: 12px; }
+        .swm-video-controls label { font-size: 11px; font-weight: 700; }
+        .swm-video-controls input { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid rgba(255,255,255,.15); border-radius: 10px; background: rgba(0,0,0,.25); color: #fff; padding: 10px; font-size: 12px; }
+        .swm-video-actions { display: flex; gap: 7px; }
+        .swm-video-actions button { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; padding: 9px 7px; background: rgba(255,255,255,.1); color: #fff; font-size: 11px; font-weight: 800; }
+        #swmVideoStatus { font-size: 10px; line-height: 1.4; opacity: .68; }
         .swm-bg::before {
             content: "";
             z-index: -2;
@@ -5323,8 +5367,84 @@
         #studyWithMeOverlay.scene-night .swm-bg { background:linear-gradient(rgba(8,13,25,.5),rgba(6,8,15,.8)),radial-gradient(ellipse at 50% 40%,rgba(38,77,147,.46),transparent 45%),#101426; } #studyWithMeOverlay.scene-sunset .swm-bg { background:linear-gradient(rgba(48,18,13,.33),rgba(20,11,10,.72)),radial-gradient(ellipse at 54% 43%,rgba(255,164,75,.54),transparent 42%),linear-gradient(120deg,#572939,#e17c45 48%,#39242d); }
         .swm-subject-row{display:flex;align-items:center;gap:6px;margin:-2px 0 10px;font-size:10px}.swm-subject-row select,.swm-music-row select{min-width:0;flex:1;border:1px solid rgba(255,255,255,.25);border-radius:7px;background:#201a17;color:#fff;padding:7px;font-size:10px}.swm-subject-row button{width:27px;height:27px;border:0;border-radius:7px;background:rgba(255,255,255,.14);color:#fff;font-size:17px}.swm-sound-panel{padding-top:13px;padding-bottom:13px}.swm-music-row{display:flex;align-items:center;gap:8px;margin-top:10px}.swm-sound-toggle{width:34px;height:31px;border:0;border-radius:8px;background:#bf7541;color:#fff;font-size:13px;font-weight:800}
         @media (max-width: 700px){ #studyWithMeOverlay.open{padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 72px);overflow-y:auto;overflow-x:hidden;align-items:stretch;display:block}.swm-topbar{position:sticky;top:0;z-index:7;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;padding:0 0 8px;align-items:stretch}.swm-left-column{position:relative;left:auto;top:auto;width:100%;margin:3px 0 0;gap:9px}.swm-background-panel{display:none}.swm-brand{min-width:0;padding:7px 6px;border-radius:12px;font-size:9px;line-height:1.05;overflow:hidden}.swm-brand span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.swm-brand b{font-size:13px;line-height:1.05}.swm-goal-pill{min-width:0}.swm-top-actions{margin-left:0;gap:4px;justify-content:flex-end}.swm-icon-btn{width:34px;height:34px;border-radius:9px}.swm-window{left:4vw;width:92vw;top:0;min-height:250px;height:45vh}.swm-desk{bottom:0}.swm-goals-panel{max-height:none}.swm-panel{padding:22px 22px;border-radius:24px}.swm-panel-head strong{font-size:22px;line-height:1.1}.swm-panel-head span{font-size:15px}.swm-panel-time{font-size:42px;line-height:1;margin:22px 0}.swm-subject-row{align-items:stretch;gap:8px;font-size:15px;flex-wrap:wrap}.swm-subject-row label{width:100%;font-weight:800}.swm-subject-row select,.swm-music-row select{font-size:15px;padding:12px;border-radius:10px}.swm-subject-row button{width:52px;height:46px;border-radius:13px;font-size:24px}.swm-panel-controls{gap:10px;flex-wrap:wrap}.swm-square{width:auto;min-width:54px;height:45px;padding:0 12px;font-size:17px;font-weight:800}.swm-add-goal{gap:10px}.swm-add-goal input{font-size:16px;padding:16px 18px;border-radius:17px}.swm-add-goal button{width:64px;border-radius:17px;font-size:33px}.swm-goal-summary{padding:18px 20px;border-radius:17px;font-size:15px;grid-template-columns:auto 1fr 1px auto 1fr}.swm-goal-summary b{font-size:32px}.swm-goal-list{max-height:190px}.swm-goal-item{font-size:15px;padding:12px}.swm-music-row{gap:12px}.swm-sound-toggle{width:52px;height:46px;border-radius:12px;font-size:16px}.swm-main{display:none}.swm-bottom{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:8}.swm-tip{max-width:90vw;white-space:normal;text-align:center;font-size:13px;padding:10px 18px}.swm-top-actions .swm-icon-btn:not(.swm-close-top){display:none} }
+        @media (max-width: 700px) {
+            #studyWithMeOverlay .swm-background-panel { display: block !important; position: relative !important; top: auto !important; right: auto !important; width: 100% !important; margin: 10px 0 0 !important; }
+            #studyWithMeOverlay .swm-top-actions #swmOpenAI { display: inline-flex !important; align-items: center; justify-content: center; }
+            #studyWithMeOverlay .swm-video-controls input { font-size: 16px; }
+        }
         @media (max-width: 380px){ .swm-panel{padding:18px 20px}.swm-panel-head strong{font-size:19px}.swm-panel-time{font-size:38px}.swm-add-goal input{font-size:15px;padding:14px}.swm-add-goal button{width:58px}.swm-goal-summary{font-size:13px;padding:16px}.swm-goal-summary b{font-size:28px}.study-stats-header{flex-wrap:wrap}.study-stats-page-title{font-size:20px}.study-stats-reset{padding:8px 10px} }
     </style>
+
+    <style id="dailyWeatherStyles">
+        #dailyWeatherCard { overflow: hidden; padding-bottom: 14px; }
+        .daily-weather-heading { margin-bottom: 8px; }
+        .daily-weather-heading-actions { display:flex; align-items:center; gap:5px; }
+        .daily-weather-expand-btn { padding:7px 10px; min-height:32px; font-size:12px; white-space:nowrap; }
+        .daily-weather-summary { display:flex; align-items:center; gap:10px; min-width:0; }
+        #dailyWeatherSummaryIcon { font-size:29px; line-height:1; }
+        #dailyWeatherSummaryTemp { font-size:28px; letter-spacing:-.8px; line-height:1; }
+        .daily-weather-summary-text { display:flex; flex-direction:column; gap:3px; min-width:0; }
+        #dailyWeatherSummaryCondition { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        #dailyWeatherSummaryPlace { font-size:11px; color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .daily-weather-expanded-content { margin-top:8px; }
+        #dailyWeatherCard:not(.weather-expanded) .daily-weather-expanded-content { display:none !important; }
+        #dailyWeatherCard.weather-expanded .daily-weather-summary { display:none; }
+        #dailyWeatherSettingsCard .daily-weather-controls { margin:12px 0 8px; }
+        #dailyWeatherSettingsCard .daily-weather-suggestions { margin-bottom:0; }
+        .daily-weather-icon-btn { border: 0; background: transparent; color: inherit; font-size: 22px; padding: 3px 8px; border-radius: 10px; cursor: pointer; }
+        .daily-weather-icon-btn:active { transform: scale(.94); }
+        .daily-weather-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-bottom: 10px; }
+        .daily-weather-search-label { grid-column: 1 / -1; color: #888; font-size: 12px; font-weight: 700; }
+        .daily-weather-search-row { display: flex; min-width: 0; gap: 7px; }
+        #dailyWeatherCityInput { box-sizing: border-box; width: 100%; min-width: 0; border: 1px solid rgba(128,128,128,.25); border-radius: 11px; padding: 10px 12px; background: rgba(128,128,128,.07); color: inherit; font: inherit; font-size: 14px; }
+        .daily-weather-search-btn, .daily-weather-location-btn { min-height: 40px; white-space: nowrap; padding: 9px 12px; font-size: 13px; }
+        .daily-weather-location-btn { grid-column: 1 / -1; justify-self: start; }
+        .daily-weather-status { font-size: 13px; color: #888; padding: 8px 0; }
+        .daily-weather-suggestions { display: grid; gap: 6px; margin: 8px 0; }
+        .daily-weather-suggestion { width: 100%; text-align: start; border: 1px solid rgba(128,128,128,.2); border-radius: 10px; background: rgba(128,128,128,.06); color: inherit; padding: 10px 12px; font: inherit; cursor: pointer; }
+        .daily-weather-current { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0 16px; }
+        .daily-weather-current-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .daily-weather-big-icon { font-size: 48px; line-height: 1; }
+        .daily-weather-temperature { font-size: 42px; line-height: 1.1; font-weight: 850; letter-spacing: -1.5px; }
+        .daily-weather-condition { font-size: 14px; font-weight: 700; margin-top: 3px; }
+        .daily-weather-muted, .daily-weather-updated { color: #888; font-size: 12px; margin-top: 4px; }
+        .daily-weather-details { display: grid; gap: 8px; font-size: 12px; text-align: end; }
+        .daily-weather-details div { display: flex; gap: 9px; justify-content: space-between; }
+        .daily-weather-details span { color: #888; }
+        .daily-weather-details strong { font-weight: 750; white-space: nowrap; }
+        .daily-weather-section { margin-top: 10px; }
+        .daily-weather-section-title { font-size: 12px; color: #888; font-weight: 800; text-transform: uppercase; letter-spacing: .35px; margin-bottom: 9px; }
+        .daily-weather-hourly { display: flex; gap: 10px; overflow-x: auto; padding: 2px 1px 10px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .daily-weather-hour { flex: 0 0 58px; text-align: center; border-radius: 12px; padding: 10px 4px; background: rgba(128,128,128,.07); }
+        .daily-weather-hour-time { font-size: 11px; color: #888; }
+        .daily-weather-hour-icon { font-size: 21px; margin: 7px 0; }
+        .daily-weather-hour-temp { font-size: 13px; font-weight: 800; }
+        .daily-weather-hour-rain { font-size: 10px; color: #5798d5; margin-top: 4px; }
+        .daily-weather-daily { display: grid; gap: 0; }
+        .daily-weather-day { display: grid; grid-template-columns: minmax(62px, .8fr) 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(128,128,128,.13); font-size: 12px; }
+        .daily-weather-day:last-child { border-bottom: 0; }
+        .daily-weather-day-name { font-weight: 700; }
+        .daily-weather-day-icon { font-size: 20px; text-align: center; }
+        .daily-weather-day-condition { color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .daily-weather-day-temps { display: flex; gap: 7px; white-space: nowrap; }
+        .daily-weather-day-low { color: #888; }
+        .daily-weather-updated { margin-top: 12px; }
+        .daily-weather-attribution { margin-top: 5px; color: #999; font-size: 10px; }
+        .daily-weather-attribution a { color: inherit; }
+        .dark #dailyWeatherCard #dailyWeatherCityInput { border-color: rgba(255,255,255,.16); }
+        .dark .daily-weather-hour, .dark .daily-weather-suggestion { background: rgba(255,255,255,.045); }
+        [dir="rtl"] .daily-weather-details { text-align: start; }
+        [dir="rtl"] .daily-weather-day { direction: rtl; }
+        @media (max-width: 420px) {
+            .daily-weather-current { align-items: flex-start; flex-direction: column; }
+            .daily-weather-details { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); text-align: start; }
+            .daily-weather-details div { display: grid; gap: 3px; }
+            .daily-weather-day { grid-template-columns: 54px 24px minmax(0, 1fr) auto; gap: 6px; }
+            .daily-weather-day-condition { font-size: 11px; }
+            .daily-weather-day-temps { gap: 5px; }
+        }
+    </style>
+
 </head>
 
 <body>
@@ -5468,36 +5588,8 @@
                 <div class="dashboard-date" id="dashDate"></div>
             </div>
 
-            <div class="dashboard-customize-toolbar">
-                <button type="button" id="dashboardCustomizeButton" class="setting-button dashboard-customize-button" aria-expanded="false">⚙️ Customize dashboard</button>
-            </div>
-            <div id="dashboardCustomizePanel" class="dashboard-customize-panel" hidden>
-                <div class="dashboard-customize-panel-head">
-                    <strong id="dashboardCustomizeTitle">Dashboard layouts</strong>
-                    <button type="button" id="dashboardCustomizeDone" class="setting-button">Done</button>
-                </div>
-                <label class="dashboard-layout-label" for="dashboardLayoutSelect" id="dashboardLayoutLabel">Saved layout</label>
-                <select id="dashboardLayoutSelect" class="dashboard-layout-select" aria-label="Saved dashboard layout"></select>
-                <div class="dashboard-layout-actions">
-                    <button type="button" id="dashboardLayoutNew" class="setting-button">＋ New</button>
-                    <button type="button" id="dashboardLayoutDuplicate" class="setting-button">Duplicate</button>
-                    <button type="button" id="dashboardLayoutRename" class="setting-button">Rename</button>
-                    <button type="button" id="dashboardLayoutDelete" class="setting-button">Delete</button>
-                </div>
-                <p class="dashboard-edit-hint" id="dashboardEditHint">Drag cards using the handle, toggle widgets below, and choose a size for each.</p>
-                <div id="dashboardWidgetSettings" class="dashboard-widget-settings"></div>
-            </div>
-
-            <div id="dashboardWidgetGrid" class="dashboard-widget-grid">
-            <!-- 7. WHAT SHOULD I DO NOW? -->
-            <div class="dashboard-card dashboard-action-card" data-dashboard-widget="nextAction">
-                <div class="dashboard-title">⚡ What should I do now?</div>
-                <div class="dashboard-text-large" id="nextActionText">🎉 You're all caught up!</div>
-                <button class="setting-button dark" id="viewTaskButton" style="display:none; margin-top:12px; border:1px solid rgba(255,255,255,0.2); background:var(--accent-contrast); color:var(--accent);">View task →</button>
-            </div>
-
             <!-- PROACTIVE AI (Daily AI briefing + one suggestion) -->
-            <div class="dashboard-card" id="paCard" data-dashboard-widget="ai" style="display:none;">
+            <div class="dashboard-card" id="paCard" style="display:none;">
                 <div class="dashboard-title">
                     <span class="pa-badge">✨ <span id="paTitleText">Daily AI</span></span>
                     <span class="pa-head-actions">
@@ -5509,21 +5601,29 @@
             </div>
 
             <!-- 2. TODAY'S PROGRESS -->
-            <div class="dashboard-card" data-dashboard-widget="progress">
+            <div class="dashboard-card">
                 <div class="dashboard-title">🎯 Today's Progress</div>
                 <div class="dashboard-progress-header" id="dashProgressPercent">0%</div>
                 <div class="dashboard-progress-bar">
                     <div class="dashboard-progress-fill" id="dashProgressFill" style="width: 0%;"></div>
                 </div>
                 <div class="dashboard-breakdown">
-                    <div>✅ Tasks <span id="dashTasksScore">0/0</span></div>
-                    <div>🕌 Prayer <span id="dashPrayerScore">—</span></div>
-                    <div>👟 Activity <span id="dashActivityScore">—</span></div>
+                    <div class="dashboard-progress-category"><span class="dashboard-progress-category-label">✅ Tasks</span><span class="dashboard-progress-category-score" id="dashTasksScore">0/0</span></div>
+                    <div class="dashboard-progress-category"><span class="dashboard-progress-category-label">🕌 Prayer</span><span class="dashboard-progress-category-score" id="dashPrayerScore">0/5</span></div>
+                    <div class="dashboard-progress-category"><span class="dashboard-progress-category-label">👟 Steps</span><span class="dashboard-progress-category-score" id="dashActivityScore">—</span></div>
+                </div>
+                <div class="dashboard-streak" id="dashProgressStreak" aria-live="polite">
+                    <span class="dashboard-streak-icon" aria-hidden="true">🔥</span>
+                    <div class="dashboard-streak-copy">
+                        <div class="dashboard-streak-title" id="dashProgressStreakTitle">Daily streak: 0 days</div>
+                        <div class="dashboard-streak-note" id="dashProgressStreakNote">Reach 85% today to start your streak.</div>
+                    </div>
+                    <div class="dashboard-streak-count" id="dashProgressStreakCount">0</div>
                 </div>
             </div>
 
             <!-- 3. PRAYER -->
-            <div class="dashboard-card" data-dashboard-widget="prayer">
+            <div class="dashboard-card">
                 <div class="dashboard-title">🕌 Prayer</div>
                 <div class="dashboard-flex-row">
                     <div>
@@ -5538,8 +5638,51 @@
                 <button class="setting-button" id="dashViewPrayersBtn" style="width:100%;">View prayers →</button>
             </div>
 
+            <!-- WEATHER DASHBOARD: compact by default; forecasts expand on demand -->
+            <section class="dashboard-card" id="dailyWeatherCard" aria-labelledby="dailyWeatherTitle">
+                <div class="dashboard-title daily-weather-heading">
+                    <span id="dailyWeatherTitle">🌦️ Weather</span>
+                    <span class="daily-weather-heading-actions">
+                        <button type="button" class="daily-weather-icon-btn" id="dailyWeatherRefresh" aria-label="Refresh weather" title="Refresh">↻</button>
+                        <button type="button" class="setting-button daily-weather-expand-btn" id="dailyWeatherExpand" aria-expanded="false">Show forecast ↓</button>
+                    </span>
+                </div>
+                <div class="daily-weather-summary" id="dailyWeatherSummary">
+                    <span id="dailyWeatherSummaryIcon" aria-hidden="true">🌤️</span>
+                    <strong id="dailyWeatherSummaryTemp">--°</strong>
+                    <span class="daily-weather-summary-text"><strong id="dailyWeatherSummaryCondition">Set location in Settings</strong><small id="dailyWeatherSummaryPlace">Weather</small></span>
+                </div>
+                <div id="dailyWeatherContent" class="daily-weather-expanded-content" hidden>
+                    <div class="daily-weather-current">
+                        <div class="daily-weather-current-main">
+                            <div id="dailyWeatherIcon" class="daily-weather-big-icon" aria-hidden="true">🌤️</div>
+                            <div>
+                                <div id="dailyWeatherTemperature" class="daily-weather-temperature">--°</div>
+                                <div id="dailyWeatherCondition" class="daily-weather-condition">—</div>
+                                <div id="dailyWeatherFeels" class="daily-weather-muted">Feels like --°</div>
+                            </div>
+                        </div>
+                        <div class="daily-weather-details">
+                            <div><span id="dailyWeatherHighLabel">High</span><strong id="dailyWeatherHigh">--°</strong></div>
+                            <div><span id="dailyWeatherLowLabel">Low</span><strong id="dailyWeatherLow">--°</strong></div>
+                            <div><span id="dailyWeatherWindLabel">Wind</span><strong id="dailyWeatherWind">-- km/h</strong></div>
+                        </div>
+                    </div>
+                    <div class="daily-weather-section">
+                        <div class="daily-weather-section-title" id="dailyWeatherHourlyTitle">Hourly forecast</div>
+                        <div id="dailyWeatherHourly" class="daily-weather-hourly"></div>
+                    </div>
+                    <div class="daily-weather-section">
+                        <div class="daily-weather-section-title" id="dailyWeatherWeeklyTitle">7-day forecast</div>
+                        <div id="dailyWeatherDaily" class="daily-weather-daily"></div>
+                    </div>
+                    <div id="dailyWeatherUpdated" class="daily-weather-updated"></div>
+                    <div class="daily-weather-attribution">Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></div>
+                </div>
+            </section>
+
             <!-- 4. STUDY -->
-            <div class="dashboard-card" data-dashboard-widget="studyGoal">
+            <div class="dashboard-card">
                 <div class="dashboard-title">📚 Study</div>
                 <div id="dashStudyContent">
                     <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
@@ -5548,20 +5691,13 @@
             </div>
 
             <!-- 6. ACTIVITY -->
-            <div class="dashboard-card" data-dashboard-widget="steps">
+            <div class="dashboard-card">
                 <div class="dashboard-title">👟 Activity</div>
                 <div class="dashboard-text-medium" id="dashActivityText">Steps haven't synced yet.</div>
             </div>
 
-            <!-- Quick timer widget: opens the existing Study Timer; the timer itself remains in the Study section. -->
-            <div class="dashboard-card dashboard-timer-widget" data-dashboard-widget="timer">
-                <div class="dashboard-title"><span id="dashboardTimerTitle">⏱️ Study Timer</span><span id="dashboardTimerStatus" class="dashboard-timer-status">Ready</span></div>
-                <div class="dashboard-timer-time" id="dashboardTimerTime">25:00</div>
-                <button type="button" class="setting-button" id="dashboardOpenTimer" style="width:100%;">Open Study Timer →</button>
-            </div>
-
             <!-- 5. TASKS (Wrapper for existing logic) -->
-            <div class="dashboard-card" data-dashboard-widget="tasks" style="padding-bottom: 2px;">
+            <div class="dashboard-card" style="padding-bottom: 2px;">
                 <div class="dashboard-title" style="margin-bottom: 16px;">
                     <span>✅ Tasks</span>
                     <span id="dashTasksCompleted" style="text-transform:none; font-weight:600;">0 of 0 completed</span>
@@ -5606,6 +5742,13 @@
                     <div class="option-row">
                         <label id="timeLabel">Time</label>
                         <input class="task-date-input" id="taskTimeInput" type="time">
+                    </div>
+                    <div class="option-row">
+                        <label id="deadlineLabel" for="taskDeadlineInput">Deadline (optional)</label>
+                        <input class="task-date-input" id="taskDeadlineInput" type="datetime-local" aria-describedby="deadlineHelp">
+                    </div>
+                    <div class="setting-description" id="deadlineHelp" style="margin:-4px 0 10px;">
+                        Set when this task must be finished. This is separate from its scheduled date and reminder time.
                     </div>
 
                     <div class="option-row">
@@ -5746,7 +5889,6 @@
                 <div id="taskList"></div>
 
             </div>
-            </div><!-- /#dashboardWidgetGrid -->
 
         </section>
 
@@ -6290,12 +6432,13 @@
         <!-- STUDY WITH ME FULL-SCREEN SESSION -->
         <div id="studyWithMeOverlay" aria-hidden="true">
             <div class="swm-bg"></div>
+            <div class="swm-video-background" id="swmVideoBackground" aria-hidden="true"></div>
             <div class="swm-room" aria-hidden="true"><div class="swm-city"></div><div class="swm-window"><i></i><i></i><i></i></div><div class="swm-desk"></div></div>
 
             <div class="swm-topbar">
                 <div class="swm-brand"><span>◉ Personal timer</span><b id="studyWithMeClock">--:--</b></div>
                 <div class="swm-brand swm-goal-pill">◎ Session goals <b id="swmGoalCount">0/0</b></div>
-                <div class="swm-top-actions"><button class="swm-icon-btn" type="button" title="Music">♫</button><button class="swm-icon-btn" type="button" title="Fullscreen" onclick="document.getElementById('studyWithMeOverlay').requestFullscreen?.()">↗</button><button class="swm-icon-btn swm-close-top" id="studyWithMeClose" type="button" aria-label="Leave session">×</button></div>
+                <div class="swm-top-actions"><button class="swm-icon-btn" id="swmOpenAI" type="button" title="Open Daily AI" aria-label="Open Daily AI">✦</button><button class="swm-icon-btn" type="button" title="Music">♫</button><button class="swm-icon-btn" type="button" title="Fullscreen" onclick="document.getElementById('studyWithMeOverlay').requestFullscreen?.()">↗</button><button class="swm-icon-btn swm-close-top" id="studyWithMeClose" type="button" aria-label="Leave session">×</button></div>
             </div>
 
             <aside class="swm-left-column">
@@ -6329,6 +6472,12 @@
                 <div class="swm-panel-head"><strong>▣ Background</strong><button class="swm-panel-close" type="button" aria-label="Hide background panel">×</button></div>
                 <div class="swm-scene-tabs" role="group" aria-label="Choose a scene"><button class="active" data-scene="rain" type="button">☂ Rainy room</button><button data-scene="night" type="button">✦ Night city</button><button data-scene="sunset" type="button">☀ Sunset</button></div>
                 <div class="swm-scene-grid"><button class="active" data-scene="rain" type="button"><span>Rainy room</span></button><button data-scene="night" type="button"><span>Night city</span></button><button data-scene="sunset" type="button"><span>Sunset desk</span></button></div>
+                <div class="swm-video-controls">
+                    <label for="swmVideoUrl">Video background URL</label>
+                    <input id="swmVideoUrl" type="url" inputmode="url" placeholder="Paste YouTube or MP4 URL" autocomplete="url">
+                    <div class="swm-video-actions"><button id="swmApplyVideo" type="button">Use video</button><button id="swmClearVideo" type="button">Remove</button></div>
+                    <div id="swmVideoStatus" role="status" aria-live="polite">Supports YouTube, Vimeo, and direct MP4/WebM links.</div>
+                </div>
                 <label class="swm-volume">♫ Ambient sound <input id="swmAmbientVolume" type="range" min="0" max="100" value="45"></label>
             </aside>
 
@@ -6843,6 +6992,22 @@
             </div>
 
 
+            <!-- WEATHER SETTINGS -->
+            <div class="settings-card" id="dailyWeatherSettingsCard">
+                <div class="settings-card-title" id="dailyWeatherSettingsTitle">Weather Location</div>
+                <div class="setting-description" id="dailyWeatherSettingsDescription">Choose a city or use your device location for the forecast shown on Today.</div>
+                <div class="daily-weather-controls">
+                    <label class="daily-weather-search-label" for="dailyWeatherCityInput" id="dailyWeatherCityLabel">City</label>
+                    <div class="daily-weather-search-row">
+                        <input id="dailyWeatherCityInput" type="search" autocomplete="off" maxlength="100" placeholder="Search a city" aria-label="Search a city">
+                        <button type="button" class="setting-button daily-weather-search-btn" id="dailyWeatherSearch">Search</button>
+                    </div>
+                    <button type="button" class="setting-button daily-weather-location-btn" id="dailyWeatherUseLocation">⌖ Use my location</button>
+                </div>
+                <div id="dailyWeatherSuggestions" class="daily-weather-suggestions" role="listbox" aria-label="City search results" hidden></div>
+                <div id="dailyWeatherStatus" class="daily-weather-status" role="status" aria-live="polite" hidden></div>
+            </div>
+
             <!-- NOTIFICATIONS -->
 
             <div class="settings-card" id="notificationsSettingsCard">
@@ -6898,6 +7063,28 @@
                             <div class="setting-description" id="stepNotifDesc">Evening reminder if you're below goal.</div>
                         </div>
                         <button class="setting-button" id="stepNotifBtn" type="button">On</button>
+                    </div>
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label" id="deadlineWarningsLabel">Deadline Warnings</div>
+                            <div class="setting-description" id="deadlineWarningsDesc">Warn before deadlines and once when overdue.</div>
+                        </div>
+                        <button class="setting-button" id="deadlineWarningsBtn" type="button">On</button>
+                    </div>
+                    <div class="option-row" style="margin-top:8px;">
+                        <label id="deadlineOffsetsLabel" for="deadlineOffsetsSelect" style="min-width:110px;">Warning schedule</label>
+                        <select class="task-date-input" id="deadlineOffsetsSelect">
+                            <option value="1440,60">24 hours and 1 hour before</option>
+                            <option value="1440,180,30">1 day, 3 hours, and 30 minutes before</option>
+                            <option value="180,30">3 hours and 30 minutes before</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label" id="studyNudgesLabel">Smart Study Nudges</div>
+                            <div class="setting-description" id="studyNudgesDesc">Suggest a focus session for study-related deadlines.</div>
+                        </div>
+                        <button class="setting-button" id="studyNudgesBtn" type="button">On</button>
                     </div>
                     
                     <div class="option-row" style="margin-top:8px;">
@@ -7325,7 +7512,6 @@
             "dailykrd_study_sessions",
             "dailykrd_music_prefs",
             "dailykrd_push_settings",
-            "dailykrd_dashboard_layouts",
             "dailykrd_welcomed",
             "dailykrd_haptic_enabled"
         ];
@@ -8032,25 +8218,6 @@
                     applyTheme();
 
                     loadAppearancePrefs();
-
-                    return;
-                }
-
-                if (key === "dailykrd_dashboard_layouts") {
-
-                    try {
-
-                        if (typeof window.__dailyKrdDashboardApply === "function") {
-
-                            window.__dailyKrdDashboardApply(rawStorageRead(key));
-
-                        }
-
-                    } catch (error) {
-
-                        console.warn("Could not apply synced dashboard layouts:", error);
-
-                    }
 
                     return;
                 }
@@ -10633,6 +10800,52 @@ done: "تەواو",
             ).textContent =
                 t("date");
 
+            const deadlineLabels = {
+                en: {
+                    label: "Deadline (optional)",
+                    help: "Set when this task must be finished. Separate from the scheduled date and reminder time.",
+                    warnings: "Deadline Warnings",
+                    warningsDesc: "Warn before deadlines and once when overdue.",
+                    offsets: "Warning schedule",
+                    study: "Smart Study Nudges",
+                    studyDesc: "Suggest a focus session for study-related deadlines.",
+                    options: ["24 hours and 1 hour before", "1 day, 3 hours, and 30 minutes before", "3 hours and 30 minutes before"]
+                },
+                ku: {
+                    label: "کاتی کۆتایی (ئارەزوومەندانە)",
+                    help: "کاتی تەواوکردنی ئەرکەکە دیاری بکە؛ جیاوازە لە بەرواری ئەرک و کاتی بیرخستنەوە.",
+                    warnings: "بیرخستنەوەی کاتی کۆتایی",
+                    warningsDesc: "پێش کاتی کۆتایی ئاگادارت دەکاتەوە و جارێکیش دوای تێپەڕبوونی.",
+                    offsets: "کاتی بیرخستنەوە",
+                    study: "بیرخستنەوەی خوێندنی زیرەک",
+                    studyDesc: "بۆ کاتی کۆتایی ئەرکی خوێندن پێشنیاری دانیشتنێکی خوێندن دەکات.",
+                    options: ["٢٤ کاتژمێر و ١ کاتژمێر پێشتر", "١ ڕۆژ، ٣ کاتژمێر و ٣٠ خولەک پێشتر", "٣ کاتژمێر و ٣٠ خولەک پێشتر"]
+                },
+                ar: {
+                    label: "الموعد النهائي (اختياري)",
+                    help: "حدد متى يجب إنهاء المهمة. هذا منفصل عن تاريخ المهمة ووقت التذكير.",
+                    warnings: "تنبيهات المواعيد النهائية",
+                    warningsDesc: "تنبيه قبل الموعد وتنبيه واحد بعد تجاوزه.",
+                    offsets: "جدول التنبيهات",
+                    study: "تذكيرات الدراسة الذكية",
+                    studyDesc: "اقتراح جلسة تركيز للمهام المرتبطة بالدراسة.",
+                    options: ["قبل 24 ساعة وقبل ساعة", "قبل يوم و3 ساعات و30 دقيقة", "قبل 3 ساعات و30 دقيقة"]
+                }
+            }[currentLanguage] || null;
+            if (deadlineLabels) {
+                document.getElementById("deadlineLabel").textContent = deadlineLabels.label;
+                document.getElementById("deadlineHelp").textContent = deadlineLabels.help;
+                document.getElementById("deadlineWarningsLabel").textContent = deadlineLabels.warnings;
+                document.getElementById("deadlineWarningsDesc").textContent = deadlineLabels.warningsDesc;
+                document.getElementById("deadlineOffsetsLabel").textContent = deadlineLabels.offsets;
+                document.getElementById("studyNudgesLabel").textContent = deadlineLabels.study;
+                document.getElementById("studyNudgesDesc").textContent = deadlineLabels.studyDesc;
+                const offsetSelect = document.getElementById("deadlineOffsetsSelect");
+                if (offsetSelect) Array.from(offsetSelect.options).forEach((option, index) => {
+                    if (deadlineLabels.options[index]) option.textContent = deadlineLabels.options[index];
+                });
+            }
+
 
             document.getElementById(
                 "repeatLabel"
@@ -12091,6 +12304,13 @@ done: "تەواو",
             if (window.Haptics) window.Haptics.selection();
         }
 
+        let deadlineDeepLinkTaskId = new URLSearchParams(window.location.search).get("deadlineTask");
+        const startupDeepLinks = new URLSearchParams(window.location.search);
+        if (startupDeepLinks.get("openStudyTimer") === "1") {
+            showSection("study");
+        } else if (deadlineDeepLinkTaskId) {
+            showSection("tasks");
+        }
 
         document
             .querySelectorAll(
@@ -12350,6 +12570,7 @@ done: "تەواو",
                     dashActivityScore.textContent = todaySteps.toLocaleString();
                 }
             }
+            updateDashboardProgress();
         }
 
 
@@ -12775,34 +12996,84 @@ done: "تەواو",
             }
         }
         
-        function updateDashboardProgress() {
-            const tasks = getTasksForDate(getActiveTasksSource(), getTodayKey());
-            const total = tasks.length;
-            const done = tasks.filter(task => isTaskCompletedOnDate(task, getTodayKey())).length;
-            const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+        const DAILY_PROGRESS_STREAK_KEY = "dailykrd_progress_streak_v1";
+        const DAILY_PROGRESS_STREAK_GOAL = 85;
 
+        function getProgressStreakDates() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(DAILY_PROGRESS_STREAK_KEY) || "{}");
+                return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function updateProgressStreak(percent, todayKey) {
+            const history = getProgressStreakDates();
+            if (percent >= DAILY_PROGRESS_STREAK_GOAL) {
+                history[todayKey] = true;
+                try { localStorage.setItem(DAILY_PROGRESS_STREAK_KEY, JSON.stringify(history)); } catch (_) {}
+            }
+
+            const dayBefore = key => {
+                const d = parseDateKey(key);
+                d.setDate(d.getDate() - 1);
+                return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-");
+            };
+            // Until today's goal is reached, yesterday's streak remains active for the rest of today.
+            let cursor = history[todayKey] ? todayKey : dayBefore(todayKey);
+            let streak = 0;
+            while (history[cursor] === true && streak < 3660) {
+                streak++;
+                cursor = dayBefore(cursor);
+            }
+
+            const title = document.getElementById("dashProgressStreakTitle");
+            const note = document.getElementById("dashProgressStreakNote");
+            const count = document.getElementById("dashProgressStreakCount");
+            if (title) title.textContent = `Daily streak: ${streak} ${streak === 1 ? "day" : "days"}`;
+            if (count) count.textContent = String(streak);
+            if (note) {
+                if (history[todayKey]) note.textContent = `Today's ${DAILY_PROGRESS_STREAK_GOAL}% goal reached — streak secured!`;
+                else if (percent >= DAILY_PROGRESS_STREAK_GOAL) note.textContent = "Goal reached — streak secured!";
+                else note.textContent = `${Math.max(0, DAILY_PROGRESS_STREAK_GOAL - percent)}% more to reach today's ${DAILY_PROGRESS_STREAK_GOAL}% goal.`;
+            }
+        }
+
+        function updateDashboardProgress() {
+            const todayKey = getTodayKey();
+            const tasks = getTasksForDate(getActiveTasksSource(), todayKey);
+            const total = tasks.length;
+            const done = tasks.filter(task => isTaskCompletedOnDate(task, todayKey)).length;
+            // With no tasks scheduled today, tasks are neutral/complete rather than blocking the daily score.
+            const taskPercent = total > 0 ? (done / total) * 100 : 100;
+
+            const prayerRecord = prayerRecordForDate(todayKey) || {};
+            const prayersDone = PRAYER_FIELDS.filter(field => prayerRecord[field] === true).length;
+            const prayerPercent = (prayersDone / PRAYER_FIELDS.length) * 100;
+
+            const stepGoal = Math.max(1, Number(pushSettings && pushSettings.stepGoal) || 10000);
+            const stepPercent = todaySteps === null || todaySteps === undefined
+                ? 0
+                : Math.min(100, (Math.max(0, Number(todaySteps) || 0) / stepGoal) * 100);
+
+            // Equal weighting: tasks, prayers, and steps each contribute one third.
+            const percent = Math.round((taskPercent + prayerPercent + stepPercent) / 3);
             const dashPercent = document.getElementById("dashProgressPercent");
             const dashFill = document.getElementById("dashProgressFill");
             const dashTasks = document.getElementById("dashTasksScore");
+            const dashPrayer = document.getElementById("dashPrayerScore");
+            const dashActivity = document.getElementById("dashActivityScore");
 
             if (dashPercent) dashPercent.textContent = percent + "%";
             if (dashFill) dashFill.style.width = percent + "%";
             if (dashTasks) dashTasks.textContent = `${done}/${total}`;
+            if (dashPrayer) dashPrayer.textContent = `${prayersDone}/5`;
+            if (dashActivity) dashActivity.textContent = todaySteps === null || todaySteps === undefined
+                ? "Sync steps"
+                : `${Math.min(Math.max(0, Number(todaySteps) || 0), stepGoal).toLocaleString()}/${stepGoal.toLocaleString()}`;
 
-            // ⚡ What should I do now?
-            const nextActionText = document.getElementById("nextActionText");
-            const viewTaskBtn = document.getElementById("viewTaskButton");
-            if (nextActionText && viewTaskBtn) {
-                const incompleteTask = tasks.find(task => !isTaskCompletedOnDate(task, getTodayKey()));
-                if (incompleteTask) {
-                    nextActionText.textContent = "Finish: " + incompleteTask.text;
-                    viewTaskBtn.style.display = "inline-block";
-                    viewTaskBtn.onclick = () => { document.getElementById("taskInput").focus(); };
-                } else {
-                    nextActionText.textContent = "🎉 You're all caught up!";
-                    viewTaskBtn.style.display = "none";
-                }
-            }
+            updateProgressStreak(percent, todayKey);
         }
 
 
@@ -12835,6 +13106,11 @@ done: "تەواو",
 
 
         function renderTasks(tasks) {
+
+            if (deadlineDeepLinkTaskId && Array.isArray(tasks)) {
+                const linkedTask = tasks.find(task => String(task?.id || "") === deadlineDeepLinkTaskId);
+                if (linkedTask?.date) selectedDate = linkedTask.date;
+            }
 
             const list =
                 document.getElementById(
@@ -12916,6 +13192,7 @@ done: "تەواو",
 
                 row.className =
                     "task";
+                row.dataset.taskId = String(task.id || "");
 
 
                 if (
@@ -13076,6 +13353,105 @@ done: "تەواو",
                     title
                 );
 
+                if (!task.deadlineAt) {
+                    const setDeadlineButton = document.createElement("button");
+                    setDeadlineButton.type = "button";
+                    setDeadlineButton.className = "setting-button";
+                    setDeadlineButton.style.marginTop = "6px";
+                    setDeadlineButton.textContent = currentLanguage === "ku" ? "کاتی کۆتایی زیاد بکە" : currentLanguage === "ar" ? "تحديد موعد نهائي" : "Set deadline";
+                    setDeadlineButton.addEventListener("click", async () => {
+                        const suggested = new Date(Date.now() + 86400000);
+                        suggested.setMinutes(suggested.getMinutes() - suggested.getTimezoneOffset());
+                        const initialValue = suggested.toISOString().slice(0, 16);
+                        const newDeadline = prompt(
+                            currentLanguage === "ku" ? "کاتی کۆتایی (YYYY-MM-DDTHH:mm)" : currentLanguage === "ar" ? "الموعد النهائي (YYYY-MM-DDTHH:mm)" : "Deadline (YYYY-MM-DDTHH:mm)",
+                            initialValue
+                        );
+                        if (newDeadline === null) return;
+                        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(newDeadline) || !Number.isFinite(new Date(newDeadline).getTime()) || new Date(newDeadline).getTime() <= Date.now()) {
+                            alert(currentLanguage === "ku" ? "تکایە کاتێکی داهاتووی دروست بنووسە." : currentLanguage === "ar" ? "أدخل موعداً مستقبلياً صالحاً." : "Enter a valid future deadline.");
+                            return;
+                        }
+                        if (!confirm(currentLanguage === "ku" ? "کاتی کۆتایی زیاد بکرێت؟" : currentLanguage === "ar" ? "هل تريد إضافة الموعد النهائي؟" : "Add this deadline to the task?")) return;
+                        try {
+                            if (currentUser) {
+                                await updateDoc(doc(db, "users", currentUser.uid, "tasks", task.id), { deadlineAt: newDeadline });
+                            } else {
+                                const guestTask = guestTasks.find(item => item.id === task.id);
+                                if (!guestTask) return;
+                                guestTask.deadlineAt = newDeadline;
+                                localStorage.setItem("dailykrd_guest_tasks", JSON.stringify(guestTasks));
+                            }
+                            refreshTasks();
+                            triggerPushSync();
+                        } catch (error) {
+                            console.error("Deadline update failed:", error);
+                            alert(currentLanguage === "ku" ? "زیادکردنی کاتی کۆتایی سەرکەوتوو نەبوو." : currentLanguage === "ar" ? "تعذر إضافة الموعد النهائي." : "Could not add the deadline.");
+                        }
+                    });
+                    content.appendChild(setDeadlineButton);
+                }
+
+                if (task.deadlineAt) {
+                    const deadlineMeta = document.createElement("div");
+                    deadlineMeta.className = "task-meta";
+                    const deadlineDate = new Date(task.deadlineAt);
+                    const formattedDeadline = Number.isNaN(deadlineDate.getTime())
+                        ? String(task.deadlineAt)
+                        : deadlineDate.toLocaleString(
+                            currentLanguage === "ku" ? "ku-Arab" : currentLanguage === "ar" ? "ar-IQ" : "en-US",
+                            { dateStyle: "medium", timeStyle: "short" }
+                        );
+                    deadlineMeta.textContent =
+                        currentLanguage === "ku" ? "کاتی کۆتایی: " + formattedDeadline :
+                        currentLanguage === "ar" ? "الموعد النهائي: " + formattedDeadline :
+                        "Deadline: " + formattedDeadline;
+                    content.appendChild(deadlineMeta);
+
+                    const deadlineMillis = new Date(task.deadlineAt).getTime();
+                    const isCompletedForDeadline = task.repeat && task.repeat !== "once"
+                        ? !!task.completedDates?.includes(String(task.deadlineAt).slice(0, 10))
+                        : !!task.completed;
+                    if (Number.isFinite(deadlineMillis) && deadlineMillis < Date.now() && !isCompletedForDeadline) {
+                        const rescheduleButton = document.createElement("button");
+                        rescheduleButton.type = "button";
+                        rescheduleButton.className = "setting-button";
+                        rescheduleButton.style.marginTop = "6px";
+                        rescheduleButton.textContent = currentLanguage === "ku" ? "دووبارە کات دیاری بکە" : currentLanguage === "ar" ? "إعادة جدولة" : "Reschedule";
+                        rescheduleButton.addEventListener("click", async () => {
+                            const suggested = new Date(Date.now() + 86400000);
+                            suggested.setMinutes(suggested.getMinutes() - suggested.getTimezoneOffset());
+                            const initialValue = suggested.toISOString().slice(0, 16);
+                            const newDeadline = prompt(
+                                currentLanguage === "ku" ? "کاتی نوێی کۆتایی (YYYY-MM-DDTHH:mm)" : currentLanguage === "ar" ? "الموعد الجديد (YYYY-MM-DDTHH:mm)" : "New deadline (YYYY-MM-DDTHH:mm)",
+                                initialValue
+                            );
+                            if (newDeadline === null) return;
+                            if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(newDeadline) || !Number.isFinite(new Date(newDeadline).getTime()) || new Date(newDeadline).getTime() <= Date.now()) {
+                                alert(currentLanguage === "ku" ? "تکایە کاتێکی داهاتووی دروست بنووسە." : currentLanguage === "ar" ? "أدخل موعداً مستقبلياً صالحاً." : "Enter a valid future deadline.");
+                                return;
+                            }
+                            if (!confirm(currentLanguage === "ku" ? "کاتی کۆتایی بگۆڕدرێت؟" : currentLanguage === "ar" ? "هل تريد تغيير الموعد النهائي؟" : "Change this task's deadline?")) return;
+                            try {
+                                if (currentUser) {
+                                    await updateDoc(doc(db, "users", currentUser.uid, "tasks", task.id), { deadlineAt: newDeadline });
+                                } else {
+                                    const guestTask = guestTasks.find(item => item.id === task.id);
+                                    if (!guestTask) return;
+                                    guestTask.deadlineAt = newDeadline;
+                                    localStorage.setItem("dailykrd_guest_tasks", JSON.stringify(guestTasks));
+                                }
+                                refreshTasks();
+                                triggerPushSync();
+                            } catch (error) {
+                                console.error("Deadline reschedule failed:", error);
+                                alert(currentLanguage === "ku" ? "گۆڕینی کات سەرکەوتوو نەبوو." : currentLanguage === "ar" ? "تعذر تغيير الموعد." : "Could not reschedule the deadline.");
+                            }
+                        });
+                        content.appendChild(rescheduleButton);
+                    }
+                }
+
 
                 if (
                     task.repeat &&
@@ -13167,6 +13543,14 @@ done: "تەواو",
                 list.appendChild(
                     row
                 );
+
+                if (deadlineDeepLinkTaskId && String(task.id || "") === deadlineDeepLinkTaskId) {
+                    row.scrollIntoView({ behavior: "smooth", block: "center" });
+                    deadlineDeepLinkTaskId = null;
+                    try {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    } catch (_) {}
+                }
 
             });
         }
@@ -13425,6 +13809,8 @@ done: "تەواو",
                     
                 reminderTime: reminderTime,
 
+                deadlineAt: document.getElementById("taskDeadlineInput").value || null,
+
                 repeat,
 
                 days:
@@ -13512,6 +13898,7 @@ done: "تەواو",
 
             input.value = "";
             document.getElementById("taskTimeInput").value = "";
+            document.getElementById("taskDeadlineInput").value = "";
 
             // Animate new task entry
             setTimeout(() => {
@@ -15314,8 +15701,14 @@ document.documentElement.classList.toggle(
             prayers: { fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true },
             tasksEnabled: true,
             stepsEnabled: true,
-            stepGoal: 10000
+            stepGoal: 10000,
+            deadlineWarningsEnabled: true,
+            deadlineOffsetsMinutes: [1440, 60],
+            studyNudgesEnabled: true
         }));
+        if (!Array.isArray(pushSettings.deadlineOffsetsMinutes)) pushSettings.deadlineOffsetsMinutes = [1440, 60];
+        if (typeof pushSettings.deadlineWarningsEnabled !== "boolean") pushSettings.deadlineWarningsEnabled = true;
+        if (typeof pushSettings.studyNudgesEnabled !== "boolean") pushSettings.studyNudgesEnabled = true;
 
         function isIOSStandalone() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -15351,8 +15744,10 @@ document.documentElement.classList.toggle(
                 settings: pushSettings,
                 language: currentLanguage || 'en',
                 timezone: getUserCoords().timezone,
+                deadlineTimezone: -new Date().getTimezoneOffset() / 60,
                 prayerTimes: prayerTimes,
                 tasks: currentUser ? currentTasksCache : guestTasks,
+                studySubjects: typeof loadStudySubjects === "function" ? loadStudySubjects() : [],
                 todaySteps: todaySteps || 0
             };
 
@@ -15413,7 +15808,9 @@ document.documentElement.classList.toggle(
 
         async function enableMasterPush() {
             const status = document.getElementById("notificationStatus");
-            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+
+            // PushManager belongs to a ServiceWorkerRegistration, not window.
+            if (!("serviceWorker" in navigator) || !("Notification" in window)) {
                 if (status) status.textContent = t("notificationsUnsupported");
                 return;
             }
@@ -15437,52 +15834,27 @@ document.documentElement.classList.toggle(
 
                 if (status) status.textContent = "Registering worker...";
 
-                // Register service worker once, reuse if already registered
-                let reg;
+                // Register once, then wait for the browser's active registration.
+                // ServiceWorkerRegistration does not have a .ready property.
                 if (!pushRegistration) {
-                    try {
-                        pushRegistration = await navigator.serviceWorker.register('./sw.js');
-                    } catch (swErr) {
-                        console.warn("sw.js registration failed:", swErr);
-                        // Continue without SW; push will not work offline but we can still subscribe if supported
-                        pushRegistration = null;
-                    }
+                    pushRegistration = await navigator.serviceWorker.register("./sw.js");
                 }
-                if (pushRegistration) {
-                    try {
-                        reg = await pushRegistration.ready;
-                    } catch (e) {
-                        reg = pushRegistration;
-                    }
-                } else {
-                    // No service worker, but we can still try to subscribe (will not work for background push)
-                    reg = { pushManager: navigator.serviceWorker ? await navigator.serviceWorker.ready : null };
+                const reg = await navigator.serviceWorker.ready;
+
+                if (!reg || !reg.pushManager) {
+                    throw new Error("PushManager is unavailable on the active service worker registration.");
                 }
 
                 if (status) status.textContent = "Subscribing to push...";
 
-                const subscribePromise = (reg && reg.pushManager ? reg.pushManager.getSubscription() : Promise.resolve(null)).then(async (existingSub) => {
-                    if (existingSub) {
-                        try {
-                            await existingSub.unsubscribe();
-                        } catch (unsubError) {
-                            console.warn("Could not unsubscribe stale push subscription:", unsubError);
-                        }
-                    }
-                    if (!reg || !reg.pushManager) {
-                        throw new Error("PushManager not available");
-                    }
-                    return await reg.pushManager.subscribe({
+                // Keep a valid existing subscription; do not destroy it just to re-enable push.
+                let sub = await reg.pushManager.getSubscription();
+                if (!sub) {
+                    sub = await reg.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                     });
-                });
-
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Subscription timed out. Try reopening.")), 8000)
-                );
-
-                const sub = await Promise.race([subscribePromise, timeoutPromise]);
+                }
 
                 pushSettings.masterEnabled = true;
                 renderPushSettingsUI();
@@ -15500,7 +15872,7 @@ document.documentElement.classList.toggle(
                 }
 
                 if (status) status.textContent = t("notificationsEnabled");
-                
+
             } catch (error) {
                 console.error("Subscription error:", error);
                 if (status) status.textContent = "Error: " + error.message;
@@ -15508,6 +15880,7 @@ document.documentElement.classList.toggle(
                 renderPushSettingsUI();
             }
         }
+
 
         async function disableMasterPush() {
             pushSettings.masterEnabled = false;
@@ -15524,6 +15897,22 @@ document.documentElement.classList.toggle(
             const taskBtn = document.getElementById("taskNotifBtn");
             const stepBtn = document.getElementById("stepNotifBtn");
             const stepInput = document.getElementById("stepGoalInput");
+            const deadlineWarningsBtn = document.getElementById("deadlineWarningsBtn");
+            const deadlineOffsetsSelect = document.getElementById("deadlineOffsetsSelect");
+            const studyNudgesBtn = document.getElementById("studyNudgesBtn");
+
+            if (deadlineWarningsBtn) {
+                deadlineWarningsBtn.textContent = pushSettings.deadlineWarningsEnabled ? t("on") : t("off");
+                deadlineWarningsBtn.className = "setting-button" + (pushSettings.deadlineWarningsEnabled ? " dark" : "");
+            }
+            if (deadlineOffsetsSelect) {
+                const selectedOffsets = (pushSettings.deadlineOffsetsMinutes || [1440, 60]).join(",");
+                deadlineOffsetsSelect.value = ["1440,60", "1440,180,30", "180,30"].includes(selectedOffsets) ? selectedOffsets : "1440,60";
+            }
+            if (studyNudgesBtn) {
+                studyNudgesBtn.textContent = pushSettings.studyNudgesEnabled ? t("on") : t("off");
+                studyNudgesBtn.className = "setting-button" + (pushSettings.studyNudgesEnabled ? " dark" : "");
+            }
 
             if (masterBtn) {
                 masterBtn.textContent = pushSettings.masterEnabled ? "On" : "Off";
@@ -15581,6 +15970,25 @@ document.documentElement.classList.toggle(
             if (window.Haptics) window.Haptics.tap();
             pushSettings.stepsEnabled = !pushSettings.stepsEnabled;
             renderPushSettingsUI(); syncPushPreferences();
+        });
+
+        document.getElementById("deadlineWarningsBtn")?.addEventListener("click", () => {
+            pushSettings.deadlineWarningsEnabled = !pushSettings.deadlineWarningsEnabled;
+            renderPushSettingsUI();
+            syncPushPreferences();
+        });
+
+        document.getElementById("deadlineOffsetsSelect")?.addEventListener("change", (event) => {
+            const parsed = String(event.target.value).split(",").map(Number).filter(n => Number.isFinite(n) && n > 0 && n <= 10080);
+            pushSettings.deadlineOffsetsMinutes = [...new Set(parsed)].sort((a, b) => b - a);
+            renderPushSettingsUI();
+            syncPushPreferences();
+        });
+
+        document.getElementById("studyNudgesBtn")?.addEventListener("click", () => {
+            pushSettings.studyNudgesEnabled = !pushSettings.studyNudgesEnabled;
+            renderPushSettingsUI();
+            syncPushPreferences();
         });
 
         document.getElementById("stepGoalInput")?.addEventListener("change", (e) => {
@@ -16628,6 +17036,7 @@ document.documentElement.classList.toggle(
             }
 
             updateDashPrayerScore();
+            updateDashboardProgress();
         }
 
 
@@ -23005,6 +23414,100 @@ document.documentElement.classList.toggle(
             roomMusic.addEventListener('change', () => { timerMusic.value = roomMusic.value; timerMusic.dispatchEvent(new Event('change')); syncMusic(); });
             timerMusic.addEventListener('change', syncMusic);
             musicPlay.addEventListener('click', () => { if (!roomMusic.value) { musicStatus.textContent = 'Choose a track first'; return; } const audio = window.musicAudio; if (audio && !audio.paused) { audio.pause(); musicPlay.textContent = '▶'; musicStatus.textContent = 'Paused'; return; } window._musicHooks && window._musicHooks.forTimerStart(roomMusic.value); musicPlay.textContent = 'Ⅱ'; const option = roomMusic.selectedOptions[0]; musicStatus.textContent = option ? option.textContent.trim() : 'Playing'; });
+            // Open the existing Daily AI widget above the full-screen study overlay.
+            const openAIButton = document.getElementById('swmOpenAI');
+            const aiBox = document.getElementById('aiBox');
+            const aiToggle = document.getElementById('aiToggle');
+            function clearStudyAiLayer() {
+                aiBox && aiBox.classList.remove('study-ai-on-top');
+                aiToggle && aiToggle.classList.remove('study-ai-on-top');
+            }
+            openAIButton && openAIButton.addEventListener('click', function () {
+                if (aiBox) aiBox.classList.add('study-ai-on-top');
+                if (aiToggle) aiToggle.classList.add('study-ai-on-top');
+                if (typeof aiSetOpen === 'function') aiSetOpen(true);
+                else if (aiToggle) aiToggle.click();
+            });
+            document.getElementById('aiCloseBtn')?.addEventListener('click', clearStudyAiLayer);
+            document.getElementById('aiToggle')?.addEventListener('click', function () {
+                // When toggled from elsewhere, restore normal stacking after closing.
+                setTimeout(function () { if (!aiBox || !aiBox.classList.contains('open')) clearStudyAiLayer(); }, 0);
+            });
+
+            // Video backgrounds are kept local to this device; no Firebase/task data is changed.
+            const videoWrap = document.getElementById('swmVideoBackground');
+            const videoUrlInput = document.getElementById('swmVideoUrl');
+            const videoStatus = document.getElementById('swmVideoStatus');
+            const videoApply = document.getElementById('swmApplyVideo');
+            const videoClear = document.getElementById('swmClearVideo');
+            const VIDEO_PREF_KEY = 'dailykrd_study_video_background_v1';
+            function videoMessage(message) { if (videoStatus) videoStatus.textContent = message; }
+            function normalizeVideoUrl(raw) {
+                let url;
+                try { url = new URL(String(raw || '').trim()); } catch (e) { return null; }
+                if (!['https:', 'http:'].includes(url.protocol)) return null;
+                const host = url.hostname.toLowerCase().replace(/^www\./, '');
+                let id = '';
+                if (host === 'youtu.be') id = url.pathname.split('/').filter(Boolean)[0] || '';
+                else if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+                    id = url.searchParams.get('v') || ((url.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/) || [])[1] || '');
+                }
+                if (id && /^[A-Za-z0-9_-]{6,20}$/.test(id)) return { type: 'youtube', id: id };
+                if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+                    const match = url.pathname.match(/(?:video\/)?(\d{5,})/);
+                    if (match) return { type: 'vimeo', id: match[1] };
+                }
+                if (/\.(mp4|webm|ogv)(?:$)/i.test(url.pathname)) return { type: 'direct', url: url.href };
+                return null;
+            }
+            function clearVideoBackground(save) {
+                if (videoWrap) { videoWrap.innerHTML = ''; videoWrap.classList.remove('active'); }
+                overlay.classList.remove('video-background-active');
+                if (videoUrlInput) videoUrlInput.value = '';
+                if (save) { try { localStorage.removeItem(VIDEO_PREF_KEY); } catch (e) {} }
+                videoMessage('Animated room background restored.');
+            }
+            function applyVideoBackground(raw, save) {
+                const parsed = normalizeVideoUrl(raw);
+                if (!parsed) { videoMessage('Paste a valid YouTube, Vimeo, or direct MP4/WebM URL.'); return false; }
+                if (!videoWrap) return false;
+                videoWrap.innerHTML = '';
+                if (parsed.type === 'direct') {
+                    const video = document.createElement('video');
+                    video.src = parsed.url;
+                    video.autoplay = true;
+                    video.muted = true;
+                    video.loop = true;
+                    video.playsInline = true;
+                    video.setAttribute('playsinline', '');
+                    video.addEventListener('error', function () { videoMessage('Could not load this video. Check the direct video link and try again.'); }, { once: true });
+                    videoWrap.appendChild(video);
+                    video.play().catch(function () { videoMessage('Tap Use video again if playback was blocked.'); });
+                } else {
+                    const frame = document.createElement('iframe');
+                    frame.title = 'Study background video';
+                    frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+                    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+                    frame.tabIndex = -1;
+                    if (parsed.type === 'youtube') frame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(parsed.id) + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + encodeURIComponent(parsed.id) + '&playsinline=1&rel=0';
+                    else frame.src = 'https://player.vimeo.com/video/' + encodeURIComponent(parsed.id) + '?autoplay=1&muted=1&loop=1&background=1';
+                    videoWrap.appendChild(frame);
+                }
+                videoWrap.classList.add('active');
+                overlay.classList.add('video-background-active');
+                if (videoUrlInput) videoUrlInput.value = raw.trim();
+                videoMessage('Video background enabled. Playback is muted so it stays behind your study session.');
+                if (save) { try { localStorage.setItem(VIDEO_PREF_KEY, raw.trim()); } catch (e) {} }
+                return true;
+            }
+            videoApply && videoApply.addEventListener('click', function () { applyVideoBackground(videoUrlInput && videoUrlInput.value, true); });
+            videoUrlInput && videoUrlInput.addEventListener('keydown', function (event) { if (event.key === 'Enter') { event.preventDefault(); applyVideoBackground(videoUrlInput.value, true); } });
+            videoClear && videoClear.addEventListener('click', function () { clearVideoBackground(true); });
+            try {
+                const savedVideoUrl = localStorage.getItem(VIDEO_PREF_KEY);
+                if (savedVideoUrl && videoUrlInput) { videoUrlInput.value = savedVideoUrl; applyVideoBackground(savedVideoUrl, false); }
+            } catch (e) {}
+
             syncSubjects();
             syncMusic();
             window._syncFocusRoomSubjects = syncSubjects;
@@ -23972,247 +24475,322 @@ document.documentElement.classList.toggle(
         })();
     </script>
 
+    <script id="dailyWeatherController">
+        (function () {
+            'use strict';
+            const STORAGE_PLACE = 'dailykrd_weather_place_v1';
+            const STORAGE_CACHE = 'dailykrd_weather_cache_v1';
+            const CACHE_MAX_AGE = 30 * 60 * 1000;
+            const $ = id => document.getElementById(id);
+            const copy = {
+                en: {
+                    title: '🌦️ Weather', city: 'City', searchPlaceholder: 'Search a city', search: 'Search', useLocation: '⌖ Use my location', expand: 'Show forecast ↓', collapse: 'Hide forecast ↑', settingsTitle: 'Weather Location', settingsDescription: 'Choose a city or use your device location for the forecast shown on Today.', setLocation: 'Set location in Settings',
+                    choose: 'Choose a city to see the forecast.', searching: 'Searching for cities…', loading: 'Loading weather…',
+                    noCities: 'No matching cities found. Try another spelling.', cityError: 'Enter a city name first.',
+                    unavailable: 'Weather could not be loaded. Check your connection and try again.', offline: 'Offline — showing the last saved forecast.',
+                    locationDenied: 'Location was unavailable or permission was denied. You can search for a city instead.',
+                    current: 'Current weather', feels: 'Feels like', high: 'High', low: 'Low', wind: 'Wind', hourly: 'Hourly forecast', weekly: '7-day forecast',
+                    updated: 'Updated', cached: 'Saved forecast', today: 'Today', now: 'Now', rain: 'Rain', kmh: 'km/h', location: 'My location',
+                    clear: 'Clear sky', mainlyClear: 'Mainly clear', partlyCloudy: 'Partly cloudy', overcast: 'Overcast', fog: 'Fog', drizzle: 'Drizzle',
+                    freezingDrizzle: 'Freezing drizzle', rainLight: 'Light rain', rain: 'Rain', heavyRain: 'Heavy rain', snow: 'Snow', snowGrains: 'Snow grains',
+                    showers: 'Rain showers', heavyShowers: 'Heavy showers', snowShowers: 'Snow showers', thunderstorm: 'Thunderstorm', thunderHail: 'Thunderstorm with hail',
+                    refresh: 'Refresh weather', chooseResult: 'Select a city'
+                },
+                ku: {
+                    title: '🌦️ کەشوهەوا', city: 'شار', searchPlaceholder: 'گەڕان بەدوای شارێکدا', search: 'گەڕان', useLocation: '⌖ شوێنی من', expand: 'پێشبینی پیشان بدە ↓', collapse: 'پێشبینی بشارەوە ↑', settingsTitle: 'شوێنی کەشوهەوا', settingsDescription: 'شارێک هەڵبژێرە یان شوێنی ئامێرەکەت بەکاربهێنە.', setLocation: 'شوێن لە ڕێکخستنەکان دیاری بکە',
+                    choose: 'شارێک هەڵبژێرە بۆ بینینی پێشبینی کەشوهەوا.', searching: 'گەڕان بەدوای شارەکاندا…', loading: 'بارکردنی کەشوهەوا…',
+                    noCities: 'هیچ شارێک نەدۆزرایەوە. ناوێکی تر تاقی بکەرەوە.', cityError: 'سەرەتا ناوی شارێک بنووسە.',
+                    unavailable: 'نەتوانرا کەشوهەوا باربکرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و دووبارە هەوڵ بدەرەوە.', offline: 'بێ ئینتەرنێت — دوا پێشبینی پاشەکەوتکراو پیشان دەدرێت.',
+                    locationDenied: 'شوێنەکە بەردەست نییە یان ڕێگەپێدان ڕەتکرایەوە. دەتوانیت بە ناوی شار بگەڕێیت.',
+                    current: 'کەشوهەوای ئێستا', feels: 'هەست بە', high: 'زۆرترین', low: 'کەمترین', wind: 'با', hourly: 'پێشبینی کاتژمێری', weekly: 'پێشبینی ٧ ڕۆژ',
+                    updated: 'نوێکراوەتەوە', cached: 'پێشبینی پاشەکەوتکراو', today: 'ئەمڕۆ', now: 'ئێستا', rain: 'باران', kmh: 'کم/کاتژمێر',
+                    location: 'شوێنی من', clear: 'ئاسمانی ڕوون', mainlyClear: 'زۆربەی ڕوون', partlyCloudy: 'هەورەیی تا ڕادەیەک', overcast: 'هەور', fog: 'تەماو', drizzle: 'بارانی سووک',
+                    freezingDrizzle: 'بارانی بەستوو', rainLight: 'بارانی سووک', heavyRain: 'بارانی زۆر', snow: 'بەفر', snowGrains: 'وردەبەفر', showers: 'ڕژانی باران',
+                    heavyShowers: 'ڕژانی زۆری باران', snowShowers: 'ڕژانی بەفر', thunderstorm: 'زریان', thunderHail: 'زریان لەگەڵ تەگەرگ', refresh: 'نوێکردنەوەی کەشوهەوا', chooseResult: 'شارێک هەڵبژێرە'
+                },
+                ar: {
+                    title: '🌦️ الطقس', city: 'المدينة', searchPlaceholder: 'ابحث عن مدينة', search: 'بحث', useLocation: '⌖ استخدام موقعي', expand: 'عرض التوقعات ↓', collapse: 'إخفاء التوقعات ↑', settingsTitle: 'موقع الطقس', settingsDescription: 'اختر مدينة أو استخدم موقع جهازك لعرض الطقس في اليوم.', setLocation: 'حدد الموقع من الإعدادات',
+                    choose: 'اختر مدينة لعرض توقعات الطقس.', searching: 'جارٍ البحث عن المدن…', loading: 'جارٍ تحميل الطقس…',
+                    noCities: 'لم يتم العثور على مدن مطابقة. جرّب كتابة الاسم بطريقة أخرى.', cityError: 'أدخل اسم المدينة أولاً.',
+                    unavailable: 'تعذّر تحميل الطقس. تحقق من الاتصال وحاول مرة أخرى.', offline: 'غير متصل — يتم عرض آخر توقعات محفوظة.',
+                    locationDenied: 'الموقع غير متاح أو تم رفض الإذن. يمكنك البحث عن مدينة بدلاً من ذلك.',
+                    current: 'الطقس الحالي', feels: 'المحسوسة', high: 'العظمى', low: 'الصغرى', wind: 'الرياح', hourly: 'توقعات كل ساعة', weekly: 'توقعات 7 أيام',
+                    updated: 'آخر تحديث', cached: 'توقعات محفوظة', today: 'اليوم', now: 'الآن', rain: 'المطر', kmh: 'كم/س', location: 'موقعي',
+                    clear: 'سماء صافية', mainlyClear: 'صحو غالباً', partlyCloudy: 'غائم جزئياً', overcast: 'غائم', fog: 'ضباب', drizzle: 'رذاذ',
+                    freezingDrizzle: 'رذاذ متجمد', rainLight: 'مطر خفيف', heavyRain: 'مطر غزير', snow: 'ثلوج', snowGrains: 'حبيبات ثلجية', showers: 'زخات مطر',
+                    heavyShowers: 'زخات غزيرة', snowShowers: 'زخات ثلجية', thunderstorm: 'عاصفة رعدية', thunderHail: 'عاصفة رعدية مع برد', refresh: 'تحديث الطقس', chooseResult: 'اختر مدينة'
+                }
+            };
+            let place = null;
+            let forecast = null;
+            let lastFetched = 0;
+            let isBusy = false;
+            let suggestions = [];
+            let cachedMode = false;
 
-<script>
-(function () {
-    "use strict";
-    const KEY = "dailykrd_dashboard_layouts";
-    const grid = document.getElementById("dashboardWidgetGrid");
-    const panel = document.getElementById("dashboardCustomizePanel");
-    const openBtn = document.getElementById("dashboardCustomizeButton");
-    if (!grid || !panel || !openBtn || grid.dataset.customizerReady === "1") return;
-    grid.dataset.customizerReady = "1";
-
-    const WIDGETS = [
-        { id: "nextAction", en: "What should I do now?", ku: "ئێستا چی بکەم؟", ar: "ماذا أفعل الآن؟" },
-        { id: "ai", en: "Daily AI briefing", ku: "پوختەی ڕۆژانەی زیرەکی دەستکرد", ar: "ملخص الذكاء الاصطناعي اليومي" },
-        { id: "progress", en: "Today's progress", ku: "پێشکەوتنی ئەمڕۆ", ar: "تقدم اليوم" },
-        { id: "prayer", en: "Prayer times", ku: "کاتەکانی نوێژ", ar: "أوقات الصلاة" },
-        { id: "studyGoal", en: "Study goal", ku: "ئامانجی خوێندن", ar: "هدف الدراسة" },
-        { id: "steps", en: "Steps / activity", ku: "هەنگاو و چالاکی", ar: "الخطوات والنشاط" },
-        { id: "timer", en: "Study timer", ku: "کاتژمێری خوێندن", ar: "مؤقت الدراسة" },
-        { id: "tasks", en: "Tasks", ku: "ئەرکەکان", ar: "المهام" }
-    ];
-    const WORDS = {
-        en: { customize:"⚙️ Customize dashboard", layouts:"Dashboard layouts", done:"Done", saved:"Saved layout", hint:"Drag cards using ☰, toggle widgets, and choose a size for each.", new:"＋ New", duplicate:"Duplicate", rename:"Rename", delete:"Delete", compact:"Compact", standard:"Standard", expanded:"Expanded", shown:"Show", name:"Layout name", newName:"My dashboard", duplicateName:"Copy of layout", confirmDelete:"Delete this layout?", cannotDelete:"At least one layout must remain.", limit:"You can save up to 12 dashboard layouts.", openTimer:"Open Study Timer →", ready:"Ready", inProgress:"In progress", paused:"Paused", drag:"Drag to reorder", defaultName:"Default", reset:"Reset layout", savedNotice:"Dashboard layout saved" },
-        ku: { customize:"⚙️ ڕێکخستنی داشبۆرد", layouts:"شێوازی داشبۆرد", done:"تەواو", saved:"شێوازی پاشەکەوتکراو", hint:"بە ☰ کارتەکان ڕیزبەندی بکە، ویجێتەکان پیشان بدە یان بیشارەوە و قەبارەیان هەڵبژێرە.", new:"＋ نوێ", duplicate:"لەبەرگرتنەوە", rename:"گۆڕینی ناو", delete:"سڕینەوە", compact:"بچووک", standard:"ئاسایی", expanded:"گەورە", shown:"پیشاندان", name:"ناوی شێواز", newName:"داشبۆردی من", duplicateName:"کۆپی شێواز", confirmDelete:"ئەم شێوازە بسڕدرێتەوە؟", cannotDelete:"دەبێت لانیکەم یەک شێواز بمێنێتەوە.", limit:"دەتوانیت تا ١٢ شێوازی داشبۆرد پاشەکەوت بکەیت.", openTimer:"کردنەوەی کاتژمێری خوێندن ←", ready:"ئامادە", inProgress:"لە کاردایە", paused:"وەستاوە", drag:"گواستنەوە بۆ ڕیزبەندی", defaultName:"بنەڕەت", reset:"گەڕاندنەوەی ڕیزبەندی", savedNotice:"ڕیزبەندی داشبۆرد پاشەکەوت کرا" },
-        ar: { customize:"⚙️ تخصيص لوحة التحكم", layouts:"تخطيطات لوحة التحكم", done:"تم", saved:"التخطيط المحفوظ", hint:"اسحب البطاقات باستخدام ☰، وأظهر الأدوات أو أخفها واختر حجم كل أداة.", new:"＋ جديد", duplicate:"نسخ", rename:"إعادة تسمية", delete:"حذف", compact:"صغير", standard:"عادي", expanded:"كبير", shown:"إظهار", name:"اسم التخطيط", newName:"لوحتي", duplicateName:"نسخة من التخطيط", confirmDelete:"هل تريد حذف هذا التخطيط؟", cannotDelete:"يجب الاحتفاظ بتخطيط واحد على الأقل.", limit:"يمكنك حفظ 12 تخطيطًا كحد أقصى.", openTimer:"فتح مؤقت الدراسة ←", ready:"جاهز", inProgress:"قيد التشغيل", paused:"متوقف مؤقتًا", drag:"اسحب لإعادة الترتيب", defaultName:"افتراضي", reset:"إعادة ضبط التخطيط", savedNotice:"تم حفظ تخطيط لوحة التحكم" }
-    };
-    function lang() {
-        const raw = (localStorage.getItem("dailykrd_language") || document.documentElement.lang || "en").toLowerCase();
-        if (raw.startsWith("ku") || raw === "kr") return "ku";
-        if (raw.startsWith("ar")) return "ar";
-        return "en";
-    }
-    function w(key) { return (WORDS[lang()] || WORDS.en)[key] || WORDS.en[key] || key; }
-    function widgetName(item) { return item[lang()] || item.en; }
-    const ids = WIDGETS.map(x => x.id);
-    const defaultLayout = () => ({ id: "default", name: w("defaultName"), order: ids.slice(), hidden: [], sizes: {} });
-    function makeId() { return "layout_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-    function cleanLayout(raw) {
-        const order = Array.isArray(raw && raw.order) ? raw.order.filter((id, i, a) => ids.includes(id) && a.indexOf(id) === i) : [];
-        ids.forEach(id => { if (!order.includes(id)) order.push(id); });
-        const hidden = Array.isArray(raw && raw.hidden) ? raw.hidden.filter(id => ids.includes(id)) : [];
-        const sizes = {};
-        ids.forEach(id => { const size = raw && raw.sizes && raw.sizes[id]; sizes[id] = ["compact", "standard", "expanded"].includes(size) ? size : "standard"; });
-        return { id: typeof (raw && raw.id) === "string" ? raw.id : makeId(), name: typeof (raw && raw.name) === "string" ? raw.name.slice(0, 40) : w("defaultName"), order, hidden, sizes };
-    }
-    function readState() {
-        try {
-            const raw = JSON.parse(localStorage.getItem(KEY) || "null");
-            if (raw && Array.isArray(raw.layouts) && raw.layouts.length) {
-                const layouts = raw.layouts.slice(0, 12).map(cleanLayout);
-                const activeId = layouts.some(x => x.id === raw.activeId) ? raw.activeId : layouts[0].id;
-                return { activeId, layouts };
+            function lang() {
+                const v = (localStorage.getItem('dailykrd_language') || document.documentElement.lang || 'en').toLowerCase();
+                return v.startsWith('ku') ? 'ku' : v.startsWith('ar') ? 'ar' : 'en';
             }
-        } catch (e) { console.warn("Could not read dashboard layouts", e); }
-        const first = defaultLayout();
-        return { activeId: first.id, layouts: [first] };
-    }
-    let state = readState();
-    let editMode = false;
-    let pointerDrag = null;
-    const cardFor = id => grid.querySelector('[data-dashboard-widget="' + id + '"]');
-    const active = () => state.layouts.find(x => x.id === state.activeId) || state.layouts[0];
-    function save() {
-        try { localStorage.setItem(KEY, JSON.stringify(state)); }
-        catch (e) { console.warn("Could not save dashboard layouts", e); }
-    }
-    function applyLayout() {
-        const layout = active();
-        layout.order.forEach(id => { const card = cardFor(id); if (card) grid.appendChild(card); });
-        layout.order.forEach(id => {
-            const card = cardFor(id); if (!card) return;
-            card.classList.toggle("dashboard-user-hidden", layout.hidden.includes(id));
-            card.dataset.dashboardSize = layout.sizes[id] || "standard";
-            card.setAttribute("aria-label", widgetName(WIDGETS.find(x => x.id === id) || { en: id }));
-        });
-        renderLayoutSelect();
-        renderWidgetSettings();
-        updateTimerMirror();
-    }
-    function renderLayoutSelect() {
-        const select = document.getElementById("dashboardLayoutSelect");
-        if (!select) return;
-        select.innerHTML = "";
-        state.layouts.forEach(layout => {
-            const option = document.createElement("option"); option.value = layout.id; option.textContent = layout.name; option.selected = layout.id === state.activeId; select.appendChild(option);
-        });
-    }
-    function renderWidgetSettings() {
-        const host = document.getElementById("dashboardWidgetSettings"); if (!host) return;
-        host.innerHTML = "";
-        WIDGETS.forEach(item => {
-            const row = document.createElement("div"); row.className = "dashboard-widget-setting";
-            const label = document.createElement("label"); label.className = "dashboard-widget-setting-label";
-            const check = document.createElement("input"); check.type = "checkbox"; check.checked = !active().hidden.includes(item.id); check.setAttribute("aria-label", w("shown") + " " + widgetName(item));
-            check.addEventListener("change", () => { const layout = active(); layout.hidden = check.checked ? layout.hidden.filter(id => id !== item.id) : [...new Set([...layout.hidden, item.id])]; save(); applyLayout(); });
-            const text = document.createElement("span"); text.textContent = widgetName(item); label.append(check, text);
-            const size = document.createElement("select"); size.setAttribute("aria-label", widgetName(item) + " size");
-            [["compact",w("compact")],["standard",w("standard")],["expanded",w("expanded")]].forEach(([value,title]) => { const opt = document.createElement("option"); opt.value = value; opt.textContent = title; size.appendChild(opt); });
-            size.value = active().sizes[item.id] || "standard";
-            size.addEventListener("change", () => { active().sizes[item.id] = size.value; save(); applyLayout(); });
-            row.append(label, size); host.appendChild(row);
-        });
-    }
-    function setEditMode(value) {
-        editMode = !!value;
-        grid.classList.toggle("dashboard-editing", editMode);
-        openBtn.setAttribute("aria-expanded", String(editMode));
-        openBtn.textContent = editMode ? "⚙️ " + w("customize") .replace(/^⚙️\s*/, "") : w("customize");
-        panel.hidden = !editMode;
-        if (editMode) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-    function addHandles() {
-        WIDGETS.forEach(item => {
-            const card = cardFor(item.id); if (!card || card.querySelector(".dashboard-drag-handle")) return;
-            const handle = document.createElement("button"); handle.type = "button"; handle.className = "dashboard-drag-handle"; handle.textContent = "☰"; handle.title = w("drag"); handle.setAttribute("aria-label", w("drag") + ": " + widgetName(item));
-            handle.draggable = true;
-            handle.addEventListener("dragstart", e => { if (!editMode) { e.preventDefault(); return; } e.dataTransfer.setData("text/plain", item.id); e.dataTransfer.effectAllowed = "move"; card.classList.add("dashboard-dragging"); });
-            handle.addEventListener("dragend", () => { card.classList.remove("dashboard-dragging"); clearDropMarks(); });
-            handle.addEventListener("pointerdown", e => {
-                if (!editMode || e.pointerType === "mouse") return;
-                e.preventDefault(); pointerDrag = { id: item.id, card }; card.classList.add("dashboard-dragging");
-                try { handle.setPointerCapture(e.pointerId); } catch (_) {}
-            });
-            handle.addEventListener("pointermove", e => {
-                if (!pointerDrag || pointerDrag.id !== item.id || e.pointerType === "mouse") return;
-                const target = document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-dashboard-widget]");
-                clearDropMarks();
-                if (target && target !== card && grid.contains(target)) target.classList.add(e.clientY < target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2 ? "dashboard-drop-before" : "dashboard-drop-after");
-            });
-            handle.addEventListener("pointerup", e => {
-                if (!pointerDrag || pointerDrag.id !== item.id || e.pointerType === "mouse") return;
-                const dragged = pointerDrag.card; pointerDrag = null; dragged.classList.remove("dashboard-dragging");
-                const target = document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-dashboard-widget]");
-                if (target && target !== dragged && grid.contains(target)) moveCard(dragged.dataset.dashboardWidget, target.dataset.dashboardWidget, e.clientY < target.getBoundingClientRect().top + target.getBoundingClientRect().height / 2);
-                clearDropMarks();
-            });
-            card.insertBefore(handle, card.firstChild);
-        });
-    }
-    function clearDropMarks() { grid.querySelectorAll(".dashboard-drop-before,.dashboard-drop-after").forEach(el => el.classList.remove("dashboard-drop-before","dashboard-drop-after")); }
-    function moveCard(from, to, before) {
-        if (!from || !to || from === to) return;
-        const layout = active(); layout.order = layout.order.filter(id => id !== from);
-        const index = layout.order.indexOf(to); layout.order.splice(index + (before ? 0 : 1), 0, from);
-        save(); applyLayout();
-    }
-    grid.addEventListener("dragover", e => {
-        if (!editMode) return;
-        const target = e.target.closest("[data-dashboard-widget]"); if (!target) return;
-        e.preventDefault(); clearDropMarks();
-        const rect = target.getBoundingClientRect(); target.classList.add(e.clientY < rect.top + rect.height / 2 ? "dashboard-drop-before" : "dashboard-drop-after");
-    });
-    grid.addEventListener("drop", e => {
-        if (!editMode) return;
-        const from = e.dataTransfer && e.dataTransfer.getData("text/plain");
-        const target = e.target.closest("[data-dashboard-widget]");
-        if (!from || !target) return;
-        e.preventDefault(); const rect = target.getBoundingClientRect(); moveCard(from, target.dataset.dashboardWidget, e.clientY < rect.top + rect.height / 2); clearDropMarks();
-    });
-    openBtn.addEventListener("click", () => setEditMode(!editMode));
-    document.getElementById("dashboardCustomizeDone")?.addEventListener("click", () => setEditMode(false));
-    document.getElementById("dashboardLayoutSelect")?.addEventListener("change", e => { state.activeId = e.target.value; save(); applyLayout(); });
-    document.getElementById("dashboardLayoutNew")?.addEventListener("click", () => {
-        if (state.layouts.length >= 12) { alert(w("limit")); return; }
-        const name = prompt(w("name"), w("newName")); if (!name || !name.trim()) return;
-        const layout = cleanLayout({ ...active(), id: makeId(), name: name.trim(), order: active().order.slice(), hidden: active().hidden.slice(), sizes: { ...active().sizes } });
-        state.layouts.push(layout); state.activeId = layout.id; save(); applyLayout();
-    });
-    document.getElementById("dashboardLayoutDuplicate")?.addEventListener("click", () => {
-        if (state.layouts.length >= 12) { alert(w("limit")); return; }
-        const name = prompt(w("name"), active().name + " — " + w("duplicateName")); if (!name || !name.trim()) return;
-        const layout = cleanLayout({ ...active(), id: makeId(), name: name.trim(), order: active().order.slice(), hidden: active().hidden.slice(), sizes: { ...active().sizes } });
-        state.layouts.push(layout); state.activeId = layout.id; save(); applyLayout();
-    });
-    document.getElementById("dashboardLayoutRename")?.addEventListener("click", () => {
-        const name = prompt(w("name"), active().name); if (!name || !name.trim()) return;
-        active().name = name.trim().slice(0, 40); save(); renderLayoutSelect();
-    });
-    document.getElementById("dashboardLayoutDelete")?.addEventListener("click", () => {
-        if (state.layouts.length <= 1) { alert(w("cannotDelete")); return; }
-        if (!confirm(w("confirmDelete"))) return;
-        state.layouts = state.layouts.filter(x => x.id !== state.activeId); state.activeId = state.layouts[0].id; save(); applyLayout();
-    });
-    document.getElementById("dashboardOpenTimer")?.addEventListener("click", () => document.getElementById("studyTab")?.click());
-    function updateTimerMirror() {
-        const source = document.getElementById("studyTimerTime"); const target = document.getElementById("dashboardTimerTime");
-        const status = document.getElementById("dashboardTimerStatus");
-        const start = document.getElementById("studyTimerStart");
-        const reset = document.getElementById("studyTimerReset");
-        if (source && target && source.textContent.trim()) target.textContent = source.textContent.trim();
-        if (status) {
-            const isActive = !!(start && start.classList.contains("study-timer-pause"));
-            const isPaused = !!(reset && reset.style.display !== "none" && !isActive);
-            status.textContent = isActive ? w("inProgress") : (isPaused ? w("paused") : w("ready"));
-        }
-    }
-    const timerSource = document.getElementById("studyTimerTime");
-    const timerStartSource = document.getElementById("studyTimerStart");
-    const timerResetSource = document.getElementById("studyTimerReset");
-    if ("MutationObserver" in window) {
-        const timerObserver = new MutationObserver(updateTimerMirror);
-        if (timerSource) timerObserver.observe(timerSource, { childList:true, characterData:true, subtree:true });
-        if (timerStartSource) timerObserver.observe(timerStartSource, { attributes:true, childList:true, characterData:true, subtree:true });
-        if (timerResetSource) timerObserver.observe(timerResetSource, { attributes:true });
-    }
-    const observer = new MutationObserver(() => {
-        openBtn.textContent = w("customize");
-        document.getElementById("dashboardCustomizeTitle").textContent = w("layouts");
-        document.getElementById("dashboardCustomizeDone").textContent = w("done");
-        document.getElementById("dashboardLayoutLabel").textContent = w("saved");
-        document.getElementById("dashboardEditHint").textContent = w("hint");
-        document.getElementById("dashboardLayoutNew").textContent = w("new");
-        document.getElementById("dashboardLayoutDuplicate").textContent = w("duplicate");
-        document.getElementById("dashboardLayoutRename").textContent = w("rename");
-        document.getElementById("dashboardLayoutDelete").textContent = w("delete");
-        document.getElementById("dashboardOpenTimer").textContent = w("openTimer");
-        document.getElementById("dashboardTimerTitle").textContent = "⏱️ " + widgetName(WIDGETS.find(x => x.id === "timer"));
-        document.querySelectorAll(".dashboard-drag-handle").forEach(btn => { const id = btn.closest("[data-dashboard-widget]")?.dataset.dashboardWidget; btn.title = w("drag"); btn.setAttribute("aria-label", w("drag") + ": " + widgetName(WIDGETS.find(x => x.id === id) || { en:id })); });
-        renderLayoutSelect(); renderWidgetSettings();
-    });
-    observer.observe(document.documentElement, { attributes:true, attributeFilter:["lang","dir"] });
-    window.__dailyKrdDashboardApply = function (rawValue) {
-        try {
-            const remote = typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
-            if (!remote || !Array.isArray(remote.layouts) || !remote.layouts.length) return;
-            state = readStateFromValue(remote);
-            save();
-            applyLayout();
-        } catch (e) { console.warn("Could not apply synced dashboard layout", e); }
-    };
-    function readStateFromValue(raw) {
-        const layouts = raw.layouts.slice(0, 12).map(cleanLayout);
-        const activeId = layouts.some(x => x.id === raw.activeId) ? raw.activeId : layouts[0].id;
-        return { activeId, layouts };
-    }
-    addHandles();
-    applyLayout();
-    // Refresh labels after the app's first-launch language selection has completed.
-    setTimeout(() => { openBtn.textContent = w("customize"); renderWidgetSettings(); }, 900);
-})();
-</script>
+            function tr(key) { return (copy[lang()] || copy.en)[key] || copy.en[key] || key; }
+            function locale() { return lang() === 'ku' ? 'ku-Arab' : lang() === 'ar' ? 'ar-IQ' : 'en-US'; }
+            function el(tag, className, value) {
+                const node = document.createElement(tag);
+                if (className) node.className = className;
+                if (value !== undefined && value !== null) node.textContent = String(value);
+                return node;
+            }
+            function weatherInfo(code, isDay) {
+                const map = {
+                    0: ['clear', isDay ? '☀️' : '🌙'], 1: ['mainlyClear', isDay ? '🌤️' : '🌙'], 2: ['partlyCloudy', '⛅'], 3: ['overcast', '☁️'],
+                    45: ['fog', '🌫️'], 48: ['fog', '🌫️'], 51: ['drizzle', '🌦️'], 53: ['drizzle', '🌦️'], 55: ['drizzle', '🌧️'],
+                    56: ['freezingDrizzle', '🌧️'], 57: ['freezingDrizzle', '🌧️'], 61: ['rainLight', '🌦️'], 63: ['rain', '🌧️'], 65: ['heavyRain', '🌧️'],
+                    66: ['freezingDrizzle', '🌧️'], 67: ['freezingDrizzle', '🌧️'], 71: ['snow', '🌨️'], 73: ['snow', '🌨️'], 75: ['snow', '❄️'], 77: ['snowGrains', '🌨️'],
+                    80: ['showers', '🌦️'], 81: ['showers', '🌧️'], 82: ['heavyShowers', '🌧️'], 85: ['snowShowers', '🌨️'], 86: ['snowShowers', '❄️'],
+                    95: ['thunderstorm', '⛈️'], 96: ['thunderHail', '⛈️'], 99: ['thunderHail', '⛈️']
+                };
+                const item = map[Number(code)] || ['partlyCloudy', '🌤️'];
+                return { text: tr(item[0]), icon: item[1] };
+            }
+            function showStatus(message, isError) {
+                const node = $('dailyWeatherStatus');
+                if (!node) return;
+                node.textContent = message;
+                node.style.color = isError ? '#c65c54' : '';
+                node.hidden = false;
+            }
+            function hideStatus() { if ($('dailyWeatherStatus')) $('dailyWeatherStatus').hidden = true; }
+            function saveCache() {
+                try { localStorage.setItem(STORAGE_CACHE, JSON.stringify({ place, forecast, savedAt: Date.now() })); } catch (e) {}
+            }
+            function loadCache() {
+                try {
+                    const data = JSON.parse(localStorage.getItem(STORAGE_CACHE) || 'null');
+                    if (data && data.place && data.forecast && data.savedAt) {
+                        place = data.place; forecast = data.forecast; lastFetched = data.savedAt; cachedMode = true;
+                        renderForecast();
+                        return true;
+                    }
+                } catch (e) {}
+                return false;
+            }
+            function savePlace() { try { localStorage.setItem(STORAGE_PLACE, JSON.stringify(place)); } catch (e) {} }
+            function formatTime(iso) {
+                const date = new Date(iso);
+                if (Number.isNaN(date.getTime())) return '--:--';
+                return new Intl.DateTimeFormat(locale(), { hour: 'numeric', minute: '2-digit' }).format(date);
+            }
+            function formatDay(iso, index) {
+                if (index === 0) return tr('today');
+                const date = new Date(iso + 'T12:00:00');
+                return new Intl.DateTimeFormat(locale(), { weekday: 'short' }).format(date);
+            }
+            function number(value) { const n = Number(value); return Number.isFinite(n) ? Math.round(n) : '--'; }
+            function renderForecast() {
+                if (!forecast || !place) return;
+                const current = forecast.current || {};
+                const daily = forecast.daily || {};
+                const info = weatherInfo(current.weather_code, current.is_day);
+                $('dailyWeatherTitle').textContent = tr('title');
+                $('dailyWeatherCityLabel').textContent = tr('city');
+                $('dailyWeatherCityInput').placeholder = tr('searchPlaceholder');
+                $('dailyWeatherCityInput').setAttribute('aria-label', tr('city'));
+                $('dailyWeatherSearch').textContent = tr('search');
+                $('dailyWeatherUseLocation').textContent = tr('useLocation');
+                $('dailyWeatherRefresh').setAttribute('aria-label', tr('refresh'));
+                $('dailyWeatherHighLabel').textContent = tr('high');
+                $('dailyWeatherLowLabel').textContent = tr('low');
+                $('dailyWeatherWindLabel').textContent = tr('wind');
+                $('dailyWeatherHourlyTitle').textContent = tr('hourly');
+                $('dailyWeatherWeeklyTitle').textContent = tr('weekly');
+                $('dailyWeatherLocationName');
+                $('dailyWeatherIcon').textContent = info.icon;
+                $('dailyWeatherTemperature').textContent = number(current.temperature_2m) + '°';
+                $('dailyWeatherCondition').textContent = info.text;
+                $('dailyWeatherFeels').textContent = tr('feels') + ' ' + number(current.apparent_temperature) + '°';
+                $('dailyWeatherHigh').textContent = number((daily.temperature_2m_max || [])[0]) + '°';
+                $('dailyWeatherLow').textContent = number((daily.temperature_2m_min || [])[0]) + '°';
+                $('dailyWeatherWind').textContent = number(current.wind_speed_10m) + ' ' + tr('kmh');
+                $('dailyWeatherSummaryIcon').textContent = info.icon;
+                $('dailyWeatherSummaryTemp').textContent = number(current.temperature_2m) + '°';
+                $('dailyWeatherSummaryCondition').textContent = info.text;
+                $('dailyWeatherSummaryPlace').textContent = place.name ? [place.name, place.admin1, place.country].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', ') : tr('location');
+                $('dailyWeatherContent').hidden = false;
+                hideStatus();
+
+                const hourlyRoot = $('dailyWeatherHourly');
+                hourlyRoot.replaceChildren();
+                const times = (forecast.hourly && forecast.hourly.time) || [];
+                const temps = (forecast.hourly && forecast.hourly.temperature_2m) || [];
+                const codes = (forecast.hourly && forecast.hourly.weather_code) || [];
+                const rains = (forecast.hourly && forecast.hourly.precipitation_probability) || [];
+                let start = times.findIndex(t => new Date(t).getTime() >= Date.now() - 60 * 60 * 1000);
+                if (start < 0) start = 0;
+                for (let i = start; i < Math.min(start + 12, times.length); i++) {
+                    const item = el('div', 'daily-weather-hour');
+                    item.append(el('div', 'daily-weather-hour-time', i === start ? tr('now') : formatTime(times[i])));
+                    item.append(el('div', 'daily-weather-hour-icon', weatherInfo(codes[i], 1).icon));
+                    item.append(el('div', 'daily-weather-hour-temp', number(temps[i]) + '°'));
+                    if (rains[i] !== undefined && rains[i] !== null) item.append(el('div', 'daily-weather-hour-rain', '💧 ' + number(rains[i]) + '%'));
+                    hourlyRoot.append(item);
+                }
+
+                const dailyRoot = $('dailyWeatherDaily');
+                dailyRoot.replaceChildren();
+                const dates = daily.time || [];
+                for (let i = 0; i < Math.min(7, dates.length); i++) {
+                    const day = el('div', 'daily-weather-day');
+                    day.append(el('div', 'daily-weather-day-name', formatDay(dates[i], i)));
+                    day.append(el('div', 'daily-weather-day-icon', weatherInfo((daily.weather_code || [])[i], 1).icon));
+                    day.append(el('div', 'daily-weather-day-condition', weatherInfo((daily.weather_code || [])[i], 1).text));
+                    const tempsBox = el('div', 'daily-weather-day-temps');
+                    tempsBox.append(el('strong', '', number((daily.temperature_2m_max || [])[i]) + '°'));
+                    tempsBox.append(el('span', 'daily-weather-day-low', number((daily.temperature_2m_min || [])[i]) + '°'));
+                    day.append(tempsBox);
+                    dailyRoot.append(day);
+                }
+                const cityLabel = place.name ? [place.name, place.admin1, place.country].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', ') : tr('location');
+                $('dailyWeatherCityInput').value = place.name || '';
+                const stamp = lastFetched ? new Intl.DateTimeFormat(locale(), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(lastFetched)) : '';
+                $('dailyWeatherUpdated').textContent = (cachedMode ? tr('cached') : tr('updated')) + (stamp ? ': ' + stamp : '') + ' · ' + cityLabel;
+            }
+            async function fetchForecast(nextPlace, force) {
+                if (isBusy) return;
+                if (!navigator.onLine) {
+                    if (forecast) { cachedMode = true; renderForecast(); showStatus(tr('offline')); }
+                    else showStatus(tr('unavailable'), true);
+                    return;
+                }
+                if (!force && forecast && place && place.latitude === nextPlace.latitude && place.longitude === nextPlace.longitude && Date.now() - lastFetched < CACHE_MAX_AGE) {
+                    cachedMode = false; renderForecast(); return;
+                }
+                isBusy = true;
+                showStatus(tr('loading'));
+                $('dailyWeatherContent').hidden = !forecast;
+                try {
+                    const url = new URL('https://api.open-meteo.com/v1/forecast');
+                    url.search = new URLSearchParams({
+                        latitude: String(nextPlace.latitude), longitude: String(nextPlace.longitude),
+                        current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m',
+                        hourly: 'temperature_2m,precipitation_probability,weather_code',
+                        daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max',
+                        temperature_unit: 'celsius', wind_speed_unit: 'kmh', timezone: 'auto', forecast_days: '7'
+                    }).toString();
+                    const response = await fetch(url.toString(), { cache: 'no-store' });
+                    if (!response.ok) throw new Error('Forecast HTTP ' + response.status);
+                    const data = await response.json();
+                    if (!data || !data.current || !data.hourly || !data.daily) throw new Error('Incomplete forecast');
+                    place = nextPlace;
+                    forecast = data;
+                    lastFetched = Date.now();
+                    cachedMode = false;
+                    savePlace(); saveCache(); renderForecast();
+                } catch (error) {
+                    console.warn('Daily.KRD weather unavailable:', error);
+                    if (forecast) { cachedMode = true; renderForecast(); showStatus(navigator.onLine ? tr('unavailable') : tr('offline'), true); }
+                    else showStatus(tr('unavailable'), true);
+                } finally { isBusy = false; }
+            }
+            async function searchCity() {
+                const query = $('dailyWeatherCityInput').value.trim();
+                if (!query) { showStatus(tr('cityError'), true); return; }
+                if (!navigator.onLine) { showStatus(tr('unavailable'), true); return; }
+                showStatus(tr('searching'));
+                $('dailyWeatherSuggestions').replaceChildren();
+                $('dailyWeatherSuggestions').hidden = true;
+                try {
+                    const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
+                    url.search = new URLSearchParams({ name: query, count: '7', language: lang() === 'ku' ? 'en' : lang(), format: 'json' }).toString();
+                    const response = await fetch(url.toString(), { cache: 'no-store' });
+                    if (!response.ok) throw new Error('Geocoding HTTP ' + response.status);
+                    const data = await response.json();
+                    suggestions = (data.results || []).filter(x => Number.isFinite(x.latitude) && Number.isFinite(x.longitude));
+                    const root = $('dailyWeatherSuggestions');
+                    root.replaceChildren();
+                    if (!suggestions.length) { showStatus(tr('noCities')); return; }
+                    suggestions.forEach((city, index) => {
+                        const button = el('button', 'daily-weather-suggestion');
+                        button.type = 'button'; button.setAttribute('role', 'option');
+                        button.textContent = [city.name, city.admin1, city.country].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', ');
+                        button.addEventListener('click', function () {
+                            const selected = { name: city.name, admin1: city.admin1 || '', country: city.country || '', latitude: city.latitude, longitude: city.longitude, timezone: city.timezone || '' };
+                            root.hidden = true;
+                            fetchForecast(selected, true);
+                        });
+                        root.append(button);
+                    });
+                    root.hidden = false;
+                    showStatus(tr('chooseResult'));
+                } catch (error) { console.warn('Daily.KRD city search failed:', error); showStatus(tr('unavailable'), true); }
+            }
+            function useLocation() {
+                if (!navigator.geolocation) { showStatus(tr('locationDenied'), true); return; }
+                showStatus(tr('loading'));
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const selected = { name: tr('location'), admin1: '', country: '', latitude: position.coords.latitude, longitude: position.coords.longitude, timezone: '' };
+                    fetchForecast(selected, true);
+                }, function () { showStatus(tr('locationDenied'), true); }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 });
+            }
+            function updateStaticText() {
+                $('dailyWeatherTitle').textContent = tr('title');
+                $('dailyWeatherCityLabel').textContent = tr('city');
+                $('dailyWeatherCityInput').placeholder = tr('searchPlaceholder');
+                $('dailyWeatherCityInput').setAttribute('aria-label', tr('city'));
+                $('dailyWeatherSearch').textContent = tr('search');
+                $('dailyWeatherUseLocation').textContent = tr('useLocation');
+                $('dailyWeatherRefresh').setAttribute('aria-label', tr('refresh'));
+                $('dailyWeatherExpand').textContent = $('dailyWeatherCard').classList.contains('weather-expanded') ? tr('collapse') : tr('expand');
+                $('dailyWeatherSettingsTitle').textContent = tr('settingsTitle');
+                $('dailyWeatherSettingsDescription').textContent = tr('settingsDescription');
+                if (forecast) renderForecast();
+            }
+            function init() {
+                if (!$('dailyWeatherCard')) return;
+                $('dailyWeatherExpand').addEventListener('click', function () {
+                    const expanded = $('dailyWeatherCard').classList.toggle('weather-expanded');
+                    $('dailyWeatherExpand').setAttribute('aria-expanded', String(expanded));
+                    $('dailyWeatherExpand').textContent = expanded ? tr('collapse') : tr('expand');
+                });
+                $('dailyWeatherSearch').addEventListener('click', searchCity);
+                $('dailyWeatherCityInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchCity(); } });
+                $('dailyWeatherUseLocation').addEventListener('click', useLocation);
+                $('dailyWeatherRefresh').addEventListener('click', () => {
+                    if (place) fetchForecast(place, true);
+                    else showStatus(tr('setLocation'), true);
+                });
+                const cached = loadCache();
+                if (!cached) {
+                    try {
+                        const saved = JSON.parse(localStorage.getItem(STORAGE_PLACE) || 'null');
+                        if (saved && Number.isFinite(saved.latitude) && Number.isFinite(saved.longitude)) place = saved;
+                    } catch (e) {}
+                    if (place) fetchForecast(place, false);
+                    else {
+                        // A useful city default avoids requesting location permission on startup.
+                        $('dailyWeatherCityInput').value = 'Erbil';
+                        $('dailyWeatherSummaryCondition').textContent = tr('setLocation');
+                        $('dailyWeatherSummaryPlace').textContent = tr('settingsTitle');
+                        showStatus(tr('choose'));
+                        // Keep location selection in Settings; don't open a city-results list on Today.
+
+                    }
+                } else if (navigator.onLine && Date.now() - lastFetched >= CACHE_MAX_AGE && place) {
+                    fetchForecast(place, true);
+                } else if (!navigator.onLine) {
+                    showStatus(tr('offline'));
+                }
+                updateStaticText();
+                window.addEventListener('online', function () { if (place) fetchForecast(place, true); });
+                try {
+                    const observer = new MutationObserver(updateStaticText);
+                    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'dir'] });
+                } catch (e) {}
+                window.addEventListener('storage', function (event) { if (event.key === 'dailykrd_language') updateStaticText(); });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+            else init();
+        })();
+    </script>
 
 </body>
 </html>
