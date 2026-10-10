@@ -15323,7 +15323,9 @@ document.documentElement.classList.toggle(
 
         async function enableMasterPush() {
             const status = document.getElementById("notificationStatus");
-            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+
+            // PushManager belongs to a ServiceWorkerRegistration, not window.
+            if (!("serviceWorker" in navigator) || !("Notification" in window)) {
                 if (status) status.textContent = t("notificationsUnsupported");
                 return;
             }
@@ -15347,52 +15349,27 @@ document.documentElement.classList.toggle(
 
                 if (status) status.textContent = "Registering worker...";
 
-                // Register service worker once, reuse if already registered
-                let reg;
+                // Register once, then wait for the browser's active registration.
+                // ServiceWorkerRegistration does not have a .ready property.
                 if (!pushRegistration) {
-                    try {
-                        pushRegistration = await navigator.serviceWorker.register('./sw.js');
-                    } catch (swErr) {
-                        console.warn("sw.js registration failed:", swErr);
-                        // Continue without SW; push will not work offline but we can still subscribe if supported
-                        pushRegistration = null;
-                    }
+                    pushRegistration = await navigator.serviceWorker.register("./sw.js");
                 }
-                if (pushRegistration) {
-                    try {
-                        reg = await pushRegistration.ready;
-                    } catch (e) {
-                        reg = pushRegistration;
-                    }
-                } else {
-                    // No service worker, but we can still try to subscribe (will not work for background push)
-                    reg = { pushManager: navigator.serviceWorker ? await navigator.serviceWorker.ready : null };
+                const reg = await navigator.serviceWorker.ready;
+
+                if (!reg || !reg.pushManager) {
+                    throw new Error("PushManager is unavailable on the active service worker registration.");
                 }
 
                 if (status) status.textContent = "Subscribing to push...";
 
-                const subscribePromise = (reg && reg.pushManager ? reg.pushManager.getSubscription() : Promise.resolve(null)).then(async (existingSub) => {
-                    if (existingSub) {
-                        try {
-                            await existingSub.unsubscribe();
-                        } catch (unsubError) {
-                            console.warn("Could not unsubscribe stale push subscription:", unsubError);
-                        }
-                    }
-                    if (!reg || !reg.pushManager) {
-                        throw new Error("PushManager not available");
-                    }
-                    return await reg.pushManager.subscribe({
+                // Keep a valid existing subscription; do not destroy it just to re-enable push.
+                let sub = await reg.pushManager.getSubscription();
+                if (!sub) {
+                    sub = await reg.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                     });
-                });
-
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Subscription timed out. Try reopening.")), 8000)
-                );
-
-                const sub = await Promise.race([subscribePromise, timeoutPromise]);
+                }
 
                 pushSettings.masterEnabled = true;
                 renderPushSettingsUI();
@@ -15410,7 +15387,7 @@ document.documentElement.classList.toggle(
                 }
 
                 if (status) status.textContent = t("notificationsEnabled");
-                
+
             } catch (error) {
                 console.error("Subscription error:", error);
                 if (status) status.textContent = "Error: " + error.message;
@@ -15418,6 +15395,7 @@ document.documentElement.classList.toggle(
                 renderPushSettingsUI();
             }
         }
+
 
         async function disableMasterPush() {
             pushSettings.masterEnabled = false;
