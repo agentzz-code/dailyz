@@ -284,6 +284,147 @@
         .aiHeadBtn:hover { background: var(--ai-chip); color: var(--ai-ink); }
         .aiHeadBtn:active { transform: scale(.9); }
 
+        /* Web search toggle — off/on states are clearly distinct:
+           off is a muted ghost icon, on is a filled, pulsing pill. */
+
+        #aiBox .aiSearchToggle {
+            border: 1px solid var(--ai-brd);
+            position: relative;
+        }
+
+        #aiBox .aiSearchToggle.on {
+            background: var(--ai-btn);
+            color: var(--ai-btn-ink);
+            border-color: var(--ai-btn);
+            box-shadow: 0 0 0 3px var(--ai-code-bg);
+        }
+
+        #aiBox .aiSearchToggle.on:hover {
+            background: var(--ai-btn);
+            color: var(--ai-btn-ink);
+        }
+
+        #aiBox .aiSearchToggle.on::after {
+            content: "";
+            position: absolute;
+            top: 3px;
+            inset-inline-end: 3px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3aa76d;
+            animation: aiSearchPulse 1.6s ease-in-out infinite;
+        }
+
+        @keyframes aiSearchPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .45; transform: scale(1.5); }
+        }
+
+        /* Sources block under an assistant reply */
+
+        .ai-sources {
+            align-self: flex-start;
+            max-width: 92%;
+            margin: 6px 0 0;
+            padding: 10px 12px;
+            border: 1px solid var(--ai-brd);
+            border-radius: 14px;
+            background: var(--ai-panel-2);
+            font-size: 12px;
+            animation: aiMsgIn .22s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .ai-sources-head {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .ai-src-head-title {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--ai-muted);
+        }
+
+        .ai-search-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--ai-ink);
+            background: var(--ai-code-bg);
+            border-radius: 999px;
+            padding: 3px 9px;
+        }
+
+        .ai-search-badge .ai-search-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3aa76d;
+            flex-shrink: 0;
+        }
+
+        .ai-sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .ai-source-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 7px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--ai-ink);
+            transition: background .15s ease;
+        }
+
+        .ai-source-item:hover { background: var(--ai-chip); }
+
+        .ai-source-num {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            margin-top: 1px;
+            border-radius: 50%;
+            background: var(--ai-chip);
+            color: var(--ai-ink);
+            font-size: 10px;
+            font-weight: 800;
+            display: grid;
+            place-items: center;
+        }
+
+        .ai-source-body { min-width: 0; display: block; }
+
+        .ai-source-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-weight: 650;
+            line-height: 1.32;
+        }
+
+        .ai-source-url {
+            display: block;
+            margin-top: 1px;
+            font-size: 10.5px;
+            color: var(--ai-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         /* Conversation area */
 
         .ai-convo {
@@ -20982,6 +21123,14 @@ document.documentElement.classList.toggle(
             <div class="ai-head-actions">
                 <button
                     type="button"
+                    id="aiSearchBtn"
+                    class="aiHeadBtn aiSearchToggle"
+                    aria-pressed="false"
+                    aria-label="Web search"
+                    title="Web search"
+                >🌐</button>
+                <button
+                    type="button"
                     id="aiNewBtn"
                     class="aiHeadBtn"
                     aria-label="Clear conversation"
@@ -21093,6 +21242,7 @@ document.documentElement.classList.toggle(
         const AI_HISTORY_LIMIT = 10;
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
         const AI_LANG_STORAGE_KEY = "dailykrd_language";
+        const AI_WEBSEARCH_STORAGE_KEY = "dailykrd_ai_websearch";
 
         /* =====================================================
            LOCALIZATION
@@ -21136,7 +21286,15 @@ document.documentElement.classList.toggle(
                     "Explain a topic simply",
                     "Help me write a note"
                 ],
-                restored: "Conversation restored"
+                restored: "Conversation restored",
+                webSearch: "Web search",
+                webSearchOn: "Web search on — answers use live Google results",
+                webSearchOff: "Web search off",
+                sourcesTitle: "Sources",
+                usedSearch: "Web search",
+                searching: "Searching the web…",
+                searchError:
+                    "I couldn't run a live web search just now. Please try again, or turn off Web Search to get an answer from Daily AI's knowledge."
             },
             ar: {
                 dir: "rtl",
@@ -21169,7 +21327,15 @@ document.documentElement.classList.toggle(
                     "اشرح لي موضوعاً ببساطة",
                     "ساعدني في كتابة مذكرة"
                 ],
-                restored: "تمت استعادة المحادثة"
+                restored: "تمت استعادة المحادثة",
+                webSearch: "البحث في الويب",
+                webSearchOn: "البحث في الويب مفعّل — الإجابات تستخدم نتائج Google المباشرة",
+                webSearchOff: "البحث في الويب متوقف",
+                sourcesTitle: "المصادر",
+                usedSearch: "بحث الويب",
+                searching: "جارٍ البحث في الويب…",
+                searchError:
+                    "تعذر إجراء بحث مباشر في الويب الآن. جرّب مرة أخرى، أو أوقف البحث في الويب للحصول على إجابة من معرفة ذكاء ديلي."
             },
             ku: {
                 dir: "rtl",
@@ -21202,7 +21368,15 @@ document.documentElement.classList.toggle(
                     "بابەتێک بە سادەیی شرۆڤە بکە",
                     "یارمەتیم بدە تێدۆکیمنتێک بنووسە"
                 ],
-                restored: "چاتەکە گەڕاندراوەتەوە"
+                restored: "چاتەکە گەڕاندراوەتەوە",
+                webSearch: "گەڕان لە وێب",
+                webSearchOn: "گەڕان لە وێب چالاکە — وەڵامەکان ئەنجامی ڕاستەوخۆی Google بەکاردەهێنن",
+                webSearchOff: "گەڕان لە وێب ناچالاکە",
+                sourcesTitle: "سەرچاوەکان",
+                usedSearch: "گەڕانی وێب",
+                searching: "گەڕان لە وێب…",
+                searchError:
+                    "نەتوانرا ئێستا گەڕانێکی ڕاستەوخۆ لە وێب بکەم. تکایە دووبارە هەوڵ بدە، یان گەڕانی وێب ناچالاک بکە بۆ وەرگرتنی وەڵام لە زانیاری دەیلی ئێدی."
             }
         };
 
@@ -21210,6 +21384,10 @@ document.documentElement.classList.toggle(
         let aiFullOpen = false;
         let aiBusy = false;
         let aiPinned = true;
+        let aiWebSearch = false;
+        try {
+            aiWebSearch = localStorage.getItem(AI_WEBSEARCH_STORAGE_KEY) === "1";
+        } catch (e) {}
 
         function aiT(key) {
             const pack = AI_STRINGS[aiLang] || AI_STRINGS.en;
@@ -21254,6 +21432,23 @@ document.documentElement.classList.toggle(
             setLabel("aiVoiceStopBtn", aiT("stop"));
             setLabel("aiVoiceCancelBtn", aiT("cancel"));
             setLabel("aiCloseBtn", aiT("close"));
+
+            const searchBtn = document.getElementById("aiSearchBtn");
+            if (searchBtn) {
+                const sLabel = aiWebSearch ? aiT("webSearchOn") : aiT("webSearchOff");
+                searchBtn.setAttribute("aria-label", sLabel);
+                searchBtn.title = sLabel;
+                searchBtn.setAttribute("aria-pressed", aiWebSearch ? "true" : "false");
+                searchBtn.classList.toggle("on", aiWebSearch);
+            }
+
+            /* keep source blocks in the current language */
+            document.querySelectorAll("#aiMessages .ai-sources").forEach((block) => {
+                const used = block.querySelector(".ai-src-used");
+                const head = block.querySelector(".ai-src-head-title");
+                if (used) used.textContent = aiT("usedSearch");
+                if (head) head.textContent = aiT("sourcesTitle");
+            });
 
             const expandBtn = document.getElementById("aiExpandBtn");
             if (expandBtn) {
@@ -21308,6 +21503,217 @@ document.documentElement.classList.toggle(
         function aiAnnounce(text) {
             const status = document.getElementById("aiStatus");
             if (status) status.textContent = text || "";
+        }
+
+        /* =====================================================
+           WEB SEARCH
+           Mirror of the Worker's existing contract: when search
+           is requested the request body carries webSearch:true.
+           Source/citation metadata is parsed tolerantly from
+           several shapes and never printed as message text.
+           ===================================================== */
+
+        /* Heuristic: questions that clearly need up-to-date facts.
+           Used only to pre-arm the flag, never to *claim* a search
+           happened — that requires confirmation in the response. */
+        function aiNeedsWebSearch(text) {
+            if (!text) return false;
+            const s = String(text).toLowerCase();
+            if (/(search|google|browse|look\s*up)\s+(the\s+)?(web|internet|online|it|for|up)?/.test(s)) {
+                return true;
+            }
+            return /\b(latest|breaking|today|tonight|this\s+(week|month|year)|current|currently|right\s+now|recent|recently|news|headlines|score|scores|weather|forecast|price|prices|stock|stocks|who\s+won|released|release\s+date|newest|updated?|updates?)\b/.test(
+                s
+            );
+        }
+
+        function aiSetWebSearch(on, announce) {
+            aiWebSearch = !!on;
+            try {
+                localStorage.setItem(
+                    AI_WEBSEARCH_STORAGE_KEY,
+                    aiWebSearch ? "1" : "0"
+                );
+            } catch (e) {}
+            const btn = document.getElementById("aiSearchBtn");
+            if (btn) {
+                btn.classList.toggle("on", aiWebSearch);
+                btn.setAttribute("aria-pressed", aiWebSearch ? "true" : "false");
+                const label = aiWebSearch ? aiT("webSearchOn") : aiT("webSearchOff");
+                btn.setAttribute("aria-label", label);
+                btn.title = label;
+            }
+            if (announce) {
+                aiAnnounce(aiWebSearch ? aiT("webSearchOn") : aiT("webSearchOff"));
+            }
+        }
+
+        function aiHostname(url) {
+            try {
+                return new URL(url).hostname.replace(/^www\./, "");
+            } catch (e) {
+                return String(url || "").replace(/^https?:\/\//i, "");
+            }
+        }
+
+        /* Accepts strings or objects from the many grounding shapes
+           (Gemini groundingChunks[].web, {sources:[...]}, {citations:[...]}
+           …) and returns a clean, de-duplicated {title,url} list. */
+        function aiNormalizeSource(item) {
+            if (!item) return null;
+            let url = "";
+            let title = "";
+            if (typeof item === "string") {
+                url = item;
+            } else if (typeof item === "object") {
+                const web = item.web || item.source || item.metadata || {};
+                url =
+                    item.url ||
+                    item.uri ||
+                    item.link ||
+                    web.uri ||
+                    web.url ||
+                    web.link ||
+                    "";
+                title =
+                    item.title ||
+                    item.name ||
+                    item.label ||
+                    web.title ||
+                    web.name ||
+                    "";
+            }
+            if (!url || typeof url !== "string") return null;
+            if (!/^https?:\/\//i.test(url)) return null;
+            return {
+                url: url.trim(),
+                title: typeof title === "string" ? title.trim() : String(title || "")
+            };
+        }
+
+        function aiExtractSources(obj) {
+            if (!obj || typeof obj !== "object") return [];
+            const found = [];
+            const pushAll = (list) => {
+                if (!Array.isArray(list)) return;
+                list.forEach((it) => {
+                    const norm = aiNormalizeSource(it);
+                    if (norm) found.push(norm);
+                });
+            };
+            if (Array.isArray(obj)) {
+                pushAll(obj);
+            } else {
+                pushAll(obj.sources);
+                pushAll(obj.searchResults);
+                pushAll(obj.citations);
+                pushAll(obj.references);
+                pushAll(obj.groundingChunks);
+                const gm = obj.groundingMetadata || obj.grounding_metadata;
+                if (gm && typeof gm === "object") {
+                    pushAll(gm.groundingChunks);
+                    pushAll(gm.grounding_chunks);
+                    pushAll(gm.sources);
+                    pushAll(gm.citations);
+                }
+                if (obj.data && typeof obj.data === "object") {
+                    pushAll(obj.data.sources);
+                    pushAll(obj.data.searchResults);
+                    const dgm = obj.data.groundingMetadata;
+                    if (dgm && typeof dgm === "object") {
+                        pushAll(dgm.groundingChunks);
+                        pushAll(dgm.sources);
+                    }
+                }
+            }
+            const seen = Object.create(null);
+            const out = [];
+            found.forEach((s) => {
+                if (seen[s.url]) return;
+                seen[s.url] = 1;
+                out.push(s);
+            });
+            return out;
+        }
+
+        /* A response *confirms* search only when it says so explicitly
+           or actually ships sources — never inferred from the question. */
+        function aiObjConfirmsSearch(obj) {
+            if (!obj || typeof obj !== "object" || Array.isArray(obj)) return false;
+            if (obj.webSearch === true || obj.searching === true || obj.grounded === true) {
+                return true;
+            }
+            if (obj.grounding === true || obj.usedSearch === true) return true;
+            const t = String(obj.type || "").toLowerCase();
+            if (t === "search" || t === "sources" || t === "grounding" || t === "web_search") {
+                return true;
+            }
+            const src = String(obj.source || "").toLowerCase();
+            if (src.indexOf("search") !== -1 || src.indexOf("google") !== -1) return true;
+            return aiExtractSources(obj).length > 0;
+        }
+
+        function aiRenderSources(sources, messageEl) {
+            if (!Array.isArray(sources) || !sources.length) return null;
+            const messages = aiMessagesEl();
+            if (!messages && !messageEl) return null;
+
+            const block = document.createElement("div");
+            block.className = "ai-sources";
+            block.setAttribute("data-ai-sources", "1");
+
+            const head = document.createElement("div");
+            head.className = "ai-sources-head";
+            const badge = document.createElement("span");
+            badge.className = "ai-search-badge";
+            const dot = document.createElement("span");
+            dot.className = "ai-search-dot";
+            dot.setAttribute("aria-hidden", "true");
+            const used = document.createElement("span");
+            used.className = "ai-src-used";
+            used.textContent = aiT("usedSearch");
+            badge.appendChild(dot);
+            badge.appendChild(used);
+            const title = document.createElement("span");
+            title.className = "ai-src-head-title";
+            title.textContent = aiT("sourcesTitle");
+            head.appendChild(badge);
+            head.appendChild(title);
+            block.appendChild(head);
+
+            const list = document.createElement("div");
+            list.className = "ai-sources-list";
+            sources.forEach((s, i) => {
+                const a = document.createElement("a");
+                a.className = "ai-source-item";
+                a.href = s.url;
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+                const num = document.createElement("span");
+                num.className = "ai-source-num";
+                num.textContent = String(i + 1);
+                const body = document.createElement("span");
+                body.className = "ai-source-body";
+                const t = document.createElement("span");
+                t.className = "ai-source-title";
+                t.textContent = s.title || aiHostname(s.url);
+                const u = document.createElement("span");
+                u.className = "ai-source-url";
+                u.textContent = aiHostname(s.url);
+                body.appendChild(t);
+                body.appendChild(u);
+                a.appendChild(num);
+                a.appendChild(body);
+                list.appendChild(a);
+            });
+            block.appendChild(list);
+
+            if (messageEl && messageEl.parentNode) {
+                messageEl.insertAdjacentElement("afterend", block);
+            } else if (messages) {
+                messages.appendChild(block);
+            }
+            return block;
         }
 
         function aiEscape(str) {
@@ -22002,6 +22408,12 @@ document.documentElement.classList.toggle(
             let sawAnyContent = false;
             let connectFailed = false;
             let renderScheduled = false;
+            let searchConfirmed = false;
+            let collectedSources = [];
+            /* search is requested when the toggle is on, or when the
+               question clearly needs current information */
+            const searchRequested =
+                aiWebSearch || aiNeedsWebSearch(effectiveMessage);
 
             function scheduleRender() {
                 if (renderScheduled || !messageEl) return;
@@ -22047,6 +22459,21 @@ document.documentElement.classList.toggle(
                 if (obj.error) {
                     throw new Error(String(obj.error));
                 }
+
+                /* Sources may ride along with a delta/response or arrive on
+                   their own — collect them and never print them as text. */
+                const srcs = aiExtractSources(obj);
+                srcs.forEach((s) => {
+                    if (!collectedSources.some((x) => x.url === s.url)) {
+                        collectedSources.push(s);
+                    }
+                });
+                if (aiObjConfirmsSearch(obj)) {
+                    searchConfirmed = true;
+                    const tl = document.querySelector("#aiLoading .ai-typing-label");
+                    if (tl) tl.textContent = aiT("searching");
+                }
+
                 if (typeof obj.delta === "string") {
                     appendDelta(obj.delta);
                 } else if (typeof obj.response === "string") {
@@ -22057,6 +22484,11 @@ document.documentElement.classList.toggle(
                     sourceLabel = "Local AI";
                 } else if (obj.source === "gemini") {
                     sourceLabel = "Cloud AI";
+                } else if (
+                    typeof obj.source === "string" &&
+                    /search|google/i.test(obj.source)
+                ) {
+                    sourceLabel = "Web search";
                 }
             }
 
@@ -22083,8 +22515,17 @@ document.documentElement.classList.toggle(
             try {
                 const requestBody = {
                     message: effectiveMessage,
-                    history: aiConversationHistory.slice(-AI_HISTORY_LIMIT * 2)
+                    /* only role/content go on the wire — keeps the Worker's
+                       existing contract even though sources are stored locally */
+                    history: aiConversationHistory
+                        .slice(-AI_HISTORY_LIMIT * 2)
+                        .map((e) => ({ role: e.role, content: e.content }))
                 };
+
+                /* Search flag matches the Worker's existing API contract. */
+                if (searchRequested) {
+                    requestBody.webSearch = true;
+                }
 
                 if (pendingImage) {
                     requestBody.image = {
@@ -22144,20 +22585,33 @@ document.documentElement.classList.toggle(
 
             document.getElementById("aiLoading")?.remove();
 
-            if (sawAnyContent) {
-                if (!messageEl) ensureMessageEl();
-                messageEl.classList.remove("ai-streaming");
-                messageEl.setAttribute("data-ai-raw", assistantText);
-                messageEl.innerHTML = aiRenderMarkdown(assistantText);
-                if (sourceLabel) {
+            const hasText = sawAnyContent && assistantText.trim().length > 0;
+            const hasSources = collectedSources.length > 0;
+
+            if (hasText || hasSources) {
+                if (hasText) {
+                    if (!messageEl) ensureMessageEl();
+                    messageEl.classList.remove("ai-streaming");
+                    messageEl.setAttribute("data-ai-raw", assistantText);
+                    messageEl.innerHTML = aiRenderMarkdown(assistantText);
+                }
+
+                let anchor = messageEl;
+                if (hasSources) {
+                    const srcEl = aiRenderSources(collectedSources, messageEl);
+                    if (srcEl) anchor = srcEl;
+                }
+                if (sourceLabel && anchor) {
                     const src = document.createElement("div");
                     src.className = "ai-source";
                     src.textContent = sourceLabel;
-                    messageEl.insertAdjacentElement("afterend", src);
-                    aiAppendMessageActions(src, assistantText);
-                } else {
-                    aiAppendMessageActions(messageEl, assistantText);
+                    anchor.insertAdjacentElement("afterend", src);
+                    anchor = src;
                 }
+                if (hasText && anchor) aiAppendMessageActions(anchor, assistantText);
+
+                const assistantEntry = { role: "assistant", content: assistantText };
+                if (hasSources) assistantEntry.sources = collectedSources;
 
                 aiConversationHistory.push(
                     {
@@ -22166,7 +22620,7 @@ document.documentElement.classList.toggle(
                             ? "[User uploaded an image and asked: " + effectiveMessage + "]"
                             : message
                     },
-                    { role: "assistant", content: assistantText }
+                    assistantEntry
                 );
                 if (aiConversationHistory.length > AI_HISTORY_LIMIT * 2) {
                     aiConversationHistory = aiConversationHistory.slice(
@@ -22175,6 +22629,9 @@ document.documentElement.classList.toggle(
                 }
                 aiSaveHistory(aiConversationHistory);
                 aiAnnounce("");
+            } else if (searchRequested) {
+                /* search was requested but the Worker returned nothing */
+                aiAppendTextMessage(aiT("searchError"), true);
             } else if (connectFailed) {
                 aiAppendTextMessage(aiT("connectError"), true);
             } else {
@@ -22210,6 +22667,10 @@ document.documentElement.classList.toggle(
 
         document.getElementById("aiNewBtn")?.addEventListener("click", () => {
             aiClearChat();
+        });
+
+        document.getElementById("aiSearchBtn")?.addEventListener("click", () => {
+            aiSetWebSearch(!aiWebSearch, true);
         });
 
         document.getElementById("aiScrollBottom")?.addEventListener("click", () => {
@@ -22248,6 +22709,7 @@ document.documentElement.classList.toggle(
 
         (function aiInit() {
             aiApplyLanguage();
+            aiSetWebSearch(aiWebSearch, false);
             aiInitVoice();
 
             /* restore this session's conversation into the UI */
@@ -22271,6 +22733,9 @@ document.documentElement.classList.toggle(
                             el.setAttribute("data-ai-raw", entry.content);
                             el.innerHTML = aiRenderMarkdown(entry.content);
                             messages.appendChild(el);
+                            if (Array.isArray(entry.sources) && entry.sources.length) {
+                                aiRenderSources(entry.sources, el);
+                            }
                         }
                     });
                 }
