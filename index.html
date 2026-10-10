@@ -5447,7 +5447,7 @@
 
 
 <style id="dailyKrdDashboardCustomizationStyles">
-    #dashboardCustomizeButton { margin: 0 0 14px; }
+    #dashboardCustomizeButton { width:100%; }
     #dashboardCustomizePanel {
         margin: 0 0 16px;
         padding: 16px;
@@ -5477,6 +5477,8 @@
     .dashboard-widget-setting-label { display:flex; align-items:center; gap:9px; min-width:0; font-size:13px; }
     .dashboard-widget-setting-label input { width:18px; height:18px; flex:0 0 auto; }
     .dashboard-widget-setting select { width:112px; flex:0 0 112px; font-size:12px; }
+    .dashboard-widget-order { display:flex; gap:4px; flex:0 0 auto; }
+    .dashboard-widget-order button { min-width:30px; padding:6px 8px; border-radius:8px; border:1px solid var(--border, rgba(128,128,128,.28)); background:transparent; color:inherit; cursor:pointer; }
     .dashboard-widget-grid { display:flex; flex-direction:column; gap:0; min-width:0; }
     .dashboard-drag-handle {
         display:none; align-items:center; justify-content:center; flex:0 0 34px;
@@ -22484,9 +22486,6 @@ document.documentElement.classList.toggle(
                             "<span>" +
                             aiEscape(block.lang || "code") +
                             "</span>" +
-                            '<button type="button" class="aiCodeCopy" data-ai-code-copy="1">' +
-                            aiEscape(aiT("copy")) +
-                            "</button>" +
                             "</div>" +
                             "<pre><code>" +
                             block.code +
@@ -22564,9 +22563,7 @@ document.documentElement.classList.toggle(
                 return (
                     '<div class="aiCode" dir="ltr"><div class="aiCodeHead"><span>' +
                     aiEscape(block.lang || "code") +
-                    '</span><button type="button" class="aiCodeCopy" data-ai-code-copy="1">' +
-                    aiEscape(aiT("copy")) +
-                    "</button></div><pre><code>" +
+                    "</span></div><pre><code>" +
                     block.code +
                     "</code></pre></div>"
                 );
@@ -22746,15 +22743,6 @@ document.documentElement.classList.toggle(
             } catch (e) {}
             document.body.removeChild(ta);
         }
-
-        /* delegated: code-block copy buttons */
-        document.getElementById("aiMessages")?.addEventListener("click", (e) => {
-            const btn = e.target.closest("[data-ai-code-copy]");
-            if (!btn) return;
-            const codeEl = btn.closest(".aiCode")?.querySelector("code");
-            if (!codeEl) return;
-            aiCopyText(codeEl.textContent, btn, aiT("copy"));
-        });
 
         /* =====================================================
            IMAGE UPLOAD / PREVIEW
@@ -24865,9 +24853,9 @@ document.documentElement.classList.toggle(
     "use strict";
     const KEY = "dailykrd_dashboard_layouts";
     const WORDS = {
-        en: {settings:"⚙️ Settings", title:"Dashboard settings", layout:"Saved layout", done:"Done", hint:"Drag the ☰ handles to reorder cards. You can hide widgets and change their size. These settings do not delete your data.", new:"＋ New layout", duplicate:"Duplicate", rename:"Rename", remove:"Delete", name:"Layout name", newName:"My dashboard", copyName:"Copy of layout", confirmDelete:"Delete this layout?", cannotDelete:"At least one layout must remain.", limit:"You can save up to 12 layouts.", show:"Show", compact:"Compact", standard:"Standard", expanded:"Expanded", drag:"Drag to reorder", reset:"Reset", defaultName:"Default"},
-        ku: {settings:"⚙️ ڕێکخستنەکان", title:"ڕێکخستنەکانی داشبۆرد", layout:"شێوازی پاشەکەوتکراو", done:"تەواو", hint:"بە دەستگرتنی ☰ کارتەکان ڕیزبەندی بکە. دەتوانیت ویجێتەکان بشاریتەوە و قەبارەیان بگۆڕیت. ئەمە داتاکانت ناسڕێتەوە.", new:"＋ شێوازی نوێ", duplicate:"لەبەرگرتنەوە", rename:"گۆڕینی ناو", remove:"سڕینەوە", name:"ناوی شێواز", newName:"داشبۆردی من", copyName:"کۆپی شێواز", confirmDelete:"ئەم شێوازە بسڕدرێتەوە؟", cannotDelete:"دەبێت لانیکەم یەک شێواز بمێنێتەوە.", limit:"دەتوانیت تا ١٢ شێواز پاشەکەوت بکەیت.", show:"پیشاندان", compact:"بچووک", standard:"ئاسایی", expanded:"گەورە", drag:"گواستنەوە بۆ ڕیزبەندی", reset:"گەڕاندنەوە", defaultName:"بنەڕەت"},
-        ar: {settings:"⚙️ الإعدادات", title:"إعدادات لوحة التحكم", layout:"التخطيط المحفوظ", done:"تم", hint:"اسحب مقابض ☰ لإعادة ترتيب البطاقات. يمكنك إخفاء الأدوات وتغيير أحجامها. لن يؤدي ذلك إلى حذف بياناتك.", new:"＋ تخطيط جديد", duplicate:"نسخ", rename:"إعادة تسمية", remove:"حذف", name:"اسم التخطيط", newName:"لوحتي", copyName:"نسخة من التخطيط", confirmDelete:"هل تريد حذف هذا التخطيط؟", cannotDelete:"يجب الاحتفاظ بتخطيط واحد على الأقل.", limit:"يمكنك حفظ 12 تخطيطًا كحد أقصى.", show:"إظهار", compact:"صغير", standard:"عادي", expanded:"كبير", drag:"اسحب لإعادة الترتيب", reset:"إعادة ضبط", defaultName:"افتراضي"}
+        en: {settings:"⚙️ Customize Dashboard", title:"Customize Dashboard", layout:"Saved layout", done:"Done", hint:"Drag the ☰ handles or use ↑ / ↓ to reorder widgets. You can hide widgets and change their size. These settings do not delete your data.", new:"＋ New layout", rename:"Rename", remove:"Delete", name:"Layout name", newName:"My dashboard", confirmDelete:"Delete this layout?", cannotDelete:"At least one layout must remain.", limit:"You can save up to 12 layouts.", show:"Show", compact:"Compact", standard:"Standard", expanded:"Expanded", drag:"Drag to reorder", moveUp:"Move up", moveDown:"Move down", defaultName:"Default"},
+        ku: {settings:"⚙️ ڕێکخستنی داشبۆرد", title:"ڕێکخستنی داشبۆرد", layout:"شێوازی پاشەکەوتکراو", done:"تەواو", hint:"بە دەستگرتنی ☰ یان ↑ / ↓ ویجێتەکان ڕیزبەندی بکە. دەتوانیت ویجێتەکان بشاریتەوە و قەبارەیان بگۆڕیت. ئەمە داتاکانت ناسڕێتەوە.", new:"＋ شێوازی نوێ", rename:"گۆڕینی ناو", remove:"سڕینەوە", name:"ناوی شێواز", newName:"داشبۆردی من", confirmDelete:"ئەم شێوازە بسڕدرێتەوە؟", cannotDelete:"دەبێت لانیکەم یەک شێواز بمێنێتەوە.", limit:"دەتوانیت تا ١٢ شێواز پاشەکەوت بکەیت.", show:"پیشاندان", compact:"بچووک", standard:"ئاسایی", expanded:"گەورە", drag:"گواستنەوە بۆ ڕیزبەندی", moveUp:"بەرەو سەرەوە", moveDown:"بەرەو خوارەوە", defaultName:"بنەڕەت"},
+        ar: {settings:"⚙️ تخصيص لوحة التحكم", title:"تخصيص لوحة التحكم", layout:"التخطيط المحفوظ", done:"تم", hint:"اسحب مقابض ☰ أو استخدم ↑ / ↓ لترتيب الأدوات. يمكنك إخفاء الأدوات وتغيير أحجامها دون حذف بياناتك.", new:"＋ تخطيط جديد", rename:"إعادة تسمية", remove:"حذف", name:"اسم التخطيط", newName:"لوحتي", confirmDelete:"هل تريد حذف هذا التخطيط؟", cannotDelete:"يجب الاحتفاظ بتخطيط واحد على الأقل.", limit:"يمكنك حفظ 12 تخطيطًا كحد أقصى.", show:"إظهار", compact:"صغير", standard:"عادي", expanded:"كبير", drag:"اسحب لإعادة الترتيب", moveUp:"تحريك لأعلى", moveDown:"تحريك لأسفل", defaultName:"افتراضي"}
     };
     const WIDGETS = [
         {id:"progress", label:{en:"Today's progress",ku:"پێشکەوتنی ئەمڕۆ",ar:"تقدم اليوم"}, find:()=>document.getElementById("dashProgressPercent")?.closest(".dashboard-card")},
@@ -24898,12 +24886,14 @@ document.documentElement.classList.toggle(
     let state=readState(), editing=false, touchDrag=null;
     const grid=document.createElement("div"); grid.id="dashboardWidgetGrid"; grid.className="dashboard-widget-grid";
     const panel=document.createElement("section"); panel.id="dashboardCustomizePanel"; panel.hidden=true;
-    panel.innerHTML='<div class="dashboard-customize-top"><strong id="dashboardCustomizeTitle"></strong><button type="button" class="setting-button" id="dashboardCustomizeDone"></button></div><label for="dashboardLayoutSelect" id="dashboardLayoutLabel"></label><select id="dashboardLayoutSelect"></select><div class="dashboard-layout-actions"><button type="button" class="setting-button" id="dashboardLayoutNew"></button><button type="button" class="setting-button" id="dashboardLayoutDuplicate"></button><button type="button" class="setting-button" id="dashboardLayoutRename"></button><button type="button" class="setting-button" id="dashboardLayoutDelete"></button></div><p class="dashboard-edit-hint" id="dashboardEditHint"></p><div id="dashboardWidgetSettings" class="dashboard-widget-settings"></div>';
-    const header=document.querySelector(".dashboard-header");
-    if(!header) return;
+    panel.innerHTML='<div class="dashboard-customize-top"><strong id="dashboardCustomizeTitle"></strong><button type="button" class="setting-button" id="dashboardCustomizeDone"></button></div><label for="dashboardLayoutSelect" id="dashboardLayoutLabel"></label><select id="dashboardLayoutSelect"></select><div class="dashboard-layout-actions"><button type="button" class="setting-button" id="dashboardLayoutNew"></button><button type="button" class="setting-button" id="dashboardLayoutRename"></button><button type="button" class="setting-button" id="dashboardLayoutDelete"></button></div><p class="dashboard-edit-hint" id="dashboardEditHint"></p><div id="dashboardWidgetSettings" class="dashboard-widget-settings"></div>';
+    const settingsSection=document.getElementById("settings");
+    if(!settingsSection) return;
+    const settingsCard=document.createElement("div"); settingsCard.className="settings-card"; settingsCard.id="dashboardCustomizeSettingsCard";
     const button=document.createElement("button"); button.type="button"; button.id="dashboardCustomizeButton"; button.className="setting-button"; button.setAttribute("aria-expanded","false");
-    header.insertAdjacentElement("afterend",button);
-    button.insertAdjacentElement("afterend",panel);
+    settingsCard.appendChild(button); settingsCard.appendChild(panel);
+    const settingsSubtitle=settingsSection.querySelector(".settings-subtitle");
+    if(settingsSubtitle) settingsSubtitle.insertAdjacentElement("afterend",settingsCard); else settingsSection.insertBefore(settingsCard,settingsSection.firstChild);
     const cards=new Map();
     WIDGETS.forEach(w=>{const card=w.find();if(card){card.dataset.dashboardWidget=w.id;cards.set(w.id,card);}});
     const first=WIDGETS.map(w=>cards.get(w.id)).find(Boolean);
@@ -24926,8 +24916,18 @@ document.documentElement.classList.toggle(
             [["compact",t("compact")],["standard",t("standard")],["expanded",t("expanded")]].forEach(([v,txt])=>{const o=document.createElement("option");o.value=v;o.textContent=txt;size.appendChild(o);});
             size.value=active().sizes[w.id]||"standard";
             size.addEventListener("change",()=>{active().sizes[w.id]=size.value;save();apply();});
-            row.append(lab,size);host.appendChild(row);
+            const orderControls=document.createElement("div");orderControls.className="dashboard-widget-order";
+            const up=document.createElement("button");up.type="button";up.textContent="↑";up.title=t("moveUp");up.setAttribute("aria-label",t("moveUp")+" "+label(w));
+            const down=document.createElement("button");down.type="button";down.textContent="↓";down.title=t("moveDown");down.setAttribute("aria-label",t("moveDown")+" "+label(w));
+            up.disabled=active().order.indexOf(w.id)<=0;down.disabled=active().order.indexOf(w.id)>=active().order.length-1;
+            up.addEventListener("click",()=>moveBy(w.id,-1));down.addEventListener("click",()=>moveBy(w.id,1));
+            orderControls.append(up,down);row.append(lab,size,orderControls);host.appendChild(row);
         });
+    }
+    function moveBy(id,delta){
+        const l=active();const index=l.order.indexOf(id);const next=index+delta;
+        if(index<0||next<0||next>=l.order.length)return;
+        [l.order[index],l.order[next]]=[l.order[next],l.order[index]];save();apply();
     }
     function apply(){
         const l=active();
@@ -24939,7 +24939,7 @@ document.documentElement.classList.toggle(
         button.textContent=t("settings");document.getElementById("dashboardCustomizeTitle").textContent=t("title");
         document.getElementById("dashboardCustomizeDone").textContent=t("done");document.getElementById("dashboardLayoutLabel").textContent=t("layout");
         document.getElementById("dashboardEditHint").textContent=t("hint");document.getElementById("dashboardLayoutNew").textContent=t("new");
-        document.getElementById("dashboardLayoutDuplicate").textContent=t("duplicate");document.getElementById("dashboardLayoutRename").textContent=t("rename");
+document.getElementById("dashboardLayoutRename").textContent=t("rename");
         document.getElementById("dashboardLayoutDelete").textContent=t("remove");
         grid.querySelectorAll(".dashboard-drag-handle").forEach(h=>{const id=h.closest("[data-dashboard-widget]")?.dataset.dashboardWidget;h.title=t("drag");h.setAttribute("aria-label",t("drag")+" "+(WIDGETS.find(w=>w.id===id)?label(WIDGETS.find(w=>w.id===id)):""));});
     }
@@ -24965,7 +24965,6 @@ document.documentElement.classList.toggle(
     document.getElementById("dashboardCustomizeDone").addEventListener("click",()=>setEditing(false));
     document.getElementById("dashboardLayoutSelect").addEventListener("change",e=>{state.activeId=e.target.value;save();apply();});
     document.getElementById("dashboardLayoutNew").addEventListener("click",()=>{if(state.layouts.length>=12){alert(t("limit"));return;}const name=prompt(t("name"),t("newName"));if(!name?.trim())return;const l=cleanLayout({...active(),id:makeId(),name:name.trim(),order:active().order.slice(),hidden:active().hidden.slice(),sizes:{...active().sizes}});state.layouts.push(l);state.activeId=l.id;save();apply();});
-    document.getElementById("dashboardLayoutDuplicate").addEventListener("click",()=>{if(state.layouts.length>=12){alert(t("limit"));return;}const name=prompt(t("name"),active().name+" — "+t("copyName"));if(!name?.trim())return;const l=cleanLayout({...active(),id:makeId(),name:name.trim(),order:active().order.slice(),hidden:active().hidden.slice(),sizes:{...active().sizes}});state.layouts.push(l);state.activeId=l.id;save();apply();});
     document.getElementById("dashboardLayoutRename").addEventListener("click",()=>{const name=prompt(t("name"),active().name);if(!name?.trim())return;active().name=name.trim().slice(0,40);save();renderSelect();});
     document.getElementById("dashboardLayoutDelete").addEventListener("click",()=>{if(state.layouts.length<=1){alert(t("cannotDelete"));return;}if(!confirm(t("confirmDelete")))return;state.layouts=state.layouts.filter(l=>l.id!==state.activeId);state.activeId=state.layouts[0].id;save();apply();});
     window.__dailyKrdDashboardApply=function(raw){try{const x=typeof raw==="string"?JSON.parse(raw):raw;if(!x||!Array.isArray(x.layouts)||!x.layouts.length)return;state={layouts:x.layouts.slice(0,12).map(cleanLayout),activeId:x.activeId};if(!state.layouts.some(l=>l.id===state.activeId))state.activeId=state.layouts[0].id;save();apply();}catch(e){console.warn("Could not apply synced dashboard settings",e);}};
