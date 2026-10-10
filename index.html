@@ -7067,17 +7067,17 @@
             <!-- SOUND & SENSORY FEEDBACK -->
             <div class="settings-card" id="dailyKrdSoundSettingsCard">
                 <div class="settings-card-title">🔊 Sound &amp; Sensory Feedback</div>
-                <div class="setting-description">Optional, gentle sounds for task completion, notes, flashcards, and study timers. Sounds are off until you enable them.</div>
+                <div class="setting-description">Optional, ultra-subtle sounds for taps, navigation, notes, flashcards, task completion, and study timers. Sounds are off until you enable them.</div>
                 <div class="setting-row">
-                    <div><div class="setting-label">App sounds</div><div class="setting-description">Play subtle interaction sounds</div></div>
+                    <div><div class="setting-label">App sounds</div><div class="setting-description">Play a tiny, soft cue for most interactions</div></div>
                     <button class="setting-button" id="dailyKrdSoundsToggle" type="button" aria-pressed="false">Off</button>
                 </div>
                 <div class="setting-row" style="align-items:center;">
                     <div><div class="setting-label">Sound volume</div></div>
-                    <input id="dailyKrdSoundsVolume" type="range" min="0" max="35" value="18" step="1" aria-label="Sound volume" style="max-width:160px;width:45%;">
+                    <input id="dailyKrdSoundsVolume" type="range" min="0" max="20" value="8" step="1" aria-label="Sound volume" style="max-width:160px;width:45%;">
                 </div>
                 <div class="setting-row">
-                    <div><div class="setting-label">Preview sounds</div><div class="setting-description">Hear a gentle chime before enabling</div></div>
+                    <div><div class="setting-label">Preview sounds</div><div class="setting-description">Preview the minimal sound style</div></div>
                     <button class="setting-button" id="dailyKrdSoundsTest" type="button">▶ Test</button>
                 </div>
             </div>
@@ -24997,9 +24997,10 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 (function () {
   'use strict';
   const KEY = 'dailykrd_sound_feedback';
-  const defaults = { enabled: false, volume: 18 };
+  const defaults = { enabled: false, volume: 8 };
   let settings = defaults;
   try { settings = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (_) {}
+  settings.volume = Math.max(0, Math.min(20, Number(settings.volume) || 0));
   let audioContext = null;
   let lastSoundAt = 0;
 
@@ -25028,13 +25029,13 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
   function play(kind, preview) {
     if (!preview && !settings.enabled) return;
     const now = Date.now(); if (now - lastSoundAt < 180) return; lastSoundAt = now;
-    const vol = Math.max(0, Math.min(35, Number(settings.volume) || 0)) / 100;
+    const vol = Math.max(0, Math.min(20, Number(settings.volume) || 0)) / 100;
     if (!vol) return;
-    if (kind === 'task') { tone(659.25, 0, .22, vol * .48); tone(880, .10, .30, vol * .40); }
-    else if (kind === 'page') { tone(520, 0, .075, vol * .18, 'triangle'); tone(690, .055, .10, vol * .13, 'sine'); }
-    else if (kind === 'gong') { tone(392, 0, 1.05, vol * .52); tone(523.25, .10, 1.15, vol * .32); tone(659.25, .22, 1.0, vol * .18); }
-    else if (kind === 'break') { tone(587.33, 0, .35, vol * .34); }
-    else { tone(659.25, 0, .25, vol * .42); }
+    if (kind === 'task') { tone(740, 0, .105, vol * .20); tone(988, .045, .12, vol * .13); }
+    else if (kind === 'page') { tone(540, 0, .045, vol * .10, 'triangle'); tone(680, .025, .055, vol * .07, 'sine'); }
+    else if (kind === 'gong') { tone(392, 0, .75, vol * .22); tone(523.25, .08, .82, vol * .13); tone(659.25, .16, .70, vol * .07); }
+    else if (kind === 'break') { tone(587.33, 0, .20, vol * .15); }
+    else { tone(720, 0, .045, vol * .10, 'sine'); }
   }
   function renderControls() {
     const toggle = document.getElementById('dailyKrdSoundsToggle');
@@ -25058,13 +25059,20 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
       if (el.closest('.task, .task-item, [data-task-id]')) play('task');
     }, true);
 
-    // Flashcard reveal/navigation and note actions use a short, quiet page cue.
+    // Quiet, minimal tactile cue for almost every deliberate app interaction.
+    // Do not sound on typing, scrolling, page load, disabled controls, or task
+    // checkboxes (those get their own completion cue from the change handler).
     document.addEventListener('click', function (event) {
-      const el = event.target && event.target.closest ? event.target.closest('button, [role="button"], .flashcard, .flashcard-study-card') : null;
-      if (!el) return;
-      const id = (el.id || '') + ' ' + (el.className && typeof el.className === 'string' ? el.className : '') + ' ' + (el.textContent || '').slice(0, 60);
-      if (/flashcard|flashcardsStudy|flashcardBackBtn/i.test(id)) { play('page'); return; }
-      if (/note|notes|save.*note|open.*note/i.test(id)) play('page');
+      const target = event.target;
+      const el = target && target.closest ? target.closest(
+        'button, a[href], input[type="checkbox"], input[type="radio"], input[type="range"], select, [role="button"], [role="tab"], [role="switch"], summary, .flashcard, .flashcard-study-card, [data-action], .nav-item, .tab-button'
+      ) : null;
+      if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+      if (el.matches('input[type="checkbox"]') && el.closest('.task, .task-item, [data-task-id]')) return;
+      if (el.matches('input[type="range"]')) return; // slider has continuous input; avoid repeated ticks
+      const id = (el.id || '') + ' ' + (typeof el.className === 'string' ? el.className : '') + ' ' + (el.textContent || '').slice(0, 40);
+      if (/flashcard|notes?|study.?card/i.test(id)) play('page');
+      else play('tap');
     }, true);
   }
 
@@ -25093,4 +25101,3 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 </script>
 
 </body>
-</html>
