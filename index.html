@@ -5427,13 +5427,6 @@
                 <div class="dashboard-date" id="dashDate"></div>
             </div>
 
-            <!-- 7. WHAT SHOULD I DO NOW? -->
-            <div class="dashboard-card dashboard-action-card">
-                <div class="dashboard-title">⚡ What should I do now?</div>
-                <div class="dashboard-text-large" id="nextActionText">🎉 You're all caught up!</div>
-                <button class="setting-button dark" id="viewTaskButton" style="display:none; margin-top:12px; border:1px solid rgba(255,255,255,0.2); background:var(--accent-contrast); color:var(--accent);">View task →</button>
-            </div>
-
             <!-- PROACTIVE AI (Daily AI briefing + one suggestion) -->
             <div class="dashboard-card" id="paCard" style="display:none;">
                 <div class="dashboard-title">
@@ -12781,20 +12774,6 @@ done: "تەواو",
             if (dashFill) dashFill.style.width = percent + "%";
             if (dashTasks) dashTasks.textContent = `${done}/${total}`;
 
-            // ⚡ What should I do now?
-            const nextActionText = document.getElementById("nextActionText");
-            const viewTaskBtn = document.getElementById("viewTaskButton");
-            if (nextActionText && viewTaskBtn) {
-                const incompleteTask = tasks.find(task => !isTaskCompletedOnDate(task, getTodayKey()));
-                if (incompleteTask) {
-                    nextActionText.textContent = "Finish: " + incompleteTask.text;
-                    viewTaskBtn.style.display = "inline-block";
-                    viewTaskBtn.onclick = () => { document.getElementById("taskInput").focus(); };
-                } else {
-                    nextActionText.textContent = "🎉 You're all caught up!";
-                    viewTaskBtn.style.display = "none";
-                }
-            }
         }
 
 
