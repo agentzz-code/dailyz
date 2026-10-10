@@ -7064,6 +7064,24 @@
                 <div id="dailyWeatherStatus" class="daily-weather-status" role="status" aria-live="polite" hidden></div>
             </div>
 
+            <!-- SOUND & SENSORY FEEDBACK -->
+            <div class="settings-card" id="dailyKrdSoundSettingsCard">
+                <div class="settings-card-title">🔊 Sound &amp; Sensory Feedback</div>
+                <div class="setting-description">Optional, gentle sounds for task completion, notes, flashcards, and study timers. Sounds are off until you enable them.</div>
+                <div class="setting-row">
+                    <div><div class="setting-label">App sounds</div><div class="setting-description">Play subtle interaction sounds</div></div>
+                    <button class="setting-button" id="dailyKrdSoundsToggle" type="button" aria-pressed="false">Off</button>
+                </div>
+                <div class="setting-row" style="align-items:center;">
+                    <div><div class="setting-label">Sound volume</div></div>
+                    <input id="dailyKrdSoundsVolume" type="range" min="0" max="35" value="18" step="1" aria-label="Sound volume" style="max-width:160px;width:45%;">
+                </div>
+                <div class="setting-row">
+                    <div><div class="setting-label">Preview sounds</div><div class="setting-description">Hear a gentle chime before enabling</div></div>
+                    <button class="setting-button" id="dailyKrdSoundsTest" type="button">▶ Test</button>
+                </div>
+            </div>
+
             <!-- NOTIFICATIONS -->
 
             <div class="settings-card" id="notificationsSettingsCard">
@@ -19961,6 +19979,7 @@ document.documentElement.classList.toggle(
             }
             // Completion haptic for timer finishing
             if (window.Haptics) window.Haptics.completion();
+            try { if (window.DailyKRDSounds) window.DailyKRDSounds.play("gong"); } catch (_) {}
             timerDoneMsg.textContent = t("timerDone") + " (" + mins + " min)";
             timerDoneMsg.style.display = "block";
 
@@ -24970,6 +24989,106 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     window.__dailyKrdDashboardApply=function(raw){try{const x=typeof raw==="string"?JSON.parse(raw):raw;if(!x||!Array.isArray(x.layouts)||!x.layouts.length)return;state={layouts:x.layouts.slice(0,12).map(cleanLayout),activeId:x.activeId};if(!state.layouts.some(l=>l.id===state.activeId))state.activeId=state.layouts[0].id;save();apply();}catch(e){console.warn("Could not apply synced dashboard settings",e);}};
     updateLabels();apply();
     if("MutationObserver"in window)new MutationObserver(()=>{updateLabels();}).observe(document.documentElement,{attributes:true,attributeFilter:["lang","dir"]});
+})();
+</script>
+
+
+<script id="dailyKrdSoundFeedback">
+(function () {
+  'use strict';
+  const KEY = 'dailykrd_sound_feedback';
+  const defaults = { enabled: false, volume: 18 };
+  let settings = defaults;
+  try { settings = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (_) {}
+  let audioContext = null;
+  let lastSoundAt = 0;
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch (_) {}
+    renderControls();
+  }
+  function getContext() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    if (!audioContext) audioContext = new Ctx();
+    if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+    return audioContext;
+  }
+  function tone(freq, start, duration, volume, type) {
+    const ctx = getContext(); if (!ctx) return;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = type || 'sine'; osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+    const peak = Math.max(0.0001, Math.min(0.16, volume));
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+    gain.gain.exponentialRampToValueAtTime(peak, ctx.currentTime + start + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + start); osc.stop(ctx.currentTime + start + duration + 0.03);
+  }
+  function play(kind, preview) {
+    if (!preview && !settings.enabled) return;
+    const now = Date.now(); if (now - lastSoundAt < 180) return; lastSoundAt = now;
+    const vol = Math.max(0, Math.min(35, Number(settings.volume) || 0)) / 100;
+    if (!vol) return;
+    if (kind === 'task') { tone(659.25, 0, .22, vol * .48); tone(880, .10, .30, vol * .40); }
+    else if (kind === 'page') { tone(520, 0, .075, vol * .18, 'triangle'); tone(690, .055, .10, vol * .13, 'sine'); }
+    else if (kind === 'gong') { tone(392, 0, 1.05, vol * .52); tone(523.25, .10, 1.15, vol * .32); tone(659.25, .22, 1.0, vol * .18); }
+    else if (kind === 'break') { tone(587.33, 0, .35, vol * .34); }
+    else { tone(659.25, 0, .25, vol * .42); }
+  }
+  function renderControls() {
+    const toggle = document.getElementById('dailyKrdSoundsToggle');
+    const slider = document.getElementById('dailyKrdSoundsVolume');
+    if (toggle) { toggle.textContent = settings.enabled ? 'On' : 'Off'; toggle.classList.toggle('dark', !!settings.enabled); toggle.setAttribute('aria-pressed', String(!!settings.enabled)); }
+    if (slider) slider.value = String(settings.volume);
+  }
+  function init() {
+    const toggle = document.getElementById('dailyKrdSoundsToggle');
+    const slider = document.getElementById('dailyKrdSoundsVolume');
+    const test = document.getElementById('dailyKrdSoundsTest');
+    if (toggle) toggle.addEventListener('click', function () { settings.enabled = !settings.enabled; save(); if (settings.enabled) play('chime', true); });
+    if (slider) slider.addEventListener('input', function () { settings.volume = Number(slider.value); save(); });
+    if (test) test.addEventListener('click', function () { play('chime', true); });
+    renderControls();
+
+    // Task completion: only play when a task checkbox is changed to checked.
+    document.addEventListener('change', function (event) {
+      const el = event.target;
+      if (!el || el.type !== 'checkbox' || !el.checked) return;
+      if (el.closest('.task, .task-item, [data-task-id]')) play('task');
+    }, true);
+
+    // Flashcard reveal/navigation and note actions use a short, quiet page cue.
+    document.addEventListener('click', function (event) {
+      const el = event.target && event.target.closest ? event.target.closest('button, [role="button"], .flashcard, .flashcard-study-card') : null;
+      if (!el) return;
+      const id = (el.id || '') + ' ' + (el.className && typeof el.className === 'string' ? el.className : '') + ' ' + (el.textContent || '').slice(0, 60);
+      if (/flashcard|flashcardsStudy|flashcardBackBtn/i.test(id)) { play('page'); return; }
+      if (/note|notes|save.*note|open.*note/i.test(id)) play('page');
+    }, true);
+  }
+
+  // The existing timer already owns completion, persistence and notifications.
+  // Wrap only the sound side-effect, leaving its original behavior intact.
+  function attachTimerHook() {
+    if (typeof window.timerFinishSession === 'function' && !window.timerFinishSession.__dailyKrdSoundWrapped) {
+      const original = window.timerFinishSession;
+      const wrapped = function () { const wasRunning = true; const result = original.apply(this, arguments); try { play('gong'); } catch (_) {} return result; };
+      wrapped.__dailyKrdSoundWrapped = true; window.timerFinishSession = wrapped;
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true }); else init();
+  // Functions in this app are often declared inside a script closure, so use a
+  // narrowly scoped completion event as a fallback when the timer ends naturally.
+  document.addEventListener('dailykrd:study-timer-complete', function () { play('gong'); });
+  window.DailyKRDSounds = { play: play, enabled: function () { return !!settings.enabled; } };
+  // Timer completion calls the existing Haptics hook; wrap it to add sound only
+  // for the completion cue while preserving all original haptic behavior.
+  const hapticWait = setInterval(function () {
+    attachTimerHook();
+    if (typeof window.timerFinishSession === 'function' && window.timerFinishSession.__dailyKrdSoundWrapped) clearInterval(hapticWait);
+  }, 500);
+  setTimeout(function () { clearInterval(hapticWait); }, 10000);
 })();
 </script>
 
