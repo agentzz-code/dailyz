@@ -5445,6 +5445,60 @@
         }
     </style>
 
+
+<style id="dailyKrdDashboardCustomizationStyles">
+    #dashboardCustomizeButton { margin: 0 0 14px; }
+    #dashboardCustomizePanel {
+        margin: 0 0 16px;
+        padding: 16px;
+        border: 1px solid var(--border, rgba(128,128,128,.25));
+        border-radius: 18px;
+        background: var(--card-bg, var(--surface, rgba(128,128,128,.06)));
+    }
+    #dashboardCustomizePanel[hidden] { display: none !important; }
+    .dashboard-customize-top, .dashboard-layout-actions {
+        display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    }
+    .dashboard-customize-top { justify-content:space-between; margin-bottom:12px; }
+    #dashboardLayoutSelect, .dashboard-widget-setting select {
+        min-width:0; max-width:100%; padding:9px 10px; border-radius:10px;
+        border:1px solid var(--border, rgba(128,128,128,.28));
+        background:var(--input-bg, var(--card-bg, transparent)); color:inherit;
+    }
+    .dashboard-layout-actions { margin:10px 0; }
+    .dashboard-layout-actions .setting-button { flex:1 1 auto; }
+    .dashboard-edit-hint { margin:8px 0 12px; color:var(--muted, #888); font-size:12px; line-height:1.5; }
+    .dashboard-widget-settings { display:grid; grid-template-columns:1fr; gap:8px; }
+    .dashboard-widget-setting {
+        display:flex; justify-content:space-between; align-items:center; gap:12px;
+        padding:9px 0; border-bottom:1px solid var(--border, rgba(128,128,128,.16));
+    }
+    .dashboard-widget-setting:last-child { border-bottom:0; }
+    .dashboard-widget-setting-label { display:flex; align-items:center; gap:9px; min-width:0; font-size:13px; }
+    .dashboard-widget-setting-label input { width:18px; height:18px; flex:0 0 auto; }
+    .dashboard-widget-setting select { width:112px; flex:0 0 112px; font-size:12px; }
+    .dashboard-widget-grid { display:flex; flex-direction:column; gap:0; min-width:0; }
+    .dashboard-drag-handle {
+        display:none; align-items:center; justify-content:center; flex:0 0 34px;
+        width:34px; height:32px; margin:0 0 8px; border:1px solid var(--border, rgba(128,128,128,.3));
+        border-radius:9px; background:transparent; color:inherit; cursor:grab; touch-action:none;
+        font-size:18px; line-height:1;
+    }
+    .dashboard-editing .dashboard-drag-handle { display:inline-flex; }
+    .dashboard-editing [data-dashboard-widget] { position:relative; outline:1px dashed rgba(128,128,128,.42); outline-offset:-2px; }
+    .dashboard-dragging { opacity:.55; }
+    .dashboard-drop-before { box-shadow:inset 0 3px 0 var(--accent, #6b8afd); }
+    .dashboard-drop-after { box-shadow:inset 0 -3px 0 var(--accent, #6b8afd); }
+    [data-dashboard-widget].dashboard-user-hidden { display:none !important; }
+    [data-dashboard-widget].dashboard-user-size-compact { padding-top:10px !important; padding-bottom:10px !important; }
+    [data-dashboard-widget].dashboard-user-size-compact .dashboard-title { margin-bottom:7px !important; }
+    [data-dashboard-widget].dashboard-user-size-expanded { min-height:170px; }
+    @media (min-width:760px) {
+        .dashboard-widget-settings { grid-template-columns:1fr 1fr; column-gap:18px; }
+        .dashboard-widget-grid { display:grid; grid-template-columns:minmax(0,1fr); }
+    }
+</style>
+
 </head>
 
 <body>
@@ -7512,6 +7566,7 @@
             "dailykrd_study_sessions",
             "dailykrd_music_prefs",
             "dailykrd_push_settings",
+            "dailykrd_dashboard_layouts",
             "dailykrd_welcomed",
             "dailykrd_haptic_enabled"
         ];
@@ -8219,6 +8274,17 @@
 
                     loadAppearancePrefs();
 
+                    return;
+                }
+
+                if (key === "dailykrd_dashboard_layouts") {
+                    try {
+                        if (typeof window.__dailyKrdDashboardApply === "function") {
+                            window.__dailyKrdDashboardApply(rawStorageRead(key));
+                        }
+                    } catch (error) {
+                        console.warn("Could not apply synced dashboard layouts:", error);
+                    }
                     return;
                 }
 
@@ -13045,8 +13111,9 @@ done: "تەواو",
             const tasks = getTasksForDate(getActiveTasksSource(), todayKey);
             const total = tasks.length;
             const done = tasks.filter(task => isTaskCompletedOnDate(task, todayKey)).length;
-            // With no tasks scheduled today, tasks are neutral/complete rather than blocking the daily score.
-            const taskPercent = total > 0 ? (done / total) * 100 : 100;
+            // No scheduled tasks are not counted as completed work. This prevents an empty
+            // task list from inflating the daily score to 100%.
+            const taskPercent = total > 0 ? (done / total) * 100 : 0;
 
             const prayerRecord = prayerRecordForDate(todayKey) || {};
             const prayersDone = PRAYER_FIELDS.filter(field => prayerRecord[field] === true).length;
@@ -24791,6 +24858,121 @@ document.documentElement.classList.toggle(
             else init();
         })();
     </script>
+
+
+<script id="dailyKrdDashboardCustomization">
+(function () {
+    "use strict";
+    const KEY = "dailykrd_dashboard_layouts";
+    const WORDS = {
+        en: {settings:"⚙️ Settings", title:"Dashboard settings", layout:"Saved layout", done:"Done", hint:"Drag the ☰ handles to reorder cards. You can hide widgets and change their size. These settings do not delete your data.", new:"＋ New layout", duplicate:"Duplicate", rename:"Rename", remove:"Delete", name:"Layout name", newName:"My dashboard", copyName:"Copy of layout", confirmDelete:"Delete this layout?", cannotDelete:"At least one layout must remain.", limit:"You can save up to 12 layouts.", show:"Show", compact:"Compact", standard:"Standard", expanded:"Expanded", drag:"Drag to reorder", reset:"Reset", defaultName:"Default"},
+        ku: {settings:"⚙️ ڕێکخستنەکان", title:"ڕێکخستنەکانی داشبۆرد", layout:"شێوازی پاشەکەوتکراو", done:"تەواو", hint:"بە دەستگرتنی ☰ کارتەکان ڕیزبەندی بکە. دەتوانیت ویجێتەکان بشاریتەوە و قەبارەیان بگۆڕیت. ئەمە داتاکانت ناسڕێتەوە.", new:"＋ شێوازی نوێ", duplicate:"لەبەرگرتنەوە", rename:"گۆڕینی ناو", remove:"سڕینەوە", name:"ناوی شێواز", newName:"داشبۆردی من", copyName:"کۆپی شێواز", confirmDelete:"ئەم شێوازە بسڕدرێتەوە؟", cannotDelete:"دەبێت لانیکەم یەک شێواز بمێنێتەوە.", limit:"دەتوانیت تا ١٢ شێواز پاشەکەوت بکەیت.", show:"پیشاندان", compact:"بچووک", standard:"ئاسایی", expanded:"گەورە", drag:"گواستنەوە بۆ ڕیزبەندی", reset:"گەڕاندنەوە", defaultName:"بنەڕەت"},
+        ar: {settings:"⚙️ الإعدادات", title:"إعدادات لوحة التحكم", layout:"التخطيط المحفوظ", done:"تم", hint:"اسحب مقابض ☰ لإعادة ترتيب البطاقات. يمكنك إخفاء الأدوات وتغيير أحجامها. لن يؤدي ذلك إلى حذف بياناتك.", new:"＋ تخطيط جديد", duplicate:"نسخ", rename:"إعادة تسمية", remove:"حذف", name:"اسم التخطيط", newName:"لوحتي", copyName:"نسخة من التخطيط", confirmDelete:"هل تريد حذف هذا التخطيط؟", cannotDelete:"يجب الاحتفاظ بتخطيط واحد على الأقل.", limit:"يمكنك حفظ 12 تخطيطًا كحد أقصى.", show:"إظهار", compact:"صغير", standard:"عادي", expanded:"كبير", drag:"اسحب لإعادة الترتيب", reset:"إعادة ضبط", defaultName:"افتراضي"}
+    };
+    const WIDGETS = [
+        {id:"progress", label:{en:"Today's progress",ku:"پێشکەوتنی ئەمڕۆ",ar:"تقدم اليوم"}, find:()=>document.getElementById("dashProgressPercent")?.closest(".dashboard-card")},
+        {id:"prayer", label:{en:"Prayer times",ku:"کاتەکانی نوێژ",ar:"أوقات الصلاة"}, find:()=>document.getElementById("dashNextPrayerName")?.closest(".dashboard-card")},
+        {id:"weather", label:{en:"Weather",ku:"کەشوهەوا",ar:"الطقس"}, find:()=>document.getElementById("dailyWeatherCard")},
+        {id:"study", label:{en:"Study goal",ku:"ئامانجی خوێندن",ar:"هدف الدراسة"}, find:()=>document.getElementById("dashStudyContent")?.closest(".dashboard-card")},
+        {id:"activity", label:{en:"Steps / activity",ku:"هەنگاو و چالاکی",ar:"الخطوات والنشاط"}, find:()=>document.getElementById("dashActivityText")?.closest(".dashboard-card")},
+        {id:"tasks", label:{en:"Tasks",ku:"ئەرکەکان",ar:"المهام"}, find:()=>document.getElementById("taskInput")?.closest(".dashboard-card")},
+        {id:"aiBriefing", label:{en:"Daily AI briefing",ku:"پوختەی زیرەکی دەستکرد",ar:"ملخص الذكاء الاصطناعي"}, find:()=>document.getElementById("paCard")}
+    ];
+    function lang(){ const x=(localStorage.getItem("dailykrd_language")||document.documentElement.lang||"en").toLowerCase(); return x.startsWith("ku")||x==="kr"?"ku":x.startsWith("ar")?"ar":"en"; }
+    function t(k){return (WORDS[lang()]||WORDS.en)[k]||WORDS.en[k]||k;}
+    function label(w){return w.label[lang()]||w.label.en;}
+    function makeId(){return "dash_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6);}
+    const widgetIds=WIDGETS.map(x=>x.id);
+    function cleanLayout(x){
+        const order=Array.isArray(x?.order)?x.order.filter((id,i,a)=>widgetIds.includes(id)&&a.indexOf(id)===i):[];
+        widgetIds.forEach(id=>{if(!order.includes(id))order.push(id);});
+        const hidden=Array.isArray(x?.hidden)?x.hidden.filter(id=>widgetIds.includes(id)):[];
+        const sizes={}; widgetIds.forEach(id=>sizes[id]=["compact","standard","expanded"].includes(x?.sizes?.[id])?x.sizes[id]:"standard");
+        return {id:typeof x?.id==="string"?x.id:makeId(),name:typeof x?.name==="string"?x.name.slice(0,40):t("defaultName"),order,hidden,sizes};
+    }
+    function defaultLayout(){return cleanLayout({id:"default",name:t("defaultName"),order:widgetIds.slice(),hidden:[],sizes:{}});}
+    function readState(){
+        try{const x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&Array.isArray(x.layouts)&&x.layouts.length){const layouts=x.layouts.slice(0,12).map(cleanLayout);return {layouts,activeId:layouts.some(y=>y.id===x.activeId)?x.activeId:layouts[0].id};}}catch(e){console.warn("Dashboard settings read failed",e);}
+        const d=defaultLayout();return {layouts:[d],activeId:d.id};
+    }
+    let state=readState(), editing=false, touchDrag=null;
+    const grid=document.createElement("div"); grid.id="dashboardWidgetGrid"; grid.className="dashboard-widget-grid";
+    const panel=document.createElement("section"); panel.id="dashboardCustomizePanel"; panel.hidden=true;
+    panel.innerHTML='<div class="dashboard-customize-top"><strong id="dashboardCustomizeTitle"></strong><button type="button" class="setting-button" id="dashboardCustomizeDone"></button></div><label for="dashboardLayoutSelect" id="dashboardLayoutLabel"></label><select id="dashboardLayoutSelect"></select><div class="dashboard-layout-actions"><button type="button" class="setting-button" id="dashboardLayoutNew"></button><button type="button" class="setting-button" id="dashboardLayoutDuplicate"></button><button type="button" class="setting-button" id="dashboardLayoutRename"></button><button type="button" class="setting-button" id="dashboardLayoutDelete"></button></div><p class="dashboard-edit-hint" id="dashboardEditHint"></p><div id="dashboardWidgetSettings" class="dashboard-widget-settings"></div>';
+    const header=document.querySelector(".dashboard-header");
+    if(!header) return;
+    const button=document.createElement("button"); button.type="button"; button.id="dashboardCustomizeButton"; button.className="setting-button"; button.setAttribute("aria-expanded","false");
+    header.insertAdjacentElement("afterend",button);
+    button.insertAdjacentElement("afterend",panel);
+    const cards=new Map();
+    WIDGETS.forEach(w=>{const card=w.find();if(card){card.dataset.dashboardWidget=w.id;cards.set(w.id,card);}});
+    const first=WIDGETS.map(w=>cards.get(w.id)).find(Boolean);
+    if(first&&first.parentNode){first.parentNode.insertBefore(grid,first);state.layouts.forEach(l=>l.order.forEach(id=>{const c=cards.get(id);if(c)grid.appendChild(c);}));}
+    const active=()=>state.layouts.find(x=>x.id===state.activeId)||state.layouts[0];
+    function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){console.warn("Dashboard settings could not be saved",e);}}
+    function renderSelect(){
+        const select=document.getElementById("dashboardLayoutSelect");select.replaceChildren();
+        state.layouts.forEach(l=>{const o=document.createElement("option");o.value=l.id;o.textContent=l.name;o.selected=l.id===state.activeId;select.appendChild(o);});
+    }
+    function renderWidgetSettings(){
+        const host=document.getElementById("dashboardWidgetSettings");host.replaceChildren();
+        WIDGETS.forEach(w=>{
+            const row=document.createElement("div");row.className="dashboard-widget-setting";
+            const lab=document.createElement("label");lab.className="dashboard-widget-setting-label";
+            const check=document.createElement("input");check.type="checkbox";check.checked=!active().hidden.includes(w.id);check.setAttribute("aria-label",t("show")+" "+label(w));
+            const text=document.createElement("span");text.textContent=label(w);lab.append(check,text);
+            check.addEventListener("change",()=>{const l=active();l.hidden=check.checked?l.hidden.filter(id=>id!==w.id):[...new Set([...l.hidden,w.id])];save();apply();});
+            const size=document.createElement("select");size.setAttribute("aria-label",label(w)+" size");
+            [["compact",t("compact")],["standard",t("standard")],["expanded",t("expanded")]].forEach(([v,txt])=>{const o=document.createElement("option");o.value=v;o.textContent=txt;size.appendChild(o);});
+            size.value=active().sizes[w.id]||"standard";
+            size.addEventListener("change",()=>{active().sizes[w.id]=size.value;save();apply();});
+            row.append(lab,size);host.appendChild(row);
+        });
+    }
+    function apply(){
+        const l=active();
+        l.order.forEach(id=>{const c=cards.get(id);if(c)grid.appendChild(c);});
+        WIDGETS.forEach(w=>{const c=cards.get(w.id);if(!c)return;c.classList.toggle("dashboard-user-hidden",l.hidden.includes(w.id));c.classList.remove("dashboard-user-size-compact","dashboard-user-size-standard","dashboard-user-size-expanded");c.classList.add("dashboard-user-size-"+(l.sizes[w.id]||"standard"));});
+        renderSelect();renderWidgetSettings();
+    }
+    function updateLabels(){
+        button.textContent=t("settings");document.getElementById("dashboardCustomizeTitle").textContent=t("title");
+        document.getElementById("dashboardCustomizeDone").textContent=t("done");document.getElementById("dashboardLayoutLabel").textContent=t("layout");
+        document.getElementById("dashboardEditHint").textContent=t("hint");document.getElementById("dashboardLayoutNew").textContent=t("new");
+        document.getElementById("dashboardLayoutDuplicate").textContent=t("duplicate");document.getElementById("dashboardLayoutRename").textContent=t("rename");
+        document.getElementById("dashboardLayoutDelete").textContent=t("remove");
+        grid.querySelectorAll(".dashboard-drag-handle").forEach(h=>{const id=h.closest("[data-dashboard-widget]")?.dataset.dashboardWidget;h.title=t("drag");h.setAttribute("aria-label",t("drag")+" "+(WIDGETS.find(w=>w.id===id)?label(WIDGETS.find(w=>w.id===id)):""));});
+    }
+    function setEditing(value){editing=!!value;grid.classList.toggle("dashboard-editing",editing);button.setAttribute("aria-expanded",String(editing));panel.hidden=!editing; if(editing)panel.scrollIntoView({behavior:"smooth",block:"nearest"});}
+    function clearMarks(){grid.querySelectorAll(".dashboard-drop-before,.dashboard-drop-after").forEach(c=>c.classList.remove("dashboard-drop-before","dashboard-drop-after"));}
+    function move(from,to,before){
+        if(!from||!to||from===to)return;
+        const l=active();l.order=l.order.filter(id=>id!==from);const idx=l.order.indexOf(to);l.order.splice(idx+(before?0:1),0,from);save();apply();
+    }
+    WIDGETS.forEach(w=>{
+        const card=cards.get(w.id);if(!card)return;
+        const handle=document.createElement("button");handle.type="button";handle.className="dashboard-drag-handle";handle.textContent="☰";handle.draggable=true;handle.title=t("drag");handle.setAttribute("aria-label",t("drag")+" "+label(w));
+        handle.addEventListener("dragstart",e=>{if(!editing){e.preventDefault();return;}e.dataTransfer.setData("text/plain",w.id);e.dataTransfer.effectAllowed="move";card.classList.add("dashboard-dragging");});
+        handle.addEventListener("dragend",()=>{card.classList.remove("dashboard-dragging");clearMarks();});
+        handle.addEventListener("pointerdown",e=>{if(!editing||e.pointerType==="mouse")return;e.preventDefault();touchDrag={id:w.id,card};card.classList.add("dashboard-dragging");try{handle.setPointerCapture(e.pointerId);}catch(_){}});
+        handle.addEventListener("pointermove",e=>{if(!touchDrag||touchDrag.id!==w.id||e.pointerType==="mouse")return;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest("[data-dashboard-widget]");clearMarks();if(target&&target!==card&&grid.contains(target))target.classList.add(e.clientY<target.getBoundingClientRect().top+target.getBoundingClientRect().height/2?"dashboard-drop-before":"dashboard-drop-after");});
+        handle.addEventListener("pointerup",e=>{if(!touchDrag||touchDrag.id!==w.id||e.pointerType==="mouse")return;touchDrag=null;card.classList.remove("dashboard-dragging");const target=document.elementFromPoint(e.clientX,e.clientY)?.closest("[data-dashboard-widget]");if(target&&target!==card&&grid.contains(target))move(w.id,target.dataset.dashboardWidget,e.clientY<target.getBoundingClientRect().top+target.getBoundingClientRect().height/2);clearMarks();});
+        card.insertBefore(handle,card.firstChild);
+    });
+    grid.addEventListener("dragover",e=>{if(!editing)return;const target=e.target.closest("[data-dashboard-widget]");if(!target||!grid.contains(target))return;e.preventDefault();clearMarks();target.classList.add(e.clientY<target.getBoundingClientRect().top+target.getBoundingClientRect().height/2?"dashboard-drop-before":"dashboard-drop-after");});
+    grid.addEventListener("drop",e=>{if(!editing)return;const from=e.dataTransfer?.getData("text/plain");const target=e.target.closest("[data-dashboard-widget]");if(!from||!target||!grid.contains(target))return;e.preventDefault();move(from,target.dataset.dashboardWidget,e.clientY<target.getBoundingClientRect().top+target.getBoundingClientRect().height/2);clearMarks();});
+    button.addEventListener("click",()=>setEditing(!editing));
+    document.getElementById("dashboardCustomizeDone").addEventListener("click",()=>setEditing(false));
+    document.getElementById("dashboardLayoutSelect").addEventListener("change",e=>{state.activeId=e.target.value;save();apply();});
+    document.getElementById("dashboardLayoutNew").addEventListener("click",()=>{if(state.layouts.length>=12){alert(t("limit"));return;}const name=prompt(t("name"),t("newName"));if(!name?.trim())return;const l=cleanLayout({...active(),id:makeId(),name:name.trim(),order:active().order.slice(),hidden:active().hidden.slice(),sizes:{...active().sizes}});state.layouts.push(l);state.activeId=l.id;save();apply();});
+    document.getElementById("dashboardLayoutDuplicate").addEventListener("click",()=>{if(state.layouts.length>=12){alert(t("limit"));return;}const name=prompt(t("name"),active().name+" — "+t("copyName"));if(!name?.trim())return;const l=cleanLayout({...active(),id:makeId(),name:name.trim(),order:active().order.slice(),hidden:active().hidden.slice(),sizes:{...active().sizes}});state.layouts.push(l);state.activeId=l.id;save();apply();});
+    document.getElementById("dashboardLayoutRename").addEventListener("click",()=>{const name=prompt(t("name"),active().name);if(!name?.trim())return;active().name=name.trim().slice(0,40);save();renderSelect();});
+    document.getElementById("dashboardLayoutDelete").addEventListener("click",()=>{if(state.layouts.length<=1){alert(t("cannotDelete"));return;}if(!confirm(t("confirmDelete")))return;state.layouts=state.layouts.filter(l=>l.id!==state.activeId);state.activeId=state.layouts[0].id;save();apply();});
+    window.__dailyKrdDashboardApply=function(raw){try{const x=typeof raw==="string"?JSON.parse(raw):raw;if(!x||!Array.isArray(x.layouts)||!x.layouts.length)return;state={layouts:x.layouts.slice(0,12).map(cleanLayout),activeId:x.activeId};if(!state.layouts.some(l=>l.id===state.activeId))state.activeId=state.layouts[0].id;save();apply();}catch(e){console.warn("Could not apply synced dashboard settings",e);}};
+    updateLabels();apply();
+    if("MutationObserver"in window)new MutationObserver(()=>{updateLabels();}).observe(document.documentElement,{attributes:true,attributeFilter:["lang","dir"]});
+})();
+</script>
 
 </body>
 </html>
