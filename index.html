@@ -5521,6 +5521,16 @@
         .profile-stats-note { color: var(--muted, #777); font-size: 12px; line-height: 1.45; margin: 8px 2px 18px; }
         @media (min-width: 620px) { .profile-stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 </style>
+
+<style id="dailyKrdGardenStyles">
+.daily-garden-card{margin:18px 0 22px;padding:18px;border:1px solid var(--border-color,rgba(120,140,130,.22));border-radius:22px;background:linear-gradient(145deg,rgba(34,112,75,.13),rgba(93,145,103,.06));overflow:hidden}
+.daily-garden-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.daily-garden-title{font-size:1.15rem;font-weight:800;letter-spacing:-.02em}.daily-garden-subtitle{font-size:.86rem;opacity:.72;margin-top:4px;line-height:1.45}.daily-garden-level{padding:7px 10px;border-radius:999px;background:rgba(47,145,93,.15);font-size:.8rem;font-weight:750;white-space:nowrap}
+.daily-garden-scene{position:relative;min-height:176px;margin:15px 0 13px;border-radius:17px;overflow:hidden;background:linear-gradient(180deg,#cce8ed 0%,#e1f0df 66%,#9acb91 67%,#77b77c 100%);isolation:isolate}.daily-garden-scene:before,.daily-garden-scene:after{content:"";position:absolute;left:-8%;width:116%;height:74px;border-radius:50%;z-index:-1}.daily-garden-scene:before{bottom:14px;background:#8fc58a;transform:rotate(-4deg)}.daily-garden-scene:after{bottom:-25px;background:#65a96f;transform:rotate(4deg)}.daily-garden-sun{position:absolute;right:18px;top:16px;width:28px;height:28px;border-radius:50%;background:#ffe8a0;box-shadow:0 0 0 8px rgba(255,232,160,.18)}
+.daily-garden-trees{position:absolute;inset:12px 12px 18px;display:flex;align-items:flex-end;justify-content:space-around;gap:4px}.daily-garden-tree{position:relative;width:13%;max-width:58px;height:var(--tree-height,82px);display:flex;align-items:flex-end;justify-content:center;transition:height .35s ease;filter:drop-shadow(0 4px 2px rgba(32,70,40,.12))}.daily-garden-tree .trunk{position:absolute;bottom:0;width:12%;min-width:5px;height:35%;border-radius:5px;background:#8b5a37}.daily-garden-tree .leaf{position:absolute;bottom:20%;width:100%;aspect-ratio:1;border-radius:46% 54% 43% 57%;background:var(--leaf,#34865b);transform:rotate(45deg)}.daily-garden-tree .leaf:before,.daily-garden-tree .leaf:after{content:"";position:absolute;inset:12%;border-radius:50%;background:inherit}.daily-garden-tree .leaf:before{transform:translate(-23%,-22%)}.daily-garden-tree .leaf:after{transform:translate(23%,-23%)}.daily-garden-tree.seedling{height:36px!important}.daily-garden-tree.seedling .leaf{width:45%;bottom:20%;background:#4a9e61}.daily-garden-tree.seedling .trunk{height:34%;width:5px}.daily-garden-tree.young{height:58px!important}.daily-garden-tree.young .leaf{width:76%;background:#459b60}.daily-garden-tree.mature .leaf{background:#28794e}.daily-garden-tree:nth-child(2n) .leaf{--leaf:#398d59}.daily-garden-tree:nth-child(3n) .leaf{--leaf:#4c9d68}.daily-garden-ground-label{position:absolute;bottom:5px;left:12px;font-size:.7rem;color:#174c35;font-weight:800;letter-spacing:.02em}.daily-garden-progress-head{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;font-weight:700;margin-bottom:7px}.daily-garden-progress{height:9px;border-radius:999px;background:rgba(100,130,110,.2);overflow:hidden}.daily-garden-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#45a66b,#b5d96f);border-radius:999px;transition:width .4s ease}.daily-garden-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}.daily-garden-stat{padding:10px;border-radius:13px;background:rgba(120,145,125,.1);min-width:0}.daily-garden-stat-value{font-size:1.05rem;font-weight:850}.daily-garden-stat-label{font-size:.72rem;opacity:.72;margin-top:3px}.daily-garden-footnote{font-size:.74rem;opacity:.65;line-height:1.4;margin-top:11px}
+@media(max-width:420px){.daily-garden-card{padding:14px}.daily-garden-scene{min-height:150px}.daily-garden-stats{gap:6px}.daily-garden-stat{padding:8px}.daily-garden-stat-value{font-size:.96rem}}
+.dark .daily-garden-scene{background:linear-gradient(180deg,#243b48 0%,#526c60 66%,#3b7650 67%,#285e42 100%)}.dark .daily-garden-scene:before{background:#39754d}.dark .daily-garden-scene:after{background:#285e42}.dark .daily-garden-ground-label{color:#e3f6dc}
+</style>
+
 </head>
 
 <body>
@@ -6682,6 +6692,29 @@
                 </div>
 
             </div>
+
+            <section class="daily-garden-card" id="dailyKrdGarden" aria-labelledby="dailyGardenTitle">
+                <div class="daily-garden-top">
+                    <div>
+                        <div class="daily-garden-title" id="dailyGardenTitle">🌱 My Focus Garden</div>
+                        <div class="daily-garden-subtitle">Your real progress grows this forest. Study, tasks, prayers, quizzes, and subjects all help it flourish.</div>
+                    </div>
+                    <div class="daily-garden-level" id="dailyGardenLevel">Level 1 · Seedling</div>
+                </div>
+                <div class="daily-garden-scene" role="img" aria-label="Your personal forest grows as you make progress in Daily.KRD">
+                    <div class="daily-garden-sun"></div>
+                    <div class="daily-garden-trees" id="dailyGardenTrees" aria-hidden="true"></div>
+                    <div class="daily-garden-ground-label" id="dailyGardenGroundLabel">A new forest begins</div>
+                </div>
+                <div class="daily-garden-progress-head"><span id="dailyGardenNextLabel">Progress to next level</span><span id="dailyGardenXpLabel">0 / 100 XP</span></div>
+                <div class="daily-garden-progress" role="progressbar" aria-label="Garden level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dailyGardenProgress"><div class="daily-garden-progress-fill" id="dailyGardenProgressFill"></div></div>
+                <div class="daily-garden-stats">
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTotalXp">0</div><div class="daily-garden-stat-label">Total XP</div></div>
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTreesCount">0</div><div class="daily-garden-stat-label">Trees grown</div></div>
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenActivities">0</div><div class="daily-garden-stat-label">Activities counted</div></div>
+                </div>
+                <div class="daily-garden-footnote" id="dailyGardenFootnote">Garden progress uses activity history available in your Daily.KRD account or on this device.</div>
+            </section>
 
             <div class="profile-stats-heading">
                 <div class="settings-card-title">Your Activity</div>
@@ -22277,6 +22310,132 @@ document.documentElement.classList.toggle(
         }
         document.addEventListener("visibilitychange", () => { if (!document.hidden && document.getElementById("profile")?.classList.contains("active")) renderProfileActivityStats(); });
         setTimeout(renderProfileActivityStats, 600);
+
+        // Daily.KRD living garden: progress is calculated from existing activity
+        // records. It adds no new task/prayer/study data model and never changes
+        // existing completion behavior.
+        const DAILY_GARDEN_STATE_KEY = "dailykrd_garden_progress_v1";
+        function gardenReadJson(key, fallback) {
+            try { const value = JSON.parse(localStorage.getItem(key) || "null"); return value == null ? fallback : value; }
+            catch (_) { return fallback; }
+        }
+        function gardenActivitySnapshot() {
+            const tasks = Array.isArray(getActiveTasksSource()) ? getActiveTasksSource() : [];
+            let completedTasks = 0;
+            for (const task of tasks) {
+                if (!task || typeof task !== "object") continue;
+                if (Array.isArray(task.completedDates) && task.completedDates.length) {
+                    completedTasks += new Set(task.completedDates.map(String)).size;
+                } else if (task.completed) completedTasks++;
+            }
+            let prayerRecords = {};
+            try { prayerRecords = typeof getPrayerRecords === "function" ? getPrayerRecords() : {}; } catch (_) {}
+            let completedPrayers = 0;
+            if (prayerRecords && typeof prayerRecords === "object" && !Array.isArray(prayerRecords)) {
+                for (const record of Object.values(prayerRecords)) {
+                    if (record && typeof record === "object") completedPrayers += PRAYER_FIELDS.filter(field => record[field] === true).length;
+                }
+            }
+            const sessionsRaw = gardenReadJson("dailykrd_study_sessions", []);
+            const sessions = Array.isArray(sessionsRaw) ? sessionsRaw.filter(session => session && typeof session === "object") : [];
+            const sessionMinutesByDate = {};
+            let undatedSessionMinutes = 0;
+            for (const session of sessions) {
+                const minutes = Math.max(0, Number(session.duration) || 0);
+                if (session.date) sessionMinutesByDate[String(session.date)] = (sessionMinutesByDate[String(session.date)] || 0) + minutes;
+                else undatedSessionMinutes += minutes;
+            }
+            const minuteDataRaw = gardenReadJson("dailykrd_study_minutes", {});
+            const minuteData = minuteDataRaw && typeof minuteDataRaw === "object" && !Array.isArray(minuteDataRaw) ? minuteDataRaw : {};
+            const studyDateKeys = new Set([...Object.keys(sessionMinutesByDate), ...Object.keys(minuteData)]);
+            let totalStudyMinutes = undatedSessionMinutes;
+            for (const dateKey of studyDateKeys) {
+                const savedDailyMinutes = Math.max(0, Number(minuteData[dateKey]) || 0);
+                totalStudyMinutes += Math.max(sessionMinutesByDate[dateKey] || 0, savedDailyMinutes);
+            }
+            const decksRaw = gardenReadJson("dailykrd_flashcards", []);
+            const decks = Array.isArray(decksRaw) ? decksRaw : [];
+            const subjectsRaw = gardenReadJson("dailykrd_study_subjects", []);
+            const subjects = Array.isArray(subjectsRaw) ? subjectsRaw : [];
+            // XP rates are intentionally simple and transparent: 10 per completed
+            // task, 5 per completed prayer, 1 per 5 study minutes, 8 per quiz deck,
+            // and 3 per subject. Existing history is the source of truth.
+            const activityCount = completedTasks + completedPrayers + sessions.length + decks.length + subjects.length;
+            const xp = completedTasks * 10 + completedPrayers * 5 + Math.floor(totalStudyMinutes / 5) + decks.length * 8 + subjects.length * 3;
+            return { completedTasks, completedPrayers, sessions: sessions.length, totalStudyMinutes, decks: decks.length, subjects: subjects.length, activityCount, xp };
+        }
+        function renderDailyKrdGarden() {
+            const root = document.getElementById("dailyKrdGarden");
+            if (!root) return;
+            const data = gardenActivitySnapshot();
+            // Keep the garden from shrinking if old task records are later removed.
+            let saved = gardenReadJson(DAILY_GARDEN_STATE_KEY, { xp: 0, activities: 0 });
+            if (!saved || typeof saved !== "object") saved = { xp: 0, activities: 0 };
+            const xp = Math.max(data.xp, Math.max(0, Number(saved.xp) || 0));
+            const activities = Math.max(data.activityCount, Math.max(0, Number(saved.activities) || 0));
+            if (xp !== Number(saved.xp) || activities !== Number(saved.activities)) {
+                try { localStorage.setItem(DAILY_GARDEN_STATE_KEY, JSON.stringify({ xp, activities, updatedAt: new Date().toISOString() })); } catch (_) {}
+            }
+            const level = Math.floor(xp / 100) + 1;
+            const levelXp = xp % 100;
+            const trees = Math.min(9, Math.floor(xp / 50));
+            const levelNames = ["Seedling", "Sprout", "Sapling", "Young Grove", "Woodland", "Forest Keeper", "Ancient Grove"];
+            const levelName = levelNames[Math.min(level - 1, levelNames.length - 1)];
+            const levelNode = document.getElementById("dailyGardenLevel");
+            if (levelNode) levelNode.textContent = `Level ${level} · ${levelName}`;
+            const xpNode = document.getElementById("dailyGardenXpLabel");
+            if (xpNode) xpNode.textContent = `${levelXp} / 100 XP`;
+            const totalNode = document.getElementById("dailyGardenTotalXp");
+            if (totalNode) totalNode.textContent = xp.toLocaleString();
+            const treeNode = document.getElementById("dailyGardenTreesCount");
+            if (treeNode) treeNode.textContent = trees.toString();
+            const activitiesNode = document.getElementById("dailyGardenActivities");
+            if (activitiesNode) activitiesNode.textContent = activities.toLocaleString();
+            const fill = document.getElementById("dailyGardenProgressFill");
+            if (fill) fill.style.width = `${levelXp}%`;
+            const progress = document.getElementById("dailyGardenProgress");
+            if (progress) progress.setAttribute("aria-valuenow", String(levelXp));
+            const ground = document.getElementById("dailyGardenGroundLabel");
+            if (ground) ground.textContent = xp < 25 ? "A new forest begins" : trees === 0 ? "Your first tree is taking root" : `${trees} ${trees === 1 ? "tree" : "trees"} in your growing forest`;
+            const treesRoot = document.getElementById("dailyGardenTrees");
+            if (treesRoot) {
+                const visibleTrees = Math.max(5, Math.min(9, trees + 3));
+                treesRoot.innerHTML = Array.from({ length: visibleTrees }, (_, i) => {
+                    const grown = i < trees;
+                    const stage = grown ? (xp >= 150 + i * 35 ? "mature" : "young") : "seedling";
+                    const height = grown ? 64 + ((i * 13 + level * 7) % 38) : 34;
+                    return `<div class="daily-garden-tree ${stage}" style="--tree-height:${height}px;--leaf:${i % 3 === 0 ? "#28794e" : i % 3 === 1 ? "#398d59" : "#4c9d68"}"><span class="leaf"></span><span class="trunk"></span></div>`;
+                }).join("");
+            }
+            const note = document.getElementById("dailyGardenFootnote");
+            if (note) note.textContent = `Earn XP from ${data.completedTasks} completed tasks, ${data.completedPrayers} prayers, ${Math.floor(data.totalStudyMinutes)} study minutes, ${data.decks} quiz decks, and ${data.subjects} subjects. Progress is saved on this device and won't decrease if older task records are removed.`;
+        }
+        window.renderDailyKrdGarden = renderDailyKrdGarden;
+        // Activity UI updates and study-session storage changes refresh the garden
+        // without polling or touching the existing Cloudflare Workers.
+        for (const targetId of ["taskList", "prayerList", "study"]) {
+            const target = document.getElementById(targetId);
+            if (target) {
+                const observer = new MutationObserver(() => { if (document.getElementById("profile")?.classList.contains("active")) renderDailyKrdGarden(); });
+                observer.observe(target, { childList: true, subtree: true, attributes: targetId !== "study", attributeFilter: targetId === "study" ? undefined : ["class", "checked"] });
+            }
+        }
+        window.addEventListener("storage", event => { if (!event.key || event.key.startsWith("dailykrd_")) renderDailyKrdGarden(); });
+        const gardenOriginalSetItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function(key, value) {
+            gardenOriginalSetItem.call(this, key, value);
+            if (["dailykrd_study_sessions", "dailykrd_study_minutes", "dailykrd_flashcards", "dailykrd_study_subjects", "dailykrd_guest_tasks", "dailykrd_guest_prayers"].includes(String(key))) {
+                queueMicrotask(renderDailyKrdGarden);
+            }
+        };
+        const gardenProfile = document.getElementById("profile");
+        if (gardenProfile) {
+            const gardenProfileObserver = new MutationObserver(() => { if (gardenProfile.classList.contains("active")) { renderDailyKrdGarden(); renderProfileActivityStats(); } });
+            gardenProfileObserver.observe(gardenProfile, { attributes: true, attributeFilter: ["class"] });
+            gardenProfile.addEventListener("click", () => setTimeout(renderDailyKrdGarden, 80));
+        }
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) renderDailyKrdGarden(); });
+        setTimeout(renderDailyKrdGarden, 700);
     </script>
 
     <!-- DAILY AI -->
