@@ -5555,6 +5555,24 @@
 @media(max-width:420px){.daily-garden-scene{min-height:190px}}
 @media(prefers-reduced-motion:reduce){.daily-garden-tree,.daily-garden-shortcut{transition:none}}
 </style>
+<style id="daily-garden-world-detail">
+.focus-garden-page{padding-bottom:30px}.focus-garden-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.focus-garden-badge{font-size:.76rem;font-weight:750;padding:9px 12px;border-radius:999px;background:linear-gradient(145deg,rgba(76,175,112,.18),rgba(178,218,112,.15));border:1px solid rgba(76,145,92,.2)}
+.focus-garden-page .daily-garden-card{margin-top:0;padding:clamp(14px,3vw,24px);border-radius:26px;background:linear-gradient(145deg,rgba(33,112,70,.16),rgba(141,191,114,.08));box-shadow:0 18px 45px rgba(29,76,47,.1),inset 0 1px rgba(255,255,255,.6)}
+.daily-garden-scene{height:clamp(290px,48vw,440px);min-height:290px;overflow:hidden;border-radius:22px;isolation:isolate;perspective:1000px;transform-style:preserve-3d;background:linear-gradient(180deg,#8bc8ed 0%,#c9e8ee 38%,#e5f0d3 57%,#9fce82 58%,#579b61 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),inset 0 -24px 35px rgba(18,70,42,.2),0 12px 24px rgba(27,74,46,.14)}
+.garden-sky-glow{position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 75% 17%,rgba(255,255,220,.55),transparent 34%),linear-gradient(115deg,rgba(255,255,255,.2),transparent 42%)}
+.daily-garden-sun{z-index:0;width:45px;height:45px;right:10%;top:10%;background:radial-gradient(circle at 32% 25%,#fffce0 0%,#ffe18a 48%,#f4b54e 100%);box-shadow:0 0 0 10px rgba(255,239,173,.2),0 0 32px rgba(255,224,127,.7),0 7px 12px rgba(174,124,45,.22)}
+.garden-cloud{position:absolute;z-index:0;width:76px;height:20px;border-radius:30px;background:linear-gradient(#fff,#e7f2f2);opacity:.78;filter:drop-shadow(0 5px 3px rgba(69,113,129,.1))}.garden-cloud:before,.garden-cloud:after{content:"";position:absolute;bottom:4px;border-radius:50%;background:inherit}.garden-cloud:before{width:31px;height:31px;left:13px}.garden-cloud:after{width:23px;height:23px;left:36px}.cloud-one{top:19%;left:12%;transform:scale(.85)}.cloud-two{top:31%;right:26%;transform:scale(.56);opacity:.55}
+.garden-mountain{position:absolute;bottom:39%;width:0;height:0;border-left:clamp(90px,19vw,190px) solid transparent;border-right:clamp(90px,19vw,190px) solid transparent;border-bottom:clamp(105px,21vw,205px) solid #8eb8a7;filter:drop-shadow(0 8px 5px rgba(40,91,72,.12));z-index:0}.mountain-back{left:13%;transform:scale(.78);border-bottom-color:#a7c9b8;opacity:.9}.mountain-front{right:1%;transform:scale(.68);border-bottom-color:#80ad9a;opacity:.88}
+.garden-hill{position:absolute;left:-10%;width:120%;border-radius:50%;transform-style:preserve-3d}.hill-back{height:44%;bottom:20%;z-index:0;background:linear-gradient(160deg,#a5d38d,#6fb579 74%,#5da56d);transform:rotateX(18deg) rotateZ(-5deg);box-shadow:inset 0 9px 12px rgba(242,255,205,.24),inset 0 -16px 18px rgba(29,97,53,.15)}.hill-mid{height:42%;bottom:2%;z-index:1;background:linear-gradient(165deg,#82c779 0%,#55a765 52%,#358552 100%);transform:rotateX(22deg) rotateZ(4deg);box-shadow:inset 0 9px 13px rgba(230,255,202,.22),inset 0 -20px 25px rgba(18,74,39,.24)}.hill-front{height:28%;bottom:-15%;z-index:2;background:linear-gradient(165deg,#65b66b,#2e7b4c 80%);transform:rotateX(18deg) rotateZ(-2deg);box-shadow:inset 0 7px 10px rgba(220,255,191,.18),inset 0 -10px 16px rgba(10,59,34,.25)}
+.garden-stream{position:absolute;z-index:2;left:45%;bottom:-4%;width:16%;height:53%;border-radius:50%;transform:rotate(13deg) skewY(-8deg);background:linear-gradient(90deg,#3b9eaf,#9ce5e6 34%,#d0f5ed 47%,#54b9c6 68%,#318b9f);box-shadow:inset 5px 0 8px rgba(255,255,255,.3),inset -5px 0 9px rgba(18,89,106,.25),0 0 0 3px rgba(34,111,86,.12);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}.garden-stream:after{content:"";position:absolute;left:24%;top:8%;height:80%;width:14%;border-radius:50%;background:rgba(239,255,247,.58);filter:blur(2px)}
+.garden-path{position:absolute;z-index:2;left:18%;bottom:-9%;width:23%;height:40%;border-radius:50%;transform:rotate(-21deg);background:linear-gradient(90deg,#a17c53,#d4b17a 45%,#9a744b);box-shadow:inset 4px 0 6px rgba(255,236,185,.3),inset -4px 0 7px rgba(81,52,28,.18);opacity:.9}
+.daily-garden-trees{z-index:3;inset:24% 5% 12%;align-items:flex-end;gap:0;transform-style:preserve-3d}.daily-garden-tree{width:clamp(34px,8%,78px);max-width:78px;filter:drop-shadow(8px 12px 5px rgba(24,61,37,.24));transform-style:preserve-3d}.daily-garden-tree .trunk{width:18%;min-width:7px;border-radius:3px 3px 7px 7px;background:linear-gradient(90deg,#5b3927,#b07b4c 34%,#80502f 69%,#4c3022);box-shadow:inset 2px 0 rgba(255,224,169,.22),3px 0 4px rgba(42,57,29,.15)}.daily-garden-tree .leaf{width:100%;aspect-ratio:.82;border-radius:48% 52% 42% 58%;background:radial-gradient(ellipse at 28% 18%,#b0e98a 0%,#68c56d 23%,#359456 56%,#1d6d43 83%,#125133 100%);box-shadow:inset -8px -11px 0 rgba(9,65,36,.18),inset 5px 4px 0 rgba(235,255,190,.2),0 6px 0 rgba(27,91,48,.2);transform:rotate(45deg) rotateX(12deg);border:1px solid rgba(17,93,50,.12)}.daily-garden-tree .leaf:before{inset:5%;background:linear-gradient(145deg,#9ee27c 0%,#4eaf60 54%,#1e7043 100%);box-shadow:inset -5px -6px 0 rgba(11,64,34,.15),inset 3px 3px rgba(240,255,198,.12)}.daily-garden-tree .leaf:after{inset:8%;background:linear-gradient(135deg,#8bd974 0%,#3e9d58 55%,#185f39 100%);box-shadow:inset -4px -5px 0 rgba(11,64,34,.16)}.daily-garden-tree:nth-child(odd){margin-bottom:4px}.daily-garden-tree:nth-child(3n){z-index:4}.daily-garden-tree:nth-child(4n) .leaf{filter:hue-rotate(12deg) saturate(.9)}
+.garden-flower{position:absolute;z-index:4;color:#fff0a8;text-shadow:0 1px 0 #bf8855,0 3px 3px rgba(30,72,39,.3);font-size:clamp(13px,2vw,21px)}.flower-one{left:15%;bottom:16%}.flower-two{left:37%;bottom:11%;color:#ffd4e4}.flower-three{right:14%;bottom:18%;color:#fff4c5}.garden-rock{position:absolute;z-index:4;width:22px;height:13px;border-radius:45% 55% 36% 40%;background:linear-gradient(145deg,#d3d8c7,#899c8c 65%,#61776a);box-shadow:inset 3px 2px 0 rgba(255,255,255,.38),0 4px 3px rgba(25,68,40,.2)}.rock-one{left:48%;bottom:12%;transform:rotate(-15deg)}.rock-two{right:24%;bottom:20%;transform:scale(.7) rotate(12deg)}.rock-three{left:24%;bottom:24%;transform:scale(.55) rotate(-8deg)}
+.daily-garden-ground-label{z-index:6;left:12px;bottom:9px;padding:6px 10px;border-radius:999px;background:rgba(239,255,230,.72);backdrop-filter:blur(8px);color:#174c35;text-shadow:none;box-shadow:0 3px 8px rgba(28,73,42,.1)}.daily-garden-scene .daily-garden-trees .daily-garden-tree:nth-child(n+7){opacity:.96}
+.dark .focus-garden-page .daily-garden-card{background:linear-gradient(145deg,rgba(28,88,56,.25),rgba(27,45,37,.3));box-shadow:0 18px 45px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.05)}.dark .daily-garden-scene{background:linear-gradient(180deg,#152e48 0%,#2f5264 39%,#b1cbb1 58%,#376c48 59%,#173f2c 100%)}.dark .garden-cloud{opacity:.24}.dark .mountain-back{border-bottom-color:#426b65}.dark .mountain-front{border-bottom-color:#355b54}.dark .hill-back{background:linear-gradient(160deg,#3f8054,#2e6847)}.dark .hill-mid{background:linear-gradient(165deg,#326f49,#205a3a)}.dark .hill-front{background:linear-gradient(165deg,#285e3e,#153e2b)}.dark .garden-stream{background:linear-gradient(90deg,#216e86,#6dc6d1 34%,#a4e5df 47%,#338da5 68%,#1b5d75)}.dark .garden-path{background:linear-gradient(90deg,#654b38,#9b7c58 45%,#5e442f)}
+@media(max-width:520px){.focus-garden-page-head{gap:6px}.daily-garden-scene{height:310px}.daily-garden-trees{inset:30% 2% 14%}.daily-garden-tree{width:10%}.garden-mountain{bottom:43%}.garden-stream{left:43%;width:18%}.garden-rock{width:17px;height:10px}}
+@media(prefers-reduced-motion:reduce){.daily-garden-scene *{scroll-behavior:auto}}
+</style>
 
 </head>
 
@@ -6683,6 +6701,47 @@
         </section>
 
 
+        <!-- FOCUS GARDEN: standalone section, opened from the tree header button -->
+        <section class="section focus-garden-page" id="focusGarden">
+            <div class="focus-garden-page-head">
+                <div>
+                    <div class="settings-title">🌳 Focus Garden</div>
+                    <div class="settings-subtitle">A living 3D-style world that grows with your real progress in Daily.KRD.</div>
+                </div>
+                <div class="focus-garden-badge">🌿 Grow a little every day</div>
+            </div>
+            <section class="daily-garden-card" id="dailyKrdGarden" aria-labelledby="dailyGardenTitle">
+                <div class="daily-garden-top">
+                    <div>
+                        <div class="daily-garden-title" id="dailyGardenTitle">🌱 My Focus Garden</div>
+                        <div class="daily-garden-subtitle">Your real progress grows this forest. Study, tasks, prayers, quizzes, and subjects all help it flourish.</div>
+                    </div>
+                    <div class="daily-garden-level" id="dailyGardenLevel">Level 1 · Seedling</div>
+                </div>
+                <div class="daily-garden-scene" role="img" aria-label="A detailed layered 3D-style garden with hills, trees, flowers, stones, and a stream that grows with your progress">
+                    <div class="garden-sky-glow"></div>
+                    <div class="daily-garden-sun"></div>
+                    <div class="garden-cloud cloud-one"></div><div class="garden-cloud cloud-two"></div>
+                    <div class="garden-mountain mountain-back"></div><div class="garden-mountain mountain-front"></div>
+                    <div class="garden-hill hill-back"></div><div class="garden-hill hill-mid"></div><div class="garden-hill hill-front"></div>
+                    <div class="garden-stream"></div>
+                    <div class="garden-path"></div>
+                    <div class="daily-garden-trees" id="dailyGardenTrees" aria-hidden="true"></div>
+                    <div class="garden-flower flower-one">✿</div><div class="garden-flower flower-two">✿</div><div class="garden-flower flower-three">✿</div>
+                    <div class="garden-rock rock-one"></div><div class="garden-rock rock-two"></div><div class="garden-rock rock-three"></div>
+                    <div class="daily-garden-ground-label" id="dailyGardenGroundLabel">A new forest begins</div>
+                </div>
+                <div class="daily-garden-progress-head"><span id="dailyGardenNextLabel">Progress to next level</span><span id="dailyGardenXpLabel">0 / 100 XP</span></div>
+                <div class="daily-garden-progress" role="progressbar" aria-label="Garden level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dailyGardenProgress"><div class="daily-garden-progress-fill" id="dailyGardenProgressFill"></div></div>
+                <div class="daily-garden-stats">
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTotalXp">0</div><div class="daily-garden-stat-label">Total XP</div></div>
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTreesCount">0</div><div class="daily-garden-stat-label">Trees grown</div></div>
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenActivities">0</div><div class="daily-garden-stat-label">Activities counted</div></div>
+                </div>
+                <div class="daily-garden-footnote" id="dailyGardenFootnote">Garden progress uses activity history available in your Daily.KRD account or on this device.</div>
+            </section>
+        </section>
+
         <!-- PROFILE -->
 
         <section
@@ -6728,28 +6787,7 @@
 
             </div>
 
-            <section class="daily-garden-card" id="dailyKrdGarden" aria-labelledby="dailyGardenTitle">
-                <div class="daily-garden-top">
-                    <div>
-                        <div class="daily-garden-title" id="dailyGardenTitle">🌱 My Focus Garden</div>
-                        <div class="daily-garden-subtitle">Your real progress grows this forest. Study, tasks, prayers, quizzes, and subjects all help it flourish.</div>
-                    </div>
-                    <div class="daily-garden-level" id="dailyGardenLevel">Level 1 · Seedling</div>
-                </div>
-                <div class="daily-garden-scene" role="img" aria-label="Your personal forest grows as you make progress in Daily.KRD">
-                    <div class="daily-garden-sun"></div>
-                    <div class="daily-garden-trees" id="dailyGardenTrees" aria-hidden="true"></div>
-                    <div class="daily-garden-ground-label" id="dailyGardenGroundLabel">A new forest begins</div>
-                </div>
-                <div class="daily-garden-progress-head"><span id="dailyGardenNextLabel">Progress to next level</span><span id="dailyGardenXpLabel">0 / 100 XP</span></div>
-                <div class="daily-garden-progress" role="progressbar" aria-label="Garden level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dailyGardenProgress"><div class="daily-garden-progress-fill" id="dailyGardenProgressFill"></div></div>
-                <div class="daily-garden-stats">
-                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTotalXp">0</div><div class="daily-garden-stat-label">Total XP</div></div>
-                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTreesCount">0</div><div class="daily-garden-stat-label">Trees grown</div></div>
-                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenActivities">0</div><div class="daily-garden-stat-label">Activities counted</div></div>
-                </div>
-                <div class="daily-garden-footnote" id="dailyGardenFootnote">Garden progress uses activity history available in your Daily.KRD account or on this device.</div>
-            </section>
+
 
             <div class="profile-stats-heading">
                 <div class="settings-card-title">Your Activity</div>
@@ -22446,14 +22484,14 @@ document.documentElement.classList.toggle(
             if (note) note.textContent = `Earn XP from ${data.completedTasks} completed tasks, ${data.completedPrayers} prayers, ${Math.floor(data.totalStudyMinutes)} study minutes, ${data.decks} quiz decks, and ${data.subjects} subjects. Progress is saved on this device and won't decrease if older task records are removed.`;
         }
         window.renderDailyKrdGarden = renderDailyKrdGarden;
-        // Header shortcut opens the garden's Profile section and scrolls directly to it.
+        // Header tree shortcut opens the dedicated Focus Garden section.
         const gardenShortcut = document.getElementById("gardenButton");
         if (gardenShortcut) gardenShortcut.addEventListener("click", () => {
             if (window.Haptics) window.Haptics.tap();
-            if (typeof showSection === "function") showSection("profile");
+            if (typeof showSection === "function") showSection("focusGarden");
             setTimeout(() => {
-                const garden = document.getElementById("dailyKrdGarden");
-                if (garden) garden.scrollIntoView({ behavior: "smooth", block: "start" });
+                const page = document.getElementById("focusGarden");
+                if (page) page.scrollIntoView({ behavior: "smooth", block: "start" });
                 renderDailyKrdGarden();
             }, 100);
         });
@@ -22462,7 +22500,7 @@ document.documentElement.classList.toggle(
         for (const targetId of ["taskList", "prayerList", "study"]) {
             const target = document.getElementById(targetId);
             if (target) {
-                const observer = new MutationObserver(() => { if (document.getElementById("profile")?.classList.contains("active")) renderDailyKrdGarden(); });
+                const observer = new MutationObserver(() => { if (document.getElementById("focusGarden")?.classList.contains("active")) renderDailyKrdGarden(); });
                 observer.observe(target, { childList: true, subtree: true, attributes: targetId !== "study", attributeFilter: targetId === "study" ? undefined : ["class", "checked"] });
             }
         }
@@ -22474,11 +22512,13 @@ document.documentElement.classList.toggle(
                 queueMicrotask(renderDailyKrdGarden);
             }
         };
-        const gardenProfile = document.getElementById("profile");
-        if (gardenProfile) {
-            const gardenProfileObserver = new MutationObserver(() => { if (gardenProfile.classList.contains("active")) { renderDailyKrdGarden(); renderProfileActivityStats(); } });
-            gardenProfileObserver.observe(gardenProfile, { attributes: true, attributeFilter: ["class"] });
-            gardenProfile.addEventListener("click", () => setTimeout(renderDailyKrdGarden, 80));
+        const gardenPage = document.getElementById("focusGarden");
+        if (gardenPage) {
+            const gardenPageObserver = new MutationObserver(() => {
+                if (gardenPage.classList.contains("active")) renderDailyKrdGarden();
+            });
+            gardenPageObserver.observe(gardenPage, { attributes: true, attributeFilter: ["class"] });
+            gardenPage.addEventListener("click", () => setTimeout(renderDailyKrdGarden, 80));
         }
         document.addEventListener("visibilitychange", () => { if (!document.hidden) renderDailyKrdGarden(); });
         setTimeout(renderDailyKrdGarden, 700);
