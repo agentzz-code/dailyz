@@ -5523,55 +5523,27 @@
 </style>
 
 <style id="dailyKrdGardenStyles">
+/* Garden card wrapper */
 .daily-garden-card{margin:18px 0 22px;padding:18px;border:1px solid var(--border-color,rgba(120,140,130,.22));border-radius:22px;background:linear-gradient(145deg,rgba(34,112,75,.13),rgba(93,145,103,.06));overflow:hidden}
 .daily-garden-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.daily-garden-title{font-size:1.15rem;font-weight:800;letter-spacing:-.02em}.daily-garden-subtitle{font-size:.86rem;opacity:.72;margin-top:4px;line-height:1.45}.daily-garden-level{padding:7px 10px;border-radius:999px;background:rgba(47,145,93,.15);font-size:.8rem;font-weight:750;white-space:nowrap}
-.daily-garden-scene{position:relative;min-height:176px;margin:15px 0 13px;border-radius:17px;overflow:hidden;background:linear-gradient(180deg,#cce8ed 0%,#e1f0df 66%,#9acb91 67%,#77b77c 100%);isolation:isolate}.daily-garden-scene:before,.daily-garden-scene:after{content:"";position:absolute;left:-8%;width:116%;height:74px;border-radius:50%;z-index:-1}.daily-garden-scene:before{bottom:14px;background:#8fc58a;transform:rotate(-4deg)}.daily-garden-scene:after{bottom:-25px;background:#65a96f;transform:rotate(4deg)}.daily-garden-sun{position:absolute;right:18px;top:16px;width:28px;height:28px;border-radius:50%;background:#ffe8a0;box-shadow:0 0 0 8px rgba(255,232,160,.18)}
-.daily-garden-trees{position:absolute;inset:12px 12px 18px;display:flex;align-items:flex-end;justify-content:space-around;gap:4px}.daily-garden-tree{position:relative;width:13%;max-width:58px;height:var(--tree-height,82px);display:flex;align-items:flex-end;justify-content:center;transition:height .35s ease;filter:drop-shadow(0 4px 2px rgba(32,70,40,.12))}.daily-garden-tree .trunk{position:absolute;bottom:0;width:12%;min-width:5px;height:35%;border-radius:5px;background:#8b5a37}.daily-garden-tree .leaf{position:absolute;bottom:20%;width:100%;aspect-ratio:1;border-radius:46% 54% 43% 57%;background:var(--leaf,#34865b);transform:rotate(45deg)}.daily-garden-tree .leaf:before,.daily-garden-tree .leaf:after{content:"";position:absolute;inset:12%;border-radius:50%;background:inherit}.daily-garden-tree .leaf:before{transform:translate(-23%,-22%)}.daily-garden-tree .leaf:after{transform:translate(23%,-23%)}.daily-garden-tree.seedling{height:36px!important}.daily-garden-tree.seedling .leaf{width:45%;bottom:20%;background:#4a9e61}.daily-garden-tree.seedling .trunk{height:34%;width:5px}.daily-garden-tree.young{height:58px!important}.daily-garden-tree.young .leaf{width:76%;background:#459b60}.daily-garden-tree.mature .leaf{background:#28794e}.daily-garden-tree:nth-child(2n) .leaf{--leaf:#398d59}.daily-garden-tree:nth-child(3n) .leaf{--leaf:#4c9d68}.daily-garden-ground-label{position:absolute;bottom:5px;left:12px;font-size:.7rem;color:#174c35;font-weight:800;letter-spacing:.02em}.daily-garden-progress-head{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;font-weight:700;margin-bottom:7px}.daily-garden-progress{height:9px;border-radius:999px;background:rgba(100,130,110,.2);overflow:hidden}.daily-garden-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#45a66b,#b5d96f);border-radius:999px;transition:width .4s ease}.daily-garden-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}.daily-garden-stat{padding:10px;border-radius:13px;background:rgba(120,145,125,.1);min-width:0}.daily-garden-stat-value{font-size:1.05rem;font-weight:850}.daily-garden-stat-label{font-size:.72rem;opacity:.72;margin-top:3px}.daily-garden-footnote{font-size:.74rem;opacity:.65;line-height:1.4;margin-top:11px}
-@media(max-width:420px){.daily-garden-card{padding:14px}.daily-garden-scene{min-height:150px}.daily-garden-stats{gap:6px}.daily-garden-stat{padding:8px}.daily-garden-stat-value{font-size:.96rem}}
-.dark .daily-garden-scene{background:linear-gradient(180deg,#243b48 0%,#526c60 66%,#3b7650 67%,#285e42 100%)}.dark .daily-garden-scene:before{background:#39754d}.dark .daily-garden-scene:after{background:#285e42}.dark .daily-garden-ground-label{color:#e3f6dc}
-</style>
-<style id="daily-garden-3d-upgrade">
-/* CSS 3D diorama upgrade: layered terrain, perspective, volumetric trees and depth shadows. */
-.daily-garden-shortcut{position:relative;isolation:isolate}
-.daily-garden-shortcut:active{transform:scale(.93)}
-.daily-garden-scene{min-height:220px;perspective:720px;transform-style:preserve-3d;background:linear-gradient(180deg,#a8d9ed 0%,#d7eee3 48%,#9ed08b 49%,#6eb879 100%);box-shadow:inset 0 -18px 30px rgba(22,75,44,.12),inset 0 1px 0 rgba(255,255,255,.5)}
-.daily-garden-scene:before{height:105px;bottom:8px;background:linear-gradient(165deg,#a8d89a,#69b878 72%);transform:rotateX(16deg) rotateZ(-5deg) scale(1.08);box-shadow:0 -9px 16px rgba(255,255,255,.12) inset}
-.daily-garden-scene:after{height:98px;bottom:-35px;background:linear-gradient(165deg,#78c37c,#347f50);transform:rotateX(12deg) rotateZ(4deg) scale(1.1);box-shadow:0 9px 16px rgba(19,71,38,.2) inset}
-.daily-garden-sun{width:36px;height:36px;right:23px;top:20px;background:radial-gradient(circle at 32% 28%,#fff8ce,#ffd66e 68%,#f4b94e);box-shadow:0 0 0 9px rgba(255,232,160,.18),0 5px 15px rgba(183,134,45,.25)}
-.daily-garden-trees{inset:12px 14px 23px;align-items:flex-end;transform-style:preserve-3d;perspective:550px}
-.daily-garden-tree{transform:translateZ(var(--tree-depth,0px)) rotateY(-7deg);transform-style:preserve-3d;filter:drop-shadow(5px 7px 3px rgba(20,65,35,.22));transition:height .45s ease,transform .45s ease,filter .45s ease}
-.daily-garden-tree .trunk{width:15%;min-width:6px;height:39%;background:linear-gradient(90deg,#633e27 0%,#a97649 40%,#71452b 78%,#4e3425 100%);box-shadow:inset 2px 0 rgba(255,220,166,.15);transform:perspective(80px) rotateY(-8deg)}
-.daily-garden-tree .leaf{width:92%;aspect-ratio:.82;border-radius:48% 52% 45% 55%;background:radial-gradient(ellipse at 30% 22%,#8bd47a 0%,var(--leaf,#34865b) 38%,#1d6844 78%,#145436 100%);box-shadow:inset -5px -7px 0 rgba(12,73,43,.18),inset 4px 3px 0 rgba(213,255,174,.14),0 4px 0 rgba(24,91,49,.18);transform:rotate(45deg) rotateX(9deg);}
-.daily-garden-tree .leaf:before{background:linear-gradient(145deg,#8bd77b 0%,#3f9c5d 64%,#246e43 100%);box-shadow:inset -3px -3px 0 rgba(12,70,39,.13)}
-.daily-garden-tree .leaf:after{background:linear-gradient(135deg,#78c96d 0%,#328b52 66%,#1d643e 100%);box-shadow:inset -3px -3px 0 rgba(12,70,39,.13)}
-.daily-garden-tree.young .leaf{width:80%;background:radial-gradient(ellipse at 30% 22%,#a3e18a,#459b60 58%,#286f45)}
-.daily-garden-tree.seedling .leaf{width:52%;aspect-ratio:1;background:radial-gradient(circle at 30% 20%,#c1ed8c,#4a9e61 70%,#267344)}
-.daily-garden-tree:nth-child(1),.daily-garden-tree:nth-child(5),.daily-garden-tree:nth-child(9){--tree-depth:-12px;transform:translateY(7px) scale(.86)}
-.daily-garden-tree:nth-child(2),.daily-garden-tree:nth-child(4),.daily-garden-tree:nth-child(8){--tree-depth:8px;transform:translateY(-2px) scale(1.04)}
-.daily-garden-tree:nth-child(3),.daily-garden-tree:nth-child(6),.daily-garden-tree:nth-child(7){--tree-depth:18px;transform:translateY(-5px) scale(1.12)}
-.daily-garden-ground-label{z-index:2;text-shadow:0 1px rgba(255,255,255,.22)}
-.dark .daily-garden-scene{background:linear-gradient(180deg,#1c3549 0%,#405f65 48%,#315e43 49%,#1b4935 100%);box-shadow:inset 0 -18px 30px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.08)}
-.dark .daily-garden-scene:before{background:linear-gradient(165deg,#3f8058,#286c47)}.dark .daily-garden-scene:after{background:linear-gradient(165deg,#2e7047,#17432f)}
-@media(max-width:420px){.daily-garden-scene{min-height:190px}}
-@media(prefers-reduced-motion:reduce){.daily-garden-tree,.daily-garden-shortcut{transition:none}}
-</style>
-<style id="daily-garden-world-detail">
+.daily-garden-progress-head{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;font-weight:700;margin-bottom:7px}.daily-garden-progress{height:9px;border-radius:999px;background:rgba(100,130,110,.2);overflow:hidden}.daily-garden-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#45a66b,#b5d96f);border-radius:999px;transition:width .4s ease}.daily-garden-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}.daily-garden-stat{padding:10px;border-radius:13px;background:rgba(120,145,125,.1);min-width:0}.daily-garden-stat-value{font-size:1.05rem;font-weight:850}.daily-garden-stat-label{font-size:.72rem;opacity:.72;margin-top:3px}.daily-garden-footnote{font-size:.74rem;opacity:.65;line-height:1.4;margin-top:11px}
+@media(max-width:420px){.daily-garden-card{padding:14px}.daily-garden-stats{gap:6px}.daily-garden-stat{padding:8px}.daily-garden-stat-value{font-size:.96rem}}
+/* 3D canvas scene wrapper */
+.daily-garden-scene{position:relative;height:clamp(290px,48vw,440px);min-height:290px;margin:15px 0 13px;border-radius:22px;overflow:hidden;background:#8bc8ed;box-shadow:0 12px 24px rgba(27,74,46,.14);isolation:isolate;touch-action:none}
+#gardenCanvas{display:block;width:100%!important;height:100%!important;border-radius:22px}
+.garden-canvas-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;opacity:.7;padding:24px;text-align:center;background:linear-gradient(180deg,#8bc8ed,#9fce82)}
+.daily-garden-ground-label{position:absolute;z-index:6;left:12px;bottom:9px;padding:6px 10px;border-radius:999px;background:rgba(239,255,230,.72);backdrop-filter:blur(8px);color:#174c35;font-size:.7rem;font-weight:800;letter-spacing:.02em;box-shadow:0 3px 8px rgba(28,73,42,.1)}
+.garden-3d-controls{position:absolute;top:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:6px}
+.garden-3d-btn{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.72);backdrop-filter:blur(8px);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:transform .15s,background .15s}
+.garden-3d-btn:hover{background:rgba(255,255,255,.9);transform:scale(1.08)}
+.dark .garden-3d-btn{background:rgba(30,50,40,.75);border-color:rgba(255,255,255,.2);color:#e0f5dc}
+/* Focus garden page */
 .focus-garden-page{padding-bottom:30px}.focus-garden-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.focus-garden-badge{font-size:.76rem;font-weight:750;padding:9px 12px;border-radius:999px;background:linear-gradient(145deg,rgba(76,175,112,.18),rgba(178,218,112,.15));border:1px solid rgba(76,145,92,.2)}
 .focus-garden-page .daily-garden-card{margin-top:0;padding:clamp(14px,3vw,24px);border-radius:26px;background:linear-gradient(145deg,rgba(33,112,70,.16),rgba(141,191,114,.08));box-shadow:0 18px 45px rgba(29,76,47,.1),inset 0 1px rgba(255,255,255,.6)}
-.daily-garden-scene{height:clamp(290px,48vw,440px);min-height:290px;overflow:hidden;border-radius:22px;isolation:isolate;perspective:1000px;transform-style:preserve-3d;background:linear-gradient(180deg,#8bc8ed 0%,#c9e8ee 38%,#e5f0d3 57%,#9fce82 58%,#579b61 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),inset 0 -24px 35px rgba(18,70,42,.2),0 12px 24px rgba(27,74,46,.14)}
-.garden-sky-glow{position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 75% 17%,rgba(255,255,220,.55),transparent 34%),linear-gradient(115deg,rgba(255,255,255,.2),transparent 42%)}
-.daily-garden-sun{z-index:0;width:45px;height:45px;right:10%;top:10%;background:radial-gradient(circle at 32% 25%,#fffce0 0%,#ffe18a 48%,#f4b54e 100%);box-shadow:0 0 0 10px rgba(255,239,173,.2),0 0 32px rgba(255,224,127,.7),0 7px 12px rgba(174,124,45,.22)}
-.garden-cloud{position:absolute;z-index:0;width:76px;height:20px;border-radius:30px;background:linear-gradient(#fff,#e7f2f2);opacity:.78;filter:drop-shadow(0 5px 3px rgba(69,113,129,.1))}.garden-cloud:before,.garden-cloud:after{content:"";position:absolute;bottom:4px;border-radius:50%;background:inherit}.garden-cloud:before{width:31px;height:31px;left:13px}.garden-cloud:after{width:23px;height:23px;left:36px}.cloud-one{top:19%;left:12%;transform:scale(.85)}.cloud-two{top:31%;right:26%;transform:scale(.56);opacity:.55}
-.garden-mountain{position:absolute;bottom:39%;width:0;height:0;border-left:clamp(90px,19vw,190px) solid transparent;border-right:clamp(90px,19vw,190px) solid transparent;border-bottom:clamp(105px,21vw,205px) solid #8eb8a7;filter:drop-shadow(0 8px 5px rgba(40,91,72,.12));z-index:0}.mountain-back{left:13%;transform:scale(.78);border-bottom-color:#a7c9b8;opacity:.9}.mountain-front{right:1%;transform:scale(.68);border-bottom-color:#80ad9a;opacity:.88}
-.garden-hill{position:absolute;left:-10%;width:120%;border-radius:50%;transform-style:preserve-3d}.hill-back{height:44%;bottom:20%;z-index:0;background:linear-gradient(160deg,#a5d38d,#6fb579 74%,#5da56d);transform:rotateX(18deg) rotateZ(-5deg);box-shadow:inset 0 9px 12px rgba(242,255,205,.24),inset 0 -16px 18px rgba(29,97,53,.15)}.hill-mid{height:42%;bottom:2%;z-index:1;background:linear-gradient(165deg,#82c779 0%,#55a765 52%,#358552 100%);transform:rotateX(22deg) rotateZ(4deg);box-shadow:inset 0 9px 13px rgba(230,255,202,.22),inset 0 -20px 25px rgba(18,74,39,.24)}.hill-front{height:28%;bottom:-15%;z-index:2;background:linear-gradient(165deg,#65b66b,#2e7b4c 80%);transform:rotateX(18deg) rotateZ(-2deg);box-shadow:inset 0 7px 10px rgba(220,255,191,.18),inset 0 -10px 16px rgba(10,59,34,.25)}
-.garden-stream{position:absolute;z-index:2;left:45%;bottom:-4%;width:16%;height:53%;border-radius:50%;transform:rotate(13deg) skewY(-8deg);background:linear-gradient(90deg,#3b9eaf,#9ce5e6 34%,#d0f5ed 47%,#54b9c6 68%,#318b9f);box-shadow:inset 5px 0 8px rgba(255,255,255,.3),inset -5px 0 9px rgba(18,89,106,.25),0 0 0 3px rgba(34,111,86,.12);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}.garden-stream:after{content:"";position:absolute;left:24%;top:8%;height:80%;width:14%;border-radius:50%;background:rgba(239,255,247,.58);filter:blur(2px)}
-.garden-path{position:absolute;z-index:2;left:18%;bottom:-9%;width:23%;height:40%;border-radius:50%;transform:rotate(-21deg);background:linear-gradient(90deg,#a17c53,#d4b17a 45%,#9a744b);box-shadow:inset 4px 0 6px rgba(255,236,185,.3),inset -4px 0 7px rgba(81,52,28,.18);opacity:.9}
-.daily-garden-trees{z-index:3;inset:24% 5% 12%;align-items:flex-end;gap:0;transform-style:preserve-3d}.daily-garden-tree{width:clamp(34px,8%,78px);max-width:78px;filter:drop-shadow(8px 12px 5px rgba(24,61,37,.24));transform-style:preserve-3d}.daily-garden-tree .trunk{width:18%;min-width:7px;border-radius:3px 3px 7px 7px;background:linear-gradient(90deg,#5b3927,#b07b4c 34%,#80502f 69%,#4c3022);box-shadow:inset 2px 0 rgba(255,224,169,.22),3px 0 4px rgba(42,57,29,.15)}.daily-garden-tree .leaf{width:100%;aspect-ratio:.82;border-radius:48% 52% 42% 58%;background:radial-gradient(ellipse at 28% 18%,#b0e98a 0%,#68c56d 23%,#359456 56%,#1d6d43 83%,#125133 100%);box-shadow:inset -8px -11px 0 rgba(9,65,36,.18),inset 5px 4px 0 rgba(235,255,190,.2),0 6px 0 rgba(27,91,48,.2);transform:rotate(45deg) rotateX(12deg);border:1px solid rgba(17,93,50,.12)}.daily-garden-tree .leaf:before{inset:5%;background:linear-gradient(145deg,#9ee27c 0%,#4eaf60 54%,#1e7043 100%);box-shadow:inset -5px -6px 0 rgba(11,64,34,.15),inset 3px 3px rgba(240,255,198,.12)}.daily-garden-tree .leaf:after{inset:8%;background:linear-gradient(135deg,#8bd974 0%,#3e9d58 55%,#185f39 100%);box-shadow:inset -4px -5px 0 rgba(11,64,34,.16)}.daily-garden-tree:nth-child(odd){margin-bottom:4px}.daily-garden-tree:nth-child(3n){z-index:4}.daily-garden-tree:nth-child(4n) .leaf{filter:hue-rotate(12deg) saturate(.9)}
-.garden-flower{position:absolute;z-index:4;color:#fff0a8;text-shadow:0 1px 0 #bf8855,0 3px 3px rgba(30,72,39,.3);font-size:clamp(13px,2vw,21px)}.flower-one{left:15%;bottom:16%}.flower-two{left:37%;bottom:11%;color:#ffd4e4}.flower-three{right:14%;bottom:18%;color:#fff4c5}.garden-rock{position:absolute;z-index:4;width:22px;height:13px;border-radius:45% 55% 36% 40%;background:linear-gradient(145deg,#d3d8c7,#899c8c 65%,#61776a);box-shadow:inset 3px 2px 0 rgba(255,255,255,.38),0 4px 3px rgba(25,68,40,.2)}.rock-one{left:48%;bottom:12%;transform:rotate(-15deg)}.rock-two{right:24%;bottom:20%;transform:scale(.7) rotate(12deg)}.rock-three{left:24%;bottom:24%;transform:scale(.55) rotate(-8deg)}
-.daily-garden-ground-label{z-index:6;left:12px;bottom:9px;padding:6px 10px;border-radius:999px;background:rgba(239,255,230,.72);backdrop-filter:blur(8px);color:#174c35;text-shadow:none;box-shadow:0 3px 8px rgba(28,73,42,.1)}.daily-garden-scene .daily-garden-trees .daily-garden-tree:nth-child(n+7){opacity:.96}
-.dark .focus-garden-page .daily-garden-card{background:linear-gradient(145deg,rgba(28,88,56,.25),rgba(27,45,37,.3));box-shadow:0 18px 45px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.05)}.dark .daily-garden-scene{background:linear-gradient(180deg,#152e48 0%,#2f5264 39%,#b1cbb1 58%,#376c48 59%,#173f2c 100%)}.dark .garden-cloud{opacity:.24}.dark .mountain-back{border-bottom-color:#426b65}.dark .mountain-front{border-bottom-color:#355b54}.dark .hill-back{background:linear-gradient(160deg,#3f8054,#2e6847)}.dark .hill-mid{background:linear-gradient(165deg,#326f49,#205a3a)}.dark .hill-front{background:linear-gradient(165deg,#285e3e,#153e2b)}.dark .garden-stream{background:linear-gradient(90deg,#216e86,#6dc6d1 34%,#a4e5df 47%,#338da5 68%,#1b5d75)}.dark .garden-path{background:linear-gradient(90deg,#654b38,#9b7c58 45%,#5e442f)}
-@media(max-width:520px){.focus-garden-page-head{gap:6px}.daily-garden-scene{height:310px}.daily-garden-trees{inset:30% 2% 14%}.daily-garden-tree{width:10%}.garden-mountain{bottom:43%}.garden-stream{left:43%;width:18%}.garden-rock{width:17px;height:10px}}
-@media(prefers-reduced-motion:reduce){.daily-garden-scene *{scroll-behavior:auto}}
+.dark .focus-garden-page .daily-garden-card{background:linear-gradient(145deg,rgba(28,88,56,.25),rgba(27,45,37,.3));box-shadow:0 18px 45px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.05)}
+.daily-garden-shortcut{position:relative;isolation:isolate}.daily-garden-shortcut:active{transform:scale(.93)}
+@media(max-width:520px){.focus-garden-page-head{gap:6px}.daily-garden-scene{height:310px}}
+@media(prefers-reduced-motion:reduce){.daily-garden-shortcut{transition:none}}
 </style>
 
 </head>
@@ -6718,17 +6690,14 @@
                     </div>
                     <div class="daily-garden-level" id="dailyGardenLevel">Level 1 · Seedling</div>
                 </div>
-                <div class="daily-garden-scene" role="img" aria-label="A detailed layered 3D-style garden with hills, trees, flowers, stones, and a stream that grows with your progress">
-                    <div class="garden-sky-glow"></div>
-                    <div class="daily-garden-sun"></div>
-                    <div class="garden-cloud cloud-one"></div><div class="garden-cloud cloud-two"></div>
-                    <div class="garden-mountain mountain-back"></div><div class="garden-mountain mountain-front"></div>
-                    <div class="garden-hill hill-back"></div><div class="garden-hill hill-mid"></div><div class="garden-hill hill-front"></div>
-                    <div class="garden-stream"></div>
-                    <div class="garden-path"></div>
-                    <div class="daily-garden-trees" id="dailyGardenTrees" aria-hidden="true"></div>
-                    <div class="garden-flower flower-one">✿</div><div class="garden-flower flower-two">✿</div><div class="garden-flower flower-three">✿</div>
-                    <div class="garden-rock rock-one"></div><div class="garden-rock rock-two"></div><div class="garden-rock rock-three"></div>
+                <div class="daily-garden-scene" role="img" aria-label="Interactive 3D productivity garden rendered with Three.js WebGL">
+                    <canvas id="gardenCanvas" aria-hidden="true"></canvas>
+                    <div class="garden-canvas-fallback" id="gardenFallback" style="display:none">
+                        🌳 3D garden requires WebGL.<br>Your progress is still tracked below.
+                    </div>
+                    <div class="garden-3d-controls">
+                        <button class="garden-3d-btn" id="gardenResetCam" title="Reset camera" aria-label="Reset garden camera">⌖</button>
+                    </div>
                     <div class="daily-garden-ground-label" id="dailyGardenGroundLabel">A new forest begins</div>
                 </div>
                 <div class="daily-garden-progress-head"><span id="dailyGardenNextLabel">Progress to next level</span><span id="dailyGardenXpLabel">0 / 100 XP</span></div>
@@ -22384,14 +22353,17 @@ document.documentElement.classList.toggle(
         document.addEventListener("visibilitychange", () => { if (!document.hidden && document.getElementById("profile")?.classList.contains("active")) renderProfileActivityStats(); });
         setTimeout(renderProfileActivityStats, 600);
 
-        // Daily.KRD living garden: progress is calculated from existing activity
-        // records. It adds no new task/prayer/study data model and never changes
-        // existing completion behavior.
+        // ────────────────────────────────────────────────────────────────────────
+        // Daily.KRD Focus Garden — Three.js WebGL implementation
+        // Progress is read from existing activity records. No new data models.
+        // ────────────────────────────────────────────────────────────────────────
         const DAILY_GARDEN_STATE_KEY = "dailykrd_garden_progress_v1";
+
         function gardenReadJson(key, fallback) {
             try { const value = JSON.parse(localStorage.getItem(key) || "null"); return value == null ? fallback : value; }
             catch (_) { return fallback; }
         }
+
         function gardenActivitySnapshot() {
             const tasks = Array.isArray(getActiveTasksSource()) ? getActiveTasksSource() : [];
             let completedTasks = 0;
@@ -22410,7 +22382,7 @@ document.documentElement.classList.toggle(
                 }
             }
             const sessionsRaw = gardenReadJson("dailykrd_study_sessions", []);
-            const sessions = Array.isArray(sessionsRaw) ? sessionsRaw.filter(session => session && typeof session === "object") : [];
+            const sessions = Array.isArray(sessionsRaw) ? sessionsRaw.filter(s => s && typeof s === "object") : [];
             const sessionMinutesByDate = {};
             let undatedSessionMinutes = 0;
             for (const session of sessions) {
@@ -22430,18 +22402,574 @@ document.documentElement.classList.toggle(
             const decks = Array.isArray(decksRaw) ? decksRaw : [];
             const subjectsRaw = gardenReadJson("dailykrd_study_subjects", []);
             const subjects = Array.isArray(subjectsRaw) ? subjectsRaw : [];
-            // XP rates are intentionally simple and transparent: 10 per completed
-            // task, 5 per completed prayer, 1 per 5 study minutes, 8 per quiz deck,
-            // and 3 per subject. Existing history is the source of truth.
             const activityCount = completedTasks + completedPrayers + sessions.length + decks.length + subjects.length;
             const xp = completedTasks * 10 + completedPrayers * 5 + Math.floor(totalStudyMinutes / 5) + decks.length * 8 + subjects.length * 3;
             return { completedTasks, completedPrayers, sessions: sessions.length, totalStudyMinutes, decks: decks.length, subjects: subjects.length, activityCount, xp };
         }
+
+        // ── Three.js garden engine ──────────────────────────────────────────────
+        const _gardenEngine = (function () {
+            let renderer = null, scene = null, camera = null, animFrame = null;
+            let initialized = false, destroyed = false;
+            let treeGroup = null, treeMeshes = [];
+            let isDark = false;
+            let currentTreeCount = 0;
+            // Camera orbit state
+            let theta = Math.PI / 5, phi = Math.PI / 3.2, radius = 14;
+            const MIN_RADIUS = 6, MAX_RADIUS = 26;
+            let isDragging = false, lastX = 0, lastY = 0;
+            let targetTheta = theta, targetPhi = phi, targetRadius = radius;
+            // Touch
+            let lastPinchDist = null;
+
+            function isDarkMode() {
+                return document.documentElement.classList.contains("dark");
+            }
+
+            function init(canvas) {
+                if (initialized || destroyed) return;
+                try {
+                    const THREE = window.THREE;
+                    if (!THREE) { showFallback(); return; }
+
+                    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                    renderer.shadowMap.enabled = true;
+                    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+                    scene = new THREE.Scene();
+                    camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+
+                    buildScene();
+                    resize();
+                    bindEvents(canvas);
+                    animate();
+                    initialized = true;
+                } catch (e) {
+                    console.warn("Garden WebGL init failed:", e);
+                    showFallback();
+                }
+            }
+
+            function showFallback() {
+                const fb = document.getElementById("gardenFallback");
+                const cv = document.getElementById("gardenCanvas");
+                if (fb) fb.style.display = "flex";
+                if (cv) cv.style.display = "none";
+            }
+
+            function buildScene() {
+                const THREE = window.THREE;
+                isDark = isDarkMode();
+                scene.clear();
+                treeMeshes = [];
+
+                // Sky / background
+                updateBackground();
+
+                // Lighting
+                const ambLight = new THREE.AmbientLight(isDark ? 0x3a4a60 : 0xfff5e0, isDark ? 0.7 : 1.0);
+                ambLight.name = "ambLight";
+                scene.add(ambLight);
+
+                const sun = new THREE.DirectionalLight(isDark ? 0x8899cc : 0xfff4d6, isDark ? 0.5 : 1.4);
+                sun.name = "sun";
+                sun.position.set(8, 14, 8);
+                sun.castShadow = true;
+                sun.shadow.mapSize.width = 1024;
+                sun.shadow.mapSize.height = 1024;
+                sun.shadow.camera.near = 0.5;
+                sun.shadow.camera.far = 60;
+                sun.shadow.camera.left = -18;
+                sun.shadow.camera.right = 18;
+                sun.shadow.camera.top = 18;
+                sun.shadow.camera.bottom = -18;
+                sun.shadow.bias = -0.001;
+                scene.add(sun);
+
+                if (isDark) {
+                    const moon = new THREE.DirectionalLight(0x6680bb, 0.3);
+                    moon.position.set(-6, 10, -5);
+                    scene.add(moon);
+                }
+
+                // ── Terrain ──
+                buildTerrain();
+                // ── Water ──
+                buildWater();
+                // ── Path ──
+                buildPath();
+                // ── Background mountains ──
+                buildMountains();
+                // ── Static environment details ──
+                buildDetails();
+                // ── Tree group (rebuilt on XP change) ──
+                treeGroup = new THREE.Group();
+                treeGroup.name = "trees";
+                scene.add(treeGroup);
+
+                // ── Stars (dark mode) ──
+                if (isDark) buildStars();
+            }
+
+            function updateBackground() {
+                const THREE = window.THREE;
+                isDark = isDarkMode();
+                if (isDark) {
+                    scene.background = new THREE.Color(0x0d1b2e);
+                    scene.fog = new THREE.Fog(0x0d1b2e, 22, 60);
+                } else {
+                    scene.background = new THREE.Color(0x87ceeb);
+                    scene.fog = new THREE.Fog(0x87ceeb, 28, 70);
+                }
+            }
+
+            function buildTerrain() {
+                const THREE = window.THREE;
+                // Main ground plane with subtle height variation via a simple geometry
+                const geo = new THREE.PlaneGeometry(40, 40, 24, 24);
+                const pos = geo.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i), z = pos.getY(i);
+                    // Rolling hills using sine waves
+                    const y = Math.sin(x * 0.28) * 0.55 + Math.cos(z * 0.22) * 0.4
+                            + Math.sin(x * 0.6 + z * 0.4) * 0.25
+                            + (x < -6 ? Math.sin((x + 6) * 0.5) * 1.2 : 0); // hill on left
+                    pos.setZ(i, y);
+                }
+                geo.computeVertexNormals();
+                const mat = new THREE.MeshStandardMaterial({
+                    color: isDark ? 0x2a5535 : 0x4a9a58,
+                    roughness: 0.95,
+                    metalness: 0.0,
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.rotation.x = -Math.PI / 2;
+                mesh.receiveShadow = true;
+                mesh.name = "terrain";
+                scene.add(mesh);
+
+                // A slightly darker "dirt" layer underneath
+                const baseGeo = new THREE.PlaneGeometry(42, 42);
+                const baseMat = new THREE.MeshStandardMaterial({ color: isDark ? 0x1a3020 : 0x3d7a46, roughness: 1.0 });
+                const base = new THREE.Mesh(baseGeo, baseMat);
+                base.rotation.x = -Math.PI / 2;
+                base.position.y = -0.05;
+                base.receiveShadow = true;
+                scene.add(base);
+            }
+
+            function buildWater() {
+                const THREE = window.THREE;
+                // Winding stream — simple elongated ellipse-ish shape
+                const geo = new THREE.PlaneGeometry(1.8, 7, 6, 20);
+                const pos = geo.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const t = (pos.getY(i) + 3.5) / 7; // 0..1 along length
+                    pos.setX(i, pos.getX(i) + Math.sin(t * Math.PI * 2) * 0.5);
+                    pos.setZ(i, 0.02); // just above ground
+                }
+                geo.computeVertexNormals();
+                const mat = new THREE.MeshStandardMaterial({
+                    color: isDark ? 0x2d7ea8 : 0x3bb0d4,
+                    roughness: 0.05,
+                    metalness: 0.6,
+                    transparent: true,
+                    opacity: 0.85,
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.rotation.x = -Math.PI / 2;
+                mesh.position.set(3.5, 0.08, 1);
+                mesh.rotation.z = 0.3;
+                scene.add(mesh);
+            }
+
+            function buildPath() {
+                const THREE = window.THREE;
+                const geo = new THREE.PlaneGeometry(1.0, 8, 4, 16);
+                const pos = geo.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const t = (pos.getY(i) + 4) / 8;
+                    pos.setX(i, pos.getX(i) + Math.sin(t * Math.PI) * 1.2);
+                    pos.setZ(i, 0.01);
+                }
+                geo.computeVertexNormals();
+                const mat = new THREE.MeshStandardMaterial({
+                    color: isDark ? 0x5e4030 : 0xc8a870,
+                    roughness: 1.0,
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.rotation.x = -Math.PI / 2;
+                mesh.position.set(-2, 0.06, 0);
+                mesh.rotation.z = 0.4;
+                scene.add(mesh);
+            }
+
+            function buildMountains() {
+                const THREE = window.THREE;
+                const mountainColor = isDark ? 0x2d5060 : 0x7baaa0;
+                const snowColor = isDark ? 0x8899aa : 0xeef5f5;
+                function makeMountain(x, z, h, r, snow) {
+                    const geo = new THREE.ConeGeometry(r, h, 7);
+                    const mat = new THREE.MeshStandardMaterial({ color: mountainColor, roughness: 0.9 });
+                    const m = new THREE.Mesh(geo, mat);
+                    m.position.set(x, h / 2 - 0.3, z);
+                    m.castShadow = true;
+                    scene.add(m);
+                    if (snow) {
+                        const sGeo = new THREE.ConeGeometry(r * 0.28, h * 0.22, 7);
+                        const sMat = new THREE.MeshStandardMaterial({ color: snowColor, roughness: 0.6 });
+                        const sm = new THREE.Mesh(sGeo, sMat);
+                        sm.position.set(x, h - h * 0.12, z);
+                        scene.add(sm);
+                    }
+                }
+                makeMountain(-12, -10, 9, 4.5, true);
+                makeMountain(-7, -14, 7, 3.5, false);
+                makeMountain(8, -13, 8, 4, true);
+                makeMountain(14, -9, 6, 3, false);
+            }
+
+            function buildDetails() {
+                const THREE = window.THREE;
+                // Rocks
+                function makeRock(x, z, s) {
+                    const geo = new THREE.DodecahedronGeometry(s, 0);
+                    const mat = new THREE.MeshStandardMaterial({
+                        color: isDark ? 0x4a5a50 : 0x8a9a8a,
+                        roughness: 0.95,
+                    });
+                    const m = new THREE.Mesh(geo, mat);
+                    m.position.set(x, s * 0.5, z);
+                    m.rotation.set(Math.random(), Math.random(), Math.random());
+                    m.castShadow = true;
+                    m.receiveShadow = true;
+                    scene.add(m);
+                }
+                makeRock(2, 3, 0.28); makeRock(-3, -2, 0.18); makeRock(5, -1, 0.22);
+                makeRock(-5, 4, 0.35); makeRock(1, -4, 0.15); makeRock(6, 2, 0.2);
+
+                // Flowers (small cones + spheres)
+                const flowerColors = [0xffee88, 0xffbbcc, 0xffffff, 0xffcc44];
+                function makeFlower(x, z, color) {
+                    const stem = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.03, 0.04, 0.35, 5),
+                        new THREE.MeshStandardMaterial({ color: 0x3a8a3a })
+                    );
+                    stem.position.set(x, 0.18, z);
+                    stem.castShadow = true;
+                    scene.add(stem);
+                    const head = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.12, 7, 7),
+                        new THREE.MeshStandardMaterial({ color, roughness: 0.5 })
+                    );
+                    head.position.set(x, 0.42, z);
+                    scene.add(head);
+                }
+                makeFlower(-1, 2, flowerColors[0]); makeFlower(0.5, 3.5, flowerColors[1]);
+                makeFlower(-2.5, 1, flowerColors[2]); makeFlower(1.5, -2, flowerColors[3]);
+                makeFlower(-4, -1, flowerColors[0]); makeFlower(4, 3, flowerColors[1]);
+
+                // Mushrooms
+                function makeMushroom(x, z) {
+                    const stem = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.06, 0.09, 0.25, 6),
+                        new THREE.MeshStandardMaterial({ color: 0xeeeecc })
+                    );
+                    stem.position.set(x, 0.12, z);
+                    scene.add(stem);
+                    const cap = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.18, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2),
+                        new THREE.MeshStandardMaterial({ color: 0xcc3322, roughness: 0.7 })
+                    );
+                    cap.position.set(x, 0.27, z);
+                    scene.add(cap);
+                }
+                makeMushroom(3, -3); makeMushroom(-3.5, 2.5);
+
+                // Small bushes (low sphere clusters)
+                function makeBush(x, z) {
+                    const color = isDark ? 0x286040 : 0x3a9a50;
+                    for (let i = 0; i < 3; i++) {
+                        const r = 0.18 + Math.random() * 0.14;
+                        const geo = new THREE.SphereGeometry(r, 7, 5);
+                        const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.9 });
+                        const m = new THREE.Mesh(geo, mat);
+                        m.position.set(x + (i - 1) * 0.22, r, z + (i % 2 === 0 ? 0.1 : -0.1));
+                        m.castShadow = true; m.receiveShadow = true;
+                        scene.add(m);
+                    }
+                }
+                makeBush(-6, 0); makeBush(6, -2); makeBush(-4, 3); makeBush(5, 4);
+            }
+
+            function buildStars() {
+                const THREE = window.THREE;
+                const geo = new THREE.BufferGeometry();
+                const count = 200;
+                const positions = new Float32Array(count * 3);
+                for (let i = 0; i < count; i++) {
+                    positions[i * 3]     = (Math.random() - 0.5) * 80;
+                    positions[i * 3 + 1] = 10 + Math.random() * 30;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+                }
+                geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+                const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.18, sizeAttenuation: true });
+                scene.add(new THREE.Points(geo, mat));
+            }
+
+            // ── Tree building ────────────────────────────────────────────────────
+            const TREE_POSITIONS = [
+                [-4, -3], [0, -5], [4, -4], [-6, 1], [-2, -1],
+                [2, -2], [6, 0], [-5, 3], [1, 2], [-3, 5],
+                [5, 3], [3, 5], [-7, -1], [7, -2], [0, 4],
+                [-1, -7], [8, 3], [-8, 4], [4, -7], [-2, 6],
+            ];
+
+            function clearTrees() {
+                if (!treeGroup) return;
+                while (treeGroup.children.length) {
+                    const child = treeGroup.children[0];
+                    child.traverse(o => {
+                        if (o.geometry) o.geometry.dispose();
+                        if (o.material) { if (Array.isArray(o.material)) o.material.forEach(m => m.dispose()); else o.material.dispose(); }
+                    });
+                    treeGroup.remove(child);
+                }
+                treeMeshes = [];
+            }
+
+            function buildTree(xz, level, xp) {
+                const THREE = window.THREE;
+                const [x, z] = xz;
+                const group = new THREE.Group();
+
+                // Determine tree size based on accumulated xp and level
+                const mature = xp >= 150;
+                const young = xp >= 50 && !mature;
+                const trunkH = mature ? 1.5 + Math.random() * 0.5 : young ? 0.9 + Math.random() * 0.3 : 0.4 + Math.random() * 0.2;
+                const trunkR = mature ? 0.14 : young ? 0.09 : 0.05;
+                const foliageR = mature ? 1.0 + Math.random() * 0.3 : young ? 0.65 + Math.random() * 0.2 : 0.3 + Math.random() * 0.1;
+
+                // Trunk
+                const trunkGeo = new THREE.CylinderGeometry(trunkR * 0.7, trunkR, trunkH, 7);
+                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x6b3d1e, roughness: 0.95 });
+                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                trunk.position.y = trunkH / 2;
+                trunk.castShadow = true;
+                trunk.receiveShadow = true;
+                group.add(trunk);
+
+                // Foliage — 2 or 3 sphere clusters for volume
+                const leafColors = [0x2d8a48, 0x3d9a55, 0x28794e, 0x4aaa60, 0x1e6e3e];
+                const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
+                const layers = mature ? 3 : young ? 2 : 1;
+                for (let li = 0; li < layers; li++) {
+                    const r = foliageR * (1 - li * 0.22);
+                    const yOff = trunkH + li * foliageR * 0.55;
+                    const leafGeo = new THREE.SphereGeometry(r, 9, 7);
+                    const leafMat = new THREE.MeshStandardMaterial({
+                        color: leafColor,
+                        roughness: 0.85,
+                    });
+                    const leaf = new THREE.Mesh(leafGeo, leafMat);
+                    leaf.position.y = yOff;
+                    leaf.castShadow = true;
+                    leaf.receiveShadow = true;
+                    group.add(leaf);
+                    // A second smaller cluster offset for asymmetry
+                    if (li === 0 && layers > 1) {
+                        const leaf2 = new THREE.Mesh(
+                            new THREE.SphereGeometry(r * 0.72, 8, 6),
+                            new THREE.MeshStandardMaterial({ color: (leafColor + 0x0a1408) & 0xffffff, roughness: 0.85 })
+                        );
+                        leaf2.position.set(r * 0.4, yOff - r * 0.25, r * 0.3);
+                        leaf2.castShadow = true;
+                        group.add(leaf2);
+                    }
+                }
+
+                // Slight random tilt for natural look
+                group.rotation.y = Math.random() * Math.PI * 2;
+                group.rotation.z = (Math.random() - 0.5) * 0.08;
+
+                // Terrain height sample (approximate, mirrors buildTerrain formula)
+                const terrainY = Math.sin(x * 0.28) * 0.55 + Math.cos(z * 0.22) * 0.4
+                                + Math.sin(x * 0.6 + z * 0.4) * 0.25
+                                + (x < -6 ? Math.sin((x + 6) * 0.5) * 1.2 : 0);
+                group.position.set(x, terrainY, z);
+                return group;
+            }
+
+            function updateTrees(xp, treeCount) {
+                if (!treeGroup || !window.THREE) return;
+                const count = Math.min(treeCount, TREE_POSITIONS.length);
+                if (count === currentTreeCount) return; // no change needed
+                clearTrees();
+                currentTreeCount = count;
+                const level = Math.floor(xp / 100) + 1;
+                for (let i = 0; i < count; i++) {
+                    const xpForThisTree = Math.max(0, xp - i * 50);
+                    const tree = buildTree(TREE_POSITIONS[i], level, xpForThisTree);
+                    treeGroup.add(tree);
+                    treeMeshes.push(tree);
+                }
+            }
+
+            // ── Camera ───────────────────────────────────────────────────────────
+            function updateCamera() {
+                if (!camera) return;
+                const x = radius * Math.sin(phi) * Math.sin(theta);
+                const y = radius * Math.cos(phi);
+                const z = radius * Math.sin(phi) * Math.cos(theta);
+                camera.position.set(x, y, z);
+                camera.lookAt(0, 1, 0);
+            }
+
+            function resetCamera() {
+                targetTheta = Math.PI / 5;
+                targetPhi = Math.PI / 3.2;
+                targetRadius = 14;
+            }
+
+            // ── Resize ───────────────────────────────────────────────────────────
+            function resize() {
+                if (!renderer || !camera) return;
+                const canvas = renderer.domElement;
+                const parent = canvas.parentElement;
+                if (!parent) return;
+                const w = parent.clientWidth;
+                const h = parent.clientHeight;
+                renderer.setSize(w, h, false);
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+            }
+
+            // ── Animation loop ───────────────────────────────────────────────────
+            let frameCount = 0;
+            function animate() {
+                if (destroyed) return;
+                animFrame = requestAnimationFrame(animate);
+                if (!renderer || !scene || !camera) return;
+                // Skip rendering when hidden
+                if (document.hidden) return;
+                const gardenSection = document.getElementById("focusGarden");
+                if (gardenSection && !gardenSection.classList.contains("active")) return;
+
+                frameCount++;
+
+                // Smooth camera lerp
+                theta += (targetTheta - theta) * 0.1;
+                phi += (targetPhi - phi) * 0.1;
+                phi = Math.max(0.15, Math.min(Math.PI / 2.05, phi));
+                radius += (targetRadius - radius) * 0.12;
+                updateCamera();
+
+                // Gentle cloud / particle animation could go here
+                renderer.render(scene, camera);
+            }
+
+            // ── Event bindings ───────────────────────────────────────────────────
+            function bindEvents(canvas) {
+                // Mouse drag
+                canvas.addEventListener("mousedown", e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; }, { passive: true });
+                window.addEventListener("mouseup", () => { isDragging = false; });
+                window.addEventListener("mousemove", e => {
+                    if (!isDragging) return;
+                    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+                    lastX = e.clientX; lastY = e.clientY;
+                    targetTheta -= dx * 0.008;
+                    targetPhi -= dy * 0.006;
+                });
+                // Wheel zoom
+                canvas.addEventListener("wheel", e => {
+                    e.preventDefault();
+                    targetRadius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, targetRadius + e.deltaY * 0.02));
+                }, { passive: false });
+                // Touch drag + pinch
+                canvas.addEventListener("touchstart", e => {
+                    if (e.touches.length === 1) {
+                        isDragging = true;
+                        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                    } else if (e.touches.length === 2) {
+                        isDragging = false;
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        lastPinchDist = Math.sqrt(dx * dx + dy * dy);
+                    }
+                }, { passive: true });
+                canvas.addEventListener("touchmove", e => {
+                    if (e.touches.length === 1 && isDragging) {
+                        e.preventDefault();
+                        const dx = e.touches[0].clientX - lastX;
+                        const dy = e.touches[0].clientY - lastY;
+                        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+                        targetTheta -= dx * 0.008;
+                        targetPhi -= dy * 0.006;
+                    } else if (e.touches.length === 2 && lastPinchDist !== null) {
+                        e.preventDefault();
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        targetRadius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, targetRadius - (dist - lastPinchDist) * 0.04));
+                        lastPinchDist = dist;
+                    }
+                }, { passive: false });
+                canvas.addEventListener("touchend", e => {
+                    isDragging = false; lastPinchDist = null;
+                }, { passive: true });
+                // Resize observer
+                const ro = new ResizeObserver(() => resize());
+                const parent = canvas.parentElement;
+                if (parent) ro.observe(parent);
+                // Theme change — rebuild scene
+                const themeObserver = new MutationObserver(() => {
+                    const dark = isDarkMode();
+                    if (dark !== isDark) { buildScene(); currentTreeCount = -1; }
+                });
+                themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+            }
+
+            function destroy() {
+                destroyed = true;
+                if (animFrame) cancelAnimationFrame(animFrame);
+                if (renderer) { renderer.dispose(); renderer = null; }
+                initialized = false;
+            }
+
+            return { init, updateTrees, resetCamera, destroy };
+        })();
+
+        // Load Three.js from CDN then boot the garden
+        (function loadThree() {
+            if (window.THREE) { bootGarden(); return; }
+            const script = document.createElement("script");
+            // Pinned stable version (r128 — well-established, available offline after first load)
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+            script.crossOrigin = "anonymous";
+            script.onload = bootGarden;
+            script.onerror = function () {
+                const fb = document.getElementById("gardenFallback");
+                const cv = document.getElementById("gardenCanvas");
+                if (fb) fb.style.display = "flex";
+                if (cv) cv.style.display = "none";
+            };
+            document.head.appendChild(script);
+        })();
+
+        function bootGarden() {
+            const canvas = document.getElementById("gardenCanvas");
+            if (!canvas) return;
+            _gardenEngine.init(canvas);
+            // Reset camera button
+            const resetBtn = document.getElementById("gardenResetCam");
+            if (resetBtn) resetBtn.addEventListener("click", () => _gardenEngine.resetCamera());
+        }
+
         function renderDailyKrdGarden() {
             const root = document.getElementById("dailyKrdGarden");
             if (!root) return;
             const data = gardenActivitySnapshot();
-            // Keep the garden from shrinking if old task records are later removed.
             let saved = gardenReadJson(DAILY_GARDEN_STATE_KEY, { xp: 0, activities: 0 });
             if (!saved || typeof saved !== "object") saved = { xp: 0, activities: 0 };
             const xp = Math.max(data.xp, Math.max(0, Number(saved.xp) || 0));
@@ -22451,9 +22979,11 @@ document.documentElement.classList.toggle(
             }
             const level = Math.floor(xp / 100) + 1;
             const levelXp = xp % 100;
-            const trees = Math.min(9, Math.floor(xp / 50));
+            const trees = Math.min(TREE_POSITIONS_COUNT, Math.floor(xp / 50));
             const levelNames = ["Seedling", "Sprout", "Sapling", "Young Grove", "Woodland", "Forest Keeper", "Ancient Grove"];
             const levelName = levelNames[Math.min(level - 1, levelNames.length - 1)];
+
+            // Update UI text nodes
             const levelNode = document.getElementById("dailyGardenLevel");
             if (levelNode) levelNode.textContent = `Level ${level} · ${levelName}`;
             const xpNode = document.getElementById("dailyGardenXpLabel");
@@ -22470,19 +23000,16 @@ document.documentElement.classList.toggle(
             if (progress) progress.setAttribute("aria-valuenow", String(levelXp));
             const ground = document.getElementById("dailyGardenGroundLabel");
             if (ground) ground.textContent = xp < 25 ? "A new forest begins" : trees === 0 ? "Your first tree is taking root" : `${trees} ${trees === 1 ? "tree" : "trees"} in your growing forest`;
-            const treesRoot = document.getElementById("dailyGardenTrees");
-            if (treesRoot) {
-                const visibleTrees = Math.max(5, Math.min(9, trees + 3));
-                treesRoot.innerHTML = Array.from({ length: visibleTrees }, (_, i) => {
-                    const grown = i < trees;
-                    const stage = grown ? (xp >= 150 + i * 35 ? "mature" : "young") : "seedling";
-                    const height = grown ? 64 + ((i * 13 + level * 7) % 38) : 34;
-                    return `<div class="daily-garden-tree ${stage}" style="--tree-height:${height}px;--leaf:${i % 3 === 0 ? "#28794e" : i % 3 === 1 ? "#398d59" : "#4c9d68"}"><span class="leaf"></span><span class="trunk"></span></div>`;
-                }).join("");
-            }
             const note = document.getElementById("dailyGardenFootnote");
-            if (note) note.textContent = `Earn XP from ${data.completedTasks} completed tasks, ${data.completedPrayers} prayers, ${Math.floor(data.totalStudyMinutes)} study minutes, ${data.decks} quiz decks, and ${data.subjects} subjects. Progress is saved on this device and won't decrease if older task records are removed.`;
+            if (note) note.textContent = `Earn XP from ${data.completedTasks} completed tasks, ${data.completedPrayers} prayers, ${Math.floor(data.totalStudyMinutes)} study minutes, ${data.decks} quiz decks, and ${data.subjects} subjects. Progress is saved on this device and won\u2019t decrease if older task records are removed.`;
+
+            // Update 3D tree count
+            _gardenEngine.updateTrees(xp, trees);
         }
+
+        // Expose TREE_POSITIONS_COUNT for renderDailyKrdGarden
+        const TREE_POSITIONS_COUNT = 20;
+
         window.renderDailyKrdGarden = renderDailyKrdGarden;
         // Header tree shortcut opens the dedicated Focus Garden section.
         const gardenShortcut = document.getElementById("gardenButton");
@@ -22496,7 +23023,6 @@ document.documentElement.classList.toggle(
             }, 100);
         });
         // Activity UI updates and study-session storage changes refresh the garden
-        // without polling or touching the existing Cloudflare Workers.
         for (const targetId of ["taskList", "prayerList", "study"]) {
             const target = document.getElementById(targetId);
             if (target) {
