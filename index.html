@@ -5530,6 +5530,31 @@
 @media(max-width:420px){.daily-garden-card{padding:14px}.daily-garden-scene{min-height:150px}.daily-garden-stats{gap:6px}.daily-garden-stat{padding:8px}.daily-garden-stat-value{font-size:.96rem}}
 .dark .daily-garden-scene{background:linear-gradient(180deg,#243b48 0%,#526c60 66%,#3b7650 67%,#285e42 100%)}.dark .daily-garden-scene:before{background:#39754d}.dark .daily-garden-scene:after{background:#285e42}.dark .daily-garden-ground-label{color:#e3f6dc}
 </style>
+<style id="daily-garden-3d-upgrade">
+/* CSS 3D diorama upgrade: layered terrain, perspective, volumetric trees and depth shadows. */
+.daily-garden-shortcut{position:relative;isolation:isolate}
+.daily-garden-shortcut:active{transform:scale(.93)}
+.daily-garden-scene{min-height:220px;perspective:720px;transform-style:preserve-3d;background:linear-gradient(180deg,#a8d9ed 0%,#d7eee3 48%,#9ed08b 49%,#6eb879 100%);box-shadow:inset 0 -18px 30px rgba(22,75,44,.12),inset 0 1px 0 rgba(255,255,255,.5)}
+.daily-garden-scene:before{height:105px;bottom:8px;background:linear-gradient(165deg,#a8d89a,#69b878 72%);transform:rotateX(16deg) rotateZ(-5deg) scale(1.08);box-shadow:0 -9px 16px rgba(255,255,255,.12) inset}
+.daily-garden-scene:after{height:98px;bottom:-35px;background:linear-gradient(165deg,#78c37c,#347f50);transform:rotateX(12deg) rotateZ(4deg) scale(1.1);box-shadow:0 9px 16px rgba(19,71,38,.2) inset}
+.daily-garden-sun{width:36px;height:36px;right:23px;top:20px;background:radial-gradient(circle at 32% 28%,#fff8ce,#ffd66e 68%,#f4b94e);box-shadow:0 0 0 9px rgba(255,232,160,.18),0 5px 15px rgba(183,134,45,.25)}
+.daily-garden-trees{inset:12px 14px 23px;align-items:flex-end;transform-style:preserve-3d;perspective:550px}
+.daily-garden-tree{transform:translateZ(var(--tree-depth,0px)) rotateY(-7deg);transform-style:preserve-3d;filter:drop-shadow(5px 7px 3px rgba(20,65,35,.22));transition:height .45s ease,transform .45s ease,filter .45s ease}
+.daily-garden-tree .trunk{width:15%;min-width:6px;height:39%;background:linear-gradient(90deg,#633e27 0%,#a97649 40%,#71452b 78%,#4e3425 100%);box-shadow:inset 2px 0 rgba(255,220,166,.15);transform:perspective(80px) rotateY(-8deg)}
+.daily-garden-tree .leaf{width:92%;aspect-ratio:.82;border-radius:48% 52% 45% 55%;background:radial-gradient(ellipse at 30% 22%,#8bd47a 0%,var(--leaf,#34865b) 38%,#1d6844 78%,#145436 100%);box-shadow:inset -5px -7px 0 rgba(12,73,43,.18),inset 4px 3px 0 rgba(213,255,174,.14),0 4px 0 rgba(24,91,49,.18);transform:rotate(45deg) rotateX(9deg);}
+.daily-garden-tree .leaf:before{background:linear-gradient(145deg,#8bd77b 0%,#3f9c5d 64%,#246e43 100%);box-shadow:inset -3px -3px 0 rgba(12,70,39,.13)}
+.daily-garden-tree .leaf:after{background:linear-gradient(135deg,#78c96d 0%,#328b52 66%,#1d643e 100%);box-shadow:inset -3px -3px 0 rgba(12,70,39,.13)}
+.daily-garden-tree.young .leaf{width:80%;background:radial-gradient(ellipse at 30% 22%,#a3e18a,#459b60 58%,#286f45)}
+.daily-garden-tree.seedling .leaf{width:52%;aspect-ratio:1;background:radial-gradient(circle at 30% 20%,#c1ed8c,#4a9e61 70%,#267344)}
+.daily-garden-tree:nth-child(1),.daily-garden-tree:nth-child(5),.daily-garden-tree:nth-child(9){--tree-depth:-12px;transform:translateY(7px) scale(.86)}
+.daily-garden-tree:nth-child(2),.daily-garden-tree:nth-child(4),.daily-garden-tree:nth-child(8){--tree-depth:8px;transform:translateY(-2px) scale(1.04)}
+.daily-garden-tree:nth-child(3),.daily-garden-tree:nth-child(6),.daily-garden-tree:nth-child(7){--tree-depth:18px;transform:translateY(-5px) scale(1.12)}
+.daily-garden-ground-label{z-index:2;text-shadow:0 1px rgba(255,255,255,.22)}
+.dark .daily-garden-scene{background:linear-gradient(180deg,#1c3549 0%,#405f65 48%,#315e43 49%,#1b4935 100%);box-shadow:inset 0 -18px 30px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.08)}
+.dark .daily-garden-scene:before{background:linear-gradient(165deg,#3f8058,#286c47)}.dark .daily-garden-scene:after{background:linear-gradient(165deg,#2e7047,#17432f)}
+@media(max-width:420px){.daily-garden-scene{min-height:190px}}
+@media(prefers-reduced-motion:reduce){.daily-garden-tree,.daily-garden-shortcut{transition:none}}
+</style>
 
 </head>
 
@@ -5571,6 +5596,16 @@
                 aria-label="Dark Mode"
             >
                 ☾
+            </button>
+
+            <button
+                class="icon-button daily-garden-shortcut"
+                id="gardenButton"
+                type="button"
+                aria-label="Open your 3D Focus Garden"
+                title="Focus Garden"
+            >
+                🌳
             </button>
 
             <button
@@ -22411,6 +22446,17 @@ document.documentElement.classList.toggle(
             if (note) note.textContent = `Earn XP from ${data.completedTasks} completed tasks, ${data.completedPrayers} prayers, ${Math.floor(data.totalStudyMinutes)} study minutes, ${data.decks} quiz decks, and ${data.subjects} subjects. Progress is saved on this device and won't decrease if older task records are removed.`;
         }
         window.renderDailyKrdGarden = renderDailyKrdGarden;
+        // Header shortcut opens the garden's Profile section and scrolls directly to it.
+        const gardenShortcut = document.getElementById("gardenButton");
+        if (gardenShortcut) gardenShortcut.addEventListener("click", () => {
+            if (window.Haptics) window.Haptics.tap();
+            if (typeof showSection === "function") showSection("profile");
+            setTimeout(() => {
+                const garden = document.getElementById("dailyKrdGarden");
+                if (garden) garden.scrollIntoView({ behavior: "smooth", block: "start" });
+                renderDailyKrdGarden();
+            }, 100);
+        });
         // Activity UI updates and study-session storage changes refresh the garden
         // without polling or touching the existing Cloudflare Workers.
         for (const targetId of ["taskList", "prayerList", "study"]) {
