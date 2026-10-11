@@ -6685,15 +6685,15 @@
 
             <div class="profile-stats-heading">
                 <div class="settings-card-title">Your Activity</div>
-                <div class="settings-description">A live overview of your tasks, prayers, study, quizzes, and steps.</div>
+                <div class="settings-description">Your all-time totals from activity recorded in Daily.KRD.</div>
             </div>
             <div class="profile-stats-grid" id="profileStatsGrid" aria-live="polite">
-                <div class="profile-stat-card"><div class="profile-stat-icon">☑️</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Tasks completed today</div></div>
-                <div class="profile-stat-card"><div class="profile-stat-icon">🕌</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Prayers today</div></div>
-                <div class="profile-stat-card"><div class="profile-stat-icon">📚</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Study time today</div></div>
-                <div class="profile-stat-card"><div class="profile-stat-icon">⏱️</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Study sessions today</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">☑️</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Tasks completed (all time)</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">🕌</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Prayers completed (all time)</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">📚</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Total study time</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">⏱️</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Total study sessions</div></div>
                 <div class="profile-stat-card"><div class="profile-stat-icon">🧠</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Quizzes created</div></div>
-                <div class="profile-stat-card"><div class="profile-stat-icon">👟</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Synced steps today</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">👟</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Subjects created</div></div>
             </div>
             <div class="profile-stats-note" id="profileStatsNote">Stats update from activity saved in Daily.KRD on this device and your synced account data.</div>
 
@@ -22190,42 +22190,83 @@ document.documentElement.classList.toggle(
 
 
 
-        // PROFILE ACTIVITY SUMMARY — reads existing Daily.KRD data without changing persistence.
+        // PROFILE ALL-TIME SUMMARY — reads existing Daily.KRD data without changing persistence.
         function renderProfileActivityStats() {
             const grid = document.getElementById("profileStatsGrid");
             if (!grid) return;
-            const now = new Date();
-            const todayKey = typeof getTodayKey === "function" ? getTodayKey() : (now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0"));
-            const safeRead = (key, fallback) => { try { const v = JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); return v ?? fallback; } catch (_) { return fallback; } };
-            let tasksToday = [], completedTasks = 0;
+            const safeRead = (key, fallback) => {
+                try {
+                    const raw = localStorage.getItem(key);
+                    const value = raw === null ? fallback : JSON.parse(raw);
+                    return value ?? fallback;
+                } catch (_) { return fallback; }
+            };
+
+            let allTasks = [];
             try {
-                const source = typeof getActiveTasksSource === "function" ? getActiveTasksSource() : (Array.isArray(currentTasksCache) && currentUser ? currentTasksCache : (typeof guestTasks !== "undefined" ? guestTasks : []));
-                tasksToday = typeof getTasksForDate === "function" ? getTasksForDate(Array.isArray(source) ? source : [], todayKey) : [];
-                completedTasks = tasksToday.filter(task => typeof isTaskCompletedOnDate === "function" ? isTaskCompletedOnDate(task, todayKey) : !!task.completed).length;
+                const source = typeof getActiveTasksSource === "function"
+                    ? getActiveTasksSource()
+                    : (Array.isArray(currentTasksCache) && currentUser
+                        ? currentTasksCache
+                        : (typeof guestTasks !== "undefined" ? guestTasks : []));
+                allTasks = Array.isArray(source) ? source : [];
             } catch (_) {}
+            const completedTaskCount = allTasks.reduce((total, task) => {
+                if (!task || typeof task !== "object") return total;
+                // Repeating tasks keep each completed date; ordinary tasks use completed=true.
+                if (Array.isArray(task.completedDates) && task.completedDates.length) {
+                    return total + new Set(task.completedDates.map(String)).size;
+                }
+                return total + (task.completed ? 1 : 0);
+            }, 0);
+
+            let prayerRecords = {};
+            try { prayerRecords = typeof getPrayerRecords === "function" ? getPrayerRecords() : {}; } catch (_) {}
             let prayersDone = 0;
-            try { prayersDone = typeof prayerCountOn === "function" ? prayerCountOn(todayKey) : 0; } catch (_) {}
-            const sessions = safeRead("dailykrd_study_sessions", []);
-            const todaysSessions = Array.isArray(sessions) ? sessions.filter(session => session && session.date === todayKey) : [];
-            let studyMinutes = todaysSessions.reduce((sum, session) => sum + (Number(session.duration) || 0), 0);
-            if (!studyMinutes) { const minuteData = safeRead("dailykrd_study_minutes", {}); studyMinutes = Number(minuteData[todayKey]) || 0; }
-            const studyTime = studyMinutes >= 60 ? `${Math.floor(studyMinutes / 60)}h ${studyMinutes % 60}m` : `${studyMinutes} min`;
-            const decks = safeRead("dailykrd_flashcards", []);
-            const quizCount = Array.isArray(decks) ? decks.length : 0;
-            const stepText = (typeof todaySteps === "number" && Number.isFinite(todaySteps)) ? todaySteps.toLocaleString() : "Not synced";
+            if (prayerRecords && typeof prayerRecords === "object" && !Array.isArray(prayerRecords)) {
+                for (const record of Object.values(prayerRecords)) {
+                    try { prayersDone += typeof countPrayersDone === "function" ? countPrayersDone(record || {}) : 0; } catch (_) {}
+                }
+            }
+
+            const sessionsRaw = safeRead("dailykrd_study_sessions", []);
+            const sessions = Array.isArray(sessionsRaw) ? sessionsRaw.filter(session => session && typeof session === "object") : [];
+            const sessionMinutesByDate = {};
+            let undatedSessionMinutes = 0;
+            for (const session of sessions) {
+                const minutes = Math.max(0, Number(session.duration) || 0);
+                if (session.date) sessionMinutesByDate[String(session.date)] = (sessionMinutesByDate[String(session.date)] || 0) + minutes;
+                else undatedSessionMinutes += minutes;
+            }
+            const minuteDataRaw = safeRead("dailykrd_study_minutes", {});
+            const minuteData = minuteDataRaw && typeof minuteDataRaw === "object" && !Array.isArray(minuteDataRaw) ? minuteDataRaw : {};
+            const studyDateKeys = new Set([...Object.keys(sessionMinutesByDate), ...Object.keys(minuteData)]);
+            let studyMinutes = undatedSessionMinutes;
+            for (const dateKey of studyDateKeys) {
+                const savedDailyMinutes = Math.max(0, Number(minuteData[dateKey]) || 0);
+                // Some versions save both sessions and a daily aggregate, so use the larger per-day total.
+                studyMinutes += Math.max(sessionMinutesByDate[dateKey] || 0, savedDailyMinutes);
+            }
+            const studyTime = studyMinutes >= 60
+                ? `${Math.floor(studyMinutes / 60)}h ${Math.round(studyMinutes % 60)}m`
+                : `${Math.round(studyMinutes)} min`;
+
+            const decksRaw = safeRead("dailykrd_flashcards", []);
+            const quizCount = Array.isArray(decksRaw) ? decksRaw.length : 0;
+            const subjectsRaw = safeRead("dailykrd_study_subjects", []);
+            const subjectCount = Array.isArray(subjectsRaw) ? subjectsRaw.length : 0;
             const stats = [
-                { icon: "☑️", value: `${completedTasks}/${tasksToday.length}`, label: "Tasks completed today" },
-                { icon: "🕌", value: `${prayersDone}/5`, label: "Prayers completed today" },
-                { icon: "📚", value: studyTime, label: "Study time today" },
-                { icon: "⏱️", value: String(todaysSessions.length), label: "Study sessions today" },
-                { icon: "🧠", value: String(quizCount), label: "Quizzes created" },
-                { icon: "👟", value: stepText, label: "Synced steps today" }
+                { icon: "☑️", value: completedTaskCount.toLocaleString(), label: "Tasks completed (all time)" },
+                { icon: "📝", value: allTasks.length.toLocaleString(), label: "Tasks created" },
+                { icon: "🕌", value: prayersDone.toLocaleString(), label: "Prayers completed (all time)" },
+                { icon: "📚", value: studyTime, label: "Total study time" },
+                { icon: "⏱️", value: sessions.length.toLocaleString(), label: "Total study sessions" },
+                { icon: "🧠", value: quizCount.toLocaleString(), label: "Quizzes created" },
+                { icon: "📖", value: subjectCount.toLocaleString(), label: "Subjects created" }
             ];
             grid.innerHTML = stats.map(stat => `<div class="profile-stat-card"><div class="profile-stat-icon" aria-hidden="true">${stat.icon}</div><div class="profile-stat-value">${stat.value}</div><div class="profile-stat-label">${stat.label}</div></div>`).join("");
             const note = document.getElementById("profileStatsNote");
-            if (note) note.textContent = (typeof todaySteps === "number" && Number.isFinite(todaySteps))
-                ? "Your overview uses Daily.KRD task and prayer records, saved study sessions, quiz decks, and synced Apple Health steps."
-                : "Your overview uses Daily.KRD task and prayer records, saved study sessions, and quiz decks. Steps appear when your Health sync is available.";
+            if (note) note.textContent = "These are all-time totals from the task and prayer records currently loaded for your account, plus saved study sessions, study minutes, quiz decks, and subjects. Historical step totals are not shown because Daily.KRD currently exposes synced steps for today rather than a complete all-time step history.";
         }
         window.renderProfileActivityStats = renderProfileActivityStats;
         const profileSectionForStats = document.getElementById("profile");
