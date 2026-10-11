@@ -5508,6 +5508,19 @@
     }
 </style>
 
+<style>
+        /* PROFILE ACTIVITY STATS */
+        .profile-stats-heading { margin: 22px 0 12px; }
+        .profile-stats-heading .settings-card-title { margin-bottom: 5px; }
+        .profile-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0; }
+        .profile-stat-card { min-width: 0; padding: 16px; border-radius: 18px; background: var(--card, #fff); border: 1px solid var(--border, rgba(120,120,120,.16)); box-shadow: 0 3px 12px rgba(0,0,0,.035); }
+        .dark .profile-stat-card { background: #202020; border-color: rgba(255,255,255,.09); }
+        .profile-stat-icon { font-size: 22px; margin-bottom: 10px; }
+        .profile-stat-value { font-size: clamp(20px, 5vw, 27px); font-weight: 850; letter-spacing: -.5px; line-height: 1.2; overflow-wrap: anywhere; }
+        .profile-stat-label { margin-top: 6px; color: var(--muted, #777); font-size: 12px; line-height: 1.35; }
+        .profile-stats-note { color: var(--muted, #777); font-size: 12px; line-height: 1.45; margin: 8px 2px 18px; }
+        @media (min-width: 620px) { .profile-stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>
 </head>
 
 <body>
@@ -6637,7 +6650,7 @@
             </div>
 
             <div class="settings-subtitle">
-                Your account details.
+                Your account details and activity overview.
             </div>
 
             <div class="settings-card">
@@ -6669,6 +6682,20 @@
                 </div>
 
             </div>
+
+            <div class="profile-stats-heading">
+                <div class="settings-card-title">Your Activity</div>
+                <div class="settings-description">A live overview of your tasks, prayers, study, quizzes, and steps.</div>
+            </div>
+            <div class="profile-stats-grid" id="profileStatsGrid" aria-live="polite">
+                <div class="profile-stat-card"><div class="profile-stat-icon">☑️</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Tasks completed today</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">🕌</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Prayers today</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">📚</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Study time today</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">⏱️</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Study sessions today</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">🧠</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Quizzes created</div></div>
+                <div class="profile-stat-card"><div class="profile-stat-icon">👟</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Synced steps today</div></div>
+            </div>
+            <div class="profile-stats-note" id="profileStatsNote">Stats update from activity saved in Daily.KRD on this device and your synced account data.</div>
 
             <div class="settings-card">
 
@@ -22161,6 +22188,54 @@ document.documentElement.classList.toggle(
             );
         }
 
+
+
+        // PROFILE ACTIVITY SUMMARY — reads existing Daily.KRD data without changing persistence.
+        function renderProfileActivityStats() {
+            const grid = document.getElementById("profileStatsGrid");
+            if (!grid) return;
+            const now = new Date();
+            const todayKey = typeof getTodayKey === "function" ? getTodayKey() : (now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0"));
+            const safeRead = (key, fallback) => { try { const v = JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); return v ?? fallback; } catch (_) { return fallback; } };
+            let tasksToday = [], completedTasks = 0;
+            try {
+                const source = typeof getActiveTasksSource === "function" ? getActiveTasksSource() : (Array.isArray(currentTasksCache) && currentUser ? currentTasksCache : (typeof guestTasks !== "undefined" ? guestTasks : []));
+                tasksToday = typeof getTasksForDate === "function" ? getTasksForDate(Array.isArray(source) ? source : [], todayKey) : [];
+                completedTasks = tasksToday.filter(task => typeof isTaskCompletedOnDate === "function" ? isTaskCompletedOnDate(task, todayKey) : !!task.completed).length;
+            } catch (_) {}
+            let prayersDone = 0;
+            try { prayersDone = typeof prayerCountOn === "function" ? prayerCountOn(todayKey) : 0; } catch (_) {}
+            const sessions = safeRead("dailykrd_study_sessions", []);
+            const todaysSessions = Array.isArray(sessions) ? sessions.filter(session => session && session.date === todayKey) : [];
+            let studyMinutes = todaysSessions.reduce((sum, session) => sum + (Number(session.duration) || 0), 0);
+            if (!studyMinutes) { const minuteData = safeRead("dailykrd_study_minutes", {}); studyMinutes = Number(minuteData[todayKey]) || 0; }
+            const studyTime = studyMinutes >= 60 ? `${Math.floor(studyMinutes / 60)}h ${studyMinutes % 60}m` : `${studyMinutes} min`;
+            const decks = safeRead("dailykrd_flashcards", []);
+            const quizCount = Array.isArray(decks) ? decks.length : 0;
+            const stepText = (typeof todaySteps === "number" && Number.isFinite(todaySteps)) ? todaySteps.toLocaleString() : "Not synced";
+            const stats = [
+                { icon: "☑️", value: `${completedTasks}/${tasksToday.length}`, label: "Tasks completed today" },
+                { icon: "🕌", value: `${prayersDone}/5`, label: "Prayers completed today" },
+                { icon: "📚", value: studyTime, label: "Study time today" },
+                { icon: "⏱️", value: String(todaysSessions.length), label: "Study sessions today" },
+                { icon: "🧠", value: String(quizCount), label: "Quizzes created" },
+                { icon: "👟", value: stepText, label: "Synced steps today" }
+            ];
+            grid.innerHTML = stats.map(stat => `<div class="profile-stat-card"><div class="profile-stat-icon" aria-hidden="true">${stat.icon}</div><div class="profile-stat-value">${stat.value}</div><div class="profile-stat-label">${stat.label}</div></div>`).join("");
+            const note = document.getElementById("profileStatsNote");
+            if (note) note.textContent = (typeof todaySteps === "number" && Number.isFinite(todaySteps))
+                ? "Your overview uses Daily.KRD task and prayer records, saved study sessions, quiz decks, and synced Apple Health steps."
+                : "Your overview uses Daily.KRD task and prayer records, saved study sessions, and quiz decks. Steps appear when your Health sync is available.";
+        }
+        window.renderProfileActivityStats = renderProfileActivityStats;
+        const profileSectionForStats = document.getElementById("profile");
+        if (profileSectionForStats) {
+            const profileStatsObserver = new MutationObserver(() => { if (profileSectionForStats.classList.contains("active")) renderProfileActivityStats(); });
+            profileStatsObserver.observe(profileSectionForStats, { attributes: true, attributeFilter: ["class"] });
+            profileSectionForStats.addEventListener("click", () => setTimeout(renderProfileActivityStats, 80));
+        }
+        document.addEventListener("visibilitychange", () => { if (!document.hidden && document.getElementById("profile")?.classList.contains("active")) renderProfileActivityStats(); });
+        setTimeout(renderProfileActivityStats, 600);
     </script>
 
     <!-- DAILY AI -->
@@ -25469,3 +25544,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 </script>
 
 </body>
+</html>
