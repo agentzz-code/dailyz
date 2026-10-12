@@ -5538,11 +5538,11 @@
 .daily-garden-stat-label{font-size:.72rem;opacity:.72;margin-top:3px}
 .daily-garden-footnote{font-size:.74rem;opacity:.65;line-height:1.4;margin-top:11px}
 /* ── 3D Canvas scene ── */
-.daily-garden-scene{position:relative;height:clamp(390px,58vw,660px);min-height:390px;margin:15px 0 13px;border-radius:22px;overflow:hidden;background:#8bc8eb;box-shadow:0 12px 24px rgba(27,74,46,.14);isolation:isolate;touch-action:none;user-select:none}
+.daily-garden-scene{position:relative;height:clamp(420px,62vw,700px);min-height:420px;margin:15px 0 13px;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#a9d9ef 0%,#d3e7d5 48%,#527c4e 100%);box-shadow:0 18px 42px rgba(10,35,23,.28),inset 0 1px 0 rgba(255,255,255,.24);isolation:isolate;touch-action:none;user-select:none}
 #gardenCanvas{display:block;width:100%!important;height:100%!important;border-radius:22px;cursor:grab}
-.daily-garden-scene:after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 24%,transparent 78%,rgba(15,43,29,.15)),radial-gradient(ellipse at 50% 42%,transparent 48%,rgba(14,44,29,.12) 100%)}
+.daily-garden-scene:after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 28%,transparent 82%,rgba(15,43,29,.06)),radial-gradient(ellipse at 50% 42%,transparent 58%,rgba(14,44,29,.06) 100%)}
 .daily-garden-scene:before{content:"";position:absolute;inset:0 0 auto;height:22%;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.13),transparent)}
-@media(max-width:560px){.daily-garden-scene{height:clamp(370px,112vw,500px);min-height:370px}.garden-edit-bar{max-width:calc(100% - 70px)}.garden-edit-btn{padding:5px 7px;font-size:.68rem}.garden-3d-controls{top:8px;right:8px}}
+@media(max-width:560px){.daily-garden-scene{height:clamp(420px,118vw,560px);min-height:420px}.garden-edit-bar{max-width:calc(100% - 70px)}.garden-edit-btn{padding:5px 7px;font-size:.68rem}.garden-3d-controls{top:8px;right:8px}}
 #gardenCanvas.dragging{cursor:grabbing}
 .garden-canvas-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.9rem;opacity:.7;padding:24px;background:linear-gradient(180deg,#8bc8ed,#9fce82);border-radius:22px}
 .daily-garden-ground-label{position:absolute;z-index:20;left:12px;bottom:9px;padding:5px 10px;border-radius:999px;background:rgba(239,255,230,.82);backdrop-filter:blur(8px);color:#174c35;font-size:.7rem;font-weight:800;letter-spacing:.02em;box-shadow:0 2px 6px rgba(28,73,42,.1);pointer-events:none}
@@ -22851,7 +22851,7 @@ document.documentElement.classList.toggle(
                 if (!T) { showFallback(); return; }
                 try {
                     renderer = new T.WebGLRenderer({ canvas, antialias: (window.innerWidth > 700) });
-                    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.35 : 1.85));
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.5 : 2));
                     if ("outputColorSpace" in renderer && T.SRGBColorSpace) renderer.outputColorSpace = T.SRGBColorSpace;
                     else if (T.sRGBEncoding) renderer.outputEncoding = T.sRGBEncoding;
                     renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -22892,23 +22892,23 @@ document.documentElement.classList.toggle(
                 terrainMesh = null;
                 // Sky & fog
                 if (dark) { scene.background=new T.Color(0x0b1520); scene.fog=new T.Fog(0x0b1520,38,100); }
-                else       { scene.background=new T.Color(0x8dd6f0); scene.fog=new T.Fog(0x8dd6f0,42,105); }
+                else       { scene.background=new T.Color(0xa8d8eb); scene.fog=new T.Fog(0xa8d8eb,34,92); }
                 // Ambient
-                scene.add(new T.AmbientLight(dark?0x304050:0xfff8e8, dark?0.55:0.85));
+                scene.add(new T.AmbientLight(dark?0x8fa6b8:0xfff8e8, dark?1.05:1.0));
                 // Sun / moon
-                const sun = new T.DirectionalLight(dark?0x6880cc:0xfff0c8, dark?0.55:1.3);
+                const sun = new T.DirectionalLight(dark?0x9bb8ee:0xfff0c8, dark?0.9:1.45);
                 sun.position.set(12,20,12); sun.castShadow=true;
-                sun.shadow.mapSize.set(window.innerWidth<700?1536:3072,window.innerWidth<700?1536:3072);
+                sun.shadow.mapSize.set(window.innerWidth<700?2048:4096,window.innerWidth<700?2048:4096);
                 sun.shadow.camera.near=0.5; sun.shadow.camera.far=58;
                 // Tighter frustum puts more shadow texels on the garden instead of the sky.
-                sun.shadow.camera.left=-17; sun.shadow.camera.right=17;
-                sun.shadow.camera.top=17; sun.shadow.camera.bottom=-17;
+                sun.shadow.camera.left=-13; sun.shadow.camera.right=13;
+                sun.shadow.camera.top=13; sun.shadow.camera.bottom=-13;
                 sun.shadow.camera.updateProjectionMatrix();
-                sun.shadow.bias=-0.00018;
-                sun.shadow.normalBias=0.028;
-                sun.shadow.radius=3;
+                sun.shadow.bias=-0.00008;
+                sun.shadow.normalBias=0.012;
+                sun.shadow.radius=4;
                 scene.add(sun);
-                if (dark) { const m=new T.DirectionalLight(0x4455aa,0.3); m.position.set(-10,14,-8); scene.add(m); }
+                if (dark) { const m=new T.DirectionalLight(0x8da8d8,0.48); m.position.set(-10,14,-8); scene.add(m); }
                 // Terrain
                 terrainMesh = buildTerrain();
                 buildBoundary();
@@ -22921,17 +22921,17 @@ document.documentElement.classList.toggle(
                 const T = window.THREE;
                 // Dense, softly rolling terrain with vertex-colour transitions rather
                 // than a single flat green slab. The central 18×18 plot remains empty.
-                const geo = new T.PlaneGeometry(34,34,160,160);
+                const geo = new T.PlaneGeometry(72,72,240,240);
                 const pos = geo.attributes.position;
                 const colors = [];
-                const cGrass = new T.Color(dark ? 0x284b35 : 0x6f9b55);
-                const cMoss  = new T.Color(dark ? 0x35523a : 0x829b59);
-                const cSoil  = new T.Color(dark ? 0x3b3026 : 0x92734b);
-                const cStone = new T.Color(dark ? 0x535d58 : 0x9da69a);
+                const cGrass = new T.Color(dark ? 0x3a6245 : 0x6f9b55);
+                const cMoss  = new T.Color(dark ? 0x47694a : 0x829b59);
+                const cSoil  = new T.Color(dark ? 0x514337 : 0x92734b);
+                const cStone = new T.Color(dark ? 0x66736b : 0x9da69a);
                 for (let i=0;i<pos.count;i++) {
                     const x=pos.getX(i), z=-pos.getY(i);
                     const d=Math.hypot(x,z);
-                    const edge=Math.max(0,(d-8.4)/9);
+                    const edge=Math.max(0,Math.min(1.15,(d-8.4)/16));
                     const wave=Math.sin(x*.31+Math.sin(z*.19))*0.28+
                                Math.cos(z*.27+x*.11)*0.24+
                                Math.sin((x+z)*.52)*0.07;
@@ -23053,7 +23053,7 @@ document.documentElement.classList.toggle(
             function terrainYForBuild(x,z) {
                 const d=Math.hypot(x,z), edge=Math.max(0,(d-8.4)/9);
                 return edge>0 ? Math.sin(x*.31+Math.sin(z*.19))*.28+
-                    Math.cos(z*.27+x*.11)*.24+Math.sin((x+z)*.52)*.07+edge*1.35 : 0;
+                    Math.cos(z*.27+x*.11)*.24+Math.sin((x+z)*.52)*.07+edge*1.0 : 0;
             }
             function buildBoundary() {
                 const T=window.THREE;
@@ -23157,9 +23157,9 @@ document.documentElement.classList.toggle(
                 // Distant conifers with layered branch tiers rather than single cone chunks.
                 const trunkMat=new T.MeshStandardMaterial({color:dark?0x493526:0x765033,roughness:1});
                 const leafMats=[
-                    new T.MeshStandardMaterial({color:dark?0x1b3b2b:0x2f7044,roughness:1}),
-                    new T.MeshStandardMaterial({color:dark?0x244b32:0x43824b,roughness:1}),
-                    new T.MeshStandardMaterial({color:dark?0x31563a:0x5d9553,roughness:1})
+                    new T.MeshStandardMaterial({color:dark?0x315d43:0x2f7044,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x3b704c:0x43824b,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x4c7950:0x5d9553,roughness:1})
                 ];
                 for(let i=0;i<35;i++){
                     const angle=i/35*Math.PI*2, rad=14.5+(i%4)*1.4;
@@ -23269,7 +23269,13 @@ document.documentElement.classList.toggle(
             function toggleGrid(on) {
                 const T=window.THREE;
                 if(gridHelper){scene.remove(gridHelper);gridHelper=null;}
-                if(on){gridHelper=new T.GridHelper(18,18,0x44886655,0x33664433);gridHelper.position.y=0.05;scene.add(gridHelper);}
+                if(on){
+                    gridHelper=new T.GridHelper(18,18,0x5b9b75,0x47745c);
+                    gridHelper.position.y=0.075;
+                    const mats=Array.isArray(gridHelper.material)?gridHelper.material:[gridHelper.material];
+                    mats.forEach(m=>{m.transparent=true;m.opacity=.24;m.depthWrite=false;});
+                    scene.add(gridHelper);
+                }
                 grdPrefs.gridVisible=on; _grdWriteJson(GRD_PREFS_KEY,grdPrefs);
                 const btn=document.getElementById("gardenGridBtn");
                 if(btn){btn.style.background=on?"rgba(47,145,93,.85)":"";btn.style.color=on?"#fff":"";}
@@ -27000,4 +27006,3 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 </script>
 
 </body>
-</html>
