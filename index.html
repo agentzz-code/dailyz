@@ -22847,8 +22847,11 @@ document.documentElement.classList.toggle(
                 const T = window.THREE;
                 if (!T) { showFallback(); return; }
                 try {
-                    renderer = new T.WebGLRenderer({ canvas, antialias:true });
-                    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+                    renderer = new T.WebGLRenderer({ canvas, antialias: (window.innerWidth > 700) });
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+                    renderer.outputEncoding = T.sRGBEncoding;
+                    renderer.toneMapping = T.ACESFilmicToneMapping;
+                    renderer.toneMappingExposure = 1.08;
                     renderer.shadowMap.enabled = true;
                     renderer.shadowMap.type = T.PCFSoftShadowMap;
                     scene  = new T.Scene();
@@ -22906,33 +22909,95 @@ document.documentElement.classList.toggle(
 
             function buildTerrain() {
                 const T = window.THREE;
-                // ~18×18 plot, slightly raised centre
-                const geo = new T.PlaneGeometry(28,28,28,28);
+                // Dense, softly rolling terrain with vertex-colour transitions rather
+                // than a single flat green slab. The central 18×18 plot remains empty.
+                const geo = new T.PlaneGeometry(34,34,100,100);
                 const pos = geo.attributes.position;
+                const colors = [];
+                const cGrass = new T.Color(dark ? 0x284b35 : 0x6f9b55);
+                const cMoss  = new T.Color(dark ? 0x35523a : 0x829b59);
+                const cSoil  = new T.Color(dark ? 0x3b3026 : 0x92734b);
+                const cStone = new T.Color(dark ? 0x535d58 : 0x9da69a);
                 for (let i=0;i<pos.count;i++) {
-                    const x=pos.getX(i), y=pos.getY(i);
-                    const d=Math.sqrt(x*x+y*y);
-                    const edge = Math.max(0,(d-9)/9);
-                    pos.setZ(i, edge>0
-                        ? Math.sin(x*.3)*.45+Math.cos(y*.25)*.4+edge*1.8
-                        : Math.sin(x*.55)*.07+Math.cos(y*.55)*.06);
+                    const x=pos.getX(i), z=-pos.getY(i);
+                    const d=Math.hypot(x,z);
+                    const edge=Math.max(0,(d-8.4)/9);
+                    const wave=Math.sin(x*.31+Math.sin(z*.19))*0.28+
+                               Math.cos(z*.27+x*.11)*0.24+
+                               Math.sin((x+z)*.52)*0.07;
+                    const plot = Math.max(Math.abs(x),Math.abs(z)) < 9;
+                    pos.setZ(i, plot
+                        ? Math.sin(x*.48)*.045+Math.cos(z*.43)*.04
+                        : wave+edge*1.35);
+                    let col=cGrass.clone();
+                    const noise=(Math.sin(x*7.13+z*3.71)*Math.cos(z*6.2-x*2.7)+1)*.5;
+                    if(!plot) {
+                        if(noise>.68) col.lerp(cMoss,Math.min(.65,(noise-.55)*2.2));
+                        if(noise<.18) col.lerp(cSoil,.3);
+                        if(d>13.8 && noise>.77) col.lerp(cStone,.34);
+                    } else {
+                        // Soft, natural soil/grass variation while preserving a clear build area.
+                        col.lerp(cMoss,noise*.12);
+                    }
+                    colors.push(col.r,col.g,col.b);
                 }
+                geo.setAttribute("color",new T.Float32BufferAttribute(colors,3));
                 geo.computeVertexNormals();
-                const mat = new T.MeshStandardMaterial({ color:dark?0x2a5038:0x5cb562, roughness:0.96 });
-                const mesh = new T.Mesh(geo, mat);
-                mesh.name="terrain"; mesh.rotation.x=-Math.PI/2; mesh.receiveShadow=true;
-                scene.add(mesh);
-                // Flat plot overlay (slightly lighter)
-                const soilMat = new T.MeshStandardMaterial({ color:dark?0x316048:0x6aca72, roughness:0.9 });
-                const soil = new T.Mesh(new T.PlaneGeometry(18,18), soilMat);
-                soil.rotation.x=-Math.PI/2; soil.position.y=0.02; soil.receiveShadow=true;
-                scene.add(soil);
-                // Base
-                const base = new T.Mesh(new T.PlaneGeometry(32,32), new T.MeshStandardMaterial({color:dark?0x182820:0x3d7840,roughness:1}));
-                base.rotation.x=-Math.PI/2; base.position.y=-0.08; scene.add(base);
+                const mat = new T.MeshStandardMaterial({
+                    vertexColors:true, roughness:1, metalness:0,
+                    flatShading:false
+                });
+                const mesh = new T.Mesh(geo,mat);
+                mesh.name="terrain"; mesh.rotation.x=-Math.PI/2;
+                mesh.receiveShadow=true; scene.add(mesh);
+
+                // Subtle layered soil shelf under the buildable plot.
+                const baseGeo=new T.BoxGeometry(18.5,.22,18.5,1,1,1);
+                const base=new T.Mesh(baseGeo,new T.MeshStandardMaterial({
+                    color:dark?0x25392b:0x795b3c,roughness:1
+                }));
+                base.position.set(0,-.16,0); base.receiveShadow=true; scene.add(base);
+                const lip=new T.Mesh(new T.BoxGeometry(18.12,.08,18.12),
+                    new T.MeshStandardMaterial({color:dark?0x426448:0x8db76a,roughness:1}));
+                lip.position.set(0,-.035,0); lip.receiveShadow=true; scene.add(lip);
+
+                // Scattered small stones and grass tufts stay outside the empty plot.
+                const stoneMat=new T.MeshStandardMaterial({color:dark?0x58645d:0x9ba394,roughness:.97});
+                const grassMats=[
+                    new T.MeshStandardMaterial({color:dark?0x2c6038:0x3d7d3a,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x3c7044:0x78a34c,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x254d32:0x5a8e40,roughness:1})
+                ];
+                let seed=7419;
+                const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+                for(let i=0;i<210;i++){
+                    let x=(rnd()-.5)*31,z=(rnd()-.5)*31;
+                    if(Math.abs(x)<9.7&&Math.abs(z)<9.7) continue;
+                    if(Math.hypot(x-14,z-4)<2.1) continue;
+                    const y=terrainYForBuild(x,z);
+                    if(i%3===0){
+                        const r=.07+rnd()*.17;
+                        const rock=new T.Mesh(new T.DodecahedronGeometry(r,1),stoneMat);
+                        rock.position.set(x,y+r*.55,z);rock.rotation.set(rnd()*2,rnd()*3,rnd()*2);
+                        rock.scale.set(1+rnd(),.45+rnd()*.45,.7+rnd()*.7);rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);
+                    }else{
+                        for(let j=0;j<3;j++){
+                            const h=.16+rnd()*.28;
+                            const blade=new T.Mesh(new T.ConeGeometry(.035+rnd()*.025,h,5),grassMats[j]);
+                            blade.position.set(x+(rnd()-.5)*.24,y+h*.48,z+(rnd()-.5)*.24);
+                            blade.rotation.z=(rnd()-.5)*.45;blade.rotation.x=(rnd()-.5)*.35;
+                            blade.castShadow=true;scene.add(blade);
+                        }
+                    }
+                }
                 return mesh;
             }
 
+            function terrainYForBuild(x,z) {
+                const d=Math.hypot(x,z), edge=Math.max(0,(d-8.4)/9);
+                return edge>0 ? Math.sin(x*.31+Math.sin(z*.19))*.28+
+                    Math.cos(z*.27+x*.11)*.24+Math.sin((x+z)*.52)*.07+edge*1.35 : 0;
+            }
             function buildBoundary() {
                 const T=window.THREE;
                 const postMat = new T.MeshStandardMaterial({color:dark?0x5a3820:0x8b5e30,roughness:0.9});
@@ -22951,37 +23016,117 @@ document.documentElement.classList.toggle(
 
             function buildEnvironment() {
                 const T=window.THREE;
-                // Mountains
-                const mCol=dark?0x1e3d50:0x7ab09a, snCol=dark?0x6a8090:0xf0f5f5;
-                function mtn(x,z,h,r,snow) {
-                    const m=new T.Mesh(new T.ConeGeometry(r,h,8), new T.MeshStandardMaterial({color:mCol,roughness:0.9}));
-                    m.position.set(x,h/2-0.6,z); m.castShadow=true; scene.add(m);
-                    if(snow){const s=new T.Mesh(new T.ConeGeometry(r*.28,h*.22,8),new T.MeshStandardMaterial({color:snCol,roughness:0.5}));s.position.set(x,h*.9,z);scene.add(s);}
+                // Layered, irregular ridgelines create real depth behind the plot.
+                const mountainMats=[
+                    new T.MeshStandardMaterial({color:dark?0x172c36:0x668e83,roughness:1,flatShading:true}),
+                    new T.MeshStandardMaterial({color:dark?0x223e46:0x86aa9a,roughness:1,flatShading:true}),
+                    new T.MeshStandardMaterial({color:dark?0x30484d:0xa8b9a5,roughness:1,flatShading:true})
+                ];
+                const snowMat=new T.MeshStandardMaterial({color:dark?0x8799a2:0xf0f0dc,roughness:.9,flatShading:true});
+                let seed=9017;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+                function ridge(x,z,h,r,layer,snow){
+                    const geo=new T.ConeGeometry(r,h,9,4);
+                    const p=geo.attributes.position;
+                    for(let i=0;i<p.count;i++){
+                        const y=p.getY(i), fac=1+(rnd()-.5)*.18;
+                        p.setX(i,p.getX(i)*fac);p.setZ(i,p.getZ(i)*fac);
+                        if(y>h*.12){p.setX(i,p.getX(i)+(rnd()-.5)*r*.12);p.setZ(i,p.getZ(i)+(rnd()-.5)*r*.12);}
+                    }
+                    geo.computeVertexNormals();
+                    const m=new T.Mesh(geo,mountainMats[layer%mountainMats.length]);
+                    m.position.set(x,h*.42-1.2,z);m.rotation.y=rnd()*1.2;m.castShadow=true;scene.add(m);
+                    if(snow){
+                        const cap=new T.Mesh(new T.ConeGeometry(r*.31,h*.21,7,2),snowMat);
+                        cap.position.set(x,h*.79-0.6,z);cap.rotation.y=m.rotation.y;scene.add(cap);
+                    }
+                    // Rocky outcrops at the foot of the ridge.
+                    for(let k=0;k<4;k++){
+                        const rock=new T.Mesh(new T.DodecahedronGeometry(.45+rnd()*.75,1),
+                            new T.MeshStandardMaterial({color:dark?0x35464a:0x7d9388,roughness:1}));
+                        rock.position.set(x+(rnd()-.5)*r*1.8,.05,z+(rnd()-.5)*r*1.2);
+                        rock.scale.set(1.4,.7+rnd()*.6,1);rock.rotation.set(rnd(),rnd()*3,rnd());
+                        rock.castShadow=true;scene.add(rock);
+                    }
                 }
-                mtn(-20,-20,12,6,true); mtn(-13,-24,9,4.5,false); mtn(15,-22,11,5.5,true); mtn(22,-15,8,4,false);
-                mtn(-22,8,10,5,false); mtn(18,12,9,4.5,true);
-                // Background trees (outside plot)
-                const leafMat=new T.MeshStandardMaterial({color:dark?0x245535:0x358844,roughness:0.9});
-                const trunkMat=new T.MeshStandardMaterial({color:0x5a3010,roughness:0.95});
-                for (const [x,z] of [[-15,0],[-14,-6],[-16,7],[15,2],[14,-7],[16,6],[-11,-15],[11,-14],[0,-17],[-13,12],[12,14]]) {
-                    const h=4+Math.random()*3;
-                    const cone=new T.Mesh(new T.ConeGeometry(1.8+Math.random()*.5,h,6),leafMat);
-                    cone.position.set(x,h/2,z); cone.castShadow=true; scene.add(cone);
-                    const tr=new T.Mesh(new T.CylinderGeometry(0.18,0.24,1.2,5),trunkMat);
-                    tr.position.set(x,0.6,z); scene.add(tr);
-                }
-                // Water stream
-                const stGeo=new T.PlaneGeometry(2.2,9,5,14);
-                const stPos=stGeo.attributes.position;
-                for(let i=0;i<stPos.count;i++){
-                    stPos.setX(i,stPos.getX(i)+Math.sin((stPos.getY(i)+4.5)/9*Math.PI*2.2)*.65);
-                    stPos.setZ(i,0.02);
-                }
-                stGeo.computeVertexNormals();
-                const stMesh=new T.Mesh(stGeo,new T.MeshStandardMaterial({color:dark?0x2d7ea8:0x3ab5d8,roughness:0.05,metalness:0.6,transparent:true,opacity:0.8}));
-                stMesh.rotation.x=-Math.PI/2; stMesh.position.set(14,0.06,4); stMesh.rotation.z=0.35; scene.add(stMesh);
-            }
+                ridge(-21,-19,13,7,0,true);ridge(-14,-24,10,5,1,false);
+                ridge(-5,-27,8,5,0,true);ridge(7,-25,11,6,1,true);
+                ridge(17,-21,13,7,0,true);ridge(24,-14,9,5,1,false);
+                ridge(-24,2,11,6,0,false);ridge(23,7,10,5,1,true);
+                ridge(-20,17,8,5,1,false);ridge(16,18,9,5,0,false);
 
+                // Distant conifers with layered branch tiers rather than single cone chunks.
+                const trunkMat=new T.MeshStandardMaterial({color:dark?0x493526:0x765033,roughness:1});
+                const leafMats=[
+                    new T.MeshStandardMaterial({color:dark?0x1b3b2b:0x2f7044,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x244b32:0x43824b,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x31563a:0x5d9553,roughness:1})
+                ];
+                for(let i=0;i<35;i++){
+                    const angle=i/35*Math.PI*2, rad=14.5+(i%4)*1.4;
+                    const x=Math.cos(angle)*rad,z=Math.sin(angle)*rad-1;
+                    if(Math.abs(x)<10.5&&Math.abs(z)<10.5)continue;
+                    const h=3.4+rnd()*3.8;
+                    const trunk=new T.Mesh(new T.CylinderGeometry(.11,.23,h*.48,8),trunkMat);
+                    trunk.position.set(x,h*.24,z);trunk.castShadow=true;scene.add(trunk);
+                    for(let tier=0;tier<4;tier++){
+                        const y=h*(.28+tier*.16),r=(1.45-tier*.22)*(h/5);
+                        const geo=new T.ConeGeometry(r,h*.34,8,2);
+                        const foliage=new T.Mesh(geo,leafMats[(tier+i)%leafMats.length]);
+                        foliage.position.set(x,y,z);foliage.rotation.y=rnd()*Math.PI;
+                        foliage.castShadow=true;foliage.receiveShadow=true;scene.add(foliage);
+                        // Tiny bough tips add a more natural, broken silhouette.
+                        for(let q=0;q<3;q++){
+                            const b=new T.Mesh(new T.ConeGeometry(.16,.55,5),
+                                leafMats[(tier+q)%leafMats.length]);
+                            const a= q*Math.PI*2/3+i;
+                            b.position.set(x+Math.cos(a)*r*.48,y-.04,z+Math.sin(a)*r*.48);
+                            b.rotation.z=Math.cos(a)*.45;b.rotation.x=Math.sin(a)*.45;scene.add(b);
+                        }
+                    }
+                }
+
+                // Winding stream: dark riverbed, soft banks, shallow water and river stones.
+                const bankMat=new T.MeshStandardMaterial({color:dark?0x3b4435:0x9b906e,roughness:1});
+                const bedMat=new T.MeshStandardMaterial({color:dark?0x183b46:0x477c83,roughness:.95});
+                function ribbon(width,length,y,material,offset){
+                    const geo=new T.PlaneGeometry(width,length,16,80),p=geo.attributes.position;
+                    for(let i=0;i<p.count;i++){
+                        const yy=p.getY(i),u=(yy/length+.5);
+                        p.setX(i,p.getX(i)+Math.sin(u*Math.PI*3.1+offset)*.8+
+                            Math.sin(u*Math.PI*7+offset)*.17);
+                        p.setZ(i,.05+Math.sin(u*Math.PI*5+offset)*.025);
+                    }
+                    geo.computeVertexNormals();
+                    const mesh=new T.Mesh(geo,material);mesh.rotation.x=-Math.PI/2;
+                    mesh.position.set(14,y,4);mesh.rotation.z=.35;mesh.receiveShadow=true;scene.add(mesh);
+                }
+                ribbon(3.7,10,.015,bankMat,.2);
+                ribbon(2.5,9.4,.045,bedMat,.3);
+                const waterMat=new T.MeshStandardMaterial({color:dark?0x247a9a:0x53c6d9,roughness:.16,metalness:.12,transparent:true,opacity:.86});
+                const waterGeo=new T.PlaneGeometry(1.45,9,20,80),wp=waterGeo.attributes.position;
+                for(let i=0;i<wp.count;i++){
+                    const yy=wp.getY(i),u=yy/9+.5;
+                    wp.setX(i,wp.getX(i)+Math.sin(u*Math.PI*3.1+.3)*.8+Math.sin(u*Math.PI*7+.3)*.17);
+                    wp.setZ(i,.08+Math.sin(u*22)*.035);
+                }
+                waterGeo.computeVertexNormals();
+                const water=new T.Mesh(waterGeo,waterMat);water.rotation.x=-Math.PI/2;water.rotation.z=.35;water.position.set(14,.075,4);scene.add(water);
+                // Stones along both banks, outside the buildable square.
+                const pebbleMats=[0x8c9a8e,0x687a76,0xb1ad92].map(c=>new T.MeshStandardMaterial({color:dark?0x52635f:c,roughness:.9}));
+                for(let i=0;i<44;i++){
+                    const z=-.5+(i/44)*9;
+                    const side=i%2?1:-1;
+                    const x=14+Math.sin((z+4.5)/9*Math.PI*2.2)*.65+side*(.95+rnd()*.6);
+                    const r=.07+rnd()*.16;
+                    const stone=new T.Mesh(new T.DodecahedronGeometry(r,1),pebbleMats[i%3]);
+                    stone.position.set(x,.1,z+3.5);stone.scale.set(1.2,.65,.9);
+                    stone.rotation.set(rnd(),rnd()*3,rnd());stone.castShadow=true;scene.add(stone);
+                }
+
+                // Low ground fog and soft environmental light complete the layered scene.
+                const glow=new T.HemisphereLight(dark?0x526c7b:0xdff5ff,dark?0x1d3025:0x5d7545,dark?.35:.45);
+                scene.add(glow);
+            }
             function buildStars() {
                 const T=window.THREE;
                 const arr=new Float32Array(280*3);
@@ -23084,6 +23229,76 @@ document.documentElement.classList.toggle(
                     // Generic fallback tree
                     const tr=mesh(new T.CylinderGeometry(.11,.16,1.6,7),mat(0x5a3010));tr.position.y=.8;g.add(tr);
                     g.add(Object.assign(mesh(new T.SphereGeometry(.72,8,6),mat(leafCol)),{position:new T.Vector3(0,1.8,0)}));
+                }
+                // Replace the old oversized spherical tree crowns with layered,
+                // irregular foliage clusters. This keeps every plant's identity while
+                // eliminating the toy-like "stack of chunks" silhouette.
+                const treeIds=["sapling1","pine1","cypress1","cherry1","sakura1","willow1",
+                    "apple1","bigoak1","redmaple1","worldtree","crystaltree","rainbowtree",
+                    "dragontree","spirittree"];
+                if(treeIds.includes(id) && !["pine1","cypress1","crystaltree"].includes(id)){
+                    const crowns=[];
+                    g.children.slice().forEach(o=>{
+                        if(o.geometry && o.geometry.type==="SphereGeometry" &&
+                           o.geometry.parameters && o.geometry.parameters.radius>=.5){
+                            crowns.push({obj:o, r:o.geometry.parameters.radius, p:o.position.clone(), scale:o.scale.clone()});
+                        }
+                    });
+                    crowns.forEach((c,ci)=>{
+                        c.obj.visible=false;
+                        const baseCol=(id==="cherry1"||id==="sakura1")?0xf2a9c3:
+                            id==="redmaple1"?0xb94725:
+                            id==="dragontree"?0x7b321e:
+                            id==="spirittree"?0x9cc9f3:
+                            id==="rainbowtree"?0x63a8e7:
+                            id==="worldtree"?0x28663c:
+                            (id==="willow1"?0x4f8c43:leafCol);
+                        const palette=id==="rainbowtree"?
+                            [0xff6b62,0xffbd58,0xf4e77a,0x73c979,0x75b9f2,0xc09af5]:
+                            id==="cherry1"||id==="sakura1"?
+                            [0xffb9ce,0xf29fbd,0xffd6df,0xd987aa]:
+                            [baseCol,baseCol,baseCol, id==="redmaple1"?0xe36a32:0x5b9a4d];
+                        const count=id==="bigoak1"||id==="worldtree"?34:22;
+                        for(let k=0;k<count;k++){
+                            const u=(k+.5)/count, ang=k*2.3999632297+ci*.71;
+                            const rr=c.r*(.35+.67*Math.sqrt(u));
+                            const yoff=(Math.sin(k*1.71+ci)*.52)*c.r;
+                            const leaf=new T.Mesh(
+                                new T.SphereGeometry(.17+c.r*(.055+((k*7)%5)*.008),8,6),
+                                mat(palette[k%palette.length],.92)
+                            );
+                            leaf.position.set(
+                                c.p.x+Math.cos(ang)*rr*c.scale.x,
+                                c.p.y+yoff,
+                                c.p.z+Math.sin(ang)*rr*c.scale.z
+                            );
+                            leaf.scale.set(1.05,.78,.92);
+                            leaf.rotation.set(Math.sin(k)*.3,ang,Math.cos(k*.8)*.22);
+                            leaf.castShadow=true;leaf.receiveShadow=true;g.add(leaf);
+                        }
+                    });
+                    // Visible surface roots and forked branches create a less cylindrical silhouette.
+                    if(!["crystaltree","spirittree"].includes(id)){
+                        const rootMat=mat(id==="spirittree"?0xd7e5ef:0x634126,.98);
+                        for(let r=0;r<5;r++){
+                            const ang=r*Math.PI*2/5+.2;
+                            const root=new T.Mesh(new T.CylinderGeometry(.025,.12,.62,6),rootMat);
+                            root.position.set(Math.cos(ang)*.24,.13,Math.sin(ang)*.24);
+                            root.rotation.z=Math.cos(ang)*.82;
+                            root.rotation.x=Math.sin(ang)*.82;
+                            root.castShadow=true;g.add(root);
+                        }
+                        const trunkH=id==="worldtree"?3.8:id==="dragontree"?2.6:id==="bigoak1"?2.1:1.6;
+                        const branchMat=mat(id==="willow1"?0x557b36:0x6a4528,.98);
+                        for(let b=0;b<5;b++){
+                            const ang=b*Math.PI*2/5+.4;
+                            const branch=new T.Mesh(new T.CylinderGeometry(.025,.065,.65,5),branchMat);
+                            branch.position.set(Math.cos(ang)*.34,trunkH*.68+(b%2)*.18,Math.sin(ang)*.34);
+                            branch.rotation.z=Math.cos(ang)*.9;
+                            branch.rotation.x=Math.sin(ang)*.9;
+                            branch.castShadow=true;g.add(branch);
+                        }
+                    }
                 }
                 return g;
             }
@@ -26655,4 +26870,3 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 </script>
 
 </body>
-</html>
