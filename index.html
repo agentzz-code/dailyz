@@ -5523,27 +5523,95 @@
 </style>
 
 <style id="dailyKrdGardenStyles">
-/* Garden card wrapper */
+/* ── Garden card & base layout ── */
 .daily-garden-card{margin:18px 0 22px;padding:18px;border:1px solid var(--border-color,rgba(120,140,130,.22));border-radius:22px;background:linear-gradient(145deg,rgba(34,112,75,.13),rgba(93,145,103,.06));overflow:hidden}
-.daily-garden-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.daily-garden-title{font-size:1.15rem;font-weight:800;letter-spacing:-.02em}.daily-garden-subtitle{font-size:.86rem;opacity:.72;margin-top:4px;line-height:1.45}.daily-garden-level{padding:7px 10px;border-radius:999px;background:rgba(47,145,93,.15);font-size:.8rem;font-weight:750;white-space:nowrap}
-.daily-garden-progress-head{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;font-weight:700;margin-bottom:7px}.daily-garden-progress{height:9px;border-radius:999px;background:rgba(100,130,110,.2);overflow:hidden}.daily-garden-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#45a66b,#b5d96f);border-radius:999px;transition:width .4s ease}.daily-garden-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}.daily-garden-stat{padding:10px;border-radius:13px;background:rgba(120,145,125,.1);min-width:0}.daily-garden-stat-value{font-size:1.05rem;font-weight:850}.daily-garden-stat-label{font-size:.72rem;opacity:.72;margin-top:3px}.daily-garden-footnote{font-size:.74rem;opacity:.65;line-height:1.4;margin-top:11px}
-@media(max-width:420px){.daily-garden-card{padding:14px}.daily-garden-stats{gap:6px}.daily-garden-stat{padding:8px}.daily-garden-stat-value{font-size:.96rem}}
-/* 3D canvas scene wrapper */
-.daily-garden-scene{position:relative;height:clamp(290px,48vw,440px);min-height:290px;margin:15px 0 13px;border-radius:22px;overflow:hidden;background:#8bc8ed;box-shadow:0 12px 24px rgba(27,74,46,.14);isolation:isolate;touch-action:none}
-#gardenCanvas{display:block;width:100%!important;height:100%!important;border-radius:22px}
-.garden-canvas-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;opacity:.7;padding:24px;text-align:center;background:linear-gradient(180deg,#8bc8ed,#9fce82)}
-.daily-garden-ground-label{position:absolute;z-index:6;left:12px;bottom:9px;padding:6px 10px;border-radius:999px;background:rgba(239,255,230,.72);backdrop-filter:blur(8px);color:#174c35;font-size:.7rem;font-weight:800;letter-spacing:.02em;box-shadow:0 3px 8px rgba(28,73,42,.1)}
-.garden-3d-controls{position:absolute;top:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:6px}
-.garden-3d-btn{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.72);backdrop-filter:blur(8px);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:transform .15s,background .15s}
-.garden-3d-btn:hover{background:rgba(255,255,255,.9);transform:scale(1.08)}
-.dark .garden-3d-btn{background:rgba(30,50,40,.75);border-color:rgba(255,255,255,.2);color:#e0f5dc}
-/* Focus garden page */
-.focus-garden-page{padding-bottom:30px}.focus-garden-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.focus-garden-badge{font-size:.76rem;font-weight:750;padding:9px 12px;border-radius:999px;background:linear-gradient(145deg,rgba(76,175,112,.18),rgba(178,218,112,.15));border:1px solid rgba(76,145,92,.2)}
+.daily-garden-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.daily-garden-title{font-size:1.15rem;font-weight:800;letter-spacing:-.02em}
+.daily-garden-subtitle{font-size:.86rem;opacity:.72;margin-top:4px;line-height:1.45}
+.daily-garden-level{padding:7px 10px;border-radius:999px;background:rgba(47,145,93,.15);font-size:.8rem;font-weight:750;white-space:nowrap}
+.daily-garden-progress-head{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;font-weight:700;margin-bottom:7px}
+.daily-garden-progress{height:9px;border-radius:999px;background:rgba(100,130,110,.2);overflow:hidden}
+.daily-garden-progress-fill{height:100%;width:0;background:linear-gradient(90deg,#45a66b,#b5d96f);border-radius:999px;transition:width .4s ease}
+.daily-garden-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}
+.daily-garden-stat{padding:10px;border-radius:13px;background:rgba(120,145,125,.1);min-width:0}
+.daily-garden-stat-value{font-size:1.05rem;font-weight:850}
+.daily-garden-stat-label{font-size:.72rem;opacity:.72;margin-top:3px}
+.daily-garden-footnote{font-size:.74rem;opacity:.65;line-height:1.4;margin-top:11px}
+/* ── 3D Canvas scene ── */
+.daily-garden-scene{position:relative;height:clamp(320px,52vw,500px);min-height:320px;margin:15px 0 13px;border-radius:22px;overflow:hidden;background:#8bc8eb;box-shadow:0 12px 24px rgba(27,74,46,.14);isolation:isolate;touch-action:none;user-select:none}
+#gardenCanvas{display:block;width:100%!important;height:100%!important;border-radius:22px;cursor:grab}
+#gardenCanvas.dragging{cursor:grabbing}
+.garden-canvas-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.9rem;opacity:.7;padding:24px;background:linear-gradient(180deg,#8bc8ed,#9fce82);border-radius:22px}
+.daily-garden-ground-label{position:absolute;z-index:20;left:12px;bottom:9px;padding:5px 10px;border-radius:999px;background:rgba(239,255,230,.82);backdrop-filter:blur(8px);color:#174c35;font-size:.7rem;font-weight:800;letter-spacing:.02em;box-shadow:0 2px 6px rgba(28,73,42,.1);pointer-events:none}
+/* ── Seed & stats bar ── */
+.garden-seed-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:rgba(76,145,92,.12);border:1px solid rgba(76,145,92,.18);margin-bottom:12px;flex-wrap:wrap}
+.garden-seed-icon{font-size:1.2rem}
+.garden-seed-count{font-size:1.05rem;font-weight:850;color:#1a6b38}
+.dark .garden-seed-count{color:#7ee89a}
+.garden-seed-label{font-size:.75rem;opacity:.7}
+.garden-seed-lifetime{font-size:.74rem;opacity:.6;margin-left:auto}
+/* ── Garden action buttons ── */
+.garden-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.garden-action-btn{padding:8px 14px;border-radius:10px;border:1px solid rgba(76,145,92,.3);background:rgba(76,145,92,.12);font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s,transform .12s;color:inherit}
+.garden-action-btn:hover{background:rgba(76,145,92,.22);transform:translateY(-1px)}
+.garden-action-btn.primary{background:rgba(47,145,93,.88);color:#fff;border-color:transparent}
+.garden-action-btn.primary:hover{background:rgba(47,145,93,1)}
+.garden-action-btn.danger{background:rgba(200,60,60,.12);border-color:rgba(200,60,60,.3)}
+.garden-action-btn.danger:hover{background:rgba(200,60,60,.22)}
+/* ── Camera overlay controls ── */
+.garden-3d-controls{position:absolute;top:10px;right:10px;z-index:20;display:flex;flex-direction:column;gap:6px}
+.garden-3d-btn{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.72);backdrop-filter:blur(8px);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:transform .15s,background .15s;color:#1a3a22}
+.garden-3d-btn:hover{background:rgba(255,255,255,.92);transform:scale(1.08)}
+.dark .garden-3d-btn{background:rgba(20,40,30,.78);border-color:rgba(255,255,255,.2);color:#c8f0d8}
+/* ── Edit mode overlay ── */
+.garden-edit-bar{position:absolute;top:10px;left:10px;z-index:20;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 120px)}
+.garden-edit-btn{padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.75);backdrop-filter:blur(8px);font-size:.75rem;font-weight:700;cursor:pointer;color:#1a3a22;transition:background .12s,transform .1s;white-space:nowrap}
+.garden-edit-btn:hover{background:rgba(255,255,255,.95);transform:scale(1.04)}
+.garden-edit-btn.active{background:rgba(47,145,93,.88);color:#fff;border-color:transparent}
+.garden-edit-btn.red{background:rgba(200,60,60,.78);color:#fff;border-color:transparent}
+.dark .garden-edit-btn{background:rgba(20,40,30,.78);border-color:rgba(255,255,255,.2);color:#c8f0d8}
+/* ── Placement preview tooltip ── */
+.garden-placement-hint{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:20;padding:5px 12px;border-radius:8px;background:rgba(0,0,0,.62);color:#fff;font-size:.75rem;font-weight:600;pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px)}
+/* ── Inventory sheet ── */
+.garden-inventory-sheet{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);display:flex;align-items:flex-end;border-radius:22px;overflow:hidden}
+.garden-inventory-inner{width:100%;max-height:78%;background:var(--card-bg,#fff);border-radius:18px 18px 0 0;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+.dark .garden-inventory-inner{background:#1a2820}
+.garden-inventory-title{font-size:1rem;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.garden-inv-close{font-size:1.2rem;cursor:pointer;padding:2px 6px;border-radius:6px;border:none;background:none;color:inherit}
+.garden-inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+.garden-inv-item{border:1.5px solid rgba(120,140,120,.22);border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;transition:border-color .15s,transform .12s,background .15s;background:rgba(76,145,92,.06)}
+.garden-inv-item:hover{border-color:rgba(47,145,93,.5);background:rgba(47,145,93,.12);transform:translateY(-2px)}
+.garden-inv-item.selected{border-color:#2f9b5d;background:rgba(47,145,93,.18)}
+.garden-inv-item.cant-afford{opacity:.45;cursor:not-allowed}
+.garden-inv-item.cant-afford:hover{transform:none;border-color:rgba(120,140,120,.22);background:rgba(76,145,92,.06)}
+.garden-inv-preview{height:56px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:6px}
+.garden-inv-name{font-size:.72rem;font-weight:700;margin-bottom:3px}
+.garden-inv-cost{font-size:.7rem;font-weight:800}
+.garden-inv-rarity{font-size:.62rem;font-weight:700;padding:2px 5px;border-radius:4px;display:inline-block;margin-bottom:4px}
+.rarity-common{background:rgba(120,140,120,.2);color:#4a6a50}
+.rarity-uncommon{background:rgba(60,120,200,.18);color:#2a6ab0}
+.rarity-rare{background:rgba(120,60,200,.18);color:#6a30b0}
+.rarity-epic{background:rgba(200,100,0,.18);color:#b05000}
+.rarity-legendary{background:rgba(200,160,0,.2);color:#8a6800}
+.dark .rarity-common{color:#8aaa90}.dark .rarity-uncommon{color:#6aaade}.dark .rarity-rare{color:#aa7ae0}.dark .rarity-epic{color:#e09050}.dark .rarity-legendary{color:#e0c840}
+/* ── Notification toast ── */
+.garden-toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);z-index:1000;background:rgba(30,80,50,.92);color:#d4f5dc;padding:9px 18px;border-radius:20px;font-size:.82rem;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:90vw;text-align:center}
+.garden-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ── Object selection glow ── */
+.garden-sel-actions{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+/* ── Empty state ── */
+.garden-empty-hint{padding:14px;border-radius:14px;background:rgba(76,145,92,.08);border:1px dashed rgba(76,145,92,.3);font-size:.82rem;line-height:1.5;text-align:center;margin-top:8px}
+/* ── Focus garden page ── */
+.focus-garden-page{padding-bottom:30px}
+.focus-garden-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.focus-garden-badge{font-size:.76rem;font-weight:750;padding:9px 12px;border-radius:999px;background:linear-gradient(145deg,rgba(76,175,112,.18),rgba(178,218,112,.15));border:1px solid rgba(76,145,92,.2)}
 .focus-garden-page .daily-garden-card{margin-top:0;padding:clamp(14px,3vw,24px);border-radius:26px;background:linear-gradient(145deg,rgba(33,112,70,.16),rgba(141,191,114,.08));box-shadow:0 18px 45px rgba(29,76,47,.1),inset 0 1px rgba(255,255,255,.6)}
 .dark .focus-garden-page .daily-garden-card{background:linear-gradient(145deg,rgba(28,88,56,.25),rgba(27,45,37,.3));box-shadow:0 18px 45px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.05)}
-.daily-garden-shortcut{position:relative;isolation:isolate}.daily-garden-shortcut:active{transform:scale(.93)}
-@media(max-width:520px){.focus-garden-page-head{gap:6px}.daily-garden-scene{height:310px}}
-@media(prefers-reduced-motion:reduce){.daily-garden-shortcut{transition:none}}
+.daily-garden-shortcut{position:relative;isolation:isolate}
+.daily-garden-shortcut:active{transform:scale(.93)}
+@media(max-width:520px){.focus-garden-page-head{gap:6px}.daily-garden-scene{height:310px}.garden-inv-grid{grid-template-columns:repeat(auto-fill,minmax(86px,1fr))}}
+@media(max-width:420px){.daily-garden-card{padding:14px}.daily-garden-stats{gap:6px}.daily-garden-stat{padding:8px}.daily-garden-stat-value{font-size:.96rem}}
+@media(prefers-reduced-motion:reduce){.daily-garden-shortcut,.garden-action-btn,.garden-3d-btn,.garden-inv-item{transition:none}}
 </style>
 
 </head>
@@ -6678,36 +6746,95 @@
             <div class="focus-garden-page-head">
                 <div>
                     <div class="settings-title">🌳 Focus Garden</div>
-                    <div class="settings-subtitle">A living 3D-style world that grows with your real progress in Daily.KRD.</div>
+                    <div class="settings-subtitle">Earn seeds by completing tasks, prayers, and study sessions. Plant them to design your garden.</div>
                 </div>
-                <div class="focus-garden-badge">🌿 Grow a little every day</div>
+                <div class="focus-garden-badge">🌱 Your land awaits</div>
             </div>
             <section class="daily-garden-card" id="dailyKrdGarden" aria-labelledby="dailyGardenTitle">
                 <div class="daily-garden-top">
                     <div>
-                        <div class="daily-garden-title" id="dailyGardenTitle">🌱 My Focus Garden</div>
-                        <div class="daily-garden-subtitle">Your real progress grows this forest. Study, tasks, prayers, quizzes, and subjects all help it flourish.</div>
+                        <div class="daily-garden-title" id="dailyGardenTitle">🌿 My Garden</div>
+                        <div class="daily-garden-subtitle" id="gardenSubtitle">Complete activities to earn seeds, then plant them here.</div>
                     </div>
-                    <div class="daily-garden-level" id="dailyGardenLevel">Level 1 · Seedling</div>
+                    <div class="daily-garden-level" id="dailyGardenLevel">Level 1</div>
                 </div>
-                <div class="daily-garden-scene" role="img" aria-label="Interactive 3D productivity garden rendered with Three.js WebGL">
+
+                <!-- Seed balance bar -->
+                <div class="garden-seed-bar" id="gardenSeedBar">
+                    <span class="garden-seed-icon">🌰</span>
+                    <span class="garden-seed-count" id="gardenSeedCount">0</span>
+                    <span class="garden-seed-label">seeds available</span>
+                    <span class="garden-seed-lifetime" id="gardenSeedLifetime">0 earned lifetime</span>
+                </div>
+
+                <!-- Action row -->
+                <div class="garden-actions">
+                    <button class="garden-action-btn primary" id="gardenEditBtn" type="button">✏️ Edit Garden</button>
+                    <button class="garden-action-btn" id="gardenCatalogBtn" type="button">🌿 Plant</button>
+                    <button class="garden-action-btn" id="gardenSaveBtn" type="button" style="display:none">💾 Save</button>
+                </div>
+
+                <!-- 3D viewport -->
+                <div class="daily-garden-scene" id="gardenScene" role="img" aria-label="Interactive 3D garden built with Three.js WebGL">
                     <canvas id="gardenCanvas" aria-hidden="true"></canvas>
                     <div class="garden-canvas-fallback" id="gardenFallback" style="display:none">
-                        🌳 3D garden requires WebGL.<br>Your progress is still tracked below.
+                        🌳 3D garden requires WebGL support.<br>Your seeds and progress are still saved.
                     </div>
+
+                    <!-- Camera controls overlay -->
                     <div class="garden-3d-controls">
-                        <button class="garden-3d-btn" id="gardenResetCam" title="Reset camera" aria-label="Reset garden camera">⌖</button>
+                        <button class="garden-3d-btn" id="gardenResetCam" title="Reset camera" aria-label="Reset camera">⌖</button>
+                        <button class="garden-3d-btn" id="gardenGridBtn" title="Toggle grid" aria-label="Toggle grid">⊞</button>
                     </div>
-                    <div class="daily-garden-ground-label" id="dailyGardenGroundLabel">A new forest begins</div>
+
+                    <!-- Edit mode toolbar (hidden by default) -->
+                    <div class="garden-edit-bar" id="gardenEditBar" style="display:none">
+                        <button class="garden-edit-btn" id="gardenUndoBtn" title="Undo" type="button">↩ Undo</button>
+                        <button class="garden-edit-btn" id="gardenRedoBtn" title="Redo" type="button">↪ Redo</button>
+                        <button class="garden-edit-btn" id="gardenSnapBtn" title="Snap to grid" type="button">⊟ Snap</button>
+                        <button class="garden-edit-btn red" id="gardenExitEditBtn" type="button">✕ Exit Edit</button>
+                    </div>
+
+                    <!-- Selection controls (shown when an object is selected) -->
+                    <div class="garden-sel-actions" id="gardenSelActions" style="display:none">
+                        <button class="garden-edit-btn active" id="gardenMoveBtn" type="button">↔ Move</button>
+                        <button class="garden-edit-btn" id="gardenRotBtn" type="button">↻ Rotate</button>
+                        <button class="garden-edit-btn" id="gardenScaleBtn" type="button">⤡ Resize</button>
+                        <button class="garden-edit-btn red" id="gardenRemoveBtn" type="button">🗑 Remove</button>
+                        <button class="garden-edit-btn" id="gardenDupBtn" type="button">⧉ Duplicate</button>
+                    </div>
+
+                    <!-- Placement hint -->
+                    <div class="garden-placement-hint" id="gardenPlacementHint" style="display:none">Click / tap to place • R to rotate</div>
+
+                    <!-- Ground label -->
+                    <div class="daily-garden-ground-label" id="dailyGardenGroundLabel">Your garden awaits — earn seeds to begin</div>
+
+                    <!-- Inventory / catalog sheet (inside scene for positioning) -->
+                    <div class="garden-inventory-sheet" id="gardenInvSheet" style="display:none" role="dialog" aria-label="Plant catalog">
+                        <div class="garden-inventory-inner">
+                            <div class="garden-inventory-title">
+                                <span>🌿 Choose a Plant</span>
+                                <button class="garden-inv-close" id="gardenInvClose" aria-label="Close catalog" type="button">✕</button>
+                            </div>
+                            <div class="garden-inv-grid" id="gardenInvGrid"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="daily-garden-progress-head"><span id="dailyGardenNextLabel">Progress to next level</span><span id="dailyGardenXpLabel">0 / 100 XP</span></div>
-                <div class="daily-garden-progress" role="progressbar" aria-label="Garden level progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dailyGardenProgress"><div class="daily-garden-progress-fill" id="dailyGardenProgressFill"></div></div>
+
+                <!-- Stats -->
                 <div class="daily-garden-stats">
                     <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTotalXp">0</div><div class="daily-garden-stat-label">Total XP</div></div>
-                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTreesCount">0</div><div class="daily-garden-stat-label">Trees grown</div></div>
-                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenActivities">0</div><div class="daily-garden-stat-label">Activities counted</div></div>
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenTreesCount">0</div><div class="daily-garden-stat-label">Plants placed</div></div>
+                    <div class="daily-garden-stat"><div class="daily-garden-stat-value" id="dailyGardenActivities">0</div><div class="daily-garden-stat-label">Activities</div></div>
                 </div>
-                <div class="daily-garden-footnote" id="dailyGardenFootnote">Garden progress uses activity history available in your Daily.KRD account or on this device.</div>
+
+                <!-- Empty state hint (shown when no plants placed) -->
+                <div class="garden-empty-hint" id="gardenEmptyHint">
+                    🌱 Your land is waiting to grow.<br>Complete tasks, study sessions, and prayers to earn seeds, then click <strong>Plant</strong> to place your first plant.
+                </div>
+
+                <div class="daily-garden-footnote" id="dailyGardenFootnote"></div>
             </section>
         </section>
 
@@ -22353,100 +22480,390 @@ document.documentElement.classList.toggle(
         document.addEventListener("visibilitychange", () => { if (!document.hidden && document.getElementById("profile")?.classList.contains("active")) renderProfileActivityStats(); });
         setTimeout(renderProfileActivityStats, 600);
 
-        // ────────────────────────────────────────────────────────────────────────
-        // Daily.KRD Focus Garden — Three.js WebGL implementation
-        // Progress is read from existing activity records. No new data models.
-        // ────────────────────────────────────────────────────────────────────────
-        const DAILY_GARDEN_STATE_KEY = "dailykrd_garden_progress_v1";
+        // ════════════════════════════════════════════════════════════════════════
+        // Daily.KRD — Interactive 3D Garden Builder & Productivity Seed System
+        // Seeds earned from real activity. Spend to plant. Full Three.js edit.
+        // No existing app data models changed.
+        // ════════════════════════════════════════════════════════════════════════
 
-        function gardenReadJson(key, fallback) {
-            try { const value = JSON.parse(localStorage.getItem(key) || "null"); return value == null ? fallback : value; }
-            catch (_) { return fallback; }
+        // ── Storage keys ──────────────────────────────────────────────────────
+        const GRD_SEEDS_KEY    = "dailykrd_garden_seeds_v2";
+        const GRD_PLACED_KEY   = "dailykrd_garden_placed_v2";
+        const GRD_REWARDED_KEY = "dailykrd_garden_rewarded_v2";
+        const GRD_PREFS_KEY    = "dailykrd_garden_prefs_v2";
+
+        // ── Configurable reward amounts (seeds per event) ──────────────────────
+        const GRD_REWARDS = {
+            task:          3,
+            prayer:        2,
+            studySession:  4,
+            deck:          5,
+            subject:       2,
+        };
+
+        // ── Plant catalog ──────────────────────────────────────────────────────
+        const GRD_PLANTS = [
+            // Common
+            { id:"grass1",     name:"Grass Tuft",       rarity:"common",    cost:5,   emoji:"\u{1F33F}", desc:"A simple clump of fresh grass." },
+            { id:"daisy1",     name:"Daisy",            rarity:"common",    cost:5,   emoji:"\u{1F33C}", desc:"A cheerful white daisy." },
+            { id:"tulip1",     name:"Tulip",            rarity:"common",    cost:6,   emoji:"\u{1F337}", desc:"A bright red tulip." },
+            { id:"seedling1",  name:"Oak Seedling",     rarity:"common",    cost:5,   emoji:"\u{1F331}", desc:"A tiny oak seedling." },
+            { id:"shrub1",     name:"Low Shrub",        rarity:"common",    cost:7,   emoji:"\u{1F33F}", desc:"A rounded decorative shrub." },
+            // Uncommon
+            { id:"bush1",      name:"Flower Bush",      rarity:"uncommon",  cost:15,  emoji:"\u{1F338}", desc:"A bush covered in blossoms." },
+            { id:"fern1",      name:"Forest Fern",      rarity:"uncommon",  cost:14,  emoji:"\u{1F33F}", desc:"A lush fern with arching fronds." },
+            { id:"mushroom1",  name:"Mushroom Cluster", rarity:"uncommon",  cost:15,  emoji:"\u{1F344}", desc:"A trio of forest mushrooms." },
+            { id:"stone1",     name:"Garden Stone",     rarity:"uncommon",  cost:12,  emoji:"\u{1FAA8}", desc:"A smooth decorative stone." },
+            { id:"sapling1",   name:"Young Oak",        rarity:"uncommon",  cost:18,  emoji:"\u{1F333}", desc:"A young oak growing strong." },
+            // Rare
+            { id:"cherry1",    name:"Cherry Blossom",   rarity:"rare",      cost:40,  emoji:"\u{1F338}", desc:"A delicate cherry blossom tree." },
+            { id:"willow1",    name:"Willow Tree",      rarity:"rare",      cost:42,  emoji:"\u{1F33F}", desc:"A graceful weeping willow." },
+            { id:"lavender1",  name:"Lavender Patch",   rarity:"rare",      cost:38,  emoji:"\u{1F49C}", desc:"Fragrant purple lavender." },
+            { id:"pine1",      name:"Pine Tree",        rarity:"rare",      cost:40,  emoji:"\u{1F332}", desc:"A tall aromatic pine." },
+            { id:"apple1",     name:"Apple Tree",       rarity:"rare",      cost:45,  emoji:"\u{1F34E}", desc:"A fruit-laden apple tree." },
+            // Epic
+            { id:"bigoak1",    name:"Ancient Oak",      rarity:"epic",      cost:100, emoji:"\u{1F333}", desc:"A massive oak with wide canopy." },
+            { id:"glowf1",     name:"Moon Flower",      rarity:"epic",      cost:95,  emoji:"\u{1F315}", desc:"A luminous flower that glows softly." },
+            { id:"sakura1",    name:"Full Sakura",       rarity:"epic",      cost:110, emoji:"\u{1F338}", desc:"A magnificent sakura in full bloom." },
+            { id:"redmaple1",  name:"Red Maple",         rarity:"epic",      cost:100, emoji:"\u{1F341}", desc:"A stunning Japanese maple." },
+            { id:"cypress1",   name:"Cypress Column",   rarity:"epic",      cost:90,  emoji:"\u{1F332}", desc:"A tall Mediterranean cypress." },
+            // Legendary
+            { id:"worldtree",  name:"World Tree",       rarity:"legendary", cost:250, emoji:"\u{1F30F}", desc:"A towering mythic tree of legends." },
+            { id:"crystaltree",name:"Crystal Tree",     rarity:"legendary", cost:260, emoji:"\u{2728}",  desc:"A crystalline tree that shimmers." },
+            { id:"rainbowtree",name:"Rainbow Tree",     rarity:"legendary", cost:280, emoji:"\u{1F308}", desc:"A tree with extraordinary leaf colors." },
+            { id:"dragontree", name:"Dragon Tree",      rarity:"legendary", cost:270, emoji:"\u{1F409}", desc:"A majestic dragon-blood tree." },
+            { id:"spirittree", name:"Spirit Tree",      rarity:"legendary", cost:300, emoji:"\u{1F54A}\uFE0F",  desc:"A luminous spirit tree with orbs." },
+        ];
+
+        // ── Runtime state ──────────────────────────────────────────────────────
+        let grdSeeds    = _grdReadJson(GRD_SEEDS_KEY,    { available:0, lifetime:0, spent:0 });
+        let grdRewarded = new Set(_grdReadJson(GRD_REWARDED_KEY, []));
+        let grdPlaced   = _grdReadJson(GRD_PLACED_KEY,   []);
+        let grdPrefs    = _grdReadJson(GRD_PREFS_KEY,    { snapGrid:false, gridVisible:false });
+
+        function _grdReadJson(key, fallback) {
+            try { const v = JSON.parse(localStorage.getItem(key) || "null"); return v == null ? fallback : v; }
+            catch(_) { return fallback; }
+        }
+        function _grdWriteJson(key, val) {
+            try { localStorage.setItem(key, JSON.stringify(val)); } catch(_){}
+        }
+        function _grdSaveAll() {
+            _grdWriteJson(GRD_SEEDS_KEY,    grdSeeds);
+            _grdWriteJson(GRD_PLACED_KEY,   grdPlaced);
+            _grdWriteJson(GRD_REWARDED_KEY, [...grdRewarded]);
+            _grdWriteJson(GRD_PREFS_KEY,    grdPrefs);
         }
 
-        function gardenActivitySnapshot() {
-            const tasks = Array.isArray(getActiveTasksSource()) ? getActiveTasksSource() : [];
-            let completedTasks = 0;
+        // ── Toast notification ─────────────────────────────────────────────────
+        let _grdToastTimer = null;
+        function grdToast(msg) {
+            let el = document.getElementById("grdToast");
+            if (!el) {
+                el = document.createElement("div");
+                el.id = "grdToast";
+                el.className = "garden-toast";
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.classList.add("show");
+            clearTimeout(_grdToastTimer);
+            _grdToastTimer = setTimeout(() => el.classList.remove("show"), 3200);
+        }
+
+        // ── Seed reward engine (de-duplicated by stable activity IDs) ─────────
+        function grdComputeRewards() {
+            const newItems = [];
+            // Tasks
+            const tasks = Array.isArray(typeof getActiveTasksSource === "function" ? getActiveTasksSource() : [])
+                ? getActiveTasksSource() : [];
             for (const task of tasks) {
                 if (!task || typeof task !== "object") continue;
+                const tid = task.id || task.uid || String(task.text || "").slice(0, 60);
+                if (!tid) continue;
                 if (Array.isArray(task.completedDates) && task.completedDates.length) {
-                    completedTasks += new Set(task.completedDates.map(String)).size;
-                } else if (task.completed) completedTasks++;
-            }
-            let prayerRecords = {};
-            try { prayerRecords = typeof getPrayerRecords === "function" ? getPrayerRecords() : {}; } catch (_) {}
-            let completedPrayers = 0;
-            if (prayerRecords && typeof prayerRecords === "object" && !Array.isArray(prayerRecords)) {
-                for (const record of Object.values(prayerRecords)) {
-                    if (record && typeof record === "object") completedPrayers += PRAYER_FIELDS.filter(field => record[field] === true).length;
+                    for (const d of new Set(task.completedDates.map(String))) {
+                        const rid = "task:" + tid + ":" + d;
+                        if (!grdRewarded.has(rid)) newItems.push({ rid, amt: GRD_REWARDS.task, label: "task" });
+                    }
+                } else if (task.completed) {
+                    const rid = "task:" + tid + ":done";
+                    if (!grdRewarded.has(rid)) newItems.push({ rid, amt: GRD_REWARDS.task, label: "task" });
                 }
             }
-            const sessionsRaw = gardenReadJson("dailykrd_study_sessions", []);
-            const sessions = Array.isArray(sessionsRaw) ? sessionsRaw.filter(s => s && typeof s === "object") : [];
-            const sessionMinutesByDate = {};
-            let undatedSessionMinutes = 0;
-            for (const session of sessions) {
-                const minutes = Math.max(0, Number(session.duration) || 0);
-                if (session.date) sessionMinutesByDate[String(session.date)] = (sessionMinutesByDate[String(session.date)] || 0) + minutes;
-                else undatedSessionMinutes += minutes;
+            // Prayers
+            let prayerRecords = {};
+            try { prayerRecords = typeof getPrayerRecords === "function" ? getPrayerRecords() : {}; } catch(_){}
+            if (prayerRecords && typeof prayerRecords === "object" && !Array.isArray(prayerRecords)) {
+                for (const [dateKey, rec] of Object.entries(prayerRecords)) {
+                    if (!rec || typeof rec !== "object") continue;
+                    for (const field of (typeof PRAYER_FIELDS !== "undefined" ? PRAYER_FIELDS : [])) {
+                        if (rec[field] === true) {
+                            const rid = "prayer:" + dateKey + ":" + field;
+                            if (!grdRewarded.has(rid)) newItems.push({ rid, amt: GRD_REWARDS.prayer, label: "prayer" });
+                        }
+                    }
+                }
             }
-            const minuteDataRaw = gardenReadJson("dailykrd_study_minutes", {});
-            const minuteData = minuteDataRaw && typeof minuteDataRaw === "object" && !Array.isArray(minuteDataRaw) ? minuteDataRaw : {};
-            const studyDateKeys = new Set([...Object.keys(sessionMinutesByDate), ...Object.keys(minuteData)]);
-            let totalStudyMinutes = undatedSessionMinutes;
-            for (const dateKey of studyDateKeys) {
-                const savedDailyMinutes = Math.max(0, Number(minuteData[dateKey]) || 0);
-                totalStudyMinutes += Math.max(sessionMinutesByDate[dateKey] || 0, savedDailyMinutes);
+            // Study sessions
+            const sessions = Array.isArray(_grdReadJson("dailykrd_study_sessions", [])) ? _grdReadJson("dailykrd_study_sessions", []) : [];
+            for (const s of sessions) {
+                if (!s || typeof s !== "object") continue;
+                if (!s.duration && !s.completed) continue;
+                const sid = s.id || s.uid || (String(s.date||"") + ":" + String(s.subject||"") + ":" + String(s.duration||""));
+                const rid = "study:" + sid;
+                if (!grdRewarded.has(rid)) newItems.push({ rid, amt: GRD_REWARDS.studySession, label: "study session" });
             }
-            const decksRaw = gardenReadJson("dailykrd_flashcards", []);
-            const decks = Array.isArray(decksRaw) ? decksRaw : [];
-            const subjectsRaw = gardenReadJson("dailykrd_study_subjects", []);
-            const subjects = Array.isArray(subjectsRaw) ? subjectsRaw : [];
-            const activityCount = completedTasks + completedPrayers + sessions.length + decks.length + subjects.length;
-            const xp = completedTasks * 10 + completedPrayers * 5 + Math.floor(totalStudyMinutes / 5) + decks.length * 8 + subjects.length * 3;
-            return { completedTasks, completedPrayers, sessions: sessions.length, totalStudyMinutes, decks: decks.length, subjects: subjects.length, activityCount, xp };
+            // Quiz decks
+            const decks = Array.isArray(_grdReadJson("dailykrd_flashcards", [])) ? _grdReadJson("dailykrd_flashcards", []) : [];
+            for (const d of decks) {
+                const did = d.id || d.uid || d.name || JSON.stringify(d).slice(0, 50);
+                const rid = "deck:" + did;
+                if (!grdRewarded.has(rid)) newItems.push({ rid, amt: GRD_REWARDS.deck, label: "quiz deck" });
+            }
+            // Subjects
+            const subjects = Array.isArray(_grdReadJson("dailykrd_study_subjects", [])) ? _grdReadJson("dailykrd_study_subjects", []) : [];
+            for (const s of subjects) {
+                const sid = s.id || s.name || String(s);
+                const rid = "subject:" + sid;
+                if (!grdRewarded.has(rid)) newItems.push({ rid, amt: GRD_REWARDS.subject, label: "subject" });
+            }
+            if (!newItems.length) return;
+            let total = 0;
+            const labels = {};
+            for (const item of newItems) {
+                grdRewarded.add(item.rid);
+                grdSeeds.available += item.amt;
+                grdSeeds.lifetime  += item.amt;
+                total += item.amt;
+                labels[item.label] = (labels[item.label] || 0) + 1;
+            }
+            _grdSaveAll();
+            grdUpdateUI();
+            const summary = Object.entries(labels).map(([k,v]) => v + " " + k).join(", ");
+            grdToast("+" + total + " \u{1F330} from " + summary);
         }
 
-        // ── Three.js garden engine ──────────────────────────────────────────────
-        const _gardenEngine = (function () {
-            let renderer = null, scene = null, camera = null, animFrame = null;
-            let initialized = false, destroyed = false;
-            let treeGroup = null, treeMeshes = [];
-            let isDark = false;
-            let currentTreeCount = 0;
-            // Camera orbit state
-            let theta = Math.PI / 5, phi = Math.PI / 3.2, radius = 14;
-            const MIN_RADIUS = 6, MAX_RADIUS = 26;
-            let isDragging = false, lastX = 0, lastY = 0;
-            let targetTheta = theta, targetPhi = phi, targetRadius = radius;
-            // Touch
-            let lastPinchDist = null;
+        // ── UI update ──────────────────────────────────────────────────────────
+        function grdUpdateUI() {
+            const q = id => document.getElementById(id);
+            const setText = (id, v) => { const el = q(id); if (el) el.textContent = v; };
+            setText("gardenSeedCount",  grdSeeds.available.toLocaleString());
+            setText("gardenSeedLife",   grdSeeds.lifetime.toLocaleString() + " earned lifetime");
+            setText("gardenPlantCount", grdPlaced.length.toString());
+            setText("gardenActCount",   grdRewarded.size.toLocaleString());
+            const lvl = Math.floor(grdSeeds.lifetime / 50) + 1;
+            setText("dailyGardenLevel", "Level " + lvl);
+            setText("dailyGardenTotalXp", (grdSeeds.lifetime * 3).toLocaleString());
+            setText("dailyGardenTreesCount", grdPlaced.length.toString());
+            setText("dailyGardenActivities", grdRewarded.size.toLocaleString());
+            const gl = q("dailyGardenGroundLabel");
+            if (gl) gl.textContent = grdPlaced.length === 0
+                ? "Your garden awaits — earn seeds to begin"
+                : grdPlaced.length + " plant" + (grdPlaced.length===1?"":"s") + " in your garden";
+            const eh = q("gardenEmptyHint");
+            if (eh) eh.style.display = grdPlaced.length === 0 ? "block" : "none";
+            const fn = q("dailyGardenFootnote");
+            if (fn) fn.textContent = grdSeeds.lifetime + " seeds earned \u2014 " + grdSeeds.spent + " spent \u2014 " + grdSeeds.available + " available. Earn seeds: tasks (" + GRD_REWARDS.task + "/ea), prayers (" + GRD_REWARDS.prayer + "/ea), study (" + GRD_REWARDS.studySession + "/session), quizzes (" + GRD_REWARDS.deck + "/deck), subjects (" + GRD_REWARDS.subject + "/ea).";
+        }
 
-            function isDarkMode() {
-                return document.documentElement.classList.contains("dark");
+        // ── Catalog / inventory sheet ──────────────────────────────────────────
+        let _grdSelectedPlant = null;
+
+        function grdOpenCatalog() {
+            const sheet = document.getElementById("gardenInvSheet");
+            const grid  = document.getElementById("gardenInvGrid");
+            if (!sheet || !grid) return;
+            grid.innerHTML = "";
+            for (const plant of GRD_PLANTS) {
+                const canAfford = grdSeeds.available >= plant.cost;
+                const item = document.createElement("div");
+                item.className = "garden-inv-item" + (canAfford ? "" : " cant-afford");
+                item.dataset.pid = plant.id;
+                item.title = plant.desc;
+                item.innerHTML =
+                    "<div class='garden-inv-emoji'>" + plant.emoji + "</div>" +
+                    "<span class='garden-inv-rarity rarity-" + plant.rarity + "'>" + plant.rarity + "</span>" +
+                    "<div class='garden-inv-name'>" + plant.name + "</div>" +
+                    "<div class='garden-inv-cost' style='color:" + (canAfford ? "#2f9b5d" : "#c04040") + "'>" +
+                    "\u{1F330} " + plant.cost + "</div>";
+                if (canAfford) item.addEventListener("click", () => grdPickPlant(plant));
+                grid.appendChild(item);
             }
+            sheet.style.display = "flex";
+        }
+        function grdCloseCatalog() {
+            const s = document.getElementById("gardenInvSheet");
+            if (s) s.style.display = "none";
+        }
+        function grdPickPlant(plant) {
+            _grdSelectedPlant = plant;
+            grdCloseCatalog();
+            const hint = document.getElementById("gardenPlacementHint");
+            if (hint) { hint.textContent = "Placing " + plant.emoji + " " + plant.name + " (\u{1F330}" + plant.cost + ") \u2014 click/tap to confirm \u2022 ESC to cancel"; hint.style.display = "block"; }
+            _grdEng.startPlacement(plant);
+        }
+        function grdConfirmPlace(pos, rot) {
+            const plant = _grdSelectedPlant;
+            if (!plant) return;
+            if (grdSeeds.available < plant.cost) { grdToast("\u274C Need " + plant.cost + " \u{1F330} \u2014 you have " + grdSeeds.available); grdCancelPlace(); return; }
+            grdSeeds.available -= plant.cost;
+            grdSeeds.spent     += plant.cost;
+            const uid = "p" + Date.now() + Math.random().toString(36).slice(2, 6);
+            const obj = { uid, plantId: plant.id, pos: [pos.x, pos.z], rot: rot || 0, scale: 1.0 };
+            grdPlaced.push(obj);
+            _grdUndoStack.push({ type: "add", uid });
+            _grdRedoStack = [];
+            _grdSaveAll();
+            grdUpdateUI();
+            _grdEng.finalizePlace(obj);
+            _grdSelectedPlant = null;
+            const hint = document.getElementById("gardenPlacementHint");
+            if (hint) hint.style.display = "none";
+            grdToast("\u{1F331} Planted " + plant.name + "!");
+        }
+        function grdCancelPlace() {
+            _grdSelectedPlant = null;
+            _grdEng.cancelPlacement();
+            const hint = document.getElementById("gardenPlacementHint");
+            if (hint) hint.style.display = "none";
+        }
 
+        // ── Edit mode state ────────────────────────────────────────────────────
+        let _grdEditMode  = false;
+        let _grdUndoStack = [];
+        let _grdRedoStack = [];
+        let _grdSelUid    = null;
+
+        function grdEnterEdit() {
+            _grdEditMode = true;
+            _grdEng.setEditMode(true);
+            document.getElementById("gardenEditBar")?.style.setProperty("display","flex");
+            document.getElementById("gardenSaveBtn")?.style.setProperty("display","inline-flex");
+            document.getElementById("gardenEditBtn")?.style.setProperty("display","none");
+            grdToast("Edit mode \u2014 select a plant to move, rotate, or remove");
+        }
+        function grdExitEdit() {
+            _grdEditMode = false;
+            grdDeselect();
+            _grdEng.setEditMode(false);
+            document.getElementById("gardenEditBar")?.style.setProperty("display","none");
+            document.getElementById("gardenSaveBtn")?.style.setProperty("display","none");
+            document.getElementById("gardenEditBtn")?.style.setProperty("display","inline-flex");
+            document.getElementById("gardenSelActions")?.style.setProperty("display","none");
+            _grdSaveAll();
+            grdToast("Garden saved \u2713");
+        }
+        function grdDeselect() {
+            _grdSelUid = null;
+            document.getElementById("gardenSelActions")?.style.setProperty("display","none");
+            _grdEng.deselect();
+        }
+        function grdSelectObj(uid) {
+            _grdSelUid = uid;
+            document.getElementById("gardenSelActions")?.style.setProperty("display","flex");
+            _grdEng.highlight(uid);
+        }
+        function grdRemoveSel() {
+            if (!_grdSelUid) return;
+            const idx = grdPlaced.findIndex(o => o.uid === _grdSelUid);
+            if (idx === -1) return;
+            const removed = grdPlaced.splice(idx, 1)[0];
+            _grdUndoStack.push({ type:"remove", obj: removed });
+            _grdRedoStack = [];
+            _grdSaveAll(); grdUpdateUI();
+            _grdEng.removeObj(removed.uid);
+            grdDeselect();
+            grdToast("Plant removed");
+        }
+        function grdDupSel() {
+            if (!_grdSelUid) return;
+            const src = grdPlaced.find(o => o.uid === _grdSelUid);
+            if (!src) return;
+            const plant = GRD_PLANTS.find(p => p.id === src.plantId);
+            if (!plant) return;
+            if (grdSeeds.available < plant.cost) { grdToast("\u274C Need " + plant.cost + " \u{1F330} to duplicate"); return; }
+            grdSeeds.available -= plant.cost; grdSeeds.spent += plant.cost;
+            const uid = "p" + Date.now() + Math.random().toString(36).slice(2,6);
+            const copy = { uid, plantId: src.plantId, pos: [src.pos[0]+1.5, src.pos[1]+1.5], rot: src.rot, scale: src.scale };
+            grdPlaced.push(copy);
+            _grdUndoStack.push({ type:"add", uid });
+            _grdRedoStack = [];
+            _grdSaveAll(); grdUpdateUI();
+            _grdEng.addObj(copy);
+            grdToast("\u29C9 Duplicated " + plant.name);
+        }
+        function grdUndo() {
+            const a = _grdUndoStack.pop(); if (!a) return;
+            if (a.type === "add") {
+                const i = grdPlaced.findIndex(o => o.uid === a.uid);
+                if (i !== -1) { const o = grdPlaced.splice(i,1)[0]; _grdRedoStack.push({type:"remove",obj:o}); _grdEng.removeObj(a.uid); }
+            } else if (a.type === "remove") {
+                grdPlaced.push(a.obj); _grdRedoStack.push({type:"add",uid:a.obj.uid}); _grdEng.addObj(a.obj);
+            } else if (a.type === "move") {
+                const obj = grdPlaced.find(o=>o.uid===a.uid);
+                if (obj) { const op=obj.pos.slice(); obj.pos=a.oldPos; _grdRedoStack.push({type:"move",uid:a.uid,oldPos:op}); _grdEng.moveObj(a.uid,obj.pos); }
+            }
+            _grdSaveAll(); grdUpdateUI();
+        }
+        function grdRedo() {
+            const a = _grdRedoStack.pop(); if (!a) return;
+            if (a.type === "add") {
+                const i = grdPlaced.findIndex(o=>o.uid===a.uid);
+                if (i !== -1) { const o = grdPlaced.splice(i,1)[0]; _grdUndoStack.push({type:"remove",obj:o}); _grdEng.removeObj(a.uid); }
+            } else if (a.type === "remove") {
+                grdPlaced.push(a.obj); _grdUndoStack.push({type:"add",uid:a.obj.uid}); _grdEng.addObj(a.obj);
+            }
+            _grdSaveAll(); grdUpdateUI();
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Three.js 3D garden engine
+        // ══════════════════════════════════════════════════════════════════════
+        const _grdEng = (function() {
+            let renderer=null, scene=null, camera=null, raf=null;
+            let inited=false, dead=false, dark=false, editMode=false;
+            let terrainMesh=null, gridHelper=null;
+            let raycaster=null, pointerV=null;
+            const objMap = {};          // uid -> THREE.Group
+            // Placement
+            let preview=null, prevPlant=null, prevRot=0, placing=false;
+            // Selection
+            let selUid=null, selGroup=null;
+            // Camera orbit
+            let theta=0.55, phi=0.95, radius=20;
+            const MIN_R=7, MAX_R=32;
+            let tTheta=theta, tPhi=phi, tRadius=radius;
+            // Interaction
+            let dragActive=false, lx=0, ly=0, pinch=null;
+            let pointerDownPos=null;   // to distinguish click vs drag
+
+            // ── Dark mode ──────────────────────────────────────────────────────
+            function isDark(){ return document.documentElement.classList.contains("dark"); }
+
+            // ── Init ───────────────────────────────────────────────────────────
             function init(canvas) {
-                if (initialized || destroyed) return;
+                if (inited||dead) return;
+                const T = window.THREE;
+                if (!T) { showFallback(); return; }
                 try {
-                    const THREE = window.THREE;
-                    if (!THREE) { showFallback(); return; }
-
-                    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-                    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                    renderer = new T.WebGLRenderer({ canvas, antialias:true });
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
                     renderer.shadowMap.enabled = true;
-                    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-                    scene = new THREE.Scene();
-                    camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
-
+                    renderer.shadowMap.type = T.PCFSoftShadowMap;
+                    scene  = new T.Scene();
+                    camera = new T.PerspectiveCamera(48,1,0.1,300);
+                    raycaster = new T.Raycaster();
+                    pointerV  = new T.Vector2();
                     buildScene();
+                    // Restore placed objects
+                    for (const obj of grdPlaced) addObj(obj);
                     resize();
                     bindEvents(canvas);
-                    animate();
-                    initialized = true;
-                } catch (e) {
-                    console.warn("Garden WebGL init failed:", e);
+                    loop();
+                    inited = true;
+                } catch(e) {
+                    console.warn("Garden 3D init failed:", e);
                     showFallback();
                 }
             }
@@ -22454,600 +22871,482 @@ document.documentElement.classList.toggle(
             function showFallback() {
                 const fb = document.getElementById("gardenFallback");
                 const cv = document.getElementById("gardenCanvas");
-                if (fb) fb.style.display = "flex";
-                if (cv) cv.style.display = "none";
+                if (fb) fb.style.display="flex";
+                if (cv) cv.style.display="none";
             }
 
+            // ── Scene build ────────────────────────────────────────────────────
             function buildScene() {
-                const THREE = window.THREE;
-                isDark = isDarkMode();
+                const T = window.THREE;
+                dark = isDark();
                 scene.clear();
-                treeMeshes = [];
-
-                // Sky / background
-                updateBackground();
-
-                // Lighting
-                const ambLight = new THREE.AmbientLight(isDark ? 0x3a4a60 : 0xfff5e0, isDark ? 0.7 : 1.0);
-                ambLight.name = "ambLight";
-                scene.add(ambLight);
-
-                const sun = new THREE.DirectionalLight(isDark ? 0x8899cc : 0xfff4d6, isDark ? 0.5 : 1.4);
-                sun.name = "sun";
-                sun.position.set(8, 14, 8);
-                sun.castShadow = true;
-                sun.shadow.mapSize.width = 1024;
-                sun.shadow.mapSize.height = 1024;
-                sun.shadow.camera.near = 0.5;
-                sun.shadow.camera.far = 60;
-                sun.shadow.camera.left = -18;
-                sun.shadow.camera.right = 18;
-                sun.shadow.camera.top = 18;
-                sun.shadow.camera.bottom = -18;
-                sun.shadow.bias = -0.001;
+                terrainMesh = null;
+                // Sky & fog
+                if (dark) { scene.background=new T.Color(0x0b1520); scene.fog=new T.Fog(0x0b1520,30,80); }
+                else       { scene.background=new T.Color(0x8dd6f0); scene.fog=new T.Fog(0x8dd6f0,35,85); }
+                // Ambient
+                scene.add(new T.AmbientLight(dark?0x304050:0xfff8e8, dark?0.55:0.85));
+                // Sun / moon
+                const sun = new T.DirectionalLight(dark?0x6880cc:0xfff0c8, dark?0.55:1.3);
+                sun.position.set(12,20,12); sun.castShadow=true;
+                sun.shadow.mapSize.set(1024,1024);
+                sun.shadow.camera.near=1; sun.shadow.camera.far=70;
+                sun.shadow.camera.left=-22; sun.shadow.camera.right=22;
+                sun.shadow.camera.top=22; sun.shadow.camera.bottom=-22;
+                sun.shadow.bias=-0.001;
                 scene.add(sun);
-
-                if (isDark) {
-                    const moon = new THREE.DirectionalLight(0x6680bb, 0.3);
-                    moon.position.set(-6, 10, -5);
-                    scene.add(moon);
-                }
-
-                // ── Terrain ──
-                buildTerrain();
-                // ── Water ──
-                buildWater();
-                // ── Path ──
-                buildPath();
-                // ── Background mountains ──
-                buildMountains();
-                // ── Static environment details ──
-                buildDetails();
-                // ── Tree group (rebuilt on XP change) ──
-                treeGroup = new THREE.Group();
-                treeGroup.name = "trees";
-                scene.add(treeGroup);
-
-                // ── Stars (dark mode) ──
-                if (isDark) buildStars();
-            }
-
-            function updateBackground() {
-                const THREE = window.THREE;
-                isDark = isDarkMode();
-                if (isDark) {
-                    scene.background = new THREE.Color(0x0d1b2e);
-                    scene.fog = new THREE.Fog(0x0d1b2e, 22, 60);
-                } else {
-                    scene.background = new THREE.Color(0x87ceeb);
-                    scene.fog = new THREE.Fog(0x87ceeb, 28, 70);
-                }
+                if (dark) { const m=new T.DirectionalLight(0x4455aa,0.3); m.position.set(-10,14,-8); scene.add(m); }
+                // Terrain
+                terrainMesh = buildTerrain();
+                buildBoundary();
+                buildEnvironment();
+                if (dark) buildStars();
+                if (grdPrefs.gridVisible) toggleGrid(true);
             }
 
             function buildTerrain() {
-                const THREE = window.THREE;
-                // Main ground plane with subtle height variation via a simple geometry
-                const geo = new THREE.PlaneGeometry(40, 40, 24, 24);
+                const T = window.THREE;
+                // ~18×18 plot, slightly raised centre
+                const geo = new T.PlaneGeometry(28,28,28,28);
                 const pos = geo.attributes.position;
-                for (let i = 0; i < pos.count; i++) {
-                    const x = pos.getX(i), z = pos.getY(i);
-                    // Rolling hills using sine waves
-                    const y = Math.sin(x * 0.28) * 0.55 + Math.cos(z * 0.22) * 0.4
-                            + Math.sin(x * 0.6 + z * 0.4) * 0.25
-                            + (x < -6 ? Math.sin((x + 6) * 0.5) * 1.2 : 0); // hill on left
-                    pos.setZ(i, y);
+                for (let i=0;i<pos.count;i++) {
+                    const x=pos.getX(i), y=pos.getY(i);
+                    const d=Math.sqrt(x*x+y*y);
+                    const edge = Math.max(0,(d-9)/9);
+                    pos.setZ(i, edge>0
+                        ? Math.sin(x*.3)*.45+Math.cos(y*.25)*.4+edge*1.8
+                        : Math.sin(x*.55)*.07+Math.cos(y*.55)*.06);
                 }
                 geo.computeVertexNormals();
-                const mat = new THREE.MeshStandardMaterial({
-                    color: isDark ? 0x2a5535 : 0x4a9a58,
-                    roughness: 0.95,
-                    metalness: 0.0,
-                });
-                const mesh = new THREE.Mesh(geo, mat);
-                mesh.rotation.x = -Math.PI / 2;
-                mesh.receiveShadow = true;
-                mesh.name = "terrain";
+                const mat = new T.MeshStandardMaterial({ color:dark?0x2a5038:0x5cb562, roughness:0.96 });
+                const mesh = new T.Mesh(geo, mat);
+                mesh.name="terrain"; mesh.rotation.x=-Math.PI/2; mesh.receiveShadow=true;
                 scene.add(mesh);
-
-                // A slightly darker "dirt" layer underneath
-                const baseGeo = new THREE.PlaneGeometry(42, 42);
-                const baseMat = new THREE.MeshStandardMaterial({ color: isDark ? 0x1a3020 : 0x3d7a46, roughness: 1.0 });
-                const base = new THREE.Mesh(baseGeo, baseMat);
-                base.rotation.x = -Math.PI / 2;
-                base.position.y = -0.05;
-                base.receiveShadow = true;
-                scene.add(base);
+                // Flat plot overlay (slightly lighter)
+                const soilMat = new T.MeshStandardMaterial({ color:dark?0x316048:0x6aca72, roughness:0.9 });
+                const soil = new T.Mesh(new T.PlaneGeometry(18,18), soilMat);
+                soil.rotation.x=-Math.PI/2; soil.position.y=0.02; soil.receiveShadow=true;
+                scene.add(soil);
+                // Base
+                const base = new T.Mesh(new T.PlaneGeometry(32,32), new T.MeshStandardMaterial({color:dark?0x182820:0x3d7840,roughness:1}));
+                base.rotation.x=-Math.PI/2; base.position.y=-0.08; scene.add(base);
+                return mesh;
             }
 
-            function buildWater() {
-                const THREE = window.THREE;
-                // Winding stream — simple elongated ellipse-ish shape
-                const geo = new THREE.PlaneGeometry(1.8, 7, 6, 20);
-                const pos = geo.attributes.position;
-                for (let i = 0; i < pos.count; i++) {
-                    const t = (pos.getY(i) + 3.5) / 7; // 0..1 along length
-                    pos.setX(i, pos.getX(i) + Math.sin(t * Math.PI * 2) * 0.5);
-                    pos.setZ(i, 0.02); // just above ground
+            function buildBoundary() {
+                const T=window.THREE;
+                const postMat = new T.MeshStandardMaterial({color:dark?0x5a3820:0x8b5e30,roughness:0.9});
+                const postGeo = new T.CylinderGeometry(0.09,0.12,0.95,5);
+                for (const [x,z] of [[-9,-9],[9,-9],[9,9],[-9,9]]) {
+                    const p=new T.Mesh(postGeo,postMat); p.position.set(x,0.47,z); p.castShadow=true; scene.add(p);
                 }
-                geo.computeVertexNormals();
-                const mat = new THREE.MeshStandardMaterial({
-                    color: isDark ? 0x2d7ea8 : 0x3bb0d4,
-                    roughness: 0.05,
-                    metalness: 0.6,
-                    transparent: true,
-                    opacity: 0.85,
-                });
-                const mesh = new THREE.Mesh(geo, mat);
-                mesh.rotation.x = -Math.PI / 2;
-                mesh.position.set(3.5, 0.08, 1);
-                mesh.rotation.z = 0.3;
-                scene.add(mesh);
+                // Mid posts
+                for (const [x,z] of [[0,-9],[0,9],[-9,0],[9,0]]) {
+                    const p=new T.Mesh(new T.CylinderGeometry(0.06,0.08,0.85,5),postMat); p.position.set(x,0.42,z); scene.add(p);
+                }
+                const lmat=new T.LineBasicMaterial({color:dark?0x7a6040:0xaa8840});
+                const corners=[[-9,-9],[9,-9],[9,9],[-9,9],[-9,-9]];
+                scene.add(new T.Line(new T.BufferGeometry().setFromPoints(corners.map(([x,z])=>new T.Vector3(x,0.72,z))),lmat));
             }
 
-            function buildPath() {
-                const THREE = window.THREE;
-                const geo = new THREE.PlaneGeometry(1.0, 8, 4, 16);
-                const pos = geo.attributes.position;
-                for (let i = 0; i < pos.count; i++) {
-                    const t = (pos.getY(i) + 4) / 8;
-                    pos.setX(i, pos.getX(i) + Math.sin(t * Math.PI) * 1.2);
-                    pos.setZ(i, 0.01);
+            function buildEnvironment() {
+                const T=window.THREE;
+                // Mountains
+                const mCol=dark?0x1e3d50:0x7ab09a, snCol=dark?0x6a8090:0xf0f5f5;
+                function mtn(x,z,h,r,snow) {
+                    const m=new T.Mesh(new T.ConeGeometry(r,h,8), new T.MeshStandardMaterial({color:mCol,roughness:0.9}));
+                    m.position.set(x,h/2-0.6,z); m.castShadow=true; scene.add(m);
+                    if(snow){const s=new T.Mesh(new T.ConeGeometry(r*.28,h*.22,8),new T.MeshStandardMaterial({color:snCol,roughness:0.5}));s.position.set(x,h*.9,z);scene.add(s);}
                 }
-                geo.computeVertexNormals();
-                const mat = new THREE.MeshStandardMaterial({
-                    color: isDark ? 0x5e4030 : 0xc8a870,
-                    roughness: 1.0,
-                });
-                const mesh = new THREE.Mesh(geo, mat);
-                mesh.rotation.x = -Math.PI / 2;
-                mesh.position.set(-2, 0.06, 0);
-                mesh.rotation.z = 0.4;
-                scene.add(mesh);
-            }
-
-            function buildMountains() {
-                const THREE = window.THREE;
-                const mountainColor = isDark ? 0x2d5060 : 0x7baaa0;
-                const snowColor = isDark ? 0x8899aa : 0xeef5f5;
-                function makeMountain(x, z, h, r, snow) {
-                    const geo = new THREE.ConeGeometry(r, h, 7);
-                    const mat = new THREE.MeshStandardMaterial({ color: mountainColor, roughness: 0.9 });
-                    const m = new THREE.Mesh(geo, mat);
-                    m.position.set(x, h / 2 - 0.3, z);
-                    m.castShadow = true;
-                    scene.add(m);
-                    if (snow) {
-                        const sGeo = new THREE.ConeGeometry(r * 0.28, h * 0.22, 7);
-                        const sMat = new THREE.MeshStandardMaterial({ color: snowColor, roughness: 0.6 });
-                        const sm = new THREE.Mesh(sGeo, sMat);
-                        sm.position.set(x, h - h * 0.12, z);
-                        scene.add(sm);
-                    }
+                mtn(-20,-20,12,6,true); mtn(-13,-24,9,4.5,false); mtn(15,-22,11,5.5,true); mtn(22,-15,8,4,false);
+                mtn(-22,8,10,5,false); mtn(18,12,9,4.5,true);
+                // Background trees (outside plot)
+                const leafMat=new T.MeshStandardMaterial({color:dark?0x245535:0x358844,roughness:0.9});
+                const trunkMat=new T.MeshStandardMaterial({color:0x5a3010,roughness:0.95});
+                for (const [x,z] of [[-15,0],[-14,-6],[-16,7],[15,2],[14,-7],[16,6],[-11,-15],[11,-14],[0,-17],[-13,12],[12,14]]) {
+                    const h=4+Math.random()*3;
+                    const cone=new T.Mesh(new T.ConeGeometry(1.8+Math.random()*.5,h,6),leafMat);
+                    cone.position.set(x,h/2,z); cone.castShadow=true; scene.add(cone);
+                    const tr=new T.Mesh(new T.CylinderGeometry(0.18,0.24,1.2,5),trunkMat);
+                    tr.position.set(x,0.6,z); scene.add(tr);
                 }
-                makeMountain(-12, -10, 9, 4.5, true);
-                makeMountain(-7, -14, 7, 3.5, false);
-                makeMountain(8, -13, 8, 4, true);
-                makeMountain(14, -9, 6, 3, false);
-            }
-
-            function buildDetails() {
-                const THREE = window.THREE;
-                // Rocks
-                function makeRock(x, z, s) {
-                    const geo = new THREE.DodecahedronGeometry(s, 0);
-                    const mat = new THREE.MeshStandardMaterial({
-                        color: isDark ? 0x4a5a50 : 0x8a9a8a,
-                        roughness: 0.95,
-                    });
-                    const m = new THREE.Mesh(geo, mat);
-                    m.position.set(x, s * 0.5, z);
-                    m.rotation.set(Math.random(), Math.random(), Math.random());
-                    m.castShadow = true;
-                    m.receiveShadow = true;
-                    scene.add(m);
+                // Water stream
+                const stGeo=new T.PlaneGeometry(2.2,9,5,14);
+                const stPos=stGeo.attributes.position;
+                for(let i=0;i<stPos.count;i++){
+                    stPos.setX(i,stPos.getX(i)+Math.sin((stPos.getY(i)+4.5)/9*Math.PI*2.2)*.65);
+                    stPos.setZ(i,0.02);
                 }
-                makeRock(2, 3, 0.28); makeRock(-3, -2, 0.18); makeRock(5, -1, 0.22);
-                makeRock(-5, 4, 0.35); makeRock(1, -4, 0.15); makeRock(6, 2, 0.2);
-
-                // Flowers (small cones + spheres)
-                const flowerColors = [0xffee88, 0xffbbcc, 0xffffff, 0xffcc44];
-                function makeFlower(x, z, color) {
-                    const stem = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.03, 0.04, 0.35, 5),
-                        new THREE.MeshStandardMaterial({ color: 0x3a8a3a })
-                    );
-                    stem.position.set(x, 0.18, z);
-                    stem.castShadow = true;
-                    scene.add(stem);
-                    const head = new THREE.Mesh(
-                        new THREE.SphereGeometry(0.12, 7, 7),
-                        new THREE.MeshStandardMaterial({ color, roughness: 0.5 })
-                    );
-                    head.position.set(x, 0.42, z);
-                    scene.add(head);
-                }
-                makeFlower(-1, 2, flowerColors[0]); makeFlower(0.5, 3.5, flowerColors[1]);
-                makeFlower(-2.5, 1, flowerColors[2]); makeFlower(1.5, -2, flowerColors[3]);
-                makeFlower(-4, -1, flowerColors[0]); makeFlower(4, 3, flowerColors[1]);
-
-                // Mushrooms
-                function makeMushroom(x, z) {
-                    const stem = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.06, 0.09, 0.25, 6),
-                        new THREE.MeshStandardMaterial({ color: 0xeeeecc })
-                    );
-                    stem.position.set(x, 0.12, z);
-                    scene.add(stem);
-                    const cap = new THREE.Mesh(
-                        new THREE.SphereGeometry(0.18, 8, 5, 0, Math.PI * 2, 0, Math.PI / 2),
-                        new THREE.MeshStandardMaterial({ color: 0xcc3322, roughness: 0.7 })
-                    );
-                    cap.position.set(x, 0.27, z);
-                    scene.add(cap);
-                }
-                makeMushroom(3, -3); makeMushroom(-3.5, 2.5);
-
-                // Small bushes (low sphere clusters)
-                function makeBush(x, z) {
-                    const color = isDark ? 0x286040 : 0x3a9a50;
-                    for (let i = 0; i < 3; i++) {
-                        const r = 0.18 + Math.random() * 0.14;
-                        const geo = new THREE.SphereGeometry(r, 7, 5);
-                        const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.9 });
-                        const m = new THREE.Mesh(geo, mat);
-                        m.position.set(x + (i - 1) * 0.22, r, z + (i % 2 === 0 ? 0.1 : -0.1));
-                        m.castShadow = true; m.receiveShadow = true;
-                        scene.add(m);
-                    }
-                }
-                makeBush(-6, 0); makeBush(6, -2); makeBush(-4, 3); makeBush(5, 4);
+                stGeo.computeVertexNormals();
+                const stMesh=new T.Mesh(stGeo,new T.MeshStandardMaterial({color:dark?0x2d7ea8:0x3ab5d8,roughness:0.05,metalness:0.6,transparent:true,opacity:0.8}));
+                stMesh.rotation.x=-Math.PI/2; stMesh.position.set(14,0.06,4); stMesh.rotation.z=0.35; scene.add(stMesh);
             }
 
             function buildStars() {
-                const THREE = window.THREE;
-                const geo = new THREE.BufferGeometry();
-                const count = 200;
-                const positions = new Float32Array(count * 3);
-                for (let i = 0; i < count; i++) {
-                    positions[i * 3]     = (Math.random() - 0.5) * 80;
-                    positions[i * 3 + 1] = 10 + Math.random() * 30;
-                    positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+                const T=window.THREE;
+                const arr=new Float32Array(280*3);
+                for(let i=0;i<280;i++){arr[i*3]=(Math.random()-.5)*120;arr[i*3+1]=15+Math.random()*40;arr[i*3+2]=(Math.random()-.5)*120;}
+                const geo=new T.BufferGeometry(); geo.setAttribute("position",new T.BufferAttribute(arr,3));
+                scene.add(new T.Points(geo,new T.PointsMaterial({color:0xffffff,size:0.16,sizeAttenuation:true})));
+            }
+
+            function toggleGrid(on) {
+                const T=window.THREE;
+                if(gridHelper){scene.remove(gridHelper);gridHelper=null;}
+                if(on){gridHelper=new T.GridHelper(18,18,0x44886655,0x33664433);gridHelper.position.y=0.05;scene.add(gridHelper);}
+                grdPrefs.gridVisible=on; _grdWriteJson(GRD_PREFS_KEY,grdPrefs);
+                const btn=document.getElementById("gardenGridBtn");
+                if(btn){btn.style.background=on?"rgba(47,145,93,.85)":"";btn.style.color=on?"#fff":"";}
+            }
+
+            // ── Plant mesh builders ────────────────────────────────────────────
+            function makeMesh(plant) {
+                const T=window.THREE; const g=new T.Group();
+                const id=plant.id;
+                const gc=[0x2e8a42,0x3a9a50,0x28794e,0x4aaa58,0x246038];
+                const leafCol=gc[Math.floor(Math.random()*gc.length)];
+                function mat(col,rough=0.85){return new T.MeshStandardMaterial({color:col,roughness:rough});}
+                function mesh(geo,m){const o=new T.Mesh(geo,m);o.castShadow=true;o.receiveShadow=true;return o;}
+
+                if(id==="grass1"){
+                    for(let i=0;i<5;i++){const b=mesh(new T.ConeGeometry(0.04,0.28+Math.random()*.18,4),mat(0x4a9a38));b.position.set((Math.random()-.5)*.38,0.14,(Math.random()-.5)*.38);b.rotation.z=(Math.random()-.5)*.45;g.add(b);}
+                } else if(id==="daisy1"){
+                    g.add(Object.assign(mesh(new T.CylinderGeometry(0.03,0.04,0.42,5),mat(0x3a8830)),{position:new T.Vector3(0,0.21,0)}));
+                    const head=mesh(new T.SphereGeometry(0.14,7,6),mat(0xffffaa,0.5));head.position.y=0.47;g.add(head);
+                    for(let i=0;i<8;i++){const p=mesh(new T.SphereGeometry(0.06,5,4),mat(0xffffff,.4));p.position.set(Math.cos(i*Math.PI/4)*.2,0.47,Math.sin(i*Math.PI/4)*.2);g.add(p);}
+                } else if(id==="tulip1"){
+                    g.add(Object.assign(mesh(new T.CylinderGeometry(0.03,0.04,0.5,5),mat(0x3a8830)),{position:new T.Vector3(0,0.25,0)}));
+                    const head=mesh(new T.SphereGeometry(0.16,7,6),mat(0xee3344,.5));head.position.y=0.56;g.add(head);
+                } else if(id==="seedling1"){
+                    g.add(Object.assign(mesh(new T.CylinderGeometry(0.03,0.04,0.3,5),mat(0x3a6028)),{position:new T.Vector3(0,0.15,0)}));
+                    g.add(Object.assign(mesh(new T.SphereGeometry(0.18,6,5),mat(0x5aaa40)),{position:new T.Vector3(0,0.36,0)}));
+                } else if(id==="shrub1"){
+                    for(let i=0;i<3;i++){const s=mesh(new T.SphereGeometry(0.28+Math.random()*.1,7,5),mat(leafCol));s.position.set((i-1)*.3,0.28,(Math.random()-.5)*.18);g.add(s);}
+                } else if(id==="bush1"){
+                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(0.22+Math.random()*.1,7,5),mat(0xdd8899,.6));b.position.set((Math.random()-.5)*.5,0.24+Math.random()*.1,(Math.random()-.5)*.4);g.add(b);}
+                } else if(id==="fern1"){
+                    for(let i=0;i<7;i++){const f=mesh(new T.ConeGeometry(0.06,0.58,4),mat(0x3a7a30));f.position.set(Math.cos(i*Math.PI*2/7)*.26,0.22,Math.sin(i*Math.PI*2/7)*.26);f.rotation.z=.85*Math.cos(i*Math.PI*2/7);g.add(f);}
+                } else if(id==="mushroom1"){
+                    for(let i=0;i<3;i++){const mx=(i-1)*.28;const st=mesh(new T.CylinderGeometry(0.05,0.07,0.24,6),mat(0xeeeecc));st.position.set(mx,0.12,0);g.add(st);const cap=mesh(new T.SphereGeometry(0.16,8,5,0,Math.PI*2,0,Math.PI/2),mat(0xcc3322,.7));cap.position.set(mx,0.25,0);g.add(cap);}
+                } else if(id==="stone1"){
+                    const s=mesh(new T.DodecahedronGeometry(0.32,0),mat(dark?0x4a5a50:0x8a9a8a,.95));s.position.y=0.2;s.rotation.set(Math.random(),Math.random(),Math.random());g.add(s);
+                } else if(id==="sapling1"){
+                    const tr=mesh(new T.CylinderGeometry(0.06,0.09,1.1,7),mat(0x5a3010));tr.position.y=0.55;g.add(tr);
+                    const f=mesh(new T.SphereGeometry(0.55,8,6),mat(leafCol));f.position.y=1.28;g.add(f);
+                } else if(id==="fern1"||id==="pine1"||id==="cypress1"){
+                    // Pine / cypress — stacked cones
+                    const layers=id==="cypress1"?5:3;
+                    const tr=mesh(new T.CylinderGeometry(0.10,0.16,id==="cypress1"?3.5:2.5,7),mat(0x5a3010));tr.position.y=id==="cypress1"?1.75:1.25;g.add(tr);
+                    for(let li=0;li<layers;li++){const r=id==="cypress1"?0.5-li*.08:0.9-li*.18;const h=id==="cypress1"?0.85:0.75;const y=id==="cypress1"?0.5+li*.7:0.7+li*.55;const c=mesh(new T.ConeGeometry(r,h,7),mat(0x246028));c.position.y=y;g.add(c);}
+                } else if(id==="cherry1"||id==="sakura1"){
+                    const sz=id==="sakura1"?1.0:.72;
+                    const tr=mesh(new T.CylinderGeometry(0.10,0.15,id==="sakura1"?1.8:1.4,7),mat(0x6a3a18));tr.position.y=id==="sakura1"?.9:.7;g.add(tr);
+                    for(let i=0;i<(id==="sakura1"?4:3);i++){const b=mesh(new T.SphereGeometry(sz+Math.random()*.18,8,6),mat(0xffaabb,.5));b.position.set((Math.random()-.5)*(sz*.8),(id==="sakura1"?1.8:1.5)+i*(sz*.35),(Math.random()-.5)*(sz*.8));g.add(b);}
+                } else if(id==="willow1"){
+                    const tr=mesh(new T.CylinderGeometry(0.12,0.18,2.4,7),mat(0x5a3810));tr.position.y=1.2;g.add(tr);
+                    const top=mesh(new T.SphereGeometry(1.15,8,6),mat(0x4aaa30));top.position.y=2.7;g.add(top);
+                    for(let i=0;i<9;i++){const ang=i*Math.PI*2/9;const dr=mesh(new T.CylinderGeometry(0.02,.01,2,4),mat(0x3a8820));dr.position.set(Math.cos(ang)*.85,1.8,Math.sin(ang)*.85);dr.rotation.z=1.0*Math.cos(ang);g.add(dr);}
+                } else if(id==="lavender1"){
+                    for(let i=0;i<7;i++){const st=mesh(new T.CylinderGeometry(0.03,0.04,0.52,5),mat(0x3a6828));st.position.set((Math.random()-.5)*.45,0.26,(Math.random()-.5)*.38);g.add(st);const fl=mesh(new T.CylinderGeometry(0.04,0.06,0.2,5),mat(0xaa44dd,.5));fl.position.set(st.position.x,0.58,st.position.z);g.add(fl);}
+                } else if(id==="apple1"){
+                    const tr=mesh(new T.CylinderGeometry(0.12,0.17,1.7,7),mat(0x5a3010));tr.position.y=.85;g.add(tr);
+                    const top=mesh(new T.SphereGeometry(0.92,8,6),mat(leafCol));top.position.y=2.0;g.add(top);
+                    for(let i=0;i<6;i++){const ap=mesh(new T.SphereGeometry(.11,6,5),mat(0xdd2222,.5));ap.position.set((Math.random()-.5)*1.2,1.65+Math.random()*.62,(Math.random()-.5)*1.2);g.add(ap);}
+                } else if(id==="bigoak1"){
+                    const tr=mesh(new T.CylinderGeometry(0.22,0.3,2.5,7),mat(0x5a3010));tr.position.y=1.25;g.add(tr);
+                    for(let i=0;i<3;i++){const b=mesh(new T.SphereGeometry(1.05+Math.random()*.18,8,6),mat(leafCol));b.position.set((Math.random()-.5)*.7,2.8+i*.32,(Math.random()-.5)*.6);g.add(b);}
+                } else if(id==="glowf1"){
+                    const st=mesh(new T.CylinderGeometry(0.04,0.055,0.65,5),mat(0x2a8030));st.position.y=0.32;g.add(st);
+                    const head=mesh(new T.SphereGeometry(0.24,8,7),mat(0xeeffaa,.3));head.position.y=0.78;g.add(head);
+                    const ring=mesh(new T.TorusGeometry(0.3,0.04,6,12),mat(0xccff88,.2));ring.position.y=0.78;g.add(ring);
+                } else if(id==="redmaple1"){
+                    const tr=mesh(new T.CylinderGeometry(0.14,0.2,2.0,7),mat(0x4a2808));tr.position.y=1.0;g.add(tr);
+                    for(let i=0;i<3;i++){const b=mesh(new T.SphereGeometry(0.88+Math.random()*.16,8,6),mat(0xcc3311,.6));b.position.set((Math.random()-.5)*.6,2.1+i*.32,(Math.random()-.5)*.5);g.add(b);}
+                } else if(id==="worldtree"){
+                    const tr=mesh(new T.CylinderGeometry(0.38,0.52,4.5,8),mat(0x4a2808));tr.position.y=2.25;g.add(tr);
+                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(1.4-i*.15,9,7),mat(0x1a6030));b.position.y=3.8+i*.55;g.add(b);}
+                } else if(id==="crystaltree"){
+                    const tr=mesh(new T.CylinderGeometry(.1,.16,2,7),mat(0x88aac0,.1));tr.position.y=1;g.add(tr);
+                    for(let i=0;i<6;i++){const cr=mesh(new T.OctahedronGeometry(.3,0),mat(0x88ddff,.05));cr.position.set((Math.random()-.5)*1.3,1.5+Math.random()*.9,(Math.random()-.5)*1.1);cr.rotation.set(Math.random(),Math.random(),Math.random());g.add(cr);}
+                } else if(id==="rainbowtree"){
+                    const tr=mesh(new T.CylinderGeometry(.16,.24,2.4,7),mat(0x5a3010));tr.position.y=1.2;g.add(tr);
+                    const cols=[0xff4444,0xff9900,0xffee00,0x44dd44,0x4488ff,0x9944ff];
+                    for(let i=0;i<6;i++){const b=mesh(new T.SphereGeometry(.56+Math.random()*.18,7,5),mat(cols[i],.5));b.position.set((Math.random()-.5)*.9,2.1+i*.3,(Math.random()-.5)*.8);g.add(b);}
+                } else if(id==="dragontree"){
+                    const tr=mesh(new T.CylinderGeometry(.15,.24,3.0,6),mat(0x4a2010));tr.position.y=1.5;g.add(tr);
+                    const top=mesh(new T.SphereGeometry(1.3,8,6),mat(0x882200,.6));top.position.y=3.3;g.add(top);
+                    for(let i=0;i<4;i++){const sp=mesh(new T.SphereGeometry(.55,7,5),mat(0xaa3310,.5));sp.position.set(Math.cos(i*Math.PI/2)*.75,2.8,Math.sin(i*Math.PI/2)*.75);g.add(sp);}
+                } else if(id==="spirittree"){
+                    const tr=mesh(new T.CylinderGeometry(.17,.26,3.8,7),mat(0xe8f0ff,.12));tr.position.y=1.9;g.add(tr);
+                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(1.15-i*.15,8,6),mat(0xbbddff,.1));b.position.y=2.7+i*.52;g.add(b);}
+                    for(let i=0;i<10;i++){const orb=mesh(new T.SphereGeometry(.08,5,4),mat(0xffffff,.08));orb.position.set(Math.cos(i*Math.PI/5)*.95,2.1+Math.random()*1.7,Math.sin(i*Math.PI/5)*.95);g.add(orb);}
+                } else {
+                    // Generic fallback tree
+                    const tr=mesh(new T.CylinderGeometry(.11,.16,1.6,7),mat(0x5a3010));tr.position.y=.8;g.add(tr);
+                    g.add(Object.assign(mesh(new T.SphereGeometry(.72,8,6),mat(leafCol)),{position:new T.Vector3(0,1.8,0)}));
                 }
-                geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-                const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.18, sizeAttenuation: true });
-                scene.add(new THREE.Points(geo, mat));
+                return g;
             }
 
-            // ── Tree building ────────────────────────────────────────────────────
-            const TREE_POSITIONS = [
-                [-4, -3], [0, -5], [4, -4], [-6, 1], [-2, -1],
-                [2, -2], [6, 0], [-5, 3], [1, 2], [-3, 5],
-                [5, 3], [3, 5], [-7, -1], [7, -2], [0, 4],
-                [-1, -7], [8, 3], [-8, 4], [4, -7], [-2, 6],
-            ];
+            // ── Terrain height approximation (matches buildTerrain formula) ────
+            function terrainY(x,z) {
+                const d=Math.sqrt(x*x+z*z), edge=Math.max(0,(d-9)/9);
+                return edge>0?Math.sin(x*.3)*.45+Math.cos(z*.25)*.4+edge*1.8:Math.sin(x*.55)*.07+Math.cos(z*.55)*.06;
+            }
+            function inside(x,z){ return Math.abs(x)<=8.9&&Math.abs(z)<=8.9; }
+            function snapXZ(x,z){ return grdPrefs.snapGrid?{x:Math.round(x),z:Math.round(z)}:{x,z}; }
 
-            function clearTrees() {
-                if (!treeGroup) return;
-                while (treeGroup.children.length) {
-                    const child = treeGroup.children[0];
-                    child.traverse(o => {
-                        if (o.geometry) o.geometry.dispose();
-                        if (o.material) { if (Array.isArray(o.material)) o.material.forEach(m => m.dispose()); else o.material.dispose(); }
-                    });
-                    treeGroup.remove(child);
-                }
-                treeMeshes = [];
+            // ── Object CRUD ────────────────────────────────────────────────────
+            function addObj(obj) {
+                if(!scene||!window.THREE) return;
+                const plant=GRD_PLANTS.find(p=>p.id===obj.plantId);
+                if(!plant) return;
+                const g=makeMesh(plant);
+                const [px,pz]=obj.pos;
+                g.position.set(px,terrainY(px,pz),pz);
+                g.rotation.y=obj.rot||0;
+                g.scale.setScalar(obj.scale||1);
+                g.userData.uid=obj.uid;
+                g.traverse(c=>{if(c.isMesh){c.userData.uid=obj.uid;c.userData.pickable=true;}});
+                scene.add(g);
+                objMap[obj.uid]=g;
+            }
+            function removeObj(uid) {
+                const g=objMap[uid]; if(!g||!scene) return;
+                g.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material){(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>m.dispose());}});
+                scene.remove(g); delete objMap[uid];
+            }
+            function moveObj(uid,pos) {
+                const g=objMap[uid]; if(!g) return;
+                g.position.set(pos[0],terrainY(pos[0],pos[1]),pos[1]);
+            }
+            function highlight(uid) {
+                deselect();
+                const g=objMap[uid]; if(!g) return;
+                selUid=uid; selGroup=g;
+                g.traverse(c=>{if(c.isMesh&&c.material&&c.material.emissive){c._oe=c.material.emissive.getHex();c.material.emissive.set(0x226622);}});
+            }
+            function deselect() {
+                if(selGroup){selGroup.traverse(c=>{if(c.isMesh&&c.material&&c._oe!==undefined)c.material.emissive&&c.material.emissive.set(c._oe);});}
+                selUid=null; selGroup=null;
             }
 
-            function buildTree(xz, level, xp) {
-                const THREE = window.THREE;
-                const [x, z] = xz;
-                const group = new THREE.Group();
+            // ── Placement ──────────────────────────────────────────────────────
+            function startPlacement(plant) {
+                cancelPlacement();
+                prevPlant=plant; prevRot=0; placing=true;
+                preview=makeMesh(plant);
+                preview.traverse(c=>{if(c.isMesh&&c.material){c.material=c.material.clone();c.material.transparent=true;c.material.opacity=0.52;}});
+                preview.name="preview";
+                scene.add(preview);
+                const cv=document.getElementById("gardenCanvas");
+                if(cv) cv.style.cursor="crosshair";
+            }
+            function cancelPlacement() {
+                if(preview){scene.remove(preview);preview=null;}
+                prevPlant=null; placing=false;
+                const cv=document.getElementById("gardenCanvas");
+                if(cv) cv.style.cursor="grab";
+            }
+            function finalizePlace(obj) { cancelPlacement(); addObj(obj); }
 
-                // Determine tree size based on accumulated xp and level
-                const mature = xp >= 150;
-                const young = xp >= 50 && !mature;
-                const trunkH = mature ? 1.5 + Math.random() * 0.5 : young ? 0.9 + Math.random() * 0.3 : 0.4 + Math.random() * 0.2;
-                const trunkR = mature ? 0.14 : young ? 0.09 : 0.05;
-                const foliageR = mature ? 1.0 + Math.random() * 0.3 : young ? 0.65 + Math.random() * 0.2 : 0.3 + Math.random() * 0.1;
-
-                // Trunk
-                const trunkGeo = new THREE.CylinderGeometry(trunkR * 0.7, trunkR, trunkH, 7);
-                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x6b3d1e, roughness: 0.95 });
-                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-                trunk.position.y = trunkH / 2;
-                trunk.castShadow = true;
-                trunk.receiveShadow = true;
-                group.add(trunk);
-
-                // Foliage — 2 or 3 sphere clusters for volume
-                const leafColors = [0x2d8a48, 0x3d9a55, 0x28794e, 0x4aaa60, 0x1e6e3e];
-                const leafColor = leafColors[Math.floor(Math.random() * leafColors.length)];
-                const layers = mature ? 3 : young ? 2 : 1;
-                for (let li = 0; li < layers; li++) {
-                    const r = foliageR * (1 - li * 0.22);
-                    const yOff = trunkH + li * foliageR * 0.55;
-                    const leafGeo = new THREE.SphereGeometry(r, 9, 7);
-                    const leafMat = new THREE.MeshStandardMaterial({
-                        color: leafColor,
-                        roughness: 0.85,
-                    });
-                    const leaf = new THREE.Mesh(leafGeo, leafMat);
-                    leaf.position.y = yOff;
-                    leaf.castShadow = true;
-                    leaf.receiveShadow = true;
-                    group.add(leaf);
-                    // A second smaller cluster offset for asymmetry
-                    if (li === 0 && layers > 1) {
-                        const leaf2 = new THREE.Mesh(
-                            new THREE.SphereGeometry(r * 0.72, 8, 6),
-                            new THREE.MeshStandardMaterial({ color: (leafColor + 0x0a1408) & 0xffffff, roughness: 0.85 })
-                        );
-                        leaf2.position.set(r * 0.4, yOff - r * 0.25, r * 0.3);
-                        leaf2.castShadow = true;
-                        group.add(leaf2);
-                    }
-                }
-
-                // Slight random tilt for natural look
-                group.rotation.y = Math.random() * Math.PI * 2;
-                group.rotation.z = (Math.random() - 0.5) * 0.08;
-
-                // Terrain height sample (approximate, mirrors buildTerrain formula)
-                const terrainY = Math.sin(x * 0.28) * 0.55 + Math.cos(z * 0.22) * 0.4
-                                + Math.sin(x * 0.6 + z * 0.4) * 0.25
-                                + (x < -6 ? Math.sin((x + 6) * 0.5) * 1.2 : 0);
-                group.position.set(x, terrainY, z);
-                return group;
+            // ── Raycasting ─────────────────────────────────────────────────────
+            function castTerrain(cx,cy) {
+                if(!terrainMesh||!camera||!renderer) return null;
+                const rect=renderer.domElement.getBoundingClientRect();
+                pointerV.set(((cx-rect.left)/rect.width)*2-1,-((cy-rect.top)/rect.height)*2+1);
+                raycaster.setFromCamera(pointerV,camera);
+                const hits=raycaster.intersectObject(terrainMesh,true);
+                return hits.length>0?hits[0].point:null;
+            }
+            function castPickable(cx,cy) {
+                if(!scene||!camera||!renderer) return null;
+                const rect=renderer.domElement.getBoundingClientRect();
+                pointerV.set(((cx-rect.left)/rect.width)*2-1,-((cy-rect.top)/rect.height)*2+1);
+                raycaster.setFromCamera(pointerV,camera);
+                const sel=[];
+                scene.traverse(c=>{if(c.isMesh&&c.userData.pickable)sel.push(c);});
+                const hits=raycaster.intersectObjects(sel,false);
+                return hits.length>0?hits[0].object.userData.uid:null;
             }
 
-            function updateTrees(xp, treeCount) {
-                if (!treeGroup || !window.THREE) return;
-                const count = Math.min(treeCount, TREE_POSITIONS.length);
-                if (count === currentTreeCount) return; // no change needed
-                clearTrees();
-                currentTreeCount = count;
-                const level = Math.floor(xp / 100) + 1;
-                for (let i = 0; i < count; i++) {
-                    const xpForThisTree = Math.max(0, xp - i * 50);
-                    const tree = buildTree(TREE_POSITIONS[i], level, xpForThisTree);
-                    treeGroup.add(tree);
-                    treeMeshes.push(tree);
-                }
+            // ── Camera ─────────────────────────────────────────────────────────
+            function camUpdate(){
+                if(!camera) return;
+                camera.position.set(radius*Math.sin(phi)*Math.sin(theta),radius*Math.cos(phi),radius*Math.sin(phi)*Math.cos(theta));
+                camera.lookAt(0,1,0);
             }
+            function resetCamera(){ tTheta=0.55; tPhi=0.95; tRadius=20; }
 
-            // ── Camera ───────────────────────────────────────────────────────────
-            function updateCamera() {
-                if (!camera) return;
-                const x = radius * Math.sin(phi) * Math.sin(theta);
-                const y = radius * Math.cos(phi);
-                const z = radius * Math.sin(phi) * Math.cos(theta);
-                camera.position.set(x, y, z);
-                camera.lookAt(0, 1, 0);
-            }
-
-            function resetCamera() {
-                targetTheta = Math.PI / 5;
-                targetPhi = Math.PI / 3.2;
-                targetRadius = 14;
-            }
-
-            // ── Resize ───────────────────────────────────────────────────────────
-            function resize() {
-                if (!renderer || !camera) return;
-                const canvas = renderer.domElement;
-                const parent = canvas.parentElement;
-                if (!parent) return;
-                const w = parent.clientWidth;
-                const h = parent.clientHeight;
-                renderer.setSize(w, h, false);
-                camera.aspect = w / h;
+            // ── Resize ─────────────────────────────────────────────────────────
+            function resize(){
+                if(!renderer||!camera) return;
+                const cv=renderer.domElement, p=cv.parentElement; if(!p) return;
+                renderer.setSize(p.clientWidth,p.clientHeight,false);
+                camera.aspect=p.clientWidth/p.clientHeight;
                 camera.updateProjectionMatrix();
             }
 
-            // ── Animation loop ───────────────────────────────────────────────────
-            let frameCount = 0;
-            function animate() {
-                if (destroyed) return;
-                animFrame = requestAnimationFrame(animate);
-                if (!renderer || !scene || !camera) return;
-                // Skip rendering when hidden
-                if (document.hidden) return;
-                const gardenSection = document.getElementById("focusGarden");
-                if (gardenSection && !gardenSection.classList.contains("active")) return;
-
-                frameCount++;
-
-                // Smooth camera lerp
-                theta += (targetTheta - theta) * 0.1;
-                phi += (targetPhi - phi) * 0.1;
-                phi = Math.max(0.15, Math.min(Math.PI / 2.05, phi));
-                radius += (targetRadius - radius) * 0.12;
-                updateCamera();
-
-                // Gentle cloud / particle animation could go here
-                renderer.render(scene, camera);
-            }
-
-            // ── Event bindings ───────────────────────────────────────────────────
-            function bindEvents(canvas) {
-                // Mouse drag
-                canvas.addEventListener("mousedown", e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; }, { passive: true });
-                window.addEventListener("mouseup", () => { isDragging = false; });
-                window.addEventListener("mousemove", e => {
-                    if (!isDragging) return;
-                    const dx = e.clientX - lastX, dy = e.clientY - lastY;
-                    lastX = e.clientX; lastY = e.clientY;
-                    targetTheta -= dx * 0.008;
-                    targetPhi -= dy * 0.006;
-                });
-                // Wheel zoom
-                canvas.addEventListener("wheel", e => {
-                    e.preventDefault();
-                    targetRadius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, targetRadius + e.deltaY * 0.02));
-                }, { passive: false });
-                // Touch drag + pinch
-                canvas.addEventListener("touchstart", e => {
-                    if (e.touches.length === 1) {
-                        isDragging = true;
-                        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-                    } else if (e.touches.length === 2) {
-                        isDragging = false;
-                        const dx = e.touches[0].clientX - e.touches[1].clientX;
-                        const dy = e.touches[0].clientY - e.touches[1].clientY;
-                        lastPinchDist = Math.sqrt(dx * dx + dy * dy);
+            // ── Events ─────────────────────────────────────────────────────────
+            function bindEvents(canvas){
+                canvas.addEventListener("mousedown",e=>{
+                    pointerDownPos={x:e.clientX,y:e.clientY};
+                    dragActive=true; lx=e.clientX; ly=e.clientY;
+                    canvas.classList.add("dragging");
+                },{passive:true});
+                window.addEventListener("mouseup",e=>{
+                    if(dragActive&&pointerDownPos) {
+                        const moved=Math.abs(e.clientX-pointerDownPos.x)+Math.abs(e.clientY-pointerDownPos.y);
+                        if(moved<5) handleClick(e.clientX,e.clientY);
                     }
-                }, { passive: true });
-                canvas.addEventListener("touchmove", e => {
-                    if (e.touches.length === 1 && isDragging) {
-                        e.preventDefault();
-                        const dx = e.touches[0].clientX - lastX;
-                        const dy = e.touches[0].clientY - lastY;
-                        lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-                        targetTheta -= dx * 0.008;
-                        targetPhi -= dy * 0.006;
-                    } else if (e.touches.length === 2 && lastPinchDist !== null) {
-                        e.preventDefault();
-                        const dx = e.touches[0].clientX - e.touches[1].clientX;
-                        const dy = e.touches[0].clientY - e.touches[1].clientY;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        targetRadius = Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, targetRadius - (dist - lastPinchDist) * 0.04));
-                        lastPinchDist = dist;
+                    dragActive=false; canvas.classList.remove("dragging");
+                },{passive:true});
+                window.addEventListener("mousemove",e=>{
+                    if(placing) {
+                        const pt=castTerrain(e.clientX,e.clientY);
+                        if(pt&&preview){const s=snapXZ(pt.x,pt.z);preview.position.set(s.x,terrainY(s.x,s.z),s.z);preview.rotation.y=prevRot;preview.traverse(c=>{if(c.isMesh&&c.material&&c.material.emissive)c.material.emissive.set(inside(s.x,s.z)?0x002200:0x440000);});}
+                        return;
                     }
-                }, { passive: false });
-                canvas.addEventListener("touchend", e => {
-                    isDragging = false; lastPinchDist = null;
-                }, { passive: true });
-                // Resize observer
-                const ro = new ResizeObserver(() => resize());
-                const parent = canvas.parentElement;
-                if (parent) ro.observe(parent);
-                // Theme change — rebuild scene
-                const themeObserver = new MutationObserver(() => {
-                    const dark = isDarkMode();
-                    if (dark !== isDark) { buildScene(); currentTreeCount = -1; }
+                    if(!dragActive) return;
+                    const moved=Math.abs(e.clientX-(pointerDownPos?.x||0))+Math.abs(e.clientY-(pointerDownPos?.y||0));
+                    if(moved>3){tTheta-=(e.clientX-lx)*.008;tPhi-=(e.clientY-ly)*.006;}
+                    lx=e.clientX; ly=e.clientY;
+                },{passive:true});
+                canvas.addEventListener("wheel",e=>{e.preventDefault();tRadius=Math.max(MIN_R,Math.min(MAX_R,tRadius+e.deltaY*.022));},{passive:false});
+                window.addEventListener("keydown",e=>{
+                    if(placing){if(e.key==="Escape"){grdCancelPlace();return;}if(e.key==="r"||e.key==="R"){prevRot+=Math.PI/6;if(preview)preview.rotation.y=prevRot;}return;}
+                    if(_grdEditMode&&(e.ctrlKey||e.metaKey)&&(e.key==="z"||e.key==="Z")){e.preventDefault();grdUndo();}
+                    if(_grdEditMode&&(e.ctrlKey||e.metaKey)&&(e.key==="y"||e.key==="Y")){e.preventDefault();grdRedo();}
                 });
-                themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+                canvas.addEventListener("touchstart",e=>{
+                    pointerDownPos={x:e.touches[0].clientX,y:e.touches[0].clientY};
+                    if(e.touches.length===1){dragActive=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
+                    else if(e.touches.length===2){dragActive=false;pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+                },{passive:true});
+                canvas.addEventListener("touchmove",e=>{
+                    if(e.touches.length===1&&dragActive){
+                        e.preventDefault();
+                        const nx=e.touches[0].clientX,ny=e.touches[0].clientY;
+                        const moved=Math.abs(nx-(pointerDownPos?.x||0))+Math.abs(ny-(pointerDownPos?.y||0));
+                        if(moved>6){tTheta-=(nx-lx)*.009;tPhi-=(ny-ly)*.007;}
+                        if(placing){const pt=castTerrain(nx,ny);if(pt&&preview){const s=snapXZ(pt.x,pt.z);preview.position.set(s.x,terrainY(s.x,s.z),s.z);}}
+                        lx=nx;ly=ny;
+                    } else if(e.touches.length===2&&pinch!==null){
+                        e.preventDefault();
+                        const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+                        tRadius=Math.max(MIN_R,Math.min(MAX_R,tRadius-(d-pinch)*.06));pinch=d;
+                    }
+                },{passive:false});
+                canvas.addEventListener("touchend",e=>{
+                    if(e.changedTouches.length===1&&pointerDownPos){
+                        const tx=e.changedTouches[0].clientX,ty=e.changedTouches[0].clientY;
+                        const moved=Math.abs(tx-pointerDownPos.x)+Math.abs(ty-pointerDownPos.y);
+                        if(moved<10) handleClick(tx,ty);
+                    }
+                    dragActive=false;pinch=null;
+                },{passive:true});
+                new ResizeObserver(()=>resize()).observe(canvas.parentElement||canvas);
+                new MutationObserver(()=>{if(isDark()!==dark){buildScene();for(const o of grdPlaced)addObj(o);}}).observe(document.documentElement,{attributes:true,attributeFilter:["class"]});
             }
 
-            function destroy() {
-                destroyed = true;
-                if (animFrame) cancelAnimationFrame(animFrame);
-                if (renderer) { renderer.dispose(); renderer = null; }
-                initialized = false;
+            function handleClick(cx,cy){
+                if(placing){
+                    const pt=castTerrain(cx,cy);
+                    if(pt){const s=snapXZ(pt.x,pt.z);if(inside(s.x,s.z)){grdConfirmPlace({x:s.x,z:s.z},prevRot);return;}}
+                    grdToast("\u26A0\uFE0F Click inside the garden boundary");
+                    return;
+                }
+                if(editMode){
+                    const uid=castPickable(cx,cy);
+                    if(uid){grdSelectObj(uid);highlight(uid);}
+                    else{grdDeselect();deselect();}
+                }
             }
 
-            return { init, updateTrees, resetCamera, destroy };
+            // ── Loop ───────────────────────────────────────────────────────────
+            function loop(){
+                if(dead) return;
+                raf=requestAnimationFrame(loop);
+                if(!renderer||!scene||!camera||document.hidden) return;
+                const sec=document.getElementById("focusGarden");
+                if(sec&&!sec.classList.contains("active")) return;
+                theta+=(tTheta-theta)*.1; phi+=(tPhi-phi)*.1;
+                phi=Math.max(.12,Math.min(Math.PI/2.06,phi));
+                radius+=(tRadius-radius)*.12;
+                camUpdate();
+                renderer.render(scene,camera);
+            }
+
+            function setEditMode(on){editMode=on;if(!on)deselect();}
+
+            return {init,addObj,removeObj,moveObj,highlight,deselect,startPlacement,cancelPlacement,finalizePlace,resetCamera,setEditMode,toggleGrid};
         })();
 
-        // Load Three.js from CDN then boot the garden
-        (function loadThree() {
-            if (window.THREE) { bootGarden(); return; }
-            const script = document.createElement("script");
-            // Pinned stable version (r128 — well-established, available offline after first load)
-            script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-            script.crossOrigin = "anonymous";
-            script.onload = bootGarden;
-            script.onerror = function () {
-                const fb = document.getElementById("gardenFallback");
-                const cv = document.getElementById("gardenCanvas");
-                if (fb) fb.style.display = "flex";
-                if (cv) cv.style.display = "none";
+        // ── Load Three.js then boot ────────────────────────────────────────────
+        (function loadThree(){
+            if(window.THREE){grdBoot();return;}
+            const s=document.createElement("script");
+            s.src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+            s.crossOrigin="anonymous";
+            s.onload=grdBoot;
+            s.onerror=function(){
+                const fb=document.getElementById("gardenFallback");
+                const cv=document.getElementById("gardenCanvas");
+                if(fb)fb.style.display="flex";
+                if(cv)cv.style.display="none";
             };
-            document.head.appendChild(script);
+            document.head.appendChild(s);
         })();
 
-        function bootGarden() {
-            const canvas = document.getElementById("gardenCanvas");
-            if (!canvas) return;
-            _gardenEngine.init(canvas);
-            // Reset camera button
-            const resetBtn = document.getElementById("gardenResetCam");
-            if (resetBtn) resetBtn.addEventListener("click", () => _gardenEngine.resetCamera());
+        function grdBoot(){
+            const cv=document.getElementById("gardenCanvas");
+            if(cv)_grdEng.init(cv);
         }
 
-        function renderDailyKrdGarden() {
-            const root = document.getElementById("dailyKrdGarden");
-            if (!root) return;
-            const data = gardenActivitySnapshot();
-            let saved = gardenReadJson(DAILY_GARDEN_STATE_KEY, { xp: 0, activities: 0 });
-            if (!saved || typeof saved !== "object") saved = { xp: 0, activities: 0 };
-            const xp = Math.max(data.xp, Math.max(0, Number(saved.xp) || 0));
-            const activities = Math.max(data.activityCount, Math.max(0, Number(saved.activities) || 0));
-            if (xp !== Number(saved.xp) || activities !== Number(saved.activities)) {
-                try { localStorage.setItem(DAILY_GARDEN_STATE_KEY, JSON.stringify({ xp, activities, updatedAt: new Date().toISOString() })); } catch (_) {}
-            }
-            const level = Math.floor(xp / 100) + 1;
-            const levelXp = xp % 100;
-            const trees = Math.min(TREE_POSITIONS_COUNT, Math.floor(xp / 50));
-            const levelNames = ["Seedling", "Sprout", "Sapling", "Young Grove", "Woodland", "Forest Keeper", "Ancient Grove"];
-            const levelName = levelNames[Math.min(level - 1, levelNames.length - 1)];
-
-            // Update UI text nodes
-            const levelNode = document.getElementById("dailyGardenLevel");
-            if (levelNode) levelNode.textContent = `Level ${level} · ${levelName}`;
-            const xpNode = document.getElementById("dailyGardenXpLabel");
-            if (xpNode) xpNode.textContent = `${levelXp} / 100 XP`;
-            const totalNode = document.getElementById("dailyGardenTotalXp");
-            if (totalNode) totalNode.textContent = xp.toLocaleString();
-            const treeNode = document.getElementById("dailyGardenTreesCount");
-            if (treeNode) treeNode.textContent = trees.toString();
-            const activitiesNode = document.getElementById("dailyGardenActivities");
-            if (activitiesNode) activitiesNode.textContent = activities.toLocaleString();
-            const fill = document.getElementById("dailyGardenProgressFill");
-            if (fill) fill.style.width = `${levelXp}%`;
-            const progress = document.getElementById("dailyGardenProgress");
-            if (progress) progress.setAttribute("aria-valuenow", String(levelXp));
-            const ground = document.getElementById("dailyGardenGroundLabel");
-            if (ground) ground.textContent = xp < 25 ? "A new forest begins" : trees === 0 ? "Your first tree is taking root" : `${trees} ${trees === 1 ? "tree" : "trees"} in your growing forest`;
-            const note = document.getElementById("dailyGardenFootnote");
-            if (note) note.textContent = `Earn XP from ${data.completedTasks} completed tasks, ${data.completedPrayers} prayers, ${Math.floor(data.totalStudyMinutes)} study minutes, ${data.decks} quiz decks, and ${data.subjects} subjects. Progress is saved on this device and won\u2019t decrease if older task records are removed.`;
-
-            // Update 3D tree count
-            _gardenEngine.updateTrees(xp, trees);
-        }
-
-        // Expose TREE_POSITIONS_COUNT for renderDailyKrdGarden
-        const TREE_POSITIONS_COUNT = 20;
-
-        window.renderDailyKrdGarden = renderDailyKrdGarden;
-        // Header tree shortcut opens the dedicated Focus Garden section.
-        const gardenShortcut = document.getElementById("gardenButton");
-        if (gardenShortcut) gardenShortcut.addEventListener("click", () => {
-            if (window.Haptics) window.Haptics.tap();
-            if (typeof showSection === "function") showSection("focusGarden");
-            setTimeout(() => {
-                const page = document.getElementById("focusGarden");
-                if (page) page.scrollIntoView({ behavior: "smooth", block: "start" });
-                renderDailyKrdGarden();
-            }, 100);
-        });
-        // Activity UI updates and study-session storage changes refresh the garden
-        for (const targetId of ["taskList", "prayerList", "study"]) {
-            const target = document.getElementById(targetId);
-            if (target) {
-                const observer = new MutationObserver(() => { if (document.getElementById("focusGarden")?.classList.contains("active")) renderDailyKrdGarden(); });
-                observer.observe(target, { childList: true, subtree: true, attributes: targetId !== "study", attributeFilter: targetId === "study" ? undefined : ["class", "checked"] });
-            }
-        }
-        window.addEventListener("storage", event => { if (!event.key || event.key.startsWith("dailykrd_")) renderDailyKrdGarden(); });
-        const gardenOriginalSetItem = Storage.prototype.setItem;
-        Storage.prototype.setItem = function(key, value) {
-            gardenOriginalSetItem.call(this, key, value);
-            if (["dailykrd_study_sessions", "dailykrd_study_minutes", "dailykrd_flashcards", "dailykrd_study_subjects", "dailykrd_guest_tasks", "dailykrd_guest_prayers"].includes(String(key))) {
-                queueMicrotask(renderDailyKrdGarden);
-            }
-        };
-        const gardenPage = document.getElementById("focusGarden");
-        if (gardenPage) {
-            const gardenPageObserver = new MutationObserver(() => {
-                if (gardenPage.classList.contains("active")) renderDailyKrdGarden();
+        // ── Wire buttons ──────────────────────────────────────────────────────
+        function grdBindUI(){
+            document.getElementById("gardenEditBtn")?.addEventListener("click",grdEnterEdit);
+            document.getElementById("gardenSaveBtn")?.addEventListener("click",grdExitEdit);
+            document.getElementById("gardenExitEditBtn")?.addEventListener("click",grdExitEdit);
+            document.getElementById("gardenCatalogBtn")?.addEventListener("click",grdOpenCatalog);
+            document.getElementById("gardenInvClose")?.addEventListener("click",grdCloseCatalog);
+            document.getElementById("gardenInvSheet")?.addEventListener("click",e=>{if(e.target===e.currentTarget)grdCloseCatalog();});
+            document.getElementById("gardenResetCam")?.addEventListener("click",()=>_grdEng.resetCamera());
+            document.getElementById("gardenGridBtn")?.addEventListener("click",()=>_grdEng.toggleGrid(!grdPrefs.gridVisible));
+            document.getElementById("gardenUndoBtn")?.addEventListener("click",grdUndo);
+            document.getElementById("gardenRedoBtn")?.addEventListener("click",grdRedo);
+            document.getElementById("gardenSnapBtn")?.addEventListener("click",()=>{
+                grdPrefs.snapGrid=!grdPrefs.snapGrid;_grdWriteJson(GRD_PREFS_KEY,grdPrefs);
+                document.getElementById("gardenSnapBtn")?.classList.toggle("active",grdPrefs.snapGrid);
             });
-            gardenPageObserver.observe(gardenPage, { attributes: true, attributeFilter: ["class"] });
-            gardenPage.addEventListener("click", () => setTimeout(renderDailyKrdGarden, 80));
+            document.getElementById("gardenRemoveBtn")?.addEventListener("click",grdRemoveSel);
+            document.getElementById("gardenDupBtn")?.addEventListener("click",grdDupSel);
         }
-        document.addEventListener("visibilitychange", () => { if (!document.hidden) renderDailyKrdGarden(); });
-        setTimeout(renderDailyKrdGarden, 700);
+        grdBindUI();
+
+        // ── Header button ─────────────────────────────────────────────────────
+        const _grdHeaderBtn=document.getElementById("gardenButton");
+        if(_grdHeaderBtn)_grdHeaderBtn.addEventListener("click",()=>{
+            if(window.Haptics)window.Haptics.tap();
+            if(typeof showSection==="function")showSection("focusGarden");
+            setTimeout(()=>{
+                document.getElementById("focusGarden")?.scrollIntoView({behavior:"smooth",block:"start"});
+                grdComputeRewards(); grdUpdateUI();
+            },100);
+        });
+
+        // ── Activity mutation observers ────────────────────────────────────────
+        for(const id of ["taskList","prayerList","study"]){
+            const el=document.getElementById(id);
+            if(el)new MutationObserver(()=>{if(document.getElementById("focusGarden")?.classList.contains("active"))grdComputeRewards();}).observe(el,{childList:true,subtree:true,attributes:true,attributeFilter:["class","checked"]});
+        }
+        window.addEventListener("storage",ev=>{if(!ev.key||ev.key.startsWith("dailykrd_"))queueMicrotask(grdComputeRewards);});
+        const _grdOrigSet=Storage.prototype.setItem;
+        Storage.prototype.setItem=function(k,v){_grdOrigSet.call(this,k,v);if(["dailykrd_study_sessions","dailykrd_study_minutes","dailykrd_flashcards","dailykrd_study_subjects","dailykrd_guest_tasks","dailykrd_guest_prayers"].includes(String(k)))queueMicrotask(grdComputeRewards);};
+        const _grdPage=document.getElementById("focusGarden");
+        if(_grdPage)new MutationObserver(()=>{if(_grdPage.classList.contains("active")){grdComputeRewards();grdUpdateUI();}}).observe(_grdPage,{attributes:true,attributeFilter:["class"]});
+        document.addEventListener("visibilitychange",()=>{if(!document.hidden)grdComputeRewards();});
+        setTimeout(()=>{grdComputeRewards();grdUpdateUI();},900);
     </script>
 
     <!-- DAILY AI -->
