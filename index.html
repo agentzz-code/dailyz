@@ -6780,8 +6780,10 @@
                 <!-- 3D viewport -->
                 <div class="daily-garden-scene" id="gardenScene" role="img" aria-label="Interactive 3D garden built with Three.js WebGL">
                     <canvas id="gardenCanvas" aria-hidden="true"></canvas>
-                    <div class="garden-canvas-fallback" id="gardenFallback" style="display:none">
-                        🌳 3D garden requires WebGL support.<br>Your seeds and progress are still saved.
+                    <div class="garden-canvas-fallback" id="gardenFallback" style="display:none; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; text-align:center">
+                        <div id="gardenFallbackTitle">🌳 The 3D garden could not start.</div>
+                        <div id="gardenFallbackDetail">Your seeds and progress are still saved.</div>
+                        <button type="button" id="gardenRetryBtn" style="padding:10px 16px;border:0;border-radius:12px;font:inherit;font-weight:600;cursor:pointer">Try again</button>
                     </div>
 
                     <!-- Camera controls overlay -->
@@ -22850,8 +22852,10 @@ document.documentElement.classList.toggle(
                 const T = window.THREE;
                 if (!T) { showFallback(); return; }
                 try {
-                    renderer = new T.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: false });
-                    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.5 : 2.0));
+                    const mobile = window.innerWidth < 700 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    // iOS Home Screen web apps have tighter GPU memory limits than desktop Safari.
+                    renderer = new T.WebGLRenderer({ canvas, antialias: !mobile, powerPreference: "default", preserveDrawingBuffer: false, failIfMajorPerformanceCaveat: false });
+                    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.15 : 1.75));
                     if ("outputColorSpace" in renderer && T.SRGBColorSpace) renderer.outputColorSpace = T.SRGBColorSpace;
                     else if (T.sRGBEncoding) renderer.outputEncoding = T.sRGBEncoding;
                     renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -22873,13 +22877,19 @@ document.documentElement.classList.toggle(
                     inited = true;
                 } catch(e) {
                     console.warn("Garden 3D init failed:", e);
-                    showFallback();
+                    try { if (renderer) renderer.dispose(); } catch (_) {}
+                    renderer = null;
+                    showFallback("3D rendering failed to start", e && e.message ? e.message : "WebGL may be unavailable or the device may be low on graphics memory.");
                 }
             }
 
-            function showFallback() {
+            function showFallback(title, detail) {
                 const fb = document.getElementById("gardenFallback");
                 const cv = document.getElementById("gardenCanvas");
+                const t = document.getElementById("gardenFallbackTitle");
+                const d = document.getElementById("gardenFallbackDetail");
+                if (t) t.textContent = title || "🌳 The 3D garden could not load.";
+                if (d) d.textContent = (detail ? String(detail).slice(0,180) + " · " : "") + "Your seeds and progress are still saved.";
                 if (fb) fb.style.display="flex";
                 if (cv) cv.style.display="none";
             }
@@ -22898,7 +22908,7 @@ document.documentElement.classList.toggle(
                 // Sun / moon
                 const sun = new T.DirectionalLight(dark?0x6880cc:0xfff0c8, dark?0.65:1.45);
                 sun.position.set(12,20,12); sun.castShadow=true;
-                sun.shadow.mapSize.set(window.innerWidth<700?2048:4096,window.innerWidth<700?2048:4096);
+                sun.shadow.mapSize.set(window.innerWidth<700?1024:3072,window.innerWidth<700?1024:3072);
                 sun.shadow.camera.near=0.5; sun.shadow.camera.far=58;
                 // Tighter frustum puts more shadow texels on the garden instead of the sky.
                 sun.shadow.camera.left=-14; sun.shadow.camera.right=14;
@@ -23677,23 +23687,44 @@ document.documentElement.classList.toggle(
         // ── Load Three.js then boot ────────────────────────────────────────────
         (function loadThree(){
             if(window.THREE){grdBoot();return;}
-            const s=document.createElement("script");
-            s.src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-            s.crossOrigin="anonymous";
-            s.onload=grdBoot;
-            s.onerror=function(){
-                const fb=document.getElementById("gardenFallback");
-                const cv=document.getElementById("gardenCanvas");
-                if(fb)fb.style.display="flex";
-                if(cv)cv.style.display="none";
-            };
-            document.head.appendChild(s);
+            const sources = [
+                "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+                "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js",
+                "https://unpkg.com/three@0.128.0/build/three.min.js"
+            ];
+            let index = 0;
+            function tryNext(){
+                if(window.THREE){grdBoot();return;}
+                if(index >= sources.length){
+                    showGardenLoadFailure();
+                    return;
+                }
+                const s=document.createElement("script");
+                s.src=sources[index++];
+                s.crossOrigin="anonymous";
+                s.onload=function(){ if(window.THREE) grdBoot(); else tryNext(); };
+                s.onerror=function(){ s.remove(); tryNext(); };
+                document.head.appendChild(s);
+            }
+            tryNext();
         })();
+
+        function showGardenLoadFailure(){
+            const fb=document.getElementById("gardenFallback");
+            const cv=document.getElementById("gardenCanvas");
+            const t=document.getElementById("gardenFallbackTitle");
+            const d=document.getElementById("gardenFallbackDetail");
+            if(t)t.textContent="🌳 The 3D engine could not be downloaded.";
+            if(d)d.textContent="Check your connection or content blockers, then try again. Your seeds and progress are still saved.";
+            if(fb)fb.style.display="flex";
+            if(cv)cv.style.display="none";
+        }
 
         function grdBoot(){
             const cv=document.getElementById("gardenCanvas");
             if(cv)_grdEng.init(cv);
         }
+        document.getElementById("gardenRetryBtn")?.addEventListener("click",()=>window.location.reload());
 
         // ── Wire buttons ──────────────────────────────────────────────────────
         function grdBindUI(){
