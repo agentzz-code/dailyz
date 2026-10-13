@@ -23448,12 +23448,12 @@ document.documentElement.classList.toggle(
                             const radial=c.r*(.28+.72*Math.sqrt(u));
                             const yoff=(Math.sin(k*1.71+ci)*.48)*c.r;
                             const leaf=new T.Mesh(leafGeo,leafMats[k%leafMats.length]);
+                            const sz=.58+((k*7)%9)*.075;
                             leaf.position.set(
                                 c.p.x+Math.cos(ang)*radial*c.scale.x,
                                 c.p.y+yoff-.17*sz,
                                 c.p.z+Math.sin(ang)*radial*c.scale.z
                             );
-                            const sz=.58+((k*7)%9)*.075;
                             leaf.scale.set(sz,sz*(.72+((k*3)%5)*.1),sz);
                             leaf.rotation.set(
                                 Math.sin(k*1.31)*.7,
@@ -27078,3 +27078,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 </script>
 
 </body>
+</html>
