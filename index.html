@@ -22997,17 +22997,17 @@ document.documentElement.classList.toggle(
                 });
                 const mesh = new T.Mesh(geo,mat);
                 mesh.name="terrain"; mesh.rotation.x=-Math.PI/2;
-                mesh.receiveShadow=true; scene.add(mesh);
+                mesh.castShadow=false; mesh.receiveShadow=false; scene.add(mesh);
 
                 // Subtle layered soil shelf under the buildable plot.
                 const baseGeo=new T.BoxGeometry(18.5,.22,18.5,1,1,1);
                 const base=new T.Mesh(baseGeo,new T.MeshStandardMaterial({
                     color:dark?0x25392b:0x795b3c,roughness:1
                 }));
-                base.position.set(0,-.16,0); base.receiveShadow=true; scene.add(base);
+                base.position.set(0,-.38,0); base.receiveShadow=false; scene.add(base);
                 const lip=new T.Mesh(new T.BoxGeometry(18.12,.08,18.12),
                     new T.MeshStandardMaterial({color:dark?0x426448:0x8db76a,roughness:.94}));
-                lip.position.set(0,-.035,0); lip.receiveShadow=true; scene.add(lip);
+                lip.position.set(0,-.245,0); lip.receiveShadow=false; scene.add(lip);
 
                 // Scattered small stones and grass tufts stay outside the empty plot.
                 const stoneMat=new T.MeshStandardMaterial({color:dark?0x58645d:0x9ba394,roughness:.97});
@@ -23479,18 +23479,18 @@ document.documentElement.classList.toggle(
                         // Individual tapered leaves replace the old faceted "rock chunks".
                         // A shared, double-sided leaf mesh keeps the higher detail affordable.
                         const mobileGPU=window.innerWidth<700 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
-                        const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?150:340):(mobileGPU?112:230);
+                        const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?185:390):(mobileGPU?145:285);
                         // Broad, smooth oval leaves with a subtle raised midrib shape.
                         // The previous narrow triangular meshes read as flying shrapnel.
-                        const leafGeo=new T.SphereGeometry(.17,10,7);
+                        const leafGeo=new T.SphereGeometry(.205,12,9);
                         const leafMats=palette.map(col=>new T.MeshStandardMaterial({
                             color:col,roughness:.88,metalness:0,side:T.DoubleSide
                         }));
                         for(let k=0;k<count;k++){
                             // Golden-angle distribution creates a rounded but irregular canopy.
                             const u=(k+.5)/count, ang=k*2.3999632297+ci*.71;
-                            const radial=c.r*(.12+.88*Math.sqrt(u));
-                            const yoff=(Math.sin(k*1.71+ci)*.52)*c.r + Math.sin(u*Math.PI)*.10*c.r;
+                            const radial=c.r*(.08+.80*Math.sqrt(u));
+                            const yoff=(Math.sin(k*1.71+ci)*.39)*c.r + Math.sin(u*Math.PI)*.08*c.r;
                             const leaf=new T.Mesh(leafGeo,leafMats[k%leafMats.length]);
                             const sz=(.72+((k*7)%7)*.075)*(k%4===0?1.08:1);
                             leaf.position.set(
@@ -23498,7 +23498,7 @@ document.documentElement.classList.toggle(
                                 c.p.y+yoff-.17*sz,
                                 c.p.z+Math.sin(ang)*radial*c.scale.z
                             );
-                            leaf.scale.set(sz*1.05,sz*.58,sz*.34);
+                            leaf.scale.set(sz*1.08,sz*.68,sz*.48);
                             leaf.rotation.set(
                                 Math.sin(k*1.31)*.22,
                                 -ang+Math.PI*.5,
@@ -23512,13 +23512,13 @@ document.documentElement.classList.toggle(
                             // Smaller inner leaves soften gaps and create layered canopy depth.
                             if(k%3!==1){
                                 const inner=new T.Mesh(leafGeo,leafMats[(k+ci+1)%leafMats.length]);
-                                const innerScale=sz*(.48+((k+ci)%4)*.055);
+                                const innerScale=sz*(.62+((k+ci)%4)*.055);
                                 inner.position.set(
                                     c.p.x+Math.cos(ang+.38)*radial*.68*c.scale.x,
                                     c.p.y+yoff*.72+.12*sz,
                                     c.p.z+Math.sin(ang+.38)*radial*.68*c.scale.z
                                 );
-                                inner.scale.set(innerScale*1.05,innerScale*.58,innerScale*.34);
+                                inner.scale.set(innerScale*1.08,innerScale*.68,innerScale*.48);
                                 inner.rotation.set(Math.sin(k*.91)*.18,-ang+Math.PI*.5+.4,Math.cos(k*.57)*.2);
                                 inner.userData.windLeaf=true;inner.userData.windPhase=k*.41+ci*2.3;
                                 inner.userData.windBaseX=inner.rotation.x;inner.userData.windBaseZ=inner.rotation.z;
@@ -23526,9 +23526,9 @@ document.documentElement.classList.toggle(
                             }
                         }
                         // Fine outer foliage: small varied leaflets soften the canopy outline.
-                        const fineGeo=new T.SphereGeometry(.105,8,6);
+                        const fineGeo=new T.SphereGeometry(.12,9,7);
                         const fineMat=palette.map(col=>new T.MeshStandardMaterial({color:col,roughness:.92}));
-                        const fineCount=mobileGPU?42:88;
+                        const fineCount=mobileGPU?56:112;
                         for(let f=0;f<fineCount;f++){
                             const a=f*2.3999632297+ci*.37, u=(f+.5)/fineCount;
                             const rr=c.r*(.45+.65*Math.sqrt(u));
