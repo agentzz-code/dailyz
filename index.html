@@ -23499,22 +23499,26 @@ document.documentElement.classList.toggle(
                         const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?185:390):(mobileGPU?145:285);
                         // Individual botanical leaf: pointed tip, rounded shoulders, gently
                         // cupped surface and a raised central vein (not a sphere/triangle).
+                        // Narrow, asymmetric lance-shaped leaf with a cupped surface.
+                        // Its local origin is the petiole, so every leaf can meet a twig.
                         const leafGeo=(()=>{
-                            const verts=[], inds=[], rows=12, cols=8;
+                            const verts=[], inds=[], rows=18, cols=10;
                             for(let i=0;i<=rows;i++){
                                 const t=i/rows;
-                                const half=Math.pow(Math.sin(Math.PI*t),.72)*.115;
+                                const profile=Math.pow(Math.sin(Math.PI*Math.pow(t,.88)),.72);
+                                const half=profile*(.047*(.82+.18*Math.sin(t*Math.PI)));
                                 for(let j=0;j<=cols;j++){
                                     const u=j/cols*2-1;
-                                    const x=(t-.5)*.43;
+                                    const x=t*.46;
                                     const y=u*half;
-                                    const z=.025*Math.sin(Math.PI*t)*(1-u*u)-.012*Math.sin(Math.PI*t);
+                                    // subtle cupping and a raised midrib, not a flat paper petal
+                                    const z=.014*Math.sin(Math.PI*t)*(1-u*u)+.004*Math.sin(Math.PI*t);
                                     verts.push(x,y,z);
                                 }
                             }
                             for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){
                                 const a=i*(cols+1)+j,b=a+cols+1;
-                                inds.push(a,b,a+1,b,b+1,a+1);
+                                inds.push(a,a+1,b,b,a+1,b+1);
                             }
                             const geo=new T.BufferGeometry();
                             geo.setAttribute('position',new T.Float32BufferAttribute(verts,3));
@@ -23523,59 +23527,52 @@ document.documentElement.classList.toggle(
                         const leafMats=palette.map(col=>new T.MeshStandardMaterial({
                             color:col,roughness:.88,metalness:0,side:T.DoubleSide
                         }));
+                        // Real branchlets radiate through each crown. Leaves grow from
+                        // their surfaces with the petiole at the branch, never floating free.
+                        const twigMat=new T.MeshStandardMaterial({color:id==="willow1"?0x526b32:0x654326,roughness:.96});
+                        const twigCount=Math.max(8,Math.round(count/7));
+                        const twigs=[];
+                        for(let ti=0;ti<twigCount;ti++){
+                            const a=ti*2.3999632297+ci*.71;
+                            const rise=((ti%5)-2)*.10;
+                            const len=c.r*(.48+((ti*7)%6)*.075);
+                            const from=new T.Vector3(c.p.x,c.p.y-.04,c.p.z);
+                            const to=new T.Vector3(c.p.x+Math.cos(a)*len*c.scale.x,c.p.y+rise*c.r,c.p.z+Math.sin(a)*len*c.scale.z);
+                            const delta=to.clone().sub(from), mid=from.clone().add(to).multiplyScalar(.5);
+                            const twig=new T.Mesh(new T.CylinderGeometry(.008,.023,delta.length(),5),twigMat);
+                            twig.position.copy(mid);twig.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),delta.clone().normalize());
+                            twig.castShadow=true;g.add(twig);twigs.push({from,to,a,delta});
+                        }
                         for(let k=0;k<count;k++){
-                            // Golden-angle distribution creates a rounded but irregular canopy.
-                            const u=(k+.5)/count, ang=k*2.3999632297+ci*.71;
-                            const radial=c.r*(.08+.80*Math.sqrt(u));
-                            const yoff=(Math.sin(k*1.71+ci)*.39)*c.r + Math.sin(u*Math.PI)*.08*c.r;
+                            const ti=k%twigs.length, twig=twigs[ti];
+                            const t=.30+((Math.floor(k/twigs.length)*3)%61)/100;
+                            const side=(k%2?1:-1);
+                            const anchor=twig.from.clone().lerp(twig.to,Math.min(.94,t));
+                            const lateral=new T.Vector3(-Math.sin(twig.a),0,Math.cos(twig.a)).multiplyScalar(side*(.025+(k%4)*.012));
+                            anchor.add(lateral);
                             const leaf=new T.Mesh(leafGeo,leafMats[k%leafMats.length]);
-                            const sz=(.72+((k*7)%7)*.075)*(k%4===0?1.08:1);
-                            leaf.position.set(
-                                c.p.x+Math.cos(ang)*radial*c.scale.x,
-                                c.p.y+yoff-.17*sz,
-                                c.p.z+Math.sin(ang)*radial*c.scale.z
-                            );
-                            leaf.scale.set(sz*1.45,sz*1.05,sz*1.0);
-                            leaf.rotation.set(
-                                Math.sin(k*1.31)*.22,
-                                -ang+Math.PI*.5,
-                                Math.cos(k*.83)*.24
-                            );
-                            leaf.userData.windLeaf=true;
-                            leaf.userData.windPhase=k*.37+ci*1.9;
-                            leaf.userData.windBaseX=leaf.rotation.x;
-                            leaf.userData.windBaseZ=leaf.rotation.z;
-                            leaf.castShadow=(k%5===0);leaf.receiveShadow=false;g.add(leaf);
-                            // Smaller inner leaves soften gaps and create layered canopy depth.
-                            if(k%3!==1){
-                                const inner=new T.Mesh(leafGeo,leafMats[(k+ci+1)%leafMats.length]);
-                                const innerScale=sz*(.62+((k+ci)%4)*.055);
-                                inner.position.set(
-                                    c.p.x+Math.cos(ang+.38)*radial*.68*c.scale.x,
-                                    c.p.y+yoff*.72+.12*sz,
-                                    c.p.z+Math.sin(ang+.38)*radial*.68*c.scale.z
-                                );
-                                inner.scale.set(innerScale*1.45,innerScale*1.05,innerScale);
-                                inner.rotation.set(Math.sin(k*.91)*.18,-ang+Math.PI*.5+.4,Math.cos(k*.57)*.2);
-                                inner.userData.windLeaf=true;inner.userData.windPhase=k*.41+ci*2.3;
-                                inner.userData.windBaseX=inner.rotation.x;inner.userData.windBaseZ=inner.rotation.z;
-                                inner.castShadow=(k%7===0);inner.receiveShadow=false;g.add(inner);
+                            leaf.position.copy(anchor);
+                            // Leaf base sits on the twig; blade angles away from it.
+                            leaf.rotation.set((k%3-1)*.18,-twig.a+(side*.48),side*(.14+(k%4)*.045));
+                            const sz=.68+((k*7)%7)*.075;
+                            leaf.scale.set(sz,sz,sz);
+                            leaf.userData.windLeaf=true;leaf.userData.windPhase=k*.37+ci*1.9;
+                            leaf.userData.windBaseX=leaf.rotation.x;leaf.userData.windBaseZ=leaf.rotation.z;
+                            leaf.castShadow=(k%8===0);leaf.receiveShadow=false;g.add(leaf);
+                            // Opposite leaf at the same node, attached to the same twig.
+                            if(k%2===0){
+                                const pair=new T.Mesh(leafGeo,leafMats[(k+ci+1)%leafMats.length]);
+                                pair.position.copy(anchor).add(lateral.clone().multiplyScalar(-2));
+                                pair.rotation.set((k%3-1)*.16,-twig.a-side*.48,-side*(.14+(k%4)*.04));
+                                pair.scale.set(sz*.88,sz*.88,sz*.88);
+                                pair.userData.windLeaf=true;pair.userData.windPhase=k*.41+ci*2.3;
+                                pair.userData.windBaseX=pair.rotation.x;pair.userData.windBaseZ=pair.rotation.z;
+                                pair.castShadow=(k%12===0);pair.receiveShadow=false;g.add(pair);
                             }
                         }
                         // Fine outer foliage: small varied leaflets soften the canopy outline.
-                        const fineGeo=leafGeo;
-                        const fineMat=palette.map(col=>new T.MeshStandardMaterial({color:col,roughness:.92}));
-                        const fineCount=mobileGPU?56:112;
-                        for(let f=0;f<fineCount;f++){
-                            const a=f*2.3999632297+ci*.37, u=(f+.5)/fineCount;
-                            const rr=c.r*(.45+.65*Math.sqrt(u));
-                            const lf=new T.Mesh(fineGeo,fineMat[f%fineMat.length]);
-                            lf.position.set(c.p.x+Math.cos(a)*rr*c.scale.x, c.p.y+Math.sin(f*1.73)*c.r*.58, c.p.z+Math.sin(a)*rr*c.scale.z);
-                            const kscale=.48+((f*13)%7)*.045;lf.scale.set(kscale*1.25,kscale*.9,kscale);
-                            lf.userData.windLeaf=true;lf.userData.windPhase=f*.29+ci*1.7;
-                            lf.userData.windBaseX=lf.rotation.x;lf.userData.windBaseZ=lf.rotation.z;
-                            lf.castShadow=(f%9===0);lf.receiveShadow=false;g.add(lf);
-                        }
+                        // No free-floating outer leaf confetti: the branch-attached leaves
+                        // above form the canopy silhouette and stay connected at their bases.
                     });
                     // Visible surface roots and forked branches create a less cylindrical silhouette.
                     if(!["crystaltree","spirittree"].includes(id)){
