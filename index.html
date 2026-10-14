@@ -22917,8 +22917,8 @@ document.documentElement.classList.toggle(
                 sun.shadow.camera.left=-14; sun.shadow.camera.right=14;
                 sun.shadow.camera.top=14; sun.shadow.camera.bottom=-14;
                 sun.shadow.camera.updateProjectionMatrix();
-                sun.shadow.bias=-0.00032;
-                sun.shadow.normalBias=0.025;
+                sun.shadow.bias=-0.00018;
+                sun.shadow.normalBias=0.045;
                 sun.shadow.radius=window.innerWidth<700?2:1.5;
                 scene.add(sun);
                 if (dark) { const m=new T.DirectionalLight(0x4455aa,0.3); m.position.set(-10,14,-8); scene.add(m); }
@@ -22975,26 +22975,26 @@ document.documentElement.classList.toggle(
                 tx.fillStyle=dark?"#344d35":"#719451"; tx.fillRect(0,0,512,512);
                 let texSeed=4271; const texRnd=()=>{texSeed=(texSeed*1664525+1013904223)>>>0;return texSeed/4294967296;};
                 // Broad mottling layer.
-                for(let n=0;n<1700;n++){
+                for(let n=0;n<1050;n++){
                     const v=texRnd();
                     tx.fillStyle=v<.34?`rgba(20,${dark?38:70},${dark?23:32},${.025+texRnd()*.09})`:
                         v<.68?`rgba(${dark?92:155},${dark?116:165},${dark?65:83},${.025+texRnd()*.10})`:
                         `rgba(${dark?54:94},${dark?83:121},${dark?49:58},${.025+texRnd()*.08})`;
-                    const x=texRnd()*512,y=texRnd()*512,r=1+texRnd()*8;
+                    const x=texRnd()*512,y=texRnd()*512,r=2+texRnd()*12;
                     tx.beginPath();tx.ellipse(x,y,r,r*(.35+texRnd()),texRnd()*3.14,0,Math.PI*2);tx.fill();
                 }
                 // Fine grass strands and scattered tiny soil/grit pixels.
-                for(let n=0;n<15500;n++){
+                for(let n=0;n<10500;n++){
                     const v=texRnd(),x=texRnd()*512,y=texRnd()*512;
                     if(v<.7){
-                        const a=.04+texRnd()*.18;
+                        const a=.025+texRnd()*.11;
                         tx.strokeStyle=v<.34?`rgba(${dark?19:34},${dark?48:76},${dark?23:35},${a})`:`rgba(${dark?101:164},${dark?131:184},${dark?74:92},${a})`;
                         tx.lineWidth=.35+texRnd()*.7;tx.beginPath();tx.moveTo(x,y);tx.lineTo(x+(texRnd()-.5)*2,y-1-texRnd()*7);tx.stroke();
                     }else{
                         // Pale moss/pollen flecks only: avoid near-black pixel dots on the meadow.
-                        const c=texRnd()>.5?"147,169,91":"190,177,119";
-                        tx.fillStyle=`rgba(${c},${.035+texRnd()*.055})`;
-                        tx.fillRect(x,y,.45+texRnd()*.75,.45+texRnd()*.75);
+                        const c=texRnd()>.5?"151,174,99":"186,177,126";
+                        tx.fillStyle=`rgba(${c},${.025+texRnd()*.035})`;
+                        tx.fillRect(x,y,.7+texRnd()*1.1,.7+texRnd()*1.1);
                     }
                 }
                 const groundTex=new T.CanvasTexture(texCanvas); groundTex.wrapS=groundTex.wrapT=T.RepeatWrapping; groundTex.repeat.set(3.5,3.5);
@@ -23016,7 +23016,7 @@ document.documentElement.classList.toggle(
                 bumpTex.generateMipmaps=true;bumpTex.minFilter=T.LinearMipmapLinearFilter;bumpTex.magFilter=T.LinearFilter;
                 if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)bumpTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
                 const mat = new T.MeshStandardMaterial({
-                    vertexColors:true, map:groundTex, bumpMap:bumpTex, bumpScale:dark?.018:.024,
+                    vertexColors:true, map:groundTex, bumpMap:bumpTex, bumpScale:dark?.004:.006,
                     roughness:.96, metalness:0, flatShading:false
                 });
                 const mesh = new T.Mesh(geo,mat);
@@ -23380,7 +23380,7 @@ document.documentElement.classList.toggle(
                     bt.repeat.set(1,1);if(T.sRGBEncoding)bt.encoding=T.sRGBEncoding;
                     const hc=document.createElement("canvas");hc.width=256;hc.height=512;
                     const hx=hc.getContext("2d");hx.fillStyle="#808080";hx.fillRect(0,0,256,512);
-                    for(let n=0;n<3200;n++){const v=Math.floor(65+br()*125);hx.fillStyle=`rgb(${v},${v},${v})`;hx.fillRect(br()*256,br()*512,.5+br()*2,4+br()*30);}
+                    for(let n=0;n<1800;n++){const v=Math.floor(94+br()*70);hx.fillStyle=`rgb(${v},${v},${v})`;hx.fillRect(br()*256,br()*512,.5+br()*2,4+br()*30);}
                     const ht=new T.CanvasTexture(hc);ht.wrapS=ht.wrapT=T.RepeatWrapping;
                     window.__dailyKrdBarkMaps={map:bt,bump:ht};
                 }
@@ -23389,7 +23389,7 @@ document.documentElement.classList.toggle(
                     const bark=rgb[0]>rgb[1]*1.25 && rgb[1]>rgb[2]*1.15 && rgb[2]<100;
                     return new T.MeshStandardMaterial({
                         color:col,roughness:rough,metalness:0,
-                        ...(bark?{map:window.__dailyKrdBarkMaps.map,bumpMap:window.__dailyKrdBarkMaps.bump,bumpScale:.075}: {})
+                        ...(bark?{map:window.__dailyKrdBarkMaps.map,bumpMap:window.__dailyKrdBarkMaps.bump,bumpScale:.032}: {})
                     });
                 }
                 function mesh(geo,m){const o=new T.Mesh(geo,m);o.castShadow=true;o.receiveShadow=true;return o;}
@@ -23502,15 +23502,16 @@ document.documentElement.classList.toggle(
                         // Individual tapered leaves replace the old faceted "rock chunks".
                         // A shared, double-sided leaf mesh keeps the higher detail affordable.
                         const mobileGPU=window.innerWidth<700 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
-                        const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?88:176):(mobileGPU?58:112);
+                        const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?132:280):(mobileGPU?88:184);
                         const leafGeo=new T.BufferGeometry();
                         leafGeo.setAttribute("position",new T.Float32BufferAttribute([
-                            0,0,0, -.085,.035,.025, 0,.34,0,
-                            0,0,0, 0,.34,0, .085,.035,.025,
-                            0,0,0, .085,.035,.025, 0,.34,0,
-                            0,0,0, 0,.34,0, -.085,.035,.025,
-                            0,.34,0, -.085,.035,.025, 0,.18,.045,
-                            0,.34,0, 0,.18,.045, .085,.035,.025
+                            0,0,0, -.105,.045,.018, -.055,.19,.065,
+                            0,0,0, -.055,.19,.065, 0,.36,0,
+                            0,0,0, 0,.36,0, .055,.19,.065,
+                            0,0,0, .055,.19,.065, .105,.045,.018,
+                            -.055,.19,.065, -.105,.045,.018, 0,.36,0,
+                            0,.36,0, .105,.045,.018, .055,.19,.065,
+                            0,.02,.015, 0,.34,0, .008,.19,.082
                         ],3));
                         leafGeo.computeVertexNormals();
                         const leafMats=palette.map(col=>new T.MeshStandardMaterial({
@@ -23519,8 +23520,8 @@ document.documentElement.classList.toggle(
                         for(let k=0;k<count;k++){
                             // Golden-angle distribution creates a rounded but irregular canopy.
                             const u=(k+.5)/count, ang=k*2.3999632297+ci*.71;
-                            const radial=c.r*(.28+.72*Math.sqrt(u));
-                            const yoff=(Math.sin(k*1.71+ci)*.48)*c.r;
+                            const radial=c.r*(.18+.82*Math.sqrt(u));
+                            const yoff=(Math.sin(k*1.71+ci)*.52)*c.r + Math.sin(u*Math.PI)*.10*c.r;
                             const leaf=new T.Mesh(leafGeo,leafMats[k%leafMats.length]);
                             const sz=(.48+((k*7)%11)*.067)*(k%4===0?1.12:1);
                             leaf.position.set(
@@ -23553,23 +23554,26 @@ document.documentElement.classList.toggle(
                     // Visible surface roots and forked branches create a less cylindrical silhouette.
                     if(!["crystaltree","spirittree"].includes(id)){
                         const rootMat=mat(id==="spirittree"?0xd7e5ef:0x634126,.98);
-                        for(let r=0;r<5;r++){
-                            const ang=r*Math.PI*2/5+.2;
-                            const root=new T.Mesh(new T.CylinderGeometry(.025,.12,.62,6),rootMat);
-                            root.position.set(Math.cos(ang)*.24,.13,Math.sin(ang)*.24);
+                        for(let r=0;r<7;r++){
+                            const ang=r*Math.PI*2/7+.2;
+                            const root=new T.Mesh(new T.CylinderGeometry(.018,.105,.58+(r%3)*.09,7),rootMat);
+                            root.position.set(Math.cos(ang)*(.22+(r%2)*.05),.12,Math.sin(ang)*(.22+(r%2)*.05));
                             root.rotation.z=Math.cos(ang)*.82;
                             root.rotation.x=Math.sin(ang)*.82;
                             root.castShadow=true;g.add(root);
                         }
                         const trunkH=id==="worldtree"?3.8:id==="dragontree"?2.6:id==="bigoak1"?2.1:1.6;
                         const branchMat=mat(id==="willow1"?0x557b36:0x6a4528,.98);
-                        for(let b=0;b<5;b++){
-                            const ang=b*Math.PI*2/5+.4;
-                            const branch=new T.Mesh(new T.CylinderGeometry(.025,.065,.65,5),branchMat);
-                            branch.position.set(Math.cos(ang)*.34,trunkH*.68+(b%2)*.18,Math.sin(ang)*.34);
+                        for(let b=0;b<7;b++){
+                            const ang=b*Math.PI*2/7+.4;
+                            const branch=new T.Mesh(new T.CylinderGeometry(.018,.075,.68+(b%3)*.12,6),branchMat);
+                            branch.position.set(Math.cos(ang)*(.31+(b%2)*.08),trunkH*.63+(b%3)*.16,Math.sin(ang)*(.31+(b%2)*.08));
                             branch.rotation.z=Math.cos(ang)*.9;
                             branch.rotation.x=Math.sin(ang)*.9;
                             branch.castShadow=true;g.add(branch);
+                            const twig=new T.Mesh(new T.CylinderGeometry(.008,.028,.34,5),branchMat);
+                            twig.position.set(branch.position.x+Math.cos(ang)*.22,branch.position.y+.27,branch.position.z+Math.sin(ang)*.22);
+                            twig.rotation.z=Math.cos(ang)*.72;twig.rotation.x=Math.sin(ang)*.72;g.add(twig);
                         }
                     }
                 }
