@@ -6788,6 +6788,7 @@
 
                     <!-- Camera controls overlay -->
                     <div class="garden-3d-controls">
+                        <button class="garden-3d-btn" id="gardenCycleBtn" title="Pause automatic day and night cycle" aria-label="Pause day and night cycle">🌗</button>
                         <button class="garden-3d-btn" id="gardenResetCam" title="Reset camera" aria-label="Reset camera">⌖</button>
                         <button class="garden-3d-btn" id="gardenGridBtn" title="Toggle grid" aria-label="Toggle grid">⊞</button>
                     </div>
@@ -22830,6 +22831,12 @@ document.documentElement.classList.toggle(
             let inited=false, dead=false, dark=false, editMode=false;
             let terrainMesh=null, gridHelper=null;
             let raycaster=null, pointerV=null;
+            // Independent garden clock: a full day/night cycle takes three minutes.
+            let gardenSun=null, gardenHemi=null, gardenAmbient=null, gardenStars=null;
+            let gardenClockStart=performance.now(), gardenCyclePaused=false, gardenPausedPhase=0.22;
+            let gardenWindTime=0;
+            const gardenSkyDay=0x8dd6f0, gardenSkyDusk=0xe58b65, gardenSkyNight=0x0b1520;
+            const gardenFogDay=0x8dd6f0, gardenFogDusk=0x72586a, gardenFogNight=0x0b1520;
             const objMap = {};          // uid -> THREE.Group
             // Placement
             let preview=null, prevPlant=null, prevRot=0, placing=false;
@@ -22860,8 +22867,9 @@ document.documentElement.classList.toggle(
                     else if (T.sRGBEncoding) renderer.outputEncoding = T.sRGBEncoding;
                     renderer.toneMapping = T.ACESFilmicToneMapping;
                     renderer.toneMappingExposure = 1.08;
-                    renderer.shadowMap.enabled = true;
-                    renderer.shadowMap.type = T.PCFSoftShadowMap;
+                    // Shadow maps caused persistent black speckles on the ground and foliage
+                    // across browsers. Use stable ambient/direct lighting instead of shadow acne.
+                    renderer.shadowMap.enabled = false;
                     // Better material response and physically consistent lighting in r128.
                     if ("physicallyCorrectLights" in renderer) renderer.physicallyCorrectLights = true;
                     scene  = new T.Scene();
@@ -22899,35 +22907,24 @@ document.documentElement.classList.toggle(
                 const T = window.THREE;
                 dark = isDark();
                 scene.clear();
+                gardenStars=null;gardenSun=null;gardenHemi=null;gardenAmbient=null;
                 terrainMesh = null;
-                // Sky & fog
-                if (dark) { scene.background=new T.Color(0x0b1520); scene.fog=new T.Fog(0x0b1520,38,100); }
-                else       { scene.background=new T.Color(0x8dd6f0); scene.fog=new T.Fog(0x8dd6f0,42,105); }
-                // Layered natural lighting: sky fill, ground bounce and a warm/cool key.
-                // These are deliberately lightweight enough for iPhone Home Screen mode.
-                const hemi = new T.HemisphereLight(dark?0x7893c7:0xdaf5ff, dark?0x1d2a20:0x62513a, dark?0.72:1.12);
-                scene.add(hemi);
-                scene.add(new T.AmbientLight(dark?0x304050:0xfff8e8, dark?0.42:0.62));
-                // Sun / moon
-                const sun = new T.DirectionalLight(dark?0x8ca8ff:0xfff0cf, dark?0.82:1.8);
-                sun.position.set(12,20,12); sun.castShadow=true;
-                sun.shadow.mapSize.set(window.innerWidth<700?1536:4096,window.innerWidth<700?1536:4096);
-                sun.shadow.camera.near=0.5; sun.shadow.camera.far=58;
-                // Tighter frustum puts more shadow texels on the garden instead of the sky.
-                sun.shadow.camera.left=-14; sun.shadow.camera.right=14;
-                sun.shadow.camera.top=14; sun.shadow.camera.bottom=-14;
-                sun.shadow.camera.updateProjectionMatrix();
-                // Avoid the dark speckled shadow-acne artifacts that appeared on the terrain.
-                sun.shadow.bias=0.00008;
-                sun.shadow.normalBias=0.018;
-                sun.shadow.radius=window.innerWidth<700?3:2;
-                scene.add(sun);
-                if (dark) { const m=new T.DirectionalLight(0x4455aa,0.3); m.position.set(-10,14,-8); scene.add(m); }
+                // Start with a neutral daylight scene; updateGardenLighting animates the
+                // sky, fog, moonlight and sun independently from the app's light/dark theme.
+                scene.background=new T.Color(gardenSkyDay);
+                scene.fog=new T.Fog(gardenFogDay,42,105);
+                gardenHemi=new T.HemisphereLight(0xdaf5ff,0x62513a,1.12);scene.add(gardenHemi);
+                gardenAmbient=new T.AmbientLight(0xfff8e8,0.62);scene.add(gardenAmbient);
+                gardenSun=new T.DirectionalLight(0xfff0cf,1.8);
+                gardenSun.position.set(12,20,12);gardenSun.castShadow=false;scene.add(gardenSun);
                 // Terrain
                 terrainMesh = buildTerrain();
                 buildBoundary();
                 buildEnvironment();
-                if (dark) buildStars();
+                buildStars();
+                // No shadow-map sampling anywhere in this scene: this guarantees the
+                // recurring black speckles cannot be shadow acne from the renderer.
+                scene.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;}});
                 if (grdPrefs.gridVisible) toggleGrid(true);
             }
 
@@ -23325,7 +23322,8 @@ document.documentElement.classList.toggle(
                 const arr=new Float32Array(280*3);
                 for(let i=0;i<280;i++){arr[i*3]=(Math.random()-.5)*120;arr[i*3+1]=15+Math.random()*40;arr[i*3+2]=(Math.random()-.5)*120;}
                 const geo=new T.BufferGeometry(); geo.setAttribute("position",new T.BufferAttribute(arr,3));
-                scene.add(new T.Points(geo,new T.PointsMaterial({color:0xffffff,size:0.16,sizeAttenuation:true})));
+                gardenStars=new T.Points(geo,new T.PointsMaterial({color:0xffffff,size:0.16,sizeAttenuation:true,transparent:true,opacity:.8}));
+                scene.add(gardenStars);
             }
 
             function toggleGrid(on) {
@@ -23482,17 +23480,9 @@ document.documentElement.classList.toggle(
                         // A shared, double-sided leaf mesh keeps the higher detail affordable.
                         const mobileGPU=window.innerWidth<700 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
                         const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?150:340):(mobileGPU?112:230);
-                        const leafGeo=new T.BufferGeometry();
-                        leafGeo.setAttribute("position",new T.Float32BufferAttribute([
-                            0,0,0, -.105,.045,.018, -.055,.19,.065,
-                            0,0,0, -.055,.19,.065, 0,.36,0,
-                            0,0,0, 0,.36,0, .055,.19,.065,
-                            0,0,0, .055,.19,.065, .105,.045,.018,
-                            -.055,.19,.065, -.105,.045,.018, 0,.36,0,
-                            0,.36,0, .105,.045,.018, .055,.19,.065,
-                            0,.02,.015, 0,.34,0, .008,.19,.082
-                        ],3));
-                        leafGeo.computeVertexNormals();
+                        // Broad, smooth oval leaves with a subtle raised midrib shape.
+                        // The previous narrow triangular meshes read as flying shrapnel.
+                        const leafGeo=new T.SphereGeometry(.17,10,7);
                         const leafMats=palette.map(col=>new T.MeshStandardMaterial({
                             color:col,roughness:.88,metalness:0,side:T.DoubleSide
                         }));
@@ -23502,19 +23492,23 @@ document.documentElement.classList.toggle(
                             const radial=c.r*(.12+.88*Math.sqrt(u));
                             const yoff=(Math.sin(k*1.71+ci)*.52)*c.r + Math.sin(u*Math.PI)*.10*c.r;
                             const leaf=new T.Mesh(leafGeo,leafMats[k%leafMats.length]);
-                            const sz=(.48+((k*7)%11)*.067)*(k%4===0?1.12:1);
+                            const sz=(.72+((k*7)%7)*.075)*(k%4===0?1.08:1);
                             leaf.position.set(
                                 c.p.x+Math.cos(ang)*radial*c.scale.x,
                                 c.p.y+yoff-.17*sz,
                                 c.p.z+Math.sin(ang)*radial*c.scale.z
                             );
-                            leaf.scale.set(sz,sz*(.72+((k*3)%5)*.1),sz);
+                            leaf.scale.set(sz*1.05,sz*.58,sz*.34);
                             leaf.rotation.set(
-                                Math.sin(k*1.31)*.82,
+                                Math.sin(k*1.31)*.22,
                                 -ang+Math.PI*.5,
-                                Math.cos(k*.83)*.78
+                                Math.cos(k*.83)*.24
                             );
-                            leaf.castShadow=(k%4===0);leaf.receiveShadow=false;g.add(leaf);
+                            leaf.userData.windLeaf=true;
+                            leaf.userData.windPhase=k*.37+ci*1.9;
+                            leaf.userData.windBaseX=leaf.rotation.x;
+                            leaf.userData.windBaseZ=leaf.rotation.z;
+                            leaf.castShadow=false;leaf.receiveShadow=false;g.add(leaf);
                             // Smaller inner leaves soften gaps and create layered canopy depth.
                             if(k%3!==1){
                                 const inner=new T.Mesh(leafGeo,leafMats[(k+ci+1)%leafMats.length]);
@@ -23524,13 +23518,15 @@ document.documentElement.classList.toggle(
                                     c.p.y+yoff*.72+.12*sz,
                                     c.p.z+Math.sin(ang+.38)*radial*.68*c.scale.z
                                 );
-                                inner.scale.set(innerScale,innerScale*.9,innerScale);
-                                inner.rotation.set(Math.sin(k*.91)*.65,-ang+Math.PI*.5+.4,Math.cos(k*.57)*.6);
-                                inner.castShadow=(k%8===0);inner.receiveShadow=false;g.add(inner);
+                                inner.scale.set(innerScale*1.05,innerScale*.58,innerScale*.34);
+                                inner.rotation.set(Math.sin(k*.91)*.18,-ang+Math.PI*.5+.4,Math.cos(k*.57)*.2);
+                                inner.userData.windLeaf=true;inner.userData.windPhase=k*.41+ci*2.3;
+                                inner.userData.windBaseX=inner.rotation.x;inner.userData.windBaseZ=inner.rotation.z;
+                                inner.castShadow=false;inner.receiveShadow=false;g.add(inner);
                             }
                         }
                         // Fine outer foliage: small varied leaflets soften the canopy outline.
-                        const fineGeo=new T.SphereGeometry(.075,7,5);
+                        const fineGeo=new T.SphereGeometry(.105,8,6);
                         const fineMat=palette.map(col=>new T.MeshStandardMaterial({color:col,roughness:.92}));
                         const fineCount=mobileGPU?42:88;
                         for(let f=0;f<fineCount;f++){
@@ -23538,8 +23534,10 @@ document.documentElement.classList.toggle(
                             const rr=c.r*(.45+.65*Math.sqrt(u));
                             const lf=new T.Mesh(fineGeo,fineMat[f%fineMat.length]);
                             lf.position.set(c.p.x+Math.cos(a)*rr*c.scale.x, c.p.y+Math.sin(f*1.73)*c.r*.58, c.p.z+Math.sin(a)*rr*c.scale.z);
-                            const kscale=.52+((f*13)%9)*.065;lf.scale.set(kscale,kscale*.72,kscale);
-                            lf.castShadow=(f%9===0);lf.receiveShadow=false;g.add(lf);
+                            const kscale=.48+((f*13)%7)*.045;lf.scale.set(kscale*1.05,kscale*.52,kscale*.3);
+                            lf.userData.windLeaf=true;lf.userData.windPhase=f*.29+ci*1.7;
+                            lf.userData.windBaseX=lf.rotation.x;lf.userData.windBaseZ=lf.rotation.z;
+                            lf.castShadow=false;lf.receiveShadow=false;g.add(lf);
                         }
                     });
                     // Visible surface roots and forked branches create a less cylindrical silhouette.
@@ -23590,7 +23588,9 @@ document.documentElement.classList.toggle(
                 g.rotation.y=obj.rot||0;
                 g.scale.setScalar(obj.scale||1);
                 g.userData.uid=obj.uid;
-                g.traverse(c=>{if(c.isMesh){c.userData.uid=obj.uid;c.userData.pickable=true;}});
+                g.userData.plantId=obj.plantId;
+                g.userData.windTree=/tree|oak|maple|willow|apple|cherry|sakura|pine|cypress|sapling|worldtree|dragontree|spirittree|rainbowtree|crystal/i.test(obj.plantId||"");
+                g.traverse(c=>{if(c.isMesh){c.userData.uid=obj.uid;c.userData.pickable=true;c.castShadow=false;c.receiveShadow=false;}});
                 scene.add(g);
                 objMap[obj.uid]=g;
             }
@@ -23747,6 +23747,54 @@ document.documentElement.classList.toggle(
                 }
             }
 
+            // ── Living atmosphere: smooth day/night + gentle plant wind ─────────
+            function updateGardenLighting(now){
+                if(!scene||!window.THREE)return;
+                const T=window.THREE;
+                const phase=gardenCyclePaused?gardenPausedPhase:(((now-gardenClockStart)/180000)%1+1)%1;
+                // Day at phase .25, sunset .5, night .75, sunrise at 0.
+                const daylight=Math.max(0,Math.sin(phase*Math.PI*2));
+                const dusk=Math.max(0,1-Math.abs(Math.sin(phase*Math.PI*2)))*Math.max(0,Math.sin(phase*Math.PI*2+Math.PI/2));
+                const night=1-daylight;
+                const sky=new T.Color(gardenSkyNight).lerp(new T.Color(gardenSkyDusk),Math.max(0,1-Math.abs(phase-.5)*5));
+                sky.lerp(new T.Color(gardenSkyDay),Math.max(0,Math.min(1,daylight*1.5)));
+                const fogCol=new T.Color(gardenFogNight).lerp(new T.Color(gardenFogDusk),Math.max(0,1-Math.abs(phase-.5)*5));
+                fogCol.lerp(new T.Color(gardenFogDay),Math.max(0,Math.min(1,daylight*1.5)));
+                scene.background.copy(sky);scene.fog.color.copy(fogCol);
+                if(gardenSun){
+                    const a=phase*Math.PI*2;
+                    gardenSun.position.set(Math.cos(a)*22,Math.max(-4,Math.sin(a)*24),Math.sin(a)*18);
+                    gardenSun.color.setRGB(1,0.72+daylight*.25,0.52+daylight*.42);
+                    gardenSun.intensity=.16+daylight*1.65;
+                }
+                if(gardenHemi){gardenHemi.intensity=.28+daylight*.82;gardenHemi.color.set(night>.7?0x7389c8:0xdaf5ff);gardenHemi.groundColor.set(night>.7?0x1b2639:0x62513a);}
+                if(gardenAmbient){gardenAmbient.intensity=.18+daylight*.46;gardenAmbient.color.set(night>.7?0x9aaddd:0xfff1d9);}
+                if(gardenStars)gardenStars.material.opacity=Math.min(.95,night*.95);
+                const btn=document.getElementById("gardenCycleBtn");
+                if(btn){btn.textContent=gardenCyclePaused?"⏸":"🌗";btn.title=gardenCyclePaused?"Resume automatic day and night cycle":"Pause automatic day and night cycle";btn.setAttribute("aria-label",btn.title);}
+            }
+            function toggleGardenCycle(){
+                const now=performance.now();
+                if(gardenCyclePaused){gardenClockStart=now-gardenPausedPhase*180000;gardenCyclePaused=false;}
+                else{gardenPausedPhase=(((now-gardenClockStart)/180000)%1+1)%1;gardenCyclePaused=true;}
+                updateGardenLighting(now);
+            }
+            function updateGardenWind(now){
+                gardenWindTime=now*.001;
+                const breeze=Math.sin(gardenWindTime*.55)*.018+Math.sin(gardenWindTime*.23)*.012;
+                Object.values(objMap).forEach(g=>{
+                    if(!g||!g.userData.windTree)return;
+                    const phase=g.userData.windPhase||0;
+                    g.rotation.z=(g.userData.baseRotZ||0)+breeze*Math.sin(gardenWindTime*.9+phase);
+                    g.rotation.x=(g.userData.baseRotX||0)+breeze*.72*Math.cos(gardenWindTime*.7+phase);
+                    g.traverse(c=>{if(c.isMesh&&c.userData.windLeaf){
+                        const p=c.userData.windPhase||0;
+                        c.rotation.x=(c.userData.windBaseX||0)+Math.sin(gardenWindTime*1.5+p)*.075;
+                        c.rotation.z=(c.userData.windBaseZ||0)+Math.cos(gardenWindTime*1.2+p)*.055;
+                    }});
+                });
+            }
+
             // ── Loop ───────────────────────────────────────────────────────────
             function loop(){
                 if(dead) return;
@@ -23758,12 +23806,14 @@ document.documentElement.classList.toggle(
                 phi=Math.max(.12,Math.min(Math.PI/2.06,phi));
                 radius+=(tRadius-radius)*.12;
                 camUpdate();
+                updateGardenLighting(performance.now());
+                updateGardenWind(performance.now());
                 renderer.render(scene,camera);
             }
 
             function setEditMode(on){editMode=on;if(!on)deselect();}
 
-            return {init,addObj,removeObj,moveObj,highlight,deselect,startPlacement,cancelPlacement,finalizePlace,resetCamera,setEditMode,toggleGrid};
+            return {init,addObj,removeObj,moveObj,highlight,deselect,startPlacement,cancelPlacement,finalizePlace,resetCamera,setEditMode,toggleGrid,toggleGardenCycle};
         })();
 
         // ── Load Three.js then boot ────────────────────────────────────────────
@@ -23817,6 +23867,7 @@ document.documentElement.classList.toggle(
             document.getElementById("gardenInvClose")?.addEventListener("click",grdCloseCatalog);
             document.getElementById("gardenInvSheet")?.addEventListener("click",e=>{if(e.target===e.currentTarget)grdCloseCatalog();});
             document.getElementById("gardenResetCam")?.addEventListener("click",()=>_grdEng.resetCamera());
+            document.getElementById("gardenCycleBtn")?.addEventListener("click",()=>_grdEng.toggleGardenCycle());
             document.getElementById("gardenGridBtn")?.addEventListener("click",()=>_grdEng.toggleGrid(!grdPrefs.gridVisible));
             document.getElementById("gardenUndoBtn")?.addEventListener("click",grdUndo);
             document.getElementById("gardenRedoBtn")?.addEventListener("click",grdRedo);
