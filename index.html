@@ -22716,7 +22716,7 @@ document.documentElement.classList.toggle(
             grdSeeds.available -= plant.cost;
             grdSeeds.spent     += plant.cost;
             const uid = "p" + Date.now() + Math.random().toString(36).slice(2, 6);
-            const obj = { uid, plantId: plant.id, pos: [pos.x, pos.z], rot: rot || 0, scale: 1.0 };
+            const obj = { uid, plantId: plant.id, pos: [pos.x, pos.z], rot: rot || 0, scale: 1.0, plantedAt: Date.now() };
             grdPlaced.push(obj);
             _grdUndoStack.push({ type: "add", uid });
             _grdRedoStack = [];
@@ -22899,9 +22899,10 @@ document.documentElement.classList.toggle(
                     else if (T.sRGBEncoding) renderer.outputEncoding = T.sRGBEncoding;
                     renderer.toneMapping = T.ACESFilmicToneMapping;
                     renderer.toneMappingExposure = 1.08;
-                    // Shadow maps caused persistent black speckles on the ground and foliage
-                    // across browsers. Use stable ambient/direct lighting instead of shadow acne.
-                    renderer.shadowMap.enabled = false;
+                    // Soft real-time shadows. Conservative bias/normalBias reduce shadow acne
+                    // while keeping tree silhouettes and contact shadows visible.
+                    renderer.shadowMap.enabled = true;
+                    renderer.shadowMap.type = T.PCFSoftShadowMap;
                     // Better material response and physically consistent lighting in r128.
                     if ("physicallyCorrectLights" in renderer) renderer.physicallyCorrectLights = true;
                     scene  = new T.Scene();
@@ -22947,16 +22948,21 @@ document.documentElement.classList.toggle(
                 scene.fog=new T.Fog(gardenFogDay,42,105);
                 gardenHemi=new T.HemisphereLight(0xdaf5ff,0x62513a,1.12);scene.add(gardenHemi);
                 gardenAmbient=new T.AmbientLight(0xfff8e8,0.62);scene.add(gardenAmbient);
-                gardenSun=new T.DirectionalLight(0xfff0cf,1.8);
-                gardenSun.position.set(12,20,12);gardenSun.castShadow=false;scene.add(gardenSun);
+                gardenSun=new T.DirectionalLight(0xfff0cf,2.0);
+                gardenSun.position.set(12,24,10);
+                gardenSun.castShadow=true;
+                gardenSun.shadow.mapSize.set((window.innerWidth<700?1024:2048),(window.innerWidth<700?1024:2048));
+                gardenSun.shadow.camera.left=-22;gardenSun.shadow.camera.right=22;
+                gardenSun.shadow.camera.top=22;gardenSun.shadow.camera.bottom=-22;
+                gardenSun.shadow.camera.near=.5;gardenSun.shadow.camera.far=70;
+                gardenSun.shadow.bias=-0.00012;gardenSun.shadow.normalBias=.025;
+                gardenSun.shadow.radius=3;
+                scene.add(gardenSun);
                 // Terrain
                 terrainMesh = buildTerrain();
                 buildBoundary();
                 buildEnvironment();
                 buildStars();
-                // No shadow-map sampling anywhere in this scene: this guarantees the
-                // recurring black speckles cannot be shadow acne from the renderer.
-                scene.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;}});
                 if (grdPrefs.gridVisible) toggleGrid(true);
             }
 
@@ -23008,7 +23014,7 @@ document.documentElement.classList.toggle(
                 });
                 const mesh = new T.Mesh(geo,mat);
                 mesh.name="terrain"; mesh.rotation.x=-Math.PI/2;
-                mesh.castShadow=false; mesh.receiveShadow=false; scene.add(mesh);
+                mesh.castShadow=false; mesh.receiveShadow=true; scene.add(mesh);
 
                 // Subtle layered soil shelf under the buildable plot.
                 const baseGeo=new T.BoxGeometry(18.5,.22,18.5,1,1,1);
@@ -23539,7 +23545,7 @@ document.documentElement.classList.toggle(
                             leaf.userData.windPhase=k*.37+ci*1.9;
                             leaf.userData.windBaseX=leaf.rotation.x;
                             leaf.userData.windBaseZ=leaf.rotation.z;
-                            leaf.castShadow=false;leaf.receiveShadow=false;g.add(leaf);
+                            leaf.castShadow=(k%5===0);leaf.receiveShadow=false;g.add(leaf);
                             // Smaller inner leaves soften gaps and create layered canopy depth.
                             if(k%3!==1){
                                 const inner=new T.Mesh(leafGeo,leafMats[(k+ci+1)%leafMats.length]);
@@ -23553,7 +23559,7 @@ document.documentElement.classList.toggle(
                                 inner.rotation.set(Math.sin(k*.91)*.18,-ang+Math.PI*.5+.4,Math.cos(k*.57)*.2);
                                 inner.userData.windLeaf=true;inner.userData.windPhase=k*.41+ci*2.3;
                                 inner.userData.windBaseX=inner.rotation.x;inner.userData.windBaseZ=inner.rotation.z;
-                                inner.castShadow=false;inner.receiveShadow=false;g.add(inner);
+                                inner.castShadow=(k%7===0);inner.receiveShadow=false;g.add(inner);
                             }
                         }
                         // Fine outer foliage: small varied leaflets soften the canopy outline.
@@ -23568,7 +23574,7 @@ document.documentElement.classList.toggle(
                             const kscale=.48+((f*13)%7)*.045;lf.scale.set(kscale*1.25,kscale*.9,kscale);
                             lf.userData.windLeaf=true;lf.userData.windPhase=f*.29+ci*1.7;
                             lf.userData.windBaseX=lf.rotation.x;lf.userData.windBaseZ=lf.rotation.z;
-                            lf.castShadow=false;lf.receiveShadow=false;g.add(lf);
+                            lf.castShadow=(f%9===0);lf.receiveShadow=false;g.add(lf);
                         }
                     });
                     // Visible surface roots and forked branches create a less cylindrical silhouette.
@@ -23608,7 +23614,16 @@ document.documentElement.classList.toggle(
             function inside(x,z){ return Math.abs(x)<=8.9&&Math.abs(z)<=8.9; }
             function snapXZ(x,z){ return grdPrefs.snapGrid?{x:Math.round(x),z:Math.round(z)}:{x,z}; }
 
-            // ── Object CRUD ────────────────────────────────────────────────────
+            // ── Object CRUD + persistent, gradual tree growth ──────────────────
+            const TREE_GROWTH_MS = 48 * 60 * 60 * 1000; // a newly planted tree matures over 48 real hours
+            function isGardenTree(id){return /tree|oak|maple|willow|apple|cherry|sakura|pine|cypress|sapling|worldtree|dragontree|spirittree|rainbowtree|crystal/i.test(id||"");}
+            function treeGrowth(obj, now){
+                if(!isGardenTree(obj.plantId) || !obj.plantedAt) return 1;
+                const progress=Math.max(0,Math.min(1,(now-obj.plantedAt)/TREE_GROWTH_MS));
+                // Start as a tiny sapling, then grow smoothly rather than popping to full size.
+                const eased=progress*progress*(3-2*progress);
+                return .14 + .86*eased;
+            }
             function addObj(obj) {
                 if(!scene||!window.THREE) return;
                 const plant=GRD_PLANTS.find(p=>p.id===obj.plantId);
@@ -23617,11 +23632,14 @@ document.documentElement.classList.toggle(
                 const [px,pz]=obj.pos;
                 g.position.set(px,terrainY(px,pz),pz);
                 g.rotation.y=obj.rot||0;
-                g.scale.setScalar(obj.scale||1);
+                g.userData.baseScale=obj.scale||1;
+                g.userData.plantedAt=Number(obj.plantedAt)||0;
+                g.userData.isGrowingTree=isGardenTree(obj.plantId)&&!!g.userData.plantedAt;
+                g.scale.setScalar(g.userData.baseScale*treeGrowth(obj,Date.now()));
                 g.userData.uid=obj.uid;
                 g.userData.plantId=obj.plantId;
                 g.userData.windTree=/tree|oak|maple|willow|apple|cherry|sakura|pine|cypress|sapling|worldtree|dragontree|spirittree|rainbowtree|crystal/i.test(obj.plantId||"");
-                g.traverse(c=>{if(c.isMesh){c.userData.uid=obj.uid;c.userData.pickable=true;c.castShadow=false;c.receiveShadow=false;}});
+                g.traverse(c=>{if(c.isMesh){c.userData.uid=obj.uid;c.userData.pickable=true;}});
                 scene.add(g);
                 objMap[obj.uid]=g;
             }
@@ -23819,7 +23837,18 @@ document.documentElement.classList.toggle(
                 const windAngle=liveFresh?weatherWindDirection:Math.PI*.25;
                 const windX=Math.sin(windAngle),windZ=Math.cos(windAngle);
                 Object.values(objMap).forEach(g=>{
-                    if(!g||!g.userData.windTree)return;
+                    if(!g)return;
+                    if(g.userData.isGrowingTree){
+                        const progress=Math.max(0,Math.min(1,(Date.now()-g.userData.plantedAt)/TREE_GROWTH_MS));
+                        const eased=progress*progress*(3-2*progress);
+                        const growth=.14+.86*eased;
+                        const target=(g.userData.baseScale||1)*growth;
+                        // Smooth visual updates while the saved planting timestamp makes growth persist offline.
+                        const current=g.scale.x;
+                        const next=current+(target-current)*.08;
+                        g.scale.setScalar(Math.abs(target-next)<.001?target:next);
+                    }
+                    if(!g.userData.windTree)return;
                     const phase=g.userData.windPhase||0;
                     g.rotation.z=(g.userData.baseRotZ||0)+breeze*windX*Math.sin(gardenWindTime*.9+phase);
                     g.rotation.x=(g.userData.baseRotX||0)+breeze*.72*windZ*Math.cos(gardenWindTime*.7+phase);
