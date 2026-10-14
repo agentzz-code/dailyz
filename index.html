@@ -23538,10 +23538,20 @@ document.documentElement.classList.toggle(
                             const len=c.r*(.48+((ti*7)%6)*.075);
                             const from=new T.Vector3(c.p.x,c.p.y-.04,c.p.z);
                             const to=new T.Vector3(c.p.x+Math.cos(a)*len*c.scale.x,c.p.y+rise*c.r,c.p.z+Math.sin(a)*len*c.scale.z);
-                            const delta=to.clone().sub(from), mid=from.clone().add(to).multiplyScalar(.5);
+                            const delta=to.clone().sub(from);
+                            // One hierarchy per twig: branch and every attached leaf share
+                            // the same pivot, so the foliage cannot drift away while swaying.
+                            const twigGroup=new T.Group();
+                            twigGroup.position.copy(from);
+                            twigGroup.userData.windBranch=true;
+                            twigGroup.userData.windPhase=ti*.63+ci*1.7;
+                            twigGroup.userData.windBaseX=0;
+                            twigGroup.userData.windBaseZ=0;
                             const twig=new T.Mesh(new T.CylinderGeometry(.008,.023,delta.length(),5),twigMat);
-                            twig.position.copy(mid);twig.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),delta.clone().normalize());
-                            twig.castShadow=true;g.add(twig);twigs.push({from,to,a,delta});
+                            twig.position.copy(delta).multiplyScalar(.5);
+                            twig.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),delta.clone().normalize());
+                            twig.castShadow=true;twigGroup.add(twig);g.add(twigGroup);
+                            twigs.push({from,to,a,delta,group:twigGroup});
                         }
                         for(let k=0;k<count;k++){
                             const ti=k%twigs.length, twig=twigs[ti];
@@ -23551,23 +23561,23 @@ document.documentElement.classList.toggle(
                             const lateral=new T.Vector3(-Math.sin(twig.a),0,Math.cos(twig.a)).multiplyScalar(side*(.025+(k%4)*.012));
                             anchor.add(lateral);
                             const leaf=new T.Mesh(leafGeo,leafMats[k%leafMats.length]);
-                            leaf.position.copy(anchor);
-                            // Leaf base sits on the twig; blade angles away from it.
+                            leaf.position.copy(anchor).sub(twig.from);
+                            // Leaf blade starts at the twig surface and points outward.
                             leaf.rotation.set((k%3-1)*.18,-twig.a+(side*.48),side*(.14+(k%4)*.045));
                             const sz=.68+((k*7)%7)*.075;
                             leaf.scale.set(sz,sz,sz);
                             leaf.userData.windLeaf=true;leaf.userData.windPhase=k*.37+ci*1.9;
                             leaf.userData.windBaseX=leaf.rotation.x;leaf.userData.windBaseZ=leaf.rotation.z;
-                            leaf.castShadow=(k%8===0);leaf.receiveShadow=false;g.add(leaf);
+                            leaf.castShadow=(k%8===0);leaf.receiveShadow=false;twig.group.add(leaf);
                             // Opposite leaf at the same node, attached to the same twig.
                             if(k%2===0){
                                 const pair=new T.Mesh(leafGeo,leafMats[(k+ci+1)%leafMats.length]);
-                                pair.position.copy(anchor).add(lateral.clone().multiplyScalar(-2));
+                                pair.position.copy(anchor).add(lateral.clone().multiplyScalar(-2)).sub(twig.from);
                                 pair.rotation.set((k%3-1)*.16,-twig.a-side*.48,-side*(.14+(k%4)*.04));
                                 pair.scale.set(sz*.88,sz*.88,sz*.88);
                                 pair.userData.windLeaf=true;pair.userData.windPhase=k*.41+ci*2.3;
                                 pair.userData.windBaseX=pair.rotation.x;pair.userData.windBaseZ=pair.rotation.z;
-                                pair.castShadow=(k%12===0);pair.receiveShadow=false;g.add(pair);
+                                pair.castShadow=(k%12===0);pair.receiveShadow=false;twig.group.add(pair);
                             }
                         }
                         // Fine outer foliage: small varied leaflets soften the canopy outline.
@@ -23849,12 +23859,20 @@ document.documentElement.classList.toggle(
                     const phase=g.userData.windPhase||0;
                     g.rotation.z=(g.userData.baseRotZ||0)+breeze*windX*Math.sin(gardenWindTime*.9+phase);
                     g.rotation.x=(g.userData.baseRotX||0)+breeze*.72*windZ*Math.cos(gardenWindTime*.7+phase);
-                    g.traverse(c=>{if(c.isMesh&&c.userData.windLeaf){
-                        const p=c.userData.windPhase||0;
-                        const leafAmp=Math.min(.20,.055+gustFactor*.035);
-                        c.rotation.x=(c.userData.windBaseX||0)+Math.sin(gardenWindTime*(1.25+gustFactor*.22)+p)*leafAmp*windZ;
-                        c.rotation.z=(c.userData.windBaseZ||0)+Math.cos(gardenWindTime*(1.05+gustFactor*.18)+p)*leafAmp*windX;
-                    }});
+                    g.traverse(c=>{
+                        if(c.userData.windBranch){
+                            const p=c.userData.windPhase||0;
+                            // Branches move first; attached leaves inherit this motion.
+                            c.rotation.z=(c.userData.windBaseZ||0)+breeze*windX*Math.sin(gardenWindTime*.9+p)*.72;
+                            c.rotation.x=(c.userData.windBaseX||0)+breeze*windZ*Math.cos(gardenWindTime*.78+p)*.55;
+                        }
+                        if(c.isMesh&&c.userData.windLeaf){
+                            const p=c.userData.windPhase||0;
+                            const leafAmp=Math.min(.095,.018+gustFactor*.022);
+                            c.rotation.x=(c.userData.windBaseX||0)+Math.sin(gardenWindTime*(1.25+gustFactor*.22)+p)*leafAmp*windZ;
+                            c.rotation.z=(c.userData.windBaseZ||0)+Math.cos(gardenWindTime*(1.05+gustFactor*.18)+p)*leafAmp*windX;
+                        }
+                    });
                 });
             }
 
