@@ -22964,36 +22964,15 @@ document.documentElement.classList.toggle(
                 }
                 geo.setAttribute("color",new T.Float32BufferAttribute(colors,3));
                 geo.computeVertexNormals();
-                // Soft, natural ground albedo. Deliberately avoid tiny dark pixels and a
-                // high-contrast bump map: both created the black speckle effect on mobile.
-                const texCanvas=document.createElement("canvas"); texCanvas.width=512; texCanvas.height=512;
-                const tx=texCanvas.getContext("2d", { alpha:false });
-                const baseGround=dark?"#3b5839":"#789b58";
-                tx.fillStyle=baseGround;tx.fillRect(0,0,512,512);
-                let texSeed=4271; const texRnd=()=>{texSeed=(texSeed*1664525+1013904223)>>>0;return texSeed/4294967296;};
-                // Broad low-contrast mottling only; no black grit or pin-point dots.
-                for(let n=0;n<520;n++){
-                    const v=texRnd();
-                    tx.fillStyle=v<.5?`rgba(${dark?91:151},${dark?119:166},${dark?68:91},${.018+texRnd()*.045})`:
-                        `rgba(${dark?40:70},${dark?73:111},${dark?42:57},${.014+texRnd()*.035})`;
-                    const x=texRnd()*512,y=texRnd()*512,r=5+texRnd()*24;
-                    tx.beginPath();tx.ellipse(x,y,r,r*(.35+texRnd()),texRnd()*3.14,0,Math.PI*2);tx.fill();
-                }
-                // Sparse, softly tinted blade strokes add texture without speckles.
-                for(let n=0;n<2400;n++){
-                    const v=texRnd(),x=texRnd()*512,y=texRnd()*512;
-                    tx.strokeStyle=v>.5?`rgba(${dark?122:176},${dark?151:190},${dark?86:113},${.025+texRnd()*.045})`:
-                        `rgba(${dark?55:91},${dark?91:128},${dark?49:68},${.02+texRnd()*.035})`;
-                    tx.lineWidth=.6+texRnd()*.7;tx.beginPath();tx.moveTo(x,y);tx.lineTo(x+(texRnd()-.5)*2,y-2-texRnd()*5);tx.stroke();
-                }
-                const groundTex=new T.CanvasTexture(texCanvas); groundTex.wrapS=groundTex.wrapT=T.RepeatWrapping; groundTex.repeat.set(3.5,3.5);
-                groundTex.generateMipmaps=true; groundTex.minFilter=T.LinearMipmapLinearFilter; groundTex.magFilter=T.LinearFilter;
-                if (renderer.capabilities && renderer.capabilities.getMaxAnisotropy) groundTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
-                if (T.sRGBEncoding) groundTex.encoding=T.sRGBEncoding;
-                // No ground bump map: shadows and vertex normals provide surface depth cleanly.
+                // HARD FIX: use a clean green ground material with NO procedural texture,
+                // NO vertex color variation, and NO bump/height texture. This removes
+                // texture-generated black spots instead of trying to camouflage them.
                 const mat = new T.MeshStandardMaterial({
-                    vertexColors:true, map:groundTex,
-                    roughness:.98, metalness:0, flatShading:false
+                    color: dark ? 0x365b35 : 0x70a94f,
+                    roughness: 1,
+                    metalness: 0,
+                    flatShading: false,
+                    vertexColors: false
                 });
                 const mesh = new T.Mesh(geo,mat);
                 mesh.name="terrain"; mesh.rotation.x=-Math.PI/2;
