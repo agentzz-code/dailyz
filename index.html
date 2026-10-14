@@ -22917,9 +22917,10 @@ document.documentElement.classList.toggle(
                 sun.shadow.camera.left=-14; sun.shadow.camera.right=14;
                 sun.shadow.camera.top=14; sun.shadow.camera.bottom=-14;
                 sun.shadow.camera.updateProjectionMatrix();
-                sun.shadow.bias=-0.00018;
-                sun.shadow.normalBias=0.045;
-                sun.shadow.radius=window.innerWidth<700?2:1.5;
+                // Avoid the dark speckled shadow-acne artifacts that appeared on the terrain.
+                sun.shadow.bias=0.00008;
+                sun.shadow.normalBias=0.018;
+                sun.shadow.radius=window.innerWidth<700?3:2;
                 scene.add(sun);
                 if (dark) { const m=new T.DirectionalLight(0x4455aa,0.3); m.position.set(-10,14,-8); scene.add(m); }
                 // Terrain
@@ -22966,58 +22967,36 @@ document.documentElement.classList.toggle(
                 }
                 geo.setAttribute("color",new T.Float32BufferAttribute(colors,3));
                 geo.computeVertexNormals();
-                // Procedural, tileable micro-texture gives the meadow a tactile surface
-                // without external image assets (and still works offline once Three.js is cached).
-                // Multi-scale procedural albedo + bump textures: mottled grass, tiny blades,
-                // darker soil flecks and fine grain. Generated locally, so no external assets.
+                // Soft, natural ground albedo. Deliberately avoid tiny dark pixels and a
+                // high-contrast bump map: both created the black speckle effect on mobile.
                 const texCanvas=document.createElement("canvas"); texCanvas.width=512; texCanvas.height=512;
                 const tx=texCanvas.getContext("2d", { alpha:false });
-                tx.fillStyle=dark?"#344d35":"#719451"; tx.fillRect(0,0,512,512);
+                const baseGround=dark?"#3b5839":"#789b58";
+                tx.fillStyle=baseGround;tx.fillRect(0,0,512,512);
                 let texSeed=4271; const texRnd=()=>{texSeed=(texSeed*1664525+1013904223)>>>0;return texSeed/4294967296;};
-                // Broad mottling layer.
-                for(let n=0;n<1050;n++){
+                // Broad low-contrast mottling only; no black grit or pin-point dots.
+                for(let n=0;n<520;n++){
                     const v=texRnd();
-                    tx.fillStyle=v<.34?`rgba(20,${dark?38:70},${dark?23:32},${.025+texRnd()*.09})`:
-                        v<.68?`rgba(${dark?92:155},${dark?116:165},${dark?65:83},${.025+texRnd()*.10})`:
-                        `rgba(${dark?54:94},${dark?83:121},${dark?49:58},${.025+texRnd()*.08})`;
-                    const x=texRnd()*512,y=texRnd()*512,r=2+texRnd()*12;
+                    tx.fillStyle=v<.5?`rgba(${dark?91:151},${dark?119:166},${dark?68:91},${.018+texRnd()*.045})`:
+                        `rgba(${dark?40:70},${dark?73:111},${dark?42:57},${.014+texRnd()*.035})`;
+                    const x=texRnd()*512,y=texRnd()*512,r=5+texRnd()*24;
                     tx.beginPath();tx.ellipse(x,y,r,r*(.35+texRnd()),texRnd()*3.14,0,Math.PI*2);tx.fill();
                 }
-                // Fine grass strands and scattered tiny soil/grit pixels.
-                for(let n=0;n<10500;n++){
+                // Sparse, softly tinted blade strokes add texture without speckles.
+                for(let n=0;n<2400;n++){
                     const v=texRnd(),x=texRnd()*512,y=texRnd()*512;
-                    if(v<.7){
-                        const a=.025+texRnd()*.11;
-                        tx.strokeStyle=v<.34?`rgba(${dark?19:34},${dark?48:76},${dark?23:35},${a})`:`rgba(${dark?101:164},${dark?131:184},${dark?74:92},${a})`;
-                        tx.lineWidth=.35+texRnd()*.7;tx.beginPath();tx.moveTo(x,y);tx.lineTo(x+(texRnd()-.5)*2,y-1-texRnd()*7);tx.stroke();
-                    }else{
-                        // Pale moss/pollen flecks only: avoid near-black pixel dots on the meadow.
-                        const c=texRnd()>.5?"151,174,99":"186,177,126";
-                        tx.fillStyle=`rgba(${c},${.025+texRnd()*.035})`;
-                        tx.fillRect(x,y,.7+texRnd()*1.1,.7+texRnd()*1.1);
-                    }
+                    tx.strokeStyle=v>.5?`rgba(${dark?122:176},${dark?151:190},${dark?86:113},${.025+texRnd()*.045})`:
+                        `rgba(${dark?55:91},${dark?91:128},${dark?49:68},${.02+texRnd()*.035})`;
+                    tx.lineWidth=.6+texRnd()*.7;tx.beginPath();tx.moveTo(x,y);tx.lineTo(x+(texRnd()-.5)*2,y-2-texRnd()*5);tx.stroke();
                 }
                 const groundTex=new T.CanvasTexture(texCanvas); groundTex.wrapS=groundTex.wrapT=T.RepeatWrapping; groundTex.repeat.set(3.5,3.5);
                 groundTex.generateMipmaps=true; groundTex.minFilter=T.LinearMipmapLinearFilter; groundTex.magFilter=T.LinearFilter;
                 if (renderer.capabilities && renderer.capabilities.getMaxAnisotropy) groundTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
                 if (T.sRGBEncoding) groundTex.encoding=T.sRGBEncoding;
-                // A dedicated grayscale micro-height map catches grazing light and makes the surface read as textured.
-                const bumpCanvas=document.createElement("canvas"); bumpCanvas.width=512; bumpCanvas.height=512;
-                const bx=bumpCanvas.getContext("2d", { alpha:false });
-                bx.fillStyle="#808080";bx.fillRect(0,0,512,512);
-                let bumpSeed=91827;const bumpRnd=()=>{bumpSeed=(bumpSeed*1664525+1013904223)>>>0;return bumpSeed/4294967296;};
-                for(let n=0;n<21000;n++){
-                    const v=Math.floor(78+bumpRnd()*105),x=bumpRnd()*512,y=bumpRnd()*512;
-                    bx.fillStyle=`rgb(${v},${v},${v})`;
-                    if(n%3===0){bx.beginPath();bx.ellipse(x,y,.45+bumpRnd()*1.6,.7+bumpRnd()*3,bumpRnd()*3.14,0,Math.PI*2);bx.fill();}
-                    else bx.fillRect(x,y,.6+bumpRnd()*1.3,.6+bumpRnd()*1.3);
-                }
-                const bumpTex=new T.CanvasTexture(bumpCanvas);bumpTex.wrapS=bumpTex.wrapT=T.RepeatWrapping;bumpTex.repeat.copy(groundTex.repeat);
-                bumpTex.generateMipmaps=true;bumpTex.minFilter=T.LinearMipmapLinearFilter;bumpTex.magFilter=T.LinearFilter;
-                if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)bumpTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+                // No ground bump map: shadows and vertex normals provide surface depth cleanly.
                 const mat = new T.MeshStandardMaterial({
-                    vertexColors:true, map:groundTex, bumpMap:bumpTex, bumpScale:dark?.004:.006,
-                    roughness:.96, metalness:0, flatShading:false
+                    vertexColors:true, map:groundTex,
+                    roughness:.98, metalness:0, flatShading:false
                 });
                 const mesh = new T.Mesh(geo,mat);
                 mesh.name="terrain"; mesh.rotation.x=-Math.PI/2;
@@ -23398,18 +23377,18 @@ document.documentElement.classList.toggle(
                     for(let i=0;i<5;i++){const b=mesh(new T.ConeGeometry(0.04,0.28+Math.random()*.18,4),mat(0x4a9a38));b.position.set((Math.random()-.5)*.38,0.14,(Math.random()-.5)*.38);b.rotation.z=(Math.random()-.5)*.45;g.add(b);}
                 } else if(id==="daisy1"){
                     {const stem=mesh(new T.CylinderGeometry(0.03,0.04,0.42,5),mat(0x3a8830));stem.position.set(0,0.21,0);g.add(stem);}
-                    const head=mesh(new T.SphereGeometry(0.14,7,6),mat(0xffffaa,0.5));head.position.y=0.47;g.add(head);
+                    const head=mesh(new T.SphereGeometry(0.14,14,10),mat(0xffffaa,0.5));head.position.y=0.47;g.add(head);
                     for(let i=0;i<8;i++){const p=mesh(new T.SphereGeometry(0.06,5,4),mat(0xffffff,.4));p.position.set(Math.cos(i*Math.PI/4)*.2,0.47,Math.sin(i*Math.PI/4)*.2);g.add(p);}
                 } else if(id==="tulip1"){
                     {const stem=mesh(new T.CylinderGeometry(0.03,0.04,0.5,5),mat(0x3a8830));stem.position.set(0,0.25,0);g.add(stem);}
-                    const head=mesh(new T.SphereGeometry(0.16,7,6),mat(0xee3344,.5));head.position.y=0.56;g.add(head);
+                    const head=mesh(new T.SphereGeometry(0.16,14,10),mat(0xee3344,.5));head.position.y=0.56;g.add(head);
                 } else if(id==="seedling1"){
                     {const stem=mesh(new T.CylinderGeometry(0.03,0.04,0.3,5),mat(0x3a6028));stem.position.set(0,0.15,0);g.add(stem);}
-                    {const leaf=mesh(new T.SphereGeometry(0.18,6,5),mat(0x5aaa40));leaf.position.set(0,0.36,0);g.add(leaf);}
+                    {const leaf=mesh(new T.SphereGeometry(0.18,12,8),mat(0x5aaa40));leaf.position.set(0,0.36,0);g.add(leaf);}
                 } else if(id==="shrub1"){
-                    for(let i=0;i<3;i++){const s=mesh(new T.SphereGeometry(0.28+Math.random()*.1,7,5),mat(leafCol));s.position.set((i-1)*.3,0.28,(Math.random()-.5)*.18);g.add(s);}
+                    for(let i=0;i<3;i++){const s=mesh(new T.SphereGeometry(0.28+Math.random()*.1,14,10),mat(leafCol));s.position.set((i-1)*.3,0.28,(Math.random()-.5)*.18);g.add(s);}
                 } else if(id==="bush1"){
-                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(0.22+Math.random()*.1,7,5),mat(0xdd8899,.6));b.position.set((Math.random()-.5)*.5,0.24+Math.random()*.1,(Math.random()-.5)*.4);g.add(b);}
+                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(0.22+Math.random()*.1,14,10),mat(0xdd8899,.6));b.position.set((Math.random()-.5)*.5,0.24+Math.random()*.1,(Math.random()-.5)*.4);g.add(b);}
                 } else if(id==="fern1"){
                     for(let i=0;i<7;i++){const f=mesh(new T.ConeGeometry(0.06,0.58,4),mat(0x3a7a30));f.position.set(Math.cos(i*Math.PI*2/7)*.26,0.22,Math.sin(i*Math.PI*2/7)*.26);f.rotation.z=.85*Math.cos(i*Math.PI*2/7);g.add(f);}
                 } else if(id==="mushroom1"){
@@ -23418,7 +23397,7 @@ document.documentElement.classList.toggle(
                     const s=mesh(new T.DodecahedronGeometry(0.32,0),mat(dark?0x4a5a50:0x8a9a8a,.95));s.position.y=0.2;s.rotation.set(Math.random(),Math.random(),Math.random());g.add(s);
                 } else if(id==="sapling1"){
                     const tr=mesh(new T.CylinderGeometry(0.06,0.09,1.1,7),mat(0x5a3010));tr.position.y=0.55;g.add(tr);
-                    const f=mesh(new T.SphereGeometry(0.55,8,6),mat(leafCol));f.position.y=1.28;g.add(f);
+                    const f=mesh(new T.SphereGeometry(0.55,16,12),mat(leafCol));f.position.y=1.28;g.add(f);
                 } else if(id==="fern1"||id==="pine1"||id==="cypress1"){
                     // Pine / cypress — stacked cones
                     const layers=id==="cypress1"?5:3;
@@ -23427,49 +23406,49 @@ document.documentElement.classList.toggle(
                 } else if(id==="cherry1"||id==="sakura1"){
                     const sz=id==="sakura1"?1.0:.72;
                     const tr=mesh(new T.CylinderGeometry(0.10,0.15,id==="sakura1"?1.8:1.4,7),mat(0x6a3a18));tr.position.y=id==="sakura1"?.9:.7;g.add(tr);
-                    for(let i=0;i<(id==="sakura1"?4:3);i++){const b=mesh(new T.SphereGeometry(sz+Math.random()*.18,8,6),mat(0xffaabb,.5));b.position.set((Math.random()-.5)*(sz*.8),(id==="sakura1"?1.8:1.5)+i*(sz*.35),(Math.random()-.5)*(sz*.8));g.add(b);}
+                    for(let i=0;i<(id==="sakura1"?4:3);i++){const b=mesh(new T.SphereGeometry(sz+Math.random()*.18,16,12),mat(0xffaabb,.5));b.position.set((Math.random()-.5)*(sz*.8),(id==="sakura1"?1.8:1.5)+i*(sz*.35),(Math.random()-.5)*(sz*.8));g.add(b);}
                 } else if(id==="willow1"){
                     const tr=mesh(new T.CylinderGeometry(0.12,0.18,2.4,7),mat(0x5a3810));tr.position.y=1.2;g.add(tr);
-                    const top=mesh(new T.SphereGeometry(1.15,8,6),mat(0x4aaa30));top.position.y=2.7;g.add(top);
+                    const top=mesh(new T.SphereGeometry(1.15,16,12),mat(0x4aaa30));top.position.y=2.7;g.add(top);
                     for(let i=0;i<9;i++){const ang=i*Math.PI*2/9;const dr=mesh(new T.CylinderGeometry(0.02,.01,2,4),mat(0x3a8820));dr.position.set(Math.cos(ang)*.85,1.8,Math.sin(ang)*.85);dr.rotation.z=1.0*Math.cos(ang);g.add(dr);}
                 } else if(id==="lavender1"){
                     for(let i=0;i<7;i++){const st=mesh(new T.CylinderGeometry(0.03,0.04,0.52,5),mat(0x3a6828));st.position.set((Math.random()-.5)*.45,0.26,(Math.random()-.5)*.38);g.add(st);const fl=mesh(new T.CylinderGeometry(0.04,0.06,0.2,5),mat(0xaa44dd,.5));fl.position.set(st.position.x,0.58,st.position.z);g.add(fl);}
                 } else if(id==="apple1"){
                     const tr=mesh(new T.CylinderGeometry(0.12,0.17,1.7,7),mat(0x5a3010));tr.position.y=.85;g.add(tr);
-                    const top=mesh(new T.SphereGeometry(0.92,8,6),mat(leafCol));top.position.y=2.0;g.add(top);
-                    for(let i=0;i<6;i++){const ap=mesh(new T.SphereGeometry(.11,6,5),mat(0xdd2222,.5));ap.position.set((Math.random()-.5)*1.2,1.65+Math.random()*.62,(Math.random()-.5)*1.2);g.add(ap);}
+                    const top=mesh(new T.SphereGeometry(0.92,16,12),mat(leafCol));top.position.y=2.0;g.add(top);
+                    for(let i=0;i<6;i++){const ap=mesh(new T.SphereGeometry(.11,12,8),mat(0xdd2222,.5));ap.position.set((Math.random()-.5)*1.2,1.65+Math.random()*.62,(Math.random()-.5)*1.2);g.add(ap);}
                 } else if(id==="bigoak1"){
                     const tr=mesh(new T.CylinderGeometry(0.22,0.3,2.5,7),mat(0x5a3010));tr.position.y=1.25;g.add(tr);
-                    for(let i=0;i<3;i++){const b=mesh(new T.SphereGeometry(1.05+Math.random()*.18,8,6),mat(leafCol));b.position.set((Math.random()-.5)*.7,2.8+i*.32,(Math.random()-.5)*.6);g.add(b);}
+                    for(let i=0;i<3;i++){const b=mesh(new T.SphereGeometry(1.05+Math.random()*.18,16,12),mat(leafCol));b.position.set((Math.random()-.5)*.7,2.8+i*.32,(Math.random()-.5)*.6);g.add(b);}
                 } else if(id==="glowf1"){
                     const st=mesh(new T.CylinderGeometry(0.04,0.055,0.65,5),mat(0x2a8030));st.position.y=0.32;g.add(st);
                     const head=mesh(new T.SphereGeometry(0.24,8,7),mat(0xeeffaa,.3));head.position.y=0.78;g.add(head);
                     const ring=mesh(new T.TorusGeometry(0.3,0.04,6,12),mat(0xccff88,.2));ring.position.y=0.78;g.add(ring);
                 } else if(id==="redmaple1"){
                     const tr=mesh(new T.CylinderGeometry(0.14,0.2,2.0,7),mat(0x4a2808));tr.position.y=1.0;g.add(tr);
-                    for(let i=0;i<3;i++){const b=mesh(new T.SphereGeometry(0.88+Math.random()*.16,8,6),mat(0xcc3311,.6));b.position.set((Math.random()-.5)*.6,2.1+i*.32,(Math.random()-.5)*.5);g.add(b);}
+                    for(let i=0;i<3;i++){const b=mesh(new T.SphereGeometry(0.88+Math.random()*.16,16,12),mat(0xcc3311,.6));b.position.set((Math.random()-.5)*.6,2.1+i*.32,(Math.random()-.5)*.5);g.add(b);}
                 } else if(id==="worldtree"){
                     const tr=mesh(new T.CylinderGeometry(0.38,0.52,4.5,8),mat(0x4a2808));tr.position.y=2.25;g.add(tr);
-                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(1.4-i*.15,9,7),mat(0x1a6030));b.position.y=3.8+i*.55;g.add(b);}
+                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(1.4-i*.15,16,12),mat(0x1a6030));b.position.y=3.8+i*.55;g.add(b);}
                 } else if(id==="crystaltree"){
                     const tr=mesh(new T.CylinderGeometry(.1,.16,2,7),mat(0x88aac0,.1));tr.position.y=1;g.add(tr);
                     for(let i=0;i<6;i++){const cr=mesh(new T.OctahedronGeometry(.3,0),mat(0x88ddff,.05));cr.position.set((Math.random()-.5)*1.3,1.5+Math.random()*.9,(Math.random()-.5)*1.1);cr.rotation.set(Math.random(),Math.random(),Math.random());g.add(cr);}
                 } else if(id==="rainbowtree"){
                     const tr=mesh(new T.CylinderGeometry(.16,.24,2.4,7),mat(0x5a3010));tr.position.y=1.2;g.add(tr);
                     const cols=[0xff4444,0xff9900,0xffee00,0x44dd44,0x4488ff,0x9944ff];
-                    for(let i=0;i<6;i++){const b=mesh(new T.SphereGeometry(.56+Math.random()*.18,7,5),mat(cols[i],.5));b.position.set((Math.random()-.5)*.9,2.1+i*.3,(Math.random()-.5)*.8);g.add(b);}
+                    for(let i=0;i<6;i++){const b=mesh(new T.SphereGeometry(.56+Math.random()*.18,14,10),mat(cols[i],.5));b.position.set((Math.random()-.5)*.9,2.1+i*.3,(Math.random()-.5)*.8);g.add(b);}
                 } else if(id==="dragontree"){
                     const tr=mesh(new T.CylinderGeometry(.15,.24,3.0,6),mat(0x4a2010));tr.position.y=1.5;g.add(tr);
-                    const top=mesh(new T.SphereGeometry(1.3,8,6),mat(0x882200,.6));top.position.y=3.3;g.add(top);
-                    for(let i=0;i<4;i++){const sp=mesh(new T.SphereGeometry(.55,7,5),mat(0xaa3310,.5));sp.position.set(Math.cos(i*Math.PI/2)*.75,2.8,Math.sin(i*Math.PI/2)*.75);g.add(sp);}
+                    const top=mesh(new T.SphereGeometry(1.3,16,12),mat(0x882200,.6));top.position.y=3.3;g.add(top);
+                    for(let i=0;i<4;i++){const sp=mesh(new T.SphereGeometry(.55,14,10),mat(0xaa3310,.5));sp.position.set(Math.cos(i*Math.PI/2)*.75,2.8,Math.sin(i*Math.PI/2)*.75);g.add(sp);}
                 } else if(id==="spirittree"){
                     const tr=mesh(new T.CylinderGeometry(.17,.26,3.8,7),mat(0xe8f0ff,.12));tr.position.y=1.9;g.add(tr);
-                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(1.15-i*.15,8,6),mat(0xbbddff,.1));b.position.y=2.7+i*.52;g.add(b);}
+                    for(let i=0;i<4;i++){const b=mesh(new T.SphereGeometry(1.15-i*.15,16,12),mat(0xbbddff,.1));b.position.y=2.7+i*.52;g.add(b);}
                     for(let i=0;i<10;i++){const orb=mesh(new T.SphereGeometry(.08,5,4),mat(0xffffff,.08));orb.position.set(Math.cos(i*Math.PI/5)*.95,2.1+Math.random()*1.7,Math.sin(i*Math.PI/5)*.95);g.add(orb);}
                 } else {
                     // Generic fallback tree
                     const tr=mesh(new T.CylinderGeometry(.11,.16,1.6,7),mat(0x5a3010));tr.position.y=.8;g.add(tr);
-                    g.add(Object.assign(mesh(new T.SphereGeometry(.72,8,6),mat(leafCol)),{position:new T.Vector3(0,1.8,0)}));
+                    g.add(Object.assign(mesh(new T.SphereGeometry(.72,16,12),mat(leafCol)),{position:new T.Vector3(0,1.8,0)}));
                 }
                 // Replace the old oversized spherical tree crowns with layered,
                 // irregular foliage clusters. This keeps every plant's identity while
@@ -23502,7 +23481,7 @@ document.documentElement.classList.toggle(
                         // Individual tapered leaves replace the old faceted "rock chunks".
                         // A shared, double-sided leaf mesh keeps the higher detail affordable.
                         const mobileGPU=window.innerWidth<700 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
-                        const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?132:280):(mobileGPU?88:184);
+                        const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?150:340):(mobileGPU?112:230);
                         const leafGeo=new T.BufferGeometry();
                         leafGeo.setAttribute("position",new T.Float32BufferAttribute([
                             0,0,0, -.105,.045,.018, -.055,.19,.065,
@@ -23520,7 +23499,7 @@ document.documentElement.classList.toggle(
                         for(let k=0;k<count;k++){
                             // Golden-angle distribution creates a rounded but irregular canopy.
                             const u=(k+.5)/count, ang=k*2.3999632297+ci*.71;
-                            const radial=c.r*(.18+.82*Math.sqrt(u));
+                            const radial=c.r*(.12+.88*Math.sqrt(u));
                             const yoff=(Math.sin(k*1.71+ci)*.52)*c.r + Math.sin(u*Math.PI)*.10*c.r;
                             const leaf=new T.Mesh(leafGeo,leafMats[k%leafMats.length]);
                             const sz=(.48+((k*7)%11)*.067)*(k%4===0?1.12:1);
@@ -23537,7 +23516,7 @@ document.documentElement.classList.toggle(
                             );
                             leaf.castShadow=(k%4===0);leaf.receiveShadow=false;g.add(leaf);
                             // Smaller inner leaves soften gaps and create layered canopy depth.
-                            if(k%2===0){
+                            if(k%3!==1){
                                 const inner=new T.Mesh(leafGeo,leafMats[(k+ci+1)%leafMats.length]);
                                 const innerScale=sz*(.48+((k+ci)%4)*.055);
                                 inner.position.set(
@@ -23549,6 +23528,18 @@ document.documentElement.classList.toggle(
                                 inner.rotation.set(Math.sin(k*.91)*.65,-ang+Math.PI*.5+.4,Math.cos(k*.57)*.6);
                                 inner.castShadow=(k%8===0);inner.receiveShadow=false;g.add(inner);
                             }
+                        }
+                        // Fine outer foliage: small varied leaflets soften the canopy outline.
+                        const fineGeo=new T.SphereGeometry(.075,7,5);
+                        const fineMat=palette.map(col=>new T.MeshStandardMaterial({color:col,roughness:.92}));
+                        const fineCount=mobileGPU?42:88;
+                        for(let f=0;f<fineCount;f++){
+                            const a=f*2.3999632297+ci*.37, u=(f+.5)/fineCount;
+                            const rr=c.r*(.45+.65*Math.sqrt(u));
+                            const lf=new T.Mesh(fineGeo,fineMat[f%fineMat.length]);
+                            lf.position.set(c.p.x+Math.cos(a)*rr*c.scale.x, c.p.y+Math.sin(f*1.73)*c.r*.58, c.p.z+Math.sin(a)*rr*c.scale.z);
+                            const kscale=.52+((f*13)%9)*.065;lf.scale.set(kscale,kscale*.72,kscale);
+                            lf.castShadow=(f%9===0);lf.receiveShadow=false;g.add(lf);
                         }
                     });
                     // Visible surface roots and forked branches create a less cylindrical silhouette.
