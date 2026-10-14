@@ -22835,6 +22835,37 @@ document.documentElement.classList.toggle(
             let gardenSun=null, gardenHemi=null, gardenAmbient=null, gardenStars=null;
             let gardenClockStart=performance.now(), gardenCyclePaused=false, gardenPausedPhase=0.22;
             let gardenWindTime=0;
+            // Wind is driven by Open-Meteo current conditions for the app's saved weather
+            // location. If weather is unavailable/offline, use a gentle local breeze.
+            let weatherWindSpeedKmh=null, weatherWindDirection=0, weatherWindUpdated=0;
+            let weatherWindPoll=null;
+            async function refreshGardenWeatherWind(){
+                try{
+                    let loc=null;
+                    try{loc=JSON.parse(localStorage.getItem('dailykrd_weather_place_v1')||'null');}catch(_){}
+                    let lat=loc&&Number(loc.latitude), lon=loc&&Number(loc.longitude);
+                    if(!Number.isFinite(lat)||!Number.isFinite(lon)){
+                        // Ask only when the user has already granted location permission.
+                        if(navigator.permissions&&navigator.geolocation){
+                            const perm=await navigator.permissions.query({name:'geolocation'});
+                            if(perm.state==='granted'){
+                                const pos=await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{maximumAge:600000,timeout:5000}));
+                                lat=pos.coords.latitude;lon=pos.coords.longitude;
+                            }
+                        }
+                    }
+                    if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
+                    const url='https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lon)+'&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=kmh&timezone=auto';
+                    const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('weather unavailable');
+                    const data=await response.json();const cur=data.current||{};
+                    if(Number.isFinite(Number(cur.wind_speed_10m))){weatherWindSpeedKmh=Math.max(0,Number(cur.wind_speed_10m));weatherWindDirection=(Number(cur.wind_direction_10m)||0)*Math.PI/180;weatherWindUpdated=Date.now();}
+                }catch(e){console.debug('Garden live wind unavailable; using gentle breeze.',e);}
+            }
+            function startGardenWeatherWind(){
+                refreshGardenWeatherWind();
+                if(weatherWindPoll)clearInterval(weatherWindPoll);
+                weatherWindPoll=setInterval(refreshGardenWeatherWind,10*60*1000);
+            }
             const gardenSkyDay=0x8dd6f0, gardenSkyDusk=0xe58b65, gardenSkyNight=0x0b1520;
             const gardenFogDay=0x8dd6f0, gardenFogDusk=0x72586a, gardenFogNight=0x0b1520;
             const objMap = {};          // uid -> THREE.Group
@@ -22856,6 +22887,7 @@ document.documentElement.classList.toggle(
             // ── Init ───────────────────────────────────────────────────────────
             function init(canvas) {
                 if (inited||dead) return;
+                startGardenWeatherWind();
                 const T = window.THREE;
                 if (!T) { showFallback(); return; }
                 try {
@@ -23459,9 +23491,29 @@ document.documentElement.classList.toggle(
                         // A shared, double-sided leaf mesh keeps the higher detail affordable.
                         const mobileGPU=window.innerWidth<700 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
                         const count=id==="bigoak1"||id==="worldtree"?(mobileGPU?185:390):(mobileGPU?145:285);
-                        // Broad, smooth oval leaves with a subtle raised midrib shape.
-                        // The previous narrow triangular meshes read as flying shrapnel.
-                        const leafGeo=new T.SphereGeometry(.205,12,9);
+                        // Individual botanical leaf: pointed tip, rounded shoulders, gently
+                        // cupped surface and a raised central vein (not a sphere/triangle).
+                        const leafGeo=(()=>{
+                            const verts=[], inds=[], rows=12, cols=8;
+                            for(let i=0;i<=rows;i++){
+                                const t=i/rows;
+                                const half=Math.pow(Math.sin(Math.PI*t),.72)*.115;
+                                for(let j=0;j<=cols;j++){
+                                    const u=j/cols*2-1;
+                                    const x=(t-.5)*.43;
+                                    const y=u*half;
+                                    const z=.025*Math.sin(Math.PI*t)*(1-u*u)-.012*Math.sin(Math.PI*t);
+                                    verts.push(x,y,z);
+                                }
+                            }
+                            for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){
+                                const a=i*(cols+1)+j,b=a+cols+1;
+                                inds.push(a,b,a+1,b,b+1,a+1);
+                            }
+                            const geo=new T.BufferGeometry();
+                            geo.setAttribute('position',new T.Float32BufferAttribute(verts,3));
+                            geo.setIndex(inds);geo.computeVertexNormals();return geo;
+                        })();
                         const leafMats=palette.map(col=>new T.MeshStandardMaterial({
                             color:col,roughness:.88,metalness:0,side:T.DoubleSide
                         }));
@@ -23477,7 +23529,7 @@ document.documentElement.classList.toggle(
                                 c.p.y+yoff-.17*sz,
                                 c.p.z+Math.sin(ang)*radial*c.scale.z
                             );
-                            leaf.scale.set(sz*1.08,sz*.68,sz*.48);
+                            leaf.scale.set(sz*1.45,sz*1.05,sz*1.0);
                             leaf.rotation.set(
                                 Math.sin(k*1.31)*.22,
                                 -ang+Math.PI*.5,
@@ -23497,7 +23549,7 @@ document.documentElement.classList.toggle(
                                     c.p.y+yoff*.72+.12*sz,
                                     c.p.z+Math.sin(ang+.38)*radial*.68*c.scale.z
                                 );
-                                inner.scale.set(innerScale*1.08,innerScale*.68,innerScale*.48);
+                                inner.scale.set(innerScale*1.45,innerScale*1.05,innerScale);
                                 inner.rotation.set(Math.sin(k*.91)*.18,-ang+Math.PI*.5+.4,Math.cos(k*.57)*.2);
                                 inner.userData.windLeaf=true;inner.userData.windPhase=k*.41+ci*2.3;
                                 inner.userData.windBaseX=inner.rotation.x;inner.userData.windBaseZ=inner.rotation.z;
@@ -23505,7 +23557,7 @@ document.documentElement.classList.toggle(
                             }
                         }
                         // Fine outer foliage: small varied leaflets soften the canopy outline.
-                        const fineGeo=new T.SphereGeometry(.12,9,7);
+                        const fineGeo=leafGeo;
                         const fineMat=palette.map(col=>new T.MeshStandardMaterial({color:col,roughness:.92}));
                         const fineCount=mobileGPU?56:112;
                         for(let f=0;f<fineCount;f++){
@@ -23513,7 +23565,7 @@ document.documentElement.classList.toggle(
                             const rr=c.r*(.45+.65*Math.sqrt(u));
                             const lf=new T.Mesh(fineGeo,fineMat[f%fineMat.length]);
                             lf.position.set(c.p.x+Math.cos(a)*rr*c.scale.x, c.p.y+Math.sin(f*1.73)*c.r*.58, c.p.z+Math.sin(a)*rr*c.scale.z);
-                            const kscale=.48+((f*13)%7)*.045;lf.scale.set(kscale*1.05,kscale*.52,kscale*.3);
+                            const kscale=.48+((f*13)%7)*.045;lf.scale.set(kscale*1.25,kscale*.9,kscale);
                             lf.userData.windLeaf=true;lf.userData.windPhase=f*.29+ci*1.7;
                             lf.userData.windBaseX=lf.rotation.x;lf.userData.windBaseZ=lf.rotation.z;
                             lf.castShadow=false;lf.receiveShadow=false;g.add(lf);
@@ -23760,16 +23812,22 @@ document.documentElement.classList.toggle(
             }
             function updateGardenWind(now){
                 gardenWindTime=now*.001;
-                const breeze=Math.sin(gardenWindTime*.55)*.018+Math.sin(gardenWindTime*.23)*.012;
+                const liveFresh=weatherWindSpeedKmh!==null && Date.now()-weatherWindUpdated<30*60*1000;
+                const speed=liveFresh?weatherWindSpeedKmh:5;
+                const gustFactor=Math.min(1.8,Math.max(.18,speed/18));
+                const breeze=(Math.sin(gardenWindTime*.55)*.018+Math.sin(gardenWindTime*.23)*.012)*gustFactor;
+                const windAngle=liveFresh?weatherWindDirection:Math.PI*.25;
+                const windX=Math.sin(windAngle),windZ=Math.cos(windAngle);
                 Object.values(objMap).forEach(g=>{
                     if(!g||!g.userData.windTree)return;
                     const phase=g.userData.windPhase||0;
-                    g.rotation.z=(g.userData.baseRotZ||0)+breeze*Math.sin(gardenWindTime*.9+phase);
-                    g.rotation.x=(g.userData.baseRotX||0)+breeze*.72*Math.cos(gardenWindTime*.7+phase);
+                    g.rotation.z=(g.userData.baseRotZ||0)+breeze*windX*Math.sin(gardenWindTime*.9+phase);
+                    g.rotation.x=(g.userData.baseRotX||0)+breeze*.72*windZ*Math.cos(gardenWindTime*.7+phase);
                     g.traverse(c=>{if(c.isMesh&&c.userData.windLeaf){
                         const p=c.userData.windPhase||0;
-                        c.rotation.x=(c.userData.windBaseX||0)+Math.sin(gardenWindTime*1.5+p)*.075;
-                        c.rotation.z=(c.userData.windBaseZ||0)+Math.cos(gardenWindTime*1.2+p)*.055;
+                        const leafAmp=Math.min(.20,.055+gustFactor*.035);
+                        c.rotation.x=(c.userData.windBaseX||0)+Math.sin(gardenWindTime*(1.25+gustFactor*.22)+p)*leafAmp*windZ;
+                        c.rotation.z=(c.userData.windBaseZ||0)+Math.cos(gardenWindTime*(1.05+gustFactor*.18)+p)*leafAmp*windX;
                     }});
                 });
             }
