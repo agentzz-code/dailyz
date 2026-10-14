@@ -22917,8 +22917,8 @@ document.documentElement.classList.toggle(
                 sun.shadow.camera.left=-14; sun.shadow.camera.right=14;
                 sun.shadow.camera.top=14; sun.shadow.camera.bottom=-14;
                 sun.shadow.camera.updateProjectionMatrix();
-                sun.shadow.bias=-0.00018;
-                sun.shadow.normalBias=0.012;
+                sun.shadow.bias=-0.00032;
+                sun.shadow.normalBias=0.025;
                 sun.shadow.radius=window.innerWidth<700?2:1.5;
                 scene.add(sun);
                 if (dark) { const m=new T.DirectionalLight(0x4455aa,0.3); m.position.set(-10,14,-8); scene.add(m); }
@@ -22991,8 +22991,10 @@ document.documentElement.classList.toggle(
                         tx.strokeStyle=v<.34?`rgba(${dark?19:34},${dark?48:76},${dark?23:35},${a})`:`rgba(${dark?101:164},${dark?131:184},${dark?74:92},${a})`;
                         tx.lineWidth=.35+texRnd()*.7;tx.beginPath();tx.moveTo(x,y);tx.lineTo(x+(texRnd()-.5)*2,y-1-texRnd()*7);tx.stroke();
                     }else{
-                        const c=texRnd()>.5?"30,36,23":"170,157,103";
-                        tx.fillStyle=`rgba(${c},${.05+texRnd()*.13})`;tx.fillRect(x,y,.5+texRnd()*1.2,.5+texRnd()*1.2);
+                        // Pale moss/pollen flecks only: avoid near-black pixel dots on the meadow.
+                        const c=texRnd()>.5?"147,169,91":"190,177,119";
+                        tx.fillStyle=`rgba(${c},${.035+texRnd()*.055})`;
+                        tx.fillRect(x,y,.45+texRnd()*.75,.45+texRnd()*.75);
                     }
                 }
                 const groundTex=new T.CanvasTexture(texCanvas); groundTex.wrapS=groundTex.wrapT=T.RepeatWrapping; groundTex.repeat.set(3.5,3.5);
@@ -23014,7 +23016,7 @@ document.documentElement.classList.toggle(
                 bumpTex.generateMipmaps=true;bumpTex.minFilter=T.LinearMipmapLinearFilter;bumpTex.magFilter=T.LinearFilter;
                 if(renderer.capabilities&&renderer.capabilities.getMaxAnisotropy)bumpTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
                 const mat = new T.MeshStandardMaterial({
-                    vertexColors:true, map:groundTex, bumpMap:bumpTex, bumpScale:dark?.055:.075,
+                    vertexColors:true, map:groundTex, bumpMap:bumpTex, bumpScale:dark?.018:.024,
                     roughness:.96, metalness:0, flatShading:false
                 });
                 const mesh = new T.Mesh(geo,mat);
@@ -23136,18 +23138,43 @@ document.documentElement.classList.toggle(
                     new T.MeshStandardMaterial({color:dark?0x30484d:0xa8b9a5,roughness:1,flatShading:true})
                 ];
                 const snowMat=new T.MeshStandardMaterial({color:dark?0x8799a2:0xf0f0dc,roughness:.9,flatShading:true});
+                const ridgeMats=[
+                    new T.MeshStandardMaterial({color:dark?0x263a38:0x617e68,roughness:1,flatShading:true}),
+                    new T.MeshStandardMaterial({color:dark?0x344744:0x87977c,roughness:1,flatShading:true}),
+                    new T.MeshStandardMaterial({color:dark?0x40514a:0xa7aa8c,roughness:1,flatShading:true})
+                ];
                 let seed=9017;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
                 function ridge(x,z,h,r,layer,snow){
-                    const geo=new T.ConeGeometry(r,h,9,4);
+                    const geo=new T.ConeGeometry(r,h,18,8);
                     const p=geo.attributes.position;
                     for(let i=0;i<p.count;i++){
-                        const y=p.getY(i), fac=1+(rnd()-.5)*.18;
+                        const y=p.getY(i), fac=1+(rnd()-.5)*.26;
                         p.setX(i,p.getX(i)*fac);p.setZ(i,p.getZ(i)*fac);
-                        if(y>h*.12){p.setX(i,p.getX(i)+(rnd()-.5)*r*.12);p.setZ(i,p.getZ(i)+(rnd()-.5)*r*.12);}
+                        if(y>h*.12){
+                            // Break the silhouette at several scales so ridges have shoulders and gullies.
+                            const ridgeNoise=Math.sin(p.getX(i)*2.7+x*.31)*Math.cos(p.getZ(i)*2.2+z*.27);
+                            p.setX(i,p.getX(i)+(rnd()-.5)*r*.12+ridgeNoise*r*.035);
+                            p.setZ(i,p.getZ(i)+(rnd()-.5)*r*.12+ridgeNoise*r*.03);
+                            p.setY(i,y+(rnd()-.5)*h*.045);
+                        }
                     }
                     geo.computeVertexNormals();
                     const m=new T.Mesh(geo,mountainMats[layer%mountainMats.length]);
-                    m.position.set(x,h*.42-1.2,z);m.rotation.y=rnd()*1.2;m.castShadow=true;scene.add(m);
+                    m.position.set(x,h*.42-1.2,z);m.rotation.y=rnd()*1.2;m.castShadow=true;m.receiveShadow=true;scene.add(m);
+                    // Overlapping lower ridge shelves create visible depth bands and foothills.
+                    for(let shelf=0;shelf<2;shelf++){
+                        const sh=r*(.63-shelf*.13), shh=h*(.42-shelf*.08);
+                        const sg=new T.ConeGeometry(sh,shh,14,5);
+                        const sp=sg.attributes.position;
+                        for(let q=0;q<sp.count;q++){
+                            const yy=sp.getY(q),n=Math.sin(sp.getX(q)*3.1+q*.7)*Math.cos(sp.getZ(q)*2.3);
+                            if(yy>0)sp.setY(q,yy+n*shh*.025);
+                        }
+                        sg.computeVertexNormals();
+                        const sm=new T.Mesh(sg,ridgeMats[(layer+shelf)%ridgeMats.length]);
+                        sm.position.set(x+(rnd()-.5)*r*.23,h*(.18-shelf*.12)-1.15,z+.22+shelf*.12);
+                        sm.rotation.y=m.rotation.y+(rnd()-.5)*.3;sm.castShadow=true;sm.receiveShadow=true;scene.add(sm);
+                    }
                     if(snow){
                         const cap=new T.Mesh(new T.ConeGeometry(r*.31,h*.21,7,2),snowMat);
                         cap.position.set(x,h*.79-0.6,z);cap.rotation.y=m.rotation.y;scene.add(cap);
@@ -23195,6 +23222,49 @@ document.documentElement.classList.toggle(
                             b.position.set(x+Math.cos(a)*r*.48,y-.04,z+Math.sin(a)*r*.48);
                             b.rotation.z=Math.cos(a)*.45;b.rotation.x=Math.sin(a)*.45;scene.add(b);
                         }
+                    }
+                }
+
+                // Layered fern beds and rounded understory shrubs add fine silhouettes between trees and rocks.
+                const fernMats=[
+                    new T.MeshStandardMaterial({color:dark?0x244d32:0x3c7b3f,roughness:.95,side:T.DoubleSide}),
+                    new T.MeshStandardMaterial({color:dark?0x35643b:0x6e9e4d,roughness:.95,side:T.DoubleSide}),
+                    new T.MeshStandardMaterial({color:dark?0x497247:0x91b864,roughness:.95,side:T.DoubleSide})
+                ];
+                const shrubMats=[
+                    new T.MeshStandardMaterial({color:dark?0x1f432c:0x477d3d,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x2e5836:0x67964a,roughness:1}),
+                    new T.MeshStandardMaterial({color:dark?0x3b6540:0x82a958,roughness:1})
+                ];
+                for(let i=0;i<(window.innerWidth<700?34:72);i++){
+                    const a=rnd()*Math.PI*2,rad=11.1+rnd()*7.2;
+                    const x=Math.cos(a)*rad,z=Math.sin(a)*rad-1;
+                    if(Math.abs(x)<10.2&&Math.abs(z)<10.2)continue;
+                    if(Math.hypot(x-14,z-4)<2.7)continue;
+                    const y=terrainYForBuild(x,z),scale=.55+rnd()*.9;
+                    if(i%3===0){
+                        const shrub=new T.Group();
+                        for(let k=0;k<5;k++){
+                            const puff=new T.Mesh(new T.IcosahedronGeometry(.22+rnd()*.19,2),shrubMats[(i+k)%shrubMats.length]);
+                            puff.position.set((rnd()-.5)*.42,.2+rnd()*.3,(rnd()-.5)*.42);puff.scale.set(1.25,.82,1);puff.castShadow=true;shrub.add(puff);
+                        }
+                        shrub.position.set(x,y,z);shrub.scale.setScalar(scale);scene.add(shrub);
+                    }else{
+                        // Each fern has several curved fronds built from tapered leaf meshes.
+                        const fern=new T.Group();
+                        for(let f=0;f<7;f++){
+                            const ang=f/7*Math.PI*2+rnd()*.25,len=.48+rnd()*.38;
+                            const stem=new T.Mesh(new T.CylinderGeometry(.012,.022,len,5),fernMats[0]);
+                            stem.position.set(Math.cos(ang)*len*.32,len*.32,Math.sin(ang)*len*.32);
+                            stem.rotation.z=-Math.cos(ang)*.65;stem.rotation.x=Math.sin(ang)*.65;fern.add(stem);
+                            for(let side of [-1,1]){
+                                const leaf=new T.Mesh(new T.SphereGeometry(.115,7,5),fernMats[(f+(side===1?1:0))%fernMats.length]);
+                                leaf.scale.set(1.45,.36,.62);
+                                leaf.position.set(Math.cos(ang)*len*.48+Math.cos(ang+Math.PI/2)*side*.12,len*.4,Math.sin(ang)*len*.48+Math.sin(ang+Math.PI/2)*side*.12);
+                                leaf.rotation.y=-ang;leaf.rotation.z=-Math.cos(ang)*.28;leaf.castShadow=true;fern.add(leaf);
+                            }
+                        }
+                        fern.position.set(x,y,z);fern.scale.setScalar(scale);scene.add(fern);
                     }
                 }
 
