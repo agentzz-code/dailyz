@@ -5617,36 +5617,6 @@
 @media(prefers-reduced-motion:reduce){.daily-garden-shortcut,.garden-action-btn,.garden-3d-btn,.garden-inv-item{transition:none}}
 </style>
 
-
-<style id="dailykrd-reset-styles">
-#reset.section{max-width:980px;margin:0 auto;padding:18px 14px 40px}
-#reset .reset-hero{border-radius:22px;padding:22px;background:linear-gradient(135deg,rgba(45,130,87,.16),rgba(109,169,120,.08));border:1px solid rgba(70,145,95,.22);margin-bottom:16px}
-#reset .reset-eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;font-weight:800;opacity:.72}
-#reset .reset-title{font-size:clamp(25px,5vw,36px);font-weight:850;line-height:1.1;margin:7px 0 9px}
-#reset .reset-sub{color:var(--muted,#777);line-height:1.55;max-width:680px}
-#reset .reset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
-#reset .reset-card{border:1px solid var(--border,rgba(120,120,120,.2));border-radius:18px;padding:17px;background:var(--card-bg,rgba(255,255,255,.7));min-width:0}
-#reset .reset-card h3{margin:0 0 10px;font-size:17px;font-weight:800}
-#reset .reset-muted{font-size:13px;color:var(--muted,#777);line-height:1.5}
-#reset .reset-stat{font-size:32px;font-weight:850;line-height:1.15;margin:8px 0}
-#reset .reset-progress{height:8px;border-radius:99px;background:rgba(120,120,120,.18);overflow:hidden;margin:10px 0}
-#reset .reset-progress>span{display:block;height:100%;width:0;background:#4b9b69;border-radius:99px;transition:width .2s}
-#reset .reset-field{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border,rgba(120,120,120,.3));border-radius:11px;background:var(--input-bg,transparent);color:inherit;margin:7px 0 12px;font:inherit}
-#reset .reset-btn{border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:750;cursor:pointer;background:#367d53;color:#fff}
-#reset .reset-btn.secondary{background:rgba(120,120,120,.13);color:inherit;border:1px solid var(--border,rgba(120,120,120,.2))}
-#reset .reset-btn:disabled{opacity:.4;cursor:not-allowed}
-#reset .reset-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-#reset .reset-checks{display:grid;gap:8px;margin:12px 0}
-#reset .reset-check{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:12px;background:rgba(120,120,120,.07);line-height:1.4}
-#reset .reset-check input{margin-top:4px;accent-color:#367d53}
-#reset .reset-message{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(66,140,89,.1);font-size:13px;line-height:1.5}
-#reset .reset-log-list{font-size:13px;line-height:1.7;color:var(--muted,#777);max-height:100px;overflow:auto}
-#reset .reset-wide{grid-column:1/-1}
-.dark #reset .reset-card{background:rgba(24,30,27,.78);border-color:rgba(255,255,255,.12)}
-.dark #reset .reset-field{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18)}
-@media(max-width:650px){#reset .reset-grid{grid-template-columns:1fr}#reset .reset-wide{grid-column:auto}#reset .reset-hero{padding:18px}}
-</style>
-
 </head>
 
 <body>
@@ -5761,16 +5731,6 @@
         >
             📅 Calendar
         </button>
-
-        <button
-            class="tab"
-            data-tab="reset"
-            id="resetTab"
-            type="button"
-        >
-            🌱 Reset
-        </button>
-
 
     </nav>
 
@@ -6744,75 +6704,7 @@
                 <div class="swm-status" id="studyWithMeStatus">Ready to focus</div>
                 <div class="swm-progress" aria-hidden="true"><div class="swm-progress-fill" id="studyWithMeProgress"></div></div>
                 <div class="swm-music" id="studyWithMeMusic"></div>
-            
-        <section class="section" id="reset" aria-labelledby="resetHeading">
-          <div class="reset-hero">
-            <div class="reset-eyebrow" id="resetEyebrow">A private habit-change plan</div>
-            <h1 class="reset-title" id="resetHeading">Reset 🌱</h1>
-            <div class="reset-sub" id="resetIntro">Gradually work toward your personal goal of once a week. This is about building choice, not shame or perfection.</div>
-          </div>
-          <div class="reset-grid">
-            <div class="reset-card">
-              <h3 id="resetGoalTitle">Your weekly goal</h3>
-              <div class="reset-stat" id="resetTargetStat">1 / week</div>
-              <div class="reset-muted" id="resetTargetHelp">Your longer-term goal is once a week. Your current step can be higher while you reduce gradually.</div>
-              <div class="reset-progress"><span id="resetProgressBar"></span></div>
-              <div class="reset-muted" id="resetProgressText">Start by setting your baseline below.</div>
-              <button class="reset-btn secondary" id="resetLowerTarget" type="button" style="margin-top:10px">Lower my weekly target by one</button>
-            </div>
-            <div class="reset-card">
-              <h3 id="resetCheckTitle">Quick daily check-in</h3>
-              <div class="reset-muted" id="resetCheckDesc">Check in without judging yourself. No intimate notes are required.</div>
-              <div class="reset-checks" id="resetMoodChecks">
-                <label class="reset-check"><input type="checkbox" value="boredom"><span id="resetTriggerBoredom">Boredom / nothing to do</span></label>
-                <label class="reset-check"><input type="checkbox" value="stress"><span id="resetTriggerStress">Stress or difficult feelings</span></label>
-                <label class="reset-check"><input type="checkbox" value="phone"><span id="resetTriggerPhone">Phone / online triggers</span></label>
-                <label class="reset-check"><input type="checkbox" value="night"><span id="resetTriggerNight">Late night / in bed</span></label>
-                <label class="reset-check"><input type="checkbox" value="automatic"><span id="resetTriggerAutomatic">Automatic habit</span></label>
-              </div>
-              <button class="reset-btn" id="resetSaveCheckin" type="button">Save check-in</button>
-              <div class="reset-muted" id="resetCheckinStatus" aria-live="polite"></div>
-            </div>
-            <div class="reset-card">
-              <h3 id="resetBaselineTitle">Set your starting point</h3>
-              <div class="reset-muted" id="resetBaselineDesc">Choose the range that best describes a typical week. This helps set a realistic first step.</div>
-              <select class="reset-field" id="resetBaselineSelect" aria-label="Typical weekly frequency">
-                <option value="1">1–2 times per week</option>
-                <option value="3">3–4 times per week</option>
-                <option value="5">5–7 times per week</option>
-                <option value="7">8 or more times per week</option>
-              </select>
-              <button class="reset-btn" id="resetSetBaseline" type="button">Set my first step</button>
-              <div class="reset-muted" id="resetBaselineStatus" aria-live="polite"></div>
-            </div>
-            <div class="reset-card">
-              <h3 id="resetUrgeTitle">When an urge hits</h3>
-              <div class="reset-muted" id="resetUrgeIntro">You don't have to make a forever decision. Just choose what to do for the next ten minutes.</div>
-              <div class="reset-checks">
-                <div class="reset-check"><span>①</span><span id="resetUrgeOne">Change location or stand up.</span></div>
-                <div class="reset-check"><span>②</span><span id="resetUrgeTwo">Put your phone out of reach and take a few slow breaths.</span></div>
-                <div class="reset-check"><span>③</span><span id="resetUrgeThree">Do one short activity: walk, wash your face, stretch, or start a tiny task.</span></div>
-                <div class="reset-check"><span>④</span><span id="resetUrgeFour">After ten minutes, choose your next step calmly. An urge is not an order.</span></div>
-              </div>
-              <button class="reset-btn secondary" id="resetUrgeDone" type="button">I tried the reset</button>
-              <div class="reset-muted" id="resetUrgeStatus" aria-live="polite"></div>
-            </div>
-            <div class="reset-card reset-wide">
-              <h3 id="resetReviewTitle">Weekly review — learn, don't punish</h3>
-              <div class="reset-muted" id="resetReviewDesc">Log honestly if you want to track your progress. A difficult day doesn't erase your effort.</div>
-              <div class="reset-row" style="margin:12px 0">
-                <button class="reset-btn" id="resetLogOccurrence" type="button">Log an occurrence today</button>
-                <button class="reset-btn secondary" id="resetUndoOccurrence" type="button">Undo today's log</button>
-              </div>
-              <div class="reset-stat" id="resetWeekCount">0 this week</div>
-              <div class="reset-muted" id="resetReviewStatus" aria-live="polite"></div>
-              <div class="reset-log-list" id="resetRecentLogs"></div>
-              <div class="reset-message" id="resetKindReminder">Progress isn't ruined by a slip. Notice the trigger, make one adjustment, and continue.</div>
-            </div>
-          </div>
-        </section>
-
-</main>
+            </main>
 
             <aside class="swm-panel swm-background-panel">
                 <div class="swm-panel-head"><strong>▣ Background</strong><button class="swm-panel-close" type="button" aria-label="Hide background panel">×</button></div>
@@ -27399,48 +27291,5 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 })();
 </script>
 
-
-<script id="dailykrd-reset-program">
-(function(){
-  'use strict';
-  const KEY='dailykrd_reset_program_v1';
-  const copy={
-    en:{tab:'🌱 Reset',eyebrow:'A private habit-change plan',intro:'Gradually work toward your personal goal of once a week. This is about building choice, not shame or perfection.',goal:'Your weekly goal',targetHelp:'Your longer-term goal is once a week. Your current step can be higher while you reduce gradually.',startProgress:'Start by setting your baseline below.',check:'Quick daily check-in',checkDesc:'Check in without judging yourself. No intimate notes are required.',boredom:'Boredom / nothing to do',stress:'Stress or difficult feelings',phone:'Phone / online triggers',night:'Late night / in bed',automatic:'Automatic habit',save:'Save check-in',saved:'Check-in saved for today.',baseline:'Set your starting point',baselineDesc:'Choose the range that best describes a typical week. This helps set a realistic first step.',ranges:['1–2 times per week','3–4 times per week','5–7 times per week','8 or more times per week'],set:'Set my first step',baselineSaved:'Your first step is set. Review progress weekly and lower the target only when it feels manageable.',urge:'When an urge hits',urgeIntro:'You don’t have to make a forever decision. Just choose what to do for the next ten minutes.',u1:'Change location or stand up.',u2:'Put your phone out of reach and take a few slow breaths.',u3:'Do one short activity: walk, wash your face, stretch, or start a tiny task.',u4:'After ten minutes, choose your next step calmly. An urge is not an order.',tried:'I tried the reset',urgeThanks:'Nice work pausing and choosing your next action.',review:'Weekly review — learn, don’t punish',reviewDesc:'Log honestly if you want to track your progress. A difficult day doesn’t erase your effort.',log:'Log an occurrence today',undo:'Undo today’s log',week:'this week',kind:'Progress isn’t ruined by a slip. Notice the trigger, make one adjustment, and continue.',first:'Choose your typical weekly frequency first.',today:'Today',noLogs:'No entries yet. Your log stays on this device.',count:'Logged occurrences this week',progress:'Current step: up to {n} per week. Long-term goal: 1 per week.',logged:'Logged for today.',undone:'Today’s log removed.',noToday:'There is no log for today to undo.',reviewStatus:'Use the last seven days as information, not a grade.',next:'When your current target feels manageable for a full week, lower it by one. If not, repeat the same step without judging yourself.',lower:'Lower my weekly target by one',atGoal:'You are already at your once-a-week goal. Keep practising your plan.',confirm:'Saved.'},
-    ku:{tab:'🌱 ڕێکخستنەوە',eyebrow:'پلانی گۆڕینی عادەت بە نهێنی',intro:'بە هێواشی بەرەو ئامانجی کەسی خۆت، جارێک لە هەفتەدا، بڕۆ. ئامانج دروستکردنی هەڵبژاردنە، نەک شەرم یان تەواوبوون.',goal:'ئامانجی هەفتانەت',targetHelp:'ئامانجی درێژخایەنت جارێک لە هەفتەدایە. لە کاتی کەمکردنەوەدا ئامانجی ئێستات دەتوانێت زیاتر بێت.',startProgress:'بۆ دەستپێکردن، خاڵی دەستپێک دیاری بکە.',check:'پشکنینی ڕۆژانە',checkDesc:'بێ حوکمدان خۆت هەڵبسەنگێنە. پێویست ناکات تێبینی تایبەت بنووسیت.',boredom:'بێزاری / کار نەبوون',stress:'فشار یان هەستی قورس',phone:'مۆبایل / هۆکارە ئۆنلاینەکان',night:'شەو درەنگ / لە جێخەودا',automatic:'عادەتی خۆکار',save:'پاشەکەوتکردنی پشکنین',saved:'پشکنینی ئەمڕۆ پاشەکەوت کرا.',baseline:'خاڵی دەستپێک دیاری بکە',baselineDesc:'ئەو مەودایە هەڵبژێرە کە هەفتەیەکی ئاسایی دەنوێنێت.',ranges:['١–٢ جار لە هەفتەدا','٣–٤ جار لە هەفتەدا','٥–٧ جار لە هەفتەدا','٨ جار یان زیاتر لە هەفتەدا'],set:'هەنگاوی یەکەمم دیاری بکە',baselineSaved:'هەنگاوی یەکەمت دیاری کرا. هەفتانە پێداچوونەوە بکە و تەنها کاتێک ئامانج کەم بکەرەوە کە گونجاو بێت.',urge:'کاتێک ئارەزوو هات',urgeIntro:'پێویست ناکات بڕیارێکی هەمیشەیی بدەیت. تەنها بڕیار بدە لە دە خولەکی داهاتوودا چی بکەیت.',u1:'شوێنەکەت بگۆڕە یان هەستە سەرپێ.',u2:'مۆبایلەکەت دوور بخەوە و چەند جار بە هێواشی هەناسە بدە.',u3:'کارێکی کورت بکە: پیاسە، شوشتنی ڕوو، کشانەوە، یان کارێکی بچووک.',u4:'دوای دە خولەک بە ئارامی هەنگاوی داهاتوو هەڵبژێرە. ئارەزوو فەرمان نییە.',tried:'هەوڵم دا',urgeThanks:'باشە، وەستایت و هەنگاوی داهاتووت هەڵبژارد.',review:'پێداچوونەوەی هەفتانە — فێربە، خۆت سزا مەدە',reviewDesc:'ئەگەر دەتەوێت پێشکەوتنت بپێویت بە ڕاستگۆیی تۆمار بکە. ڕۆژێکی قورس هەوڵەکانت ناسڕێتەوە.',log:'تۆمارکردنی ڕووداوێکی ئەمڕۆ',undo:'سڕینەوەی تۆماری ئەمڕۆ',week:'لەو هەفتەیەدا',kind:'پێشکەوتنت بەهۆی هەڵەیەکەوە لەناو ناچێت. هۆکارەکە بناسە، گۆڕانکارییەکی بچووک بکە و بەردەوام بە.',first:'سەرەتا ژمارەی ئاسایی هەفتانەت هەڵبژێرە.',today:'ئەمڕۆ',noLogs:'هێشتا تۆمار نییە. تۆمارەکان لەم ئامێرەدا دەمێننەوە.',count:'ژمارەی تۆمارکراو لەم هەفتەیەدا',progress:'هەنگاوی ئێستا: تا {n} جار لە هەفتەدا. ئامانجی درێژخایەن: ١ جار لە هەفتەدا.',logged:'ئەمڕۆ تۆمار کرا.',undone:'تۆماری ئەمڕۆ سڕایەوە.',noToday:'تۆمارێکی ئەمڕۆ نییە بۆ سڕینەوە.',reviewStatus:'حەوت ڕۆژی ڕابردوو وەک زانیاری ببینە، نەک نمرە.',next:'کاتێک ئامانجی ئێستا بۆ هەفتەیەک گونجاو بوو، بە یەک جار کەمی بکەوە. ئەگەر نا، هەمان هەنگاو دووبارە بکەرەوە.',lower:'ئامانجی هەفتانە بە یەک جار کەم بکەرەوە',atGoal:'ئێستا گەیشتوویتە ئامانجی جارێک لە هەفتەدا. بەردەوام بە لە ڕاهێنانی پلانی خۆت.',confirm:'پاشەکەوت کرا.'},
-    ar:{tab:'🌱 إعادة ضبط',eyebrow:'خطة خاصة لتغيير العادة',intro:'تقدّم تدريجيًا نحو هدفك الشخصي، مرة واحدة أسبوعيًا. الهدف هو بناء القدرة على الاختيار، لا الشعور بالخجل أو السعي للكمال.',goal:'هدفك الأسبوعي',targetHelp:'هدفك طويل المدى مرة واحدة أسبوعيًا. يمكن أن يكون هدفك الحالي أعلى أثناء التقليل التدريجي.',startProgress:'ابدأ بتحديد نقطة البداية أدناه.',check:'متابعة يومية سريعة',checkDesc:'تابع نفسك دون لوم. لا تحتاج إلى كتابة تفاصيل خاصة.',boredom:'الملل / عدم وجود ما تفعله',stress:'التوتر أو المشاعر الصعبة',phone:'الهاتف / محفزات الإنترنت',night:'وقت متأخر / في السرير',automatic:'عادة تلقائية',save:'حفظ المتابعة',saved:'تم حفظ متابعة اليوم.',baseline:'حدد نقطة البداية',baselineDesc:'اختر النطاق الذي يصف أسبوعك المعتاد لمساعدتك على تحديد خطوة أولى واقعية.',ranges:['مرة أو مرتان أسبوعيًا','3–4 مرات أسبوعيًا','5–7 مرات أسبوعيًا','8 مرات أو أكثر أسبوعيًا'],set:'حدد خطوتي الأولى',baselineSaved:'تم تحديد خطوتك الأولى. راجع تقدمك أسبوعيًا وخفّض الهدف عندما يصبح ذلك ممكنًا.',urge:'عندما تأتي الرغبة',urgeIntro:'لا تحتاج إلى اتخاذ قرار للأبد. اختر فقط ما ستفعله خلال الدقائق العشر القادمة.',u1:'غيّر مكانك أو قف.',u2:'أبعد هاتفك وخذ أنفاسًا بطيئة.',u3:'قم بنشاط قصير: المشي أو غسل الوجه أو التمدد أو مهمة صغيرة.',u4:'بعد عشر دقائق اختر خطوتك التالية بهدوء. الرغبة ليست أمرًا.',tried:'جرّبت التوقف المؤقت',urgeThanks:'أحسنت، توقفت قليلًا واخترت خطوتك التالية.',review:'مراجعة أسبوعية — تعلّم دون عقاب',reviewDesc:'سجّل بصدق إذا أردت متابعة تقدمك. اليوم الصعب لا يمحو جهودك.',log:'تسجيل حدوث اليوم',undo:'إلغاء تسجيل اليوم',week:'هذا الأسبوع',kind:'التعثر لا يمحو تقدمك. لاحظ المحفز، وعدّل شيئًا واحدًا، ثم واصل.',first:'اختر أولًا المعدل المعتاد أسبوعيًا.',today:'اليوم',noLogs:'لا توجد سجلات بعد. تبقى سجلاتك على هذا الجهاز.',count:'عدد مرات التسجيل هذا الأسبوع',progress:'الخطوة الحالية: حتى {n} أسبوعيًا. الهدف طويل المدى: مرة أسبوعيًا.',logged:'تم التسجيل لليوم.',undone:'تم حذف تسجيل اليوم.',noToday:'لا يوجد تسجيل لليوم لحذفه.',reviewStatus:'استخدم الأيام السبعة الماضية كمعلومات لا كدرجة.',next:'عندما يصبح الهدف الحالي قابلًا للتحقيق لأسبوع كامل، خفّضه بمقدار واحد. وإلا كرر الخطوة نفسها دون لوم.',lower:'خفض هدفي الأسبوعي بمقدار واحد',atGoal:'لقد وصلت إلى هدفك مرة واحدة أسبوعيًا. واصل ممارسة خطتك.',confirm:'تم الحفظ.'}
-  };
-  const $=id=>document.getElementById(id);
-  const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}};
-  let state=load(); if(!state||typeof state!=='object')state={};
-  state.logs=Array.isArray(state.logs)?state.logs:[]; state.checkins=state.checkins&&typeof state.checkins==='object'?state.checkins:{};
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
-  function lang(){return (typeof currentLanguage!=='undefined'&&copy[currentLanguage])?currentLanguage:'en'}
-  function tr(k){return copy[lang()][k]||copy.en[k]||k}
-  function weeklyLogs(){const cutoff=new Date();cutoff.setHours(0,0,0,0);cutoff.setDate(cutoff.getDate()-6);const min=cutoff.getFullYear()+'-'+String(cutoff.getMonth()+1).padStart(2,'0')+'-'+String(cutoff.getDate()).padStart(2,'0');return state.logs.filter(d=>d>=min&&d<=today()).length}
-  function activeTarget(){return Number(state.target)||1}
-  function render(){
-    const fields={resetTab:'tab',resetEyebrow:'eyebrow',resetIntro:'intro',resetGoalTitle:'goal',resetTargetHelp:'targetHelp',resetCheckTitle:'check',resetCheckDesc:'checkDesc',resetTriggerBoredom:'boredom',resetTriggerStress:'stress',resetTriggerPhone:'phone',resetTriggerNight:'night',resetTriggerAutomatic:'automatic',resetSaveCheckin:'save',resetBaselineTitle:'baseline',resetBaselineDesc:'baselineDesc',resetSetBaseline:'set',resetUrgeTitle:'urge',resetUrgeIntro:'urgeIntro',resetUrgeOne:'u1',resetUrgeTwo:'u2',resetUrgeThree:'u3',resetUrgeFour:'u4',resetUrgeDone:'tried',resetReviewTitle:'review',resetReviewDesc:'reviewDesc',resetLogOccurrence:'log',resetUndoOccurrence:'undo',resetKindReminder:'kind',resetLowerTarget:'lower'};
-    Object.keys(fields).forEach(id=>{const el=$(id);if(el)el.textContent=tr(fields[id])});
-    const select=$('resetBaselineSelect');if(select){Array.from(select.options).forEach((o,i)=>{if(tr('ranges')[i])o.textContent=tr('ranges')[i]});if(state.baseline)select.value=String(state.baseline)}
-    const target=activeTarget(),count=weeklyLogs();$('resetTargetStat').textContent=target+' / week';$('resetWeekCount').textContent=count+' '+tr('week');$('resetProgressBar').style.width=Math.min(100,count/Math.max(1,target)*100)+'%';$('resetProgressText').textContent=state.baseline?tr('progress').replace('{n}',target):tr('startProgress');$('resetLowerTarget').disabled=!state.baseline||target<=1;
-    $('resetBaselineStatus').textContent=state.baseline?tr('baselineSaved'):'';
-    $('resetRecentLogs').textContent=state.logs.length?tr('count')+': '+state.logs.slice(-7).join(', '):tr('noLogs');
-    const ci=state.checkins[today()];document.querySelectorAll('#resetMoodChecks input').forEach(el=>el.checked=!!(ci&&ci.triggers&&ci.triggers.includes(el.value)));
-    $('resetCheckinStatus').textContent=ci?tr('saved'):'';$('resetUrgeStatus').textContent=state.urgeDate===today()?tr('urgeThanks'):'';$('resetReviewStatus').textContent=tr('next');
-    const tab=$('resetTab');if(tab)tab.textContent=tr('tab');
-    const section=$('reset');if(section)section.dir=lang()==='en'?'ltr':'rtl';
-  }
-  $('resetSetBaseline').addEventListener('click',()=>{const val=Number($('resetBaselineSelect').value)||1;state.baseline=val;state.target=val===1?1:val===3?3:val===5?5:7;state.baselineDate=state.baselineDate||today();save();render()});
-  $('resetLowerTarget').addEventListener('click',()=>{if(activeTarget()<=1){$('resetReviewStatus').textContent=tr('atGoal');return}state.target=activeTarget()-1;save();render();$('resetReviewStatus').textContent=tr('next')});
-  $('resetSaveCheckin').addEventListener('click',()=>{const triggers=Array.from(document.querySelectorAll('#resetMoodChecks input:checked')).map(el=>el.value);state.checkins[today()]={triggers};save();render()});
-  $('resetUrgeDone').addEventListener('click',()=>{state.urgeDate=today();save();render()});
-  $('resetLogOccurrence').addEventListener('click',()=>{if(!state.baseline){$('resetBaselineStatus').textContent=tr('first');return}if(!state.logs.includes(today()))state.logs.push(today());save();render();$('resetReviewStatus').textContent=tr('logged')+' '+tr('next')});
-  $('resetUndoOccurrence').addEventListener('click',()=>{const n=state.logs.length;state.logs=state.logs.filter(d=>d!==today());save();render();$('resetReviewStatus').textContent=n===state.logs.length?tr('noToday'):tr('undone')});
-  // Preserve the app's existing localization flow and re-render this additive section after language changes.
-  if(typeof applyLanguage==='function'){const original=applyLanguage;applyLanguage=function(){original.apply(this,arguments);try{render()}catch(e){}}}
-  render();
-})();
-</script>
-
 </body>
+</html>
