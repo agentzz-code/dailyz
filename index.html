@@ -1057,7 +1057,7 @@
         }
 
     
-/* Daily.KRD Quiz replacement: remove the legacy flip-card study screen. */
+/* Horizon Quiz replacement: remove the legacy flip-card study screen. */
 #flashcardsStudyView { display: none !important; }
 #flashcardsSection .flashcard-deck-right { flex-wrap: wrap; }
 #flashcardsSection .quiz-library-action { border:1px solid var(--border-color,rgba(128,128,128,.22)); background:transparent; color:inherit; border-radius:9px; padding:7px 9px; font-size:12px; }
@@ -1069,8 +1069,11 @@
     <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
+    <meta name="application-name" content="Horizon">
+    <meta name="apple-mobile-web-app-title" content="Horizon">
+    <meta name="description" content="Horizon helps you organize your day, study, track tasks, and build better routines.">
 
-    <title>Daily.KRD</title>
+    <title>Horizon</title>
 
     <style>
 .motion-bg {
@@ -5523,7 +5526,7 @@
 </style>
 
 <style>
-/* Daily.KRD study calculator — functional utility, responsive and theme-aware. */
+/* Horizon study calculator — functional utility, responsive and theme-aware. */
 .study-calculator-launch{width:100%;display:flex;align-items:center;gap:13px;margin:12px 0;padding:15px 16px;border:1px solid var(--border-color,rgba(128,128,128,.22));border-radius:16px;background:var(--card-bg,rgba(255,255,255,.72));color:inherit;text-align:left;cursor:pointer;transition:transform .16s ease,border-color .16s ease}
 .study-calculator-launch:hover{transform:translateY(-1px);border-color:var(--accent-color,#7c83ff)}
 .dark .study-calculator-launch{background:rgba(30,30,34,.86)}
@@ -5570,7 +5573,7 @@
 
 <body>
 
-    <div id="bootLoader"><div class="boot-logo">Daily.KRD</div></div>
+    <div id="bootLoader"><div class="boot-logo">Horizon</div></div>
 
     <!-- MOTION BACKGROUND -->
 
@@ -5592,7 +5595,7 @@
     <header class="header">
 
         <div>
-            <div class="logo">Daily.KRD</div>
+            <div class="logo">Horizon</div>
             <div class="date" id="date"></div>
             <div class="sync-status" id="syncStatus"></div>
         </div>
@@ -6786,7 +6789,7 @@
 
             <div class="profile-stats-heading">
                 <div class="settings-card-title">Your Activity</div>
-                <div class="settings-description">Your all-time totals from activity recorded in Daily.KRD.</div>
+                <div class="settings-description">Your all-time totals from activity recorded in Horizon.</div>
             </div>
             <div class="profile-stats-grid" id="profileStatsGrid" aria-live="polite">
                 <div class="profile-stat-card"><div class="profile-stat-icon">☑️</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Tasks completed (all time)</div></div>
@@ -6796,7 +6799,7 @@
                 <div class="profile-stat-card"><div class="profile-stat-icon">🧠</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Quizzes created</div></div>
                 <div class="profile-stat-card"><div class="profile-stat-icon">👟</div><div class="profile-stat-value">—</div><div class="profile-stat-label">Subjects created</div></div>
             </div>
-            <div class="profile-stats-note" id="profileStatsNote">Stats update from activity saved in Daily.KRD on this device and your synced account data.</div>
+            <div class="profile-stats-note" id="profileStatsNote">Stats update from activity saved in Horizon on this device and your synced account data.</div>
 
             <div class="settings-card">
 
@@ -6828,7 +6831,7 @@
                 class="settings-subtitle"
                 id="settingsSubtitle"
             >
-                Customize your Daily.KRD experience.
+                Customize your Horizon experience.
             </div>
 
 
@@ -6938,7 +6941,7 @@
                             class="setting-description"
                             id="darkModeDescription"
                         >
-                            Change the appearance of Daily.KRD.
+                            Change the appearance of Horizon.
                         </div>
 
                     </div>
@@ -7134,7 +7137,7 @@
                             class="setting-description"
                             id="languageDescription"
                         >
-                            Choose the language used throughout Daily.KRD.
+                            Choose the language used throughout Horizon.
                         </div>
 
                     </div>
@@ -7286,7 +7289,7 @@
 
                 <div id="iosInstallNotice" style="display:none; background:rgba(255,149,0,0.12); border-left:4px solid #ff9500; padding:12px 14px; border-radius:10px; margin-bottom:14px; font-size:13px; line-height:1.4;">
                     <strong id="iosInstallTitle">📱 Add to Home Screen Required</strong>
-                    <p id="iosInstallDesc" style="margin:4px 0 0; opacity:0.85;">On iPhone, Apple requires Daily.KRD to be added to your Home Screen before notifications can be delivered.</p>
+                    <p id="iosInstallDesc" style="margin:4px 0 0; opacity:0.85;">On iPhone, Apple requires Horizon to be added to your Home Screen before notifications can be delivered.</p>
                 </div>
 
                 <div class="setting-row">
@@ -7404,7 +7407,7 @@
         <div class="welcome-box">
 
             <div class="welcome-logo">
-                Daily.KRD
+                Horizon
             </div>
 
             <div
@@ -7468,7 +7471,7 @@
                 class="auth-subtitle"
                 id="authSubtitle"
             >
-                Start organizing your day with Daily.KRD.
+                Start organizing your day with Horizon.
             </div>
 
             <div
@@ -8954,7 +8957,7 @@
             setSyncStatus("syncing");
 
             console.info(
-                "[Daily.KRD sync] app-state sync active · uid=" +
+                "[Horizon sync] app-state sync active · uid=" +
                 uid +
                 " · layout=" +
                 appstateSyncPath
@@ -9008,7 +9011,7 @@
                     .catch(error => {
 
                         console.warn(
-                            "[Daily.KRD sync] could not inspect the profile document:",
+                            "[Horizon sync] could not inspect the profile document:",
                             error
                         );
                     });
@@ -9280,7 +9283,7 @@
                     "Welcome back",
 
                 authCreateSubtitle:
-                    "Start organizing your day with Daily.KRD.",
+                    "Start organizing your day with Horizon.",
 
                 authLoginSubtitle:
                     "Sign in to continue.",
@@ -9361,7 +9364,7 @@
                     "Settings",
 
                 settingsSubtitle:
-                    "Customize your Daily.KRD experience.",
+                    "Customize your Horizon experience.",
 
                 hapticFeedback:
                     "Haptic Feedback",
@@ -9397,13 +9400,13 @@
                     "Dark Mode",
 
                 darkModeDescription:
-                    "Change the appearance of Daily.KRD.",
+                    "Change the appearance of Horizon.",
 
                 language:
                     "Language",
 
                 languageDescription:
-                    "Choose the language used throughout Daily.KRD.",
+                    "Choose the language used throughout Horizon.",
 
                 location:
                     "Location",
@@ -9734,7 +9737,7 @@
                     "بەخێربێیتەوە",
 
                 authCreateSubtitle:
-                    "ڕۆژەکەت لەگەڵ Daily.KRD ڕێکبخە.",
+                    "ڕۆژەکەت لەگەڵ Horizon ڕێکبخە.",
 
                 authLoginSubtitle:
                     "بۆ بەردەوامبوون بچۆ ژوورەوە.",
@@ -9815,7 +9818,7 @@
                     "ڕێکخستنەکان",
 
                 settingsSubtitle:
-                    "ئەزموونی Daily.KRD ـەکەت بە دڵی خۆت ڕێکبخە.",
+                    "ئەزموونی Horizon ـەکەت بە دڵی خۆت ڕێکبخە.",
 
                 hapticFeedback:
                     "پێکهاتەی سەنتەری",
@@ -9851,13 +9854,13 @@
                     "دۆخی تاریک",
 
                 darkModeDescription:
-                    "ڕووکاری Daily.KRD بگۆڕە.",
+                    "ڕووکاری Horizon بگۆڕە.",
 
                 language:
                     "زمان",
 
                 languageDescription:
-                    "زمانی بەکارهێنراو لە هەموو Daily.KRD هەڵبژێرە.",
+                    "زمانی بەکارهێنراو لە هەموو Horizon هەڵبژێرە.",
 
                 location:
                     "شوێن",
@@ -10177,7 +10180,7 @@ done: "تەواو",
                     "مرحباً بعودتك",
 
                 authCreateSubtitle:
-                    "نظّم يومك مع Daily.KRD.",
+                    "نظّم يومك مع Horizon.",
 
                 authLoginSubtitle:
                     "سجّل الدخول للمتابعة.",
@@ -10258,7 +10261,7 @@ done: "تەواو",
                     "الإعدادات",
 
                 settingsSubtitle:
-                    "خصّص تجربة Daily.KRD الخاصة بك.",
+                    "خصّص تجربة Horizon الخاصة بك.",
 
                 hapticFeedback:
                     "الردود اللمسية",
@@ -10294,13 +10297,13 @@ done: "تەواو",
                     "الوضع الداكن",
 
                 darkModeDescription:
-                    "غيّر مظهر Daily.KRD.",
+                    "غيّر مظهر Horizon.",
 
                 language:
                     "اللغة",
 
                 languageDescription:
-                    "اختر اللغة المستخدمة في جميع أنحاء Daily.KRD.",
+                    "اختر اللغة المستخدمة في جميع أنحاء Horizon.",
 
                 location:
                     "الموقع",
@@ -16120,7 +16123,7 @@ document.documentElement.classList.toggle(
 
             const { isIOS, isStandalone } = isIOSStandalone();
             if (isIOS && !isStandalone) {
-                alert(currentLanguage === "ku" ? "تکایە سەرەتا ئەپەکە زیاد بکە بۆ سەر شاشەی سەرەکی (Add to Home Screen)." : (currentLanguage === "ar" ? "يرجى إضافة التطبيق إلى الشاشة الرئيسية أولاً." : "Please add Daily.KRD to your Home Screen to enable notifications."));
+                alert(currentLanguage === "ku" ? "تکایە سەرەتا ئەپەکە زیاد بکە بۆ سەر شاشەی سەرەکی (Add to Home Screen)." : (currentLanguage === "ar" ? "يرجى إضافة التطبيق إلى الشاشة الرئيسية أولاً." : "Please add Horizon to your Home Screen to enable notifications."));
                 return;
             }
 
@@ -16325,7 +16328,7 @@ document.documentElement.classList.toggle(
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         subscription: sub.toJSON(),
-                        title: "Daily.KRD 🚀",
+                        title: "Horizon 🚀",
                         message: "Push notification is working perfectly on your device!"
                     })
                 });
@@ -16350,7 +16353,7 @@ document.documentElement.classList.toggle(
            PRAYER TRACKING + STATISTICS
            ======================================================================
 
-           Storage model (reuses Daily.KRD's existing architecture):
+           Storage model (reuses Horizon's existing architecture):
 
            - Signed-in users:
              users/{uid}/prayers/{date} Firestore documents, one per calendar
@@ -20095,7 +20098,7 @@ document.documentElement.classList.toggle(
                 remaining = timerDuration;
             }
             timerTimeEl.textContent = timerFormat(remaining);
-            document.title = (remaining > 0 ? timerFormat(remaining) + " - " : "") + "Daily.KRD";
+            document.title = (remaining > 0 ? timerFormat(remaining) + " - " : "") + "Horizon";
         }
 
         function timerTick() {
@@ -20158,7 +20161,7 @@ document.documentElement.classList.toggle(
             timerStartBtn.className = "study-timer-start";
             timerResetBtn.style.display = "none";
             timerRender();
-            document.title = "Daily.KRD";
+            document.title = "Horizon";
 
             /* Gently fade out any session music. Timer completion behavior
                and notifications below are unchanged. */
@@ -20218,7 +20221,7 @@ document.documentElement.classList.toggle(
             timerResetBtn.style.display = "none";
             timerDoneMsg.style.display = "none";
             timerRender();
-            document.title = "Daily.KRD";
+            document.title = "Horizon";
         }
 
         function timerPopulateSubject() {
@@ -22499,7 +22502,7 @@ document.documentElement.classList.toggle(
 
 
 
-        // PROFILE ALL-TIME SUMMARY — reads existing Daily.KRD data without changing persistence.
+        // PROFILE ALL-TIME SUMMARY — reads existing Horizon data without changing persistence.
         function renderProfileActivityStats() {
             const grid = document.getElementById("profileStatsGrid");
             if (!grid) return;
@@ -22575,7 +22578,7 @@ document.documentElement.classList.toggle(
             ];
             grid.innerHTML = stats.map(stat => `<div class="profile-stat-card"><div class="profile-stat-icon" aria-hidden="true">${stat.icon}</div><div class="profile-stat-value">${stat.value}</div><div class="profile-stat-label">${stat.label}</div></div>`).join("");
             const note = document.getElementById("profileStatsNote");
-            if (note) note.textContent = "These are all-time totals from the task and prayer records currently loaded for your account, plus saved study sessions, study minutes, quiz decks, and subjects. Historical step totals are not shown because Daily.KRD currently exposes synced steps for today rather than a complete all-time step history.";
+            if (note) note.textContent = "These are all-time totals from the task and prayer records currently loaded for your account, plus saved study sessions, study minutes, quiz decks, and subjects. Historical step totals are not shown because Horizon currently exposes synced steps for today rather than a complete all-time step history.";
         }
         window.renderProfileActivityStats = renderProfileActivityStats;
         const profileSectionForStats = document.getElementById("profile");
@@ -24527,7 +24530,7 @@ document.documentElement.classList.toggle(
                     prioHigh: "high",
                     langWord: "English",
                     promptHead:
-                        "You are the proactive assistant inside the Daily.KRD app. Write the daily briefing card.\n" +
+                        "You are the proactive assistant inside the Horizon app. Write the daily briefing card.\n" +
                         "Reply with EXACTLY one JSON object — no markdown, no code fences, no other text.\n" +
                         "Schema (keys always in English): {\"briefing\":\"…\",\"suggestion\":\"…\",\"explanation\":\"…\",\"action\":\"open_tasks|start_study|review_flashcards|propose_task|none\",\"proposal\":{\"text\":\"…\",\"date\":\"YYYY-MM-DD\",\"time\":\"HH:MM or empty\",\"priority\":\"low|medium|high\"}}\n" +
                         "Rules:\n" +
@@ -24564,7 +24567,7 @@ document.documentElement.classList.toggle(
                     prioHigh: "عالية",
                     langWord: "Arabic",
                     promptHead:
-                        "أنت المساعد الاستباقي داخل تطبيق Daily.KRD. اكتب بطاقة موجز اليوم.\n" +
+                        "أنت المساعد الاستباقي داخل تطبيق Horizon. اكتب بطاقة موجز اليوم.\n" +
                         "أجب بكائن JSON واحد ONLY — بدون markdown، بدون أسوار كود، بدون أي نص آخر.\n" +
                         "Schema (المفاتيح تبقى بالإنجليزية): {\"briefing\":\"…\",\"suggestion\":\"…\",\"explanation\":\"…\",\"action\":\"open_tasks|start_study|review_flashcards|propose_task|none\",\"proposal\":{\"text\":\"…\",\"date\":\"YYYY-MM-DD\",\"time\":\"HH:MM or empty\",\"priority\":\"low|medium|high\"}}\n" +
                         "قواعد:\n" +
@@ -24601,7 +24604,7 @@ document.documentElement.classList.toggle(
                     prioHigh: "بەرز",
                     langWord: "Kurdish (Sorani)",
                     promptHead:
-                        "تۆ یاریدەدەری پێشنیاری ناو ئەپڵی Daily.KRD یت، بۆ کارتی پوختەی ڕۆژ.\n" +
+                        "تۆ یاریدەدەری پێشنیاری ناو ئەپڵی Horizon یت، بۆ کارتی پوختەی ڕۆژ.\n" +
                         "بە تەنها یەک شێوەنامەی JSON وەڵام بدەرەوە — نە مارکداون، نە فێنسی کۆد، نە دەقێکی تر.\n" +
                         "Schema (کلیلەکان هەمیشە ئینگلیزی بن): {\"briefing\":\"…\",\"suggestion\":\"…\",\"explanation\":\"…\",\"action\":\"open_tasks|start_study|review_flashcards|propose_task|none\",\"proposal\":{\"text\":\"…\",\"date\":\"YYYY-MM-DD\",\"time\":\"HH:MM or empty\",\"priority\":\"low|medium|high\"}}\n" +
                         "ڕێکخستنەکان:\n" +
@@ -25553,7 +25556,7 @@ document.documentElement.classList.toggle(
                     cachedMode = false;
                     savePlace(); saveCache(); renderForecast();
                 } catch (error) {
-                    console.warn('Daily.KRD weather unavailable:', error);
+                    console.warn('Horizon weather unavailable:', error);
                     if (forecast) { cachedMode = true; renderForecast(); showStatus(navigator.onLine ? tr('unavailable') : tr('offline'), true); }
                     else showStatus(tr('unavailable'), true);
                 } finally { isBusy = false; }
@@ -25588,7 +25591,7 @@ document.documentElement.classList.toggle(
                     });
                     root.hidden = false;
                     showStatus(tr('chooseResult'));
-                } catch (error) { console.warn('Daily.KRD city search failed:', error); showStatus(tr('unavailable'), true); }
+                } catch (error) { console.warn('Horizon city search failed:', error); showStatus(tr('unavailable'), true); }
             }
             function useLocation() {
                 if (!navigator.geolocation) { showStatus(tr('locationDenied'), true); return; }
