@@ -5521,6 +5521,51 @@
         .profile-stats-note { color: var(--muted, #777); font-size: 12px; line-height: 1.45; margin: 8px 2px 18px; }
         @media (min-width: 620px) { .profile-stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 </style>
+
+<style>
+/* Daily.KRD study calculator — functional utility, responsive and theme-aware. */
+.study-calculator-launch{width:100%;display:flex;align-items:center;gap:13px;margin:12px 0;padding:15px 16px;border:1px solid var(--border-color,rgba(128,128,128,.22));border-radius:16px;background:var(--card-bg,rgba(255,255,255,.72));color:inherit;text-align:left;cursor:pointer;transition:transform .16s ease,border-color .16s ease}
+.study-calculator-launch:hover{transform:translateY(-1px);border-color:var(--accent-color,#7c83ff)}
+.dark .study-calculator-launch{background:rgba(30,30,34,.86)}
+.study-calculator-launch-icon{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border-radius:13px;background:rgba(124,131,255,.13);font-size:23px}
+.study-calculator-launch-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.study-calculator-launch-title{font-weight:800;font-size:15px}
+.study-calculator-launch-sub{font-size:12px;line-height:1.4;color:var(--muted,#777)}
+.study-calculator-launch-arrow{font-size:26px;opacity:.65}
+.study-calculator-overlay{position:fixed;inset:0;z-index:100020;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(5,8,15,.68);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+.study-calculator-overlay.open{display:flex}
+.study-calculator-dialog{width:min(100%,420px);max-height:min(92dvh,760px);overflow:auto;padding:20px;border:1px solid rgba(255,255,255,.14);border-radius:24px;background:#f8f9fc;color:#171923;box-shadow:0 28px 100px rgba(0,0,0,.35)}
+.dark .study-calculator-dialog{background:#181a22;color:#f5f6fb;border-color:rgba(255,255,255,.12)}
+.study-calculator-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.study-calculator-eyebrow{font-size:9px;letter-spacing:1.5px;font-weight:900;color:#777f98;margin-bottom:6px}
+.study-calculator-header h2{font-size:23px;line-height:1.2;margin:0;font-weight:850}
+.study-calculator-close{width:38px;height:38px;border:0;border-radius:12px;background:rgba(128,128,128,.13);color:inherit;font-size:26px;cursor:pointer}
+.study-calculator-display-wrap{padding:14px;border-radius:16px;background:rgba(128,128,128,.09);margin-bottom:14px}
+.study-calculator-display-wrap label{display:block;font-size:11px;color:#85899b;margin-bottom:8px}
+.study-calculator-display{width:100%;min-width:0;border:0;outline:none;background:transparent;color:inherit;font-size:23px;font-weight:650;text-align:right;font-variant-numeric:tabular-nums}
+.study-calculator-result{min-height:34px;padding-top:8px;text-align:right;font-size:30px;font-weight:850;overflow-wrap:anywhere;color:#5664db;font-variant-numeric:tabular-nums}
+.dark .study-calculator-result{color:#a5adff}
+.study-calculator-keypad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.calc-key{min-width:0;min-height:52px;border:1px solid rgba(128,128,128,.13);border-radius:14px;background:#fff;color:#20222b;font-size:20px;font-weight:750;cursor:pointer;touch-action:manipulation;transition:transform .12s ease,filter .12s ease}
+.dark .calc-key{background:#272a35;color:#f5f6fb;border-color:rgba(255,255,255,.07)}
+.calc-key:active{transform:scale(.96)}
+.calc-key-muted{background:#e9ebf3;color:#34384b}
+.dark .calc-key-muted{background:#343746;color:#e6e8f6}
+.calc-key-op{background:#eceeff;color:#4d58c8}
+.dark .calc-key-op{background:#30334f;color:#bdc3ff}
+.calc-key-equals{background:#5865e8;color:white;border-color:transparent}
+.calc-key-zero{grid-column:span 1}
+.study-calculator-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.study-calculator-footer span{font-size:10px;line-height:1.45;color:#777f91;flex:1}
+.study-calculator-copy{border:0;border-radius:10px;padding:10px 12px;background:rgba(88,101,232,.12);color:#4d58c8;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
+.dark .study-calculator-copy{color:#c0c6ff}
+.study-calculator-status{min-height:16px;margin-top:8px;font-size:11px;color:#777f91}
+#swmCalculatorLaunch{font-size:18px}
+@media(max-width:480px){.study-calculator-overlay{padding:10px;align-items:center}.study-calculator-dialog{padding:16px;border-radius:20px;max-height:94dvh}.calc-key{min-height:49px;border-radius:12px}.study-calculator-footer{align-items:flex-start;flex-direction:column}.study-calculator-copy{width:100%}}
+@media(max-width:700px){#studyWithMeOverlay .swm-top-actions #swmCalculatorLaunch{display:inline-flex!important;align-items:center;justify-content:center}}
+@media(prefers-reduced-motion:reduce){.study-calculator-launch,.calc-key{transition:none}}
+</style>
+
 </head>
 
 <body>
@@ -6269,6 +6314,16 @@
             </div>
 
 
+            <!-- STUDY CALCULATOR LAUNCH -->
+            <button class="study-calculator-launch" id="studyCalculatorLaunch" type="button" aria-haspopup="dialog" aria-controls="studyCalculatorOverlay">
+                <span class="study-calculator-launch-icon" aria-hidden="true">🧮</span>
+                <span class="study-calculator-launch-copy">
+                    <span class="study-calculator-launch-title" id="studyCalculatorLaunchTitle">Study Calculator</span>
+                    <span class="study-calculator-launch-sub" id="studyCalculatorLaunchSub">Quick calculations without leaving your study session</span>
+                </span>
+                <span class="study-calculator-launch-arrow" aria-hidden="true">›</span>
+            </button>
+
             <!-- MINI PLAYER (shown inside Study when Music view is closed but a track is loaded) -->
             <button
                 class="study-mini-player"
@@ -6570,7 +6625,7 @@
             <div class="swm-topbar">
                 <div class="swm-brand"><span>◉ Personal timer</span><b id="studyWithMeClock">--:--</b></div>
                 <div class="swm-brand swm-goal-pill">◎ Session goals <b id="swmGoalCount">0/0</b></div>
-                <div class="swm-top-actions"><button class="swm-icon-btn" id="swmOpenAI" type="button" title="Open Daily AI" aria-label="Open Daily AI">✦</button><button class="swm-icon-btn" type="button" title="Music">♫</button><button class="swm-icon-btn" type="button" title="Fullscreen" onclick="document.getElementById('studyWithMeOverlay').requestFullscreen?.()">↗</button><button class="swm-icon-btn swm-close-top" id="studyWithMeClose" type="button" aria-label="Leave session">×</button></div>
+                <div class="swm-top-actions"><button class="swm-icon-btn" id="swmOpenAI" type="button" title="Open Daily AI" aria-label="Open Daily AI">✦</button><button class="swm-icon-btn" id="swmCalculatorLaunch" type="button" title="Study calculator" aria-label="Study calculator">🧮</button><button class="swm-icon-btn" type="button" title="Music">♫</button><button class="swm-icon-btn" type="button" title="Fullscreen" onclick="document.getElementById('studyWithMeOverlay').requestFullscreen?.()">↗</button><button class="swm-icon-btn swm-close-top" id="studyWithMeClose" type="button" aria-label="Leave session">×</button></div>
             </div>
 
             <aside class="swm-left-column">
@@ -6614,6 +6669,52 @@
             </aside>
 
             <div class="swm-bottom"><div class="swm-tip" id="studyWithMeTip">Stay focused. You can leave this screen and your timer will keep running.</div></div>
+        </div>
+
+
+        <!-- STUDY CALCULATOR DIALOG: shared by Study and Study With Me -->
+        <div id="studyCalculatorOverlay" class="study-calculator-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="studyCalculatorTitle">
+            <section class="study-calculator-dialog">
+                <header class="study-calculator-header">
+                    <div>
+                        <div class="study-calculator-eyebrow">DAILY.KRD · STUDY TOOLS</div>
+                        <h2 id="studyCalculatorTitle">Study Calculator</h2>
+                    </div>
+                    <button type="button" id="studyCalculatorClose" class="study-calculator-close" aria-label="Close calculator">×</button>
+                </header>
+                <div class="study-calculator-display-wrap">
+                    <label for="studyCalculatorDisplay" id="studyCalculatorExpressionLabel">Expression</label>
+                    <input id="studyCalculatorDisplay" class="study-calculator-display" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0" aria-label="Calculator expression">
+                    <div id="studyCalculatorResult" class="study-calculator-result" aria-live="polite">0</div>
+                </div>
+                <div class="study-calculator-keypad" id="studyCalculatorKeypad" role="group" aria-label="Calculator keypad">
+                    <button type="button" data-calc="clear" class="calc-key calc-key-muted">AC</button>
+                    <button type="button" data-calc="backspace" class="calc-key calc-key-muted">⌫</button>
+                    <button type="button" data-value="(" class="calc-key calc-key-muted">(</button>
+                    <button type="button" data-value=")" class="calc-key calc-key-muted">)</button>
+                    <button type="button" data-value="7" class="calc-key">7</button>
+                    <button type="button" data-value="8" class="calc-key">8</button>
+                    <button type="button" data-value="9" class="calc-key">9</button>
+                    <button type="button" data-value="÷" class="calc-key calc-key-op">÷</button>
+                    <button type="button" data-value="4" class="calc-key">4</button>
+                    <button type="button" data-value="5" class="calc-key">5</button>
+                    <button type="button" data-value="6" class="calc-key">6</button>
+                    <button type="button" data-value="×" class="calc-key calc-key-op">×</button>
+                    <button type="button" data-value="1" class="calc-key">1</button>
+                    <button type="button" data-value="2" class="calc-key">2</button>
+                    <button type="button" data-value="3" class="calc-key">3</button>
+                    <button type="button" data-value="−" class="calc-key calc-key-op">−</button>
+                    <button type="button" data-value="0" class="calc-key calc-key-zero">0</button>
+                    <button type="button" data-value="." class="calc-key">.</button>
+                    <button type="button" data-calc="equals" class="calc-key calc-key-equals">=</button>
+                    <button type="button" data-value="+" class="calc-key calc-key-op">+</button>
+                </div>
+                <footer class="study-calculator-footer">
+                    <span id="studyCalculatorHint">Supports +, −, ×, ÷ and parentheses. You can also type with your keyboard.</span>
+                    <button type="button" id="studyCalculatorCopy" class="study-calculator-copy">Copy result</button>
+                </footer>
+                <div id="studyCalculatorStatus" class="study-calculator-status" role="status" aria-live="polite"></div>
+            </section>
         </div>
 
 
@@ -9535,6 +9636,14 @@
                 studyWithMeResume: "Resume",
                 studyWithMeFinish: "Finish Session",
                 studyWithMeTip: "Stay focused. You can leave this screen and your timer will keep running.",
+                studyCalculator: "Study Calculator",
+                studyCalculatorSub: "Quick calculations without leaving your study session",
+                calculatorExpression: "Expression",
+                calculatorHint: "Supports +, −, ×, ÷ and parentheses. You can also type with your keyboard.",
+                calculatorCopy: "Copy result",
+                calculatorCopied: "Result copied",
+                calculatorInvalid: "Check the expression and try again.",
+                calculatorNoResult: "Calculate a result first.",
                 statsSubjects: "Subjects",
                 statsMostStudied: "Most Studied",
                 statsOther: "Other",
@@ -9971,6 +10080,14 @@ done: "تەواو",
                 statsByDay: "بەپێی ڕۆژ",
                 statsByMonthDay: "بەپێی ڕۆژی مانگ",
                 statsByMonth: "بەپێی مانگ",                statsLaunchText: "ئاماری خوێندن",
+                studyCalculator: "ژمێرەری خوێندن",
+                studyCalculatorSub: "ژمێریاری خێرا بەبێ دەرچوون لە دانیشتنی خوێندن",
+                calculatorExpression: "دەربڕین",
+                calculatorHint: "+, −, ×, ÷ و کەوانە پشتگیری دەکرێن. دەتوانیت کیبۆردیش بەکاربهێنیت.",
+                calculatorCopy: "لەبەرگرتنەوەی ئەنجام",
+                calculatorCopied: "ئەنجام لەبەرگیرا",
+                calculatorInvalid: "دەربڕینەکە بپشکنە و دووبارە هەوڵ بدەوە.",
+                calculatorNoResult: "سەرەتا ئەنجامێک هەژمار بکە.",
                 statsSubjects: "بابەتەکان",
                 statsMostStudied: "زۆرترین خوێندراو",
                 statsOther: "هیتر",
@@ -10417,6 +10534,14 @@ done: "تەواو",
                 studyWithMeResume: "استئناف",
                 studyWithMeFinish: "إنهاء الجلسة",
                 studyWithMeTip: "ابقَ مركزًا. يمكنك مغادرة هذه الشاشة وسيستمر المؤقت.",
+                studyCalculator: "آلة حاسبة للدراسة",
+                studyCalculatorSub: "حسابات سريعة دون مغادرة جلسة الدراسة",
+                calculatorExpression: "المعادلة",
+                calculatorHint: "تدعم + و− و× و÷ والأقواس. يمكنك الكتابة باستخدام لوحة المفاتيح أيضًا.",
+                calculatorCopy: "نسخ النتيجة",
+                calculatorCopied: "تم نسخ النتيجة",
+                calculatorInvalid: "تحقق من المعادلة وحاول مرة أخرى.",
+                calculatorNoResult: "احسب النتيجة أولًا.",
                 statsSubjects: "المواد الدراسية",
                 statsMostStudied: "الأكثر دراسة",
                 statsOther: "أخرى",
@@ -11317,6 +11442,7 @@ done: "تەواو",
                 if (swmEyebrow) swmEyebrow.textContent = t("studyWithMeEyebrow");
                 if (swmFinish) swmFinish.textContent = t("studyWithMeFinish");
                 if (swmTip) swmTip.textContent = t("studyWithMeTip");
+                if (window._refreshStudyCalculatorTranslations) window._refreshStudyCalculatorTranslations();
                 if (typeof window._renderStudyWithMe === "function") window._renderStudyWithMe();
             } catch (e) {}
 
@@ -20357,6 +20483,189 @@ document.documentElement.classList.toggle(
 
             window._renderStudyWithMe = render;
         })();
+
+
+        /* ============================================================
+           STUDY CALCULATOR
+           Shared modal launched from the Study section or Study With Me.
+           Uses a small arithmetic parser; no eval/Function execution.
+           ============================================================ */
+        (function initStudyCalculator() {
+            const overlay = document.getElementById("studyCalculatorOverlay");
+            const display = document.getElementById("studyCalculatorDisplay");
+            const result = document.getElementById("studyCalculatorResult");
+            const status = document.getElementById("studyCalculatorStatus");
+            const keypad = document.getElementById("studyCalculatorKeypad");
+            const closeBtn = document.getElementById("studyCalculatorClose");
+            const copyBtn = document.getElementById("studyCalculatorCopy");
+            const launchers = [document.getElementById("studyCalculatorLaunch"), document.getElementById("swmCalculatorLaunch")].filter(Boolean);
+            if (!overlay || !display || !result || !keypad) return;
+
+            let lastResult = null;
+            let previousFocus = null;
+
+            function translateLabels() {
+                const title = document.getElementById("studyCalculatorTitle");
+                const launchTitle = document.getElementById("studyCalculatorLaunchTitle");
+                const launchSub = document.getElementById("studyCalculatorLaunchSub");
+                const exprLabel = document.getElementById("studyCalculatorExpressionLabel");
+                const hint = document.getElementById("studyCalculatorHint");
+                if (title) title.textContent = t("studyCalculator");
+                if (launchTitle) launchTitle.textContent = t("studyCalculator");
+                if (launchSub) launchSub.textContent = t("studyCalculatorSub");
+                if (exprLabel) exprLabel.textContent = t("calculatorExpression");
+                if (hint) hint.textContent = t("calculatorHint");
+                if (copyBtn) copyBtn.textContent = t("calculatorCopy");
+            }
+
+            function parseExpression(raw) {
+                const input = String(raw).replace(/[×]/g, "*").replace(/[÷]/g, "/").replace(/[−]/g, "-").replace(/\s+/g, "");
+                if (!input || !/^[0-9.+*/()\-%^]+$/.test(input)) throw new Error("invalid");
+                let i = 0;
+                function number() {
+                    let start = i;
+                    while (i < input.length && /[0-9.]/.test(input[i])) i++;
+                    const part = input.slice(start, i);
+                    if (!part || (part.match(/\./g) || []).length > 1) throw new Error("invalid");
+                    const n = Number(part);
+                    if (!Number.isFinite(n)) throw new Error("invalid");
+                    return n;
+                }
+                function primary() {
+                    if (input[i] === "+") { i++; return unary(); }
+                    if (input[i] === "-") { i++; return -unary(); }
+                    let value;
+                    if (input[i] === "(") {
+                        i++; value = addSub();
+                        if (input[i] !== ")") throw new Error("invalid");
+                        i++;
+                    } else value = number();
+                    while (input[i] === "%") { value /= 100; i++; }
+                    return value;
+                }
+                function power() {
+                    let left = primary();
+                    if (input[i] === "^") { i++; left = Math.pow(left, unary()); }
+                    return left;
+                }
+                function unary() { return power(); }
+                function mulDiv() {
+                    let value = unary();
+                    while (input[i] === "*" || input[i] === "/") {
+                        const op = input[i++], rhs = unary();
+                        if (op === "/" && rhs === 0) throw new Error("dividezero");
+                        value = op === "*" ? value * rhs : value / rhs;
+                    }
+                    return value;
+                }
+                function addSub() {
+                    let value = mulDiv();
+                    while (input[i] === "+" || input[i] === "-") {
+                        const op = input[i++], rhs = mulDiv();
+                        value = op === "+" ? value + rhs : value - rhs;
+                    }
+                    return value;
+                }
+                const value = addSub();
+                if (i !== input.length || !Number.isFinite(value)) throw new Error("invalid");
+                return value;
+            }
+
+            function formatNumber(value) {
+                if (!Number.isFinite(value)) return "—";
+                const rounded = Math.abs(value) < 1e-10 ? 0 : Number(value.toPrecision(12));
+                return String(rounded);
+            }
+
+            function calculate(showError = true) {
+                if (!display.value.trim()) {
+                    result.textContent = "0";
+                    lastResult = null;
+                    if (status) status.textContent = "";
+                    return null;
+                }
+                try {
+                    const value = parseExpression(display.value);
+                    const formatted = formatNumber(value);
+                    result.textContent = formatted;
+                    lastResult = formatted;
+                    if (status) status.textContent = "";
+                    return formatted;
+                } catch (error) {
+                    lastResult = null;
+                    if (status) status.textContent = error.message === "dividezero" ? "Cannot divide by zero." : (showError ? t("calculatorInvalid") : "");
+                    return null;
+                }
+            }
+
+            function open() {
+                previousFocus = document.activeElement;
+                translateLabels();
+                overlay.classList.add("open");
+                overlay.setAttribute("aria-hidden", "false");
+                document.body.style.overflow = "hidden";
+                calculate(false);
+                window.setTimeout(() => display.focus(), 0);
+            }
+            function close() {
+                overlay.classList.remove("open");
+                overlay.setAttribute("aria-hidden", "true");
+                document.body.style.overflow = document.getElementById("studyWithMeOverlay")?.classList.contains("open") ? "hidden" : "";
+                if (previousFocus && typeof previousFocus.focus === "function") previousFocus.focus();
+            }
+            function insert(value) {
+                const start = display.selectionStart ?? display.value.length;
+                const end = display.selectionEnd ?? display.value.length;
+                display.value = display.value.slice(0, start) + value + display.value.slice(end);
+                const next = start + value.length;
+                display.setSelectionRange(next, next);
+                display.focus();
+                calculate(false);
+            }
+            function clear() { display.value = ""; result.textContent = "0"; lastResult = null; if (status) status.textContent = ""; display.focus(); }
+            function equals() {
+                const value = calculate(true);
+                if (value !== null) { display.value = value; result.textContent = value; display.focus(); display.setSelectionRange(display.value.length, display.value.length); }
+            }
+
+            launchers.forEach(button => button.addEventListener("click", open));
+            closeBtn?.addEventListener("click", close);
+            overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+            keypad.addEventListener("click", event => {
+                const button = event.target.closest("button[data-value],button[data-calc]");
+                if (!button) return;
+                const action = button.dataset.calc;
+                if (action === "clear") clear();
+                else if (action === "backspace") {
+                    const start = display.selectionStart ?? display.value.length;
+                    const end = display.selectionEnd ?? display.value.length;
+                    if (start !== end) { display.value = display.value.slice(0,start) + display.value.slice(end); display.setSelectionRange(start,start); }
+                    else if (start > 0) { display.value = display.value.slice(0,start-1) + display.value.slice(end); display.setSelectionRange(start-1,start-1); }
+                    calculate(false); display.focus();
+                } else if (action === "equals") equals();
+                else if (button.dataset.value) insert(button.dataset.value);
+            });
+            display.addEventListener("input", () => calculate(false));
+            display.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === "=") { event.preventDefault(); equals(); }
+                if (event.key === "Escape") { event.preventDefault(); close(); }
+            });
+            document.addEventListener("keydown", event => {
+                if (event.key === "Escape" && overlay.classList.contains("open")) close();
+            });
+            copyBtn?.addEventListener("click", async () => {
+                const value = lastResult ?? calculate(true);
+                if (value === null) { if (status) status.textContent = t("calculatorNoResult"); return; }
+                try {
+                    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(String(value));
+                    else { display.focus(); display.select(); if (!document.execCommand("copy")) throw new Error("copy failed"); }
+                    if (status) status.textContent = t("calculatorCopied");
+                } catch (_) { if (status) status.textContent = "Copy isn't available here. Select the result to copy it."; }
+            });
+            translateLabels();
+            window._refreshStudyCalculatorTranslations = translateLabels;
+        })();
+
 
 
         /* FLASHCARDS */
