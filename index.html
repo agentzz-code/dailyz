@@ -5691,10 +5691,6 @@
             <div class="dashboard-header">
                 <h1 class="dashboard-greeting" id="dashGreeting">Good morning</h1>
                 <div class="dashboard-date" id="dashDate"></div>
-                <div class="horizon-dashboard-actions">
-                    <button class="horizon-quick-action" type="button" data-open-section="taskManager"><span aria-hidden="true">✓</span><span id="dashQuickTasksLabel">Open tasks</span></button>
-                    <button class="horizon-quick-action" type="button" data-open-section="calendar"><span aria-hidden="true">▦</span><span id="dashQuickCalendarLabel">Open calendar</span></button>
-                </div>
             </div>
 
             <!-- PROACTIVE AI (Daily AI briefing + one suggestion) -->
@@ -22411,6 +22407,8 @@ document.documentElement.classList.toggle(
                     renderCalendar();
                 }
             };
+            window._horizonRefreshCalendar = function(){ updateCalendarUI(); renderCalendar(); };
+            document.addEventListener('horizon:calendar-open', window._horizonRefreshCalendar);
 
         })();
 
@@ -24575,21 +24573,30 @@ main { width: 100%; max-width: var(--horizon-content-max); margin-inline: auto; 
     #dashboardWidgetGrid { gap: 12px; }
 }
 @media (max-width: 760px) {
-    body { padding-block-start: max(env(safe-area-inset-top), 10px); padding-block-end: calc(92px + env(safe-area-inset-bottom)); padding-inline: 14px; }
+    body { padding-block-start: max(env(safe-area-inset-top), 10px); padding-block-end: calc(104px + env(safe-area-inset-bottom)); padding-inline: 14px; overflow-x: hidden; }
     .header { padding: 8px 2px 16px; }
     .header .logo { font-size: 28px; }
     .header-actions { gap: 7px; }
     .tabs#primaryNavigation {
-        inset-inline: 10px; inset-block: auto 0; width: auto; max-width: none;
-        margin: 0; padding: 7px 7px calc(7px + env(safe-area-inset-bottom));
-        display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); flex-direction: row; gap: 3px;
-        border-radius: 18px 18px 0 0; border-bottom: 0;
-        box-shadow: 0 -8px 30px rgba(0,0,0,.09); overflow: visible;
+        inset-inline: 10px; inset-block: auto 8px; width: auto; max-width: none;
+        margin: 0; padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+        display: flex; flex-direction: row; align-items: stretch; gap: 5px;
+        border: 1px solid rgba(255,255,255,.34); border-radius: 24px;
+        background: rgba(245,247,252,.62); backdrop-filter: blur(28px) saturate(185%);
+        -webkit-backdrop-filter: blur(28px) saturate(185%);
+        box-shadow: 0 8px 32px rgba(15,23,42,.18), inset 0 1px 0 rgba(255,255,255,.5);
+        overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x;
+        scroll-snap-type: x proximity;
     }
-    #primaryNavigation .tab { min-width: 0; min-height: 56px; width: auto; padding: 6px 2px; flex-direction: column; justify-content: center; align-items: center; gap: 4px; border-radius: 11px; font-size: 10.5px; }
+    .tabs#primaryNavigation::-webkit-scrollbar { display:none; }
+    .dark .tabs#primaryNavigation { background: rgba(28,30,38,.66); border-color: rgba(255,255,255,.13); box-shadow: 0 8px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.1); }
+    #primaryNavigation .tab { flex: 0 0 70px; min-width: 70px; min-height: 56px; width: 70px; padding: 6px 4px; flex-direction: column; justify-content: center; align-items: center; gap: 4px; border-radius: 16px; font-size: 10.5px; scroll-snap-align: center; }
+    #primaryNavigation .tab.active { background: rgba(255,255,255,.58); box-shadow: inset 0 0 0 1px rgba(255,255,255,.3), 0 2px 8px rgba(0,0,0,.05); }
+    .dark #primaryNavigation .tab.active { background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
     #primaryNavigation .nav-icon { width: auto; min-width: 0; font-size: 20px; }
     #primaryNavigation .nav-label { display: block; max-width: 100%; font-size: 10px; line-height: 1.2; }
-    #primaryNavigation .calendar-nav-tab { display: none !important; }
+    #primaryNavigation .calendar-nav-tab { display: flex !important; }
     main, .section { max-width: 100%; }
     .section { padding-bottom: 20px; }
     #dashboardWidgetGrid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
@@ -24607,8 +24614,6 @@ main { width: 100%; max-width: var(--horizon-content-max); margin-inline: auto; 
 @media (max-width: 360px) {
     body { padding-inline: 10px; }
     #primaryNavigation .nav-label { font-size: 9px; }
-    .horizon-dashboard-actions { gap: 6px; }
-    .horizon-quick-action { padding: 7px 9px; font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .horizon-more-card, .horizon-quick-action { transition: none; }
@@ -26038,11 +26043,24 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
   function lang(){const raw=(localStorage.getItem('dailykrd_language')||document.documentElement.lang||'en').toLowerCase();return raw.startsWith('ku')||raw==='kr'?'ku':raw.startsWith('ar')?'ar':'en';}
   function set(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
   function updateLabels(){const t=translations[lang()]||translations.en;
-    set('navTaskManagerLabel',t.tasks);set('navMoreLabel',t.more);set('taskManagerHeading',t.tasks);set('taskManagerEyebrow',t.plan);set('taskManagerDescription',t.taskDesc);set('moreHeading',t.more);set('moreEyebrow',t.workspace);set('moreDescription',t.moreDesc);set('dashOpenTasksLabel',t.taskManager);set('dashQuickTasksLabel',t.openTasks);set('dashQuickCalendarLabel',t.openCalendar);set('dashTasksSummaryCopy',t.taskCopy);
+    set('navTaskManagerLabel',t.tasks);set('navMoreLabel',t.more);set('taskManagerHeading',t.tasks);set('taskManagerEyebrow',t.plan);set('taskManagerDescription',t.taskDesc);set('moreHeading',t.more);set('moreEyebrow',t.workspace);set('moreDescription',t.moreDesc);set('dashOpenTasksLabel',t.taskManager);set('dashTasksSummaryCopy',t.taskCopy);
     set('moreCalendarLabel',t.calendar);set('moreCalendarHint',t.calendarHint);set('moreStatsLabel',t.stats);set('moreStatsHint',t.statsHint);set('moreProfileLabel',t.profile);set('moreProfileHint',t.profileHint);set('moreSettingsLabel',t.settings);set('moreSettingsHint',t.settingsHint);set('moreTasksLabel',t.tasks);set('moreTasksHint',t.tasksHint);set('moreStudyLabel',t.study);set('moreStudyHint',t.studyHint);set('moreAiLabel',t.ai);set('moreAiHint',t.aiHint);set('taskCalendarShortcutLabel',t.calendar);
   }
-  function routeTo(id){if(typeof window.showSection==='function')window.showSection(id);else {const tab=document.querySelector('.tab[data-tab="'+id+'"]');if(tab)tab.click();}
-    const more=document.getElementById('moreTab');const mobile=window.matchMedia('(max-width: 760px)').matches;if(more && (['studyStats','profile','settings'].includes(id)||(id==='calendar'&&mobile))){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));more.classList.add('active');}
+  function routeTo(id){
+    const target=document.getElementById(id);
+    if(!target)return;
+    const tab=document.querySelector('#primaryNavigation .tab[data-tab="'+id+'"]');
+    // For destinations with a tab, use the app's own click handler so its
+    // existing section-specific behavior continues to run.
+    if(tab){tab.click();}
+    else {
+      // Stats, Profile and Settings are intentionally reached from More and
+      // do not have their own primary-navigation tabs.
+      document.querySelectorAll('.section').forEach(section=>section.classList.toggle('active',section===target));
+      document.querySelectorAll('#primaryNavigation .tab').forEach(item=>item.classList.remove('active'));
+      const more=document.getElementById('moreTab');if(more)more.classList.add('active');
+      if(id==='studyStats' && typeof window._renderStudyStatsPage==='function')window._renderStudyStatsPage();
+    }
     window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   }
   document.addEventListener('click',function(e){
