@@ -5636,44 +5636,25 @@
 
     <!-- NAVIGATION -->
 
-    <nav class="tabs">
-
-        <button
-            class="tab active"
-            data-tab="tasks"
-            id="tasksTab"
-            type="button"
-        >
-            🏠 Today
+    <nav class="tabs" id="primaryNavigation" aria-label="Primary navigation">
+        <button class="tab active" data-tab="tasks" id="tasksTab" type="button" aria-label="Today">
+            <span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Today</span>
         </button>
-
-        <button
-            class="tab"
-            data-tab="study"
-            id="studyTab"
-            type="button"
-        >
-            📚 Study
+        <button class="tab" data-tab="taskManager" id="tasksManagerTab" type="button" aria-label="Tasks">
+            <span class="nav-icon" aria-hidden="true">✓</span><span class="nav-label" id="navTaskManagerLabel">Tasks</span>
         </button>
-
-        <button
-            class="tab"
-            data-tab="prayers"
-            id="prayersTab"
-            type="button"
-        >
-            🕌 Prayer
+        <button class="tab" data-tab="study" id="studyTab" type="button" aria-label="Study">
+            <span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Study</span>
         </button>
-
-        <button
-            class="tab"
-            data-tab="calendar"
-            id="calendarTab"
-            type="button"
-        >
-            📅 Calendar
+        <button class="tab" data-tab="prayers" id="prayersTab" type="button" aria-label="Prayer">
+            <span class="nav-icon" aria-hidden="true">☾</span><span class="nav-label">Prayer</span>
         </button>
-
+        <button class="tab calendar-nav-tab" data-tab="calendar" id="calendarTab" type="button" aria-label="Calendar">
+            <span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">Calendar</span>
+        </button>
+        <button class="tab" data-tab="more" id="moreTab" type="button" aria-label="More">
+            <span class="nav-icon" aria-hidden="true">•••</span><span class="nav-label" id="navMoreLabel">More</span>
+        </button>
     </nav>
 
 
@@ -5710,6 +5691,10 @@
             <div class="dashboard-header">
                 <h1 class="dashboard-greeting" id="dashGreeting">Good morning</h1>
                 <div class="dashboard-date" id="dashDate"></div>
+                <div class="horizon-dashboard-actions">
+                    <button class="horizon-quick-action" type="button" data-open-section="taskManager"><span aria-hidden="true">✓</span><span id="dashQuickTasksLabel">Open tasks</span></button>
+                    <button class="horizon-quick-action" type="button" data-open-section="calendar"><span aria-hidden="true">▦</span><span id="dashQuickCalendarLabel">Open calendar</span></button>
+                </div>
             </div>
 
             <!-- PROACTIVE AI (Daily AI briefing + one suggestion) -->
@@ -5820,6 +5805,32 @@
                 <div class="dashboard-text-medium" id="dashActivityText">Steps haven't synced yet.</div>
             </div>
 
+            <!-- TASKS SUMMARY WIDGET: task creation and the full list live on the separate Tasks screen -->
+            <div class="dashboard-card horizon-task-summary" id="dashTasksWidget">
+                <div class="dashboard-title">
+                    <span>✅ Tasks</span>
+                    <span id="taskManagerCountLabel" style="text-transform:none; font-weight:600;">Manage your tasks</span>
+                </div>
+                <p class="horizon-muted-copy" id="dashTasksSummaryCopy">Your task list is ready when you are.</p>
+                <button class="setting-button horizon-wide-action" type="button" data-open-section="taskManager">
+                    <span id="dashOpenTasksLabel">Open task manager →</span>
+                </button>
+            </div>
+
+        </section>
+
+
+        <!-- TASK MANAGER: existing task controls retained with their original IDs -->
+        <section class="section" id="taskManager" aria-labelledby="taskManagerHeading">
+            <div class="horizon-page-heading">
+                <div>
+                    <p class="horizon-eyebrow" id="taskManagerEyebrow">PLAN YOUR DAY</p>
+                    <h1 id="taskManagerHeading">Tasks</h1>
+                    <p class="horizon-page-description" id="taskManagerDescription">Capture tasks, set dates and deadlines, and track what you finish.</p>
+                </div>
+                <button class="setting-button" type="button" data-open-section="calendar"><span aria-hidden="true">▦ </span><span id="taskCalendarShortcutLabel">Calendar</span></button>
+            </div>
+            <div class="horizon-task-manager-shell">
             <!-- 5. TASKS (Wrapper for existing logic) -->
             <div class="dashboard-card" style="padding-bottom: 2px;">
                 <div class="dashboard-title" style="margin-bottom: 16px;">
@@ -6013,7 +6024,7 @@
                 <div id="taskList"></div>
 
             </div>
-
+            </div>
         </section>
 
 
@@ -6813,6 +6824,27 @@
 
             </div>
 
+        </section>
+
+
+        <!-- MORE: secondary destinations, especially for compact mobile navigation -->
+        <section class="section" id="more" aria-labelledby="moreHeading">
+            <div class="horizon-page-heading">
+                <div>
+                    <p class="horizon-eyebrow" id="moreEyebrow">YOUR WORKSPACE</p>
+                    <h1 id="moreHeading">More</h1>
+                    <p class="horizon-page-description" id="moreDescription">Calendar, insights, account and app tools.</p>
+                </div>
+            </div>
+            <div class="horizon-more-grid">
+                <button class="horizon-more-card" type="button" data-open-section="calendar"><span class="horizon-more-icon" aria-hidden="true">▦</span><span><strong id="moreCalendarLabel">Calendar</strong><small id="moreCalendarHint">Plan upcoming days</small></span><span class="horizon-more-arrow" aria-hidden="true">›</span></button>
+                <button class="horizon-more-card" type="button" data-open-section="studyStats"><span class="horizon-more-icon" aria-hidden="true">↗</span><span><strong id="moreStatsLabel">Study statistics</strong><small id="moreStatsHint">Review your progress</small></span><span class="horizon-more-arrow" aria-hidden="true">›</span></button>
+                <button class="horizon-more-card" type="button" data-open-section="profile"><span class="horizon-more-icon" aria-hidden="true">◎</span><span><strong id="moreProfileLabel">Profile</strong><small id="moreProfileHint">Your account and activity</small></span><span class="horizon-more-arrow" aria-hidden="true">›</span></button>
+                <button class="horizon-more-card" type="button" data-open-section="settings"><span class="horizon-more-icon" aria-hidden="true">⚙</span><span><strong id="moreSettingsLabel">Settings</strong><small id="moreSettingsHint">Preferences and notifications</small></span><span class="horizon-more-arrow" aria-hidden="true">›</span></button>
+                <button class="horizon-more-card" type="button" data-open-section="taskManager"><span class="horizon-more-icon" aria-hidden="true">✓</span><span><strong id="moreTasksLabel">Tasks</strong><small id="moreTasksHint">Open your task manager</small></span><span class="horizon-more-arrow" aria-hidden="true">›</span></button>
+                <button class="horizon-more-card" type="button" data-open-section="study"><span class="horizon-more-icon" aria-hidden="true">▤</span><span><strong id="moreStudyLabel">Study</strong><small id="moreStudyHint">Timer, calculator and tools</small></span><span class="horizon-more-arrow" aria-hidden="true">›</span></button>
+                <button class="horizon-more-card" type="button" data-horizon-action="ai"><span class="horizon-more-icon" aria-hidden="true">✦</span><span><strong id="moreAiLabel">Horizon AI</strong><small id="moreAiHint">Ask your study assistant</small></span><span class="horizon-more-arrow" aria-hidden="true">›</span></button>
+            </div>
         </section>
 
 
@@ -11069,28 +11101,21 @@ done: "تەواو",
                     : t("signUp");
 
 
-            document.getElementById(
-                "tasksTab"
-            ).textContent =
-                t("tasks");
+            const todayNavLabel = document.querySelector("#tasksTab .nav-label");
+            if (todayNavLabel) todayNavLabel.textContent = t("today") || t("tasks");
+            else document.getElementById("tasksTab").textContent = t("today") || t("tasks");
 
+            const calendarNavLabel = document.querySelector("#calendarTab .nav-label");
+            if (calendarNavLabel) calendarNavLabel.textContent = t("calendar");
+            else document.getElementById("calendarTab").textContent = t("calendar");
 
-            document.getElementById(
-                "calendarTab"
-            ).textContent =
-                t("calendar");
+            const prayerNavLabel = document.querySelector("#prayersTab .nav-label");
+            if (prayerNavLabel) prayerNavLabel.textContent = t("prayers");
+            else document.getElementById("prayersTab").textContent = t("prayers");
 
-
-            document.getElementById(
-                "prayersTab"
-            ).textContent =
-                t("prayers");
-
-
-            document.getElementById(
-                "studyTab"
-            ).textContent =
-                t("study");
+            const studyNavLabel = document.querySelector("#studyTab .nav-label");
+            if (studyNavLabel) studyNavLabel.textContent = t("study");
+            else document.getElementById("studyTab").textContent = t("study");
 
 
             document.getElementById(
@@ -12614,7 +12639,7 @@ done: "تەواو",
         if (startupDeepLinks.get("openStudyTimer") === "1") {
             showSection("study");
         } else if (deadlineDeepLinkTaskId) {
-            showSection("tasks");
+            showSection("taskManager");
         }
 
         document
@@ -24484,7 +24509,112 @@ document.documentElement.classList.toggle(
             .pa-actions { gap: 6px; }
             .pa-primary, .pa-secondary { padding: 8px 12px; font-size: 13px; }
         }
-    </style>
+    
+
+/* ================================================================
+   HORIZON 2.0 LAYOUT LAYER
+   Structural layout only: uses existing theme colors and variables.
+   ================================================================ */
+:root { --horizon-sidebar-width: 224px; --horizon-content-max: 1160px; }
+html { scroll-padding-top: 18px; }
+body { padding-block: max(env(safe-area-inset-top), 18px) max(env(safe-area-inset-bottom), 18px); padding-inline-start: calc(var(--horizon-sidebar-width) + 42px); padding-inline-end: 30px; }
+.header { max-width: var(--horizon-content-max); width: 100%; padding: 8px 0 22px; }
+.header .logo { font-size: 32px; }
+.tabs#primaryNavigation {
+    position: fixed; z-index: 1000; inset-block: 18px; inset-inline-start: 18px;
+    width: var(--horizon-sidebar-width); max-width: none; margin: 0; padding: 12px;
+    display: flex; flex-direction: column; align-items: stretch; gap: 6px;
+    border: 1px solid var(--border-color, rgba(128,128,128,.18)); border-radius: 20px;
+    background: var(--card-bg, rgba(240,240,245,.94)); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 10px 36px rgba(0,0,0,.07); overflow-y: auto; overscroll-behavior: contain;
+}
+.dark .tabs#primaryNavigation { background: var(--card-bg, rgba(30,30,34,.96)); }
+#primaryNavigation .tab { flex: 0 0 auto; width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: flex-start; gap: 13px; padding: 11px 13px; border-radius: 13px; text-align: start; font-size: 14px; white-space: normal; }
+#primaryNavigation .tab.active { box-shadow: none; }
+#primaryNavigation .nav-icon { width: 24px; min-width: 24px; display: inline-flex; justify-content: center; align-items: center; font-size: 21px; line-height: 1; }
+#primaryNavigation .nav-label { overflow: hidden; text-overflow: ellipsis; }
+main { width: 100%; max-width: var(--horizon-content-max); margin-inline: auto; }
+.section { max-width: var(--horizon-content-max); width: 100%; margin-inline: auto; padding-bottom: 50px; }
+#tasks .dashboard-header { padding: 4px 2px 0; margin-bottom: 22px; }
+#tasks .dashboard-greeting { font-size: clamp(29px, 3vw, 42px); line-height: 1.1; letter-spacing: -1px; }
+#dashboardWidgetGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+#dashboardWidgetGrid > [data-dashboard-widget] { min-width: 0; border-radius: 18px; }
+#dashboardWidgetGrid > [data-dashboard-widget="progress"],
+#dashboardWidgetGrid > [data-dashboard-widget="aiBriefing"] { grid-column: 1 / -1; }
+.horizon-dashboard-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.horizon-quick-action { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 8px 12px; border: 1px solid var(--border-color, rgba(128,128,128,.22)); border-radius: 11px; background: var(--card-bg, rgba(255,255,255,.62)); color: inherit; font-size: 13px; font-weight: 700; }
+.horizon-quick-action:active, .horizon-more-card:active { transform: scale(.985); }
+.horizon-page-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin: 4px 0 22px; }
+.horizon-page-heading h1 { margin: 0; font-size: clamp(28px, 3vw, 38px); letter-spacing: -.8px; line-height: 1.1; }
+.horizon-eyebrow { margin: 0 0 7px; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; opacity: .58; }
+.horizon-page-description, .horizon-muted-copy { margin: 8px 0 0; color: var(--muted-color, #777); font-size: 14px; line-height: 1.55; }
+.horizon-task-manager-shell { width: 100%; }
+.horizon-task-manager-shell > .dashboard-card { width: 100%; max-width: none; border-radius: 18px; }
+.horizon-wide-action { width: 100%; min-height: 44px; margin-top: 10px; }
+.horizon-task-summary .horizon-muted-copy { margin-bottom: 10px; }
+.horizon-more-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.horizon-more-card { min-width: 0; display: flex; align-items: center; gap: 13px; padding: 16px; text-align: start; border: 1px solid var(--border-color, rgba(128,128,128,.2)); border-radius: 16px; background: var(--card-bg, rgba(255,255,255,.65)); color: inherit; transition: transform .15s ease; }
+.horizon-more-card > span:nth-child(2) { flex: 1; min-width: 0; }
+.horizon-more-card strong, .horizon-more-card small { display: block; }
+.horizon-more-card strong { font-size: 14px; line-height: 1.35; }
+.horizon-more-card small { margin-top: 4px; font-size: 12px; line-height: 1.4; color: var(--muted-color, #777); }
+.horizon-more-icon { width: 42px; height: 42px; min-width: 42px; display: inline-flex; justify-content: center; align-items: center; border-radius: 13px; background: var(--surface-bg, rgba(128,128,128,.1)); font-size: 21px; }
+.horizon-more-arrow { opacity: .55; font-size: 24px; }
+[dir="rtl"] #primaryNavigation .tab { text-align: start; }
+[dir="rtl"] .horizon-more-arrow { transform: rotate(180deg); }
+
+@media (min-width: 761px) {
+    #calendar, #prayers, #study, #studyStats, #profile, #settings, #more, #taskManager { padding-top: 6px; }
+    #prayers, #study, #studyStats, #profile, #settings { max-width: 960px; }
+    .calendar-nav-tab { display: flex !important; }
+}
+@media (max-width: 1050px) and (min-width: 761px) {
+    :root { --horizon-sidebar-width: 196px; }
+    body { padding-inline-start: calc(var(--horizon-sidebar-width) + 30px); padding-inline-end: 22px; }
+    .tabs#primaryNavigation { inset-inline-start: 12px; width: var(--horizon-sidebar-width); }
+    #dashboardWidgetGrid { gap: 12px; }
+}
+@media (max-width: 760px) {
+    body { padding-block-start: max(env(safe-area-inset-top), 10px); padding-block-end: calc(92px + env(safe-area-inset-bottom)); padding-inline: 14px; }
+    .header { padding: 8px 2px 16px; }
+    .header .logo { font-size: 28px; }
+    .header-actions { gap: 7px; }
+    .tabs#primaryNavigation {
+        inset-inline: 10px; inset-block: auto 0; width: auto; max-width: none;
+        margin: 0; padding: 7px 7px calc(7px + env(safe-area-inset-bottom));
+        display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); flex-direction: row; gap: 3px;
+        border-radius: 18px 18px 0 0; border-bottom: 0;
+        box-shadow: 0 -8px 30px rgba(0,0,0,.09); overflow: visible;
+    }
+    #primaryNavigation .tab { min-width: 0; min-height: 56px; width: auto; padding: 6px 2px; flex-direction: column; justify-content: center; align-items: center; gap: 4px; border-radius: 11px; font-size: 10.5px; }
+    #primaryNavigation .nav-icon { width: auto; min-width: 0; font-size: 20px; }
+    #primaryNavigation .nav-label { display: block; max-width: 100%; font-size: 10px; line-height: 1.2; }
+    #primaryNavigation .calendar-nav-tab { display: none !important; }
+    main, .section { max-width: 100%; }
+    .section { padding-bottom: 20px; }
+    #dashboardWidgetGrid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    #dashboardWidgetGrid > [data-dashboard-widget="progress"],
+    #dashboardWidgetGrid > [data-dashboard-widget="aiBriefing"] { grid-column: auto; }
+    #tasks .dashboard-header { margin-bottom: 16px; }
+    #tasks .dashboard-greeting { font-size: clamp(27px, 7vw, 34px); }
+    .horizon-page-heading { align-items: flex-start; flex-direction: column; margin-bottom: 17px; }
+    .horizon-page-heading > button { align-self: stretch; }
+    .horizon-more-grid { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+    .horizon-more-card { padding: 13px; }
+    .horizon-more-icon { width: 38px; height: 38px; min-width: 38px; }
+    .horizon-task-manager-shell > .dashboard-card { padding: 16px; }
+}
+@media (max-width: 360px) {
+    body { padding-inline: 10px; }
+    #primaryNavigation .nav-label { font-size: 9px; }
+    .horizon-dashboard-actions { gap: 6px; }
+    .horizon-quick-action { padding: 7px 9px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .horizon-more-card, .horizon-quick-action { transition: none; }
+}
+
+</style>
     <script>
         (function () {
             "use strict";
@@ -25678,7 +25808,7 @@ document.documentElement.classList.toggle(
         {id:"weather", label:{en:"Weather",ku:"کەشوهەوا",ar:"الطقس"}, find:()=>document.getElementById("dailyWeatherCard")},
         {id:"study", label:{en:"Study goal",ku:"ئامانجی خوێندن",ar:"هدف الدراسة"}, find:()=>document.getElementById("dashStudyContent")?.closest(".dashboard-card")},
         {id:"activity", label:{en:"Steps / activity",ku:"هەنگاو و چالاکی",ar:"الخطوات والنشاط"}, find:()=>document.getElementById("dashActivityText")?.closest(".dashboard-card")},
-        {id:"tasks", label:{en:"Tasks",ku:"ئەرکەکان",ar:"المهام"}, find:()=>document.getElementById("taskInput")?.closest(".dashboard-card")},
+        {id:"tasks", label:{en:"Tasks",ku:"ئەرکەکان",ar:"المهام"}, find:()=>document.getElementById("dashTasksWidget")},
         {id:"aiBriefing", label:{en:"Daily AI briefing",ku:"پوختەی زیرەکی دەستکرد",ar:"ملخص الذكاء الاصطناعي"}, find:()=>document.getElementById("paCard")}
     ];
     function lang(){ const x=(localStorage.getItem("dailykrd_language")||document.documentElement.lang||"en").toLowerCase(); return x.startsWith("ku")||x==="kr"?"ku":x.startsWith("ar")?"ar":"en"; }
@@ -25893,6 +26023,36 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     if (typeof window.timerFinishSession === 'function' && window.timerFinishSession.__dailyKrdSoundWrapped) clearInterval(hapticWait);
   }, 500);
   setTimeout(function () { clearInterval(hapticWait); }, 10000);
+})();
+</script>
+
+
+<script id="horizon20LayoutNavigation">
+(function () {
+  'use strict';
+  const translations = {
+    en: {today:'Today',tasks:'Tasks',study:'Study',prayer:'Prayer',calendar:'Calendar',more:'More',plan:'PLAN YOUR DAY',taskDesc:'Capture tasks, set dates and deadlines, and track what you finish.',workspace:'YOUR WORKSPACE',moreDesc:'Calendar, insights, account and app tools.',openTasks:'Open tasks',openCalendar:'Open calendar',taskManager:'Open task manager',taskCopy:'Your task list is ready when you are.',calendarHint:'Plan upcoming days',stats:'Study statistics',statsHint:'Review your progress',profile:'Profile',profileHint:'Your account and activity',settings:'Settings',settingsHint:'Preferences and notifications',tasksHint:'Open your task manager',studyHint:'Timer, calculator and tools',ai:'Horizon AI',aiHint:'Ask your study assistant'},
+    ku: {today:'ئەمڕۆ',tasks:'ئەرکەکان',study:'خوێندن',prayer:'نوێژ',calendar:'ڕۆژژمێر',more:'زیاتر',plan:'ڕێکخستنی ڕۆژەکەت',taskDesc:'ئەرک زیاد بکە، بەروار و کاتی کۆتایی دیاری بکە و تەواوکردنەکانت بەدواداچوون بکە.',workspace:'شوێنی کارەکەت',moreDesc:'ڕۆژژمێر، ئامار، هەژمار و ئامرازەکان.',openTasks:'کردنەوەی ئەرکەکان',openCalendar:'کردنەوەی ڕۆژژمێر',taskManager:'کردنەوەی بەڕێوەبەری ئەرک',taskCopy:'لیستی ئەرکەکانت ئامادەیە.',calendarHint:'ڕۆژانی داهاتوو ڕێکبخە',stats:'ئاماری خوێندن',statsHint:'پێداچوونەوە بە پێشکەوتن',profile:'پرۆفایل',profileHint:'هەژمار و چالاکییەکانت',settings:'ڕێکخستنەکان',settingsHint:'هەڵبژاردە و ئاگادارکردنەوەکان',tasksHint:'بەڕێوەبەری ئەرکەکان بکەرەوە',studyHint:'کاتژمێر، ژمێرەر و ئامرازەکان',ai:'Horizon AI',aiHint:'پرسیار لە یاریدەدەری خوێندنت بکە'},
+    ar: {today:'اليوم',tasks:'المهام',study:'الدراسة',prayer:'الصلاة',calendar:'التقويم',more:'المزيد',plan:'خطط ليومك',taskDesc:'أضف المهام وحدد التواريخ والمواعيد النهائية وتابع إنجازك.',workspace:'مساحة عملك',moreDesc:'التقويم والإحصاءات والحساب وأدوات التطبيق.',openTasks:'فتح المهام',openCalendar:'فتح التقويم',taskManager:'فتح مدير المهام',taskCopy:'قائمة مهامك جاهزة.',calendarHint:'خطط للأيام القادمة',stats:'إحصاءات الدراسة',statsHint:'راجع تقدمك',profile:'الملف الشخصي',profileHint:'حسابك ونشاطك',settings:'الإعدادات',settingsHint:'التفضيلات والإشعارات',tasksHint:'افتح مدير المهام',studyHint:'المؤقت والآلة الحاسبة والأدوات',ai:'Horizon AI',aiHint:'اسأل مساعد الدراسة'}
+  };
+  function lang(){const raw=(localStorage.getItem('dailykrd_language')||document.documentElement.lang||'en').toLowerCase();return raw.startsWith('ku')||raw==='kr'?'ku':raw.startsWith('ar')?'ar':'en';}
+  function set(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+  function updateLabels(){const t=translations[lang()]||translations.en;
+    set('navTaskManagerLabel',t.tasks);set('navMoreLabel',t.more);set('taskManagerHeading',t.tasks);set('taskManagerEyebrow',t.plan);set('taskManagerDescription',t.taskDesc);set('moreHeading',t.more);set('moreEyebrow',t.workspace);set('moreDescription',t.moreDesc);set('dashOpenTasksLabel',t.taskManager);set('dashQuickTasksLabel',t.openTasks);set('dashQuickCalendarLabel',t.openCalendar);set('dashTasksSummaryCopy',t.taskCopy);
+    set('moreCalendarLabel',t.calendar);set('moreCalendarHint',t.calendarHint);set('moreStatsLabel',t.stats);set('moreStatsHint',t.statsHint);set('moreProfileLabel',t.profile);set('moreProfileHint',t.profileHint);set('moreSettingsLabel',t.settings);set('moreSettingsHint',t.settingsHint);set('moreTasksLabel',t.tasks);set('moreTasksHint',t.tasksHint);set('moreStudyLabel',t.study);set('moreStudyHint',t.studyHint);set('moreAiLabel',t.ai);set('moreAiHint',t.aiHint);set('taskCalendarShortcutLabel',t.calendar);
+  }
+  function routeTo(id){if(typeof window.showSection==='function')window.showSection(id);else {const tab=document.querySelector('.tab[data-tab="'+id+'"]');if(tab)tab.click();}
+    const more=document.getElementById('moreTab');const mobile=window.matchMedia('(max-width: 760px)').matches;if(more && (['studyStats','profile','settings'].includes(id)||(id==='calendar'&&mobile))){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));more.classList.add('active');}
+    window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  }
+  document.addEventListener('click',function(e){
+    const route=e.target.closest('[data-open-section]');if(route){e.preventDefault();routeTo(route.getAttribute('data-open-section'));return;}
+    const ai=e.target.closest('[data-horizon-action="ai"]');if(ai){e.preventDefault();const toggle=document.getElementById('aiToggle');if(toggle)toggle.click();else {const box=document.getElementById('aiBox');if(box)box.classList.toggle('open');}return;}
+  });
+  updateLabels();
+  if('MutationObserver'in window)new MutationObserver(updateLabels).observe(document.documentElement,{attributes:true,attributeFilter:['lang','dir']});
+  window.addEventListener('storage',e=>{if(e.key==='dailykrd_language')updateLabels();});
+  window.addEventListener('load',updateLabels,{once:true});
 })();
 </script>
 
