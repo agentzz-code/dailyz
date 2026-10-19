@@ -5655,6 +5655,11 @@
         <button class="tab" data-tab="more" id="moreTab" type="button" aria-label="More">
             <span class="nav-icon" aria-hidden="true">•••</span><span class="nav-label" id="navMoreLabel">More</span>
         </button>
+        <!-- Compact-dock destinations revealed only after a press-and-hold on mobile. -->
+        <button class="tab mobile-extra-tab" type="button" data-open-section="studyStats" aria-label="Study statistics"><span class="nav-icon" aria-hidden="true">↗</span><span class="nav-label">Stats</span></button>
+        <button class="tab mobile-extra-tab" type="button" data-open-section="profile" aria-label="Profile"><span class="nav-icon" aria-hidden="true">◎</span><span class="nav-label">Profile</span></button>
+        <button class="tab mobile-extra-tab" type="button" data-open-section="settings" aria-label="Settings"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label">Settings</span></button>
+        <button class="tab mobile-extra-tab" type="button" data-horizon-action="ai" aria-label="Horizon AI"><span class="nav-icon" aria-hidden="true">✦</span><span class="nav-label">AI</span></button>
     </nav>
 
 
@@ -24619,6 +24624,41 @@ main { width: 100%; max-width: var(--horizon-content-max); margin-inline: auto; 
     .horizon-more-card, .horizon-quick-action { transition: none; }
 }
 
+/* Horizon mobile dock: compact Apple-inspired pill; hold to reveal the swipeable destination strip. */
+.mobile-extra-tab { display: none !important; }
+@media (max-width: 760px) {
+    body { padding-block-end: calc(82px + env(safe-area-inset-bottom)); }
+    .tabs#primaryNavigation {
+        inset-inline-start: 50%; inset-inline-end: auto; transform: translateX(-50%);
+        bottom: calc(7px + env(safe-area-inset-bottom)); width: max-content; max-width: calc(100vw - 28px);
+        padding: 5px; gap: 2px; border-radius: 22px;
+        background: rgba(246,247,250,.76); border: 1px solid rgba(255,255,255,.68);
+        box-shadow: 0 5px 22px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.82);
+        overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap;
+        transition: width .22s ease, border-radius .22s ease, background .22s ease;
+        touch-action: pan-x; user-select: none; -webkit-user-select: none;
+    }
+    .dark .tabs#primaryNavigation { background: rgba(28,30,38,.78); border-color: rgba(255,255,255,.16); box-shadow: 0 5px 22px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.12); }
+    #primaryNavigation .tab { flex: 0 0 57px; width: 57px; min-width: 57px; min-height: 48px; padding: 4px 2px; gap: 2px; border-radius: 15px; }
+    #primaryNavigation .nav-icon { font-size: 19px; }
+    #primaryNavigation .nav-label { font-size: 9px; line-height: 1.05; }
+    #primaryNavigation #moreTab { display: none !important; }
+    #primaryNavigation .calendar-nav-tab { display: none !important; }
+    #primaryNavigation .mobile-extra-tab { display: none !important; }
+    #primaryNavigation .tab.active { background: rgba(255,255,255,.72); box-shadow: 0 1px 4px rgba(0,0,0,.08), inset 0 0 0 1px rgba(255,255,255,.7); }
+    .dark #primaryNavigation .tab.active { background: rgba(255,255,255,.15); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+    #primaryNavigation.nav-expanded { width: calc(100vw - 24px); max-width: calc(100vw - 24px); justify-content: flex-start; border-radius: 20px; background: rgba(246,247,250,.88); }
+    .dark #primaryNavigation.nav-expanded { background: rgba(28,30,38,.9); }
+    #primaryNavigation.nav-expanded .calendar-nav-tab,
+    #primaryNavigation.nav-expanded .mobile-extra-tab { display: flex !important; }
+    #primaryNavigation.nav-expanded #moreTab { display: none !important; }
+    #primaryNavigation.nav-expanded .tab { flex-basis: 62px; width: 62px; min-width: 62px; }
+    #primaryNavigation.nav-expanded .nav-label { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #primaryNavigation { transition: none !important; }
+}
+
 </style>
     <script>
         (function () {
@@ -26074,5 +26114,70 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 })();
 </script>
 
+
+<script id="horizonMobileGlassDock">
+(function(){
+  'use strict';
+  const nav=document.getElementById('primaryNavigation');
+  if(!nav) return;
+  let holdTimer=null, didExpandFromHold=false, startX=0, startY=0, pointerMoved=false;
+  const mobile=()=>window.matchMedia('(max-width: 760px)').matches;
+  function clearHold(){ if(holdTimer){clearTimeout(holdTimer);holdTimer=null;} }
+  nav.addEventListener('pointerdown',function(e){
+    if(!mobile() || e.pointerType==='mouse') return;
+    startX=e.clientX; startY=e.clientY; pointerMoved=false; didExpandFromHold=false;
+    clearHold();
+    holdTimer=setTimeout(function(){
+      nav.classList.add('nav-expanded');
+      didExpandFromHold=true;
+      const active=nav.querySelector('.tab.active');
+      if(active) active.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+    },460);
+  },{passive:true});
+  nav.addEventListener('pointermove',function(e){
+    if(Math.abs(e.clientX-startX)>10 || Math.abs(e.clientY-startY)>12){pointerMoved=true;clearHold();}
+  },{passive:true});
+  ['pointerup','pointercancel','pointerleave'].forEach(type=>nav.addEventListener(type,clearHold,{passive:true}));
+  nav.addEventListener('click',function(e){
+    if(!mobile()) return;
+    if(didExpandFromHold){
+      didExpandFromHold=false;
+      e.preventDefault(); e.stopImmediatePropagation();
+      return;
+    }
+    const item=e.target.closest('.tab');
+    if(!item) return;
+    if(item.matches('[data-open-section]')){
+      e.preventDefault(); e.stopPropagation();
+      const id=item.getAttribute('data-open-section');
+      const target=document.getElementById(id);
+      if(target){
+        const regularTab=nav.querySelector('.tab[data-tab="'+id+'"]');
+        if(regularTab) regularTab.click();
+        else {
+          document.querySelectorAll('.section').forEach(section=>section.classList.toggle('active',section===target));
+          nav.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
+          const equivalent={studyStats:'study',profile:'tasks',settings:'tasks'}[id];
+          const active=equivalent&&nav.querySelector('.tab[data-tab="'+equivalent+'"]');
+          if(active) active.classList.add('active');
+          if(id==='studyStats' && typeof window._renderStudyStatsPage==='function') window._renderStudyStatsPage();
+        }
+      }
+      nav.classList.remove('nav-expanded'); return;
+    }
+    if(item.matches('[data-horizon-action="ai"]')){
+      e.preventDefault(); e.stopPropagation();
+      const toggle=document.getElementById('aiToggle');
+      if(toggle) toggle.click(); else {const box=document.getElementById('aiBox');if(box)box.classList.toggle('open');}
+      nav.classList.remove('nav-expanded'); return;
+    }
+    if(item.id!=='moreTab' && item.matches('[data-tab]')) nav.classList.remove('nav-expanded');
+  },true);
+  document.addEventListener('click',function(e){
+    if(mobile() && nav.classList.contains('nav-expanded') && !nav.contains(e.target)) nav.classList.remove('nav-expanded');
+  });
+  window.addEventListener('resize',function(){if(!mobile()) nav.classList.remove('nav-expanded');});
+})();
+</script>
 </body>
 </html>
