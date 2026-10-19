@@ -23,7 +23,7 @@
                 // Full-palette themes share one class structure; only their
                 // variables differ. Applied pre-paint so there is no flash.
                 var themeName = localStorage.getItem("dailykrd_theme");
-                var paletteThemes = ["horizon", "ocean", "sunset", "forest", "berry"];
+                var paletteThemes = ["horizon", "ocean", "sunset", "forest", "berry", "glass"];
                 var isPalette = paletteThemes.indexOf(themeName) !== -1;
 
                 if (isPalette) {
@@ -35,7 +35,8 @@
                     ocean: ["#E7EFF7", "#0A1B2E"],
                     sunset: ["#F5E8DE", "#221410"],
                     forest: ["#E7EDDD", "#0F1F16"],
-                    berry: ["#F4E6EC", "#1F0F18"]
+                    berry: ["#F4E6EC", "#1F0F18"],
+                    glass: ["#EAF2FA", "#101923"]
                 };
 
                 var meta = document.querySelector('meta[name="theme-color"]');
@@ -5364,6 +5365,108 @@
             --tp-logo1: #FAE8F0; --tp-logo2: #F4A3C4; --tp-logo3: #FAE8F0;
         }
 
+        /* ---------- GLASS — Apple-inspired translucent surfaces ---------- */
+        .theme-glass {
+            --tp-bg: #EAF2FA;
+            --tp-g1: #F7FAFE; --tp-g2: #EAF2FA; --tp-g3: #D7E7F6;
+            --tp-orb1: #FFFFFF; --tp-orb2: #9FC9F0; --tp-orb3: #759BC4;
+            --tp-ink: #172A3E; --tp-muted: rgba(23, 42, 62, .62);
+            --tp-card: rgba(255, 255, 255, .52); --tp-brd: rgba(255, 255, 255, .72);
+            --tp-modal: rgba(246, 250, 255, .88); --tp-overlay: rgba(234, 242, 250, .92);
+            --tp-bar: rgba(255, 255, 255, .48); --tp-chip: rgba(255, 255, 255, .48);
+            --tp-track: rgba(36, 74, 112, .12); --tp-check: rgba(36, 74, 112, .38);
+            --tp-ring: rgba(73, 132, 190, .65);
+            --tp-pill: #244A70; --tp-pill-text: #F4F9FF;
+            --tp-hero: rgba(255, 255, 255, .58); --tp-hero-text: #172A3E;
+            --tp-btn: #244A70; --tp-btn-text: #F4F9FF;
+            --tp-fab: rgba(255, 255, 255, .72); --tp-fab-text: #244A70;
+            --tp-sel: #D3E8FC; --tp-sel-text: #172A3E; --tp-sel-score: rgba(23, 42, 62, .7);
+            --tp-logo1: #172A3E; --tp-logo2: #4984BE; --tp-logo3: #172A3E;
+            --tp-solid-light: #F4F9FF; --tp-solid-ink: #172A3E;
+        }
+        .dark.theme-glass {
+            --tp-bg: #101923;
+            --tp-g1: #172636; --tp-g2: #101923; --tp-g3: #20374C;
+            --tp-orb1: #A8D6FF; --tp-orb2: #477BAA; --tp-orb3: #080F17;
+            --tp-ink: #F0F7FF; --tp-muted: rgba(240, 247, 255, .66);
+            --tp-card: rgba(31, 49, 67, .55); --tp-brd: rgba(255, 255, 255, .16);
+            --tp-modal: rgba(20, 34, 48, .92); --tp-overlay: rgba(12, 22, 32, .94);
+            --tp-bar: rgba(255, 255, 255, .09); --tp-chip: rgba(255, 255, 255, .09);
+            --tp-track: rgba(240, 247, 255, .14); --tp-check: rgba(240, 247, 255, .38);
+            --tp-ring: rgba(151, 207, 255, .72);
+            --tp-pill: #B8DFFF; --tp-pill-text: #102A43;
+            --tp-hero: rgba(184, 223, 255, .14); --tp-hero-text: #F0F7FF;
+            --tp-btn: #B8DFFF; --tp-btn-text: #102A43;
+            --tp-fab: rgba(255, 255, 255, .14); --tp-fab-text: #F0F7FF;
+            --tp-sel: rgba(184, 223, 255, .22); --tp-sel-text: #F0F7FF; --tp-sel-score: rgba(240, 247, 255, .76);
+            --tp-logo1: #F0F7FF; --tp-logo2: #B8DFFF; --tp-logo3: #F0F7FF;
+            --tp-solid-light: #B8DFFF; --tp-solid-ink: #102A43;
+        }
+        /* Glass treatment is limited to app surfaces; content remains readable. */
+        .theme-glass .dashboard-card,
+        .theme-glass .streak-card,
+        .theme-glass .step-card,
+        .theme-glass .progress-ring-card,
+        .theme-glass .score-card,
+        .theme-glass .quote-card,
+        .theme-glass .selected-day,
+        .theme-glass .task,
+        .theme-glass .calendar-card,
+        .theme-glass .qibla-card,
+        .theme-glass .prayer,
+        .theme-glass .prayer-tracker,
+        .theme-glass .settings-card,
+        .theme-glass .study-progress-card,
+        .theme-glass .study-timer-card,
+        .theme-glass .study-subject,
+        .theme-glass .study-stats-launch,
+        .theme-glass .cal-day-events-card,
+        .theme-glass .cal-upcoming-card,
+        .theme-glass .tabs,
+        .theme-glass .horizon-glass-dock {
+            -webkit-backdrop-filter: blur(22px) saturate(155%);
+            backdrop-filter: blur(22px) saturate(155%);
+            box-shadow: 0 8px 28px rgba(31, 62, 91, .08), inset 0 1px 0 rgba(255, 255, 255, .68);
+        }
+        .theme-glass .dashboard-card,
+        .theme-glass .settings-card,
+        .theme-glass .study-timer-card,
+        .theme-glass .calendar-card,
+        .theme-glass .prayer-tracker {
+            border-radius: 22px;
+        }
+        .theme-glass .icon-button,
+        .theme-glass .setting-button,
+        .theme-glass .language-option,
+        .theme-glass .calendar-nav button,
+        .theme-glass .prayer-cal-nav button {
+            border: 1px solid rgba(255, 255, 255, .56);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .62), 0 3px 12px rgba(31, 62, 91, .06);
+        }
+        .dark.theme-glass .dashboard-card,
+        .dark.theme-glass .streak-card,
+        .dark.theme-glass .step-card,
+        .dark.theme-glass .progress-ring-card,
+        .dark.theme-glass .score-card,
+        .dark.theme-glass .quote-card,
+        .dark.theme-glass .selected-day,
+        .dark.theme-glass .task,
+        .dark.theme-glass .calendar-card,
+        .dark.theme-glass .qibla-card,
+        .dark.theme-glass .prayer,
+        .dark.theme-glass .prayer-tracker,
+        .dark.theme-glass .settings-card,
+        .dark.theme-glass .study-progress-card,
+        .dark.theme-glass .study-timer-card,
+        .dark.theme-glass .study-subject,
+        .dark.theme-glass .study-stats-launch,
+        .dark.theme-glass .cal-day-events-card,
+        .dark.theme-glass .cal-upcoming-card,
+        .dark.theme-glass .tabs,
+        .dark.theme-glass .horizon-glass-dock {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255, 255, 255, .13);
+        }
+
         /* Focus room visual refresh */
         #studyWithMeOverlay { padding: 10px 18px 18px; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #17120f; }
         .swm-bg { inset: 0; background: linear-gradient(rgba(18,12,10,.46),rgba(12,9,8,.7)), radial-gradient(ellipse at 45% 42%, rgba(180,104,46,.42), transparent 43%), linear-gradient(110deg,#17120f 0%,#59321d 46%,#1d1511 100%); animation: none; }
@@ -7091,6 +7194,7 @@
                             <button type="button" class="setting-button theme-option" data-theme="forest" data-theme-color="#2e8b57">Forest</button>
                             <button type="button" class="setting-button theme-option" data-theme="berry" data-theme-color="#c2185b">Berry</button>
                             <button type="button" class="setting-button theme-option" data-theme="horizon">Horizon</button>
+                            <button type="button" class="setting-button theme-option" data-theme="glass" data-theme-color="#244A70">Glass</button>
                         </div>
 
                     </div>
@@ -10745,27 +10849,30 @@ done: "تەواو",
         /* STATUS BAR / THEME COLOR */
 
         /* Full-palette theme registry (light/dark accent + meta colors). */
-        const PALLETE_THEMES = ["horizon", "ocean", "sunset", "forest", "berry"];
+        const PALLETE_THEMES = ["horizon", "ocean", "sunset", "forest", "berry", "glass"];
         const THEME_ACCENTS = {
             horizon: ["#1E3A34", "#F5A937"],
             ocean: ["#0D3B66", "#9CC9EE"],
             sunset: ["#6E3527", "#ED9B4E"],
             forest: ["#234D38", "#9CD3A6"],
-            berry: ["#6E1B3F", "#F4A3C4"]
+            berry: ["#6E1B3F", "#F4A3C4"],
+            glass: ["#244A70", "#B8DFFF"]
         };
         const THEME_ACCENT_CONTRASTS = {
             "1e3a34": "#F0E9D2", "f5a937": "#12211F",
             "0d3b66": "#F0F6FC", "9cc9ee": "#0E2A43",
             "6e3527": "#FBEBDD", "ed9b4e": "#46291F",
             "234d38": "#EFF5EC", "9cd3a6": "#1E3A2C",
-            "6e1b3f": "#FCE9F1", "f4a3c4": "#49172E"
+            "6e1b3f": "#FCE9F1", "f4a3c4": "#49172E",
+            "244a70": "#F4F9FF", "b8dfff": "#102A43"
         };
         const THEME_META_COLORS = {
             horizon: ["#F0E9D2", "#12211F"],
             ocean: ["#E7EFF7", "#0A1B2E"],
             sunset: ["#F5E8DE", "#221410"],
             forest: ["#E7EDDD", "#0F1F16"],
-            berry: ["#F4E6EC", "#1F0F18"]
+            berry: ["#F4E6EC", "#1F0F18"],
+            glass: ["#EAF2FA", "#101923"]
         };
 
         function syncThemeColorMeta() {
