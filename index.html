@@ -237,6 +237,23 @@
 
         /* Header */
 
+        /* Horizon AI 3.0 settings */
+        #aiSettingsModal { display:none; position:absolute; inset:0; z-index:20; padding:14px; overflow:auto; background:var(--ai-panel); color:var(--ai-ink); }
+        #aiSettingsModal.open { display:block; animation:aiPanelIn .18s ease-out; }
+        .aiSettingsTop { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+        .aiSettingsTop strong { font-size:16px; }
+        .aiSettingsClose { border:0; border-radius:10px; padding:8px 10px; background:var(--ai-chip); color:var(--ai-ink); }
+        .aiSettingsGroup { border:1px solid var(--ai-brd); border-radius:14px; padding:12px; margin:10px 0; }
+        .aiSettingsGroup h4 { margin:0 0 8px; font-size:13px; }
+        .aiSettingsGroup label { display:block; font-size:12px; color:var(--ai-muted); margin:9px 0 5px; }
+        .aiSettingsGroup select,.aiSettingsGroup input,.aiSettingsGroup textarea { box-sizing:border-box; width:100%; border:1px solid var(--ai-brd); border-radius:10px; padding:9px 10px; background:var(--ai-panel-2); color:var(--ai-ink); font:inherit; font-size:13px; }
+        .aiSettingsGroup textarea { min-height:68px; resize:vertical; }
+        .aiSettingsHint { font-size:11px; line-height:1.45; color:var(--ai-muted); margin:6px 0 0; }
+        .aiSettingsSave { border:0; border-radius:11px; padding:10px 12px; width:100%; background:var(--ai-btn); color:var(--ai-btn-ink); font-weight:700; margin-top:8px; }
+        .aiSettingsStatus { font-size:12px; color:var(--ai-muted); min-height:16px; margin-top:8px; }
+        .aiActionCard { border:1px solid var(--ai-brd); border-radius:13px; padding:12px; margin:8px 0; background:var(--ai-panel-2); }
+        .aiActionCard button { border:0; border-radius:9px; padding:8px 10px; margin:8px 6px 0 0; background:var(--ai-btn); color:var(--ai-btn-ink); }
+        .aiActionCard button.secondary { background:var(--ai-chip); color:var(--ai-ink); }
         #aiHeader {
             display: flex;
             align-items: center;
@@ -22592,6 +22609,7 @@ document.documentElement.classList.toggle(
            engine calls exclusively after the user taps an explicit
            confirmation button in the card UI.
            ===================================================== */
+        window.__horizonAiCreatedTasks = window.__horizonAiCreatedTasks || new Set();
         window.__paBridge = {
             lang() {
                 return currentLanguage;
@@ -22621,6 +22639,28 @@ document.documentElement.classList.toggle(
             },
             /* Persists ONLY a proposal the user already confirmed in the
                suggestion card. Uses the same storage paths as addTask(). */
+            async createAiTask(raw) {
+                const text = raw && typeof raw.text === "string" ? raw.text.trim().slice(0, 120) : "";
+                if (!text) return { ok: false };
+                const date = raw && typeof raw.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.date) ? raw.date : getTodayKey();
+                const time = raw && typeof raw.time === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(raw.time) ? raw.time : null;
+                const priority = raw && ["high", "low"].includes(raw.priority) ? raw.priority : "medium";
+                const task = { priority, id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), text, date, reminderTime: time, repeat: "once", days: [], completed: false, completedDates: [], createdAt: Date.now() };
+                try {
+                    if (!currentUser) { guestTasks.push(task); localStorage.setItem("dailykrd_guest_tasks", JSON.stringify(guestTasks)); }
+                    else { const { id, ...taskData } = task; await setDoc(doc(db, "users", currentUser.uid, "tasks", id), taskData); }
+                    window.__horizonAiCreatedTasks.add(task.id); refreshTasks(); renderCalendar(); triggerPushSync();
+                    return { ok: true, id: task.id };
+                } catch (error) { console.error("Horizon AI task creation failed:", error); return { ok: false }; }
+            },
+            async undoAiTask(id) {
+                if (typeof id !== "string" || !window.__horizonAiCreatedTasks.has(id)) return false;
+                try {
+                    if (!currentUser) { guestTasks = guestTasks.filter(item => item.id !== id); localStorage.setItem("dailykrd_guest_tasks", JSON.stringify(guestTasks)); }
+                    else { await deleteDoc(doc(db, "users", currentUser.uid, "tasks", id)); }
+                    window.__horizonAiCreatedTasks.delete(id); refreshTasks(); renderCalendar(); triggerPushSync(); return true;
+                } catch (error) { console.error("Horizon AI task undo failed:", error); return false; }
+            },
             async confirmAddTask(raw) {
                 const text = raw && typeof raw.text === "string" ? raw.text.trim().slice(0, 120) : "";
                 if (!text) return false;
@@ -22798,6 +22838,7 @@ document.documentElement.classList.toggle(
                 <div id="aiHeaderSub">Ask anything</div>
             </div>
             <div class="ai-head-actions">
+                <button type="button" id="aiSettingsBtn" class="aiHeadBtn" aria-label="AI settings" title="AI settings">⚙</button>
                 <button
                     type="button"
                     id="aiSearchBtn"
@@ -22829,6 +22870,45 @@ document.documentElement.classList.toggle(
                 >✕</button>
             </div>
         </div>
+
+        <section id="aiSettingsModal" aria-label="Horizon AI settings" aria-hidden="true">
+            <div class="aiSettingsTop"><strong>Horizon AI settings</strong><button type="button" class="aiSettingsClose" id="aiSettingsClose">Done</button></div>
+            <div class="aiSettingsGroup">
+                <h4>Model</h4>
+                <label for="aiModelSelect">Response model</label>
+                <select id="aiModelSelect"><option value="auto">Automatic (Worker default)</option><option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option><option value="gemini-2.5-pro">Gemini 2.5 Pro</option></select>
+                <p class="aiSettingsHint">Availability depends on the model access enabled for your Gemini API key. If a model is unavailable, Horizon will try its configured fallback.</p>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Behavior</h4>
+                <label for="aiToneSelect">Personality</label>
+                <select id="aiToneSelect"><option value="warm">Warm and supportive</option><option value="cool">Cool and direct</option><option value="professional">Professional</option><option value="friendly">Friendly and casual</option><option value="coach">Encouraging coach</option></select>
+                <label for="aiDetailSelect">Answer detail</label>
+                <select id="aiDetailSelect"><option value="balanced">Balanced</option><option value="concise">Concise</option><option value="detailed">Detailed</option></select>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Memory</h4>
+                <label for="aiMemoryInput">Saved memory (only what you choose to save)</label>
+                <textarea id="aiMemoryInput" maxlength="3000" placeholder="Preferences, goals, ongoing projects…"></textarea>
+                <p class="aiSettingsHint">This first version stores memory on this device in this browser. It is sent with your AI request when you chat; avoid storing passwords or highly sensitive details.</p>
+                <button type="button" class="aiSettingsSave" id="aiClearMemoryBtn">Clear memory</button>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Copilot permissions</h4>
+                <label for="aiPermissionSelect">What can Copilot do?</label>
+                <select id="aiPermissionSelect"><option value="suggest">Suggest only — never offer app changes</option><option value="confirm">Ask me before every change</option><option value="approved">Allow only actions I explicitly enable</option></select>
+                <label for="aiRulesInput">Personal rules and boundaries</label>
+                <textarea id="aiRulesInput" maxlength="2000" placeholder="Example: Ask before deleting anything. Keep plans realistic."></textarea>
+                <p class="aiSettingsHint">Task creation can be proposed for your approval. Other app actions are not enabled until their tool and permission checks are implemented.</p>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Action history</h4>
+                <div id="aiActionHistoryText" class="aiSettingsHint">No Copilot actions recorded yet.</div>
+                <button type="button" class="aiSettingsSave" id="aiClearActionHistoryBtn">Clear action history</button>
+            </div>
+            <button type="button" class="aiSettingsSave" id="aiSettingsSaveBtn">Save AI settings</button>
+            <div id="aiSettingsStatus" class="aiSettingsStatus" role="status" aria-live="polite"></div>
+        </section>
 
         <div class="ai-convo">
             <div id="aiWelcome">
@@ -22920,6 +23000,11 @@ document.documentElement.classList.toggle(
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
         const AI_LANG_STORAGE_KEY = "dailykrd_language";
         const AI_WEBSEARCH_STORAGE_KEY = "dailykrd_ai_websearch";
+        const AI_SETTINGS_KEY = "horizon_ai_settings_v3";
+        const AI_ACTION_LOG_KEY = "horizon_ai_action_log_v3";
+        const AI_DEFAULT_SETTINGS = { model: "auto", tone: "warm", detail: "balanced", memory: "", permission: "confirm", rules: "" };
+        let aiSettings = { ...AI_DEFAULT_SETTINGS };
+        try { aiSettings = { ...AI_DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || "{}") }; } catch (e) {}
 
         /* =====================================================
            LOCALIZATION
@@ -24039,6 +24124,44 @@ document.documentElement.classList.toggle(
            exactly; rendering upgraded to throttled markdown.
            ===================================================== */
 
+        function aiLoadSettingsIntoUI() {
+            const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value || ""; };
+            set("aiModelSelect", aiSettings.model); set("aiToneSelect", aiSettings.tone); set("aiDetailSelect", aiSettings.detail);
+            set("aiMemoryInput", aiSettings.memory); set("aiPermissionSelect", aiSettings.permission); set("aiRulesInput", aiSettings.rules);
+            aiRenderActionHistory();
+        }
+        function aiReadSettingsFromUI() {
+            const get = id => document.getElementById(id)?.value || "";
+            aiSettings = { model: get("aiModelSelect"), tone: get("aiToneSelect"), detail: get("aiDetailSelect"), memory: get("aiMemoryInput").slice(0,3000), permission: get("aiPermissionSelect"), rules: get("aiRulesInput").slice(0,2000) };
+            try { localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(aiSettings)); } catch (e) {}
+        }
+        function aiOpenSettings() { aiLoadSettingsIntoUI(); const el=document.getElementById("aiSettingsModal"); if(el){el.classList.add("open");el.setAttribute("aria-hidden","false");} }
+        function aiCloseSettings() { const el=document.getElementById("aiSettingsModal"); if(el){el.classList.remove("open");el.setAttribute("aria-hidden","true");} }
+        function aiReadActionLog() { try { const x=JSON.parse(localStorage.getItem(AI_ACTION_LOG_KEY)||"[]"); return Array.isArray(x)?x.slice(-20):[]; } catch(e){return [];} }
+        function aiLogAction(action, status) { const list=aiReadActionLog(); list.push({action:String(action).slice(0,160),status:String(status).slice(0,40),at:new Date().toISOString()}); try{localStorage.setItem(AI_ACTION_LOG_KEY,JSON.stringify(list.slice(-20)));}catch(e){} aiRenderActionHistory(); }
+        function aiRenderActionHistory() { const el=document.getElementById("aiActionHistoryText"); if(!el)return; const items=aiReadActionLog(); el.textContent=items.length?items.slice(-5).reverse().map(x=>new Date(x.at).toLocaleString()+" — "+x.status+": "+x.action).join("\n"):"No Copilot actions recorded yet."; el.style.whiteSpace="pre-line"; }
+        function aiBuildContext() {
+            let tasks = null; try { tasks = window.__paBridge?.todayTasks?.() || null; } catch(e) {}
+            const localDate = tasks && /^\d{4}-\d{2}-\d{2}$/.test(tasks.date || "") ? tasks.date : new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")+"-"+String(new Date().getDate()).padStart(2,"0");
+            return { today: localDate, tasks, permission: aiSettings.permission };
+        }
+        function aiExtractAction(text) {
+            const match = String(text||"").match(/\{\s*"horizon_action"\s*:\s*(\{[\s\S]*?\})\s*\}/);
+            if (!match) return null;
+            try { const outer=JSON.parse(match[0]); const a=outer.horizon_action; if(a && a.type==="create_task" && typeof a.text==="string" && a.text.trim()) return {type:"create_task",text:a.text.trim().slice(0,120),date:/^\d{4}-\d{2}-\d{2}$/.test(a.date||"")?a.date:(window.__paBridge?.todayTasks?.().date || (new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")+"-"+String(new Date().getDate()).padStart(2,"0"))),time:/^([01]\d|2[0-3]):[0-5]\d$/.test(a.time||"")?a.time:null,priority:["low","medium","high"].includes(a.priority)?a.priority:"medium"}; } catch(e){} return null;
+        }
+        function aiRenderActionProposal(action, anchor) {
+            if (!action || !anchor || aiSettings.permission === "suggest") return;
+            const card=document.createElement("div"); card.className="aiActionCard";
+            aiLogAction("Create task: "+action.text,"proposed");
+            const title=document.createElement("strong"); title.textContent="Copilot proposes: create task"; card.appendChild(title);
+            const desc=document.createElement("p"); desc.textContent=action.text+" · "+action.date+(action.time?" at "+action.time:"")+" · "+action.priority+" priority"; card.appendChild(desc);
+            const approve=document.createElement("button"); approve.type="button"; approve.textContent="Approve and add task";
+            const reject=document.createElement("button"); reject.type="button"; reject.className="secondary"; reject.textContent="Reject";
+            approve.addEventListener("click",async()=>{ approve.disabled=true; try { const result=await window.__paBridge?.createAiTask?.(action); if(result && result.ok){desc.textContent="Task added successfully."; approve.remove(); reject.remove(); aiLogAction("Create task: "+action.text,"completed"); const undo=document.createElement("button"); undo.type="button"; undo.className="secondary"; undo.textContent="Undo"; undo.addEventListener("click",async()=>{undo.disabled=true;const undone=await window.__paBridge?.undoAiTask?.(result.id);if(undone){desc.textContent="Task creation undone.";undo.remove();aiLogAction("Undo task: "+action.text,"completed");}else{desc.textContent="Couldn't undo this task.";undo.disabled=false;aiLogAction("Undo task: "+action.text,"failed");}});card.appendChild(undo);}else{desc.textContent="Couldn't add the task. No change was confirmed.";approve.disabled=false;aiLogAction("Create task: "+action.text,"failed");}}catch(e){desc.textContent="Couldn't add the task.";approve.disabled=false;aiLogAction("Create task: "+action.text,"failed");} });
+            reject.addEventListener("click",()=>{card.remove();aiLogAction("Create task: "+action.text,"rejected");}); card.append(approve,reject); anchor.insertAdjacentElement("afterend",card);
+        }
+
         async function sendAI() {
             if (aiBusy) return;
             const input = document.getElementById("aiInput");
@@ -24178,6 +24301,8 @@ document.documentElement.classList.toggle(
             try {
                 const requestBody = {
                     message: effectiveMessage,
+                    model: aiSettings.model,
+                    aiConfig: { tone: aiSettings.tone, detail: aiSettings.detail, memory: aiSettings.memory, permission: aiSettings.permission, rules: aiSettings.rules, context: aiBuildContext() },
                     /* only role/content go on the wire — keeps the Worker's
                        existing contract even though sources are stored locally */
                     history: aiConversationHistory
@@ -24272,6 +24397,12 @@ document.documentElement.classList.toggle(
                     anchor = src;
                 }
                 if (hasText && anchor) aiAppendMessageActions(anchor, assistantText);
+                const proposedAction = aiExtractAction(assistantText);
+                if (proposedAction && anchor) {
+                    const cleanText = assistantText.replace(/\s*\{\s*"horizon_action"\s*:\s*\{[\s\S]*?\}\s*\}\s*/g, "\n").trim();
+                    if (cleanText && messageEl) { messageEl.setAttribute("data-ai-raw", cleanText); messageEl.innerHTML = aiRenderMarkdown(cleanText); }
+                    aiRenderActionProposal(proposedAction, anchor);
+                }
 
                 const assistantEntry = { role: "assistant", content: assistantText };
                 if (hasSources) assistantEntry.sources = collectedSources;
@@ -24310,6 +24441,13 @@ document.documentElement.classList.toggle(
         /* =====================================================
            WIDGET CONTROLS
            ===================================================== */
+
+        document.getElementById("aiSettingsBtn")?.addEventListener("click", aiOpenSettings);
+        document.getElementById("aiSettingsClose")?.addEventListener("click", aiCloseSettings);
+        document.getElementById("aiSettingsSaveBtn")?.addEventListener("click", () => { aiReadSettingsFromUI(); const el=document.getElementById("aiSettingsStatus"); if(el)el.textContent="Settings saved on this device."; aiLogAction("AI preferences updated","settings"); });
+        document.getElementById("aiClearMemoryBtn")?.addEventListener("click", () => { const el=document.getElementById("aiMemoryInput"); if(el)el.value=""; aiReadSettingsFromUI(); const status=document.getElementById("aiSettingsStatus"); if(status)status.textContent="Memory cleared on this device."; });
+        document.getElementById("aiClearActionHistoryBtn")?.addEventListener("click", () => { try{localStorage.removeItem(AI_ACTION_LOG_KEY);}catch(e){} aiRenderActionHistory(); });
+        document.getElementById("aiSettingsModal")?.addEventListener("keydown", e => { if(e.key==="Escape") aiCloseSettings(); });
 
         document.getElementById("aiInput")?.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && !e.isComposing) sendAI();
@@ -24358,6 +24496,7 @@ document.documentElement.classList.toggle(
             if (e.key !== "Escape") return;
             const box = document.getElementById("aiBox");
             if (!box || !box.classList.contains("open")) return;
+            if (document.getElementById("aiSettingsModal")?.classList.contains("open")) { aiCloseSettings(); return; }
             if (aiVoiceActive) {
                 aiStopVoice(true);
                 return;
@@ -24371,6 +24510,7 @@ document.documentElement.classList.toggle(
            ===================================================== */
 
         (function aiInit() {
+            aiLoadSettingsIntoUI();
             aiApplyLanguage();
             aiSetWebSearch(aiWebSearch, false);
             aiInitVoice();
@@ -26451,4 +26591,3 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 </script>
 
 </body>
-</html>
