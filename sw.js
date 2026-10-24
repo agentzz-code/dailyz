@@ -1,10 +1,10 @@
-const RUNTIME_CACHE = 'dailykrd-offline-v1';
+const RUNTIME_CACHE = 'dailykrd-offline-v3';
 
 // Any cache that starts with this prefix is considered ours and eligible for
 // cleanup on activate when it is no longer the active cache version.
 const CACHE_PREFIX = 'dailykrd-';
 
-// The app entry point. Because Daily.KRD is a single-file PWA, `./` resolves to
+// The app entry point. Because Horizon is a single-file PWA, `./` resolves to
 // index.html and is the only asset we can safely precache without guessing.
 // All other same-origin GETs are cached dynamically at runtime instead.
 const PRECACHE_URLS = ['./'];
@@ -21,7 +21,7 @@ self.addEventListener('activate', (event) => {
         Promise.all([
             // Take control of open pages immediately.
             self.clients.claim(),
-            // Remove old Daily.KRD cache versions that are no longer needed.
+            // Remove old app cache versions that are no longer needed.
             caches.keys().then((keys) =>
                 Promise.all(
                     keys
@@ -111,7 +111,7 @@ self.addEventListener('fetch', (event) => {
 // PUSH NOTIFICATION RECEIVER
 self.addEventListener('push', (event) => {
     let payload = {
-        title: 'Daily.KRD',
+        title: 'Horizon',
         body: 'You have a new update!',
         icon: './icons/icon-192.png',
         badge: './icons/icon-32.png',
