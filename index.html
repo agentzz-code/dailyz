@@ -1125,6 +1125,84 @@ body:has(#ai.active) #ai.active .ai-welcome-title { background:linear-gradient(1
 }
 @media(prefers-reduced-motion:reduce){body:has(#ai.active) #ai.active::before,body:has(#ai.active) #ai.active::after{animation:none!important}}
 
+
+/* Horizon 3.6 — mobile-first fullscreen, animated ambient gradient, and Escape control */
+#ai.active {
+  position:fixed !important; inset:0 !important; z-index:9999 !important;
+  width:100vw !important; height:100dvh !important; min-height:100dvh !important;
+  overflow:hidden !important; isolation:isolate;
+  background:#080b1b !important;
+}
+body:has(#ai.active) { overflow:hidden !important; }
+body:has(#ai.active) main { width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; }
+#ai.active::before {
+  content:""; position:fixed; inset:-35%; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(ellipse at 18% 70%, rgba(28,91,255,.42), transparent 34%),
+    radial-gradient(ellipse at 78% 68%, rgba(255,64,145,.32), transparent 35%),
+    radial-gradient(ellipse at 52% 22%, rgba(103,47,255,.34), transparent 36%),
+    radial-gradient(ellipse at 86% 88%, rgba(255,112,42,.34), transparent 29%),
+    linear-gradient(135deg,#070a18 0%,#11102e 48%,#160a24 100%);
+  filter:blur(22px); background-size:150% 150%;
+  animation:horizonAiAurora 18s ease-in-out infinite alternate;
+}
+#ai.active::after {
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(120deg,transparent 20%,rgba(255,255,255,.025) 45%,transparent 65%);
+  background-size:220% 100%; animation:horizonAiSheen 13s linear infinite;
+}
+@keyframes horizonAiAurora {
+  0%{transform:translate3d(-2%,1%,0) rotate(-3deg) scale(1);background-position:0% 50%}
+  50%{transform:translate3d(2%,-2%,0) rotate(2deg) scale(1.07);background-position:100% 45%}
+  100%{transform:translate3d(-1%,2%,0) rotate(-1deg) scale(1.03);background-position:30% 100%}
+}
+@keyframes horizonAiSheen { from{background-position:180% 0} to{background-position:-40% 0} }
+#ai.active .ai-workspace,
+#ai.active .ai-chat-main,
+#ai.active #aiBox.horizon-ai-page,
+#ai.active #aiBox.horizon-ai-page.open { background:transparent !important; }
+#ai.active .ai-chat-sidebar {
+  background:rgba(8,10,29,.62) !important; backdrop-filter:blur(26px) saturate(145%);
+  -webkit-backdrop-filter:blur(26px) saturate(145%); border-right:1px solid rgba(255,255,255,.1) !important;
+}
+#ai.active #aiBox.horizon-ai-page #aiHeader { background:rgba(8,10,28,.28) !important; border-bottom-color:rgba(255,255,255,.09) !important; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+#ai.active .aiInput { background:rgba(21,19,48,.62) !important; border:1px solid rgba(180,132,255,.72) !important; box-shadow:0 0 0 1px rgba(255,105,210,.12),0 12px 55px rgba(88,56,255,.16) !important; backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); }
+#ai.active #aiSendBtn { background:linear-gradient(135deg,#8a65ff,#ff659c 65%,#ff8c55) !important; color:white !important; box-shadow:0 4px 22px rgba(200,74,255,.3); }
+#ai.active .ai-welcome-title { background:linear-gradient(100deg,#ffd1e9,#b7a0ff 48%,#ffb38c); -webkit-background-clip:text; background-clip:text; color:transparent !important; }
+#ai.active .ai-suggest { border:1px solid rgba(255,255,255,.13) !important; border-radius:24px !important; background:rgba(15,13,38,.38) !important; backdrop-filter:blur(12px); }
+#ai.active .aiHeadBtn, #ai.active #aiModelQuickBtn { border:1px solid rgba(255,255,255,.13) !important; background:rgba(255,255,255,.045) !important; }
+#ai.active .horizon-ai-escape {
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  height:34px; min-width:48px; padding:0 10px; border-radius:11px;
+  border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.07);
+  color:#f3edff; font:600 12px/1 system-ui,sans-serif; cursor:pointer;
+}
+#ai.active .horizon-ai-escape:hover { background:rgba(255,255,255,.15); }
+@media(max-width:760px) {
+  #ai.active { inset:0 !important; width:100vw !important; height:100dvh !important; min-height:100dvh !important; }
+  #ai.active .ai-workspace { width:100% !important; height:100dvh !important; min-height:0 !important; }
+  #ai.active .ai-chat-main { width:100%; height:100dvh !important; min-height:0 !important; }
+  #ai.active #aiBox.horizon-ai-page { height:100dvh !important; min-height:0 !important; }
+  #ai.active #aiBox.horizon-ai-page #aiHeader { min-height:58px; flex-basis:58px; padding:0 12px; gap:7px; }
+  #ai.active #aiTitle { font-size:15px !important; }
+  #ai.active .ai-head-actions { gap:4px !important; }
+  #ai.active .aiHeadBtn { width:34px !important; height:34px !important; }
+  #ai.active #aiModelQuickBtn { max-width:108px; overflow:hidden; text-overflow:ellipsis; }
+  #ai.active #aiWelcome { min-height:0; padding:20px 0 12px; }
+  #ai.active .ai-welcome-title { font-size:clamp(27px,7vw,36px) !important; text-align:center; }
+  #ai.active .ai-welcome-sub { font-size:14px !important; padding:0 8px; text-align:center; }
+  #ai.active .ai-convo { display:flex; flex-direction:column; padding:0 14px; }
+  #ai.active .ai-suggest-row { justify-content:center; padding:0 12px calc(10px + env(safe-area-inset-bottom)); gap:7px; }
+  #ai.active .ai-suggest { font-size:12px; padding:10px 12px; }
+  #ai.active .aiInput { width:calc(100% - 24px); max-width:none; margin:0 auto calc(12px + env(safe-area-inset-bottom)); min-height:60px; border-radius:28px; padding:8px 10px; }
+  #ai.active #aiMessages { max-width:none; padding:14px 0 20px; }
+  #ai.active .ai-chat-sidebar { top:64px; bottom:calc(10px + env(safe-area-inset-bottom)); left:10px; width:min(330px,calc(100vw - 20px)); background:rgba(8,10,29,.88) !important; }
+  #ai.active .horizon-ai-escape { min-width:42px; height:32px; padding:0 7px; font-size:11px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ #ai.active::before,#ai.active::after { animation:none !important; }
+}
+
 </style>
 
     <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
@@ -27074,6 +27152,43 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     if('MutationObserver'in window)new MutationObserver(updateText).observe(root,{attributes:true,attributeFilter:['lang','dir']});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
+
+<script>
+(function(){
+  function setupHorizonAiEscape(){
+    const ai=document.getElementById('ai');
+    const actions=document.querySelector('#aiBox #aiHeader .ai-head-actions');
+    if(!ai||!actions||actions.querySelector('.horizon-ai-escape')) return;
+    const btn=document.createElement('button');
+    btn.type='button'; btn.className='horizon-ai-escape';
+    btn.textContent='Esc'; btn.setAttribute('aria-label','Exit Horizon AI fullscreen');
+    btn.title='Exit fullscreen AI (Esc)';
+    btn.addEventListener('click',function(){
+      const today=document.getElementById('tasksTab');
+      if(today) today.click();
+      else { ai.classList.remove('active'); ai.style.display='none'; }
+    });
+    actions.prepend(btn);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',setupHorizonAiEscape);
+  else setupHorizonAiEscape();
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape') return;
+    const ai=document.getElementById('ai');
+    if(!ai||!ai.classList.contains('active')) return;
+    const sidebar=document.getElementById('aiChatSidebar');
+    if(sidebar&&sidebar.classList.contains('mobile-open')){
+      sidebar.classList.remove('mobile-open');
+      document.getElementById('aiSidebarToggleBtn')?.setAttribute('aria-expanded','false');
+      e.preventDefault(); return;
+    }
+    document.getElementById('tasksTab')?.click();
+  });
+  const observer=new MutationObserver(setupHorizonAiEscape);
+  observer.observe(document.documentElement,{subtree:true,childList:true});
 })();
 </script>
 
