@@ -25628,6 +25628,45 @@ body:has(#ai.active) main { padding-top:0 !important; }
   #ai.active .ai-suggest { max-width:100%; white-space:normal !important; }
   #ai.active .ai-chat-sidebar { overflow-y:auto !important; -webkit-overflow-scrolling:touch !important; touch-action:pan-y !important; }
 }
+
+/* Horizon 3.8: real mobile scroll fix — give the transcript a bounded flex parent */
+@media (max-width: 760px) {
+  html:has(#ai.active), body:has(#ai.active) {
+    width:100% !important; height:100% !important; min-height:0 !important;
+    overflow:hidden !important; overscroll-behavior:none !important;
+  }
+  body:has(#ai.active) #ai.active {
+    position:fixed !important; inset:0 !important; width:100vw !important;
+    height:100vh !important; height:100dvh !important; max-height:100dvh !important;
+    display:flex !important; flex-direction:column !important; overflow:hidden !important;
+  }
+  body:has(#ai.active) #ai.active > .ai-workspace,
+  body:has(#ai.active) #ai.active .ai-chat-main,
+  body:has(#ai.active) #ai.active #aiBox.horizon-ai-page,
+  body:has(#ai.active) #ai.active #aiBox.horizon-ai-page.open,
+  body:has(#ai.active) #ai.active #aiContent,
+  body:has(#ai.active) #ai.active .ai-content,
+  body:has(#ai.active) #ai.active .ai-chat-content,
+  body:has(#ai.active) #ai.active .ai-chat-body {
+    display:flex !important; flex-direction:column !important;
+    flex:1 1 0% !important; min-height:0 !important; height:0 !important;
+    max-height:none !important; overflow:hidden !important;
+  }
+  body:has(#ai.active) #ai.active #aiMessages {
+    display:block !important; flex:1 1 0% !important; min-height:0 !important;
+    height:0 !important; max-height:none !important; width:100% !important;
+    overflow-y:scroll !important; overflow-x:hidden !important;
+    -webkit-overflow-scrolling:touch !important; overscroll-behavior-y:contain !important;
+    touch-action:pan-y !important; pointer-events:auto !important;
+  }
+  body:has(#ai.active) #ai.active #aiMessages > * { max-width:100%; }
+  body:has(#ai.active) #ai.active #aiHeader,
+  body:has(#ai.active) #ai.active #aiVoiceBar,
+  body:has(#ai.active) #ai.active #aiInputArea,
+  body:has(#ai.active) #ai.active .ai-input-area,
+  body:has(#ai.active) #ai.active #aiScrollBottom { flex-shrink:0 !important; }
+  body:has(#ai.active) #ai.active .ai-chat-sidebar { touch-action:pan-y !important; }
+}
 </style>
     <script>
         (function () {
