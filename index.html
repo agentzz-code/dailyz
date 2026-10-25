@@ -25667,6 +25667,45 @@ body:has(#ai.active) main { padding-top:0 !important; }
   body:has(#ai.active) #ai.active #aiScrollBottom { flex-shrink:0 !important; }
   body:has(#ai.active) #ai.active .ai-chat-sidebar { touch-action:pan-y !important; }
 }
+
+/* Horizon 3.9: simple mobile conversation scrolling */
+@media (max-width: 760px) {
+  #ai.active #aiBox.horizon-ai-page {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+  #ai.active #aiBox.horizon-ai-page .ai-convo {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+  }
+  #ai.active #aiBox.horizon-ai-page #aiWelcome {
+    flex: none !important;
+  }
+  #ai.active #aiBox.horizon-ai-page #aiMessages {
+    display: flex !important;
+    flex: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    touch-action: pan-y !important;
+  }
+  #ai.active #aiBox.horizon-ai-page #aiHeader,
+  #ai.active #aiBox.horizon-ai-page .aiInput,
+  #ai.active #aiBox.horizon-ai-page #aiVoiceBar {
+    flex-shrink: 0 !important;
+  }
+}
+
 </style>
     <script>
         (function () {
