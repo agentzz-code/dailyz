@@ -25566,37 +25566,28 @@ body:has(#ai.active) main { padding-top:0 !important; }
 @media(prefers-reduced-motion:reduce) { #ai.active *, #ai.active *::before, #ai.active *::after { animation:none !important; transition:none !important; } }
 
 
-/* Minimal chat scrolling fix: keep the app layout; constrain the chat viewport. */
-body:has(#ai.active) #ai.active > .ai-workspace,
-body:has(#ai.active) #ai.active .ai-chat-main,
-body:has(#ai.active) #ai.active #aiBox.horizon-ai-page,
-body:has(#ai.active) #ai.active #aiBox.horizon-ai-page.open {
+/* Simple chat scrolling fix: scroll the conversation area, not the whole app. */
+#ai.active #aiBox.horizon-ai-page .ai-convo {
+  flex: 1 1 0% !important;
   min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: block !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
 }
-body:has(#ai.active) #ai.active .ai-chat-main {
-  display: flex !important; flex-direction: column !important;
-  flex: 1 1 0% !important; height: 0 !important; overflow: hidden !important;
+#ai.active #aiBox.horizon-ai-page #aiWelcome { flex: 0 0 auto !important; }
+#ai.active #aiBox.horizon-ai-page #aiMessages {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+  display: flex !important;
 }
-body:has(#ai.active) #ai.active #aiBox.horizon-ai-page,
-body:has(#ai.active) #ai.active #aiBox.horizon-ai-page.open {
-  display: flex !important; flex-direction: column !important;
-  flex: 1 1 0% !important; height: 0 !important; overflow: hidden !important;
-}
-body:has(#ai.active) #ai.active #aiMessages {
-  display: flex !important; flex: 1 1 0% !important;
-  min-height: 0 !important; height: 0 !important; max-height: none !important;
-  overflow-y: auto !important; overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-y: contain !important; touch-action: pan-y !important;
-  scrollbar-width: thin !important; scrollbar-color: #8b7bff #202034 !important;
-}
-body:has(#ai.active) #ai.active #aiMessages::-webkit-scrollbar { width: 8px !important; }
-body:has(#ai.active) #ai.active #aiMessages::-webkit-scrollbar-track { background: rgba(120,120,160,.16) !important; }
-body:has(#ai.active) #ai.active #aiMessages::-webkit-scrollbar-thumb { background: #8b7bff !important; border-radius: 10px !important; }
-@media (max-width: 760px) {
-  body:has(#ai.active) #ai.active .ai-workspace { min-height: 0 !important; }
-  body:has(#ai.active) #ai.active .ai-chat-main { min-height: 0 !important; }
-}
+#ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar { width: 7px; }
+#ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar-thumb { background: rgba(150,130,255,.65); border-radius: 10px; }
+#ai.active #aiBox.horizon-ai-page .ai-convo { scrollbar-width: thin; scrollbar-color: rgba(150,130,255,.65) transparent; }
 </style>
     <script>
         (function () {
