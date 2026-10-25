@@ -23289,6 +23289,19 @@ document.documentElement.classList.toggle(
             );
         }
 
+        function aiIsTaskWorkflow(effectiveMessage) {
+            const text = String(effectiveMessage || "").toLowerCase().trim();
+            const taskRequest = value => /\b(add|create|make|schedule|set up|put)\b.{0,50}\b(task|todo|to-do)\b/.test(value) || /\b(task|todo|to-do)\b.{0,35}\b(add|create|make)\b/.test(value) || /\bremind me to\b/.test(value);
+            if (taskRequest(text)) return true;
+            const recent = Array.isArray(aiConversationHistory) ? aiConversationHistory.slice(-6) : [];
+            const recentUsers = recent.filter(item => item && item.role === "user").map(item => String(item.content || "").toLowerCase());
+            const lastAssistant = [...recent].reverse().find(item => item && item.role === "assistant");
+            const assistantText = String(lastAssistant && lastAssistant.content || "").toLowerCase();
+            const askedForTaskDetails = /\b(task|title|name)\b/.test(assistantText) && /\b(today|date|what is|what should|which)\b/.test(assistantText);
+            const looksLikeDetails = /\b(today|tomorrow|name:|title:|task name|for today|for tomorrow)\b/.test(text) && text.length < 180;
+            return recentUsers.some(taskRequest) && askedForTaskDetails && looksLikeDetails;
+        }
+
         function aiSetWebSearch(on, announce) {
             aiWebSearch = !!on;
             try {
@@ -24198,8 +24211,9 @@ document.documentElement.classList.toggle(
             let collectedSources = [];
             /* search is requested when the toggle is on, or when the
                question clearly needs current information */
-            const searchRequested =
-                aiWebSearch || aiNeedsWebSearch(effectiveMessage);
+            const taskWorkflow = aiIsTaskWorkflow(effectiveMessage);
+            const explicitlySearching = /\b(search|google|browse|look\s*up|web search|internet search)\b/i.test(effectiveMessage);
+            const searchRequested = explicitlySearching || (!taskWorkflow && (aiWebSearch || aiNeedsWebSearch(effectiveMessage)));
 
             function scheduleRender() {
                 if (renderScheduled || !messageEl) return;
