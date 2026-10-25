@@ -25516,7 +25516,7 @@ body:has(#ai.active) main { padding-top:0 !important; }
 #ai.active #aiBox.horizon-ai-page .aiHeadBtn:hover { background:#262626; }
 #ai.active #aiBox.horizon-ai-page #aiSearchBtn { opacity:.9; }
 #ai.active #aiBox.horizon-ai-page #aiNewBtn, #ai.active #aiBox.horizon-ai-page #aiExpandBtn, #ai.active #aiBox.horizon-ai-page #aiCloseBtn, #ai.active #aiBox.horizon-ai-page #aiPageSettingsBtn { display:none !important; }
-#ai.active .ai-convo { flex:1; min-height:0; width:100%; max-width:850px; margin:0 auto; padding:0 26px; overflow:hidden; }
+#ai.active .ai-convo { flex:1; min-height:0; width:100%; max-width:850px; margin:0 auto; padding:0 26px; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; }
 #ai.active #aiWelcome { flex:1; min-height:300px; justify-content:center; gap:15px; padding:24px 0 12px; color:#e5e5e5; }
 #ai.active .ai-welcome-emoji { display:none; }
 #ai.active .ai-welcome-title { font-size:clamp(27px,3vw,36px); line-height:1.2; font-weight:500; letter-spacing:-.035em; color:#e8e8e8; }
@@ -25565,29 +25565,6 @@ body:has(#ai.active) main { padding-top:0 !important; }
 }
 @media(prefers-reduced-motion:reduce) { #ai.active *, #ai.active *::before, #ai.active *::after { animation:none !important; transition:none !important; } }
 
-
-/* Simple chat scrolling fix: scroll the conversation area, not the whole app. */
-#ai.active #aiBox.horizon-ai-page .ai-convo {
-  flex: 1 1 0% !important;
-  min-height: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  display: block !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  touch-action: pan-y;
-}
-#ai.active #aiBox.horizon-ai-page #aiWelcome { flex: 0 0 auto !important; }
-#ai.active #aiBox.horizon-ai-page #aiMessages {
-  flex: 0 0 auto !important;
-  min-height: 0 !important;
-  height: auto !important;
-  overflow: visible !important;
-  display: flex !important;
-}
-#ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar { width: 7px; }
-#ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar-thumb { background: rgba(150,130,255,.65); border-radius: 10px; }
-#ai.active #aiBox.horizon-ai-page .ai-convo { scrollbar-width: thin; scrollbar-color: rgba(150,130,255,.65) transparent; }
 </style>
     <script>
         (function () {
