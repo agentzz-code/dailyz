@@ -25706,6 +25706,43 @@ body:has(#ai.active) main { padding-top:0 !important; }
   }
 }
 
+
+
+/* Horizon 4.0: visible scrollbar for the AI interface on desktop and mobile */
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page #aiMessages,
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page .ai-convo {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(170, 180, 255, .78) rgba(255, 255, 255, .09) !important;
+}
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page #aiMessages::-webkit-scrollbar,
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page #aiMessages::-webkit-scrollbar-track,
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, .08) !important;
+  border-radius: 8px !important;
+}
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page #aiMessages::-webkit-scrollbar-thumb,
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar-thumb {
+  background: rgba(170, 180, 255, .78) !important;
+  border: 2px solid transparent !important;
+  background-clip: padding-box !important;
+  border-radius: 8px !important;
+}
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page #aiMessages::-webkit-scrollbar-thumb:hover,
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page .ai-convo::-webkit-scrollbar-thumb:hover {
+  background: rgba(205, 190, 255, .98) !important;
+  background-clip: padding-box !important;
+}
+@media (max-width: 760px) {
+  body:has(#ai.active) #ai.active #aiBox.horizon-ai-page .ai-convo {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+  }
+}
+
 </style>
     <script>
         (function () {
