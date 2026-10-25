@@ -1081,6 +1081,50 @@
 #flashcardsSection .quiz-library-action { border:1px solid var(--border-color,rgba(128,128,128,.22)); background:transparent; color:inherit; border-radius:9px; padding:7px 9px; font-size:12px; }
 #flashcardsSection .quiz-library-action:active { transform:scale(.96); }
 
+
+/* Horizon 3.5: true edge-to-edge AI canvas + animated gradient atmosphere */
+body:has(#ai.active) { overflow:hidden !important; }
+body:has(#ai.active) #ai.active {
+  position:fixed !important; inset:0 !important; z-index:99999 !important;
+  display:flex !important; flex-direction:column !important;
+  width:100vw !important; height:100vh !important; height:100dvh !important;
+  max-width:none !important; min-width:0 !important; min-height:0 !important;
+  margin:0 !important; padding:0 !important; overflow:hidden !important;
+  isolation:isolate; border:0 !important; border-radius:0 !important;
+  background:radial-gradient(ellipse at 18% 72%,rgba(34,91,255,.34),transparent 38%),radial-gradient(ellipse at 82% 70%,rgba(255,91,91,.25),transparent 40%),radial-gradient(ellipse at 53% 8%,rgba(132,45,255,.26),transparent 44%),#08091a !important;
+}
+body:has(#ai.active) #ai.active::before,
+body:has(#ai.active) #ai.active::after {
+  content:""; position:absolute; inset:-25%; z-index:-1; pointer-events:none;
+  background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(68,89,255,.15) 65deg,transparent 125deg,rgba(255,74,167,.16) 210deg,transparent 280deg,rgba(255,135,65,.13) 330deg,transparent 360deg);
+  filter:blur(55px); animation:horizonAIAurora 24s linear infinite; transform-origin:center;
+}
+body:has(#ai.active) #ai.active::after { background:radial-gradient(ellipse at 20% 82%,rgba(41,105,255,.24),transparent 38%),radial-gradient(ellipse at 76% 80%,rgba(255,93,95,.22),transparent 36%); animation:horizonAIBreathe 12s ease-in-out infinite alternate; filter:blur(35px); }
+@keyframes horizonAIAurora { from{transform:rotate(0deg) scale(1.08)} to{transform:rotate(360deg) scale(1.08)} }
+@keyframes horizonAIBreathe { from{transform:translate3d(-2%,1%,0) scale(.96);opacity:.7} to{transform:translate3d(2%,-2%,0) scale(1.08);opacity:1} }
+body:has(#ai.active) #ai.active > .ai-workspace { position:relative !important; z-index:1; display:flex !important; flex:1 1 auto !important; width:100% !important; height:auto !important; min-height:0 !important; max-height:none !important; margin:0 !important; padding:0 !important; gap:0 !important; overflow:hidden !important; background:transparent !important; }
+body:has(#ai.active) #ai.active .ai-chat-main,
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page,
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page.open { background:transparent !important; }
+body:has(#ai.active) #ai.active #aiBox.horizon-ai-page #aiHeader { background:rgba(9,10,28,.36) !important; border-bottom:1px solid rgba(255,255,255,.10) !important; backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); }
+body:has(#ai.active) #ai.active .ai-chat-sidebar { background:rgba(8,10,28,.62) !important; border-right:1px solid rgba(255,255,255,.10) !important; backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px); }
+body:has(#ai.active) #ai.active .ai-chat-item:hover,
+body:has(#ai.active) #ai.active .ai-chat-item.active { background:rgba(125,103,255,.18) !important; }
+body:has(#ai.active) #ai.active .ai-chat-search-wrap,
+body:has(#ai.active) #ai.active .ai-sidebar-memory { background:rgba(255,255,255,.055) !important; border-color:rgba(255,255,255,.12) !important; }
+body:has(#ai.active) #ai.active .aiInput { background:rgba(22,19,48,.58) !important; border:1px solid rgba(180,139,255,.65) !important; box-shadow:0 0 0 1px rgba(112,93,255,.12),0 12px 55px rgba(64,46,153,.22) !important; backdrop-filter:blur(26px); -webkit-backdrop-filter:blur(26px); }
+body:has(#ai.active) #ai.active #aiSendBtn { background:linear-gradient(135deg,#9b75ff,#ff7d85) !important; color:white !important; box-shadow:0 0 24px rgba(165,98,255,.34); }
+body:has(#ai.active) #ai.active .ai-suggest { border:1px solid rgba(255,255,255,.10) !important; border-radius:22px !important; background:rgba(12,13,35,.28) !important; backdrop-filter:blur(12px); }
+body:has(#ai.active) #ai.active .ai-suggest:hover { background:rgba(126,93,255,.18) !important; border-color:rgba(185,151,255,.35) !important; }
+body:has(#ai.active) #ai.active .ai-welcome-title { background:linear-gradient(100deg,#fff 4%,#f4b4ff 43%,#9f91ff 72%,#ffad9e 100%); -webkit-background-clip:text; background-clip:text; color:transparent !important; }
+@media(max-width:760px){
+ body:has(#ai.active) #ai.active { width:100vw !important; height:100dvh !important; }
+ body:has(#ai.active) #ai.active > .ai-workspace { display:flex !important; }
+ body:has(#ai.active) #ai.active .ai-chat-main { min-width:0; width:100%; }
+ body:has(#ai.active) #ai.active .ai-chat-sidebar { background:rgba(8,10,28,.88) !important; }
+}
+@media(prefers-reduced-motion:reduce){body:has(#ai.active) #ai.active::before,body:has(#ai.active) #ai.active::after{animation:none!important}}
+
 </style>
 
     <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
