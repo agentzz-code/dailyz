@@ -25565,6 +25565,69 @@ body:has(#ai.active) main { padding-top:0 !important; }
 }
 @media(prefers-reduced-motion:reduce) { #ai.active *, #ai.active *::before, #ai.active *::after { animation:none !important; transition:none !important; } }
 
+
+/* Horizon 3.7 — mobile vertical scrolling and touch-friendly layout */
+@media (max-width:760px) {
+  html:has(#ai.active), body:has(#ai.active) {
+    height:100%; min-height:100%; overflow:hidden !important;
+    overscroll-behavior-y:contain;
+  }
+  #ai.active { overflow:hidden !important; touch-action:pan-y !important; }
+  #ai.active .ai-workspace {
+    display:flex !important; flex-direction:column !important;
+    height:100dvh !important; min-height:0 !important; overflow:hidden !important;
+  }
+  #ai.active .ai-chat-main {
+    display:flex !important; flex-direction:column !important;
+    flex:1 1 auto !important; min-height:0 !important; height:auto !important;
+    overflow:hidden !important; touch-action:pan-y !important;
+  }
+  #ai.active #aiBox.horizon-ai-page,
+  #ai.active #aiBox.horizon-ai-page.open {
+    display:flex !important; flex-direction:column !important;
+    flex:1 1 auto !important; min-height:0 !important; height:auto !important;
+    max-height:none !important; overflow:hidden !important;
+  }
+  #ai.active #aiBox.horizon-ai-page #aiHeader { flex:0 0 auto !important; }
+  #ai.active #aiContent,
+  #ai.active .ai-content,
+  #ai.active .ai-chat-content,
+  #ai.active .ai-chat-body,
+  #ai.active .ai-conversation-wrap {
+    min-height:0 !important; max-height:none !important;
+  }
+  /* The transcript becomes the main touch-scroll surface. */
+  #ai.active #aiMessages {
+    display:flex !important; flex:1 1 auto !important;
+    min-height:0 !important; height:auto !important; max-height:none !important;
+    overflow-y:auto !important; overflow-x:hidden !important;
+    -webkit-overflow-scrolling:touch !important; overscroll-behavior-y:contain;
+    touch-action:pan-y !important; padding:18px 14px calc(24px + env(safe-area-inset-bottom)) !important;
+    scroll-behavior:smooth;
+  }
+  #ai.active #aiWelcome {
+    flex:0 0 auto !important; min-height:min(42dvh,360px) !important;
+    padding:clamp(26px,8vh,76px) 14px 20px !important;
+    justify-content:center !important;
+  }
+  #ai.active .ai-convo {
+    flex:0 0 auto !important; min-height:0 !important;
+    overflow:visible !important; touch-action:pan-y !important;
+  }
+  #ai.active .aiInput {
+    flex:0 0 auto !important; position:relative !important;
+    margin:8px 12px calc(10px + env(safe-area-inset-bottom)) !important;
+    width:calc(100% - 24px) !important; max-width:none !important;
+    touch-action:pan-y !important;
+  }
+  #ai.active .ai-suggest-row {
+    flex:0 0 auto !important; flex-wrap:wrap !important;
+    max-height:none !important; overflow:visible !important;
+    padding:4px 12px 14px !important; touch-action:pan-y !important;
+  }
+  #ai.active .ai-suggest { max-width:100%; white-space:normal !important; }
+  #ai.active .ai-chat-sidebar { overflow-y:auto !important; -webkit-overflow-scrolling:touch !important; touch-action:pan-y !important; }
+}
 </style>
     <script>
         (function () {
