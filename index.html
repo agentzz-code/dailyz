@@ -22951,9 +22951,9 @@ document.documentElement.classList.toggle(
         <div class="ai-convo">
             <div id="aiWelcome">
                 <div class="ai-welcome-emoji" aria-hidden="true">✨</div>
-                <div class="ai-welcome-title" id="aiWelcomeTitle">Hi! I'm Daily AI 👋</div>
+                <div class="ai-welcome-title" id="aiWelcomeTitle">Where should we start?</div>
                 <div class="ai-welcome-sub" id="aiWelcomeSub">
-                    Ask me anything — study help, summaries, translations and more.
+                    Ask anything — study, planning, writing, translations and more.
                 </div>
                 <div class="ai-suggest-row">
                     <button type="button" class="ai-suggest" data-ai-suggest="1">Give me study tips</button>
@@ -23013,8 +23013,8 @@ document.documentElement.classList.toggle(
             <input
                 id="aiInput"
                 type="text"
-                placeholder="Ask Daily AI..."
-                aria-label="Ask Daily AI"
+                placeholder="Ask Horizon AI anything..."
+                aria-label="Ask Horizon AI"
                 autocomplete="off"
             />
             <button
@@ -24695,6 +24695,56 @@ document.documentElement.classList.toggle(
                 aiBoxForPage.setAttribute("aria-label", "Horizon AI chat");
                 aiChatHost.appendChild(aiBoxForPage);
             }
+            // Keep the AI screen simple: put the chat drawer and new-chat controls in the chat header.
+            const aiHeaderActions = document.querySelector("#aiHeader .ai-head-actions");
+            const aiDrawerButton = document.getElementById("aiSidebarToggleBtn");
+            const aiNewChatButton = document.getElementById("aiSidebarNewChatBtn");
+            if (aiHeaderActions && aiDrawerButton) {
+                aiDrawerButton.className = "aiHeadBtn aiChatMenuToggle";
+                aiDrawerButton.textContent = "☰";
+                aiDrawerButton.setAttribute("aria-label", "Open chats");
+                aiDrawerButton.title = "Chats";
+                aiHeaderActions.prepend(aiDrawerButton);
+            }
+            if (aiHeaderActions && aiNewChatButton) {
+                aiNewChatButton.className = "aiHeadBtn aiHeaderNewChat";
+                aiNewChatButton.textContent = "＋";
+                aiNewChatButton.setAttribute("aria-label", "New chat");
+                aiNewChatButton.title = "New chat";
+                aiHeaderActions.insertBefore(aiNewChatButton, document.getElementById("aiSettingsBtn"));
+            }
+            // A compact model pill keeps model choice visible in the chat header.
+            const aiHeaderActionsForModel = document.querySelector("#aiHeader .ai-head-actions");
+            if (aiHeaderActionsForModel && !document.getElementById("aiModelQuickBtn")) {
+                const modelButton = document.createElement("button");
+                modelButton.type = "button";
+                modelButton.id = "aiModelQuickBtn";
+                modelButton.className = "aiModelQuickBtn";
+                modelButton.setAttribute("aria-label", "Choose AI model");
+                modelButton.title = "Choose AI model";
+                const updateModelButton = () => {
+                    const select = document.getElementById("aiModelSelect");
+                    const option = select?.selectedOptions?.[0];
+                    modelButton.textContent = ((select?.value === "auto") ? "Gemini Auto" : (option?.textContent || "Gemini model")) + "  ▾";
+                };
+                modelButton.addEventListener("click", () => { aiOpenSettings(); setTimeout(() => document.getElementById("aiModelSelect")?.focus(), 80); });
+                document.getElementById("aiSettingsBtn")?.insertAdjacentElement("beforebegin", modelButton);
+                document.getElementById("aiModelSelect")?.addEventListener("change", updateModelButton);
+                updateModelButton();
+            }
+            // Keep the welcome suggestions beneath the composer, like a modern AI chat home.
+            const aiSuggestionRow = document.querySelector("#aiWelcome .ai-suggest-row");
+            const aiComposer = document.querySelector("#aiBox .aiInput");
+            if (aiSuggestionRow && aiComposer) {
+                aiComposer.insertAdjacentElement("afterend", aiSuggestionRow);
+                const syncSuggestionVisibility = () => aiSuggestionRow.classList.toggle("ai-suggestions-hidden", document.getElementById("aiWelcome")?.classList.contains("hide") || !!document.getElementById("aiMessages")?.children.length);
+                syncSuggestionVisibility();
+                const welcomeObserver = new MutationObserver(syncSuggestionVisibility);
+                const welcome = document.getElementById("aiWelcome");
+                if (welcome) welcomeObserver.observe(welcome, { attributes: true, attributeFilter: ["class"] });
+                const messageList = document.getElementById("aiMessages");
+                if (messageList) new MutationObserver(syncSuggestionVisibility).observe(messageList, { childList: true });
+            }
             // Page controls are shortcuts to the existing chat and settings, not duplicate implementations.
             document.getElementById("aiPageSettingsBtn")?.addEventListener("click", () => aiOpenSettings());
             document.getElementById("aiPageNewChatBtn")?.addEventListener("click", () => aiCreateNewChat());
@@ -24702,7 +24752,7 @@ document.documentElement.classList.toggle(
             document.getElementById("aiChatSearch")?.addEventListener("input", aiRenderChatLists);
             document.getElementById("aiSidebarMemoryBtn")?.addEventListener("click", () => aiOpenSettings());
             document.getElementById("aiChatMemoryToggle")?.addEventListener("click", () => { const key=AI_CHAT_MEMORY_CONTEXT_KEY; const enabled=localStorage.getItem(key)==="false"; localStorage.setItem(key,enabled?"true":"false"); aiUpdateMemorySidebar(); });
-            document.getElementById("aiSidebarToggleBtn")?.addEventListener("click", () => { const side=document.getElementById("aiChatSidebar"); if(!side)return; const open=side.classList.toggle("mobile-open"); document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded",open?"true":"false"); });
+            document.getElementById("aiSidebarToggleBtn")?.addEventListener("click", () => { const side=document.getElementById("aiChatSidebar"), workspace=document.getElementById("aiWorkspace"); if(!side||!workspace)return; let open; if(window.matchMedia("(max-width:760px)").matches){open=side.classList.toggle("mobile-open");}else{open=workspace.classList.toggle("sidebar-collapsed")?false:true;} document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded",open?"true":"false"); });
             aiLoadSettingsIntoUI();
             aiApplyLanguage();
             aiSetWebSearch(aiWebSearch, false);
@@ -25240,6 +25290,158 @@ main { width: 100%; max-width: var(--horizon-content-max); margin-inline: auto; 
 }
 @keyframes aiSidebarIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.ai-chat-item,.ai-new-chat-primary,.ai-chat-sidebar.mobile-open{animation:none!important;transition:none!important}}
+
+
+
+/* Horizon AI simple full-screen chat: keep history and memory tucked into the menu. */
+#ai.active .ai-page-heading,
+#ai.active > .ai-memory-status { display:none !important; }
+#ai.active { min-width:0; padding-top:0 !important; }
+#ai.active .ai-workspace { display:block; position:relative; height:calc(100dvh - 128px); min-height:440px; margin:0; }
+#ai.active .ai-chat-main { width:100%; height:100%; min-height:0; }
+#ai.active #aiBox.horizon-ai-page,
+#ai.active #aiBox.horizon-ai-page.open { width:100%; height:100%; min-height:0; max-height:none; margin:0; border:0; border-radius:0; box-shadow:none; }
+#ai.active #aiBox.horizon-ai-page #aiHeader { min-height:58px; padding:9px 14px; border-radius:0; background:var(--ai-panel, var(--card-bg)); }
+#ai.active #aiBox.horizon-ai-page #aiHeaderSub { display:none; }
+#ai.active #aiBox.horizon-ai-page .ai-head-emoji { display:none; }
+#ai.active #aiBox.horizon-ai-page #aiTitle { font-size:16px; font-weight:700; }
+#ai.active #aiBox.horizon-ai-page .ai-head-actions { gap:5px; }
+#ai.active #aiBox.horizon-ai-page .aiHeadBtn { width:36px; height:36px; border-radius:50%; font-size:18px; }
+#ai.active #aiBox.horizon-ai-page #aiNewBtn,
+#ai.active #aiBox.horizon-ai-page #aiExpandBtn,
+#ai.active #aiBox.horizon-ai-page #aiCloseBtn,
+#ai.active #aiBox.horizon-ai-page #aiPageSettingsBtn { display:none !important; }
+#ai.active .ai-chat-sidebar { display:none; position:absolute; z-index:60; top:58px; bottom:8px; left:8px; width:min(300px, calc(100% - 16px)); max-height:none; padding:12px; border-radius:18px; box-shadow:0 16px 50px rgba(0,0,0,.2); background:var(--ai-panel, var(--card-bg)); }
+#ai.active .ai-chat-sidebar.mobile-open { display:flex; }
+#ai.active .ai-chat-list { max-height:none; flex:1; }
+#ai.active .ai-sidebar-section-title { padding-top:5px; }
+#ai.active .ai-sidebar-memory { margin-top:8px; }
+#ai.active .ai-local-note { font-size:10px; }
+#ai.active .aiHeaderNewChat { display:grid; place-items:center; border:0; cursor:pointer; background:transparent; color:var(--ai-muted); }
+#ai.active .aiChatMenuToggle { display:grid; place-items:center; border:0; cursor:pointer; background:transparent; color:var(--ai-muted); }
+@media(max-width:760px) {
+  #ai.active .ai-workspace { height:calc(100dvh - 142px); min-height:360px; }
+  #ai.active #aiBox.horizon-ai-page, #ai.active #aiBox.horizon-ai-page.open { border-radius:0; }
+  #ai.active #aiBox.horizon-ai-page #aiHeader { padding:8px 10px; }
+  #ai.active .ai-chat-sidebar { top:54px; bottom:8px; width:min(320px, calc(100% - 16px)); max-height:none; }
+}
+@media(prefers-reduced-motion:reduce) { #ai.active .ai-chat-sidebar { animation:none !important; } }
+
+/* Horizon AI — Gemini-inspired full-screen chat layout (keeps Horizon's app navigation and existing chat logic). */
+body:has(#ai.active) .header { display:none !important; }
+body:has(#ai.active) main { padding-top:0 !important; }
+#ai.active {
+  --h-ai-bg:#101010; --h-ai-sidebar:#1d1d1d; --h-ai-panel:#1d1d1d;
+  --h-ai-input:#1e1e1e; --h-ai-text:#e8e8e8; --h-ai-muted:#a3a3a3;
+  --h-ai-border:#303030; --h-ai-hover:#292929; --h-ai-accent:#a9c7ff;
+  color:var(--h-ai-text); background:var(--h-ai-bg) !important;
+  padding:0 !important; margin:0 !important; min-height:calc(100dvh - 8px);
+}
+#ai.active .ai-workspace {
+  display:grid; grid-template-columns:260px minmax(0,1fr); gap:0;
+  width:100%; height:calc(100dvh - 8px); min-height:520px; margin:0;
+  background:var(--h-ai-bg); border:0; border-radius:0; overflow:hidden;
+}
+#ai.active .ai-workspace.sidebar-collapsed { grid-template-columns:0 minmax(0,1fr); }
+#ai.active .ai-chat-sidebar {
+  display:flex !important; position:relative; inset:auto; z-index:2;
+  width:auto; height:100%; max-height:none; min-height:0; overflow:hidden;
+  padding:16px 12px 12px; gap:10px; border:0; border-right:1px solid #2a2a2a;
+  border-radius:0; box-shadow:none; background:var(--h-ai-sidebar); color:var(--h-ai-text);
+  transition:transform .2s ease, opacity .2s ease;
+}
+#ai.active .ai-workspace.sidebar-collapsed .ai-chat-sidebar { display:none !important; }
+#ai.active .ai-chat-sidebar .ai-new-chat-primary {
+  display:flex; align-items:center; justify-content:flex-start; gap:10px; min-height:44px;
+  padding:0 16px; border:0; border-radius:24px; background:#292929; color:#f1f1f1;
+  font-size:13px; font-weight:650; box-shadow:none;
+}
+#ai.active .ai-chat-search-wrap { min-height:40px; padding:0 12px; border:1px solid #343434; border-radius:22px; background:#242424; color:#b9b9b9; }
+#ai.active .ai-chat-search-wrap input { color:#eee !important; }
+#ai.active .ai-sidebar-section-title { color:#a7a7a7; font-size:11px; font-weight:650; letter-spacing:.02em; padding:7px 8px 2px; }
+#ai.active .ai-chat-list { max-height:none; flex:1; min-height:0; gap:2px; }
+#ai.active .ai-chat-list-empty { color:#929292; padding:8px; }
+#ai.active .ai-chat-item { border-radius:10px; }
+#ai.active .ai-chat-item:hover, #ai.active .ai-chat-item.active { background:#303030; }
+#ai.active .ai-chat-open { padding:10px 9px; gap:0; }
+#ai.active .ai-chat-item-title { color:#ededed; font-size:12px; font-weight:500; }
+#ai.active .ai-chat-item-preview { display:none; }
+#ai.active .ai-chat-menu { color:#ddd; }
+#ai.active .ai-sidebar-memory { border:1px solid #343434; background:#252525; border-radius:13px; padding:10px; }
+#ai.active .ai-sidebar-memory-copy strong { color:#eee; }
+#ai.active .ai-sidebar-memory-copy span, #ai.active .ai-local-note { color:#a2a2a2; }
+#ai.active .ai-memory-toggle, #ai.active #aiSidebarMemoryBtn { color:#d8d8d8; }
+#ai.active .ai-local-note { margin:0; font-size:10px; }
+#ai.active .ai-chat-main { min-width:0; min-height:0; height:100%; overflow:hidden; background:var(--h-ai-bg); }
+#ai.active #aiBox.horizon-ai-page, #ai.active #aiBox.horizon-ai-page.open {
+  display:flex; flex-direction:column; position:relative; inset:auto; z-index:1;
+  width:100%; height:100%; min-height:0; max-height:none; margin:0; padding:0;
+  border:0; border-radius:0; box-shadow:none; overflow:hidden; background:var(--h-ai-bg); color:var(--h-ai-text);
+}
+#ai.active #aiBox.horizon-ai-page #aiHeader {
+  flex:0 0 60px; min-height:60px; display:flex; align-items:center; gap:12px;
+  padding:0 22px; border:0; border-bottom:1px solid #252525; border-radius:0;
+  background:var(--h-ai-bg); color:var(--h-ai-text);
+}
+#ai.active #aiBox.horizon-ai-page .ai-head-emoji { display:none; }
+#ai.active #aiBox.horizon-ai-page .ai-head-text { min-width:0; }
+#ai.active #aiBox.horizon-ai-page #aiTitle { font-size:16px; font-weight:600; letter-spacing:-.02em; color:#f0f0f0; }
+#ai.active #aiBox.horizon-ai-page #aiHeaderSub { display:none; }
+#ai.active #aiBox.horizon-ai-page .ai-head-actions { display:flex; align-items:center; gap:7px; margin-left:auto; }
+#ai.active #aiModelQuickBtn { display:inline-flex; align-items:center; justify-content:center; min-height:38px; max-width:220px; padding:0 14px; border:1px solid #3b3b3b; border-radius:22px; background:transparent; color:#e2e2e2; font-size:12px; white-space:nowrap; cursor:pointer; }
+#ai.active #aiModelQuickBtn:hover { background:#222; }
+#ai.active #aiBox.horizon-ai-page .aiHeadBtn { display:grid; place-items:center; width:38px; height:38px; padding:0; border:0; border-radius:50%; background:transparent; color:#d1d1d1; font-size:17px; }
+#ai.active #aiBox.horizon-ai-page .aiHeadBtn:hover { background:#262626; }
+#ai.active #aiBox.horizon-ai-page #aiSearchBtn { opacity:.9; }
+#ai.active #aiBox.horizon-ai-page #aiNewBtn, #ai.active #aiBox.horizon-ai-page #aiExpandBtn, #ai.active #aiBox.horizon-ai-page #aiCloseBtn, #ai.active #aiBox.horizon-ai-page #aiPageSettingsBtn { display:none !important; }
+#ai.active .ai-convo { flex:1; min-height:0; width:100%; max-width:850px; margin:0 auto; padding:0 26px; overflow:hidden; }
+#ai.active #aiWelcome { flex:1; min-height:300px; justify-content:center; gap:15px; padding:24px 0 12px; color:#e5e5e5; }
+#ai.active .ai-welcome-emoji { display:none; }
+#ai.active .ai-welcome-title { font-size:clamp(27px,3vw,36px); line-height:1.2; font-weight:500; letter-spacing:-.035em; color:#e8e8e8; }
+#ai.active .ai-welcome-sub { max-width:560px; font-size:14px; line-height:1.55; color:#a6a6a6; }
+#ai.active .ai-suggest-row { width:100%; max-width:650px; display:flex; justify-content:flex-start; flex-wrap:wrap; gap:8px; margin:0 auto 20px; padding:0 26px 8px; }
+#ai.active .ai-suggest-row.ai-suggestions-hidden { display:none !important; }
+#ai.active .ai-suggest { padding:10px 14px; border:0; border-radius:12px; background:transparent; color:#d6d6d6; font-size:13px; font-weight:500; text-align:left; }
+#ai.active .ai-suggest:hover { background:#202020; }
+#ai.active #aiMessages { width:100%; max-width:800px; margin:0 auto; padding:20px 0 24px; color:#e6e6e6; }
+#ai.active .aiInput {
+  flex:0 0 auto; width:calc(100% - 52px); max-width:720px; min-height:62px;
+  margin:0 auto 12px; padding:9px 12px; gap:8px; border:1px solid #303030;
+  border-radius:30px; background:#1e1e1e; box-shadow:none; align-items:center;
+}
+#ai.active .aiInput input#aiInput { min-height:42px; padding:8px 5px; border:0; border-radius:0; outline:none; background:transparent; color:#f0f0f0; font-size:15px; box-shadow:none; }
+#ai.active .aiInput input#aiInput::placeholder { color:#858585; }
+#ai.active .aiInput input#aiInput:focus { border:0; box-shadow:none; }
+#ai.active .aiImageBtn, #ai.active .aiMicBtn { width:36px; height:36px; flex:0 0 36px; border:0; border-radius:50%; color:#e3e3e3; background:transparent; }
+#ai.active .aiImageBtn:hover, #ai.active .aiMicBtn:hover { background:#303030; }
+#ai.active #aiSendBtn { width:40px; height:40px; flex:0 0 40px; border-radius:50%; background:#d9e2f8; color:#1a2230; }
+#ai.active #aiVoiceBar, #ai.active #aiImagePreviewWrap { width:calc(100% - 52px); max-width:720px; margin:0 auto 8px; background:#1e1e1e; border-color:#333; color:#eee; }
+#ai.active #aiStatus { color:#bbb; }
+#ai.active #aiSettingsModal { background:#191919; color:#eee; border-color:#333; }
+#ai.active #aiSettingsModal select, #ai.active #aiSettingsModal textarea { color:#eee; background:#242424; border-color:#393939; }
+@media (min-width:761px) {
+  #ai.active .ai-chat-sidebar { position:relative; top:auto; bottom:auto; left:auto; width:auto; }
+  #ai.active .ai-chat-sidebar.mobile-open { display:flex !important; }
+}
+@media (max-width:760px) {
+  body:has(#ai.active) .header { display:none !important; }
+  #ai.active .ai-workspace { display:block; position:relative; height:calc(100dvh - env(safe-area-inset-bottom)); min-height:0; }
+  #ai.active .ai-chat-sidebar { display:none !important; position:absolute; z-index:30; top:60px; bottom:8px; left:8px; width:min(300px,calc(100% - 16px)); max-height:none; border:1px solid #353535; border-radius:16px; box-shadow:0 18px 60px #0009; }
+  #ai.active .ai-chat-sidebar.mobile-open { display:flex !important; }
+  #ai.active .ai-chat-main { height:100%; }
+  #ai.active #aiBox.horizon-ai-page #aiHeader { min-height:54px; flex-basis:54px; padding:0 10px; }
+  #ai.active #aiModelQuickBtn { max-width:132px; min-height:34px; padding:0 9px; font-size:10px; }
+  #ai.active .ai-convo { padding:0 16px; }
+  #ai.active .ai-welcome-title { font-size:27px; }
+  #ai.active .ai-welcome-sub { font-size:13px; }
+  #ai.active .aiInput { width:calc(100% - 24px); margin-bottom:8px; min-height:56px; padding:7px 9px; gap:5px; }
+  #ai.active .aiInput input#aiInput { font-size:14px; }
+  #ai.active .ai-suggest-row { padding:0 14px 8px; gap:4px; }
+  #ai.active .ai-suggest { padding:9px 10px; font-size:12px; }
+  #ai.active #aiMessages { padding:16px 0 20px; }
+  #ai.active .aiImageBtn, #ai.active .aiMicBtn { width:32px; height:32px; flex-basis:32px; }
+}
+@media(prefers-reduced-motion:reduce) { #ai.active *, #ai.active *::before, #ai.active *::after { animation:none !important; transition:none !important; } }
 
 </style>
     <script>
