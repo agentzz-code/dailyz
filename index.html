@@ -24846,24 +24846,51 @@ document.documentElement.classList.toggle(
 
         document.addEventListener("keydown", (e) => {
             if (e.key !== "Escape") return;
-            const box = document.getElementById("aiBox");
-            if (!box || !box.classList.contains("open")) return;
-            if (document.getElementById("aiSettingsModal")?.classList.contains("open")) { aiCloseSettings(); return; }
+            
+            // FIX: Close sidebar first if open (priority 1)
+            const sidebar = document.getElementById("aiChatSidebar");
+            if (sidebar && sidebar.classList.contains("mobile-open")) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                sidebar.classList.remove("mobile-open");
+                document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded", "false");
+                return;
+            }
+            
+            // FIX: Close settings modal if open (priority 2)
+            const modal = document.getElementById("aiSettingsModal");
+            if (modal && modal.classList.contains("open")) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                aiCloseSettings();
+                modal.style.display = "";
+                modal.style.pointerEvents = "";
+                return;
+            }
+            
+            // FIX: Stop voice if active (priority 3)
             if (aiVoiceActive) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
                 aiStopVoice(true);
                 return;
             }
-            // FIX: Ensure clean close - force remove open class and reset modal state
+            
+            // FIX: Close AI box or fullscreen mode (priority 4)
+            const box = document.getElementById("aiBox");
+            if (!box || !box.classList.contains("open")) return;
+            
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
             if (aiFullOpen) {
                 aiSetFullscreen(false);
             } else {
                 box.classList.remove("open");
-                const modal = document.getElementById("aiSettingsModal");
-                if (modal) {
-                    modal.classList.remove("open");
-                    modal.style.display = "";
-                    modal.style.pointerEvents = "";
-                }
+                modal.classList.remove("open");
+                modal.style.display = "";
+                modal.style.pointerEvents = "";
+                aiPinned = false;
                 if (typeof showSection === "function" && document.getElementById("ai")?.classList.contains("active")) {
                     showSection("tasks");
                 }
@@ -24979,7 +25006,22 @@ document.documentElement.classList.toggle(
             document.getElementById("aiChatSearch")?.addEventListener("input", aiRenderChatLists);
             document.getElementById("aiSidebarMemoryBtn")?.addEventListener("click", () => aiOpenSettings());
             document.getElementById("aiChatMemoryToggle")?.addEventListener("click", () => { const key=AI_CHAT_MEMORY_CONTEXT_KEY; const enabled=localStorage.getItem(key)==="false"; localStorage.setItem(key,enabled?"true":"false"); aiUpdateMemorySidebar(); });
-            document.getElementById("aiSidebarToggleBtn")?.addEventListener("click", () => { const side=document.getElementById("aiChatSidebar"), workspace=document.getElementById("aiWorkspace"); if(!side||!workspace)return; let open; if(window.matchMedia("(max-width:760px)").matches){open=side.classList.toggle("mobile-open");}else{open=workspace.classList.toggle("sidebar-collapsed")?false:true;} document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded",open?"true":"false"); });
+            document.getElementById("aiSidebarToggleBtn")?.addEventListener("click", (e) => { 
+                e.preventDefault();
+                e.stopPropagation();
+                const side=document.getElementById("aiChatSidebar"), workspace=document.getElementById("aiWorkspace"); 
+                if(!side||!workspace)return; 
+                let open; 
+                if(window.matchMedia("(max-width:760px)").matches){
+                    // FIX: Use explicit toggle with proper state tracking
+                    const isMobileOpen = side.classList.contains("mobile-open");
+                    side.classList.toggle("mobile-open", !isMobileOpen);
+                    open = !isMobileOpen;
+                } else {
+                    open=workspace.classList.toggle("sidebar-collapsed")?false:true;
+                } 
+                document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded",open?"true":"false"); 
+            });
             aiLoadSettingsIntoUI();
             // FIX: Apply language BEFORE rendering suggestions
             aiApplyLanguage();
@@ -27421,6 +27463,38 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 
 #aiSettingsModal {
   z-index: 21 !important;
+}
+
+/* FIX: Sidebar z-index and overlay behavior */
+#aiChatSidebar {
+  z-index: 501 !important;
+  position: fixed !important;
+}
+
+#aiChatSidebar.mobile-open {
+  display: flex !important;
+  pointer-events: auto !important;
+}
+
+#aiChatSidebar:not(.mobile-open) {
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* FIX: Ensure backdrop/overlay blocks interaction when sidebar open */
+#aiWorkspace.sidebar-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.3);
+  z-index: 499;
+  pointer-events: auto;
+}
+
+/* FIX: Sidebar toggle always interactive */
+#aiSidebarToggleBtn {
+  pointer-events: auto !important;
+  z-index: 25 !important;
 }
 
 /* FIX: Ensure model button is always above other header items */
