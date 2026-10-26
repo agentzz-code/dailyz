@@ -5882,7 +5882,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 }
 </style>
 
-<script src="https://apis.google.com/js/api.js?onload=__iframefcb163199" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
+<script src="https://apis.google.com/js/api.js?onload=__iframefcb446191" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
 
 <body>
 
@@ -7393,7 +7393,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 <div id="aiTitle">Horizon AI</div>
                 <div id="aiHeaderSub">Your personal copilot</div>
             </div>
-            <div class="ai-head-actions"><button type="button" class="horizon-ai-escape" aria-label="Exit Horizon AI" title="Exit Horizon AI">Esc</button><button class="aiHeadBtn aiChatMenuToggle" id="aiSidebarToggleBtn" type="button" aria-expanded="false" aria-controls="aiChatSidebar" aria-label="Open chats" title="Chats">☰</button>
+            <div class="ai-head-actions"><button type="button" class="horizon-ai-escape" aria-label="Exit Horizon AI fullscreen" title="Exit fullscreen AI (Esc)">Esc</button><button class="aiHeadBtn aiChatMenuToggle" id="aiSidebarToggleBtn" type="button" aria-expanded="false" aria-controls="aiChatSidebar" aria-label="Open chats" title="Chats">☰</button>
                 <button type="button" class="aiHeadBtn aiHeaderNewChat" id="aiSidebarNewChatBtn" aria-label="New chat" title="New chat">＋</button><button type="button" id="aiModelQuickBtn" class="aiModelQuickBtn" aria-label="Choose AI model" title="Choose AI model">Gemini Auto  ▾</button><button type="button" id="aiSettingsBtn" class="aiHeadBtn" aria-label="AI settings" title="AI settings">⚙</button>
                 <button type="button" id="aiSearchBtn" class="aiHeadBtn aiSearchToggle" aria-pressed="false" aria-label="Web search off" title="Web search off">🌐</button>
                 <button type="button" id="aiNewBtn" class="aiHeadBtn" aria-label="New chat" title="New chat">🧹</button>
@@ -22797,14 +22797,22 @@ document.documentElement.classList.toggle(
 
         function aiDetectLang() {
             let stored = "";
-            try {
-                stored = (localStorage.getItem(AI_LANG_STORAGE_KEY) || "").toLowerCase();
-            } catch (e) {}
-            if (stored && AI_STRINGS[stored]) return stored;
-            const docLang = (document.documentElement.lang || "").toLowerCase();
-            if (docLang.indexOf("ar") === 0) return "ar";
-            if (docLang.indexOf("ku") === 0 || docLang.indexOf("ckb") === 0) return "ku";
-            return "en";
+            try { stored = (localStorage.getItem(AI_LANG_STORAGE_KEY) || "").toLowerCase().trim(); } catch (e) {}
+            const docLang = (document.documentElement.lang || "").toLowerCase().trim();
+            const normalize = (value) => {
+                if (!value) return "";
+                if (value === "ku" || value.startsWith("ku-") || value.startsWith("ckb") || value.includes("sorani")) return "ku";
+                if (value === "ar" || value.startsWith("ar-") || value.startsWith("arab")) return "ar";
+                if (value === "en" || value.startsWith("en-")) return "en";
+                return "";
+            };
+            return normalize(stored) || normalize(docLang) || "en";
+        }
+
+        function aiResponseLanguageInstruction() {
+            if (aiLang === "ku") return "Kurdish (Central Kurdish / Sorani, written in the Arabic-based Kurdish script used in Iraq)";
+            if (aiLang === "ar") return "Arabic";
+            return "English";
         }
 
         function aiSpeechLang() {
@@ -23912,27 +23920,8 @@ document.documentElement.classList.toggle(
             aiSettings = { model: get("aiModelSelect"), tone: get("aiToneSelect"), detail: get("aiDetailSelect"), memory: get("aiMemoryInput").slice(0,3000), permission: get("aiPermissionSelect"), rules: get("aiRulesInput").slice(0,2000) };
             try { localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(aiSettings)); } catch (e) {}
         }
-        function aiOpenSettings() {
-            aiLoadSettingsIntoUI();
-            const el = document.getElementById("aiSettingsModal");
-            if (!el) return;
-            el.classList.add("open");
-            el.setAttribute("aria-hidden", "false");
-            el.style.display = "block";
-            el.style.visibility = "visible";
-            el.style.pointerEvents = "auto";
-            el.style.zIndex = "999";
-            requestAnimationFrame(() => document.getElementById("aiModelSelect")?.focus({preventScroll:true}));
-        }
-        function aiCloseSettings() {
-            const el = document.getElementById("aiSettingsModal");
-            if (el) {
-                el.classList.remove("open");
-                el.setAttribute("aria-hidden", "true");
-                el.style.display = "none";
-                el.style.pointerEvents = "none";
-            }
-        }
+        function aiOpenSettings() { aiLoadSettingsIntoUI(); const el=document.getElementById("aiSettingsModal"); if(el){el.classList.add("open");el.setAttribute("aria-hidden","false");} }
+        function aiCloseSettings() { const el=document.getElementById("aiSettingsModal"); if(el){el.classList.remove("open");el.setAttribute("aria-hidden","true");} }
         function aiReadActionLog() { try { const x=JSON.parse(localStorage.getItem(AI_ACTION_LOG_KEY)||"[]"); return Array.isArray(x)?x.slice(-20):[]; } catch(e){return [];} }
         function aiLogAction(action, status) { const list=aiReadActionLog(); list.push({action:String(action).slice(0,160),status:String(status).slice(0,40),at:new Date().toISOString()}); try{localStorage.setItem(AI_ACTION_LOG_KEY,JSON.stringify(list.slice(-20)));}catch(e){} aiRenderActionHistory(); }
         function aiRenderActionHistory() { const el=document.getElementById("aiActionHistoryText"); if(!el)return; const items=aiReadActionLog(); el.textContent=items.length?items.slice(-5).reverse().map(x=>new Date(x.at).toLocaleString()+" — "+x.status+": "+x.action).join("\n"):"No Copilot actions recorded yet."; el.style.whiteSpace="pre-line"; }
@@ -24096,10 +24085,14 @@ document.documentElement.classList.toggle(
             }
 
             try {
+                const responseLanguage = aiResponseLanguageInstruction();
+                const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
                 const requestBody = {
                     message: effectiveMessage,
                     model: aiSettings.model,
-                    aiConfig: { tone: aiSettings.tone, detail: aiSettings.detail, memory: [aiSettings.memory, aiBuildCrossChatContext()].filter(Boolean).join("\n\n"), permission: aiSettings.permission, rules: aiSettings.rules, context: aiBuildContext() },
+                    language: aiLang,
+                    responseLanguage: responseLanguage,
+                    aiConfig: { tone: aiSettings.tone, detail: aiSettings.detail, memory: [aiSettings.memory, aiBuildCrossChatContext()].filter(Boolean).join("\n\n"), permission: aiSettings.permission, rules: [languageRule, aiSettings.rules].filter(Boolean).join("\n\n"), context: aiBuildContext() },
                     /* only role/content go on the wire — keeps the Worker's
                        existing contract even though sources are stored locally */
                     history: aiConversationHistory
@@ -24240,7 +24233,7 @@ document.documentElement.classList.toggle(
            ===================================================== */
 
         document.getElementById("aiSettingsBtn")?.addEventListener("click", aiOpenSettings);
-        document.getElementById("aiSettingsClose")?.addEventListener("click", aiCloseSettings);
+        document.getElementById("aiSettingsClose")?.addEventListener("click", () => { aiCloseSettings(); const modal=document.getElementById("aiSettingsModal"); if(modal) modal.style.display=""; });
         document.getElementById("aiSettingsSaveBtn")?.addEventListener("click", () => { aiReadSettingsFromUI(); aiUpdateMemorySidebar(); const el=document.getElementById("aiSettingsStatus"); if(el)el.textContent="Settings saved on this device."; aiLogAction("AI preferences updated","settings"); });
         document.getElementById("aiClearMemoryBtn")?.addEventListener("click", () => { const el=document.getElementById("aiMemoryInput"); if(el)el.value=""; aiReadSettingsFromUI(); const status=document.getElementById("aiSettingsStatus"); if(status)status.textContent="Memory cleared on this device."; });
         document.getElementById("aiClearActionHistoryBtn")?.addEventListener("click", () => { try{localStorage.removeItem(AI_ACTION_LOG_KEY);}catch(e){} aiRenderActionHistory(); });
@@ -24281,14 +24274,13 @@ document.documentElement.classList.toggle(
         }, { passive: true });
 
         document.querySelectorAll("#aiWelcome .ai-suggest").forEach((btn) => {
-            // Suggestions are prompt shortcuts: populate the composer and submit it.
-            btn.addEventListener("click", (event) => {
-                event.preventDefault();
-                if (aiBusy) return;
+            btn.addEventListener("click", () => {
                 const input = document.getElementById("aiInput");
-                if (!input) return;
-                input.value = (btn.textContent || "").trim();
-                if (input.value) sendAI();
+                if (!input || aiBusy) return;
+                input.value = (btn.getAttribute("data-ai-prompt") || btn.textContent || "").trim();
+                input.focus({ preventScroll: true });
+                // Suggestions are actions: send their prompt directly.
+                sendAI();
             });
         });
 
@@ -24351,13 +24343,26 @@ document.documentElement.classList.toggle(
                     modelButton.textContent = ((select?.value === "auto") ? "Gemini Auto" : (option?.textContent || "Gemini model")) + "  ▾";
                 };
                 modelButton.addEventListener("click", (event) => {
-                    event.preventDefault(); event.stopPropagation();
-                    aiOpenSettings();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (typeof aiOpenSettings === "function") aiOpenSettings();
+                    const modal = document.getElementById("aiSettingsModal");
+                    if (modal) {
+                        modal.classList.add("open");
+                        modal.setAttribute("aria-hidden", "false");
+                        modal.style.display = "block";
+                        modal.style.pointerEvents = "auto";
+                    }
+                    requestAnimationFrame(() => {
+                        const select = document.getElementById("aiModelSelect");
+                        if (select) select.focus({ preventScroll: true });
+                    });
                 });
-                document.getElementById("aiSettingsBtn")?.insertAdjacentElement("beforebegin", modelButton);
+                const settingsButton = document.getElementById("aiSettingsBtn");
+                if (settingsButton) settingsButton.insertAdjacentElement("beforebegin", modelButton);
+                else aiHeaderActionsForModel.appendChild(modelButton);
                 const modelSelect = document.getElementById("aiModelSelect");
-                modelSelect?.addEventListener("change", () => {
-                    // Persist the model immediately; users should not need a second Save tap.
+                if (modelSelect) modelSelect.addEventListener("change", () => {
                     aiReadSettingsFromUI();
                     updateModelButton();
                     const status = document.getElementById("aiSettingsStatus");
@@ -25077,11 +25082,60 @@ body:has(#ai.active) main { padding-top:0 !important; }
 @media(prefers-reduced-motion:reduce) { #ai.active *, #ai.active *::before, #ai.active *::after { animation:none !important; transition:none !important; } }
 
 
-/* Reliable AI settings overlay state (including iPhone Safari). */
-#ai #aiSettingsModal { display:none; pointer-events:none; }
-#ai #aiSettingsModal.open { display:block !important; visibility:visible !important; pointer-events:auto !important; position:absolute; inset:0; z-index:999 !important; overflow:auto; -webkit-overflow-scrolling:touch; }
-#ai #aiSettingsModal.open button, #ai #aiSettingsModal.open select, #ai #aiSettingsModal.open textarea, #ai #aiSettingsModal.open input { pointer-events:auto !important; touch-action:manipulation; }
-#ai.active .horizon-ai-escape, #ai.active #aiModelQuickBtn, #ai.active .ai-suggest { pointer-events:auto !important; touch-action:manipulation !important; }
+
+/* Horizon AI audit fix — final mobile layout override (wins over legacy rules). */
+@media (max-width:760px) {
+  /* The standalone AI landing heading/status row sits above the workspace in the old layout.
+     Hide it in fullscreen mode so it cannot push the chat beyond the viewport. */
+  #ai.active .ai-page-heading, #ai.active .ai-memory-status { display:none !important; }
+  body:has(#ai.active) { overflow:hidden !important; }
+  body:has(#ai.active) main { height:100dvh !important; min-height:0 !important; padding:0 !important; margin:0 !important; overflow:hidden !important; }
+  #ai.active {
+    position:fixed !important; inset:0 !important; width:100vw !important;
+    height:100dvh !important; min-height:0 !important; max-height:none !important;
+    margin:0 !important; padding:0 !important; overflow:hidden !important;
+    box-sizing:border-box !important; background:#080b1b !important;
+  }
+  #ai.active .ai-workspace {
+    display:flex !important; flex-direction:row !important; position:relative !important;
+    width:100% !important; height:100% !important; min-height:0 !important;
+    max-height:none !important; margin:0 !important; padding:0 !important;
+    box-sizing:border-box !important; overflow:hidden !important;
+  }
+  #ai.active .ai-chat-main { display:flex !important; flex-direction:column !important; width:100% !important; height:100% !important; min-height:0 !important; flex:1 1 auto !important; overflow:hidden !important; }
+  #ai.active #aiChatHost { display:flex !important; flex:1 1 auto !important; min-height:0 !important; height:100% !important; overflow:hidden !important; }
+  #ai.active #aiBox.horizon-ai-page, #ai.active #aiBox.horizon-ai-page.open {
+    display:flex !important; flex-direction:column !important; position:relative !important;
+    inset:auto !important; flex:1 1 auto !important; width:100% !important;
+    height:100% !important; min-height:0 !important; max-height:none !important;
+    margin:0 !important; padding:0 !important; border:0 !important; border-radius:0 !important;
+    overflow:hidden !important; box-sizing:border-box !important;
+  }
+  #ai.active #aiBox.horizon-ai-page #aiHeader {
+    flex:0 0 auto !important; min-height:calc(54px + env(safe-area-inset-top)) !important;
+    padding:calc(env(safe-area-inset-top) + 5px) 8px 6px !important;
+    gap:4px !important; align-items:center !important; box-sizing:border-box !important;
+    position:relative !important; z-index:80 !important; overflow:visible !important;
+  }
+  #ai.active #aiBox.horizon-ai-page .ai-head-text { flex:0 1 68px !important; min-width:0 !important; max-width:68px !important; }
+  #ai.active #aiBox.horizon-ai-page #aiTitle { font-size:12px !important; line-height:1.15 !important; white-space:nowrap !important; }
+  #ai.active #aiBox.horizon-ai-page .ai-head-actions { display:flex !important; flex:1 1 auto !important; min-width:0 !important; width:auto !important; margin-left:auto !important; gap:3px !important; align-items:center !important; justify-content:flex-end !important; position:relative !important; z-index:81 !important; pointer-events:auto !important; }
+  #ai.active #aiBox.horizon-ai-page .ai-head-actions > button { flex:0 0 auto !important; position:relative !important; z-index:82 !important; pointer-events:auto !important; touch-action:manipulation !important; }
+  #ai.active #aiModelQuickBtn { flex:0 1 auto !important; min-width:0 !important; max-width:min(31vw,132px) !important; height:34px !important; min-height:34px !important; padding:0 7px !important; overflow:hidden !important; text-overflow:ellipsis !important; font-size:10px !important; }
+  #ai.active #aiBox.horizon-ai-page .aiHeadBtn { width:32px !important; min-width:32px !important; height:32px !important; font-size:15px !important; }
+  #ai.active .horizon-ai-escape { flex:0 0 34px !important; min-width:34px !important; width:34px !important; height:30px !important; padding:0 !important; font-size:10px !important; z-index:83 !important; }
+  #ai.active .ai-convo { flex:1 1 auto !important; min-height:0 !important; height:auto !important; overflow-y:auto !important; overflow-x:hidden !important; padding:0 14px !important; -webkit-overflow-scrolling:touch !important; }
+  #ai.active #aiWelcome { min-height:0 !important; flex:1 0 auto !important; padding:22px 0 12px !important; }
+  #ai.active #aiMessages { flex:0 0 auto !important; min-height:0 !important; padding:14px 0 calc(20px + env(safe-area-inset-bottom)) !important; }
+  #ai.active #aiBox.horizon-ai-page .aiInput { flex:0 0 auto !important; width:calc(100% - 20px) !important; max-width:none !important; margin:8px 10px calc(8px + env(safe-area-inset-bottom)) !important; box-sizing:border-box !important; }
+  #ai.active .ai-suggest-row { flex:0 0 auto !important; padding-bottom:8px !important; }
+  #ai.active #aiSettingsModal { position:absolute !important; inset:0 !important; z-index:100 !important; max-height:100% !important; overflow:auto !important; padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 16px) !important; box-sizing:border-box !important; pointer-events:auto !important; }
+  #ai.active .ai-chat-sidebar { top:calc(60px + env(safe-area-inset-top)) !important; bottom:calc(8px + env(safe-area-inset-bottom)) !important; }
+}
+@media (min-width:761px) {
+  #ai.active #aiModelQuickBtn { pointer-events:auto !important; }
+}
+
 </style>
     <script>
         (function () {
@@ -26681,29 +26735,43 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     if(!ai||!actions||actions.querySelector('.horizon-ai-escape')) return;
     const btn=document.createElement('button');
     btn.type='button'; btn.className='horizon-ai-escape';
-    btn.textContent='Esc'; btn.setAttribute('aria-label','Exit Horizon AI');
-    btn.title='Exit Horizon AI';
-    btn.addEventListener('click',function(e){
-      e.preventDefault(); e.stopPropagation();
-      const modal=document.getElementById('aiSettingsModal');
-      if(modal && modal.classList.contains('open')) {
-        if(typeof aiCloseSettings==='function') aiCloseSettings();
+    btn.textContent='Esc'; btn.setAttribute('aria-label','Exit Horizon AI fullscreen');
+    btn.title='Exit fullscreen AI (Esc)';
+    btn.addEventListener('click',function(){
+      const settings=document.getElementById('aiSettingsModal');
+      if(settings && settings.classList.contains('open')) {
+        if(typeof aiCloseSettings === 'function') aiCloseSettings();
+        settings.style.display = '';
         return;
       }
-      // Use the app's own navigation; never hide the section with inline display styles.
-      if(typeof aiSetOpen==='function') aiSetOpen(false);
-      else if(typeof showSection==='function') showSection('tasks');
-      ai.classList.remove('active');
-      document.body.style.overflow='';
+      const sidebar=document.getElementById('aiChatSidebar');
+      if(sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+        document.getElementById('aiSidebarToggleBtn')?.setAttribute('aria-expanded','false');
+        return;
+      }
+      // Keep the app section state, fullscreen state, and body scroll in sync.
+      if(typeof aiSetOpen === 'function') aiSetOpen(false);
+      else if(typeof showSection === 'function') showSection('tasks');
+      else if(ai) ai.classList.remove('active');
     });
     actions.prepend(btn);
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',setupHorizonAiEscape,{once:true});
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',setupHorizonAiEscape);
   else setupHorizonAiEscape();
-  if('MutationObserver' in window) new MutationObserver(setupHorizonAiEscape).observe(document.documentElement,{subtree:true,childList:true});
+  /* The AI widget already owns the Escape key handler. Keep this helper
+     responsible only for creating the visible Esc button, avoiding double navigation. */
+  const observer=new MutationObserver(setupHorizonAiEscape);
+  observer.observe(document.documentElement,{subtree:true,childList:true});
 })();
 </script>
 
 
 
-<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793047882716" name="I0_1793047882716" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793047882716&amp;_gfid=I0_1793047882716&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=33539522" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
+
+<style id="horizon-ai-controls-functional-fix">
+#ai.active #aiSettingsModal:not(.open) { display:none !important; pointer-events:none !important; }
+#ai.active #aiSettingsModal.open { display:block !important; pointer-events:auto !important; }
+#ai.active .horizon-ai-escape, #ai.active #aiModelQuickBtn, #ai.active .ai-suggest { pointer-events:auto !important; touch-action:manipulation !important; cursor:pointer !important; }
+</style>
+<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793048150896" name="I0_1793048150896" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793048150896&amp;_gfid=I0_1793048150896&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=33195204" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
