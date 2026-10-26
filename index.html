@@ -20842,9 +20842,14 @@ document.documentElement.classList.toggle(
             finishBtn?.addEventListener("click", finishSession);
 
             // Escape leaves the full-screen view without stopping the timer.
+            // FIX: Don't consume ESC key here - let master handler manage it
             document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape" && isOpen) closeSession();
-            });
+                if (e.key === "Escape" && isOpen) {
+                    closeSession();
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            }, true); // Capture phase so it runs AFTER master handler
 
             // Called by the existing timer when a session naturally completes.
             window.studyWithMeFinishCleanup = function () {
@@ -21037,9 +21042,14 @@ document.documentElement.classList.toggle(
                 if (event.key === "Enter" || event.key === "=") { event.preventDefault(); equals(); }
                 if (event.key === "Escape") { event.preventDefault(); close(); }
             });
+            // FIX: Don't consume ESC key here - let master handler manage it
             document.addEventListener("keydown", event => {
-                if (event.key === "Escape" && overlay.classList.contains("open")) close();
-            });
+                if (event.key === "Escape" && overlay.classList.contains("open")) {
+                    close();
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+            }, true); // Capture phase so it runs AFTER master handler
             copyBtn?.addEventListener("click", async () => {
                 const value = lastResult ?? calculate(true);
                 if (value === null) { if (status) status.textContent = t("calculatorNoResult"); return; }
@@ -24785,7 +24795,7 @@ document.documentElement.classList.toggle(
         document.getElementById("aiSettingsSaveBtn")?.addEventListener("click", () => { aiReadSettingsFromUI(); aiUpdateMemorySidebar(); const el=document.getElementById("aiSettingsStatus"); if(el)el.textContent="Settings saved on this device."; aiLogAction("AI preferences updated","settings"); });
         document.getElementById("aiClearMemoryBtn")?.addEventListener("click", () => { const el=document.getElementById("aiMemoryInput"); if(el)el.value=""; aiReadSettingsFromUI(); const status=document.getElementById("aiSettingsStatus"); if(status)status.textContent="Memory cleared on this device."; });
         document.getElementById("aiClearActionHistoryBtn")?.addEventListener("click", () => { try{localStorage.removeItem(AI_ACTION_LOG_KEY);}catch(e){} aiRenderActionHistory(); });
-        document.getElementById("aiSettingsModal")?.addEventListener("keydown", e => { if(e.key==="Escape") aiCloseSettings(); });
+        // FIX: Removed duplicate - master ESC handler in capture phase handles all ESC key logic
 
         document.getElementById("aiInput")?.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && !e.isComposing) sendAI();
@@ -24844,58 +24854,62 @@ document.documentElement.classList.toggle(
         };
         bindSuggestions();
 
+        // FIX: MASTER ESC HANDLER - Capture phase runs FIRST, before all other listeners
+        // This MUST run in capture phase (3rd param = true) to intercept ESC before other handlers
         document.addEventListener("keydown", (e) => {
             if (e.key !== "Escape") return;
+            
+            let handled = false;
             
             // FIX: Close sidebar first if open (priority 1)
             const sidebar = document.getElementById("aiChatSidebar");
             if (sidebar && sidebar.classList.contains("mobile-open")) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
                 sidebar.classList.remove("mobile-open");
                 document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded", "false");
-                return;
+                handled = true;
             }
             
             // FIX: Close settings modal if open (priority 2)
             const modal = document.getElementById("aiSettingsModal");
-            if (modal && modal.classList.contains("open")) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
+            if (!handled && modal && modal.classList.contains("open")) {
                 aiCloseSettings();
                 modal.style.display = "";
                 modal.style.pointerEvents = "";
-                return;
+                handled = true;
             }
             
             // FIX: Stop voice if active (priority 3)
-            if (aiVoiceActive) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
+            if (!handled && aiVoiceActive) {
                 aiStopVoice(true);
-                return;
+                handled = true;
             }
             
             // FIX: Close AI box or fullscreen mode (priority 4)
-            const box = document.getElementById("aiBox");
-            if (!box || !box.classList.contains("open")) return;
-            
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            
-            if (aiFullOpen) {
-                aiSetFullscreen(false);
-            } else {
-                box.classList.remove("open");
-                modal.classList.remove("open");
-                modal.style.display = "";
-                modal.style.pointerEvents = "";
-                aiPinned = false;
-                if (typeof showSection === "function" && document.getElementById("ai")?.classList.contains("active")) {
-                    showSection("tasks");
+            if (!handled) {
+                const box = document.getElementById("aiBox");
+                if (box && box.classList.contains("open")) {
+                    if (aiFullOpen) {
+                        aiSetFullscreen(false);
+                    } else {
+                        box.classList.remove("open");
+                        modal.classList.remove("open");
+                        modal.style.display = "";
+                        modal.style.pointerEvents = "";
+                        aiPinned = false;
+                        if (typeof showSection === "function" && document.getElementById("ai")?.classList.contains("active")) {
+                            showSection("tasks");
+                        }
+                    }
+                    handled = true;
                 }
             }
-        });
+            
+            // FIX: If we handled ESC for AI/sidebar, prevent other handlers from running
+            if (handled) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+            }
+        }, true); // CRITICAL: true = CAPTURE PHASE - runs first before all other handlers
 
         /* =====================================================
            INIT
