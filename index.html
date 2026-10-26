@@ -1,4 +1,7 @@
-<html lang="en" dir="ltr" data-horizon-motion="balanced"><head>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual">
@@ -8,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="https://apis.google.com/_/scs/abc-static/_/js/k=gapi.lb.en.etOqPKhAhvg.O/m=gapi_iframes/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-l5JrVgGKVELwC844E6riBHX86-w/cb=gapi.loaded_0?le=scs" async=""></script><script>
+    <script>
         (function () {
             try {
                 var dark = localStorage.getItem("dailykrd_dark") === "true";
@@ -5882,7 +5885,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 }
 </style>
 
-<script src="https://apis.google.com/js/api.js?onload=__iframefcb446191" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
+</head>
 
 <body>
 
@@ -5915,15 +5918,30 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         <div class="header-actions">
 
-            <button class="icon-button" id="themeButton" type="button" aria-label="Dark Mode">
+            <button
+                class="icon-button"
+                id="themeButton"
+                type="button"
+                aria-label="Dark Mode"
+            >
                 ☾
             </button>
 
-            <button class="icon-button" id="accountButton" type="button" aria-label="Account">
+            <button
+                class="icon-button"
+                id="accountButton"
+                type="button"
+                aria-label="Account"
+            >
                 👤
             </button>
 
-            <button class="icon-button" id="settingsButton" type="button" aria-label="Settings">
+            <button
+                class="icon-button"
+                id="settingsButton"
+                type="button"
+                aria-label="Settings"
+            >
                 ⚙
             </button>
 
@@ -5934,7 +5952,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
     <!-- NAVIGATION -->
 
-    <nav class="tabs" id="primaryNavigation" aria-label="Primary navigation" style="--dock-selection-left: 5px; --dock-selection-width: 57px;">
+    <nav class="tabs" id="primaryNavigation" aria-label="Primary navigation">
         <button class="tab active" data-tab="tasks" id="tasksTab" type="button" aria-label="Today">
             <span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Today</span>
         </button>
@@ -5996,13 +6014,22 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             <div class="dashboard-header">
                 <h1 class="dashboard-greeting" id="dashGreeting">Good morning</h1>
                 <div class="dashboard-date" id="dashDate"></div>
-            </div><div class="horizon-dashboard-actions" aria-label="Quick actions"><button type="button" class="horizon-quick-action"><span class="horizon-quick-icon" aria-hidden="true">▤</span><span class="horizon-quick-label">Study</span></button><button type="button" class="horizon-quick-action"><span class="horizon-quick-icon" aria-hidden="true">☾</span><span class="horizon-quick-label">Prayer</span></button><button type="button" class="horizon-quick-action"><span class="horizon-quick-icon" aria-hidden="true">▦</span><span class="horizon-quick-label">Calendar</span></button></div>
+            </div>
 
             <!-- PROACTIVE AI (Daily AI briefing + one suggestion) -->
-            
+            <div class="dashboard-card" id="paCard" style="display:none;">
+                <div class="dashboard-title">
+                    <span class="pa-badge">✨ <span id="paTitleText">Daily AI</span></span>
+                    <span class="pa-head-actions">
+                        <button type="button" class="pa-icon-btn" id="paRefreshBtn" title="Refresh" aria-label="Refresh suggestion">↻</button>
+                        <button type="button" class="pa-icon-btn" id="paDismissBtn" title="Dismiss" aria-label="Dismiss suggestion">✕</button>
+                    </span>
+                </div>
+                <div id="paBody"></div>
+            </div>
 
             <!-- 2. TODAY'S PROGRESS -->
-            <div id="dashboardWidgetGrid" class="dashboard-widget-grid"><div class="dashboard-card dashboard-user-size-expanded" data-dashboard-widget="progress"><button type="button" class="dashboard-drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder Today's progress">☰</button>
+            <div class="dashboard-card">
                 <div class="dashboard-title">🎯 Today's Progress</div>
                 <div class="dashboard-progress-header" id="dashProgressPercent">0%</div>
                 <div class="dashboard-progress-bar">
@@ -6021,16 +6048,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     </div>
                     <div class="dashboard-streak-count" id="dashProgressStreakCount">0</div>
                 </div>
-            </div><div class="dashboard-card horizon-task-summary dashboard-user-size-expanded" id="dashTasksWidget" data-dashboard-widget="tasks"><button type="button" class="dashboard-drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder Tasks">☰</button>
-                <div class="dashboard-title">
-                    <span>✅ Tasks</span>
-                    <span id="taskManagerCountLabel" style="text-transform:none; font-weight:600;">Manage your tasks</span>
-                </div>
-                <p class="horizon-muted-copy" id="dashTasksSummaryCopy">Your task list is ready when you are.</p>
-                <button class="setting-button horizon-wide-action" type="button" data-open-section="taskManager">
-                    <span id="dashOpenTasksLabel">Open task manager</span>
-                </button>
-            </div><div class="dashboard-card dashboard-user-size-standard" data-dashboard-widget="prayer"><button type="button" class="dashboard-drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder Prayer times">☰</button>
+            </div>
+
+            <!-- 3. PRAYER -->
+            <div class="dashboard-card">
                 <div class="dashboard-title">🕌 Prayer</div>
                 <div class="dashboard-flex-row">
                     <div>
@@ -6043,16 +6064,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     </div>
                 </div>
                 <button class="setting-button" id="dashViewPrayersBtn" style="width:100%;">View prayers →</button>
-            </div><div class="dashboard-card dashboard-user-size-standard" data-dashboard-widget="study"><button type="button" class="dashboard-drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder Study goal">☰</button>
-                <div class="dashboard-title">📚 Study</div>
-                <div id="dashStudyContent">
-                    <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
-                    <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
-                </div>
-            </div><div class="dashboard-card dashboard-user-size-compact" data-dashboard-widget="activity"><button type="button" class="dashboard-drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder Steps / activity">☰</button>
-                <div class="dashboard-title">👟 Activity</div>
-                <div class="dashboard-text-medium" id="dashActivityText">Steps haven't synced yet.</div>
-            </div><section class="dashboard-card dashboard-user-size-compact" id="dailyWeatherCard" aria-labelledby="dailyWeatherTitle" data-dashboard-widget="weather"><button type="button" class="dashboard-drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder Weather">☰</button>
+            </div>
+
+            <!-- WEATHER DASHBOARD: compact by default; forecasts expand on demand -->
+            <section class="dashboard-card" id="dailyWeatherCard" aria-labelledby="dailyWeatherTitle">
                 <div class="dashboard-title daily-weather-heading">
                     <span id="dailyWeatherTitle">🌦️ Weather</span>
                     <span class="daily-weather-heading-actions">
@@ -6063,9 +6078,9 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 <div class="daily-weather-summary" id="dailyWeatherSummary">
                     <span id="dailyWeatherSummaryIcon" aria-hidden="true">🌤️</span>
                     <strong id="dailyWeatherSummaryTemp">--°</strong>
-                    <span class="daily-weather-summary-text"><strong id="dailyWeatherSummaryCondition">Set location in Settings</strong><small id="dailyWeatherSummaryPlace">Weather Location</small></span>
+                    <span class="daily-weather-summary-text"><strong id="dailyWeatherSummaryCondition">Set location in Settings</strong><small id="dailyWeatherSummaryPlace">Weather</small></span>
                 </div>
-                <div id="dailyWeatherContent" class="daily-weather-expanded-content" hidden="">
+                <div id="dailyWeatherContent" class="daily-weather-expanded-content" hidden>
                     <div class="daily-weather-current">
                         <div class="daily-weather-current-main">
                             <div id="dailyWeatherIcon" class="daily-weather-big-icon" aria-hidden="true">🌤️</div>
@@ -6092,31 +6107,34 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <div id="dailyWeatherUpdated" class="daily-weather-updated"></div>
                     <div class="daily-weather-attribution">Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></div>
                 </div>
-            </section><div class="dashboard-card dashboard-user-size-standard" id="paCard" style="display:none;" data-dashboard-widget="aiBriefing"><button type="button" class="dashboard-drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder Daily AI briefing">☰</button>
-                <div class="dashboard-title">
-                    <span class="pa-badge">✨ <span id="paTitleText">Daily AI</span></span>
-                    <span class="pa-head-actions">
-                        <button type="button" class="pa-icon-btn" id="paRefreshBtn" title="Refresh" aria-label="Refresh suggestion">↻</button>
-                        <button type="button" class="pa-icon-btn" id="paDismissBtn" title="Dismiss" aria-label="Dismiss suggestion">✕</button>
-                    </span>
-                </div>
-                <div id="paBody"></div>
-            </div></div>
-
-            <!-- 3. PRAYER -->
-            
-
-            <!-- WEATHER DASHBOARD: compact by default; forecasts expand on demand -->
-            
+            </section>
 
             <!-- 4. STUDY -->
-            
+            <div class="dashboard-card">
+                <div class="dashboard-title">📚 Study</div>
+                <div id="dashStudyContent">
+                    <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
+                    <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
+                </div>
+            </div>
 
             <!-- 6. ACTIVITY -->
-            
+            <div class="dashboard-card">
+                <div class="dashboard-title">👟 Activity</div>
+                <div class="dashboard-text-medium" id="dashActivityText">Steps haven't synced yet.</div>
+            </div>
 
             <!-- TASKS SUMMARY WIDGET: task creation and the full list live on the separate Tasks screen -->
-            
+            <div class="dashboard-card horizon-task-summary" id="dashTasksWidget">
+                <div class="dashboard-title">
+                    <span>✅ Tasks</span>
+                    <span id="taskManagerCountLabel" style="text-transform:none; font-weight:600;">Manage your tasks</span>
+                </div>
+                <p class="horizon-muted-copy" id="dashTasksSummaryCopy">Your task list is ready when you are.</p>
+                <button class="setting-button horizon-wide-action" type="button" data-open-section="taskManager">
+                    <span id="dashOpenTasksLabel">Open task manager →</span>
+                </button>
+            </div>
 
         </section>
 
@@ -6141,9 +6159,18 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 
                 <div class="task-input">
 
-                    <input id="taskInput" type="text" placeholder="Add a task..." autocomplete="off">
+                    <input
+                        id="taskInput"
+                        type="text"
+                        placeholder="Add a task..."
+                        autocomplete="off"
+                    >
 
-                    <button class="add-button" id="addTaskButton" type="button">
+                    <button
+                        class="add-button"
+                        id="addTaskButton"
+                        type="button"
+                    >
                         +
                     </button>
 
@@ -6158,7 +6185,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                             Date
                         </label>
 
-                        <input class="task-date-input" id="taskDateInput" type="date">
+                        <input
+                            class="task-date-input"
+                            id="taskDateInput"
+                            type="date"
+                        >
 
                     </div>
                     
@@ -6180,21 +6211,36 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                             Repeat
                         </label>
 
-                        <select class="repeat-select" id="repeatSelect">
+                        <select
+                            class="repeat-select"
+                            id="repeatSelect"
+                        >
 
-                            <option id="repeatOnce" value="once">
+                            <option
+                                id="repeatOnce"
+                                value="once"
+                            >
                                 Once
                             </option>
 
-                            <option id="repeatDaily" value="daily">
+                            <option
+                                id="repeatDaily"
+                                value="daily"
+                            >
                                 Every day
                             </option>
 
-                            <option id="repeatWeekly" value="weekly">
+                            <option
+                                id="repeatWeekly"
+                                value="weekly"
+                            >
                                 Every week
                             </option>
 
-                            <option id="repeatCustom" value="custom">
+                            <option
+                                id="repeatCustom"
+                                value="custom"
+                            >
                                 Custom days
                             </option>
 
@@ -6209,43 +6255,77 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                             Priority
                         </label>
 
-                        <select class="priority-select" id="prioritySelect">
+                        <select
+                            class="priority-select"
+                            id="prioritySelect"
+                        >
 
                             <option value="low" id="priorityLow">Low</option>
-                            <option value="medium" id="priorityMedium" selected="">Medium</option>
+                            <option value="medium" id="priorityMedium" selected>Medium</option>
                             <option value="high" id="priorityHigh">High</option>
 
                         </select>
 
                     </div>
 
-                    <div class="repeat-days" id="repeatDays">
+                    <div
+                        class="repeat-days"
+                        id="repeatDays"
+                    >
 
-                        <button class="repeat-day" data-day="0" type="button">
+                        <button
+                            class="repeat-day"
+                            data-day="0"
+                            type="button"
+                        >
                             Sun
                         </button>
 
-                        <button class="repeat-day" data-day="1" type="button">
+                        <button
+                            class="repeat-day"
+                            data-day="1"
+                            type="button"
+                        >
                             Mon
                         </button>
 
-                        <button class="repeat-day" data-day="2" type="button">
+                        <button
+                            class="repeat-day"
+                            data-day="2"
+                            type="button"
+                        >
                             Tue
                         </button>
 
-                        <button class="repeat-day" data-day="3" type="button">
+                        <button
+                            class="repeat-day"
+                            data-day="3"
+                            type="button"
+                        >
                             Wed
                         </button>
 
-                        <button class="repeat-day" data-day="4" type="button">
+                        <button
+                            class="repeat-day"
+                            data-day="4"
+                            type="button"
+                        >
                             Thu
                         </button>
 
-                        <button class="repeat-day" data-day="5" type="button">
+                        <button
+                            class="repeat-day"
+                            data-day="5"
+                            type="button"
+                        >
                             Fri
                         </button>
 
-                        <button class="repeat-day" data-day="6" type="button">
+                        <button
+                            class="repeat-day"
+                            data-day="6"
+                            type="button"
+                        >
                             Sat
                         </button>
 
@@ -6254,7 +6334,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 </div>
 
 
-                <div class="selected-day" id="selectedDayText">
+                <div
+                    class="selected-day"
+                    id="selectedDayText"
+                >
                 </div>
 
                 <div id="taskList"></div>
@@ -6315,7 +6398,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         <!-- PRAYERS -->
 
-        <section class="section" id="prayers">
+        <section
+            class="section"
+            id="prayers"
+        >
 
             <div class="prayer-header">
 
@@ -6323,7 +6409,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     Prayer Times
                 </h2>
 
-                <div class="location" id="locationText">
+                <div
+                    class="location"
+                    id="locationText"
+                >
                     Erbil
                 </div>
 
@@ -6332,19 +6421,31 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="next-prayer">
 
-                <div class="next-label" id="nextLabel">
+                <div
+                    class="next-label"
+                    id="nextLabel"
+                >
                     NEXT PRAYER
                 </div>
 
-                <div class="next-name" id="nextName">
+                <div
+                    class="next-name"
+                    id="nextName"
+                >
                     Fajr
                 </div>
 
-                <div class="next-time" id="nextTime">
+                <div
+                    class="next-time"
+                    id="nextTime"
+                >
                     03:46
                 </div>
 
-                <div class="next-countdown" id="nextCountdown">
+                <div
+                    class="next-countdown"
+                    id="nextCountdown"
+                >
                     00:00:00
                 </div>
 
@@ -6356,27 +6457,53 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <!-- PRAYER TRACKING & STATISTICS -->
 
-            <div class="prayer-tracker" id="prayerTracking">
+            <div
+                class="prayer-tracker"
+                id="prayerTracking"
+            >
 
-                <div class="prayer-stats-tabs" id="prayerStatsTabs">
+                <div
+                    class="prayer-stats-tabs"
+                    id="prayerStatsTabs"
+                >
 
-                    <button class="prayer-stats-tab active" data-pstat="daily" type="button">
+                    <button
+                        class="prayer-stats-tab active"
+                        data-pstat="daily"
+                        type="button"
+                    >
                         Daily
                     </button>
 
-                    <button class="prayer-stats-tab" data-pstat="weekly" type="button">
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="weekly"
+                        type="button"
+                    >
                         Weekly
                     </button>
 
-                    <button class="prayer-stats-tab" data-pstat="monthly" type="button">
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="monthly"
+                        type="button"
+                    >
                         Monthly
                     </button>
 
-                    <button class="prayer-stats-tab" data-pstat="yearly" type="button">
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="yearly"
+                        type="button"
+                    >
                         Yearly
                     </button>
 
-                    <button class="prayer-stats-tab" data-pstat="calendar" type="button">
+                    <button
+                        class="prayer-stats-tab"
+                        data-pstat="calendar"
+                        type="button"
+                    >
                         Calendar
                     </button>
 
@@ -6389,7 +6516,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="qibla-card">
 
-                <div class="qibla-title" id="qiblaTitle">
+                <div
+                    class="qibla-title"
+                    id="qiblaTitle"
+                >
                     Qibla Direction
                 </div>
 
@@ -6399,25 +6529,42 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div class="qibla-north-label">N</div>
 
-                    <div class="qibla-needle" id="qiblaNeedle"></div>
+                    <div
+                        class="qibla-needle"
+                        id="qiblaNeedle"
+                    ></div>
 
                     <div class="qibla-center-dot"></div>
 
                 </div>
 
-                <div class="qibla-degrees" id="qiblaDegrees">
+                <div
+                    class="qibla-degrees"
+                    id="qiblaDegrees"
+                >
                     0°
                 </div>
 
-                <div class="qibla-hint" id="qiblaHint">
+                <div
+                    class="qibla-hint"
+                    id="qiblaHint"
+                >
                     Direction from your location toward the Kaaba, Mecca.
                 </div>
 
-                <button class="setting-button" id="enableCompassButton" type="button" style="margin-top:12px;">
+                <button
+                    class="setting-button"
+                    id="enableCompassButton"
+                    type="button"
+                    style="margin-top:12px;"
+                >
                     🧭 <span id="enableCompassLabel">Enable Live Compass</span>
                 </button>
 
-                <div class="status" id="compassStatus"></div>
+                <div
+                    class="status"
+                    id="compassStatus"
+                ></div>
 
             </div>
 
@@ -6426,7 +6573,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         <!-- STUDY -->
 
-        <section class="section" id="study">
+        <section
+            class="section"
+            id="study"
+        >
 
             <!-- STUDY GOAL -->
 
@@ -6438,7 +6588,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                         <span class="study-goal-unit">min</span>
                     </div>
                 </div>
-                <button class="study-goal-btn" id="studyGoalBtn" type="button">
+                <button
+                    class="study-goal-btn"
+                    id="studyGoalBtn"
+                    type="button"
+                >
                     Set Goal
                 </button>
             </div>
@@ -6452,7 +6606,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <div class="study-progress-value" id="studyProgressValue">0 min</div>
                 </div>
                 <div class="study-progress-bar">
-                    <div class="study-progress-fill" id="studyProgressFill" style="width: 0%;"></div>
+                    <div
+                        class="study-progress-fill"
+                        id="studyProgressFill"
+                        style="width: 0%;"
+                    ></div>
                 </div>            </div>
 
 
@@ -6466,7 +6624,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <button class="study-timer-preset" data-min="0" type="button">Custom</button>
                 </div>
                 <div class="study-timer-custom-wrap" id="studyTimerCustomWrap">
-                    <input type="number" class="study-timer-custom-input" id="studyTimerCustomMin" min="1" max="300" placeholder="min">
+                    <input type="number" class="study-timer-custom-input" id="studyTimerCustomMin" min="1" max="300" placeholder="min" />
                     <button class="study-timer-custom-ok" id="studyTimerCustomOk" type="button">OK</button>
                 </div>
                 <div class="study-timer-subject-row">
@@ -6475,7 +6633,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 </div>
                 <div class="study-timer-music-row" id="studyTimerMusicRow">
                     <span id="studyTimerMusicLabel">Music</span>
-                    <select class="study-timer-music-select" id="studyTimerMusic" aria-label="Music for this session"></select>
+                    <select
+                        class="study-timer-music-select"
+                        id="studyTimerMusic"
+                        aria-label="Music for this session"
+                    ></select>
                 </div>
                 <div class="study-timer-btns" id="studyTimerBtns">
                     <button class="study-timer-start" id="studyTimerStart" type="button"></button>
@@ -6496,7 +6658,12 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             </button>
 
             <!-- MINI PLAYER (shown inside Study when Music view is closed but a track is loaded) -->
-            <button class="study-mini-player" id="studyMiniPlayer" type="button" aria-label="Open Study Music">
+            <button
+                class="study-mini-player"
+                id="studyMiniPlayer"
+                type="button"
+                aria-label="Open Study Music"
+            >
                 <span class="study-mini-art" id="studyMiniArt">🎧</span>
                 <span class="study-mini-info">
                     <span class="study-mini-title" id="studyMiniTitle"></span>
@@ -6505,12 +6672,22 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                         <span class="study-mini-progress-fill" id="studyMiniProgress"></span>
                     </span>
                 </span>
-                <span class="study-mini-btn" id="studyMiniPlayBtn" role="button" tabindex="0" aria-label="Play or pause">▶</span>
+                <span
+                    class="study-mini-btn"
+                    id="studyMiniPlayBtn"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Play or pause"
+                >▶</span>
             </button>
 
 
             <!-- STUDY WITH ME -->
-            <button class="study-with-me-launch" id="studyWithMeLaunch" type="button">
+            <button
+                class="study-with-me-launch"
+                id="studyWithMeLaunch"
+                type="button"
+            >
                 <span class="study-with-me-launch-left">
                     <span class="study-with-me-launch-icon">🌙</span>
                     <span>
@@ -6523,7 +6700,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
 
             <!-- STUDY MUSIC LAUNCH -->
-            <button class="study-music-launch" id="studyMusicLaunch" type="button">
+            <button
+                class="study-music-launch" id="studyMusicLaunch"
+                type="button"
+            >
                 <span class="study-music-launch-left">
                     <span class="study-music-launch-icon">🎧</span>
                     <span>
@@ -6541,7 +6721,12 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 <div class="music-page-title" id="studyMusicTitle">Study Music</div>
                 <div class="music-page-sub" id="studyMusicSub"></div>
 
-                <div class="music-status" id="musicStatusBanner" role="status" aria-live="polite"></div>
+                <div
+                    class="music-status"
+                    id="musicStatusBanner"
+                    role="status"
+                    aria-live="polite"
+                ></div>
 
                 <div class="music-cats" id="musicCats"></div>
                 <div class="music-track-list" id="musicTrackList"></div>
@@ -6552,7 +6737,16 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <div class="music-now-title" id="musicNowTitle">—</div>
                     <div class="music-now-cat" id="musicNowCat"></div>
 
-                    <div class="music-progress" id="musicProgressBar" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div
+                        class="music-progress"
+                        id="musicProgressBar"
+                        role="slider"
+                        tabindex="0"
+                        aria-label="Seek"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                    >
                         <div class="music-progress-fill" id="musicProgressFill"></div>
                     </div>
                     <div class="music-time-row">
@@ -6561,16 +6755,56 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     </div>
 
                     <div class="music-controls">
-                        <button class="music-ctrl" id="musicShuffleBtn" type="button" aria-label="Shuffle" aria-pressed="false">🔀</button>
-                        <button class="music-ctrl" id="musicPrevBtn" type="button" aria-label="Previous track">⏮</button>
-                        <button class="music-ctrl play" id="musicPlayBtn" type="button" aria-label="Play">▶</button>
-                        <button class="music-ctrl" id="musicNextBtn" type="button" aria-label="Next track">⏭</button>
-                        <button class="music-ctrl" id="musicRepeatBtn" type="button" aria-label="Repeat" aria-pressed="false">🔁</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicShuffleBtn"
+                            type="button"
+                            aria-label="Shuffle"
+                            aria-pressed="false"
+                        >🔀</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicPrevBtn"
+                            type="button"
+                            aria-label="Previous track"
+                        >⏮</button>
+                        <button
+                            class="music-ctrl play"
+                            id="musicPlayBtn"
+            type="button"
+                            aria-label="Play"
+                        >▶</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicNextBtn"
+                            type="button"
+                            aria-label="Next track"
+                        >⏭</button>
+                        <button
+                            class="music-ctrl"
+                            id="musicRepeatBtn"
+                            type="button"
+                            aria-label="Repeat"
+                            aria-pressed="false"
+            >🔁</button>
                     </div>
 
                     <div class="music-vol-row">
-                        <button class="music-vol-btn" id="musicMuteBtn" type="button" aria-label="Mute">🔊</button>
-                        <input type="range" class="music-vol" id="musicVolume" min="0" max="100" value="70" aria-label="Volume">
+                        <button
+                            class="music-vol-btn"
+                            id="musicMuteBtn"
+                            type="button"
+                            aria-label="Mute"
+                        >🔊</button>
+                        <input
+                            type="range"
+                            class="music-vol"
+                            id="musicVolume"
+                            min="0"
+                            max="100"
+                            value="70"
+                            aria-label="Volume"
+                        />
                     </div>
                 </div>
             </div>
@@ -6589,12 +6823,19 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="study-subjects-header">
                 <div class="study-subjects-title">Subjects</div>
-                <button class="study-add-btn" id="studyAddSubjectBtn" type="button">
+                <button
+                    class="study-add-btn"
+                    id="studyAddSubjectBtn"
+                    type="button"
+                >
                     + Add
                 </button>
             </div>
 
-            <div class="study-subject-list" id="studySubjectList">
+            <div
+                class="study-subject-list"
+                id="studySubjectList"
+            >
             </div>
 
             <!-- QUIZ LIBRARY -->
@@ -6626,9 +6867,9 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                         </select>
                         <label style="display:block;font-size:13px;margin-bottom:6px;">Question types (for custom mode)</label>
                         <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px;margin-bottom:10px;">
-                            <label><input type="checkbox" class="flashcard-mode-type" value="multiple" checked=""> Multiple choice</label><label><input type="checkbox" class="flashcard-mode-type" value="matching" checked=""> Matching</label><label><input type="checkbox" class="flashcard-mode-type" value="truefalse" checked=""> True/false</label><label><input type="checkbox" class="flashcard-mode-type" value="blank" checked=""> Fill blank</label>
+                            <label><input type="checkbox" class="flashcard-mode-type" value="multiple" checked> Multiple choice</label><label><input type="checkbox" class="flashcard-mode-type" value="matching" checked> Matching</label><label><input type="checkbox" class="flashcard-mode-type" value="truefalse" checked> True/false</label><label><input type="checkbox" class="flashcard-mode-type" value="blank" checked> Fill blank</label>
                         </div>
-                        <label style="display:block;font-size:13px;margin-bottom:6px;">Difficulty</label><select id="flashcardQuizDifficulty" style="width:100%;padding:11px;border-radius:10px;margin-bottom:10px;"><option value="easy">Easy</option><option value="normal" selected="">Normal</option><option value="hard">Hard</option></select>
+                        <label style="display:block;font-size:13px;margin-bottom:6px;">Difficulty</label><select id="flashcardQuizDifficulty" style="width:100%;padding:11px;border-radius:10px;margin-bottom:10px;"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select>
                         <button type="button" class="study-add-btn" id="flashcardStartModeBtn" style="width:100%;padding:12px;">Start studying</button>
                     </div>
                     <div id="flashcardCardList"></div>
@@ -6669,7 +6910,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             <div class="flashcard-modal-overlay" id="flashcardDeckModal">
                 <div class="flashcard-modal">
                     <div class="flashcard-modal-title" id="flashcardDeckModalTitle"></div>
-                    <input type="text" id="flashcardDeckModalInput" autocomplete="off">
+                    <input type="text" id="flashcardDeckModalInput" autocomplete="off" />
                     <div class="flashcard-modal-actions">
                         <button type="button" class="flashcard-modal-cancel" id="flashcardDeckModalCancel"></button>
                         <button type="button" class="flashcard-modal-confirm" id="flashcardDeckModalConfirm"></button>
@@ -6682,18 +6923,18 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 <div class="flashcard-modal" style="width:min(560px,94vw);max-height:88vh;overflow:auto;">
                     <div class="flashcard-modal-title">✨ Generate a quiz from photos</div>
                     <p style="font-size:13px;color:var(--text-secondary,#888);margin:0 0 12px;">Upload textbook pages, notes, diagrams, or slides. AI will build an editable quiz using the material in your photos.</p>
-                    <label for="flashcardAiTitle" style="display:block;font-size:13px;margin-bottom:5px;">Quiz name</label>
-                    <input type="text" id="flashcardAiTitle" autocomplete="off" placeholder="e.g. Biology — Cell Structure" style="width:100%;box-sizing:border-box;margin-bottom:12px;">
+                    <label for="flashcardAiTitle" style="display:block;font-size:13px;margin-bottom:5px;" >Quiz name</label>
+                    <input type="text" id="flashcardAiTitle" autocomplete="off" placeholder="e.g. Biology — Cell Structure" style="width:100%;box-sizing:border-box;margin-bottom:12px;" />
                     <label for="flashcardAiPhotos" style="display:block;font-size:13px;margin-bottom:5px;">Quiz source photos (select multiple)</label>
-                    <input type="file" id="flashcardAiPhotos" accept="image/*" multiple="" style="width:100%;margin-bottom:12px;">
+                    <input type="file" id="flashcardAiPhotos" accept="image/*" multiple style="width:100%;margin-bottom:12px;" />
                     <label for="flashcardAiInstructions" style="display:block;font-size:13px;margin-bottom:5px;">Instructions for the AI (optional)</label>
                     <textarea id="flashcardAiInstructions" rows="3" placeholder="e.g. Only use highlighted parts. Focus on definitions and dates. Skip examples. Make the questions difficult." style="width:100%;box-sizing:border-box;margin-bottom:12px;resize:vertical;"></textarea>
                     <p style="font-size:12px;color:var(--text-secondary,#888);margin:-6px 0 12px;">Tell the AI what to include, skip, or how difficult the quiz should be.</p>
                     <label for="flashcardAiMode" style="display:block;font-size:13px;margin-bottom:5px;">Question format</label>
-                    <select id="flashcardAiMode" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;"><option value="auto" selected="">Automatic — mixed quiz</option><option value="custom">Custom — choose available study modes</option></select>
-                    <div id="flashcardAiCustomTypes" style="display:none;margin-bottom:12px;font-size:13px;gap:10px;flex-wrap:wrap;"><label><input type="checkbox" value="multiple" checked=""> Multiple choice</label><label><input type="checkbox" value="classic" checked=""> Classic</label><label><input type="checkbox" value="matching" checked=""> Matching</label><label><input type="checkbox" value="truefalse" checked=""> True/false</label><label><input type="checkbox" value="blank" checked=""> Fill in blank</label></div>
+                    <select id="flashcardAiMode" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;"><option value="auto" selected>Automatic — mixed quiz</option><option value="custom">Custom — choose available study modes</option></select>
+                    <div id="flashcardAiCustomTypes" style="display:none;margin-bottom:12px;font-size:13px;gap:10px;flex-wrap:wrap;"><label><input type="checkbox" value="multiple" checked> Multiple choice</label><label><input type="checkbox" value="classic" checked> Classic</label><label><input type="checkbox" value="matching" checked> Matching</label><label><input type="checkbox" value="truefalse" checked> True/false</label><label><input type="checkbox" value="blank" checked> Fill in blank</label></div>
                     <label for="flashcardAiCount" style="display:block;font-size:13px;margin-bottom:5px;">Questions per photo</label>
-                    <select id="flashcardAiCount" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;"><option value="4">4 — Quick review</option><option value="6" selected="">6 — Balanced</option><option value="10">10 — Detailed</option></select>
+                    <select id="flashcardAiCount" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;"><option value="4">4 — Quick review</option><option value="6" selected>6 — Balanced</option><option value="10">10 — Detailed</option></select>
                     <div id="flashcardAiStatus" role="status" aria-live="polite" style="font-size:13px;margin:8px 0;white-space:pre-wrap;"></div>
                     <label for="flashcardAiPreview" id="flashcardAiPreviewLabel" style="display:none;font-size:13px;margin:10px 0 5px;">Review/edit generated questions (JSON)</label>
                     <textarea id="flashcardAiPreview" rows="9" spellcheck="false" style="display:none;width:100%;box-sizing:border-box;font:12px/1.45 monospace;margin-bottom:10px;"></textarea>
@@ -6728,7 +6969,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <div class="swm-panel-controls"><button class="swm-square" id="studyWithMePause" type="button" title="Pause / resume">Ⅱ</button><button class="swm-square" id="studyWithMeFinish" type="button" title="Finish session">■</button></div>
                 </section>
                 <section class="swm-panel swm-goals-panel">
-                    <div class="swm-panel-head"><strong>◎ Session goals</strong><span id="swmGoalStats">General · 0 completed</span></div>
+                    <div class="swm-panel-head"><strong>◎ Session goals</strong><span id="swmGoalStats">0 completed</span></div>
                     <form class="swm-add-goal" id="swmGoalForm"><input id="swmGoalInput" maxlength="70" placeholder="Type a goal..." aria-label="New session goal"><button type="submit">＋</button></form>
                     <div class="swm-goal-summary"><b id="swmGoalTotal">0</b><span>Goals</span><em></em><b id="swmGoalDone">0</b><span>Completed</span></div>
                     <div class="swm-goal-list" id="swmGoalList"></div>
@@ -6833,7 +7074,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         <!-- PROFILE -->
 
-        <section class="section" id="profile">
+        <section
+            class="section"
+            id="profile"
+        >
 
             <div class="settings-title">
                 Profile
@@ -6853,11 +7097,17 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="profileUsername">
+                        <div
+                            class="setting-label"
+                            id="profileUsername"
+                        >
                             Not signed in
                         </div>
 
-                        <div class="setting-description" id="profileEmail">
+                        <div
+                            class="setting-description"
+                            id="profileEmail"
+                        >
                             Not signed in
                         </div>
 
@@ -6883,7 +7133,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card">
 
-                <button class="danger-button" id="profileLogoutButton" type="button">
+                <button
+                    class="danger-button"
+                    id="profileLogoutButton"
+                    type="button"
+                >
                     Sign Out
                 </button>
 
@@ -6915,22 +7169,31 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         <!-- SETTINGS -->
 
-        <section class="section" id="settings">
+        <section
+            class="section"
+            id="settings"
+        >
 
             <div class="settings-title" id="settingsTitle">
                 Settings
             </div>
 
-            <div class="settings-subtitle" id="settingsSubtitle">
+            <div
+                class="settings-subtitle"
+                id="settingsSubtitle"
+            >
                 Customize your Horizon experience.
-            </div><div class="settings-card" id="dashboardCustomizeSettingsCard"><button type="button" id="dashboardCustomizeButton" class="setting-button" aria-expanded="false">⚙️ Customize Dashboard</button><div class="horizon-motion-row"><div class="horizon-motion-copy"><strong id="horizonMotionTitle">Animation intensity</strong><small id="horizonMotionHint">Choose how lively Horizon feels.</small></div><select id="horizonMotionSelect" aria-labelledby="horizonMotionTitle"><option value="reduced">Reduced</option><option value="balanced">Balanced</option><option value="expressive">Expressive</option></select></div><section id="dashboardCustomizePanel" hidden=""><div class="dashboard-customize-top"><strong id="dashboardCustomizeTitle">Customize Dashboard</strong><button type="button" class="setting-button" id="dashboardCustomizeDone">Done</button></div><label for="dashboardLayoutSelect" id="dashboardLayoutLabel">Saved layout</label><select id="dashboardLayoutSelect"><option value="default">Default</option></select><div class="dashboard-layout-actions"><button type="button" class="setting-button" id="dashboardLayoutNew">＋ New layout</button><button type="button" class="setting-button" id="dashboardLayoutRename">Rename</button><button type="button" class="setting-button" id="dashboardLayoutDelete">Delete</button></div><p class="dashboard-edit-hint" id="dashboardEditHint">Drag the ☰ handles or use ↑ / ↓ to reorder widgets. You can hide widgets and change their size. These settings do not delete your data.</p><div id="dashboardWidgetSettings" class="dashboard-widget-settings"><div class="dashboard-widget-setting"><label class="dashboard-widget-setting-label"><input type="checkbox" aria-label="Show Today's progress"><span>Today's progress</span></label><select aria-label="Today's progress size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="expanded">Expanded</option></select><div class="dashboard-widget-order"><button type="button" title="Move up" aria-label="Move up Today's progress" disabled="">↑</button><button type="button" title="Move down" aria-label="Move down Today's progress">↓</button></div></div><div class="dashboard-widget-setting"><label class="dashboard-widget-setting-label"><input type="checkbox" aria-label="Show Prayer times"><span>Prayer times</span></label><select aria-label="Prayer times size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="expanded">Expanded</option></select><div class="dashboard-widget-order"><button type="button" title="Move up" aria-label="Move up Prayer times">↑</button><button type="button" title="Move down" aria-label="Move down Prayer times">↓</button></div></div><div class="dashboard-widget-setting"><label class="dashboard-widget-setting-label"><input type="checkbox" aria-label="Show Weather"><span>Weather</span></label><select aria-label="Weather size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="expanded">Expanded</option></select><div class="dashboard-widget-order"><button type="button" title="Move up" aria-label="Move up Weather">↑</button><button type="button" title="Move down" aria-label="Move down Weather">↓</button></div></div><div class="dashboard-widget-setting"><label class="dashboard-widget-setting-label"><input type="checkbox" aria-label="Show Study goal"><span>Study goal</span></label><select aria-label="Study goal size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="expanded">Expanded</option></select><div class="dashboard-widget-order"><button type="button" title="Move up" aria-label="Move up Study goal">↑</button><button type="button" title="Move down" aria-label="Move down Study goal">↓</button></div></div><div class="dashboard-widget-setting"><label class="dashboard-widget-setting-label"><input type="checkbox" aria-label="Show Steps / activity"><span>Steps / activity</span></label><select aria-label="Steps / activity size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="expanded">Expanded</option></select><div class="dashboard-widget-order"><button type="button" title="Move up" aria-label="Move up Steps / activity">↑</button><button type="button" title="Move down" aria-label="Move down Steps / activity">↓</button></div></div><div class="dashboard-widget-setting"><label class="dashboard-widget-setting-label"><input type="checkbox" aria-label="Show Tasks"><span>Tasks</span></label><select aria-label="Tasks size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="expanded">Expanded</option></select><div class="dashboard-widget-order"><button type="button" title="Move up" aria-label="Move up Tasks">↑</button><button type="button" title="Move down" aria-label="Move down Tasks">↓</button></div></div><div class="dashboard-widget-setting"><label class="dashboard-widget-setting-label"><input type="checkbox" aria-label="Show Daily AI briefing"><span>Daily AI briefing</span></label><select aria-label="Daily AI briefing size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="expanded">Expanded</option></select><div class="dashboard-widget-order"><button type="button" title="Move up" aria-label="Move up Daily AI briefing">↑</button><button type="button" title="Move down" aria-label="Move down Daily AI briefing" disabled="">↓</button></div></div></div></section></div>
+            </div>
 
 
             <!-- ACCOUNT -->
 
             <div class="settings-card">
 
-                <div class="settings-card-title" id="accountTitle">
+                <div
+                    class="settings-card-title"
+                    id="accountTitle"
+                >
                     Account
                 </div>
 
@@ -6938,11 +7201,17 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="settingsUsername">
+                        <div
+                            class="setting-label"
+                            id="settingsUsername"
+                        >
                             Not signed in
                         </div>
 
-                        <div class="setting-description" id="settingsEmail">
+                        <div
+                            class="setting-description"
+                            id="settingsEmail"
+                        >
                             Not signed in
                         </div>
 
@@ -6957,7 +7226,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card">
 
-                <div class="settings-card-title" id="healthSyncTitle">
+                <div
+                    class="settings-card-title"
+                    id="healthSyncTitle"
+                >
                     Health Sync
                 </div>
 
@@ -6965,17 +7237,27 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="healthSyncLabel">
+                        <div
+                            class="setting-label"
+                            id="healthSyncLabel"
+                        >
                             Shortcut Sync Key
                         </div>
 
-                        <div class="setting-description" id="healthSyncDescription">
+                        <div
+                            class="setting-description"
+                            id="healthSyncDescription"
+                        >
                             Copy a private key for your iPhone Shortcut to sync steps. Keep it secret.
                         </div>
 
                     </div>
 
-                    <button class="setting-button" id="healthSyncKeyButton" type="button">
+                    <button
+                        class="setting-button"
+                        id="healthSyncKeyButton"
+                        type="button"
+                    >
                         Copy Key
                     </button>
 
@@ -6988,7 +7270,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card">
 
-                <div class="settings-card-title" id="appearanceTitle">
+                <div
+                    class="settings-card-title"
+                    id="appearanceTitle"
+                >
                     Appearance
                 </div>
 
@@ -6996,17 +7281,27 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="darkModeLabel">
+                        <div
+                            class="setting-label"
+                            id="darkModeLabel"
+                        >
                             Dark Mode
                         </div>
 
-                        <div class="setting-description" id="darkModeDescription">
+                        <div
+                            class="setting-description"
+                            id="darkModeDescription"
+                        >
                             Change the appearance of Horizon.
                         </div>
 
                     </div>
 
-                    <button class="setting-button" id="settingsThemeButton" type="button">
+                    <button
+                        class="setting-button"
+                        id="settingsThemeButton"
+                        type="button"
+                    >
                         Off
                     </button>
 
@@ -7016,15 +7311,24 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="accentColorLabel">
+                        <div
+                            class="setting-label"
+                            id="accentColorLabel"
+                        >
                             Accent Color
                         </div>
 
-                        <div class="setting-description" id="accentColorDescription">
+                        <div
+                            class="setting-description"
+                            id="accentColorDescription"
+                        >
                             Pick a color used for buttons, tabs, and checkmarks.
                         </div>
 
-                        <div id="accentSwatches" style="display:flex; gap:10px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+                        <div
+                            id="accentSwatches"
+                            style="display:flex; gap:10px; margin-top:10px; align-items:center; flex-wrap:wrap;"
+                        >
                             <button type="button" class="accent-swatch" data-accent="#111111" style="background:#111111;" aria-label="Default"></button>
                             <button type="button" class="accent-swatch" data-accent="#2f80ed" style="background:#2f80ed;" aria-label="Blue"></button>
                             <button type="button" class="accent-swatch" data-accent="#ff7a45" style="background:#ff7a45;" aria-label="Orange"></button>
@@ -7032,7 +7336,13 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                             <button type="button" class="accent-swatch" data-accent="#c2185b" style="background:#c2185b;" aria-label="Pink"></button>
                             <button type="button" class="accent-swatch" data-accent="#7c4dff" style="background:#7c4dff;" aria-label="Purple"></button>
 
-                            <input type="color" id="accentColorPicker" value="#111111" style="width:34px; height:34px; border:none; border-radius:50%; padding:0; background:none; cursor:pointer;" aria-label="Custom accent color">
+                            <input
+                                type="color"
+                                id="accentColorPicker"
+                                value="#111111"
+                                style="width:34px; height:34px; border:none; border-radius:50%; padding:0; background:none; cursor:pointer;"
+                                aria-label="Custom accent color"
+                            >
                         </div>
 
                     </div>
@@ -7043,15 +7353,24 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="iconStyleLabel">
+                        <div
+                            class="setting-label"
+                            id="iconStyleLabel"
+                        >
                             Icons
                         </div>
 
-                        <div class="setting-description" id="iconStyleDescription">
+                        <div
+                            class="setting-description"
+                            id="iconStyleDescription"
+                        >
                             Choose the icons used for your streak and steps.
                         </div>
 
-                        <div id="iconStyleOptions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                        <div
+                            id="iconStyleOptions"
+                            style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;"
+                        >
                             <button type="button" class="setting-button icon-style-option" data-streak-icon="🔥" data-step-icon="👟" data-icon-set="classic">🔥 👟</button>
                             <button type="button" class="setting-button icon-style-option" data-streak-icon="⚡" data-step-icon="🚶" data-icon-set="minimal">⚡ 🚶</button>
                             <button type="button" class="setting-button icon-style-option" data-streak-icon="🌱" data-step-icon="🥾" data-icon-set="nature">🌱 🥾</button>
@@ -7066,15 +7385,24 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="themeLabel">
+                        <div
+                            class="setting-label"
+                            id="themeLabel"
+                        >
                             Theme
                         </div>
 
-                        <div class="setting-description" id="themeDescription">
+                        <div
+                            class="setting-description"
+                            id="themeDescription"
+                        >
                             Adds a soft color wash across the app to match your accent.
                         </div>
 
-                        <div id="themeOptions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                        <div
+                            id="themeOptions"
+                            style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;"
+                        >
                             <button type="button" class="setting-button theme-option" data-theme="none">None</button>
                             <button type="button" class="setting-button theme-option" data-theme="ocean" data-theme-color="#2f80ed">Ocean</button>
                             <button type="button" class="setting-button theme-option" data-theme="sunset" data-theme-color="#ff7a45">Sunset</button>
@@ -7095,7 +7423,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card">
 
-                <div class="settings-card-title" id="hapticTitle">
+                <div
+                    class="settings-card-title"
+                    id="hapticTitle"
+                >
                     Haptic Feedback
                 </div>
 
@@ -7103,17 +7434,27 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="hapticLabel">
+                        <div
+                            class="setting-label"
+                            id="hapticLabel"
+                        >
                             Haptic Feedback
                         </div>
 
-                        <div class="setting-description" id="hapticDescription">
+                        <div
+                            class="setting-description"
+                            id="hapticDescription"
+                        >
                             Enable subtle vibration feedback for interactions.
                         </div>
 
                     </div>
 
-                    <button class="setting-button" id="hapticToggleBtn" type="button">
+                    <button
+                        class="setting-button"
+                        id="hapticToggleBtn"
+                        type="button"
+                    >
                         On
                     </button>
 
@@ -7126,7 +7467,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card">
 
-                <div class="settings-card-title" id="languageTitle">
+                <div
+                    class="settings-card-title"
+                    id="languageTitle"
+                >
                     Language
                 </div>
 
@@ -7134,17 +7478,26 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div>
 
-                        <div class="setting-label" id="languageLabel">
+                        <div
+                            class="setting-label"
+                            id="languageLabel"
+                        >
                             Language
                         </div>
 
-                        <div class="setting-description" id="languageDescription">
+                        <div
+                            class="setting-description"
+                            id="languageDescription"
+                        >
                             Choose the language used throughout Horizon.
                         </div>
 
                     </div>
 
-                    <select class="language-select" id="settingsLanguage">
+                    <select
+                        class="language-select"
+                        id="settingsLanguage"
+                    >
 
                         <option value="en">
                             English
@@ -7169,7 +7522,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card">
 
-                <div class="settings-card-title" id="prayerSettingsTitle">
+                <div
+                    class="settings-card-title"
+                    id="prayerSettingsTitle"
+                >
                     Prayer Settings
                 </div>
 
@@ -7177,19 +7533,33 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     <div style="width:100%;">
 
-                        <div class="setting-label" id="locationLabel">
+                        <div
+                            class="setting-label"
+                            id="locationLabel"
+                        >
                             Location
                         </div>
 
-                        <div class="setting-description" id="locationDescription">
+                        <div
+                            class="setting-description"
+                            id="locationDescription"
+                        >
                             Your prayer-time location.
                         </div>
 
                         <div class="location-row" style="margin-top:10px;">
 
-                            <input id="locationInput" type="text" placeholder="Erbil">
+                            <input
+                                id="locationInput"
+                                type="text"
+                                placeholder="Erbil"
+                            >
 
-                            <button class="setting-button" id="updateLocationButton" type="button">
+                            <button
+                                class="setting-button"
+                                id="updateLocationButton"
+                                type="button"
+                            >
                                 Update
                             </button>
 
@@ -7197,11 +7567,21 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                         <div class="location-row" style="margin-top:8px;">
 
-                            <button class="setting-button" id="locateMeButton" type="button" style="width:100%;">
+                            <button
+                                class="setting-button"
+                                id="locateMeButton"
+                                type="button"
+                                style="width:100%;"
+                            >
                                 📍 <span id="locateMeLabel">Use My Location</span>
                             </button>
 
-                            <button class="setting-button" id="useErbilButton" type="button" style="width:100%;">
+                            <button
+                                class="setting-button"
+                                id="useErbilButton"
+                                type="button"
+                                style="width:100%;"
+                            >
                                 🕌 <span id="useErbilLabel">Use Erbil</span>
                             </button>
 
@@ -7221,13 +7601,13 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 <div class="daily-weather-controls">
                     <label class="daily-weather-search-label" for="dailyWeatherCityInput" id="dailyWeatherCityLabel">City</label>
                     <div class="daily-weather-search-row">
-                        <input id="dailyWeatherCityInput" type="search" autocomplete="off" maxlength="100" placeholder="Search a city" aria-label="City">
+                        <input id="dailyWeatherCityInput" type="search" autocomplete="off" maxlength="100" placeholder="Search a city" aria-label="Search a city">
                         <button type="button" class="setting-button daily-weather-search-btn" id="dailyWeatherSearch">Search</button>
                     </div>
                     <button type="button" class="setting-button daily-weather-location-btn" id="dailyWeatherUseLocation">⌖ Use my location</button>
                 </div>
-                <div id="dailyWeatherSuggestions" class="daily-weather-suggestions" role="listbox" aria-label="City search results" hidden=""></div>
-                <div id="dailyWeatherStatus" class="daily-weather-status" role="status" aria-live="polite">Choose a city to see the forecast.</div>
+                <div id="dailyWeatherSuggestions" class="daily-weather-suggestions" role="listbox" aria-label="City search results" hidden></div>
+                <div id="dailyWeatherStatus" class="daily-weather-status" role="status" aria-live="polite" hidden></div>
             </div>
 
             <!-- SOUND & SENSORY FEEDBACK -->
@@ -7252,7 +7632,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card" id="notificationsSettingsCard">
 
-                <div class="settings-card-title" id="notificationsTitle">
+                <div
+                    class="settings-card-title"
+                    id="notificationsTitle"
+                >
                     Notifications
                 </div>
 
@@ -7326,7 +7709,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     
                     <div class="option-row" style="margin-top:8px;">
                         <label id="stepGoalLabel" style="min-width:110px;">Step Goal</label>
-                        <input type="number" id="stepGoalInput" class="task-date-input" value="10000" min="1000" step="500">
+                        <input type="number" id="stepGoalInput" class="task-date-input" value="10000" min="1000" step="500" />
                     </div>
 
                     <button class="setting-button" id="testPushBtn" type="button" style="width:100%; margin-top:16px; padding:12px; font-weight:700;">
@@ -7343,11 +7726,18 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             <div class="settings-card">
 
-                <div class="settings-card-title" id="accountActionsTitle">
+                <div
+                    class="settings-card-title"
+                    id="accountActionsTitle"
+                >
                     Account Actions
                 </div>
 
-                <button class="danger-button" id="logoutButton" type="button">
+                <button
+                    class="danger-button"
+                    id="logoutButton"
+                    type="button"
+                >
                     Sign Out
                 </button>
 
@@ -7364,125 +7754,29 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <p class="horizon-page-description">Your conversations, ideas, and saved preferences in one place.</p>
                 </div>
                 <div class="ai-page-actions">
-                    
+                    <button class="horizon-quick-action ai-sidebar-toggle" id="aiSidebarToggleBtn" type="button" aria-expanded="false" aria-controls="aiChatSidebar">☰ Chats</button>
                     <button class="horizon-quick-action" id="aiPageSettingsBtn" type="button">⚙ Memory &amp; settings</button>
                 </div>
             </div>
-            <div class="ai-memory-status" id="aiMemoryStatus"><span class="ai-memory-dot" aria-hidden="true"></span><span id="aiMemoryStatusText">1 saved conversation on this device</span><button type="button" id="aiPageNewChatBtn">＋ New chat</button></div>
+            <div class="ai-memory-status" id="aiMemoryStatus"><span class="ai-memory-dot" aria-hidden="true"></span><span id="aiMemoryStatusText">Your chats are saved on this device</span><button type="button" id="aiPageNewChatBtn">＋ New chat</button></div>
             <div class="ai-workspace" id="aiWorkspace">
                 <aside class="ai-chat-sidebar" id="aiChatSidebar" aria-label="Chats and memory">
-                    
+                    <button type="button" class="ai-new-chat-primary" id="aiSidebarNewChatBtn"><span aria-hidden="true">＋</span> New chat</button>
                     <label class="ai-chat-search-wrap"><span aria-hidden="true">⌕</span><input type="search" id="aiChatSearch" placeholder="Search chats" autocomplete="off" aria-label="Search chats"></label>
                     <div class="ai-sidebar-section-title">Pinned</div>
                     <div class="ai-chat-list" id="aiPinnedChatList"><div class="ai-chat-list-empty">Pinned chats appear here</div></div>
                     <div class="ai-sidebar-section-title ai-recent-heading">Recent</div>
-                    <div class="ai-chat-list" id="aiRecentChatList"><div class="ai-chat-item active"><button type="button" class="ai-chat-open" title="New chat" aria-current="page"><span class="ai-chat-item-title">New chat</span><span class="ai-chat-item-preview">Start a conversation</span></button><button type="button" class="ai-chat-menu" aria-label="Chat options" title="Chat options">···</button></div></div>
+                    <div class="ai-chat-list" id="aiRecentChatList"><div class="ai-chat-list-empty">Your conversations will appear here</div></div>
                     <div class="ai-sidebar-memory">
                         <div class="ai-sidebar-memory-icon" aria-hidden="true">✦</div>
-                        <div class="ai-sidebar-memory-copy"><strong>Memory</strong><span id="aiSidebarMemorySummary">Save preferences to personalize replies</span></div>
+                        <div class="ai-sidebar-memory-copy"><strong>Memory</strong><span id="aiSidebarMemorySummary">Your saved preferences help personalize replies.</span></div>
                         <button type="button" id="aiChatMemoryToggle" class="ai-memory-toggle" aria-pressed="true" title="Use recent chats as context">Use chats</button>
                         <button type="button" id="aiSidebarMemoryBtn" aria-label="Manage AI memory" title="Manage memory">›</button>
                     </div>
                     <p class="ai-local-note">Chat history and memory are stored in this browser on this device.</p>
                 </aside>
                 <div class="ai-chat-main" id="aiChatMain" aria-label="Horizon AI conversation">
-                    <div id="aiChatHost" aria-label="Horizon AI chat"><div id="aiBox" role="region" aria-label="Horizon AI" class="horizon-ai-page">
-        <div id="aiHeader">
-            <div class="ai-head-emoji" aria-hidden="true">✨</div>
-            <div class="ai-head-text">
-                <div id="aiTitle">Horizon AI</div>
-                <div id="aiHeaderSub">Your personal copilot</div>
-            </div>
-            <div class="ai-head-actions"><button type="button" class="horizon-ai-escape" aria-label="Exit Horizon AI fullscreen" title="Exit fullscreen AI (Esc)">Esc</button><button class="aiHeadBtn aiChatMenuToggle" id="aiSidebarToggleBtn" type="button" aria-expanded="false" aria-controls="aiChatSidebar" aria-label="Open chats" title="Chats">☰</button>
-                <button type="button" class="aiHeadBtn aiHeaderNewChat" id="aiSidebarNewChatBtn" aria-label="New chat" title="New chat">＋</button><button type="button" id="aiModelQuickBtn" class="aiModelQuickBtn" aria-label="Choose AI model" title="Choose AI model">Gemini Auto  ▾</button><button type="button" id="aiSettingsBtn" class="aiHeadBtn" aria-label="AI settings" title="AI settings">⚙</button>
-                <button type="button" id="aiSearchBtn" class="aiHeadBtn aiSearchToggle" aria-pressed="false" aria-label="Web search off" title="Web search off">🌐</button>
-                <button type="button" id="aiNewBtn" class="aiHeadBtn" aria-label="New chat" title="New chat">🧹</button>
-                <button type="button" id="aiExpandBtn" class="aiHeadBtn" aria-label="Full screen" title="Full screen">🗖</button>
-                <button type="button" id="aiCloseBtn" class="aiHeadBtn" aria-label="Close" title="Close">✕</button>
-            </div>
-        </div>
-
-        <section id="aiSettingsModal" aria-label="Horizon AI settings" aria-hidden="true">
-            <div class="aiSettingsTop"><strong>Horizon AI settings</strong><button type="button" class="aiSettingsClose" id="aiSettingsClose">Done</button></div>
-            <div class="aiSettingsGroup">
-                <h4>Model</h4>
-                <label for="aiModelSelect">Response model</label>
-                <select id="aiModelSelect"><option value="auto">Automatic (Worker default)</option><option value="gemini-3.8-flash">Gemini 3.8 Flash</option><option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (lighter)</option></select>
-                <p class="aiSettingsHint">Availability depends on the model access enabled for your Gemini API key. If a model is unavailable, Horizon will try its configured fallback.</p>
-            </div>
-            <div class="aiSettingsGroup">
-                <h4>Behavior</h4>
-                <label for="aiToneSelect">Personality</label>
-                <select id="aiToneSelect"><option value="warm">Warm and supportive</option><option value="cool">Cool and direct</option><option value="professional">Professional</option><option value="friendly">Friendly and casual</option><option value="coach">Encouraging coach</option></select>
-                <label for="aiDetailSelect">Answer detail</label>
-                <select id="aiDetailSelect"><option value="balanced">Balanced</option><option value="concise">Concise</option><option value="detailed">Detailed</option></select>
-            </div>
-            <div class="aiSettingsGroup">
-                <h4>Memory</h4>
-                <label for="aiMemoryInput">Saved memory (only what you choose to save)</label>
-                <textarea id="aiMemoryInput" maxlength="3000" placeholder="Preferences, goals, ongoing projects…"></textarea>
-                <p class="aiSettingsHint">This first version stores memory on this device in this browser. It is sent with your AI request when you chat; avoid storing passwords or highly sensitive details.</p>
-                <button type="button" class="aiSettingsSave" id="aiClearMemoryBtn">Clear memory</button>
-            </div>
-            <div class="aiSettingsGroup">
-                <h4>Copilot permissions</h4>
-                <label for="aiPermissionSelect">What can Copilot do?</label>
-                <select id="aiPermissionSelect"><option value="suggest">Suggest only — never offer app changes</option><option value="confirm">Ask me before every change</option><option value="approved">Allow only actions I explicitly enable</option></select>
-                <label for="aiRulesInput">Personal rules and boundaries</label>
-                <textarea id="aiRulesInput" maxlength="2000" placeholder="Example: Ask before deleting anything. Keep plans realistic."></textarea>
-                <p class="aiSettingsHint">Task creation can be proposed for your approval. Other app actions are not enabled until their tool and permission checks are implemented.</p>
-            </div>
-            <div class="aiSettingsGroup">
-                <h4>Action history</h4>
-                <div id="aiActionHistoryText" class="aiSettingsHint" style="white-space: pre-line;">No Copilot actions recorded yet.</div>
-                <button type="button" class="aiSettingsSave" id="aiClearActionHistoryBtn">Clear action history</button>
-            </div>
-            <button type="button" class="aiSettingsSave" id="aiSettingsSaveBtn">Save AI settings</button>
-            <div id="aiSettingsStatus" class="aiSettingsStatus" role="status" aria-live="polite"></div>
-        </section>
-
-        <div class="ai-convo">
-            <div id="aiWelcome">
-                <div class="ai-welcome-emoji" aria-hidden="true">✨</div>
-                <div class="ai-welcome-title" id="aiWelcomeTitle">Hi! I'm Horizon AI 👋</div>
-                <div class="ai-welcome-sub" id="aiWelcomeSub">Ask me anything — study help, daily planning, translations and more.</div>
-                
-            </div>
-
-            <div id="aiMessages" role="log" aria-live="off" aria-label="Daily AI conversation"></div>
-
-            <button type="button" id="aiScrollBottom" aria-label="Jump to latest" title="Jump to latest">↓</button>
-        </div>
-
-        <div id="aiVoiceBar" hidden="">
-            <span class="ai-voice-dot" aria-hidden="true"></span>
-            <span id="aiVoiceText">Listening…</span>
-            <button type="button" id="aiVoiceCancelBtn" class="aiVoiceBtn" aria-label="Cancel" title="Cancel">✕ Cancel</button>
-            <button type="button" id="aiVoiceStopBtn" class="aiVoiceBtn stop" aria-label="Stop" title="Stop">⏹ Stop</button>
-        </div>
-
-        <div id="aiImagePreviewWrap">
-            <img id="aiImagePreviewThumb" alt="Selected image preview">
-            <button type="button" id="aiImageRemoveBtn" aria-label="Remove image" title="Remove image">✕</button>
-        </div>
-
-        <div class="aiInput">
-            <input type="file" id="aiImageFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" hidden="">
-            <button type="button" class="aiImageBtn aiGhostBtn" id="aiImageBtn" aria-label="Add image" title="Add image">📷</button>
-            <button type="button" class="aiMicBtn aiGhostBtn" id="aiMicBtn" aria-label="Dictate by voice" title="Dictate by voice" hidden="">🎤</button>
-            <input id="aiInput" type="text" placeholder="Ask Horizon AI..." aria-label="Ask Horizon AI..." autocomplete="off">
-            <button type="button" id="aiSendBtn" onclick="sendAI()" aria-label="Send" title="Send">
-                <span class="aiSendIcon" aria-hidden="true">➤</span>
-                <span class="aiSendSpin" aria-hidden="true"></span>
-            </button>
-        </div><div class="ai-suggest-row">
-                    <button type="button" class="ai-suggest" data-ai-suggest="1">Give me study tips</button>
-                    <button type="button" class="ai-suggest" data-ai-suggest="2">Summarize a topic</button>
-                    <button type="button" class="ai-suggest" data-ai-suggest="3">Help me write a note</button>
-                </div>
-
-        <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite" aria-label="Horizon AI"></div>
-    </div></div>
+                    <div id="aiChatHost" aria-label="Horizon AI chat"></div>
                 </div>
             </div>
         </section>
@@ -7492,7 +7786,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
     <!-- WELCOME -->
 
-    <div class="welcome-screen" id="welcomeScreen" style="display:none;">
+    <div
+        class="welcome-screen"
+        id="welcomeScreen"
+        style="display:none;"
+    >
 
         <div class="welcome-box">
 
@@ -7500,19 +7798,34 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 Horizon
             </div>
 
-            <div class="welcome-subtitle" id="welcomeSubtitle">
+            <div
+                class="welcome-subtitle"
+                id="welcomeSubtitle"
+            >
                 Organize your day your way.
             </div>
 
-            <button class="welcome-button" id="welcomeSignIn" type="button">
+            <button
+                class="welcome-button"
+                id="welcomeSignIn"
+                type="button"
+            >
                 Sign In
             </button>
 
-            <button class="welcome-button secondary" id="welcomeCreate" type="button">
+            <button
+                class="welcome-button secondary"
+                id="welcomeCreate"
+                type="button"
+            >
                 Create Account
             </button>
 
-            <button class="welcome-button guest" id="welcomeGuest" type="button">
+            <button
+                class="welcome-button guest"
+                id="welcomeGuest"
+                type="button"
+            >
                 Continue without an account
             </button>
 
@@ -7523,11 +7836,18 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
     <!-- AUTH -->
 
-    <div class="auth-overlay" id="authOverlay">
+    <div
+        class="auth-overlay"
+        id="authOverlay"
+    >
 
         <div id="authCard">
 
-            <button class="close-auth" id="closeAuth" type="button">
+            <button
+                class="close-auth"
+                id="closeAuth"
+                type="button"
+            >
                 ×
             </button>
 
@@ -7535,22 +7855,56 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 Create your account
             </h2>
 
-            <div class="auth-subtitle" id="authSubtitle">
+            <div
+                class="auth-subtitle"
+                id="authSubtitle"
+            >
                 Start organizing your day with Horizon.
             </div>
 
-            <div class="auth-error" id="authError">
+            <div
+                class="auth-error"
+                id="authError"
+            >
             </div>
 
-            <input class="auth-input" id="usernameInput" type="text" placeholder="Username" autocomplete="username">
+            <input
+                class="auth-input"
+                id="usernameInput"
+                type="text"
+                placeholder="Username"
+                autocomplete="username"
+            >
 
-            <input class="auth-input" id="emailInput" type="email" placeholder="Email" autocomplete="email">
+            <input
+                class="auth-input"
+                id="emailInput"
+                type="email"
+                placeholder="Email"
+                autocomplete="email"
+            >
 
-            <input class="auth-input" id="passwordInput" type="password" placeholder="Password" autocomplete="current-password">
+            <input
+                class="auth-input"
+                id="passwordInput"
+                type="password"
+                placeholder="Password"
+                autocomplete="current-password"
+            >
 
-            <input class="auth-input" id="confirmPasswordInput" type="password" placeholder="Confirm password" autocomplete="new-password">
+            <input
+                class="auth-input"
+                id="confirmPasswordInput"
+                type="password"
+                placeholder="Confirm password"
+                autocomplete="new-password"
+            >
 
-            <button class="auth-button" id="authButton" type="button">
+            <button
+                class="auth-button"
+                id="authButton"
+                type="button"
+            >
                 Create Account
             </button>
 
@@ -7560,7 +7914,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     Already have an account?
                 </span>
 
-                <button id="switchButton" type="button">
+                <button
+                    id="switchButton"
+                    type="button"
+                >
                     Sign In
                 </button>
 
@@ -7573,7 +7930,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
     <!-- LANGUAGE -->
 
-    <div class="language-overlay" id="languageOverlay" style="display:none;">
+    <div
+        class="language-overlay"
+        id="languageOverlay"
+        style="display:none;"
+    >
 
         <div class="language-box">
 
@@ -7585,15 +7946,27 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 Select the language you want to use.
             </p>
 
-            <button class="language-option" data-language="en" type="button">
+            <button
+                class="language-option"
+                data-language="en"
+                type="button"
+            >
                 English
             </button>
 
-            <button class="language-option" data-language="ku" type="button">
+            <button
+                class="language-option"
+                data-language="ku"
+                type="button"
+            >
                 کوردی
             </button>
 
-            <button class="language-option" data-language="ar" type="button">
+            <button
+                class="language-option"
+                data-language="ar"
+                type="button"
+            >
                 العربية
             </button>
 
@@ -22629,9 +23002,171 @@ document.documentElement.classList.toggle(
 
     <!-- DAILY AI -->
 
-    <button id="aiToggle" type="button" aria-label="Horizon AI" aria-expanded="false" title="Horizon AI">✦</button>
+    <button id="aiToggle" type="button" aria-label="Horizon AI" aria-expanded="false">✦</button>
 
-    
+    <div id="aiBox" role="dialog" aria-label="Daily AI">
+        <div id="aiHeader">
+            <div class="ai-head-emoji" aria-hidden="true">✨</div>
+            <div class="ai-head-text">
+                <div id="aiTitle">Horizon AI</div>
+                <div id="aiHeaderSub">Your personal copilot</div>
+            </div>
+            <div class="ai-head-actions">
+                <button type="button" id="aiSettingsBtn" class="aiHeadBtn" aria-label="AI settings" title="AI settings">⚙</button>
+                <button
+                    type="button"
+                    id="aiSearchBtn"
+                    class="aiHeadBtn aiSearchToggle"
+                    aria-pressed="false"
+                    aria-label="Web search"
+                    title="Web search"
+                >🌐</button>
+                <button
+                    type="button"
+                    id="aiNewBtn"
+                    class="aiHeadBtn"
+                    aria-label="Clear conversation"
+                    title="New chat"
+                >🧹</button>
+                <button
+                    type="button"
+                    id="aiExpandBtn"
+                    class="aiHeadBtn"
+                    aria-label="Full screen"
+                    title="Full screen"
+                >🗖</button>
+                <button
+                    type="button"
+                    id="aiCloseBtn"
+                    class="aiHeadBtn"
+                    aria-label="Close"
+                    title="Close"
+                >✕</button>
+            </div>
+        </div>
+
+        <section id="aiSettingsModal" aria-label="Horizon AI settings" aria-hidden="true">
+            <div class="aiSettingsTop"><strong>Horizon AI settings</strong><button type="button" class="aiSettingsClose" id="aiSettingsClose">Done</button></div>
+            <div class="aiSettingsGroup">
+                <h4>Model</h4>
+                <label for="aiModelSelect">Response model</label>
+                <select id="aiModelSelect"><option value="auto">Automatic (Worker default)</option><option value="gemini-3.8-flash">Gemini 3.8 Flash</option><option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (lighter)</option></select>
+                <p class="aiSettingsHint">Availability depends on the model access enabled for your Gemini API key. If a model is unavailable, Horizon will try its configured fallback.</p>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Behavior</h4>
+                <label for="aiToneSelect">Personality</label>
+                <select id="aiToneSelect"><option value="warm">Warm and supportive</option><option value="cool">Cool and direct</option><option value="professional">Professional</option><option value="friendly">Friendly and casual</option><option value="coach">Encouraging coach</option></select>
+                <label for="aiDetailSelect">Answer detail</label>
+                <select id="aiDetailSelect"><option value="balanced">Balanced</option><option value="concise">Concise</option><option value="detailed">Detailed</option></select>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Memory</h4>
+                <label for="aiMemoryInput">Saved memory (only what you choose to save)</label>
+                <textarea id="aiMemoryInput" maxlength="3000" placeholder="Preferences, goals, ongoing projects…"></textarea>
+                <p class="aiSettingsHint">This first version stores memory on this device in this browser. It is sent with your AI request when you chat; avoid storing passwords or highly sensitive details.</p>
+                <button type="button" class="aiSettingsSave" id="aiClearMemoryBtn">Clear memory</button>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Copilot permissions</h4>
+                <label for="aiPermissionSelect">What can Copilot do?</label>
+                <select id="aiPermissionSelect"><option value="suggest">Suggest only — never offer app changes</option><option value="confirm">Ask me before every change</option><option value="approved">Allow only actions I explicitly enable</option></select>
+                <label for="aiRulesInput">Personal rules and boundaries</label>
+                <textarea id="aiRulesInput" maxlength="2000" placeholder="Example: Ask before deleting anything. Keep plans realistic."></textarea>
+                <p class="aiSettingsHint">Task creation can be proposed for your approval. Other app actions are not enabled until their tool and permission checks are implemented.</p>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Action history</h4>
+                <div id="aiActionHistoryText" class="aiSettingsHint">No Copilot actions recorded yet.</div>
+                <button type="button" class="aiSettingsSave" id="aiClearActionHistoryBtn">Clear action history</button>
+            </div>
+            <button type="button" class="aiSettingsSave" id="aiSettingsSaveBtn">Save AI settings</button>
+            <div id="aiSettingsStatus" class="aiSettingsStatus" role="status" aria-live="polite"></div>
+        </section>
+
+        <div class="ai-convo">
+            <div id="aiWelcome">
+                <div class="ai-welcome-emoji" aria-hidden="true">✨</div>
+                <div class="ai-welcome-title" id="aiWelcomeTitle">Where should we start?</div>
+                <div class="ai-welcome-sub" id="aiWelcomeSub">
+                    Ask anything — study, planning, writing, translations and more.
+                </div>
+                <div class="ai-suggest-row">
+                    <button type="button" class="ai-suggest" data-ai-suggest="1">Give me study tips</button>
+                    <button type="button" class="ai-suggest" data-ai-suggest="2">Summarize a topic</button>
+                    <button type="button" class="ai-suggest" data-ai-suggest="3">Help me write a note</button>
+                </div>
+            </div>
+
+            <div
+                id="aiMessages"
+                role="log"
+                aria-live="off"
+                aria-label="Daily AI conversation"
+            ></div>
+
+            <button
+                type="button"
+                id="aiScrollBottom"
+                aria-label="Jump to latest"
+                title="Jump to latest"
+            >↓</button>
+        </div>
+
+        <div id="aiVoiceBar" hidden>
+            <span class="ai-voice-dot" aria-hidden="true"></span>
+            <span id="aiVoiceText">Listening…</span>
+            <button type="button" id="aiVoiceCancelBtn" class="aiVoiceBtn">✕ Cancel</button>
+            <button type="button" id="aiVoiceStopBtn" class="aiVoiceBtn stop">⏹ Stop</button>
+        </div>
+
+        <div id="aiImagePreviewWrap">
+            <img id="aiImagePreviewThumb" alt="Selected image preview" />
+            <button type="button" id="aiImageRemoveBtn" aria-label="Remove image" title="Remove image">✕</button>
+        </div>
+
+        <div class="aiInput">
+            <input
+                type="file"
+                id="aiImageFileInput"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                hidden
+            />
+            <button
+                type="button"
+                class="aiImageBtn aiGhostBtn"
+                id="aiImageBtn"
+                aria-label="Add image"
+                title="Add image"
+            >📷</button>
+            <button
+                type="button"
+                class="aiMicBtn aiGhostBtn"
+                id="aiMicBtn"
+                aria-label="Dictate by voice"
+                title="Dictate by voice"
+            >🎤</button>
+            <input
+                id="aiInput"
+                type="text"
+                placeholder="Ask Horizon AI anything..."
+                aria-label="Ask Horizon AI"
+                autocomplete="off"
+            />
+            <button
+                type="button"
+                id="aiSendBtn"
+                onclick="sendAI()"
+                aria-label="Send"
+                title="Send"
+            >
+                <span class="aiSendIcon" aria-hidden="true">➤</span>
+                <span class="aiSendSpin" aria-hidden="true"></span>
+            </button>
+        </div>
+
+        <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
+    </div>
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
@@ -24233,7 +24768,20 @@ document.documentElement.classList.toggle(
            ===================================================== */
 
         document.getElementById("aiSettingsBtn")?.addEventListener("click", aiOpenSettings);
-        document.getElementById("aiSettingsClose")?.addEventListener("click", () => { aiCloseSettings(); const modal=document.getElementById("aiSettingsModal"); if(modal) modal.style.display=""; });
+        document.getElementById("aiSettingsClose")?.addEventListener("click", () => { 
+            aiCloseSettings(); 
+            const modal=document.getElementById("aiSettingsModal"); 
+            if(modal) {
+                modal.style.display="";
+                modal.style.pointerEvents="";
+                // FIX: Restore focus to the button that opened settings
+                const returnEl = modal.dataset.focusReturnElement;
+                if (returnEl) {
+                    const btn = document.getElementById(returnEl);
+                    if (btn) setTimeout(() => btn.focus(), 0);
+                }
+            }
+        });
         document.getElementById("aiSettingsSaveBtn")?.addEventListener("click", () => { aiReadSettingsFromUI(); aiUpdateMemorySidebar(); const el=document.getElementById("aiSettingsStatus"); if(el)el.textContent="Settings saved on this device."; aiLogAction("AI preferences updated","settings"); });
         document.getElementById("aiClearMemoryBtn")?.addEventListener("click", () => { const el=document.getElementById("aiMemoryInput"); if(el)el.value=""; aiReadSettingsFromUI(); const status=document.getElementById("aiSettingsStatus"); if(status)status.textContent="Memory cleared on this device."; });
         document.getElementById("aiClearActionHistoryBtn")?.addEventListener("click", () => { try{localStorage.removeItem(AI_ACTION_LOG_KEY);}catch(e){} aiRenderActionHistory(); });
@@ -24273,16 +24821,28 @@ document.documentElement.classList.toggle(
             aiUpdatePin();
         }, { passive: true });
 
-        document.querySelectorAll("#aiWelcome .ai-suggest").forEach((btn) => {
-            btn.addEventListener("click", () => {
-                const input = document.getElementById("aiInput");
-                if (!input || aiBusy) return;
-                input.value = (btn.getAttribute("data-ai-prompt") || btn.textContent || "").trim();
-                input.focus({ preventScroll: true });
-                // Suggestions are actions: send their prompt directly.
-                sendAI();
+        // FIX: Properly bind suggestion buttons with correct attribute names and delegation
+        const bindSuggestions = () => {
+            document.querySelectorAll("#aiWelcome .ai-suggest").forEach((btn) => {
+                // Remove old listeners by cloning (if already bound)
+                if (btn.dataset.suggestionBound) return;
+                btn.dataset.suggestionBound = "true";
+                
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const input = document.getElementById("aiInput");
+                    if (!input || aiBusy) return;
+                    // FIX: Use data-ai-suggest attribute (matches HTML), fallback to textContent
+                    const promptText = btn.getAttribute("data-ai-suggest") || btn.getAttribute("data-ai-prompt") || btn.textContent || "";
+                    input.value = promptText.trim();
+                    input.focus({ preventScroll: true });
+                    // Suggestions are actions: send their prompt directly.
+                    sendAI();
+                }, { once: false, passive: false });
             });
-        });
+        };
+        bindSuggestions();
 
         document.addEventListener("keydown", (e) => {
             if (e.key !== "Escape") return;
@@ -24293,8 +24853,21 @@ document.documentElement.classList.toggle(
                 aiStopVoice(true);
                 return;
             }
-            if (aiFullOpen) aiSetFullscreen(false);
-            else aiSetOpen(false);
+            // FIX: Ensure clean close - force remove open class and reset modal state
+            if (aiFullOpen) {
+                aiSetFullscreen(false);
+            } else {
+                box.classList.remove("open");
+                const modal = document.getElementById("aiSettingsModal");
+                if (modal) {
+                    modal.classList.remove("open");
+                    modal.style.display = "";
+                    modal.style.pointerEvents = "";
+                }
+                if (typeof showSection === "function" && document.getElementById("ai")?.classList.contains("active")) {
+                    showSection("tasks");
+                }
+            }
         });
 
         /* =====================================================
@@ -24339,8 +24912,22 @@ document.documentElement.classList.toggle(
                 modelButton.title = "Choose AI model";
                 const updateModelButton = () => {
                     const select = document.getElementById("aiModelSelect");
-                    const option = select?.selectedOptions?.[0];
-                    modelButton.textContent = ((select?.value === "auto") ? "Gemini Auto" : (option?.textContent || "Gemini model")) + "  ▾";
+                    if (!select) {
+                        modelButton.textContent = "Gemini model  ▾";
+                        return;
+                    }
+                    const value = select.value || "auto";
+                    let displayText = "Gemini model";
+                    if (value === "auto") {
+                        displayText = "Gemini Auto";
+                    } else {
+                        // FIX: Use options array instead of readonly selectedOptions
+                        const option = Array.from(select.options).find(opt => opt.value === value);
+                        if (option && option.textContent) {
+                            displayText = option.textContent;
+                        }
+                    }
+                    modelButton.textContent = displayText + "  ▾";
                 };
                 modelButton.addEventListener("click", (event) => {
                     event.preventDefault();
@@ -24352,6 +24939,8 @@ document.documentElement.classList.toggle(
                         modal.setAttribute("aria-hidden", "false");
                         modal.style.display = "block";
                         modal.style.pointerEvents = "auto";
+                        // FIX: Store reference to opening button for focus restoration
+                        modal.dataset.focusReturnElement = "aiModelQuickBtn";
                     }
                     requestAnimationFrame(() => {
                         const select = document.getElementById("aiModelSelect");
@@ -24392,6 +24981,7 @@ document.documentElement.classList.toggle(
             document.getElementById("aiChatMemoryToggle")?.addEventListener("click", () => { const key=AI_CHAT_MEMORY_CONTEXT_KEY; const enabled=localStorage.getItem(key)==="false"; localStorage.setItem(key,enabled?"true":"false"); aiUpdateMemorySidebar(); });
             document.getElementById("aiSidebarToggleBtn")?.addEventListener("click", () => { const side=document.getElementById("aiChatSidebar"), workspace=document.getElementById("aiWorkspace"); if(!side||!workspace)return; let open; if(window.matchMedia("(max-width:760px)").matches){open=side.classList.toggle("mobile-open");}else{open=workspace.classList.toggle("sidebar-collapsed")?false:true;} document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded",open?"true":"false"); });
             aiLoadSettingsIntoUI();
+            // FIX: Apply language BEFORE rendering suggestions
             aiApplyLanguage();
             aiSetWebSearch(aiWebSearch, false);
             aiInitVoice();
@@ -24403,6 +24993,9 @@ document.documentElement.classList.toggle(
             aiRenderCurrentChat();
             aiRenderChatLists();
             aiUpdateMemorySidebar();
+            
+            // FIX: Re-bind suggestions after language is applied to ensure correct text
+            bindSuggestions();
 
             /* follow the app language (applyLanguage() mutates <html lang>) */
             try {
@@ -26766,12 +27359,78 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 })();
 </script>
 
-
-
+</body>
+</html>
 
 <style id="horizon-ai-controls-functional-fix">
-#ai.active #aiSettingsModal:not(.open) { display:none !important; pointer-events:none !important; }
-#ai.active #aiSettingsModal.open { display:block !important; pointer-events:auto !important; }
-#ai.active .horizon-ai-escape, #ai.active #aiModelQuickBtn, #ai.active .ai-suggest { pointer-events:auto !important; touch-action:manipulation !important; cursor:pointer !important; }
+/* FIX: Comprehensive state management for settings modal */
+#aiSettingsModal {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+#aiSettingsModal.open {
+  display: block !important;
+  pointer-events: auto !important;
+}
+
+/* FIX: Ensure ESC, model button, and suggestions always receive clicks */
+#ai.active #aiSettingsModal:not(.open) { 
+  display: none !important; 
+  pointer-events: none !important; 
+}
+
+#ai.active #aiSettingsModal.open { 
+  display: block !important; 
+  pointer-events: auto !important; 
+}
+
+/* FIX: Critical - ensure all interactive elements in AI are clickable */
+#ai.active .horizon-ai-escape {
+  pointer-events: auto !important; 
+  touch-action: manipulation !important; 
+  cursor: pointer !important;
+  z-index: 25 !important;
+}
+
+#ai.active #aiModelQuickBtn {
+  pointer-events: auto !important; 
+  touch-action: manipulation !important; 
+  cursor: pointer !important;
+  z-index: 24 !important;
+}
+
+#ai.active .ai-suggest {
+  pointer-events: auto !important; 
+  touch-action: manipulation !important; 
+  cursor: pointer !important;
+  z-index: 10 !important;
+}
+
+/* FIX: Suggestions should never be hidden when welcome is visible */
+#aiWelcome .ai-suggest-row:not(.ai-suggestions-hidden) .ai-suggest {
+  pointer-events: auto !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+/* FIX: Prevent z-index stacking issues */
+#aiBox {
+  z-index: 500 !important;
+}
+
+#aiSettingsModal {
+  z-index: 21 !important;
+}
+
+/* FIX: Ensure model button is always above other header items */
+#aiModelQuickBtn {
+  z-index: 24 !important;
+}
+
+/* FIX: Settings status message should be visible */
+#aiSettingsStatus {
+  pointer-events: auto !important;
+  user-select: text !important;
+}
 </style>
-<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793048150896" name="I0_1793048150896" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793048150896&amp;_gfid=I0_1793048150896&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=33195204" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
