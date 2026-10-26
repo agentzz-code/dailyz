@@ -1173,57 +1173,32 @@ body:has(#ai.active) main { width:100% !important; max-width:none !important; ma
 }
 #ai.active .horizon-ai-escape:hover { background:rgba(255,255,255,.15); }
 @media(max-width:760px) {
-  #ai.active { inset:0 !important; width:100vw !important; height:100dvh !important; min-height:100dvh !important; }
-  #ai.active .ai-workspace { width:100% !important; height:100dvh !important; min-height:0 !important; }
-  #ai.active .ai-chat-main { width:100%; height:100dvh !important; min-height:0 !important; }
-  #ai.active #aiBox.horizon-ai-page { height:100dvh !important; min-height:0 !important; }
-  #ai.active #aiBox.horizon-ai-page #aiHeader { min-height:58px; flex-basis:58px; padding:0 12px; gap:7px; }
-  #ai.active #aiTitle { font-size:15px !important; }
-  #ai.active .ai-head-actions { gap:4px !important; }
-  #ai.active .aiHeadBtn { width:34px !important; height:34px !important; }
-  #ai.active #aiModelQuickBtn { max-width:108px; overflow:hidden; text-overflow:ellipsis; }
+  /* iPhone safe areas: keep the status bar clear and extend the aurora behind the home indicator. */
+  body:has(#ai.active) { background:#080b1b !important; }
+  #ai.active { inset:0 0 calc(-1 * env(safe-area-inset-bottom)) 0 !important; width:100vw !important; height:calc(100dvh + env(safe-area-inset-bottom)) !important; min-height:0 !important; }
+  #ai.active .ai-workspace { width:100% !important; height:calc(100dvh + env(safe-area-inset-bottom)) !important; min-height:0 !important; }
+  #ai.active .ai-chat-main { width:100%; height:100% !important; min-height:0 !important; }
+  #ai.active #aiBox.horizon-ai-page { height:100% !important; min-height:0 !important; }
+  #ai.active #aiBox.horizon-ai-page #aiHeader { box-sizing:border-box; min-height:calc(58px + env(safe-area-inset-top)); flex-basis:calc(58px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) 10px 0; gap:5px; }
+  #ai.active #aiBox.horizon-ai-page .ai-head-text { flex:0 1 auto; min-width:0; max-width:82px; }
+  #ai.active #aiTitle { font-size:14px !important; line-height:1.1; overflow-wrap:anywhere; }
+  #ai.active .ai-head-actions { flex:1 1 auto; min-width:0; gap:4px !important; justify-content:flex-end; }
+  #ai.active .aiHeadBtn { width:32px !important; height:32px !important; flex:0 0 32px; font-size:16px !important; }
+  #ai.active #aiModelQuickBtn { flex:0 1 132px; width:auto; min-width:0; max-width:132px; padding:0 8px; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #ai.active #aiWelcome { min-height:0; padding:20px 0 12px; }
   #ai.active .ai-welcome-title { font-size:clamp(27px,7vw,36px) !important; text-align:center; }
   #ai.active .ai-welcome-sub { font-size:14px !important; padding:0 8px; text-align:center; }
   #ai.active .ai-convo { display:flex; flex-direction:column; padding:0 14px; }
   #ai.active .ai-suggest-row { justify-content:center; padding:0 12px calc(10px + env(safe-area-inset-bottom)); gap:7px; }
   #ai.active .ai-suggest { font-size:12px; padding:10px 12px; }
-  #ai.active .aiInput { width:calc(100% - 24px); max-width:none; margin:0 auto calc(12px + env(safe-area-inset-bottom)); min-height:60px; border-radius:28px; padding:8px 10px; }
+  #ai.active .aiInput { box-sizing:border-box; width:calc(100% - 24px); max-width:none; margin:0 auto calc(12px + env(safe-area-inset-bottom)); min-height:60px; border-radius:28px; padding:8px 10px; }
+  #ai.active #aiInput { min-width:0; }
   #ai.active #aiMessages { max-width:none; padding:14px 0 20px; }
-  #ai.active .ai-chat-sidebar { top:64px; bottom:calc(10px + env(safe-area-inset-bottom)); left:10px; width:min(330px,calc(100vw - 20px)); background:rgba(8,10,29,.88) !important; }
+  #ai.active .ai-chat-sidebar { top:calc(64px + env(safe-area-inset-top)); bottom:calc(10px + env(safe-area-inset-bottom)); left:10px; width:min(330px,calc(100vw - 20px)); background:rgba(8,10,29,.88) !important; }
   #ai.active .horizon-ai-escape { min-width:42px; height:32px; padding:0 7px; font-size:11px; }
 }
 @media(prefers-reduced-motion:reduce) {
  #ai.active::before,#ai.active::after { animation:none !important; }
-}
-
-
-/* Mobile AI header repair: keep controls inside the screen without changing desktop. */
-@media (max-width: 480px) {
-  #ai.active #aiBox.horizon-ai-page #aiHeader {
-    box-sizing:border-box !important; width:100% !important; min-width:0 !important;
-    padding:7px 9px !important; gap:6px !important; overflow:hidden !important;
-  }
-  #ai.active #aiBox.horizon-ai-page .ai-head-text { flex:0 1 auto !important; min-width:0 !important; max-width:74px !important; }
-  #ai.active #aiBox.horizon-ai-page #aiTitle { font-size:15px !important; line-height:1.05 !important; overflow-wrap:anywhere; }
-  #ai.active #aiBox.horizon-ai-page #aiHeaderSub { display:none !important; }
-  #ai.active #aiBox.horizon-ai-page .ai-head-emoji { display:none !important; }
-  #ai.active #aiBox.horizon-ai-page .ai-head-actions {
-    flex:1 1 auto !important; min-width:0 !important; gap:4px !important;
-    justify-content:flex-end !important; overflow:hidden !important;
-  }
-  #ai.active #aiBox.horizon-ai-page .aiHeadBtn,
-  #ai.active #aiBox.horizon-ai-page .horizon-ai-escape {
-    box-sizing:border-box !important; width:36px !important; min-width:36px !important;
-    height:36px !important; min-height:36px !important; padding:0 !important;
-    flex:0 0 36px !important; border-radius:50% !important; font-size:15px !important;
-  }
-  #ai.active #aiModelQuickBtn {
-    box-sizing:border-box !important; flex:1 1 86px !important; min-width:0 !important;
-    width:auto !important; max-width:104px !important; min-height:36px !important;
-    padding:0 7px !important; overflow:hidden !important; text-overflow:ellipsis !important;
-    font-size:10px !important; white-space:nowrap !important;
-  }
 }
 
 </style>
@@ -5894,7 +5869,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 }
 </style>
 
-<script src="https://apis.google.com/js/api.js?onload=__iframefcb512589" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
+<script src="https://apis.google.com/js/api.js?onload=__iframefcb999943" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
 
 <body>
 
@@ -7481,7 +7456,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         <div class="aiInput">
             <input type="file" id="aiImageFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" hidden="">
             <button type="button" class="aiImageBtn aiGhostBtn" id="aiImageBtn" aria-label="Add image" title="Add image">📷</button>
-            <button type="button" class="aiMicBtn aiGhostBtn" id="aiMicBtn" aria-label="Dictate by voice" title="Dictate by voice">🎤</button>
+            <button type="button" class="aiMicBtn aiGhostBtn" id="aiMicBtn" aria-label="Dictate by voice" title="Dictate by voice" hidden="">🎤</button>
             <input id="aiInput" type="text" placeholder="Ask Horizon AI..." aria-label="Ask Horizon AI..." autocomplete="off">
             <button type="button" id="aiSendBtn" onclick="sendAI()" aria-label="Send" title="Send">
                 <span class="aiSendIcon" aria-hidden="true">➤</span>
@@ -26685,4 +26660,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 
 
 
-<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1792950972126" name="I0_1792950972126" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1792950972126&amp;_gfid=I0_1792950972126&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=53518370" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
+<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793039716306" name="I0_1793039716306" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793039716306&amp;_gfid=I0_1793039716306&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=29802783" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
