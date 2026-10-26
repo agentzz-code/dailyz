@@ -1173,29 +1173,29 @@ body:has(#ai.active) main { width:100% !important; max-width:none !important; ma
 }
 #ai.active .horizon-ai-escape:hover { background:rgba(255,255,255,.15); }
 @media(max-width:760px) {
-  /* iPhone safe areas: keep the status bar clear and extend the aurora behind the home indicator. */
+  /* iPhone layout correction: keep controls clear of the status bar and home indicator. */
   body:has(#ai.active) { background:#080b1b !important; }
-  #ai.active { inset:0 0 calc(-1 * env(safe-area-inset-bottom)) 0 !important; width:100vw !important; height:calc(100dvh + env(safe-area-inset-bottom)) !important; min-height:0 !important; }
-  #ai.active .ai-workspace { width:100% !important; height:calc(100dvh + env(safe-area-inset-bottom)) !important; min-height:0 !important; }
-  #ai.active .ai-chat-main { width:100%; height:100% !important; min-height:0 !important; }
-  #ai.active #aiBox.horizon-ai-page { height:100% !important; min-height:0 !important; }
-  #ai.active #aiBox.horizon-ai-page #aiHeader { box-sizing:border-box; min-height:calc(58px + env(safe-area-inset-top)); flex-basis:calc(58px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) 10px 0; gap:5px; }
-  #ai.active #aiBox.horizon-ai-page .ai-head-text { flex:0 1 auto; min-width:0; max-width:82px; }
-  #ai.active #aiTitle { font-size:14px !important; line-height:1.1; overflow-wrap:anywhere; }
-  #ai.active .ai-head-actions { flex:1 1 auto; min-width:0; gap:4px !important; justify-content:flex-end; }
-  #ai.active .aiHeadBtn { width:32px !important; height:32px !important; flex:0 0 32px; font-size:16px !important; }
-  #ai.active #aiModelQuickBtn { flex:0 1 132px; width:auto; min-width:0; max-width:132px; padding:0 8px; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  #ai.active #aiWelcome { min-height:0; padding:20px 0 12px; }
-  #ai.active .ai-welcome-title { font-size:clamp(27px,7vw,36px) !important; text-align:center; }
-  #ai.active .ai-welcome-sub { font-size:14px !important; padding:0 8px; text-align:center; }
-  #ai.active .ai-convo { display:flex; flex-direction:column; padding:0 14px; }
-  #ai.active .ai-suggest-row { justify-content:center; padding:0 12px calc(10px + env(safe-area-inset-bottom)); gap:7px; }
-  #ai.active .ai-suggest { font-size:12px; padding:10px 12px; }
-  #ai.active .aiInput { box-sizing:border-box; width:calc(100% - 24px); max-width:none; margin:0 auto calc(12px + env(safe-area-inset-bottom)); min-height:60px; border-radius:28px; padding:8px 10px; }
-  #ai.active #aiInput { min-width:0; }
-  #ai.active #aiMessages { max-width:none; padding:14px 0 20px; }
-  #ai.active .ai-chat-sidebar { top:calc(64px + env(safe-area-inset-top)); bottom:calc(10px + env(safe-area-inset-bottom)); left:10px; width:min(330px,calc(100vw - 20px)); background:rgba(8,10,29,.88) !important; }
-  #ai.active .horizon-ai-escape { min-width:42px; height:32px; padding:0 7px; font-size:11px; }
+  #ai.active { inset:0 !important; width:100vw !important; height:100dvh !important; min-height:0 !important; padding:0 !important; }
+  #ai.active > .ai-workspace { display:flex !important; width:100% !important; height:100% !important; min-height:0 !important; }
+  #ai.active .ai-chat-main { display:flex !important; flex-direction:column !important; width:100% !important; height:100% !important; min-width:0 !important; min-height:0 !important; }
+  #ai.active #aiBox.horizon-ai-page, #ai.active #aiBox.horizon-ai-page.open { display:flex !important; flex-direction:column !important; flex:1 1 auto !important; width:100% !important; height:100% !important; min-height:0 !important; max-height:none !important; padding:0 !important; margin:0 !important; gap:0 !important; overflow:hidden !important; }
+  #ai.active #aiBox.horizon-ai-page #aiHeader { box-sizing:border-box; display:flex !important; flex:0 0 auto !important; min-height:calc(58px + max(env(safe-area-inset-top), 34px)); padding:calc(max(env(safe-area-inset-top), 34px)) 10px 8px !important; gap:5px !important; align-items:center !important; }
+  #ai.active #aiBox.horizon-ai-page .ai-head-text { flex:0 1 66px !important; min-width:0 !important; max-width:66px !important; }
+  #ai.active #aiTitle { font-size:13px !important; line-height:1.05 !important; overflow-wrap:normal !important; white-space:normal !important; }
+  #ai.active #aiHeaderSub { display:none !important; }
+  #ai.active .ai-head-actions { display:flex !important; flex:1 1 auto !important; min-width:0 !important; gap:4px !important; justify-content:flex-end !important; align-items:center !important; }
+  #ai.active .aiHeadBtn { width:clamp(27px, 8vw, 32px) !important; height:clamp(27px, 8vw, 32px) !important; flex:0 1 32px !important; min-width:0 !important; padding:0 !important; font-size:15px !important; border-radius:50% !important; }
+  #ai.active #aiModelQuickBtn { flex:1 1 86px !important; width:auto !important; min-width:0 !important; max-width:118px !important; height:34px !important; padding:0 7px !important; font-size:10px !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; }
+  #ai.active .ai-convo { flex:1 1 auto !important; min-height:0 !important; overflow-y:auto !important; overflow-x:hidden !important; -webkit-overflow-scrolling:touch !important; padding:0 14px !important; }
+  #ai.active #aiMessages { flex:0 0 auto !important; min-height:min-content !important; max-width:none !important; padding:14px 0 20px !important; }
+  #ai.active #aiWelcome { flex:0 0 auto !important; min-height:0 !important; padding:20px 0 12px !important; }
+  #ai.active .ai-suggest-row { display:flex !important; flex:0 0 auto !important; flex-wrap:wrap !important; justify-content:center !important; max-height:92px !important; overflow-y:auto !important; padding:5px 12px 8px !important; gap:6px !important; }
+  #ai.active .ai-suggest { max-width:100% !important; font-size:12px !important; padding:9px 11px !important; }
+  #ai.active .aiInput { box-sizing:border-box !important; display:flex !important; flex:0 0 auto !important; width:calc(100% - 24px) !important; max-width:none !important; margin:8px auto calc(8px + env(safe-area-inset-bottom)) !important; min-height:58px !important; border-radius:28px !important; padding:7px 10px !important; }
+  #ai.active #aiInput { min-width:0 !important; font-size:16px !important; }
+  #ai.active #aiSendBtn { flex:0 0 42px !important; width:42px !important; height:42px !important; }
+  #ai.active .ai-chat-sidebar { top:calc(64px + max(env(safe-area-inset-top), 34px)) !important; bottom:calc(10px + env(safe-area-inset-bottom)) !important; left:10px !important; width:min(330px,calc(100vw - 20px)) !important; background:rgba(8,10,29,.92) !important; }
+  #ai.active .horizon-ai-escape { min-width:38px !important; height:30px !important; padding:0 6px !important; font-size:10px !important; }
 }
 @media(prefers-reduced-motion:reduce) {
  #ai.active::before,#ai.active::after { animation:none !important; }
@@ -5869,7 +5869,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 }
 </style>
 
-<script src="https://apis.google.com/js/api.js?onload=__iframefcb999943" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
+<script src="https://apis.google.com/js/api.js?onload=__iframefcb856064" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
 
 <body>
 
@@ -26660,4 +26660,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 
 
 
-<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793039716306" name="I0_1793039716306" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793039716306&amp;_gfid=I0_1793039716306&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=29802783" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
+<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793040080006" name="I0_1793040080006" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793040080006&amp;_gfid=I0_1793040080006&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=42506004" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
