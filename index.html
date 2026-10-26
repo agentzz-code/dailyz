@@ -1201,6 +1201,19 @@ body:has(#ai.active) main { width:100% !important; max-width:none !important; ma
  #ai.active::before,#ai.active::after { animation:none !important; }
 }
 
+
+/* Horizon iPhone follow-up: reliable controls and full-height viewport */
+@media (max-width:760px) {
+  #ai.active { height:100dvh !important; min-height:100dvh !important; bottom:0 !important; }
+  #ai.active .ai-workspace { height:100dvh !important; min-height:0 !important; padding-bottom:env(safe-area-inset-bottom) !important; box-sizing:border-box !important; }
+  #ai.active .ai-chat-main { height:100% !important; min-height:0 !important; }
+  #ai.active #aiBox.horizon-ai-page { height:100% !important; min-height:0 !important; }
+  #ai.active #aiBox.horizon-ai-page #aiHeader { position:relative; z-index:50; }
+  #ai.active #aiBox.horizon-ai-page .ai-head-actions { position:relative; z-index:51; pointer-events:auto !important; }
+  #ai.active #aiModelQuickBtn, #ai.active .horizon-ai-escape { position:relative; z-index:52; pointer-events:auto !important; touch-action:manipulation; }
+  #ai.active .ai-convo { min-height:0 !important; }
+}
+
 </style>
 
     <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
@@ -5869,7 +5882,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 }
 </style>
 
-<script src="https://apis.google.com/js/api.js?onload=__iframefcb856064" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
+<script src="https://apis.google.com/js/api.js?onload=__iframefcb396495" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
 
 <body>
 
@@ -7456,7 +7469,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         <div class="aiInput">
             <input type="file" id="aiImageFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" hidden="">
             <button type="button" class="aiImageBtn aiGhostBtn" id="aiImageBtn" aria-label="Add image" title="Add image">📷</button>
-            <button type="button" class="aiMicBtn aiGhostBtn" id="aiMicBtn" aria-label="Dictate by voice" title="Dictate by voice" hidden="">🎤</button>
+            <button type="button" class="aiMicBtn aiGhostBtn" id="aiMicBtn" aria-label="Dictate by voice" title="Dictate by voice">🎤</button>
             <input id="aiInput" type="text" placeholder="Ask Horizon AI..." aria-label="Ask Horizon AI..." autocomplete="off">
             <button type="button" id="aiSendBtn" onclick="sendAI()" aria-label="Send" title="Send">
                 <span class="aiSendIcon" aria-hidden="true">➤</span>
@@ -26635,7 +26648,12 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     btn.addEventListener('click',function(){
       const today=document.getElementById('tasksTab');
       if(today) today.click();
-      else { ai.classList.remove('active'); ai.style.display='none'; }
+      ai.classList.remove('active');
+      ai.style.display='none';
+      document.body.style.overflow='';
+      document.querySelectorAll('main > .section, main .section').forEach(function(section){
+        if(section.id==='tasksSection' || section.id==='tasks' || section.id==='todaySection') section.style.display='';
+      });
     });
     actions.prepend(btn);
   }
@@ -26660,4 +26678,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 
 
 
-<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793040080006" name="I0_1793040080006" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793040080006&amp;_gfid=I0_1793040080006&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=42506004" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
+<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793045620249" name="I0_1793045620249" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793045620249&amp;_gfid=I0_1793045620249&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=28064812" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
