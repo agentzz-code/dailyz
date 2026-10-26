@@ -5882,7 +5882,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 }
 </style>
 
-<script src="https://apis.google.com/js/api.js?onload=__iframefcb396495" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
+<script src="https://apis.google.com/js/api.js?onload=__iframefcb490325" type="text/javascript" charset="UTF-8" gapi_processed="true"></script></head>
 
 <body>
 
@@ -7469,7 +7469,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         <div class="aiInput">
             <input type="file" id="aiImageFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" hidden="">
             <button type="button" class="aiImageBtn aiGhostBtn" id="aiImageBtn" aria-label="Add image" title="Add image">📷</button>
-            <button type="button" class="aiMicBtn aiGhostBtn" id="aiMicBtn" aria-label="Dictate by voice" title="Dictate by voice">🎤</button>
+            <button type="button" class="aiMicBtn aiGhostBtn" id="aiMicBtn" aria-label="Dictate by voice" title="Dictate by voice" hidden="">🎤</button>
             <input id="aiInput" type="text" placeholder="Ask Horizon AI..." aria-label="Ask Horizon AI..." autocomplete="off">
             <button type="button" id="aiSendBtn" onclick="sendAI()" aria-label="Send" title="Send">
                 <span class="aiSendIcon" aria-hidden="true">➤</span>
@@ -22797,14 +22797,22 @@ document.documentElement.classList.toggle(
 
         function aiDetectLang() {
             let stored = "";
-            try {
-                stored = (localStorage.getItem(AI_LANG_STORAGE_KEY) || "").toLowerCase();
-            } catch (e) {}
-            if (stored && AI_STRINGS[stored]) return stored;
-            const docLang = (document.documentElement.lang || "").toLowerCase();
-            if (docLang.indexOf("ar") === 0) return "ar";
-            if (docLang.indexOf("ku") === 0 || docLang.indexOf("ckb") === 0) return "ku";
-            return "en";
+            try { stored = (localStorage.getItem(AI_LANG_STORAGE_KEY) || "").toLowerCase().trim(); } catch (e) {}
+            const docLang = (document.documentElement.lang || "").toLowerCase().trim();
+            const normalize = (value) => {
+                if (!value) return "";
+                if (value === "ku" || value.startsWith("ku-") || value.startsWith("ckb") || value.includes("sorani")) return "ku";
+                if (value === "ar" || value.startsWith("ar-") || value.startsWith("arab")) return "ar";
+                if (value === "en" || value.startsWith("en-")) return "en";
+                return "";
+            };
+            return normalize(stored) || normalize(docLang) || "en";
+        }
+
+        function aiResponseLanguageInstruction() {
+            if (aiLang === "ku") return "Kurdish (Central Kurdish / Sorani, written in the Arabic-based Kurdish script used in Iraq)";
+            if (aiLang === "ar") return "Arabic";
+            return "English";
         }
 
         function aiSpeechLang() {
@@ -24077,10 +24085,14 @@ document.documentElement.classList.toggle(
             }
 
             try {
+                const responseLanguage = aiResponseLanguageInstruction();
+                const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
                 const requestBody = {
                     message: effectiveMessage,
                     model: aiSettings.model,
-                    aiConfig: { tone: aiSettings.tone, detail: aiSettings.detail, memory: [aiSettings.memory, aiBuildCrossChatContext()].filter(Boolean).join("\n\n"), permission: aiSettings.permission, rules: aiSettings.rules, context: aiBuildContext() },
+                    language: aiLang,
+                    responseLanguage: responseLanguage,
+                    aiConfig: { tone: aiSettings.tone, detail: aiSettings.detail, memory: [aiSettings.memory, aiBuildCrossChatContext()].filter(Boolean).join("\n\n"), permission: aiSettings.permission, rules: [languageRule, aiSettings.rules].filter(Boolean).join("\n\n"), context: aiBuildContext() },
                     /* only role/content go on the wire — keeps the Worker's
                        existing contract even though sources are stored locally */
                     history: aiConversationHistory
@@ -24328,9 +24340,23 @@ document.documentElement.classList.toggle(
                     const option = select?.selectedOptions?.[0];
                     modelButton.textContent = ((select?.value === "auto") ? "Gemini Auto" : (option?.textContent || "Gemini model")) + "  ▾";
                 };
-                modelButton.addEventListener("click", () => { aiOpenSettings(); setTimeout(() => document.getElementById("aiModelSelect")?.focus(), 80); });
-                document.getElementById("aiSettingsBtn")?.insertAdjacentElement("beforebegin", modelButton);
-                document.getElementById("aiModelSelect")?.addEventListener("change", updateModelButton);
+                modelButton.addEventListener("click", () => {
+                    aiOpenSettings();
+                    requestAnimationFrame(() => {
+                        const select = document.getElementById("aiModelSelect");
+                        if (select) { select.focus({ preventScroll: true }); }
+                    });
+                });
+                const settingsButton = document.getElementById("aiSettingsBtn");
+                if (settingsButton) settingsButton.insertAdjacentElement("beforebegin", modelButton);
+                else aiHeaderActionsForModel.appendChild(modelButton);
+                const modelSelect = document.getElementById("aiModelSelect");
+                if (modelSelect) modelSelect.addEventListener("change", () => {
+                    aiReadSettingsFromUI();
+                    updateModelButton();
+                    const status = document.getElementById("aiSettingsStatus");
+                    if (status) status.textContent = "Model preference saved on this device.";
+                });
                 updateModelButton();
             }
             // Keep the welcome suggestions beneath the composer, like a modern AI chat home.
@@ -25043,6 +25069,61 @@ body:has(#ai.active) main { padding-top:0 !important; }
   #ai.active .aiImageBtn, #ai.active .aiMicBtn { width:32px; height:32px; flex-basis:32px; }
 }
 @media(prefers-reduced-motion:reduce) { #ai.active *, #ai.active *::before, #ai.active *::after { animation:none !important; transition:none !important; } }
+
+
+
+/* Horizon AI audit fix — final mobile layout override (wins over legacy rules). */
+@media (max-width:760px) {
+  /* The standalone AI landing heading/status row sits above the workspace in the old layout.
+     Hide it in fullscreen mode so it cannot push the chat beyond the viewport. */
+  #ai.active .ai-page-heading, #ai.active .ai-memory-status { display:none !important; }
+  body:has(#ai.active) { overflow:hidden !important; }
+  body:has(#ai.active) main { height:100dvh !important; min-height:0 !important; padding:0 !important; margin:0 !important; overflow:hidden !important; }
+  #ai.active {
+    position:fixed !important; inset:0 !important; width:100vw !important;
+    height:100dvh !important; min-height:0 !important; max-height:none !important;
+    margin:0 !important; padding:0 !important; overflow:hidden !important;
+    box-sizing:border-box !important; background:#080b1b !important;
+  }
+  #ai.active .ai-workspace {
+    display:flex !important; flex-direction:row !important; position:relative !important;
+    width:100% !important; height:100% !important; min-height:0 !important;
+    max-height:none !important; margin:0 !important; padding:0 !important;
+    box-sizing:border-box !important; overflow:hidden !important;
+  }
+  #ai.active .ai-chat-main { display:flex !important; flex-direction:column !important; width:100% !important; height:100% !important; min-height:0 !important; flex:1 1 auto !important; overflow:hidden !important; }
+  #ai.active #aiChatHost { display:flex !important; flex:1 1 auto !important; min-height:0 !important; height:100% !important; overflow:hidden !important; }
+  #ai.active #aiBox.horizon-ai-page, #ai.active #aiBox.horizon-ai-page.open {
+    display:flex !important; flex-direction:column !important; position:relative !important;
+    inset:auto !important; flex:1 1 auto !important; width:100% !important;
+    height:100% !important; min-height:0 !important; max-height:none !important;
+    margin:0 !important; padding:0 !important; border:0 !important; border-radius:0 !important;
+    overflow:hidden !important; box-sizing:border-box !important;
+  }
+  #ai.active #aiBox.horizon-ai-page #aiHeader {
+    flex:0 0 auto !important; min-height:calc(54px + env(safe-area-inset-top)) !important;
+    padding:calc(env(safe-area-inset-top) + 5px) 8px 6px !important;
+    gap:4px !important; align-items:center !important; box-sizing:border-box !important;
+    position:relative !important; z-index:80 !important; overflow:visible !important;
+  }
+  #ai.active #aiBox.horizon-ai-page .ai-head-text { flex:0 1 68px !important; min-width:0 !important; max-width:68px !important; }
+  #ai.active #aiBox.horizon-ai-page #aiTitle { font-size:12px !important; line-height:1.15 !important; white-space:nowrap !important; }
+  #ai.active #aiBox.horizon-ai-page .ai-head-actions { display:flex !important; flex:1 1 auto !important; min-width:0 !important; width:auto !important; margin-left:auto !important; gap:3px !important; align-items:center !important; justify-content:flex-end !important; position:relative !important; z-index:81 !important; pointer-events:auto !important; }
+  #ai.active #aiBox.horizon-ai-page .ai-head-actions > button { flex:0 0 auto !important; position:relative !important; z-index:82 !important; pointer-events:auto !important; touch-action:manipulation !important; }
+  #ai.active #aiModelQuickBtn { flex:0 1 auto !important; min-width:0 !important; max-width:min(31vw,132px) !important; height:34px !important; min-height:34px !important; padding:0 7px !important; overflow:hidden !important; text-overflow:ellipsis !important; font-size:10px !important; }
+  #ai.active #aiBox.horizon-ai-page .aiHeadBtn { width:32px !important; min-width:32px !important; height:32px !important; font-size:15px !important; }
+  #ai.active .horizon-ai-escape { flex:0 0 34px !important; min-width:34px !important; width:34px !important; height:30px !important; padding:0 !important; font-size:10px !important; z-index:83 !important; }
+  #ai.active .ai-convo { flex:1 1 auto !important; min-height:0 !important; height:auto !important; overflow-y:auto !important; overflow-x:hidden !important; padding:0 14px !important; -webkit-overflow-scrolling:touch !important; }
+  #ai.active #aiWelcome { min-height:0 !important; flex:1 0 auto !important; padding:22px 0 12px !important; }
+  #ai.active #aiMessages { flex:0 0 auto !important; min-height:0 !important; padding:14px 0 calc(20px + env(safe-area-inset-bottom)) !important; }
+  #ai.active #aiBox.horizon-ai-page .aiInput { flex:0 0 auto !important; width:calc(100% - 20px) !important; max-width:none !important; margin:8px 10px calc(8px + env(safe-area-inset-bottom)) !important; box-sizing:border-box !important; }
+  #ai.active .ai-suggest-row { flex:0 0 auto !important; padding-bottom:8px !important; }
+  #ai.active #aiSettingsModal { position:absolute !important; inset:0 !important; z-index:100 !important; max-height:100% !important; overflow:auto !important; padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 16px) !important; box-sizing:border-box !important; pointer-events:auto !important; }
+  #ai.active .ai-chat-sidebar { top:calc(60px + env(safe-area-inset-top)) !important; bottom:calc(8px + env(safe-area-inset-bottom)) !important; }
+}
+@media (min-width:761px) {
+  #ai.active #aiModelQuickBtn { pointer-events:auto !important; }
+}
 
 </style>
     <script>
@@ -26646,31 +26727,27 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     btn.textContent='Esc'; btn.setAttribute('aria-label','Exit Horizon AI fullscreen');
     btn.title='Exit fullscreen AI (Esc)';
     btn.addEventListener('click',function(){
+      const settings=document.getElementById('aiSettingsModal');
+      if(settings && settings.classList.contains('open')) {
+        if(typeof aiCloseSettings === 'function') aiCloseSettings();
+        return;
+      }
+      const sidebar=document.getElementById('aiChatSidebar');
+      if(sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+        document.getElementById('aiSidebarToggleBtn')?.setAttribute('aria-expanded','false');
+        return;
+      }
       const today=document.getElementById('tasksTab');
       if(today) today.click();
-      ai.classList.remove('active');
-      ai.style.display='none';
-      document.body.style.overflow='';
-      document.querySelectorAll('main > .section, main .section').forEach(function(section){
-        if(section.id==='tasksSection' || section.id==='tasks' || section.id==='todaySection') section.style.display='';
-      });
+      else if(ai) ai.classList.remove('active');
     });
     actions.prepend(btn);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',setupHorizonAiEscape);
   else setupHorizonAiEscape();
-  document.addEventListener('keydown',function(e){
-    if(e.key!=='Escape') return;
-    const ai=document.getElementById('ai');
-    if(!ai||!ai.classList.contains('active')) return;
-    const sidebar=document.getElementById('aiChatSidebar');
-    if(sidebar&&sidebar.classList.contains('mobile-open')){
-      sidebar.classList.remove('mobile-open');
-      document.getElementById('aiSidebarToggleBtn')?.setAttribute('aria-expanded','false');
-      e.preventDefault(); return;
-    }
-    document.getElementById('tasksTab')?.click();
-  });
+  /* The AI widget already owns the Escape key handler. Keep this helper
+     responsible only for creating the visible Esc button, avoiding double navigation. */
   const observer=new MutationObserver(setupHorizonAiEscape);
   observer.observe(document.documentElement,{subtree:true,childList:true});
 })();
@@ -26678,4 +26755,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 
 
 
-<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793045620249" name="I0_1793045620249" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793045620249&amp;_gfid=I0_1793045620249&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=28064812" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
+<iframe ng-non-bindable="" frameborder="0" hspace="0" marginheight="0" marginwidth="0" scrolling="no" tabindex="-1" vspace="0" width="100%" aria-hidden="true" id="I0_1793046334715" name="I0_1793046334715" src="https://dailyz-web.firebaseapp.com/__/auth/iframe?apiKey=AIzaSyBZs-JcWpgc9LHbhMJT9l5AdTBvYOEFMZ8&amp;appName=%5BDEFAULT%5D&amp;v=12.17.1&amp;eid=p&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.etOqPKhAhvg.O%2Fd%3D1%2Frs%3DAHpOoo-l5JrVgGKVELwC844E6riBHX86-w%2Fm%3D__features__#id=I0_1793046334715&amp;_gfid=I0_1793046334715&amp;parent=file%3A%2F%2F&amp;pfname=&amp;rpctoken=18726819" style="position: absolute; top: -100px; width: 1px; height: 1px;"></iframe></body></html>
