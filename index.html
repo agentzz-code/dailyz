@@ -24886,19 +24886,17 @@ document.documentElement.classList.toggle(
             
             // FIX: Close AI box or fullscreen mode (priority 4)
             if (!handled) {
+                const aiSection = document.getElementById("ai");
                 const box = document.getElementById("aiBox");
-                if (box && box.classList.contains("open")) {
+                
+                // Check if AI is active (shown)
+                if (aiSection && aiSection.classList.contains("active")) {
                     if (aiFullOpen) {
+                        // If fullscreen, exit fullscreen first (don't close AI yet)
                         aiSetFullscreen(false);
                     } else {
-                        box.classList.remove("open");
-                        modal.classList.remove("open");
-                        modal.style.display = "";
-                        modal.style.pointerEvents = "";
-                        aiPinned = false;
-                        if (typeof showSection === "function" && document.getElementById("ai")?.classList.contains("active")) {
-                            showSection("tasks");
-                        }
+                        // Close AI completely - use aiSetOpen(false) for proper cleanup
+                        aiSetOpen(false);
                     }
                     handled = true;
                 }
