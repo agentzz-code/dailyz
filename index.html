@@ -24428,19 +24428,32 @@ document.documentElement.classList.toggle(
         }
 
         function aiSetOpen(open) {
+            console.log("aiSetOpen called with:", open);
             const box = document.getElementById("aiBox");
             const toggle = document.getElementById("aiToggle");
-            if (!box) return;
+            if (!box) {
+                console.log("  ERROR: aiBox not found!");
+                return;
+            }
             if (toggle) toggle.setAttribute("aria-expanded", open ? "true" : "false");
             if (open) {
+                console.log("  Opening AI...");
                 if (typeof showSection === "function" && document.getElementById("ai")) showSection("ai");
                 box.classList.add("open");
                 requestAnimationFrame(() => { aiMaybeScroll(true); document.getElementById("aiInput")?.focus({ preventScroll: true }); });
             } else {
+                console.log("  Closing AI...");
                 box.classList.remove("open");
+                console.log("  Removed 'open' class from aiBox");
                 if (aiFullOpen) aiSetFullscreen(false);
                 aiStopVoice(false);
-                if (document.getElementById("ai")?.classList.contains("active") && typeof showSection === "function") showSection("tasks");
+                const ai = document.getElementById("ai");
+                console.log("  #ai element active?", ai?.classList.contains("active"));
+                if (ai?.classList.contains("active") && typeof showSection === "function") {
+                    console.log("  Calling showSection('tasks')...");
+                    showSection("tasks");
+                    console.log("  After showSection, #ai.active?", ai?.classList.contains("active"));
+                }
             }
         }
 
@@ -24859,6 +24872,7 @@ document.documentElement.classList.toggle(
         document.addEventListener("keydown", (e) => {
             if (e.key !== "Escape") return;
             
+            console.log("🔑 ESC PRESSED - MASTER HANDLER");
             let handled = false;
             
             // FIX: Close sidebar first if open (priority 1)
@@ -24889,18 +24903,26 @@ document.documentElement.classList.toggle(
                 const aiSection = document.getElementById("ai");
                 const box = document.getElementById("aiBox");
                 
+                console.log("  AI active?", aiSection?.classList.contains("active"));
+                console.log("  aiFullOpen?", aiFullOpen);
+                
                 // Check if AI is active (shown)
                 if (aiSection && aiSection.classList.contains("active")) {
+                    console.log("  → Closing AI...");
                     if (aiFullOpen) {
                         // If fullscreen, exit fullscreen first (don't close AI yet)
+                        console.log("    Exiting fullscreen");
                         aiSetFullscreen(false);
                     } else {
                         // Close AI completely - use aiSetOpen(false) for proper cleanup
+                        console.log("    Calling aiSetOpen(false)");
                         aiSetOpen(false);
                     }
                     handled = true;
                 }
             }
+            
+            console.log("  Handled?", handled);
             
             // FIX: If we handled ESC for AI/sidebar, prevent other handlers from running
             if (handled) {
@@ -24908,6 +24930,19 @@ document.documentElement.classList.toggle(
                 e.stopImmediatePropagation();
             }
         }, true); // CRITICAL: true = CAPTURE PHASE - runs first before all other handlers
+
+        // EMERGENCY BACKUP: Add ESC handler directly on document in bubble phase as fallback
+        document.addEventListener("keydown", (e) => {
+            if (e.key !== "Escape") return;
+            
+            const aiSection = document.getElementById("ai");
+            if (!aiSection?.classList.contains("active")) return;
+            
+            console.log("🚨 BACKUP ESC HANDLER - AI is active, closing...");
+            e.preventDefault();
+            e.stopPropagation();
+            aiSetOpen(false);
+        }, false); // Bubble phase, as fallback
 
         /* =====================================================
            INIT
