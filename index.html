@@ -1645,6 +1645,32 @@ body:has(#ai.active) main { width:100% !important; max-width:none !important; ma
             display: block;
         }
 
+        /* Tab open animation: the keyframe re-runs each time a section goes from
+           display:none to block, so every tab change (nav, More menu, deep links)
+           gets it without any JavaScript. The AI overlay only fades: a transform
+           there would become the containing block for its fixed children. */
+        /* fill-mode "backwards" (not "both") so the transform is removed once the
+           animation ends: a leftover transform would make position:fixed children
+           of the section position against the section instead of the viewport. */
+        .section.active {
+            animation: sectionEnter .38s cubic-bezier(.2, .8, .2, 1) backwards;
+        }
+        .section.active#ai {
+            animation: sectionFade .28s ease backwards;
+        }
+        @keyframes sectionEnter {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes sectionFade {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .section.active,
+            .section.active#ai { animation: none !important; }
+        }
+
         /* TODAY DASHBOARD STYLES */
         .dashboard-header {
             margin-bottom: 20px;
