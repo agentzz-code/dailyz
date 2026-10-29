@@ -12993,6 +12993,12 @@ done: "تەواو",
             if (window.Haptics) window.Haptics.selection();
         }
 
+        // Expose showSection to classic (non-module) scripts such as the Horizon AI
+        // controller, which otherwise sees typeof showSection === "undefined" and can
+        // never leave the AI screen with Esc. The wrapper calls the live binding so
+        // later overrides of showSection still apply.
+        window.showSection = (id) => showSection(id);
+
         let deadlineDeepLinkTaskId = new URLSearchParams(window.location.search).get("deadlineTask");
         const startupDeepLinks = new URLSearchParams(window.location.search);
         if (startupDeepLinks.get("openStudyTimer") === "1") {
