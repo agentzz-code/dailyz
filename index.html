@@ -12,6 +12,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script>
+        window.__bootStart = performance.now();
+        // Failsafe: reveal the app even if startup code throws before the normal reveal.
+        setTimeout(function () { document.documentElement.classList.add("app-ready"); }, 8000);
         (function () {
             try {
                 var dark = localStorage.getItem("dailykrd_dark") === "true";
@@ -46,60 +49,135 @@
     </script>
 
     <style>
+        /* ---- Boot loader: brand mark, shimmer wordmark, progress sweep ---- */
         #bootLoader {
+            --bl-bg: #f5f5f7;
+            --bl-muted: rgba(17, 17, 17, .55);
+            --bl-track: rgba(17, 17, 17, .09);
+            --bl-accent-a: #5b8cff;
+            --bl-accent-b: #b56cff;
             position: fixed;
             inset: 0;
             z-index: 99999;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #f5f5f7;
-            transition: opacity .25s ease;
+            gap: 14px;
+            overflow: hidden;
+            background: var(--bl-bg);
+            transition: opacity .35s ease, visibility .35s ease;
         }
-        html.dark #bootLoader { background: #101010; }
+        html.dark #bootLoader {
+            --bl-bg: #101010;
+            --bl-muted: rgba(255, 255, 255, .6);
+            --bl-track: rgba(255, 255, 255, .12);
+        }
+        /* Soft ambient glow behind the mark */
+        #bootLoader::before {
+            content: "";
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--bl-accent-a) 0%, var(--bl-accent-b) 60%, transparent 70%);
+            filter: blur(60px);
+            opacity: .22;
+            pointer-events: none;
+            animation: bootGlow 4.5s ease-in-out infinite alternate;
+        }
+        #bootLoader .boot-mark {
+            position: relative;
+            width: 76px;
+            height: 76px;
+            border-radius: 22px;
+            box-shadow: 0 14px 34px rgba(40, 40, 110, .22);
+            animation: bootMarkIn .7s cubic-bezier(.2, .8, .2, 1) both;
+        }
         #bootLoader .boot-logo {
+            position: relative;
             font-size: 30px;
             font-weight: 850;
             letter-spacing: -1px;
             color: #111;
-            opacity: 0;
-            background: linear-gradient(90deg, #111 0%, #666 45%, #111 100%);
+            background: linear-gradient(90deg, #111 0%, #777 45%, #111 100%);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             animation:
-                bootLogoIn .9s cubic-bezier(.2, .8, .2, 1) forwards,
-                bootLogoShimmer 2.2s linear .9s infinite;
+                bootLogoIn .8s .15s cubic-bezier(.2, .8, .2, 1) both,
+                bootLogoShimmer 2.4s linear 1s infinite;
+        }
+        #bootLoader .boot-sub {
+            position: relative;
+            font: 500 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+            color: var(--bl-muted);
+            letter-spacing: .2px;
+            animation: bootFade .6s .35s both;
+        }
+        #bootLoader .boot-bar {
+            position: relative;
+            width: 132px;
+            height: 3px;
+            margin-top: 10px;
+            border-radius: 3px;
+            background: var(--bl-track);
+            overflow: hidden;
+            animation: bootFade .6s .45s both;
+        }
+        #bootLoader .boot-bar::after {
+            content: "";
+            display: block;
+            width: 40%;
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--bl-accent-a), var(--bl-accent-b));
+            animation: bootSweep 1.3s ease-in-out infinite;
         }
         html.dark #bootLoader .boot-logo {
+            color: #fff;
             background: linear-gradient(90deg, #fff 0%, #999 45%, #fff 100%);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        @keyframes bootMarkIn {
+            0% { opacity: 0; transform: translateY(14px) scale(.85); filter: blur(6px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
         @keyframes bootLogoIn {
-            0% {
-                opacity: 0;
-                transform: translateY(10px) scale(.96);
-                filter: blur(4px);
-            }
-            60% {
-                opacity: 1;
-                filter: blur(0);
-            }
-            100% {
-                opacity: .85;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
+            0% { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes bootFade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
         @keyframes bootLogoShimmer {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
-        html.app-ready #bootLoader { opacity: 0; pointer-events: none; }
+        @keyframes bootSweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(260%); }
+        }
+        @keyframes bootGlow {
+            0% { transform: scale(.9); opacity: .16; }
+            100% { transform: scale(1.1); opacity: .28; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #bootLoader::before,
+            #bootLoader .boot-mark,
+            #bootLoader .boot-logo,
+            #bootLoader .boot-sub,
+            #bootLoader .boot-bar,
+            #bootLoader .boot-bar::after { animation: none !important; }
+            #bootLoader .boot-logo { -webkit-text-fill-color: currentColor; background: none; }
+            #bootLoader .boot-bar::after { width: 100%; opacity: .6; }
+        }
+        html.app-ready #bootLoader { opacity: 0; visibility: hidden; pointer-events: none; }
         html:not(.app-ready) body > *:not(#bootLoader) { visibility: hidden; }
 
         /* AI CHAT WIDGET */
@@ -5119,7 +5197,11 @@ body:has(#ai.active) main { width:100% !important; max-width:none !important; ma
         .theme-palette .motion-orb.three { background: var(--tp-orb3); opacity: .18; }
 
         /* Boot loader & status-bar color */
-        .theme-palette #bootLoader { background: var(--tp-bg); }
+        .theme-palette #bootLoader {
+            background: var(--tp-bg);
+            --bl-accent-a: var(--tp-logo1);
+            --bl-accent-b: var(--tp-logo3);
+        }
         .theme-palette .boot-logo {
             background: linear-gradient(90deg, var(--tp-logo1) 0%, var(--tp-logo2) 45%, var(--tp-logo3) 100%);
             background-size: 200% 100%;
@@ -5889,7 +5971,12 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
 <body>
 
-    <div id="bootLoader"><div class="boot-logo">Horizon</div></div>
+    <div id="bootLoader" role="status" aria-live="polite" aria-label="Loading Horizon">
+        <img class="boot-mark" src="icons/icon-192.png" alt="" width="76" height="76">
+        <div class="boot-logo">Horizon</div>
+        <div class="boot-sub">Getting your day ready…</div>
+        <div class="boot-bar" aria-hidden="true"></div>
+    </div>
 
     <!-- MOTION BACKGROUND -->
 
@@ -18390,19 +18477,20 @@ document.documentElement.classList.toggle(
 
         /* ===================================================================== */
 
-        requestAnimationFrame(() => {
+        // Keep the loader up long enough for its intro animation to read,
+        // but never longer than needed: startup time counts toward the minimum.
+        const BOOT_MIN_MS = 1400;
+        const bootElapsed = performance.now() - (window.__bootStart || 0);
+        const bootWait = Math.max(0, BOOT_MIN_MS - bootElapsed);
 
-            document.documentElement.classList.add("app-ready");
-
-            setTimeout(() => {
-
-                const loader = document.getElementById("bootLoader");
-
-                if (loader) loader.remove();
-
-            }, 300);
-
-        });
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                document.documentElement.classList.add("app-ready");
+                setTimeout(() => {
+                    document.getElementById("bootLoader")?.remove();
+                }, 400);
+            });
+        }, bootWait);
 
 
         /* STUDY */
