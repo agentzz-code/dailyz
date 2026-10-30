@@ -48,6 +48,379 @@
         })();
     </script>
 
+    <style id="designTokens">
+        /* ================================================================
+           HORIZON DESIGN TOKENS — Semantic Design System
+           Minimal Premium: Apple-inspired with subtle futuristic details
+           ================================================================ */
+
+        :root {
+          /* ----- Color: Base (Light) ----- */
+          --color-bg: #f5f5f7;
+          --color-surface: rgba(255, 255, 255, 0.92);
+          --color-surface-elevated: rgba(255, 255, 255, 0.98);
+          --color-surface-overlay: rgba(248, 248, 250, 0.98);
+          --color-border: rgba(0, 0, 0, 0.06);
+          --color-border-strong: rgba(0, 0, 0, 0.10);
+          --color-text: #111111;
+          --color-text-secondary: #666666;
+          --color-text-muted: #8e8e93;
+          --color-text-placeholder: #c7c7cc;
+          --color-primary: #111111;
+          --color-primary-contrast: #ffffff;
+          --color-primary-hover: #333333;
+          --color-primary-active: #000000;
+          --color-error: #c0392b;
+          --color-error-bg: rgba(192, 57, 43, 0.10);
+          --color-success: #2e8b57;
+          --color-success-bg: rgba(46, 139, 87, 0.10);
+          --color-warning: #c47f17;
+          --color-warning-bg: rgba(196, 127, 23, 0.10);
+          --color-focus: #0066cc;
+
+          /* ----- Color: Accent (User-selectable, defaults to neutral) ----- */
+          --color-accent: var(--color-primary);
+          --color-accent-contrast: var(--color-primary-contrast);
+          --color-accent-hover: var(--color-primary-hover);
+          --color-accent-active: var(--color-primary-active);
+          --color-accent-subtle: rgba(17, 17, 17, 0.08);
+          --color-accent-subtle-hover: rgba(17, 17, 17, 0.12);
+
+          /* ----- Typography ----- */
+          --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+          --font-display: "Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+          /* Semantic type scale */
+          --text-display: 40px;
+          --text-title-1: 32px;
+          --text-title-2: 24px;
+          --text-title-3: 20px;
+          --text-body-lg: 17px;
+          --text-body: 15px;
+          --text-body-sm: 13px;
+          --text-caption: 12px;
+          --text-caption-sm: 11px;
+          --text-micro: 10px;
+
+          /* Legacy aliases (preserved for compatibility) */
+          --text-xs: var(--text-caption-sm);
+          --text-sm: var(--text-body-sm);
+          --text-base: var(--text-body);
+          --text-lg: var(--text-body-lg);
+          --text-xl: var(--text-title-3);
+          --text-2xl: var(--text-title-2);
+          --text-3xl: var(--text-title-1);
+          --text-4xl: var(--text-display);
+
+          --font-weight-normal: 400;
+          --font-weight-medium: 500;
+          --font-weight-semibold: 600;
+          --font-weight-bold: 700;
+          --font-weight-extrabold: 800;
+          --font-weight-black: 850;
+
+          --line-height-tight: 1.1;
+          --line-height-snug: 1.25;
+          --line-height-normal: 1.5;
+          --line-height-relaxed: 1.65;
+
+          --letter-spacing-tight: -0.02em;
+          --letter-spacing-normal: 0;
+          --letter-spacing-wide: 0.02em;
+          --letter-spacing-wider: 0.08em;
+
+          /* ----- Spacing (8px rhythm for touch) ----- */
+          --space-0: 0;
+          --space-1: 4px;
+          --space-2: 8px;
+          --space-3: 12px;
+          --space-4: 16px;
+          --space-5: 20px;
+          --space-6: 24px;
+          --space-7: 28px;
+          --space-8: 32px;
+          --space-9: 36px;
+          --space-10: 40px;
+          --space-11: 44px;
+          --space-12: 48px;
+          --space-14: 56px;
+          --space-16: 64px;
+          --space-20: 80px;
+          --space-24: 96px;
+
+          /* ----- Radius ----- */
+          --radius-none: 0;
+          --radius-xs: 4px;
+          --radius-sm: 8px;
+          --radius-md: 12px;
+          --radius-lg: 16px;
+          --radius-xl: 20px;
+          --radius-2xl: 28px;
+          --radius-full: 9999px;
+
+          /* ----- Shadows (3 elevation levels) ----- */
+          --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 1px rgba(0, 0, 0, 0.02);
+          --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+          --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.10), 0 4px 8px rgba(0, 0, 0, 0.06);
+          --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.10);
+          --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+
+          /* Legacy shadow aliases (preserved for compatibility) */
+          --shadow-xs: var(--shadow-surface);
+          --shadow-sm: var(--shadow-surface);
+          --shadow-md: var(--shadow-elevated);
+          --shadow-lg: var(--shadow-overlay);
+          --shadow-xl: var(--shadow-modal);
+
+          /* ----- Borders ----- */
+          --border-width: 1px;
+          --border-width-thick: 2px;
+
+          /* ----- Transitions / Motion ----- */
+          --motion-instant: 80ms;
+          --motion-fast: 150ms;
+          --motion-base: 200ms;
+          --motion-slow: 320ms;
+          --motion-spring: 400ms;
+          --easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+          --easing-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+          --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+          --easing-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+          /* Legacy motion aliases (preserved for compatibility) */
+          --motion-slower: var(--motion-spring);
+
+          /* ----- Z-Index Scale ----- */
+          --z-base: 0;
+          --z-dropdown: 100;
+          --z-sticky: 200;
+          --z-fixed: 300;
+          --z-modal-backdrop: 1000;
+          --z-modal: 1100;
+          --z-popover: 1200;
+          --z-toast: 1300;
+          --z-tooltip: 1400;
+          --z-bootloader: 99999;
+
+          /* ----- Layout ----- */
+          --layout-sidebar-width: 224px;
+          --layout-sidebar-width-compact: 196px;
+          --layout-content-max: 1160px;
+          --layout-header-height: 64px;
+          --layout-dock-height: 72px;
+          --layout-dock-height-expanded: 320px;
+
+          /* ----- Touch Targets ----- */
+          --touch-target-min: 44px;
+          --touch-target-comfortable: 48px;
+
+          /* ----- Safe Area (fallback) ----- */
+          --safe-top: env(safe-area-inset-top, 0);
+          --safe-bottom: env(safe-area-inset-bottom, 0);
+          --safe-left: env(safe-area-inset-left, 0);
+          --safe-right: env(safe-area-inset-right, 0);
+        }
+
+        /* ----- Dark Mode Overrides (Desaturated, not inverted) ----- */
+        .dark {
+          --color-bg: #101010;
+          --color-surface: rgba(28, 28, 30, 0.94);
+          --color-surface-elevated: rgba(34, 34, 36, 0.98);
+          --color-surface-overlay: rgba(38, 38, 42, 0.98);
+          --color-border: rgba(255, 255, 255, 0.08);
+          --color-border-strong: rgba(255, 255, 255, 0.12);
+          --color-text: #f5f5f7;
+          --color-text-secondary: #d1d1d6;
+          --color-text-muted: #98989e;
+          --color-text-placeholder: #6e6e73;
+          --color-primary: #ffffff;
+          --color-primary-contrast: #111111;
+          --color-primary-hover: #d1d1d6;
+          --color-primary-active: #f5f5f7;
+          --color-error: #ff8a7a;
+          --color-error-bg: rgba(255, 138, 122, 0.15);
+          --color-success: #30d158;
+          --color-success-bg: rgba(48, 209, 88, 0.15);
+          --color-warning: #ffd60a;
+          --color-warning-bg: rgba(255, 214, 10, 0.15);
+          --color-focus: #6aa3ff;
+
+          /* Accent in dark follows primary unless user overrides */
+          --color-accent: var(--color-primary);
+          --color-accent-contrast: var(--color-primary-contrast);
+          --color-accent-hover: var(--color-primary-hover);
+          --color-accent-active: var(--color-primary-active);
+          --color-accent-subtle: rgba(255, 255, 255, 0.10);
+          --color-accent-subtle-hover: rgba(255, 255, 255, 0.16);
+
+          --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.20), 0 1px 1px rgba(0, 0, 0, 0.15);
+          --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.30), 0 2px 4px rgba(0, 0, 0, 0.20);
+          --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.40), 0 4px 8px rgba(0, 0, 0, 0.30);
+          --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.50), 0 8px 16px rgba(0, 0, 0, 0.40);
+          --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.20);
+        }
+
+        /* ----- Reduced Motion ----- */
+        @media (prefers-reduced-motion: reduce) {
+          :root {
+            --motion-instant: 0ms;
+            --motion-fast: 0ms;
+            --motion-base: 0ms;
+            --motion-slow: 0ms;
+            --motion-spring: 0ms;
+          }
+        }
+
+        /* ----- High Contrast Mode Support ----- */
+        @media (prefers-contrast: high) {
+          :root {
+            --color-border: currentColor;
+            --color-border-strong: currentColor;
+          }
+          .dark {
+            --color-border: currentColor;
+            --color-border-strong: currentColor;
+          }
+        }
+
+        /* ----- Utility Classes for Token Application ----- */
+        .surface { background: var(--color-surface); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-lg); }
+        .surface-elevated { background: var(--color-surface-elevated); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-elevated); }
+        .surface-overlay { background: var(--color-surface-overlay); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay); }
+
+        .text-primary { color: var(--color-text); }
+        .text-secondary { color: var(--color-text-secondary); }
+        .text-muted { color: var(--color-text-muted); }
+        .text-placeholder { color: var(--color-text-placeholder); }
+        .text-accent { color: var(--color-accent); }
+        .text-error { color: var(--color-error); }
+        .text-success { color: var(--color-success); }
+        .text-warning { color: var(--color-warning); }
+
+        .border-default { border: var(--border-width) solid var(--color-border); }
+        .border-strong { border: var(--border-width) solid var(--color-border-strong); }
+
+        .shadow-surface { box-shadow: var(--shadow-surface); }
+        .shadow-elevated { box-shadow: var(--shadow-elevated); }
+        .shadow-overlay { box-shadow: var(--shadow-overlay); }
+        .shadow-modal { box-shadow: var(--shadow-modal); }
+        .shadow-xs { box-shadow: var(--shadow-xs); }
+        .shadow-sm { box-shadow: var(--shadow-sm); }
+        .shadow-md { box-shadow: var(--shadow-md); }
+        .shadow-lg { box-shadow: var(--shadow-lg); }
+        .shadow-xl { box-shadow: var(--shadow-xl); }
+
+        .radius-sm { border-radius: var(--radius-sm); }
+        .radius-md { border-radius: var(--radius-md); }
+        .radius-lg { border-radius: var(--radius-lg); }
+        .radius-xl { border-radius: var(--radius-xl); }
+        .radius-2xl { border-radius: var(--radius-2xl); }
+        .radius-full { border-radius: var(--radius-full); }
+
+        /* ----- Focus Ring ----- */
+        .focus-ring:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 3px var(--color-focus);
+        }
+        .dark .focus-ring:focus-visible {
+          box-shadow: 0 0 0 3px var(--color-focus);
+        }
+
+        /* ----- Touch Target Expansion (for small icons) ----- */
+        .touch-expand {
+          position: relative;
+        }
+        .touch-expand::before {
+          content: "";
+          position: absolute;
+          inset: calc((var(--touch-target-min) - 100%) / 2);
+          border-radius: inherit;
+        }
+
+    </style>
+
+    <style id="themeMapping">
+        /* ================================================================
+           THEME MAPPING LAYER — Maps legacy --tp-* vars to new semantic tokens
+           This allows existing palette themes to work with the new design system
+           ================================================================ */
+
+        .theme-palette {
+          /* Map legacy theme variables to new semantic tokens */
+          --color-bg: var(--tp-bg);
+          --color-surface: var(--tp-card);
+          --color-surface-elevated: var(--tp-modal);
+          --color-surface-overlay: var(--tp-overlay);
+          --color-border: var(--tp-brd);
+          --color-border-strong: var(--tp-brd);
+          --color-text: var(--tp-ink);
+          --color-text-secondary: var(--tp-muted);  /* fallback to muted */
+          --color-text-muted: var(--tp-muted);
+          --color-primary: var(--tp-btn);
+          --color-primary-contrast: var(--tp-btn-text);
+          --color-primary-hover: var(--tp-btn);
+          --color-primary-active: var(--tp-btn);
+          --color-focus: var(--tp-pill);
+          --color-accent: var(--tp-btn);
+          --color-accent-contrast: var(--tp-btn-text);
+          --color-accent-hover: var(--tp-btn);
+          --color-accent-active: var(--tp-btn);
+          --color-accent-subtle: var(--tp-chip);
+          --color-accent-subtle-hover: var(--tp-chip);
+
+          /* Shadows from theme (new 3-level system + legacy aliases) */
+          --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 1px rgba(0, 0, 0, 0.02);
+          --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+          --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.10), 0 4px 8px rgba(0, 0, 0, 0.06);
+          --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.10);
+          /* Legacy aliases for backward compatibility */
+          --shadow-xs: var(--shadow-surface);
+          --shadow-sm: var(--shadow-surface);
+          --shadow-md: var(--shadow-elevated);
+          --shadow-lg: var(--shadow-overlay);
+          --shadow-xl: var(--shadow-modal);
+
+          .dark & {
+            --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.20), 0 1px 1px rgba(0, 0, 0, 0.15);
+            --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.30), 0 2px 4px rgba(0, 0, 0, 0.20);
+            --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.40), 0 4px 8px rgba(0, 0, 0, 0.30);
+            --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.50), 0 8px 16px rgba(0, 0, 0, 0.40);
+            --shadow-xs: var(--shadow-surface);
+            --shadow-sm: var(--shadow-surface);
+            --shadow-md: var(--shadow-elevated);
+            --shadow-lg: var(--shadow-overlay);
+            --shadow-xl: var(--shadow-modal);
+          }
+        }
+
+        /* Glass theme special handling - more translucent */
+        .theme-glass {
+          --color-surface: var(--tp-card);
+          --color-surface-elevated: var(--tp-modal);
+          --color-border: var(--tp-brd);
+        }
+
+        /* Dark mode adjustments for palette themes */
+        .dark.theme-palette {
+          --color-bg: var(--tp-bg);
+          --color-surface: var(--tp-card);
+          --color-surface-elevated: var(--tp-modal);
+          --color-surface-overlay: var(--tp-overlay);
+          --color-border: var(--tp-brd);
+          --color-border-strong: var(--tp-brd);
+          --color-text: var(--tp-ink);
+          --color-text-secondary: var(--tp-muted);
+          --color-text-muted: var(--tp-muted);
+          --color-primary: var(--tp-btn);
+          --color-primary-contrast: var(--tp-btn-text);
+          --color-focus: var(--tp-pill);
+          --color-accent-subtle: var(--tp-chip);
+          --color-accent-subtle-hover: var(--tp-chip);
+        }
+
+    </style>
+
     <style>
         /* ---- Boot loader: brand mark, shimmer wordmark, progress sweep ---- */
         #bootLoader {
@@ -5991,6 +6364,721 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
   #dashboardWidgetGrid > [data-dashboard-widget], .horizon-quick-action { animation:none !important; transition:none !important; }
   #dashboardWidgetGrid > [data-dashboard-widget]:hover, .horizon-quick-action:hover { transform:none !important; }
 }
+
+/* ============================================================
+   HORIZON DASHBOARD REDESIGN — Phase 1B
+   Hero progress ring + widget grid + skeleton loaders
+   ============================================================ */
+
+/* Dashboard Header / Greeting Bar */
+#dashboardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  padding: 0 var(--space-1);
+}
+.dashboard-greeting {
+  font-size: var(--text-title-1);
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  margin: 0;
+}
+.dashboard-date {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+.dashboard-streak-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-warning);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-warning-bg);
+  border-radius: var(--radius-full);
+  width: fit-content;
+}
+.dashboard-streak-mini .dashboard-streak-icon {
+  font-size: var(--text-body);
+}
+
+/* Hero Progress Card */
+.hero-progress-card {
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  position: relative;
+  overflow: hidden;
+}
+.hero-progress-card::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 20px solid var(--color-accent-subtle);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.hero-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-4);
+}
+.hero-progress-title {
+  font-size: var(--text-title-3);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.hero-progress-percent {
+  font-size: var(--text-title-2);
+  font-weight: 700;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+.hero-progress-ring-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto var(--space-6);
+}
+.hero-progress-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.hero-progress-track {
+  stroke: var(--color-border);
+  transition: stroke var(--motion-base) ease;
+}
+.hero-progress-fill {
+  stroke: var(--color-accent);
+  stroke-dasharray: 339.3;
+  stroke-dashoffset: 339.3;
+  transition: stroke-dashoffset 0.8s var(--easing-emphasized), stroke var(--motion-base) ease;
+}
+.hero-progress-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.hero-progress-main {
+  font-size: var(--text-title-1);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.hero-progress-sub {
+  font-size: var(--text-caption-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+.hero-progress-breakdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.hero-progress-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  text-align: center;
+}
+.hero-progress-item-label {
+  font-size: var(--text-caption-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+.hero-progress-item-value {
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Widget Grid */
+.dashboard-widget-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.dashboard-widget {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  min-height: 140px;
+  transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, border-color var(--motion-fast) ease;
+  animation: horizonCardEnter var(--motion-slow) var(--easing-emphasized) both;
+}
+.dashboard-widget:nth-child(1) { animation-delay: 0ms; }
+.dashboard-widget:nth-child(2) { animation-delay: 40ms; }
+.dashboard-widget:nth-child(3) { animation-delay: 80ms; }
+.dashboard-widget:nth-child(4) { animation-delay: 120ms; }
+.dashboard-widget:nth-child(5) { animation-delay: 160ms; }
+.dashboard-widget:nth-child(6) { animation-delay: 200ms; }
+.dashboard-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+  border-color: var(--color-border-strong);
+}
+.dashboard-widget:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Widget Title Row */
+.widget-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+.widget-title {
+  font-size: var(--text-title-3);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.widget-next {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+/* Widget Actions */
+.widget-action {
+  margin-top: auto;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+}
+
+/* Prayer Widget */
+.widget-prayer-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: var(--space-2) 0;
+}
+.widget-prayer-name {
+  font-size: var(--text-title-2);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.widget-prayer-time {
+  font-size: var(--text-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+  line-height: 1.1;
+  margin: var(--space-2) 0;
+}
+.widget-prayer-countdown {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Study Widget */
+.widget-study-goal-bar {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+.widget-study-goal-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  transition: width var(--motion-slow) var(--easing-emphasized);
+}
+.widget-study-goal-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+}
+.widget-study-goal-current {
+  color: var(--color-accent);
+}
+.widget-study-goal-target {
+  color: var(--color-text-muted);
+}
+
+/* Activity Widget */
+.widget-activity-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: var(--space-2) 0;
+}
+.widget-activity-steps {
+  font-size: var(--text-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+.widget-activity-label {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+.widget-activity-goal-bar {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: var(--space-3);
+}
+.widget-activity-goal-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  transition: width var(--motion-slow) var(--easing-emphasized);
+}
+.widget-activity-goal-text {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+/* Skeleton Loaders */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-border-strong) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--color-border); }
+}
+
+.skeleton-text {
+  height: 1em;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.skeleton-text.short { width: 40%; }
+.skeleton-text.medium { width: 70%; }
+.skeleton-text.long { width: 100%; }
+.skeleton-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+.skeleton-ring {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+.skeleton-bar {
+  height: 6px;
+  border-radius: var(--radius-full);
+  margin-top: var(--space-2);
+}
+
+/* Reduced motion for dashboard */
+@media (prefers-reduced-motion: reduce) {
+  .hero-progress-fill,
+  .widget-study-goal-fill,
+  .widget-activity-goal-fill {
+    transition: none !important;
+  }
+  .dashboard-widget {
+    animation: none !important;
+    transition: none !important;
+  }
+  .dashboard-widget:hover {
+    transform: none !important;
+  }
+}
+
+/* Mobile: single column widget grid */
+@media (max-width: 760px) {
+  .dashboard-widget-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-progress-breakdown {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+  .hero-progress-ring-wrap {
+    width: 100px;
+    height: 100px;
+  }
+  .hero-progress-main {
+    font-size: var(--text-title-2);
+  }
+  .hero-progress-card {
+    padding: var(--space-5);
+  }
+  .hero-progress-card::before {
+    width: 140px;
+    height: 140px;
+    top: -40px;
+    right: -40px;
+    border-width: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-widget-grid {
+    gap: var(--space-3);
+  }
+  .dashboard-widget {
+    padding: var(--space-3);
+    min-height: 120px;
+  }
+  .dashboard-greeting {
+    font-size: var(--text-title-2);
+  }
+  .dashboard-streak-mini {
+    font-size: var(--text-caption-sm);
+  }
+}
+
+/* Dashboard Density System */
+html[data-horizon-density="compact"] .dashboard-widget {
+  padding: var(--space-2);
+  min-height: 100px;
+}
+html[data-horizon-density="compact"] .hero-progress-card {
+  padding: var(--space-4);
+}
+html[data-horizon-density="compact"] .hero-progress-main {
+  font-size: var(--text-title-2);
+}
+html[data-horizon-density="compact"] .dashboard-greeting {
+  font-size: var(--text-title-2);
+}
+html[data-horizon-density="compact"] .widget-title {
+  font-size: var(--text-body);
+}
+html[data-horizon-density="compact"] .widget-prayer-time {
+  font-size: var(--text-title-1);
+}
+html[data-horizon-density="compact"] .widget-activity-steps {
+  font-size: var(--text-title-1);
+}
+
+html[data-horizon-density="spacious"] .dashboard-widget {
+  padding: var(--space-5);
+  min-height: 160px;
+}
+html[data-horizon-density="spacious"] .hero-progress-card {
+  padding: var(--space-8);
+}
+html[data-horizon-density="spacious"] .hero-progress-main {
+  font-size: var(--text-display);
+}
+html[data-horizon-density="spacious"] .dashboard-greeting {
+  font-size: var(--text-display);
+}
+html[data-horizon-density="spacious"] .widget-title {
+  font-size: var(--text-title-2);
+}
+html[data-horizon-density="spacious"] .widget-prayer-time {
+  font-size: var(--text-display);
+}
+html[data-horizon-density="spacious"] .widget-activity-steps {
+  font-size: var(--text-display);
+}
+html[data-horizon-density="spacious"] .dashboard-widget-grid {
+  gap: var(--space-5);
+}
+
+/* ============================================================
+   LAYOUT SYSTEM — Sidebar / Bottom Nav switching
+   Independent from theme system
+   ============================================================ */
+
+/* Layout attribute on html element */
+html[data-horizon-layout="sidebar"] .header,
+html[data-horizon-layout="sidebar"] .bottom-nav,
+html[data-horizon-layout="bottom"] .sidebar {
+  display: none;
+}
+
+html[data-horizon-layout="sidebar"] .sidebar {
+  display: flex;
+}
+
+html[data-horizon-layout="bottom"] .bottom-nav {
+  display: flex;
+}
+
+/* Sidebar styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--layout-sidebar-width);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: none;
+  flex-direction: column;
+  z-index: var(--z-fixed);
+  box-shadow: var(--shadow-elevated);
+  transition: transform var(--motion-base) var(--easing-standard);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-4) var(--space-3);
+  overflow-y: auto;
+}
+
+.sidebar-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  font-weight: 500;
+  text-align: left;
+  transition: background var(--motion-fast) ease, color var(--motion-fast) ease;
+}
+
+.sidebar-tab:hover {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.sidebar-tab.active {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.sidebar-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus);
+}
+
+.sidebar-icon {
+  font-size: var(--text-xl);
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebar-label {
+  flex: 1;
+}
+
+.sidebar-footer {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-elevated);
+}
+
+.sidebar-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xl);
+}
+
+.sidebar-user-name {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+}
+
+/* Bottom Navigation styles */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--layout-dock-height);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: none;
+  flex-direction: column;
+  z-index: var(--z-fixed);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.bottom-nav-tabs {
+  display: flex;
+  height: 100%;
+}
+
+.bottom-nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-1);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-caption-sm);
+  font-weight: 600;
+  transition: color var(--motion-fast) ease;
+}
+
+.bottom-nav-tab:hover {
+  color: var(--color-accent);
+}
+
+.bottom-nav-tab.active {
+  color: var(--color-accent);
+}
+
+.bottom-nav-tab:focus-visible {
+  outline: none;
+  box-shadow: inset 0 3px 0 var(--color-focus);
+}
+
+.bottom-nav-icon {
+  font-size: var(--text-2xl);
+  line-height: 1;
+}
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: calc(var(--z-fixed) - 1);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--motion-base) ease, visibility var(--motion-base) ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile sidebar open state */
+@media (max-width: 1023px) {
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-modal);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Content area adjustment for sidebar layout */
+html[data-horizon-layout="sidebar"] main {
+  margin-left: var(--layout-sidebar-width);
+  min-height: 100vh;
+}
+
+html[data-horizon-layout="bottom"] main {
+  padding-bottom: calc(var(--layout-dock-height) + env(safe-area-inset-bottom, 0));
+}
+
+/* Header adjustments */
+html[data-horizon-layout="sidebar"] .header {
+  max-width: calc(100% - var(--layout-sidebar-width));
+  margin-left: var(--layout-sidebar-width);
+}
+
+html[data-horizon-layout="bottom"] .header {
+  max-width: 100%;
+}
+
+/* Tablet/Desktop: show sidebar, hide bottom nav */
+@media (min-width: 1024px) {
+  html[data-horizon-layout="sidebar"] .sidebar {
+    display: flex;
+  }
+  html[data-horizon-layout="sidebar"] .bottom-nav {
+    display: none;
+  }
+  html[data-horizon-layout="bottom"] .sidebar {
+    display: none;
+  }
+  html[data-horizon-layout="bottom"] .bottom-nav {
+    display: flex;
+  }
+}
+
+/* Mobile: show bottom nav by default, sidebar as overlay */
+@media (max-width: 1023px) {
+  html[data-horizon-layout="bottom"] .bottom-nav {
+    display: flex;
+  }
+  html[data-horizon-layout="bottom"] .sidebar {
+    display: flex;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .bottom-nav,
+  .sidebar-overlay {
+    transition: none !important;
+  }
+}
+
+/* Safe area for header in sidebar layout */
+html[data-horizon-layout="sidebar"] .header {
+  padding-top: calc(18px + env(safe-area-inset-top, 0));
+}
 </style>
 
 </head>
@@ -6021,7 +7109,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
     <!-- HEADER -->
 
-    <header class="header">
+    <header class="header" id="appHeader">
 
         <div>
             <div class="logo">Horizon</div>
@@ -6062,36 +7150,66 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
     </header>
 
+    <!-- SIDEBAR NAVIGATION (Desktop ≥1024px) -->
+    <aside class="sidebar" id="appSidebar" aria-label="Main navigation">
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <button class="sidebar-tab active" data-tab="tasks" id="sidebarTasksTab" type="button" aria-label="Today">
+                <span class="sidebar-icon" aria-hidden="true">⌂</span><span class="sidebar-label">Today</span>
+            </button>
+            <button class="sidebar-tab" data-tab="taskManager" id="sidebarTasksManagerTab" type="button" aria-label="Tasks">
+                <span class="sidebar-icon" aria-hidden="true">✓</span><span class="sidebar-label" id="sidebarNavTaskManagerLabel">Tasks</span>
+            </button>
+            <button class="sidebar-tab" data-tab="study" id="sidebarStudyTab" type="button" aria-label="Study">
+                <span class="sidebar-icon" aria-hidden="true">▤</span><span class="sidebar-label">Study</span>
+            </button>
+            <button class="sidebar-tab" data-tab="ai" id="sidebarAiTab" type="button" aria-label="Horizon AI">
+                <span class="sidebar-icon" aria-hidden="true">✦</span><span class="sidebar-label">AI</span>
+            </button>
+            <button class="sidebar-tab" data-tab="prayers" id="sidebarPrayersTab" type="button" aria-label="Prayer">
+                <span class="sidebar-icon" aria-hidden="true">☾</span><span class="sidebar-label">Prayer</span>
+            </button>
+            <button class="sidebar-tab" data-tab="calendar" id="sidebarCalendarTab" type="button" aria-label="Calendar">
+                <span class="sidebar-icon" aria-hidden="true">▦</span><span class="sidebar-label">Calendar</span>
+            </button>
+            <button class="sidebar-tab" data-tab="more" id="sidebarMoreTab" type="button" aria-label="More">
+                <span class="sidebar-icon" aria-hidden="true">•••</span><span class="sidebar-label" id="sidebarNavMoreLabel">More</span>
+            </button>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user" id="sidebarUser">
+                <span class="sidebar-user-avatar" aria-hidden="true">👤</span>
+                <span class="sidebar-user-name" id="sidebarUserName">Guest</span>
+            </div>
+        </div>
+    </aside>
 
-    <!-- NAVIGATION -->
-
-    <nav class="tabs" id="primaryNavigation" aria-label="Primary navigation">
-        <button class="tab active" data-tab="tasks" id="tasksTab" type="button" aria-label="Today">
-            <span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Today</span>
+    <!-- BOTTOM NAVIGATION (Mobile) -->
+    <nav class="bottom-nav" id="bottomNavigation" aria-label="Primary navigation">
+        <button class="bottom-nav-tab active" data-tab="tasks" id="bottomTasksTab" type="button" aria-label="Today">
+            <span class="bottom-nav-icon" aria-hidden="true">⌂</span><span class="bottom-nav-label">Today</span>
         </button>
-        <button class="tab" data-tab="taskManager" id="tasksManagerTab" type="button" aria-label="Tasks">
-            <span class="nav-icon" aria-hidden="true">✓</span><span class="nav-label" id="navTaskManagerLabel">Tasks</span>
+        <button class="bottom-nav-tab" data-tab="taskManager" id="bottomTasksManagerTab" type="button" aria-label="Tasks">
+            <span class="bottom-nav-icon" aria-hidden="true">✓</span><span class="bottom-nav-label" id="bottomNavTaskManagerLabel">Tasks</span>
         </button>
-        <button class="tab" data-tab="study" id="studyTab" type="button" aria-label="Study">
-            <span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Study</span>
+        <button class="bottom-nav-tab" data-tab="study" id="bottomStudyTab" type="button" aria-label="Study">
+            <span class="bottom-nav-icon" aria-hidden="true">▤</span><span class="bottom-nav-label">Study</span>
         </button>
-        <button class="tab" data-tab="ai" id="aiTab" type="button" aria-label="Horizon AI">
-            <span class="nav-icon" aria-hidden="true">✦</span><span class="nav-label">AI</span>
+        <button class="bottom-nav-tab" data-tab="ai" id="bottomAiTab" type="button" aria-label="Horizon AI">
+            <span class="bottom-nav-icon" aria-hidden="true">✦</span><span class="bottom-nav-label">AI</span>
         </button>
-        <button class="tab" data-tab="prayers" id="prayersTab" type="button" aria-label="Prayer">
-            <span class="nav-icon" aria-hidden="true">☾</span><span class="nav-label">Prayer</span>
+        <button class="bottom-nav-tab" data-tab="prayers" id="bottomPrayersTab" type="button" aria-label="Prayer">
+            <span class="bottom-nav-icon" aria-hidden="true">☾</span><span class="bottom-nav-label">Prayer</span>
         </button>
-        <button class="tab calendar-nav-tab" data-tab="calendar" id="calendarTab" type="button" aria-label="Calendar">
-            <span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">Calendar</span>
+        <button class="bottom-nav-tab" data-tab="calendar" id="bottomCalendarTab" type="button" aria-label="Calendar">
+            <span class="bottom-nav-icon" aria-hidden="true">▦</span><span class="bottom-nav-label">Calendar</span>
         </button>
-        <button class="tab" data-tab="more" id="moreTab" type="button" aria-label="More">
-            <span class="nav-icon" aria-hidden="true">•••</span><span class="nav-label" id="navMoreLabel">More</span>
+        <button class="bottom-nav-tab" data-tab="more" id="bottomMoreTab" type="button" aria-label="More">
+            <span class="bottom-nav-icon" aria-hidden="true">•••</span><span class="bottom-nav-label" id="bottomNavMoreLabel">More</span>
         </button>
-        <!-- Compact-dock destinations revealed only after a press-and-hold on mobile. -->
-        <button class="tab mobile-extra-tab" type="button" data-open-section="studyStats" aria-label="Study statistics"><span class="nav-icon" aria-hidden="true">↗</span><span class="nav-label">Stats</span></button>
-        <button class="tab mobile-extra-tab" type="button" data-open-section="profile" aria-label="Profile"><span class="nav-icon" aria-hidden="true">◎</span><span class="nav-label">Profile</span></button>
-        <button class="tab mobile-extra-tab" type="button" data-open-section="settings" aria-label="Settings"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label">Settings</span></button>
     </nav>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
 
     <!-- TASKS / TODAY DASHBOARD -->
@@ -6122,131 +7240,234 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 </div>
                 <div class="quote-card" id="quoteCard"></div>
             </div>
-            
-            <!-- 1. GREETING -->
-            <div class="dashboard-header">
+
+            <!-- GREETING BAR -->
+            <div class="dashboard-header" id="dashboardHeader">
                 <h1 class="dashboard-greeting" id="dashGreeting">Good morning</h1>
                 <div class="dashboard-date" id="dashDate"></div>
+                <div class="dashboard-streak-mini" id="dashStreakMini" aria-live="polite" style="display:none;">
+                    <span class="dashboard-streak-icon" aria-hidden="true">🔥</span>
+                    <span id="dashStreakMiniText">0 day streak</span>
+                </div>
             </div>
 
-            <!-- PROACTIVE AI (Daily AI briefing + one suggestion) -->
+            <!-- HERO PROGRESS RING -->
+            <div class="dashboard-card hero-progress-card" id="heroProgressCard">
+                <div class="hero-progress-header">
+                    <span class="hero-progress-title">Today's Progress</span>
+                    <span class="hero-progress-percent" id="heroProgressPercent">0%</span>
+                </div>
+                <div class="hero-progress-ring-wrap" aria-label="Today's overall progress">
+                    <svg class="hero-progress-ring" viewBox="0 0 120 120" role="img" aria-labelledby="heroProgressTitle">
+                        <title id="heroProgressTitle">Today's progress: 0 percent</title>
+                        <circle class="hero-progress-track" cx="60" cy="60" r="54" fill="none" stroke-width="8"></circle>
+                        <circle class="hero-progress-fill" id="heroProgressFill" cx="60" cy="60" r="54" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3"></circle>
+                    </svg>
+                    <div class="hero-progress-center">
+                        <span class="hero-progress-main" id="heroProgressMain">0%</span>
+                        <span class="hero-progress-sub" id="heroProgressSub">Complete</span>
+                    </div>
+                </div>
+                <div class="hero-progress-breakdown" id="heroProgressBreakdown">
+                    <div class="hero-progress-item">
+                        <span class="hero-progress-item-label">Tasks</span>
+                        <span class="hero-progress-item-value" id="heroTasksScore">0/0</span>
+                    </div>
+                    <div class="hero-progress-item">
+                        <span class="hero-progress-item-label">Prayer</span>
+                        <span class="hero-progress-item-value" id="heroPrayerScore">0/5</span>
+                    </div>
+                    <div class="hero-progress-item">
+                        <span class="hero-progress-item-label">Study</span>
+                        <span class="hero-progress-item-value" id="heroStudyScore">0m</span>
+                    </div>
+                    <div class="hero-progress-item">
+                        <span class="hero-progress-item-label">Steps</span>
+                        <span class="hero-progress-item-value" id="heroStepsScore">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WIDGET GRID -->
+            <div class="dashboard-widget-grid" id="dashboardWidgetGrid" role="list">
+
+                <!-- PRAYER WIDGET -->
+                <article class="dashboard-card dashboard-widget" data-dashboard-widget="prayer" role="listitem">
+                    <div class="dashboard-title widget-title-row">
+                        <span class="widget-title">Prayer</span>
+                        <span class="widget-next" id="widgetNextPrayerLabel">Next: Fajr</span>
+                    </div>
+                    <div class="widget-prayer-main">
+                        <!-- Skeleton loader for prayer widget -->
+                        <div class="widget-prayer-skeleton" id="widgetPrayerSkeleton" aria-hidden="true">
+                            <div class="skeleton skeleton-text short"></div>
+                            <div class="skeleton skeleton-circle"></div>
+                            <div class="skeleton skeleton-text short"></div>
+                        </div>
+                        <div class="widget-prayer-content" id="widgetPrayerContent" style="display:none;">
+                            <div class="widget-prayer-name" id="widgetNextPrayerName">Fajr</div>
+                            <div class="widget-prayer-time" id="widgetNextPrayerTime">--:--</div>
+                            <div class="widget-prayer-countdown" id="widgetNextPrayerCountdown">in --:--:--</div>
+                        </div>
+                    </div>
+                    <button class="setting-button widget-action" id="widgetViewPrayersBtn" style="width:100%;">View all prayers →</button>
+                </article>
+
+                <!-- WEATHER WIDGET -->
+                <article class="dashboard-card dashboard-widget" data-dashboard-widget="weather" role="listitem">
+                    <div class="dashboard-title widget-title-row">
+                        <span id="dailyWeatherTitle">Weather</span>
+                        <span class="daily-weather-heading-actions">
+                            <button type="button" class="daily-weather-icon-btn" id="dailyWeatherRefresh" aria-label="Refresh weather" title="Refresh">↻</button>
+                        </span>
+                    </div>
+                    <div class="daily-weather-summary" id="dailyWeatherSummary">
+                        <span id="dailyWeatherSummaryIcon" aria-hidden="true">🌤️</span>
+                        <strong id="dailyWeatherSummaryTemp">--°</strong>
+                        <span class="daily-weather-summary-text"><strong id="dailyWeatherSummaryCondition">Set location in Settings</strong><small id="dailyWeatherSummaryPlace">Weather</small></span>
+                    </div>
+                    <div id="dailyWeatherContent" class="daily-weather-expanded-content" hidden>
+                        <div class="daily-weather-current">
+                            <div class="daily-weather-current-main">
+                                <div id="dailyWeatherIcon" class="daily-weather-big-icon" aria-hidden="true">🌤️</div>
+                                <div>
+                                    <div id="dailyWeatherTemperature" class="daily-weather-temperature">--°</div>
+                                    <div id="dailyWeatherCondition" class="daily-weather-condition">—</div>
+                                    <div id="dailyWeatherFeels" class="daily-weather-muted">Feels like --°</div>
+                                </div>
+                            </div>
+                            <div class="daily-weather-details">
+                                <div><span id="dailyWeatherHighLabel">High</span><strong id="dailyWeatherHigh">--°</strong></div>
+                                <div><span id="dailyWeatherLowLabel">Low</span><strong id="dailyWeatherLow">--°</strong></div>
+                                <div><span id="dailyWeatherWindLabel">Wind</span><strong id="dailyWeatherWind">-- km/h</strong></div>
+                            </div>
+                        </div>
+                        <div class="daily-weather-section">
+                            <div class="daily-weather-section-title" id="dailyWeatherHourlyTitle">Hourly forecast</div>
+                            <div id="dailyWeatherHourly" class="daily-weather-hourly"></div>
+                        </div>
+                        <div class="daily-weather-section">
+                            <div class="daily-weather-section-title" id="dailyWeatherWeeklyTitle">7-day forecast</div>
+                            <div id="dailyWeatherDaily" class="daily-weather-daily"></div>
+                        </div>
+                        <div id="dailyWeatherUpdated" class="daily-weather-updated"></div>
+                        <div class="daily-weather-attribution">Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></div>
+                    </div>
+                    <button class="setting-button daily-weather-expand-btn" id="dailyWeatherExpand" aria-expanded="false" style="width:100%; margin-top:8px;">Show forecast ↓</button>
+                </article>
+
+                <!-- STUDY WIDGET -->
+                <article class="dashboard-card dashboard-widget" data-dashboard-widget="study" role="listitem">
+                    <div class="dashboard-title widget-title-row">
+                        <span class="widget-title">Study</span>
+                    </div>
+                    <div id="dashStudyContent">
+                        <!-- Skeleton loader for study widget -->
+                        <div class="widget-study-skeleton" id="widgetStudySkeleton" aria-hidden="true">
+                            <div class="skeleton skeleton-text medium"></div>
+                            <div class="skeleton skeleton-bar"></div>
+                            <div class="skeleton skeleton-text short"></div>
+                        </div>
+                        <div class="widget-study-goal" id="widgetStudyGoal" style="display:none;">
+                            <div class="widget-study-goal-bar">
+                                <div class="widget-study-goal-fill" id="widgetStudyGoalFill" style="width: 0%;"></div>
+                            </div>
+                            <div class="widget-study-goal-meta">
+                                <span class="widget-study-goal-current" id="widgetStudyGoalCurrent">0m</span>
+                                <span class="widget-study-goal-target" id="widgetStudyGoalTarget">/ 120m</span>
+                            </div>
+                        </div>
+                        <div class="widget-study-empty" id="widgetStudyEmpty">
+                            <p class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</p>
+                            <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
+                        </div>
+                        <div class="widget-study-timer" id="widgetStudyTimer" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--color-border);">
+                            <div class="widget-study-timer-time" id="widgetStudyTimerTime">25:00</div>
+                            <button class="setting-button widget-action" id="widgetStartStudyBtn" style="width:100%;">Start session →</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- ACTIVITY WIDGET -->
+                <article class="dashboard-card dashboard-widget" data-dashboard-widget="activity" role="listitem">
+                    <div class="dashboard-title widget-title-row">
+                        <span class="widget-title">Activity</span>
+                    </div>
+                    <div class="widget-activity-main">
+                        <!-- Skeleton loader for activity widget -->
+                        <div class="widget-activity-skeleton" id="widgetActivitySkeleton" aria-hidden="true">
+                            <div class="skeleton skeleton-circle"></div>
+                            <div class="skeleton skeleton-text short"></div>
+                            <div class="skeleton skeleton-bar"></div>
+                        </div>
+                        <div class="widget-activity-content" id="widgetActivityContent" style="display:none;">
+                            <div class="widget-activity-steps" id="widgetActivitySteps">—</div>
+                            <div class="widget-activity-label">Steps today</div>
+                            <div class="widget-activity-goal" id="widgetActivityGoal" style="display:none; margin-top:8px;">
+                                <div class="widget-activity-goal-bar">
+                                    <div class="widget-activity-goal-fill" id="widgetActivityGoalFill" style="width: 0%;"></div>
+                                </div>
+                                <span class="widget-activity-goal-text" id="widgetActivityGoalText">Goal: 10,000</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="dashActivityText" class="dashboard-text-medium" style="margin-top:12px; display:none;">Steps haven't synced yet.</div>
+                    <button class="setting-button widget-action" id="widgetSyncStepsBtn" style="width:100%; margin-top:12px; display:none;">Sync steps →</button>
+                </article>
+
+                <!-- AI BRIEFING WIDGET -->
+                <article class="dashboard-card dashboard-widget" data-dashboard-widget="aiBriefing" role="listitem" id="widgetAiBriefing" style="display:none;">
+                    <div class="dashboard-title widget-title-row">
+                        <span class="widget-title">✨ AI Briefing</span>
+                        <span class="pa-head-actions">
+                            <button type="button" class="pa-icon-btn" id="paRefreshBtn" title="Refresh" aria-label="Refresh suggestion">↻</button>
+                            <button type="button" class="pa-icon-btn" id="paDismissBtn" title="Dismiss" aria-label="Dismiss suggestion">✕</button>
+                        </span>
+                    </div>
+                    <!-- Skeleton loader for AI briefing -->
+                    <div class="widget-ai-skeleton" id="widgetAiSkeleton" aria-hidden="true">
+                        <div class="skeleton skeleton-text medium"></div>
+                        <div class="skeleton skeleton-text long"></div>
+                        <div class="skeleton skeleton-text medium"></div>
+                    </div>
+                    <div id="paBody" style="display:none;"></div>
+                </article>
+
+                <!-- TASKS WIDGET -->
+                <article class="dashboard-card dashboard-widget" data-dashboard-widget="tasks" role="listitem">
+                    <div class="dashboard-title widget-title-row">
+                        <span class="widget-title">Tasks</span>
+                        <span id="taskManagerCountLabel" style="text-transform:none; font-weight:600;">0 of 0 completed</span>
+                    </div>
+                    <!-- Skeleton loader for tasks widget -->
+                    <div class="widget-tasks-skeleton" id="widgetTasksSkeleton" aria-hidden="true">
+                        <div class="skeleton skeleton-text long"></div>
+                        <div class="skeleton skeleton-text medium"></div>
+                        <div class="skeleton skeleton-text short"></div>
+                    </div>
+                    <div id="dashTasksWidgetContent" style="display:none;">
+                        <p class="horizon-muted-copy" id="dashTasksSummaryCopy">Your task list is ready when you are.</p>
+                        <button class="setting-button horizon-wide-action widget-action" type="button" data-open-section="taskManager">
+                            <span id="dashOpenTasksLabel">Open task manager →</span>
+                        </button>
+                    </div>
+                    <div id="dashTasksWidgetList" style="display:none; margin-top:12px;">
+                        <!-- Up to 3 tasks shown here -->
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- PROACTIVE AI CARD (shown when dismissed from widget) -->
             <div class="dashboard-card" id="paCard" style="display:none;">
                 <div class="dashboard-title">
                     <span class="pa-badge">✨ <span id="paTitleText">Daily AI</span></span>
                     <span class="pa-head-actions">
-                        <button type="button" class="pa-icon-btn" id="paRefreshBtn" title="Refresh" aria-label="Refresh suggestion">↻</button>
-                        <button type="button" class="pa-icon-btn" id="paDismissBtn" title="Dismiss" aria-label="Dismiss suggestion">✕</button>
+                        <button type="button" class="pa-icon-btn" id="paRefreshBtn2" title="Refresh" aria-label="Refresh suggestion">↻</button>
+                        <button type="button" class="pa-icon-btn" id="paDismissBtn2" title="Dismiss" aria-label="Dismiss suggestion">✕</button>
                     </span>
                 </div>
-                <div id="paBody"></div>
-            </div>
-
-            <!-- 2. TODAY'S PROGRESS -->
-            <div class="dashboard-card">
-                <div class="dashboard-title">🎯 Today's Progress</div>
-                <div class="dashboard-progress-header" id="dashProgressPercent">0%</div>
-                <div class="dashboard-progress-bar">
-                    <div class="dashboard-progress-fill" id="dashProgressFill" style="width: 0%;"></div>
-                </div>
-                <div class="dashboard-breakdown">
-                    <div class="dashboard-progress-category"><span class="dashboard-progress-category-label">✅ Tasks</span><span class="dashboard-progress-category-score" id="dashTasksScore">0/0</span></div>
-                    <div class="dashboard-progress-category"><span class="dashboard-progress-category-label">🕌 Prayer</span><span class="dashboard-progress-category-score" id="dashPrayerScore">0/5</span></div>
-                    <div class="dashboard-progress-category"><span class="dashboard-progress-category-label">👟 Steps</span><span class="dashboard-progress-category-score" id="dashActivityScore">—</span></div>
-                </div>
-                <div class="dashboard-streak" id="dashProgressStreak" aria-live="polite">
-                    <span class="dashboard-streak-icon" aria-hidden="true">🔥</span>
-                    <div class="dashboard-streak-copy">
-                        <div class="dashboard-streak-title" id="dashProgressStreakTitle">Daily streak: 0 days</div>
-                        <div class="dashboard-streak-note" id="dashProgressStreakNote">Reach 85% today to start your streak.</div>
-                    </div>
-                    <div class="dashboard-streak-count" id="dashProgressStreakCount">0</div>
-                </div>
-            </div>
-
-            <!-- 3. PRAYER -->
-            <div class="dashboard-card">
-                <div class="dashboard-title">🕌 Prayer</div>
-                <div class="dashboard-flex-row">
-                    <div>
-                        <div style="font-size:12px; color:#888; margin-bottom:4px;" id="dashNextPrayerLabel">NEXT PRAYER</div>
-                        <div class="dashboard-text-large" id="dashNextPrayerName">Fajr</div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="dashboard-text-large" id="dashNextPrayerTime">--:--</div>
-                        <div style="color:#888; font-size:13px; font-variant-numeric: tabular-nums;" id="dashNextPrayerCountdown">--:--:--</div>
-                    </div>
-                </div>
-                <button class="setting-button" id="dashViewPrayersBtn" style="width:100%;">View prayers →</button>
-            </div>
-
-            <!-- WEATHER DASHBOARD: compact by default; forecasts expand on demand -->
-            <section class="dashboard-card" id="dailyWeatherCard" aria-labelledby="dailyWeatherTitle">
-                <div class="dashboard-title daily-weather-heading">
-                    <span id="dailyWeatherTitle">🌦️ Weather</span>
-                    <span class="daily-weather-heading-actions">
-                        <button type="button" class="daily-weather-icon-btn" id="dailyWeatherRefresh" aria-label="Refresh weather" title="Refresh">↻</button>
-                        <button type="button" class="setting-button daily-weather-expand-btn" id="dailyWeatherExpand" aria-expanded="false">Show forecast ↓</button>
-                    </span>
-                </div>
-                <div class="daily-weather-summary" id="dailyWeatherSummary">
-                    <span id="dailyWeatherSummaryIcon" aria-hidden="true">🌤️</span>
-                    <strong id="dailyWeatherSummaryTemp">--°</strong>
-                    <span class="daily-weather-summary-text"><strong id="dailyWeatherSummaryCondition">Set location in Settings</strong><small id="dailyWeatherSummaryPlace">Weather</small></span>
-                </div>
-                <div id="dailyWeatherContent" class="daily-weather-expanded-content" hidden>
-                    <div class="daily-weather-current">
-                        <div class="daily-weather-current-main">
-                            <div id="dailyWeatherIcon" class="daily-weather-big-icon" aria-hidden="true">🌤️</div>
-                            <div>
-                                <div id="dailyWeatherTemperature" class="daily-weather-temperature">--°</div>
-                                <div id="dailyWeatherCondition" class="daily-weather-condition">—</div>
-                                <div id="dailyWeatherFeels" class="daily-weather-muted">Feels like --°</div>
-                            </div>
-                        </div>
-                        <div class="daily-weather-details">
-                            <div><span id="dailyWeatherHighLabel">High</span><strong id="dailyWeatherHigh">--°</strong></div>
-                            <div><span id="dailyWeatherLowLabel">Low</span><strong id="dailyWeatherLow">--°</strong></div>
-                            <div><span id="dailyWeatherWindLabel">Wind</span><strong id="dailyWeatherWind">-- km/h</strong></div>
-                        </div>
-                    </div>
-                    <div class="daily-weather-section">
-                        <div class="daily-weather-section-title" id="dailyWeatherHourlyTitle">Hourly forecast</div>
-                        <div id="dailyWeatherHourly" class="daily-weather-hourly"></div>
-                    </div>
-                    <div class="daily-weather-section">
-                        <div class="daily-weather-section-title" id="dailyWeatherWeeklyTitle">7-day forecast</div>
-                        <div id="dailyWeatherDaily" class="daily-weather-daily"></div>
-                    </div>
-                    <div id="dailyWeatherUpdated" class="daily-weather-updated"></div>
-                    <div class="daily-weather-attribution">Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></div>
-                </div>
-            </section>
-
-            <!-- 4. STUDY -->
-            <div class="dashboard-card">
-                <div class="dashboard-title">📚 Study</div>
-                <div id="dashStudyContent">
-                    <div class="dashboard-text-medium" style="margin-bottom:14px;">No study goal yet.</div>
-                    <button class="setting-button" id="dashSetStudyBtn" style="width:100%;">Set study goal →</button>
-                </div>
-            </div>
-
-            <!-- 6. ACTIVITY -->
-            <div class="dashboard-card">
-                <div class="dashboard-title">👟 Activity</div>
-                <div class="dashboard-text-medium" id="dashActivityText">Steps haven't synced yet.</div>
-            </div>
-
-            <!-- TASKS SUMMARY WIDGET: task creation and the full list live on the separate Tasks screen -->
-            <div class="dashboard-card horizon-task-summary" id="dashTasksWidget">
-                <div class="dashboard-title">
-                    <span>✅ Tasks</span>
-                    <span id="taskManagerCountLabel" style="text-transform:none; font-weight:600;">Manage your tasks</span>
-                </div>
-                <p class="horizon-muted-copy" id="dashTasksSummaryCopy">Your task list is ready when you are.</p>
-                <button class="setting-button horizon-wide-action" type="button" data-open-section="taskManager">
-                    <span id="dashOpenTasksLabel">Open task manager →</span>
-                </button>
+                <div id="paBody2"></div>
             </div>
 
         </section>
@@ -11573,22 +12794,41 @@ done: "تەواو",
                     : t("signUp");
 
 
-            const todayNavLabel = document.querySelector("#tasksTab .nav-label");
+            const todayNavLabel = document.querySelector("#tasksTab .nav-label, #sidebarTasksTab .sidebar-label, #bottomTasksTab .bottom-nav-label");
             if (todayNavLabel) todayNavLabel.textContent = t("today") || t("tasks");
-            else document.getElementById("tasksTab").textContent = t("today") || t("tasks");
+            else {
+              const tasksTab = document.getElementById("tasksTab");
+              if (tasksTab) tasksTab.textContent = t("today") || t("tasks");
+            }
 
-            const calendarNavLabel = document.querySelector("#calendarTab .nav-label");
+            const calendarNavLabel = document.querySelector("#calendarTab .nav-label, #sidebarCalendarTab .sidebar-label, #bottomCalendarTab .bottom-nav-label");
             if (calendarNavLabel) calendarNavLabel.textContent = t("calendar");
-            else document.getElementById("calendarTab").textContent = t("calendar");
+            else {
+              const calTab = document.getElementById("calendarTab");
+              if (calTab) calTab.textContent = t("calendar");
+            }
 
-            const prayerNavLabel = document.querySelector("#prayersTab .nav-label");
+            const prayerNavLabel = document.querySelector("#prayersTab .nav-label, #sidebarPrayersTab .sidebar-label, #bottomPrayersTab .bottom-nav-label");
             if (prayerNavLabel) prayerNavLabel.textContent = t("prayers");
-            else document.getElementById("prayersTab").textContent = t("prayers");
+            else {
+              const prayerTab = document.getElementById("prayersTab");
+              if (prayerTab) prayerTab.textContent = t("prayers");
+            }
 
-            const studyNavLabel = document.querySelector("#studyTab .nav-label");
+            const studyNavLabel = document.querySelector("#studyTab .nav-label, #sidebarStudyTab .sidebar-label, #bottomStudyTab .bottom-nav-label");
             if (studyNavLabel) studyNavLabel.textContent = t("study");
-            else document.getElementById("studyTab").textContent = t("study");
+            else {
+              const studyTab = document.getElementById("studyTab");
+              if (studyTab) studyTab.textContent = t("study");
+            }
 
+
+            const taskNavLabel = document.querySelector("#tasksManagerTab .nav-label, #sidebarTasksManagerTab .sidebar-label, #bottomTasksManagerTab .bottom-nav-label");
+            if (taskNavLabel) taskNavLabel.textContent = t("tasks");
+            else {
+              const taskTab = document.getElementById("tasksManagerTab");
+              if (taskTab) taskTab.textContent = t("tasks");
+            }
 
             document.getElementById(
                 "taskInput"
@@ -13066,7 +14306,7 @@ done: "تەواو",
 
             document
                 .querySelectorAll(
-                    ".tab"
+                    ".tab, .sidebar-tab, .bottom-nav-tab"
                 )
                 .forEach(tab => {
 
@@ -13091,7 +14331,7 @@ done: "تەواو",
 
             const tab =
                 document.querySelector(
-                    `.tab[data-tab="${id}"]`
+                    `.tab[data-tab="${id}"], .sidebar-tab[data-tab="${id}"], .bottom-nav-tab[data-tab="${id}"]`
                 );
 
 
@@ -13122,7 +14362,7 @@ done: "تەواو",
 
         document
             .querySelectorAll(
-                ".tab"
+                ".tab, .sidebar-tab, .bottom-nav-tab"
             )
             .forEach(tab => {
 
@@ -16171,15 +17411,22 @@ document.documentElement.classList.toggle(
 
 
         function timeStrToSeconds(time) {
-
-            const [hours, minutes, seconds] =
-                time.split(":").map(Number);
-
+            if (!time || typeof time !== 'string') {
+              console.warn('timeStrToSeconds received invalid time:', time);
+              return 0;
+            }
+            const parts = time.split(":");
+            if (parts.length < 2) {
+              console.warn('timeStrToSeconds invalid format:', time);
+              return 0;
+            }
+            const [hours, minutes, seconds] = parts.map(Number);
             return hours * 3600 + minutes * 60 + (seconds || 0);
         }
 
 
         function updateNextPrayer() {
+            if (!prayerTimes || Object.keys(prayerTimes).length === 0) return;
 
             const now = new Date();
 
@@ -16198,7 +17445,7 @@ document.documentElement.classList.toggle(
                     prayerTimes
                 )
             ) {
-
+                if (!time || typeof time !== 'string') continue;
                 const prayerSeconds =
                     timeStrToSeconds(time);
 
@@ -27625,13 +28872,13 @@ body:has(#ai.active) main { padding-top:0 !important; }
     }
     function defaultLayout(){return cleanLayout({id:"default",name:t("defaultName"),order:["progress","tasks","prayer","study","activity","weather","aiBriefing"],hidden:[],sizes:{progress:"expanded",tasks:"expanded",prayer:"standard",study:"standard",activity:"compact",weather:"compact",aiBriefing:"standard"}});}
     function readState(){
-        try{const x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&Array.isArray(x.layouts)&&x.layouts.length){const layouts=x.layouts.slice(0,12).map(cleanLayout);return {layouts,activeId:layouts.some(y=>y.id===x.activeId)?x.activeId:layouts[0].id};}}catch(e){console.warn("Dashboard settings read failed",e);}
-        const d=defaultLayout();return {layouts:[d],activeId:d.id};
+        try{const x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&Array.isArray(x.layouts)&&x.layouts.length){const layouts=x.layouts.slice(0,12).map(cleanLayout);return {layouts,activeId:layouts.some(y=>y.id===x.activeId)?x.activeId:layouts[0].id,density:x.density||"comfortable"};}}catch(e){console.warn("Dashboard settings read failed",e);}
+        const d=defaultLayout();return {layouts:[d],activeId:d.id,density:"comfortable"};
     }
     let state=readState(), editing=false, touchDrag=null;
     const grid=document.createElement("div"); grid.id="dashboardWidgetGrid"; grid.className="dashboard-widget-grid";
     const panel=document.createElement("section"); panel.id="dashboardCustomizePanel"; panel.hidden=true;
-    panel.innerHTML='<div class="dashboard-customize-top"><strong id="dashboardCustomizeTitle"></strong><button type="button" class="setting-button" id="dashboardCustomizeDone"></button></div><label for="dashboardLayoutSelect" id="dashboardLayoutLabel"></label><select id="dashboardLayoutSelect"></select><div class="dashboard-layout-actions"><button type="button" class="setting-button" id="dashboardLayoutNew"></button><button type="button" class="setting-button" id="dashboardLayoutRename"></button><button type="button" class="setting-button" id="dashboardLayoutDelete"></button></div><p class="dashboard-edit-hint" id="dashboardEditHint"></p><div id="dashboardWidgetSettings" class="dashboard-widget-settings"></div>';
+    panel.innerHTML='<div class="dashboard-customize-top"><strong id="dashboardCustomizeTitle"></strong><button type="button" class="setting-button" id="dashboardCustomizeDone"></button></div><div class="dashboard-density-row" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px 0 2px;border-top:1px solid var(--border-color,rgba(128,128,128,.15));"><span style="flex:1;min-width:0;"><strong style="display:block;font-size:13px;">Dashboard Density</strong><small style="display:block;margin-top:3px;color:var(--muted-color,#888);font-size:12px;line-height:1.4;">Choose how much space widgets use</small></span><select id="dashboardDensitySelect" style="max-width:145px;min-width:120px;padding:9px 10px;border-radius:11px;border:1px solid var(--border-color,rgba(128,128,128,.22));background:var(--card-bg,transparent);color:inherit;font:inherit;font-size:12px;"><option value="compact">Compact</option><option value="comfortable" selected>Comfortable</option><option value="spacious">Spacious</option></select></div><label for="dashboardLayoutSelect" id="dashboardLayoutLabel"></label><select id="dashboardLayoutSelect"></select><div class="dashboard-layout-actions"><button type="button" class="setting-button" id="dashboardLayoutNew"></button><button type="button" class="setting-button" id="dashboardLayoutRename"></button><button type="button" class="setting-button" id="dashboardLayoutDelete"></button></div><p class="dashboard-edit-hint" id="dashboardEditHint"></p><div id="dashboardWidgetSettings" class="dashboard-widget-settings"></div>';
     const settingsSection=document.getElementById("settings");
     if(!settingsSection) return;
     const settingsCard=document.createElement("div"); settingsCard.className="settings-card"; settingsCard.id="dashboardCustomizeSettingsCard";
@@ -27645,6 +28892,7 @@ body:has(#ai.active) main { padding-top:0 !important; }
     if(first&&first.parentNode){first.parentNode.insertBefore(grid,first);state.layouts.forEach(l=>l.order.forEach(id=>{const c=cards.get(id);if(c)grid.appendChild(c);}));}
     const active=()=>state.layouts.find(x=>x.id===state.activeId)||state.layouts[0];
     function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){console.warn("Dashboard settings could not be saved",e);}}
+    function applyDensity(){const val=state.density||"comfortable";document.documentElement.dataset.horizonDensity=val;}
     function renderSelect(){
         const select=document.getElementById("dashboardLayoutSelect");select.replaceChildren();
         state.layouts.forEach(l=>{const o=document.createElement("option");o.value=l.id;o.textContent=l.name;o.selected=l.id===state.activeId;select.appendChild(o);});
@@ -27709,11 +28957,12 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     button.addEventListener("click",()=>setEditing(!editing));
     document.getElementById("dashboardCustomizeDone").addEventListener("click",()=>setEditing(false));
     document.getElementById("dashboardLayoutSelect").addEventListener("change",e=>{state.activeId=e.target.value;save();apply();});
+    document.getElementById("dashboardDensitySelect").addEventListener("change",e=>{state.density=e.target.value;save();applyDensity();});
     document.getElementById("dashboardLayoutNew").addEventListener("click",()=>{if(state.layouts.length>=12){alert(t("limit"));return;}const name=prompt(t("name"),t("newName"));if(!name?.trim())return;const l=cleanLayout({...active(),id:makeId(),name:name.trim(),order:active().order.slice(),hidden:active().hidden.slice(),sizes:{...active().sizes}});state.layouts.push(l);state.activeId=l.id;save();apply();});
     document.getElementById("dashboardLayoutRename").addEventListener("click",()=>{const name=prompt(t("name"),active().name);if(!name?.trim())return;active().name=name.trim().slice(0,40);save();renderSelect();});
     document.getElementById("dashboardLayoutDelete").addEventListener("click",()=>{if(state.layouts.length<=1){alert(t("cannotDelete"));return;}if(!confirm(t("confirmDelete")))return;state.layouts=state.layouts.filter(l=>l.id!==state.activeId);state.activeId=state.layouts[0].id;save();apply();});
     window.__dailyKrdDashboardApply=function(raw){try{const x=typeof raw==="string"?JSON.parse(raw):raw;if(!x||!Array.isArray(x.layouts)||!x.layouts.length)return;state={layouts:x.layouts.slice(0,12).map(cleanLayout),activeId:x.activeId};if(!state.layouts.some(l=>l.id===state.activeId))state.activeId=state.layouts[0].id;save();apply();}catch(e){console.warn("Could not apply synced dashboard settings",e);}};
-    updateLabels();apply();
+    updateLabels();apply();applyDensity();
     if("MutationObserver"in window)new MutationObserver(()=>{updateLabels();}).observe(document.documentElement,{attributes:true,attributeFilter:["lang","dir"]});
 })();
 </script>
