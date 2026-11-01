@@ -25401,7 +25401,10 @@ document.documentElement.classList.toggle(
                 }
 
                 const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiIsFileWorkRequest(effectiveMessage));
-                if (fileWorkRequested) {
+                // A selected Puter model must handle ordinary coding prompts directly.
+                // Keep the Worker file-work route only when files are attached (the
+                // direct Puter chat path does not implement file editing/packaging).
+                if (fileWorkRequested && (!requestedModel.startsWith("puter::") || pendingFiles.length > 0)) {
                     const fileWorkUrl = AI_ENDPOINT.replace(/\/+$/, "") + "/file-work";
                     const fileWorkResponse = await fetch(fileWorkUrl, {
                         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
