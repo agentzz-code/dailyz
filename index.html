@@ -23212,11 +23212,11 @@ document.documentElement.classList.toggle(
                 <select id="aiModelSelect"><option value="auto">Automatic</option></select>
                 <p class="aiSettingsHint" id="aiModelMeta" role="status" aria-live="polite"></p>
                 <button type="button" class="aiSettingsSave" id="aiModelRefreshBtn">Refresh models</button>
-                <button type="button" class="aiSettingsSave" id="aiPuterConnectBtn">Connect Puter account</button>
-                <p class="aiSettingsHint" id="aiPuterStatus" role="status" aria-live="polite">Connect a Puter account to use GPT and Claude through Puter.</p>
+                <button type="button" class="aiSettingsSave" id="aiPuterConnectBtn" hidden>Connect Puter account</button>
+                <p class="aiSettingsHint" id="aiPuterStatus" role="status" aria-live="polite">Choose a Puter GPT or Claude model to connect a Puter account. APInex models do not need Puter.</p>
                 <label for="aiMaxTokensSelect">Response length</label>
                 <select id="aiMaxTokensSelect"><option value="auto">Automatic</option><option value="512">Short (512 tokens)</option><option value="1024">Medium (1,024 tokens)</option><option value="2048">Long (2,048 tokens)</option><option value="4096">Very long (4,096 tokens)</option></select>
-                <p class="aiSettingsHint">Automatic uses your configured Horizon providers. Puter GPT and Claude models are discovered live from Puter and require a connected Puter account; usage follows Puter’s user-pays terms. Each of Horizon and Atlas remembers its own model.</p>
+                <p class="aiSettingsHint">APInex models use your configured Horizon AI Worker and do not require Puter. Puter GPT and Claude models are discovered live and use your connected Puter account; usage follows Puter’s user-pays terms. Each of Horizon and Atlas remembers its own model.</p>
             </div>
             <div class="aiSettingsGroup ai-atlas-only">
                 <h4>Atlas project context</h4>
@@ -24991,11 +24991,24 @@ document.documentElement.classList.toggle(
 
         function aiUpdatePuterStatus(message) {
             const el = document.getElementById("aiPuterStatus");
+            const btn = document.getElementById("aiPuterConnectBtn");
             if (!el) return;
+            const select = document.getElementById("aiModelSelect");
+            const selected = select ? select.value : aiSelectedModelPref();
+            const isPuterModel = typeof selected === "string" && selected.startsWith("puter::");
+            // Keep Puter sign-in messaging out of the way for APInex and Automatic.
+            el.hidden = !isPuterModel;
+            if (btn) btn.hidden = !isPuterModel;
+            if (!isPuterModel) {
+                el.textContent = selected === "auto"
+                    ? "Automatic uses your configured Horizon provider. Puter sign-in is only needed if you select a Puter GPT or Claude model."
+                    : "This model uses your configured Horizon AI Worker (APInex); no Puter sign-in is required.";
+                return;
+            }
             if (message) { el.textContent = message; return; }
             if (!window.puter) el.textContent = "Puter.js is not available. Check the network or content-security policy.";
-            else if (puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn()) el.textContent = "Puter connected. GPT and Claude requests use your Puter account.";
-            else el.textContent = "Puter ready. Connect your Puter account before using GPT or Claude models.";
+            else if (puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn()) el.textContent = "Puter connected. This GPT or Claude model will use your Puter account.";
+            else el.textContent = "Connect your Puter account to use this GPT or Claude model.";
         }
 
         async function aiConnectPuter() {
@@ -25060,6 +25073,7 @@ document.documentElement.classList.toggle(
             });
             const chosen = aiResolveModel();
             select.value = chosen;
+            aiUpdatePuterStatus();
             if (!meta) return;
             if (aiModelCatalog.loading) { meta.textContent = aiT("modelsLoading"); return; }
             if (aiModelCatalog.error && !aiModelCatalog.loaded) { meta.textContent = aiT("modelsLoadFailed"); return; }
