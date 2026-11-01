@@ -5969,6 +5969,40 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 }
 </style>
 
+<style id="horizon-ai-worker-contract">
+/* Horizon / Atlas mode bar */
+#aiModeBar { display:flex; align-items:center; gap:10px; flex:0 0 auto; flex-wrap:wrap; padding:8px 14px; border-bottom:1px solid var(--ai-brd, rgba(128,128,128,.18)); background:transparent; }
+#aiModeBar .ai-mode-tabs { display:inline-flex; gap:2px; padding:3px; border-radius:12px; background:var(--ai-chip, rgba(128,128,128,.15)); }
+#aiModeBar .ai-mode-tab { min-height:30px; padding:6px 16px; border:0; border-radius:9px; background:transparent; color:var(--ai-muted, #86868b); font:inherit; font-size:12.5px; font-weight:650; cursor:pointer; touch-action:manipulation; }
+#aiModeBar .ai-mode-tab.on { background:var(--ai-btn, #111); color:var(--ai-btn-ink, #fff); }
+#aiModeBar .ai-mode-tab:disabled { opacity:.5; cursor:not-allowed; }
+#aiModeHint { flex:1 1 200px; min-width:0; font-size:11.5px; line-height:1.4; color:var(--ai-muted, #86868b); }
+#aiModeHint[hidden] { display:none; }
+#ai.active #aiModeBar { border-bottom-color:#252525; }
+#ai.active #aiModeBar .ai-mode-tabs { background:rgba(255,255,255,.08); }
+#ai.active #aiModeBar .ai-mode-tab { color:#b4b4b4; }
+#ai.active #aiModeBar .ai-mode-tab.on { background:#ececec; color:#111; }
+#ai.active #aiModeHint { color:#a2a2a2; }
+@media (max-width:760px) { #aiModeBar { padding:6px 10px; gap:6px; } #aiModeHint { font-size:11px; } }
+
+/* Mode-specific settings */
+#aiBox[data-ai-mode="atlas"] .ai-horizon-only,
+#aiBox:not([data-ai-mode="atlas"]) .ai-atlas-only { display:none !important; }
+#aiProjectContextInput { width:100%; box-sizing:border-box; min-height:110px; resize:vertical; }
+#aiModelMeta { min-height:1.2em; }
+
+/* Send button doubles as Stop while a reply is streaming */
+#aiSendBtn .aiStopIcon { display:none; width:12px; height:12px; border-radius:3px; background:currentColor; }
+#aiSendBtn.stop .aiSendIcon, #aiSendBtn.stop .aiSendSpin { display:none; }
+#aiSendBtn.stop .aiStopIcon { display:block; }
+
+/* Stream notes and error actions */
+.ai-stream-note { max-width:92%; margin:4px 2px 0; font-size:11.5px; line-height:1.4; color:var(--ai-muted, #86868b); }
+.ai-stream-note.ai-stream-note-error { color:#e05c5c; }
+.ai-error-actions { margin-top:8px; }
+.ai-error-actions button { padding:7px 12px; border:1px solid currentColor; border-radius:10px; background:transparent; color:inherit; font:inherit; font-size:12.5px; font-weight:650; cursor:pointer; }
+.ai-error-actions button:disabled { opacity:.5; }
+</style>
 </head>
 
 <body>
@@ -21227,7 +21261,7 @@ document.documentElement.classList.toggle(
             const response = await fetch(AI_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: prompt, image: image, history: [] })
+                body: JSON.stringify({ mode: "horizon", model: "auto", message: prompt, history: [], aiConfig: { tone: "professional", detail: "concise", memory: "", permission: "suggest", rules: "Return only the JSON that was requested.", context: {} }, webSearch: false, image: image })
             });
             if (!response.ok) throw new Error("AI Worker returned HTTP " + response.status + ".");
             let raw = "";
@@ -23151,13 +23185,32 @@ document.documentElement.classList.toggle(
             </div>
         </div>
 
+        <div id="aiModeBar">
+            <div class="ai-mode-tabs" role="tablist" aria-label="AI mode">
+                <button type="button" role="tab" class="ai-mode-tab on" id="aiModeHorizonTab" data-ai-mode="horizon" aria-selected="true">Horizon</button>
+                <button type="button" role="tab" class="ai-mode-tab" id="aiModeAtlasTab" data-ai-mode="atlas" aria-selected="false" tabindex="-1">Atlas</button>
+            </div>
+            <div id="aiModeHint" hidden></div>
+        </div>
+
         <section id="aiSettingsModal" aria-label="Horizon AI settings" aria-hidden="true">
             <div class="aiSettingsTop"><strong>Horizon AI settings</strong><button type="button" class="aiSettingsClose" id="aiSettingsClose">Done</button></div>
             <div class="aiSettingsGroup">
                 <h4>Model</h4>
                 <label for="aiModelSelect">Response model</label>
-                <select id="aiModelSelect"><option value="auto">Automatic (Worker default)</option><option value="gemini-3.8-flash">Gemini 3.8 Flash</option><option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (lighter)</option></select>
-                <p class="aiSettingsHint">Availability depends on the model access enabled for your Gemini API key. If a model is unavailable, Horizon will try its configured fallback.</p>
+                <select id="aiModelSelect"><option value="auto">Automatic</option></select>
+                <p class="aiSettingsHint" id="aiModelMeta" role="status" aria-live="polite"></p>
+                <button type="button" class="aiSettingsSave" id="aiModelRefreshBtn">Refresh models</button>
+                <label for="aiMaxTokensSelect">Response length</label>
+                <select id="aiMaxTokensSelect"><option value="auto">Automatic</option><option value="512">Short (512 tokens)</option><option value="1024">Medium (1,024 tokens)</option><option value="2048">Long (2,048 tokens)</option><option value="4096">Very long (4,096 tokens)</option></select>
+                <p class="aiSettingsHint">The model list is loaded live from the Horizon AI Worker and only free models are shown. Availability can change, so Automatic is the safest choice. Each of Horizon and Atlas remembers its own model.</p>
+            </div>
+            <div class="aiSettingsGroup ai-atlas-only">
+                <h4>Atlas project context</h4>
+                <label for="aiProjectContextInput">Project notes (optional)</label>
+                <textarea id="aiProjectContextInput" maxlength="12000" placeholder="Stack, conventions, goals, relevant code snippets…"></textarea>
+                <p class="aiSettingsHint">Sent with your Atlas messages only. Atlas can't open repositories or run code; it only sees what you paste here or into the chat. Stored on this device.</p>
+                <button type="button" class="aiSettingsSave" id="aiClearProjectContextBtn">Clear project context</button>
             </div>
             <div class="aiSettingsGroup">
                 <h4>Behavior</h4>
@@ -23173,7 +23226,7 @@ document.documentElement.classList.toggle(
                 <p class="aiSettingsHint">This first version stores memory on this device in this browser. It is sent with your AI request when you chat; avoid storing passwords or highly sensitive details.</p>
                 <button type="button" class="aiSettingsSave" id="aiClearMemoryBtn">Clear memory</button>
             </div>
-            <div class="aiSettingsGroup">
+            <div class="aiSettingsGroup ai-horizon-only">
                 <h4>Copilot permissions</h4>
                 <label for="aiPermissionSelect">What can Copilot do?</label>
                 <select id="aiPermissionSelect"><option value="suggest">Suggest only — never offer app changes</option><option value="confirm">Ask me before every change</option><option value="approved">Allow only actions I explicitly enable</option></select>
@@ -23181,7 +23234,7 @@ document.documentElement.classList.toggle(
                 <textarea id="aiRulesInput" maxlength="2000" placeholder="Example: Ask before deleting anything. Keep plans realistic."></textarea>
                 <p class="aiSettingsHint">Task creation can be proposed for your approval. Other app actions are not enabled until their tool and permission checks are implemented.</p>
             </div>
-            <div class="aiSettingsGroup">
+            <div class="aiSettingsGroup ai-horizon-only">
                 <h4>Action history</h4>
                 <div id="aiActionHistoryText" class="aiSettingsHint">No Copilot actions recorded yet.</div>
                 <button type="button" class="aiSettingsSave" id="aiClearActionHistoryBtn">Clear action history</button>
@@ -23262,12 +23315,13 @@ document.documentElement.classList.toggle(
             <button
                 type="button"
                 id="aiSendBtn"
-                onclick="sendAI()"
+                onclick="aiSendOrStop()"
                 aria-label="Send"
                 title="Send"
             >
                 <span class="aiSendIcon" aria-hidden="true">➤</span>
                 <span class="aiSendSpin" aria-hidden="true"></span>
+                <span class="aiStopIcon" aria-hidden="true"></span>
             </button>
         </div>
 
@@ -23276,13 +23330,16 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
+        const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
+        const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
+        const aiModelCatalog = { loaded: false, loading: false, error: false, provider: "", models: [], at: 0, promise: null };
         const AI_HISTORY_LIMIT = 10;
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
         const AI_LANG_STORAGE_KEY = "dailykrd_language";
         const AI_WEBSEARCH_STORAGE_KEY = "dailykrd_ai_websearch";
         const AI_SETTINGS_KEY = "horizon_ai_settings_v3";
         const AI_ACTION_LOG_KEY = "horizon_ai_action_log_v3";
-        const AI_DEFAULT_SETTINGS = { model: "auto", tone: "warm", detail: "concise", memory: "", permission: "confirm", rules: "" };
+        const AI_DEFAULT_SETTINGS = { model: "auto", atlasModel: "auto", maxTokens: "auto", tone: "warm", detail: "concise", memory: "", permission: "confirm", rules: "", projectContext: "" };
         let aiSettings = { ...AI_DEFAULT_SETTINGS };
         try { aiSettings = { ...AI_DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || "{}") }; } catch (e) {}
 
@@ -23422,6 +23479,65 @@ document.documentElement.classList.toggle(
             }
         };
 
+        Object.assign(AI_STRINGS.en, {
+            modeLabel: "AI mode", modeHorizon: "Horizon", modeAtlas: "Atlas",
+            atlasNote: "Atlas is chat-only: it can't run code or access your repositories or files. Paste what you want it to look at.",
+            atlasTitle: "Atlas", atlasSubtitle: "Code & technical assistant",
+            atlasPlaceholder: "Ask Atlas about code, bugs, design…",
+            atlasWelcomeTitle: "Atlas",
+            atlasWelcomeSub: "Ask about code, debugging, architecture and technical plans. Paste the code or details you want help with.",
+            atlasSuggestions: ["Review the code I paste", "Help me debug an error", "Plan a project structure"],
+            modelAuto: "Automatic", modelUnavailable: "unavailable",
+            modelsLoading: "Loading free models…",
+            modelsLoadFailed: "Couldn't load the model list. Automatic will be used.",
+            modelsNoFree: "No free models are available right now. Automatic will be used.",
+            stopGenerating: "Stop generating", stopped: "Stopped", interrupted: "The response was interrupted.",
+            errModel: "That model isn't available right now.", errModelHint: "Try Automatic or pick another model.",
+            errRate: "The AI service is busy or rate-limited. Please wait a moment and try again.",
+            errProvider: "The AI provider had a problem. Please try again shortly.",
+            retryAuto: "Retry with Automatic"
+        });
+        Object.assign(AI_STRINGS.ar, {
+            modeLabel: "وضع الذكاء الاصطناعي", modeHorizon: "هورايزن", modeAtlas: "أطلس",
+            atlasNote: "أطلس للمحادثة فقط: لا يمكنه تشغيل الأكواد أو الوصول إلى مستودعاتك أو ملفاتك. الصق ما تريد منه مراجعته.",
+            atlasTitle: "أطلس", atlasSubtitle: "مساعد البرمجة والأمور التقنية",
+            atlasPlaceholder: "اسأل أطلس عن الأكواد والأخطاء والتصميم…",
+            atlasWelcomeTitle: "أطلس",
+            atlasWelcomeSub: "اسأل عن البرمجة وإصلاح الأخطاء والبنية والخطط التقنية. الصق الكود أو التفاصيل التي تريد المساعدة فيها.",
+            atlasSuggestions: ["راجع الكود الذي ألصقه", "ساعدني في إصلاح خطأ", "خطط لهيكل مشروع"],
+            modelAuto: "تلقائي", modelUnavailable: "غير متاح",
+            modelsLoading: "جارٍ تحميل النماذج المجانية…",
+            modelsLoadFailed: "تعذّر تحميل قائمة النماذج. سيتم استخدام الوضع التلقائي.",
+            modelsNoFree: "لا تتوفر نماذج مجانية الآن. سيتم استخدام الوضع التلقائي.",
+            stopGenerating: "إيقاف التوليد", stopped: "تم الإيقاف", interrupted: "انقطعت الإجابة.",
+            errModel: "هذا النموذج غير متاح الآن.", errModelHint: "جرّب الوضع التلقائي أو اختر نموذجاً آخر.",
+            errRate: "الخدمة مشغولة أو وصلت إلى الحد المسموح. انتظر قليلاً ثم حاول مجدداً.",
+            errProvider: "واجه مزوّد الذكاء الاصطناعي مشكلة. حاول مرة أخرى بعد قليل.",
+            retryAuto: "أعد المحاولة بالوضع التلقائي"
+        });
+        Object.assign(AI_STRINGS.ku, {
+            modeLabel: "دۆخی زیرەکی دەستکرد", modeHorizon: "هۆرایزن", modeAtlas: "ئەتلەس",
+            atlasNote: "ئەتلەس تەنیا بۆ چاتە: ناتوانێت کۆد جێبەجێ بکات یان دەستی بە ڕیپۆ و فایلەکانت بگات. ئەوەی دەتەوێت ببینێت لێرە دایبنێ.",
+            atlasTitle: "ئەتلەس", atlasSubtitle: "یاریدەدەری کۆد و تەکنیکی",
+            atlasPlaceholder: "لە ئەتلەس بپرسە دەربارەی کۆد و هەڵە و دیزاین…",
+            atlasWelcomeTitle: "ئەتلەس",
+            atlasWelcomeSub: "دەربارەی کۆد، چاککردنی هەڵە، بونیاد و پلانی تەکنیکی بپرسە. ئەو کۆد و وردەکارییانە دابنێ کە یارمەتیت دەوێت.",
+            atlasSuggestions: ["ئەو کۆدەی دایدەنێم پێداچوونەوەی بۆ بکە", "یارمەتیم بدە هەڵەیەک چاک بکەم", "پلانی پێکهاتەی پڕۆژەیەک دابنێ"],
+            modelAuto: "خۆکار", modelUnavailable: "بەردەست نییە",
+            modelsLoading: "بارکردنی مۆدێلە بێبەرامبەرەکان…",
+            modelsLoadFailed: "نەتوانرا لیستی مۆدێلەکان باربکرێت. دۆخی خۆکار بەکاردێت.",
+            modelsNoFree: "ئێستا هیچ مۆدێلێکی بێبەرامبەر بەردەست نییە. دۆخی خۆکار بەکاردێت.",
+            stopGenerating: "وەستاندنی دروستکردن", stopped: "وەستێنرا", interrupted: "وەڵامەکە بڕا.",
+            errModel: "ئەم مۆدێلە ئێستا بەردەست نییە.", errModelHint: "دۆخی خۆکار تاقی بکەرەوە یان مۆدێلێکی تر هەڵبژێرە.",
+            errRate: "خزمەتگوزارییەکە سەرقاڵە یان گەیشتووەتە سنوور. کەمێک چاوەڕێ بکە و دووبارە هەوڵ بدە.",
+            errProvider: "دابینکەری زیرەکی دەستکرد کێشەیەکی هەبوو. تکایە کەمێکی تر دووبارە هەوڵ بدە.",
+            retryAuto: "بە دۆخی خۆکار دووبارە هەوڵ بدە"
+        });
+
+        let aiMode = "horizon";
+        try { if (localStorage.getItem(AI_MODE_STORAGE_KEY) === "atlas") aiMode = "atlas"; } catch (e) {}
+        let aiAbortController = null;
+        let aiStreamCancelled = false;
         let aiLang = "en";
         let aiFullOpen = false;
         let aiBusy = false;
@@ -23468,8 +23584,8 @@ document.documentElement.classList.toggle(
             const input = document.getElementById("aiInput");
             const status = document.getElementById("aiStatus");
             if (input) {
-                input.placeholder = aiT("placeholder");
-                input.setAttribute("aria-label", aiT("placeholder"));
+                input.placeholder = aiModeStr("placeholder");
+                input.setAttribute("aria-label", aiModeStr("placeholder"));
             }
             if (status) status.setAttribute("aria-label", aiT("title"));
 
@@ -23482,6 +23598,14 @@ document.documentElement.classList.toggle(
             setLabel("aiVoiceStopBtn", aiT("stop"));
             setLabel("aiVoiceCancelBtn", aiT("cancel"));
             setLabel("aiCloseBtn", aiT("close"));
+            const tabH = document.getElementById("aiModeHorizonTab");
+            const tabA = document.getElementById("aiModeAtlasTab");
+            if (tabH) tabH.textContent = aiT("modeHorizon");
+            if (tabA) tabA.textContent = aiT("modeAtlas");
+            const modeTabs = document.querySelector("#aiModeBar .ai-mode-tabs");
+            if (modeTabs) modeTabs.setAttribute("aria-label", aiT("modeLabel"));
+            const modeHint = document.getElementById("aiModeHint");
+            if (modeHint) { modeHint.textContent = aiMode === "atlas" ? aiT("atlasNote") : ""; modeHint.hidden = aiMode !== "atlas"; }
 
             const searchBtn = document.getElementById("aiSearchBtn");
             if (searchBtn) {
@@ -23516,23 +23640,25 @@ document.documentElement.classList.toggle(
 
             const title = document.getElementById("aiTitle");
             const sub = document.getElementById("aiHeaderSub");
-            if (title) title.textContent = aiT("title");
-            if (sub) sub.textContent = aiT("subtitle");
+            if (title) title.textContent = aiModeStr("title");
+            if (sub) sub.textContent = aiModeStr("subtitle");
 
             const box = document.getElementById("aiBox");
             if (box) box.setAttribute("aria-label", aiT("title"));
 
             const wTitle = document.getElementById("aiWelcomeTitle");
             const wSub = document.getElementById("aiWelcomeSub");
-            if (wTitle) wTitle.textContent = aiT("welcomeTitle");
-            if (wSub) wSub.textContent = aiT("welcomeSub");
-            document.querySelectorAll("#aiWelcome .ai-suggest").forEach((btn, i) => {
-                const text = aiT("suggestions")[i];
+            if (wTitle) wTitle.textContent = aiModeStr("welcomeTitle");
+            if (wSub) wSub.textContent = aiModeStr("welcomeSub");
+            document.querySelectorAll("#aiBox .ai-suggest").forEach((btn, i) => {
+                const text = aiModeStr("suggestions")[i];
                 if (text) btn.textContent = text;
             });
 
             const vText = document.getElementById("aiVoiceText");
             if (vText) vText.textContent = aiT("listening");
+            aiRenderModelOptions();
+            aiUpdateModelPill();
 
             /* re-render assistant bubbles so restored history follows the language */
             document
@@ -24020,7 +24146,8 @@ document.documentElement.classList.toggle(
         }
 
         function aiSaveHistory(history) {
-            try {
+            /* the legacy single-transcript key belongs to Horizon only; Atlas never writes it */
+            if (aiMode === "horizon") try {
                 const safeHistory = (Array.isArray(history) ? history : []).slice(-40);
                 localStorage.setItem(AI_HISTORY_STORAGE_KEY, JSON.stringify(safeHistory));
                 sessionStorage.setItem(AI_HISTORY_STORAGE_KEY, JSON.stringify(safeHistory));
@@ -24047,9 +24174,12 @@ document.documentElement.classList.toggle(
             const title = first.content.replace(/^\[User uploaded an image and asked:\s*/i, "").replace(/\]$/, "").replace(/\s+/g, " ").trim();
             return title.length > 42 ? title.slice(0, 39) + "…" : (title || "New chat");
         }
+        /* Horizon keeps its original keys; Atlas has a fully separate store. */
+        function aiChatsStorageKey() { return aiMode === "atlas" ? "horizon_atlas_chats_v1" : AI_CHATS_STORAGE_KEY; }
+        function aiCurrentChatStorageKey() { return aiMode === "atlas" ? "horizon_atlas_current_chat_v1" : "horizon_ai_current_chat_v1"; }
         function aiLoadChats() {
             try {
-                const raw = localStorage.getItem(AI_CHATS_STORAGE_KEY);
+                const raw = localStorage.getItem(aiChatsStorageKey());
                 const parsed = raw ? JSON.parse(raw) : null;
                 if (Array.isArray(parsed) && parsed.length) {
                     const valid = parsed.filter(c => c && typeof c.id === "string" && Array.isArray(c.messages)).map(c => ({
@@ -24057,10 +24187,10 @@ document.documentElement.classList.toggle(
                         messages: c.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-40),
                         updatedAt: Number(c.updatedAt) || Date.now(), pinned: !!c.pinned
                     })).slice(0,80);
-                    if (valid.length) { aiCurrentChatId = localStorage.getItem("horizon_ai_current_chat_v1") || valid[0].id; if (!valid.some(c => c.id === aiCurrentChatId)) aiCurrentChatId = valid[0].id; return valid; }
+                    if (valid.length) { aiCurrentChatId = localStorage.getItem(aiCurrentChatStorageKey()) || valid[0].id; if (!valid.some(c => c.id === aiCurrentChatId)) aiCurrentChatId = valid[0].id; return valid; }
                 }
             } catch (e) {}
-            const legacy = Array.isArray(aiConversationHistory) ? aiConversationHistory.slice(-40) : [];
+            const legacy = (aiMode === "horizon" && Array.isArray(aiConversationHistory)) ? aiConversationHistory.slice(-40) : [];
             const migrated = { id: aiMakeChatId(), title: aiChatTitle(legacy), messages: legacy, updatedAt: Date.now(), pinned: false };
             aiCurrentChatId = migrated.id;
             return [migrated];
@@ -24068,8 +24198,8 @@ document.documentElement.classList.toggle(
         function aiPersistChats() {
             try {
                 aiChats = aiChats.slice(0,80).map(c => ({...c, messages:(c.messages || []).slice(-40)}));
-                localStorage.setItem(AI_CHATS_STORAGE_KEY, JSON.stringify(aiChats));
-                localStorage.setItem("horizon_ai_current_chat_v1", aiCurrentChatId);
+                localStorage.setItem(aiChatsStorageKey(), JSON.stringify(aiChats));
+                localStorage.setItem(aiCurrentChatStorageKey(), aiCurrentChatId);
             } catch (e) {}
             aiRenderChatLists();
             aiUpdateMemorySidebar();
@@ -24147,7 +24277,7 @@ document.documentElement.classList.toggle(
             aiPersistChats(); aiRenderCurrentChat();
         }
         function aiBuildCrossChatContext() {
-            if(localStorage.getItem(AI_CHAT_MEMORY_CONTEXT_KEY)==="false")return "";
+            if(aiMode==="atlas"||localStorage.getItem(AI_CHAT_MEMORY_CONTEXT_KEY)==="false")return "";
             const current=aiCurrentChatId;
             const snippets=aiChats.filter(c=>c.id!==current && c.messages?.length).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)).slice(0,3).map(c=>{
                 const lines=c.messages.filter(m=>m.role==="user"||m.role==="assistant").slice(-4).map(m=>(m.role==="user"?"User":"Assistant")+": "+String(m.content).slice(0,500));
@@ -24167,11 +24297,15 @@ document.documentElement.classList.toggle(
             const micBtn = document.getElementById("aiMicBtn");
             if (input) input.disabled = disabled;
             if (sendBtn) {
-                sendBtn.disabled = disabled;
-                sendBtn.classList.toggle("busy", disabled);
+                /* while a reply is in flight the send button becomes Stop and stays enabled */
+                sendBtn.disabled = false;
+                sendBtn.classList.toggle("stop", disabled);
+                setLabel("aiSendBtn", disabled ? aiT("stopGenerating") : aiT("send"));
             }
             if (imageBtn) imageBtn.disabled = disabled;
             if (micBtn) micBtn.disabled = disabled;
+            /* the mode can't change mid-stream: the reply belongs to the mode that asked */
+            document.querySelectorAll("#aiModeBar .ai-mode-tab").forEach((b) => { b.disabled = disabled; });
         }
 
         function aiShowWelcome(show) {
@@ -24565,16 +24699,22 @@ document.documentElement.classList.toggle(
 
         function aiLoadSettingsIntoUI() {
             const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value || ""; };
-            set("aiModelSelect", aiSettings.model); set("aiToneSelect", aiSettings.tone); set("aiDetailSelect", aiSettings.detail);
+            set("aiToneSelect", aiSettings.tone); set("aiDetailSelect", aiSettings.detail);
+            set("aiMaxTokensSelect", aiSettings.maxTokens || "auto"); set("aiProjectContextInput", aiSettings.projectContext);
+            aiRenderModelOptions();
             set("aiMemoryInput", aiSettings.memory); set("aiPermissionSelect", aiSettings.permission); set("aiRulesInput", aiSettings.rules);
             aiRenderActionHistory();
         }
         function aiReadSettingsFromUI() {
             const get = id => document.getElementById(id)?.value || "";
-            aiSettings = { model: get("aiModelSelect"), tone: get("aiToneSelect"), detail: get("aiDetailSelect"), memory: get("aiMemoryInput").slice(0,3000), permission: get("aiPermissionSelect"), rules: get("aiRulesInput").slice(0,2000) };
-            try { localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(aiSettings)); } catch (e) {}
+            const next = { ...aiSettings, tone: get("aiToneSelect"), detail: get("aiDetailSelect"), memory: get("aiMemoryInput").slice(0,3000), permission: get("aiPermissionSelect"), rules: get("aiRulesInput").slice(0,2000), maxTokens: get("aiMaxTokensSelect") || "auto", projectContext: get("aiProjectContextInput").slice(0,12000) };
+            /* the model select only reflects the saved choice once the catalogue has loaded */
+            const picked = get("aiModelSelect") || "auto";
+            if (aiModelCatalog.loaded || picked === "auto") { if (aiMode === "atlas") next.atlasModel = picked; else next.model = picked; }
+            aiSettings = next;
+            aiPersistSettings();
         }
-        function aiOpenSettings() { aiLoadSettingsIntoUI(); const el=document.getElementById("aiSettingsModal"); if(el){el.classList.add("open");el.setAttribute("aria-hidden","false");} }
+        function aiOpenSettings() { aiFetchModels(false); aiLoadSettingsIntoUI(); const el=document.getElementById("aiSettingsModal"); if(el){el.classList.add("open");el.setAttribute("aria-hidden","false");} }
         function aiCloseSettings() { const el=document.getElementById("aiSettingsModal"); if(el){el.classList.remove("open");el.setAttribute("aria-hidden","true");} }
         function aiReadActionLog() { try { const x=JSON.parse(localStorage.getItem(AI_ACTION_LOG_KEY)||"[]"); return Array.isArray(x)?x.slice(-20):[]; } catch(e){return [];} }
         function aiLogAction(action, status) { const list=aiReadActionLog(); list.push({action:String(action).slice(0,160),status:String(status).slice(0,40),at:new Date().toISOString()}); try{localStorage.setItem(AI_ACTION_LOG_KEY,JSON.stringify(list.slice(-20)));}catch(e){} aiRenderActionHistory(); }
@@ -24601,11 +24741,290 @@ document.documentElement.classList.toggle(
             reject.addEventListener("click",()=>{card.remove();aiLogAction("Create task: "+action.text,"rejected");}); card.append(approve,reject); anchor.insertAdjacentElement("afterend",card);
         }
 
+        /* =====================================================
+           WORKER CONTRACT
+           GET  {AI_ENDPOINT}/models   -> { ok, provider, models[] }
+           POST {AI_ENDPOINT}          -> SSE: data: {"delta":"…"} … data: [DONE]
+           Nothing here touches a provider or an API key; the
+           browser only ever talks to the Horizon AI Worker.
+           ===================================================== */
+
+        function aiModeStr(key) {
+            return aiMode === "atlas" ? aiT("atlas" + key.charAt(0).toUpperCase() + key.slice(1)) : aiT(key);
+        }
+
+        function aiPersistSettings() {
+            try { localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(aiSettings)); } catch (e) {}
+        }
+
+        /* ---------- model discovery ---------- */
+
+        function aiNormCaps(c) {
+            if (Array.isArray(c)) return c.map(String).filter(Boolean);
+            if (c && typeof c === "object") return Object.keys(c).filter((k) => c[k]);
+            if (typeof c === "string" && c) return [c];
+            return [];
+        }
+
+        function aiFormatContext(n) {
+            n = Number(n);
+            if (!isFinite(n) || n <= 0) return "";
+            if (n >= 1000000) return (Math.round(n / 100000) / 10) + "M";
+            if (n >= 1000) return Math.round(n / 1000) + "k";
+            return String(n);
+        }
+
+        async function aiFetchModels(force) {
+            if (aiModelCatalog.loading && aiModelCatalog.promise) return aiModelCatalog.promise;
+            if (!force && aiModelCatalog.loaded && Date.now() - aiModelCatalog.at < 10 * 60 * 1000) return;
+            aiModelCatalog.loading = true;
+            aiModelCatalog.error = false;
+            aiRenderModelOptions();
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 12000);
+            aiModelCatalog.promise = (async () => {
+                try {
+                    const res = await fetch(AI_MODELS_URL, {
+                        method: "GET",
+                        headers: { "Accept": "application/json" },
+                        cache: "no-store",
+                        signal: controller.signal
+                    });
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    const data = await res.json();
+                    if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected catalogue");
+                    const provider = typeof data.provider === "string" ? data.provider : "";
+                    const seen = new Set();
+                    const models = [];
+                    data.models.forEach((m) => {
+                        if (!m || typeof m.id !== "string" || !m.id.trim() || seen.has(m.id)) return;
+                        /* only models the Worker explicitly reports as free are listed */
+                        const free = m.free === true || m.free === "true" || m.free === 1;
+                        if (!free) return;
+                        seen.add(m.id);
+                        models.push({
+                            id: m.id,
+                            name: typeof m.name === "string" && m.name.trim() ? m.name.trim() : m.id,
+                            provider: typeof m.provider === "string" && m.provider ? m.provider : provider,
+                            available: m.available !== false,
+                            contextLength: Number(m.contextLength) > 0 ? Number(m.contextLength) : 0,
+                            capabilities: aiNormCaps(m.capabilities)
+                        });
+                    });
+                    models.sort((a, b) => (b.available ? 1 : 0) - (a.available ? 1 : 0));
+                    aiModelCatalog.models = models;
+                    aiModelCatalog.provider = provider;
+                    aiModelCatalog.loaded = true;
+                    aiModelCatalog.at = Date.now();
+                    /* a saved model that no longer exists in the catalogue falls back to Automatic */
+                    let changed = false;
+                    ["model", "atlasModel"].forEach((k) => {
+                        const v = aiSettings[k];
+                        if (v && v !== "auto" && !models.some((m) => m.id === v)) { aiSettings[k] = "auto"; changed = true; }
+                    });
+                    if (changed) aiPersistSettings();
+                } catch (e) {
+                    aiModelCatalog.error = true;
+                } finally {
+                    clearTimeout(timer);
+                    aiModelCatalog.loading = false;
+                    aiModelCatalog.promise = null;
+                    aiRenderModelOptions();
+                    aiUpdateModelPill();
+                }
+            })();
+            return aiModelCatalog.promise;
+        }
+
+        function aiSelectedModelPref() {
+            return (aiMode === "atlas" ? aiSettings.atlasModel : aiSettings.model) || "auto";
+        }
+
+        /* The ID actually sent: only a model the catalogue lists as available.
+           Anything unverified (catalogue not loaded, stale saved id) becomes "auto". */
+        function aiResolveModel() {
+            const wanted = aiSelectedModelPref();
+            if (wanted === "auto" || !aiModelCatalog.loaded) return "auto";
+            const m = aiModelCatalog.models.find((x) => x.id === wanted);
+            return m && m.available ? m.id : "auto";
+        }
+
+        function aiSetModelPref(id) {
+            if (aiMode === "atlas") aiSettings.atlasModel = id; else aiSettings.model = id;
+            aiPersistSettings();
+            aiRenderModelOptions();
+            aiUpdateModelPill();
+        }
+
+        function aiRenderModelOptions() {
+            const select = document.getElementById("aiModelSelect");
+            const meta = document.getElementById("aiModelMeta");
+            const refresh = document.getElementById("aiModelRefreshBtn");
+            if (refresh) refresh.disabled = aiModelCatalog.loading;
+            if (!select) return;
+            select.replaceChildren();
+            const auto = document.createElement("option");
+            auto.value = "auto";
+            auto.textContent = aiT("modelAuto");
+            select.appendChild(auto);
+            aiModelCatalog.models.forEach((m) => {
+                const o = document.createElement("option");
+                o.value = m.id;
+                o.textContent = m.name + (m.available ? "" : " — " + aiT("modelUnavailable"));
+                o.disabled = !m.available;
+                select.appendChild(o);
+            });
+            const chosen = aiResolveModel();
+            select.value = chosen;
+            if (!meta) return;
+            if (aiModelCatalog.loading) { meta.textContent = aiT("modelsLoading"); return; }
+            if (aiModelCatalog.error && !aiModelCatalog.loaded) { meta.textContent = aiT("modelsLoadFailed"); return; }
+            if (aiModelCatalog.loaded && !aiModelCatalog.models.length) { meta.textContent = aiT("modelsNoFree"); return; }
+            const m = aiModelCatalog.models.find((x) => x.id === chosen);
+            if (!m) { meta.textContent = aiModelCatalog.provider ? aiModelCatalog.provider : ""; return; }
+            const bits = [m.provider, aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " context" : "", m.capabilities.join(", ")].filter(Boolean);
+            meta.textContent = bits.join(" · ");
+        }
+
+        function aiUpdateModelPill() {
+            const btn = document.getElementById("aiModelQuickBtn");
+            if (!btn) return;
+            const id = aiResolveModel();
+            let label = aiT("modelAuto");
+            if (id !== "auto") {
+                const m = aiModelCatalog.models.find((x) => x.id === id);
+                label = m ? m.name : id;
+            }
+            btn.textContent = label + "  ▾";
+        }
+
+        /* ---------- Horizon / Atlas mode ---------- */
+
+        function aiApplyMode() {
+            const atlas = aiMode === "atlas";
+            const box = document.getElementById("aiBox");
+            if (box) box.setAttribute("data-ai-mode", aiMode);
+            document.querySelectorAll("#aiModeBar [data-ai-mode]").forEach((btn) => {
+                const on = btn.getAttribute("data-ai-mode") === aiMode;
+                btn.classList.toggle("on", on);
+                btn.setAttribute("aria-selected", on ? "true" : "false");
+                btn.tabIndex = on ? 0 : -1;
+            });
+            const h1 = document.getElementById("aiPageHeading");
+            if (h1) {
+                if (!h1.dataset.horizonText) h1.dataset.horizonText = h1.textContent;
+                h1.textContent = atlas ? aiT("atlasTitle") : h1.dataset.horizonText;
+            }
+            aiApplyLanguage();
+            aiRenderModelOptions();
+            aiUpdateModelPill();
+            const ctx = document.getElementById("aiProjectContextInput");
+            if (ctx) ctx.value = aiSettings.projectContext || "";
+        }
+
+        function aiSetMode(next) {
+            if (next !== "horizon" && next !== "atlas") return;
+            if (aiBusy || next === aiMode) return;
+            aiPersistChats(); /* save the outgoing mode's chats under its own keys */
+            aiMode = next;
+            try { localStorage.setItem(AI_MODE_STORAGE_KEY, aiMode); } catch (e) {}
+            aiChats = aiLoadChats();
+            aiClearSelectedImage();
+            aiApplyMode();
+            aiPersistChats();
+            aiRenderCurrentChat();
+            aiFetchModels(false);
+        }
+
+        function aiBindModeControls() {
+            const bar = document.getElementById("aiModeBar");
+            if (!bar || bar.dataset.bound) return;
+            bar.dataset.bound = "1";
+            bar.querySelectorAll("[data-ai-mode]").forEach((btn) => {
+                btn.addEventListener("click", () => aiSetMode(btn.getAttribute("data-ai-mode")));
+            });
+            bar.addEventListener("keydown", (e) => {
+                if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                e.preventDefault();
+                aiSetMode(aiMode === "atlas" ? "horizon" : "atlas");
+                bar.querySelector('[data-ai-mode="' + aiMode + '"]')?.focus();
+            });
+            document.getElementById("aiModelRefreshBtn")?.addEventListener("click", () => aiFetchModels(true));
+            document.getElementById("aiMaxTokensSelect")?.addEventListener("change", aiReadSettingsFromUI);
+            document.getElementById("aiClearProjectContextBtn")?.addEventListener("click", () => {
+                const el = document.getElementById("aiProjectContextInput");
+                if (el) el.value = "";
+                aiReadSettingsFromUI();
+                const status = document.getElementById("aiSettingsStatus");
+                if (status) status.textContent = "Project context cleared on this device.";
+            });
+        }
+
+        /* ---------- errors ---------- */
+
+        function aiErrorInfo(status, payload) {
+            let code = "";
+            let message = "";
+            if (payload && typeof payload === "object") {
+                const e = payload.error;
+                if (typeof e === "string") message = e;
+                else if (e && typeof e === "object") {
+                    message = String(e.message || "");
+                    code = String(e.code || e.type || e.status || "");
+                }
+                if (!message && typeof payload.message === "string") message = payload.message;
+                if (!code && (typeof payload.code === "string" || typeof payload.code === "number")) code = String(payload.code);
+                if (!code && typeof payload.type === "string") code = payload.type;
+            }
+            const hay = (code + " " + message).toLowerCase();
+            let kind = "unknown";
+            if (/model/.test(hay) && (/(unavailable|not[_ -]?found|unsupported|unknown|invalid|no access|not accessible|disabled|deprecated|not available|does not exist|not allowed)/.test(hay) || [400, 403, 404, 409, 410, 422].indexOf(status) !== -1)) kind = "model";
+            else if (status === 429 || /rate|quota|too many|limit/.test(hay)) kind = "rate";
+            else if (status === 401 || status === 403 || /auth|permission|forbidden|unauthor|credential/.test(hay)) kind = "provider";
+            else if (status >= 500 || /provider|upstream|overload|timeout|temporar|unavailable/.test(hay)) kind = "provider";
+            return { kind: kind, status: status || 0, code: code, message: message };
+        }
+
+        function aiFriendlyError(info) {
+            switch (info && info.kind) {
+                case "model": return aiT("errModel") + " " + aiT("errModelHint");
+                case "rate": return aiT("errRate");
+                case "network": return aiT("connectError");
+                case "provider": return aiT("errProvider");
+                default: return aiT("genericError");
+            }
+        }
+
+        function aiSendOrStop() {
+            if (aiBusy) aiCancelStream();
+            else sendAI();
+        }
+
+        function aiCancelStream() {
+            if (!aiBusy || !aiAbortController) return;
+            aiStreamCancelled = true;
+            try { aiAbortController.abort(); } catch (e) {}
+        }
+
+        function aiAppendNote(text) {
+            const messages = aiMessagesEl();
+            if (!messages || !text) return null;
+            const el = document.createElement("div");
+            el.className = "ai-stream-note";
+            el.textContent = text;
+            messages.appendChild(el);
+            return el;
+        }
+
+        /* ---------- send ---------- */
+
         async function sendAI() {
             if (aiBusy) return;
             const input = document.getElementById("aiInput");
             if (!input) return;
 
+            const mode = aiMode;
+            const isAtlas = mode === "atlas";
             const message = input.value.trim();
             const pendingImage = aiSelectedImage;
 
@@ -24615,12 +25034,15 @@ document.documentElement.classList.toggle(
                 message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : "");
 
             aiShowWelcome(false);
-            aiAppendUserMessage(message, pendingImage ? pendingImage.previewUrl : null);
+            const userEl = aiAppendUserMessage(message, pendingImage ? pendingImage.previewUrl : null);
 
             input.value = "";
             aiClearSelectedImage();
-            aiSetInputDisabled(true);
             aiBusy = true;
+            aiStreamCancelled = false;
+            aiAbortController = new AbortController();
+            const signal = aiAbortController.signal;
+            aiSetInputDisabled(true);
             aiPinned = true;
             aiMaybeScroll(true);
 
@@ -24631,15 +25053,19 @@ document.documentElement.classList.toggle(
             let sourceLabel = null;
             let messageEl = null;
             let sawAnyContent = false;
-            let connectFailed = false;
             let renderScheduled = false;
-            let searchConfirmed = false;
+            let sawDone = false;
+            let streamError = null;
+            let sseEvent = "";
             let collectedSources = [];
-            /* search is requested when the toggle is on, or when the
-               question clearly needs current information */
-            const taskWorkflow = aiIsTaskWorkflow(effectiveMessage);
+            let reader = null;
+
+            /* search is requested when the toggle is on, when the user says so, or (Horizon only)
+               when the question clearly needs current information */
+            const taskWorkflow = !isAtlas && aiIsTaskWorkflow(effectiveMessage);
             const explicitlySearching = /\b(search|google|browse|look\s*up|web search|internet search)\b/i.test(effectiveMessage);
-            const searchRequested = explicitlySearching || (!taskWorkflow && (aiWebSearch || aiNeedsWebSearch(effectiveMessage)));
+            const searchRequested = explicitlySearching || (!taskWorkflow && (aiWebSearch || (!isAtlas && aiNeedsWebSearch(effectiveMessage))));
+            const requestedModel = aiResolveModel();
 
             function scheduleRender() {
                 if (renderScheduled || !messageEl) return;
@@ -24682,20 +25108,19 @@ document.documentElement.classList.toggle(
             function handleParsedObject(obj) {
                 if (!obj || typeof obj !== "object") return;
 
-                if (obj.error) {
-                    throw new Error(String(obj.error));
+                if (obj.error || obj.ok === false) {
+                    const err = new Error("Worker error");
+                    err.aiInfo = aiErrorInfo(Number(obj.status) || 0, obj);
+                    throw err;
                 }
 
                 /* Sources may ride along with a delta/response or arrive on
                    their own — collect them and never print them as text. */
                 const srcs = aiExtractSources(obj);
                 srcs.forEach((s) => {
-                    if (!collectedSources.some((x) => x.url === s.url)) {
-                        collectedSources.push(s);
-                    }
+                    if (!collectedSources.some((x) => x.url === s.url)) collectedSources.push(s);
                 });
                 if (aiObjConfirmsSearch(obj)) {
-                    searchConfirmed = true;
                     const tl = document.querySelector("#aiLoading .ai-typing-label");
                     if (tl) tl.textContent = aiT("searching");
                 }
@@ -24708,56 +25133,58 @@ document.documentElement.classList.toggle(
 
                 if (obj.source === "local") {
                     sourceLabel = "Local AI";
-                } else if (obj.source === "gemini") {
-                    sourceLabel = "Cloud AI";
-                } else if (
-                    typeof obj.source === "string" &&
-                    /search|google/i.test(obj.source)
-                ) {
+                } else if (typeof obj.source === "string" && /search|google/i.test(obj.source)) {
                     sourceLabel = "Web search";
                 }
             }
 
+            /* One SSE line at a time: `data: {"delta":"…"}` and `data: [DONE]`. */
             function handleLine(rawLine) {
-                let line = String(rawLine).trim();
-                if (!line) return;
-
+                const line = String(rawLine).replace(/\r$/, "");
+                if (!line.trim()) { sseEvent = ""; return; }
                 if (line.startsWith(":")) return;
-                if (line.startsWith("event:")) return;
-
-                if (line.startsWith("data:")) {
-                    line = line.slice(5).trim();
-                }
-
-                if (!line || line === "[DONE]") return;
-
-                try {
-                    handleParsedObject(JSON.parse(line));
-                } catch (e) {
-                    appendDelta(line);
-                }
+                if (line.startsWith("event:")) { sseEvent = line.slice(6).trim(); return; }
+                if (!line.startsWith("data:")) return;
+                const data = line.slice(5).trim();
+                if (!data) return;
+                if (data === "[DONE]") { sawDone = true; return; }
+                let obj;
+                try { obj = JSON.parse(data); } catch (e) { return; }
+                if (sseEvent === "error" && obj && typeof obj === "object" && obj.error === undefined) obj = { error: obj };
+                handleParsedObject(obj);
             }
 
             try {
                 const responseLanguage = aiResponseLanguageInstruction();
                 const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
+                const atlasRule = "You are Atlas, a coding and technical assistant. You cannot run code, execute commands, browse the user's files or access any repository; you only see what the user pastes into this chat. Never claim to have run, tested, opened, cloned or modified anything.";
+                const ctx = aiBuildContext();
+                const memoryParts = isAtlas ? [aiSettings.memory] : [aiSettings.memory, aiBuildCrossChatContext()];
+
                 const requestBody = {
+                    mode: mode,
+                    model: requestedModel,
                     message: effectiveMessage,
-                    model: aiSettings.model,
-                    language: aiLang,
-                    responseLanguage: responseLanguage,
-                    aiConfig: { tone: aiSettings.tone, detail: aiSettings.detail, memory: [aiSettings.memory, aiBuildCrossChatContext()].filter(Boolean).join("\n\n"), permission: aiSettings.permission, rules: [languageRule, aiSettings.rules].filter(Boolean).join("\n\n"), context: aiBuildContext() },
-                    /* only role/content go on the wire — keeps the Worker's
-                       existing contract even though sources are stored locally */
+                    /* only role/content go on the wire */
                     history: aiConversationHistory
                         .slice(-AI_HISTORY_LIMIT * 2)
-                        .map((e) => ({ role: e.role, content: e.content }))
+                        .map((e) => ({ role: e.role, content: e.content })),
+                    aiConfig: {
+                        tone: aiSettings.tone,
+                        detail: aiSettings.detail,
+                        memory: memoryParts.filter(Boolean).join("\n\n"),
+                        permission: isAtlas ? "suggest" : aiSettings.permission,
+                        rules: [languageRule, isAtlas ? atlasRule : "", aiSettings.rules].filter(Boolean).join("\n\n"),
+                        context: isAtlas ? { today: ctx.today } : ctx
+                    },
+                    webSearch: !!searchRequested
                 };
 
-                /* Search flag matches the Worker's existing API contract. */
-                if (searchRequested) {
-                    requestBody.webSearch = true;
-                }
+                const maxTokens = parseInt(aiSettings.maxTokens, 10);
+                if (isFinite(maxTokens) && maxTokens > 0) requestBody.max_tokens = maxTokens;
+
+                const projectContext = String(aiSettings.projectContext || "").trim();
+                if (isAtlas && projectContext) requestBody.projectContext = projectContext.slice(0, 12000);
 
                 if (pendingImage) {
                     requestBody.image = {
@@ -24769,56 +25196,73 @@ document.documentElement.classList.toggle(
                 const response = await fetch(AI_ENDPOINT, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Accept": "text/event-stream"
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(requestBody),
+                    signal: signal
                 });
 
                 if (!response.ok) {
-                    throw new Error("Bad response: " + response.status);
+                    let payload = null;
+                    try { payload = JSON.parse(await response.text()); } catch (e) {}
+                    const err = new Error("HTTP " + response.status);
+                    err.aiInfo = aiErrorInfo(response.status, payload);
+                    throw err;
                 }
 
-                if (response.body && typeof response.body.getReader === "function") {
-                    const reader = response.body.getReader();
+                const ctype = (response.headers.get("content-type") || "").toLowerCase();
+                if (ctype.indexOf("application/json") !== -1 || !response.body || typeof response.body.getReader !== "function") {
+                    /* Non-streaming reply (error envelope or legacy shape). */
+                    const text = await response.text();
+                    let parsed = null;
+                    try { parsed = JSON.parse(text); } catch (e) {}
+                    if (parsed) handleParsedObject(parsed);
+                    else text.split("\n").forEach(handleLine);
+                    sawDone = true;
+                } else {
+                    reader = response.body.getReader();
                     const decoder = new TextDecoder();
                     let buffer = "";
-
-                    while (true) {
+                    while (!sawDone) {
                         const { done, value } = await reader.read();
-
                         if (value) {
                             buffer += decoder.decode(value, { stream: true });
-
                             let newlineIndex;
                             while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
                                 const line = buffer.slice(0, newlineIndex);
                                 buffer = buffer.slice(newlineIndex + 1);
                                 handleLine(line);
+                                if (sawDone) break;
                             }
                         }
-
                         if (done) {
                             buffer += decoder.decode();
-                            if (buffer.trim()) {
-                                handleLine(buffer);
-                            }
+                            if (!sawDone && buffer.trim()) handleLine(buffer);
                             break;
                         }
                     }
-                } else {
-                    const text = await response.text();
-                    text.split("\n").forEach(handleLine);
                 }
             } catch (error) {
-                if (!sawAnyContent) {
-                    connectFailed = true;
+                if (signal.aborted || aiStreamCancelled || (error && error.name === "AbortError")) {
+                    aiStreamCancelled = true;
+                } else {
+                    streamError = error && error.aiInfo
+                        ? error.aiInfo
+                        : { kind: error instanceof TypeError ? "network" : "unknown", status: 0, code: "", message: String(error && error.message || "") };
+                    try { console.warn("[Horizon AI] request failed:", streamError.kind, streamError.status, streamError.code); } catch (e) {}
                 }
+            } finally {
+                /* [DONE] or failure: release the connection */
+                if (reader) { try { await reader.cancel(); } catch (e) {} }
             }
 
             document.getElementById("aiLoading")?.remove();
 
+            const cancelled = aiStreamCancelled;
             const hasText = sawAnyContent && assistantText.trim().length > 0;
             const hasSources = collectedSources.length > 0;
+            const interrupted = !cancelled && !streamError && !sawDone && hasText;
 
             if (hasText || hasSources) {
                 if (hasText) {
@@ -24840,12 +25284,24 @@ document.documentElement.classList.toggle(
                     anchor.insertAdjacentElement("afterend", src);
                     anchor = src;
                 }
+                const noteText = cancelled ? aiT("stopped") : (streamError ? aiFriendlyError(streamError) : (interrupted ? aiT("interrupted") : ""));
+                if (noteText && anchor) {
+                    const note = document.createElement("div");
+                    note.className = "ai-stream-note" + (streamError ? " ai-stream-note-error" : "");
+                    note.textContent = noteText;
+                    anchor.insertAdjacentElement("afterend", note);
+                    anchor = note;
+                }
                 if (hasText && anchor) aiAppendMessageActions(anchor, assistantText);
-                const proposedAction = aiExtractAction(assistantText);
-                if (proposedAction && anchor) {
-                    const cleanText = assistantText.replace(/\s*\{\s*"horizon_action"\s*:\s*\{[\s\S]*?\}\s*\}\s*/g, "\n").trim();
-                    if (cleanText && messageEl) { messageEl.setAttribute("data-ai-raw", cleanText); messageEl.innerHTML = aiRenderMarkdown(cleanText); }
-                    aiRenderActionProposal(proposedAction, anchor);
+
+                /* Copilot task proposals exist only in Horizon, and only for complete replies. */
+                if (!isAtlas && hasText && !cancelled && !streamError && !interrupted) {
+                    const proposedAction = aiExtractAction(assistantText);
+                    if (proposedAction && anchor) {
+                        const cleanText = assistantText.replace(/\s*\{\s*"horizon_action"\s*:\s*\{[\s\S]*?\}\s*\}\s*/g, "\n").trim();
+                        if (cleanText && messageEl) { messageEl.setAttribute("data-ai-raw", cleanText); messageEl.innerHTML = aiRenderMarkdown(cleanText); }
+                        aiRenderActionProposal(proposedAction, anchor);
+                    }
                 }
 
                 const assistantEntry = { role: "assistant", content: assistantText };
@@ -24861,26 +25317,55 @@ document.documentElement.classList.toggle(
                     assistantEntry
                 );
                 if (aiConversationHistory.length > AI_HISTORY_LIMIT * 2) {
-                    aiConversationHistory = aiConversationHistory.slice(
-                        -AI_HISTORY_LIMIT * 2
-                    );
+                    aiConversationHistory = aiConversationHistory.slice(-AI_HISTORY_LIMIT * 2);
                 }
                 aiSaveHistory(aiConversationHistory);
+                aiAnnounce("");
+            } else if (cancelled) {
+                aiAppendNote(aiT("stopped"));
+                aiAnnounce("");
+            } else if (streamError) {
+                const errEl = aiAppendTextMessage(aiFriendlyError(streamError), true);
+                if (streamError.kind === "model" && requestedModel !== "auto" && errEl) {
+                    /* the selected model is not accessible: offer a one-tap retry on Automatic */
+                    const row = document.createElement("div");
+                    row.className = "ai-error-actions";
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.textContent = aiT("retryAuto");
+                    btn.addEventListener("click", () => {
+                        if (aiBusy) return;
+                        btn.disabled = true;
+                        aiSetModelPref("auto");
+                        if (userEl) userEl.remove();
+                        errEl.remove();
+                        const box = document.getElementById("aiInput");
+                        if (box) box.value = message;
+                        if (pendingImage) { aiSelectedImage = pendingImage; aiShowImagePreview(pendingImage.previewUrl); }
+                        sendAI();
+                    });
+                    row.appendChild(btn);
+                    errEl.appendChild(row);
+                }
                 aiAnnounce("");
             } else if (searchRequested) {
                 /* search was requested but the Worker returned nothing */
                 aiAppendTextMessage(aiT("searchError"), true);
-            } else if (connectFailed) {
-                aiAppendTextMessage(aiT("connectError"), true);
             } else {
                 aiAppendTextMessage(aiT("genericError"), true);
             }
 
             aiBusy = false;
+            aiAbortController = null;
+            aiStreamCancelled = false;
             aiSetInputDisabled(false);
             aiMaybeScroll(true);
             input.focus();
         }
+
+        window.addEventListener("pagehide", () => {
+            try { if (aiAbortController) aiAbortController.abort(); } catch (e) {}
+        });
 
         /* =====================================================
            WIDGET CONTROLS
@@ -24942,7 +25427,7 @@ document.documentElement.classList.toggle(
 
         // FIX: Properly bind suggestion buttons with correct attribute names and delegation
         const bindSuggestions = () => {
-            document.querySelectorAll("#aiWelcome .ai-suggest").forEach((btn) => {
+            document.querySelectorAll("#aiBox .ai-suggest").forEach((btn) => {
                 // Remove old listeners by cloning (if already bound)
                 if (btn.dataset.suggestionBound) return;
                 btn.dataset.suggestionBound = "true";
@@ -24953,7 +25438,7 @@ document.documentElement.classList.toggle(
                     const input = document.getElementById("aiInput");
                     if (!input || aiBusy) return;
                     // FIX: Use data-ai-suggest attribute (matches HTML), fallback to textContent
-                    const promptText = btn.getAttribute("data-ai-suggest") || btn.getAttribute("data-ai-prompt") || btn.textContent || "";
+                    const promptText = (btn.textContent || btn.getAttribute("data-ai-prompt") || "").trim();
                     input.value = promptText.trim();
                     input.focus({ preventScroll: true });
                     // Suggestions are actions: send their prompt directly.
@@ -25080,25 +25565,7 @@ document.documentElement.classList.toggle(
                 modelButton.className = "aiModelQuickBtn";
                 modelButton.setAttribute("aria-label", "Choose AI model");
                 modelButton.title = "Choose AI model";
-                const updateModelButton = () => {
-                    const select = document.getElementById("aiModelSelect");
-                    if (!select) {
-                        modelButton.textContent = "Gemini model  ▾";
-                        return;
-                    }
-                    const value = select.value || "auto";
-                    let displayText = "Gemini model";
-                    if (value === "auto") {
-                        displayText = "Gemini Auto";
-                    } else {
-                        // FIX: Use options array instead of readonly selectedOptions
-                        const option = Array.from(select.options).find(opt => opt.value === value);
-                        if (option && option.textContent) {
-                            displayText = option.textContent;
-                        }
-                    }
-                    modelButton.textContent = displayText + "  ▾";
-                };
+                const updateModelButton = () => aiUpdateModelPill();
                 modelButton.addEventListener("click", (event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -25165,9 +25632,11 @@ document.documentElement.classList.toggle(
                 } 
                 document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded",open?"true":"false"); 
             });
+            aiBindModeControls();
             aiLoadSettingsIntoUI();
             // FIX: Apply language BEFORE rendering suggestions
-            aiApplyLanguage();
+            aiApplyMode();
+            setTimeout(() => aiFetchModels(false), 1500);
             aiSetWebSearch(aiWebSearch, false);
             aiInitVoice();
 
