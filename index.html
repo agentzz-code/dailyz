@@ -23201,9 +23201,11 @@ document.documentElement.classList.toggle(
                 <select id="aiModelSelect"><option value="auto">Automatic</option></select>
                 <p class="aiSettingsHint" id="aiModelMeta" role="status" aria-live="polite"></p>
                 <button type="button" class="aiSettingsSave" id="aiModelRefreshBtn">Refresh models</button>
+                <button type="button" class="aiSettingsSave" id="aiPuterConnectBtn">Connect Puter account</button>
+                <p class="aiSettingsHint" id="aiPuterStatus" role="status" aria-live="polite">Connect a Puter account to use GPT and Claude through Puter.</p>
                 <label for="aiMaxTokensSelect">Response length</label>
                 <select id="aiMaxTokensSelect"><option value="auto">Automatic</option><option value="512">Short (512 tokens)</option><option value="1024">Medium (1,024 tokens)</option><option value="2048">Long (2,048 tokens)</option><option value="4096">Very long (4,096 tokens)</option></select>
-                <p class="aiSettingsHint">The model list is loaded live from the Horizon AI Worker and only free models are shown. Availability can change, so Automatic is the safest choice. Each of Horizon and Atlas remembers its own model.</p>
+                <p class="aiSettingsHint">Automatic uses your configured Horizon providers. Puter GPT and Claude models are discovered live from Puter and require a connected Puter account; usage follows Puter’s user-pays terms. Each of Horizon and Atlas remembers its own model.</p>
             </div>
             <div class="aiSettingsGroup ai-atlas-only">
                 <h4>Atlas project context</h4>
@@ -23328,6 +23330,7 @@ document.documentElement.classList.toggle(
         <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
     </div>
 
+    <script src="https://js.puter.com/v2/"></script>
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
@@ -24745,8 +24748,9 @@ document.documentElement.classList.toggle(
            WORKER CONTRACT
            GET  {AI_ENDPOINT}/models   -> { ok, provider, models[] }
            POST {AI_ENDPOINT}          -> SSE: data: {"delta":"…"} … data: [DONE]
-           Nothing here touches a provider or an API key; the
-           browser only ever talks to the Horizon AI Worker.
+           APInex/Gemini requests use the Horizon AI Worker. Puter GPT/Claude
+           requests use the official Puter.js browser SDK and the signed-in
+           user's Puter account; no provider API key is exposed in this page.
            ===================================================== */
 
         function aiModeStr(key) {
@@ -24784,56 +24788,122 @@ document.documentElement.classList.toggle(
             const timer = setTimeout(() => controller.abort(), 12000);
             aiModelCatalog.promise = (async () => {
                 try {
-                    const res = await fetch(AI_MODELS_URL, {
-                        method: "GET",
-                        headers: { "Accept": "application/json" },
-                        cache: "no-store",
-                        signal: controller.signal
-                    });
-                    if (!res.ok) throw new Error("HTTP " + res.status);
-                    const data = await res.json();
-                    if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected catalogue");
-                    const provider = typeof data.provider === "string" ? data.provider : "";
-                    const seen = new Set();
+                    const sources = await Promise.allSettled([
+                        fetch(AI_MODELS_URL, {
+                            method: "GET", headers: { "Accept": "application/json" },
+                            cache: "no-store", signal: controller.signal
+                        }).then(async (res) => {
+                            if (!res.ok) throw new Error("Worker model catalogue HTTP " + res.status);
+                            const data = await res.json();
+                            if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected Worker catalogue");
+                            return data;
+                        }),
+                        (async () => {
+                            if (!window.puter || !puter.ai || typeof puter.ai.listModels !== "function") throw new Error("Puter.js did not load");
+                            return await puter.ai.listModels();
+                        })()
+                    ]);
                     const models = [];
-                    data.models.forEach((m) => {
-                        if (!m || typeof m.id !== "string" || !m.id.trim() || seen.has(m.id)) return;
-                        /* only models the Worker explicitly reports as free are listed */
-                        const free = m.free === true || m.free === "true" || m.free === 1;
-                        if (!free) return;
-                        seen.add(m.id);
+                    const seen = new Set();
+                    const workerData = sources[0].status === "fulfilled" ? sources[0].value : null;
+                    const puterData = sources[1].status === "fulfilled" && Array.isArray(sources[1].value) ? sources[1].value : [];
+
+                    if (workerData) {
+                        const workerProvider = typeof workerData.provider === "string" ? workerData.provider : "APInex";
+                        workerData.models.forEach((m) => {
+                            if (!m || typeof m.id !== "string" || !m.id.trim() || seen.has(m.id)) return;
+                            const free = m.free === true || m.free === "true" || m.free === 1;
+                            if (!free) return;
+                            seen.add(m.id);
+                            models.push({
+                                id: m.id,
+                                name: typeof m.name === "string" && m.name.trim() ? m.name.trim() : m.id,
+                                provider: typeof m.provider === "string" && m.provider ? m.provider : workerProvider,
+                                available: m.available !== false,
+                                contextLength: Number(m.contextLength) > 0 ? Number(m.contextLength) : 0,
+                                capabilities: aiNormCaps(m.capabilities)
+                            });
+                        });
+                    }
+
+                    // Puter supplies the live OpenAI and Anthropic model catalogue.
+                    // Prefix IDs so the existing Worker/APInex IDs cannot collide.
+                    puterData.forEach((m) => {
+                        if (!m || typeof m.id !== "string" || !m.id.trim()) return;
+                        const vendor = String(m.provider || "").toLowerCase();
+                        if (!["openai", "claude", "anthropic"].includes(vendor)) return;
+                        const id = "puter::" + m.id;
+                        if (seen.has(id)) return;
+                        seen.add(id);
+                        const vendorName = vendor === "openai" ? "ChatGPT" : "Claude";
                         models.push({
-                            id: m.id,
-                            name: typeof m.name === "string" && m.name.trim() ? m.name.trim() : m.id,
-                            provider: typeof m.provider === "string" && m.provider ? m.provider : provider,
-                            available: m.available !== false,
-                            contextLength: Number(m.contextLength) > 0 ? Number(m.contextLength) : 0,
-                            capabilities: aiNormCaps(m.capabilities)
+                            id,
+                            name: vendorName + " · " + String(m.name || m.id),
+                            provider: "Puter / " + (vendor === "openai" ? "OpenAI" : "Anthropic"),
+                            available: true,
+                            contextLength: Number(m.context || 0),
+                            capabilities: ["chat", "streaming"]
                         });
                     });
-                    models.sort((a, b) => (b.available ? 1 : 0) - (a.available ? 1 : 0));
+
+                    models.sort((a, b) => (b.available ? 1 : 0) - (a.available ? 1 : 0) || a.name.localeCompare(b.name));
                     aiModelCatalog.models = models;
-                    aiModelCatalog.provider = provider;
+                    aiModelCatalog.provider = [workerData ? "APInex" : "", puterData.length ? "Puter" : ""].filter(Boolean).join(" + ") || "AI providers";
                     aiModelCatalog.loaded = true;
                     aiModelCatalog.at = Date.now();
-                    /* a saved model that no longer exists in the catalogue falls back to Automatic */
+                    aiModelCatalog.error = !workerData && !puterData.length;
                     let changed = false;
                     ["model", "atlasModel"].forEach((k) => {
                         const v = aiSettings[k];
                         if (v && v !== "auto" && !models.some((m) => m.id === v)) { aiSettings[k] = "auto"; changed = true; }
                     });
                     if (changed) aiPersistSettings();
+                    if (!workerData && !puterData.length) throw new Error("No AI model catalogue could be loaded");
                 } catch (e) {
                     aiModelCatalog.error = true;
+                    if (!aiModelCatalog.loaded) aiModelCatalog.models = [];
+                    console.warn("[Horizon AI] model discovery issue:", e && e.message ? e.message : e);
                 } finally {
                     clearTimeout(timer);
                     aiModelCatalog.loading = false;
                     aiModelCatalog.promise = null;
                     aiRenderModelOptions();
                     aiUpdateModelPill();
+                    aiUpdatePuterStatus();
                 }
             })();
             return aiModelCatalog.promise;
+        }
+
+        function aiUpdatePuterStatus(message) {
+            const el = document.getElementById("aiPuterStatus");
+            if (!el) return;
+            if (message) { el.textContent = message; return; }
+            if (!window.puter) el.textContent = "Puter.js is not available. Check the network or content-security policy.";
+            else if (puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn()) el.textContent = "Puter connected. GPT and Claude requests use your Puter account.";
+            else el.textContent = "Puter ready. Connect your Puter account before using GPT or Claude models.";
+        }
+
+        async function aiConnectPuter() {
+            const btn = document.getElementById("aiPuterConnectBtn");
+            if (!window.puter || !puter.auth || typeof puter.auth.signIn !== "function") {
+                aiUpdatePuterStatus("Puter.js could not load. Refresh the page and try again.");
+                return;
+            }
+            if (puter.auth.isSignedIn()) {
+                aiUpdatePuterStatus("Your Puter account is already connected.");
+                return;
+            }
+            if (btn) { btn.disabled = true; btn.textContent = "Connecting…"; }
+            try {
+                await puter.auth.signIn();
+                aiUpdatePuterStatus("Puter account connected. GPT and Claude are ready to use.");
+                await aiFetchModels(true);
+            } catch (error) {
+                aiUpdatePuterStatus("Puter connection was not completed: " + String(error && (error.msg || error.message) || "Please try again."));
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = "Connect Puter account"; }
+            }
         }
 
         function aiSelectedModelPref() {
@@ -24950,6 +25020,7 @@ document.documentElement.classList.toggle(
                 bar.querySelector('[data-ai-mode="' + aiMode + '"]')?.focus();
             });
             document.getElementById("aiModelRefreshBtn")?.addEventListener("click", () => aiFetchModels(true));
+            document.getElementById("aiPuterConnectBtn")?.addEventListener("click", aiConnectPuter);
             document.getElementById("aiMaxTokensSelect")?.addEventListener("change", aiReadSettingsFromUI);
             document.getElementById("aiClearProjectContextBtn")?.addEventListener("click", () => {
                 const el = document.getElementById("aiProjectContextInput");
@@ -25193,6 +25264,43 @@ document.documentElement.classList.toggle(
                     };
                 }
 
+                if (requestedModel.startsWith("puter::")) {
+                    if (!window.puter || !puter.ai || typeof puter.ai.chat !== "function") throw new Error("Puter.js is unavailable. Refresh the page and try again.");
+                    if (!puter.auth || !puter.auth.isSignedIn()) throw new Error("Connect your Puter account in AI settings before selecting GPT or Claude.");
+                    const selectedPuterModel = requestedModel.slice("puter::".length);
+                    const systemParts = [
+                        isAtlas ? "You are Atlas, a careful software engineering assistant." : "You are Horizon AI, a helpful personal assistant.",
+                        "Answer in the user's language: " + responseLanguage + ".",
+                        "Tone: " + aiSettings.tone + ". Detail: " + aiSettings.detail + ".",
+                        memoryParts.filter(Boolean).join("\n\n"),
+                        aiSettings.rules,
+                        JSON.stringify(requestBody.aiConfig.context || {}).slice(0, 12000),
+                        isAtlas ? String(aiSettings.projectContext || "").slice(0, 12000) : ""
+                    ].filter(Boolean).join("\n\n");
+                    const puterMessages = [{ role: "system", content: systemParts }]
+                        .concat(requestBody.history.map((item) => ({ role: item.role === "assistant" ? "assistant" : "user", content: item.content })))
+                    let puterUserContent = effectiveMessage;
+                    if (pendingImage) {
+                        puterUserContent = [
+                            { type: "text", text: effectiveMessage || "Please analyze this image." },
+                            { type: "image_url", image_url: { url: "data:" + pendingImage.mimeType + ";base64," + pendingImage.data } }
+                        ];
+                    }
+                    puterMessages.push({ role: "user", content: puterUserContent });
+                    const puterStream = await puter.ai.chat(puterMessages, {
+                        model: selectedPuterModel,
+                        stream: true,
+                        signal: signal,
+                        normalize: true,
+                        max_tokens: isFinite(maxTokens) && maxTokens > 0 ? maxTokens : undefined
+                    });
+                    for await (const part of puterStream) {
+                        if (signal.aborted || aiStreamCancelled) break;
+                        if (part && part.type === "error") throw new Error(String(part.message || "Puter AI request failed."));
+                        if (part && typeof part.text === "string") appendDelta(part.text);
+                    }
+                    if (!signal.aborted && !aiStreamCancelled) sawDone = true;
+                } else {
                 const response = await fetch(AI_ENDPOINT, {
                     method: "POST",
                     headers: {
@@ -25243,6 +25351,7 @@ document.documentElement.classList.toggle(
                         }
                     }
                 }
+                } // end non-Puter Worker route
             } catch (error) {
                 if (signal.aborted || aiStreamCancelled || (error && error.name === "AbortError")) {
                     aiStreamCancelled = true;
