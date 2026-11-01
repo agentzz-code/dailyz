@@ -970,6 +970,27 @@
         .ai-file-results { margin:10px 0 14px; padding:10px 12px; border:1px solid var(--ai-brd); border-radius:12px; background:var(--ai-panel-2); font-size:13px; }
         .ai-file-result-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:8px; flex-wrap:wrap; }
         .ai-file-result-row a,.ai-file-result-row button { color:var(--ai-link, #6aa9ff); font:inherit; font-weight:650; text-decoration:underline; border:0; background:transparent; cursor:pointer; }
+        #aiFilePreviewWrap .ai-file-chip { flex-wrap:wrap; max-width:100%; }
+        #aiFilePreviewWrap .ai-file-chip .ai-chip-meta { opacity:.7; font-size:11px; }
+        #aiFilePreviewWrap .ai-chip-btn { font-size:11px; text-decoration:underline; padding:2px 4px; }
+        #aiFilePreviewWrap .ai-chip-btn:focus-visible, #aiFilePreviewWrap button:focus-visible, .ai-file-card button:focus-visible, .ai-file-card a:focus-visible, .ai-file-results button:focus-visible { outline:2px solid #6aa9ff; outline-offset:2px; }
+        #aiFilePreviewWrap .ai-chip-preview { display:block; width:100%; max-height:140px; overflow:auto; white-space:pre-wrap; word-break:break-word; margin:4px 0 2px; padding:7px; border-radius:8px; background:var(--ai-code-bg); font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; direction:ltr; text-align:left; }
+        #aiFilePreviewWrap .ai-file-status { display:block; margin:3px 0; font-size:12px; }
+        #aiFilePreviewWrap .ai-file-status.error { color:#e05c5c; }
+        #aiFilePreviewWrap progress { width:100%; height:6px; }
+        #aiDropOverlay { position:fixed; inset:0; z-index:99999; display:none; align-items:center; justify-content:center; background:rgba(20,24,32,.72); color:#fff; font:600 18px/1.4 system-ui,sans-serif; pointer-events:none; text-align:center; padding:24px; }
+        #aiDropOverlay.show { display:flex; }
+        #aiDropOverlay div { border:2px dashed #8ab4ff; border-radius:18px; padding:36px 44px; background:rgba(0,0,0,.35); }
+        .ai-file-card { display:flex; align-items:center; gap:12px; padding:10px 12px; margin-top:8px; border:1px solid var(--ai-brd); border-radius:12px; background:var(--ai-panel, transparent); }
+        .ai-file-card .ai-file-icon { font-size:26px; line-height:1; flex:0 0 auto; }
+        .ai-file-card .ai-file-info { flex:1 1 auto; min-width:0; }
+        .ai-file-card .ai-file-name { font-weight:650; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; }
+        .ai-file-card .ai-file-sub { font-size:12px; opacity:.72; display:block; }
+        .ai-file-card .ai-file-actions { display:flex; gap:8px; flex:0 0 auto; }
+        .ai-file-card .ai-dl, .ai-file-results .ai-zip { text-decoration:none; padding:7px 12px; border-radius:9px; border:1px solid var(--ai-brd); background:var(--ai-chip); color:var(--ai-ink); font:inherit; font-weight:650; cursor:pointer; }
+        .ai-file-card .ai-pv { padding:7px 10px; border-radius:9px; border:1px solid var(--ai-brd); background:transparent; color:inherit; font:inherit; cursor:pointer; text-decoration:none; }
+        .ai-file-ok { color:#4caf7a; font-size:12px; margin-top:6px; display:block; }
+        @media (max-width:560px) { .ai-file-card { flex-wrap:wrap; } .ai-file-card .ai-file-actions { width:100%; } .ai-file-card .ai-file-actions > * { flex:1 1 0; text-align:center; } #aiFilePreviewWrap { width:calc(100% - 24px); } }
         .ai-file-preview { display:block; max-height:260px; overflow:auto; white-space:pre; direction:ltr; text-align:left; padding:9px; margin:8px 0 2px; border-radius:9px; background:var(--ai-code-bg); font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
 
         #aiImageRemoveBtn {
@@ -23308,11 +23329,11 @@ document.documentElement.classList.toggle(
             <input
                 type="file"
                 id="aiFileInput"
-                accept=".txt,.md,.markdown,.js,.jsx,.mjs,.cjs,.ts,.tsx,.py,.html,.htm,.css,.scss,.json,.jsonc,.yaml,.yml,.xml,.sql,.sh,.ps1,.java,.c,.h,.cpp,.hpp,.go,.rs,.php,.rb,.swift,.kt,.dart,.vue,.svelte,.csv,.log,.ini,.toml,.env.example,.properties,.gradle,.dockerfile,.gitignore"
+                accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf,.txt,.md,.markdown,.js,.jsx,.mjs,.cjs,.ts,.tsx,.py,.html,.htm,.css,.scss,.json,.jsonc,.yaml,.yml,.xml,.sql,.sh,.ps1,.java,.c,.h,.cpp,.hpp,.go,.rs,.php,.rb,.swift,.kt,.dart,.vue,.svelte,.csv,.log,.ini,.toml,.env.example,.properties,.gradle,.dockerfile,.gitignore"
                 multiple
                 hidden
             />
-            <button type="button" class="aiImageBtn aiGhostBtn aiFileBtn" id="aiFileBtn" aria-label="Attach code or text files" title="Attach code or text files">📎</button>
+            <button type="button" class="aiImageBtn aiGhostBtn aiFileBtn" id="aiFileBtn" aria-label="Attach files (code, text, PDF, images)" title="Attach files (code, text, PDF, images) — or drag and drop">📎</button>
             <button
                 type="button"
                 class="aiImageBtn aiGhostBtn"
@@ -23347,6 +23368,7 @@ document.documentElement.classList.toggle(
             </button>
         </div>
         <div id="aiFilePreviewWrap" hidden aria-live="polite"></div>
+        <div id="aiDropOverlay" aria-hidden="true"><div>📎 Drop files to attach<br><small>Code, text, PDF or image files</small></div></div>
 
         <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
     </div>
@@ -24574,45 +24596,129 @@ document.documentElement.classList.toggle(
         const aiProjectFileContexts = new Map();
         function aiGetActiveProjectFiles() { return aiProjectFileContexts.get(aiCurrentChatId) || []; }
 
+        const AI_MAX_PDF_BYTES = 12 * 1024 * 1024;
+        const AI_FILE_TYPE_LABELS = { html:"HTML document", htm:"HTML document", css:"CSS stylesheet", scss:"SCSS stylesheet", js:"JavaScript", mjs:"JavaScript module", cjs:"JavaScript module", jsx:"React JSX", ts:"TypeScript", tsx:"React TSX", json:"JSON data", jsonc:"JSON data", md:"Markdown document", markdown:"Markdown document", txt:"Text file", xml:"XML document", csv:"CSV data", py:"Python script", sql:"SQL script", sh:"Shell script", yaml:"YAML config", yml:"YAML config", toml:"TOML config", ini:"INI config", log:"Log file", pdf:"PDF document", png:"PNG image", jpg:"JPEG image", jpeg:"JPEG image", webp:"WebP image", gif:"GIF image", zip:"ZIP archive" };
+        const AI_FILE_TYPE_ICONS = { html:"🌐", htm:"🌐", css:"🎨", scss:"🎨", js:"📜", mjs:"📜", cjs:"📜", jsx:"⚛️", ts:"📘", tsx:"⚛️", json:"🧾", jsonc:"🧾", md:"📝", markdown:"📝", txt:"📄", xml:"📰", csv:"📊", py:"🐍", sql:"🗄️", sh:"💻", yaml:"⚙️", yml:"⚙️", toml:"⚙️", ini:"⚙️", log:"📋", pdf:"📕", png:"🖼️", jpg:"🖼️", jpeg:"🖼️", webp:"🖼️", gif:"🖼️", zip:"🗜️" };
+        function aiFileExt(name) { const base = String(name || "").split("/").pop(); const i = base.lastIndexOf("."); return i > 0 || (i === 0 && base.length > 1) ? base.slice(i + 1).toLowerCase() : base.toLowerCase(); }
+        function aiFileTypeLabel(name) { return AI_FILE_TYPE_LABELS[aiFileExt(name)] || ((aiFileExt(name) || "file").toUpperCase() + " file"); }
+        function aiFileTypeIcon(name) { return AI_FILE_TYPE_ICONS[aiFileExt(name)] || "📄"; }
+        function aiFormatBytes(n) { n = Number(n) || 0; if (n < 1024) return n + " B"; if (n < 1048576) return (n / 1024).toFixed(n < 10240 ? 1 : 0) + " KB"; return (n / 1048576).toFixed(1) + " MB"; }
+        function aiByteLength(text) { return new TextEncoder().encode(String(text || "")).length; }
+        let aiFileStatus = null; // { text, error, progress }
+        function aiSetFileStatus(text, opts) { aiFileStatus = text ? { text, error: !!(opts && opts.error), progress: opts && typeof opts.progress === "number" ? opts.progress : null } : null; aiRenderFilePreview(); }
+        const aiOpenChipPreviews = new Set();
+
         function aiRenderFilePreview() {
             const wrap = document.getElementById("aiFilePreviewWrap");
             if (!wrap) return;
             wrap.replaceChildren();
-            if (!aiSelectedFiles.length) { wrap.hidden = true; return; }
+            if (!aiSelectedFiles.length && !aiFileStatus) { wrap.hidden = true; return; }
             wrap.hidden = false;
-            const label = document.createElement("span");
-            label.textContent = "Attached files: ";
-            wrap.appendChild(label);
+            if (aiSelectedFiles.length) {
+                const label = document.createElement("span");
+                label.textContent = "Attached files (" + aiSelectedFiles.length + "): ";
+                wrap.appendChild(label);
+            }
             aiSelectedFiles.forEach((file, index) => {
                 const chip = document.createElement("span"); chip.className = "ai-file-chip";
-                const name = document.createElement("span"); name.textContent = (file.path || file.name) + " (" + Math.max(1, Math.round(file.content.length / 1024)) + " KB)";
-                const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "×"; remove.setAttribute("aria-label", "Remove " + file.name);
-                remove.addEventListener("click", () => { aiSelectedFiles.splice(index, 1); aiRenderFilePreview(); });
-                chip.append(name, remove); wrap.appendChild(chip);
+                const icon = document.createElement("span"); icon.setAttribute("aria-hidden", "true"); icon.textContent = aiFileTypeIcon(file.name);
+                const name = document.createElement("span"); name.textContent = file.path || file.name;
+                const meta = document.createElement("span"); meta.className = "ai-chip-meta";
+                meta.textContent = aiFileTypeLabel(file.name) + " · " + aiFormatBytes(file.size != null ? file.size : aiByteLength(file.content)) + (file.note ? " · " + file.note : "");
+                const prev = document.createElement("button"); prev.type = "button"; prev.className = "ai-chip-btn";
+                const open = aiOpenChipPreviews.has(file);
+                prev.textContent = open ? "Hide preview" : "Preview"; prev.setAttribute("aria-expanded", String(open));
+                prev.setAttribute("aria-label", (open ? "Hide preview of " : "Preview ") + file.name);
+                prev.addEventListener("click", () => { if (aiOpenChipPreviews.has(file)) aiOpenChipPreviews.delete(file); else aiOpenChipPreviews.add(file); aiRenderFilePreview(); });
+                const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "×"; remove.setAttribute("aria-label", "Remove " + file.name); remove.title = "Remove " + file.name;
+                remove.addEventListener("click", () => { aiOpenChipPreviews.delete(file); aiSelectedFiles.splice(index, 1); aiRenderFilePreview(); });
+                chip.append(icon, name, meta, prev, remove);
+                if (open) {
+                    const pre = document.createElement("pre"); pre.className = "ai-chip-preview";
+                    const text = String(file.content || "");
+                    pre.textContent = text.slice(0, 4000) + (text.length > 4000 ? "\n… (preview truncated; the full " + text.length + " characters are sent to the model)" : "");
+                    chip.appendChild(pre);
+                }
+                wrap.appendChild(chip);
             });
+            if (aiFileStatus) {
+                const st = document.createElement("span"); st.className = "ai-file-status" + (aiFileStatus.error ? " error" : ""); st.setAttribute("role", aiFileStatus.error ? "alert" : "status");
+                st.textContent = aiFileStatus.text; wrap.appendChild(st);
+                if (aiFileStatus.progress != null) { const pr = document.createElement("progress"); pr.max = 100; pr.value = Math.round(aiFileStatus.progress * 100); pr.setAttribute("aria-label", "Reading files"); wrap.appendChild(pr); }
+            }
+        }
+
+        let aiPdfJsPromise = null;
+        function aiLoadPdfJs() {
+            if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+            if (aiPdfJsPromise) return aiPdfJsPromise;
+            aiPdfJsPromise = new Promise((resolve, reject) => {
+                const sc = document.createElement("script");
+                sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+                sc.onload = () => { try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; resolve(window.pdfjsLib); } catch (e) { reject(e); } };
+                sc.onerror = () => { aiPdfJsPromise = null; reject(new Error("The PDF reader could not be loaded (network or content blocker).")); };
+                document.head.appendChild(sc);
+            });
+            return aiPdfJsPromise;
+        }
+        async function aiExtractPdfText(file, onProgress) {
+            const lib = await aiLoadPdfJs();
+            const doc = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+            let out = ""; const pages = Math.min(doc.numPages, 200);
+            for (let i = 1; i <= pages; i++) {
+                const page = await doc.getPage(i); const tc = await page.getTextContent();
+                out += "\n--- Page " + i + " ---\n" + tc.items.map(it => it.str).join(" ");
+                if (onProgress) onProgress(i / pages);
+            }
+            if (doc.numPages > pages) out += "\n[Only the first " + pages + " of " + doc.numPages + " pages were read.]";
+            return { text: out.trim(), pages: doc.numPages };
         }
 
         async function aiAddTextFiles(fileList) {
             const incoming = Array.from(fileList || []);
             if (!incoming.length) return;
-            const additions = [];
-            for (const file of incoming) {
-                const ext = (file.name.split(".").pop() || "").toLowerCase();
-                if (!AI_TEXT_FILE_EXTENSIONS.has(ext) && !/^Dockerfile$/i.test(file.name) && !/^Makefile$/i.test(file.name)) throw new Error("Unsupported file type: " + file.name + ". Attach text, source-code, JSON, CSV, or log files.");
-                if (file.size > AI_MAX_TEXT_FILE_BYTES) throw new Error(file.name + " is larger than 2 MB. Split it into smaller files.");
-                const content = await file.text();
-                if (content.includes("\u0000")) throw new Error(file.name + " appears to be binary. Only text/code files are supported here.");
-                additions.push({ name: file.name, path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/"), mimeType: file.type || "text/plain", content });
+            const additions = []; const problems = [];
+            try {
+                for (let n = 0; n < incoming.length; n++) {
+                    const file = incoming[n];
+                    aiSetFileStatus("Reading " + file.name + " (" + (n + 1) + " of " + incoming.length + ")…", { progress: n / incoming.length });
+                    try {
+                        const ext = aiFileExt(file.name);
+                        if (/^image\//.test(file.type) || ["png","jpg","jpeg","webp","gif"].includes(ext)) {
+                            if (aiSelectedImage) throw new Error("Only one image can be attached at a time. Remove the current image first.");
+                            if (!/^image\/(png|jpe?g|webp|gif)$/.test(file.type)) throw new Error(file.name + ": unsupported image type. Use PNG, JPEG, WebP or GIF.");
+                            aiSelectedImage = await aiPrepareImage(file); aiShowImagePreview(aiSelectedImage.previewUrl);
+                            continue;
+                        }
+                        if (ext === "pdf" || file.type === "application/pdf") {
+                            if (file.size > AI_MAX_PDF_BYTES) throw new Error(file.name + " is larger than 12 MB. Split the PDF.");
+                            let res;
+                            try { res = await aiExtractPdfText(file, (f) => aiSetFileStatus("Extracting text from " + file.name + "…", { progress: f })); }
+                            catch (e) { throw new Error(file.name + ": could not extract PDF text (" + (e && e.message || "unknown error") + "). The file was NOT attached, so the model will not see it."); }
+                            if (!res.text || res.text.replace(/--- Page \d+ ---/g, "").trim().length < 20) throw new Error(file.name + " has no extractable text (it may be a scanned image). It was NOT attached; OCR is not supported.");
+                            additions.push({ name: file.name + ".txt", path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/") + ".txt", mimeType: "text/plain", content: res.text, size: file.size, note: res.pages + " pages, text extracted" });
+                            continue;
+                        }
+                        if (!AI_TEXT_FILE_EXTENSIONS.has(ext) && !/^(Dockerfile|Makefile)$/i.test(file.name)) throw new Error("Unsupported file type: " + file.name + ". Attach text, source-code, JSON, CSV, log, PDF or image files.");
+                        if (file.size > AI_MAX_TEXT_FILE_BYTES) throw new Error(file.name + " is larger than 2 MB. Split it into smaller files.");
+                        const content = await file.text();
+                        if (content.includes("\u0000")) throw new Error(file.name + " appears to be binary. Only text/code files are supported here.");
+                        additions.push({ name: file.name, path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/"), mimeType: file.type || "text/plain", content, size: file.size });
+                    } catch (e) { problems.push(String(e && e.message || "Could not read " + file.name)); }
+                }
+                if (aiSelectedFiles.length + additions.length > AI_MAX_TEXT_FILES) { problems.push("Attach up to " + AI_MAX_TEXT_FILES + " files at a time; extra files were not added."); additions.length = Math.max(0, AI_MAX_TEXT_FILES - aiSelectedFiles.length); }
+                let total = aiSelectedFiles.reduce((sum, f) => sum + f.content.length, 0);
+                const accepted = [];
+                for (const f of additions) { if (total + f.content.length > AI_MAX_TEXT_TOTAL_CHARS) { problems.push(f.name + " was skipped: combined file text would exceed the 4 MB limit."); continue; } total += f.content.length; accepted.push(f); }
+                aiSelectedFiles = aiSelectedFiles.concat(accepted);
+            } finally {
+                aiFileStatus = null; aiRenderFilePreview();
             }
-            if (aiSelectedFiles.length + additions.length > AI_MAX_TEXT_FILES) throw new Error("Attach up to 20 files at a time.");
-            const total = aiSelectedFiles.concat(additions).reduce((sum, file) => sum + file.content.length, 0);
-            if (total > AI_MAX_TEXT_TOTAL_CHARS) throw new Error("Combined file text is over the 4 MB limit. Send very large projects in smaller batches.");
-            aiSelectedFiles = aiSelectedFiles.concat(additions);
-            aiRenderFilePreview();
+            if (problems.length) { aiSetFileStatus(problems.join(" "), { error: true }); const err = new Error(problems.join("\n")); err.aiReported = true; throw err; }
         }
 
         function aiClearSelectedFiles() {
-            aiSelectedFiles = [];
+            aiSelectedFiles = []; aiFileStatus = null; aiOpenChipPreviews.clear();
             const input = document.getElementById("aiFileInput"); if (input) input.value = "";
             aiRenderFilePreview();
         }
@@ -24716,32 +24822,46 @@ document.documentElement.classList.toggle(
             return new Blob([...chunks, ...central, end], { type: "application/zip" });
         }
 
+        function aiDownloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob); const a = document.createElement("a");
+            a.href = url; a.download = filename; a.rel = "noopener"; a.style.display = "none";
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        }
+
         function aiRenderGeneratedFiles(files, anchor) {
             if (!Array.isArray(files) || !files.length || !anchor) return;
-            const wrap = document.createElement("div"); wrap.className = "ai-file-results";
-            const heading = document.createElement("strong"); heading.textContent = "Claude-generated files · review before using"; wrap.appendChild(heading);
-            const note = document.createElement("p"); note.textContent = "Original uploads were not changed. These are separate generated files you can preview and download."; wrap.appendChild(note);
-            if (files.length > 1) {
-                const zip = document.createElement("button"); zip.type = "button"; zip.textContent = "Download all as ZIP";
-                zip.addEventListener("click", () => {
-                    const blob = aiBuildZipBlob(files); const url = URL.createObjectURL(blob); const a = document.createElement("a");
-                    a.href = url; a.download = "atlas-generated-files.zip"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 60000);
-                });
+            const valid = files.filter(f => f && typeof f.content === "string" && f.name);
+            if (!valid.length) return;
+            const wrap = document.createElement("div"); wrap.className = "ai-file-results"; wrap.setAttribute("role", "group"); wrap.setAttribute("aria-label", "Generated files");
+            const heading = document.createElement("strong"); heading.textContent = valid.length + (valid.length === 1 ? " file" : " files") + " ready · review before using"; wrap.appendChild(heading);
+            const note = document.createElement("p"); note.textContent = "Original uploads were not changed. These are separate, complete files generated by the model."; wrap.appendChild(note);
+            if (valid.length > 1) {
+                const zip = document.createElement("button"); zip.type = "button"; zip.className = "ai-zip"; zip.textContent = "⬇ Download all as ZIP";
+                zip.addEventListener("click", () => { try { aiDownloadBlob(aiBuildZipBlob(valid), "atlas-generated-files.zip"); } catch (e) { zip.textContent = "ZIP failed — download files individually"; } });
                 wrap.appendChild(zip);
             }
-            files.forEach((file) => {
-                if (!file || typeof file.content !== "string" || !file.name) return;
-                const row = document.createElement("div"); row.className = "ai-file-result-row";
-                const label = document.createElement("span"); label.textContent = (file.action === "edit" ? "Modified · " : "New · ") + file.name;
+            valid.forEach((file) => {
                 const safeName = aiSafeRelativePath(file.name);
-                const link = document.createElement("a"); link.textContent = "Download"; link.href = URL.createObjectURL(new Blob([file.content], { type: file.mimeType || "text/plain;charset=utf-8" }));
-                link.download = safeName.split("/").pop(); link.rel = "noopener";
-                link.addEventListener("click", () => setTimeout(() => URL.revokeObjectURL(link.href), 60000), { once: true });
-                const preview = document.createElement("button"); preview.type = "button"; preview.textContent = "Preview";
-                const pre = document.createElement("pre"); pre.className = "ai-file-preview"; pre.hidden = true; pre.textContent = file.content;
-                preview.addEventListener("click", () => { pre.hidden = !pre.hidden; preview.textContent = pre.hidden ? "Preview" : "Hide preview"; });
-                row.append(label, preview, link); wrap.append(row);
+                const base = safeName.split("/").pop();
+                const size = aiByteLength(file.content);
+                const card = document.createElement("div"); card.className = "ai-file-card";
+                const icon = document.createElement("span"); icon.className = "ai-file-icon"; icon.setAttribute("aria-hidden", "true"); icon.textContent = aiFileTypeIcon(base);
+                const info = document.createElement("span"); info.className = "ai-file-info";
+                const nm = document.createElement("span"); nm.className = "ai-file-name"; nm.textContent = safeName; nm.title = safeName;
+                const sub = document.createElement("span"); sub.className = "ai-file-sub";
+                const ext = aiFileExt(base);
+                sub.textContent = aiFileTypeLabel(base) + (ext ? " (." + ext + ")" : "") + " · " + aiFormatBytes(size) + " · " + (file.action === "edit" ? "modified" : "new");
+                info.append(nm, sub);
+                const actions = document.createElement("span"); actions.className = "ai-file-actions";
+                const pv = document.createElement("button"); pv.type = "button"; pv.className = "ai-pv"; pv.textContent = "Preview"; pv.setAttribute("aria-expanded", "false");
+                const dl = document.createElement("button"); dl.type = "button"; dl.className = "ai-dl"; dl.textContent = "⬇ Download"; dl.setAttribute("aria-label", "Download " + base);
+                dl.addEventListener("click", () => { aiDownloadBlob(new Blob([file.content], { type: file.mimeType || "text/plain;charset=utf-8" }), base); });
+                actions.append(pv, dl);
+                card.append(icon, info, actions); wrap.appendChild(card);
                 if (file.explanation) { const why = document.createElement("p"); why.textContent = file.explanation; wrap.appendChild(why); }
+                const pre = document.createElement("pre"); pre.className = "ai-file-preview"; pre.hidden = true; pre.textContent = file.content;
+                pv.addEventListener("click", () => { pre.hidden = !pre.hidden; pv.textContent = pre.hidden ? "Preview" : "Hide preview"; pv.setAttribute("aria-expanded", String(!pre.hidden)); });
                 wrap.appendChild(pre);
             });
             anchor.insertAdjacentElement("afterend", wrap);
@@ -24750,9 +24870,28 @@ document.documentElement.classList.toggle(
         document.getElementById("aiFileBtn")?.addEventListener("click", () => document.getElementById("aiFileInput")?.click());
         document.getElementById("aiFileInput")?.addEventListener("change", async (event) => {
             try { await aiAddTextFiles(event.target.files); }
-            catch (error) { aiAppendTextMessage(String(error && error.message || "Could not read the selected files."), true); }
+            catch (error) { if (!(error && error.aiReported)) aiAppendTextMessage(String(error && error.message || "Could not read the selected files."), true); }
             finally { event.target.value = ""; }
         });
+
+        (function aiSetupFileDrop() {
+            const overlay = document.getElementById("aiDropOverlay");
+            let depth = 0;
+            const aiActive = () => { const ai = document.getElementById("ai"); return !!ai && ai.classList.contains("active"); };
+            const hasFiles = (e) => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files");
+            const hide = () => { depth = 0; if (overlay) overlay.classList.remove("show"); };
+            document.addEventListener("dragenter", (e) => { if (!aiActive() || !hasFiles(e)) return; depth++; overlay && overlay.classList.add("show"); });
+            document.addEventListener("dragover", (e) => { if (!aiActive() || !hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = "copy"; });
+            document.addEventListener("dragleave", (e) => { if (!aiActive() || !hasFiles(e)) return; depth = Math.max(0, depth - 1); if (!depth) hide(); });
+            document.addEventListener("drop", async (e) => {
+                if (!aiActive() || !hasFiles(e)) return;
+                e.preventDefault(); hide();
+                if (aiBusy) { aiAppendTextMessage("Wait for the current reply to finish (or press Stop) before attaching files.", true); return; }
+                try { await aiAddTextFiles(e.dataTransfer.files); }
+                catch (error) { if (!(error && error.aiReported)) aiAppendTextMessage(String(error && error.message || "Could not read the dropped files."), true); }
+            });
+            window.addEventListener("blur", hide);
+        })();
 
         /* =====================================================
            VOICE DICTATION (Web Speech API, client-side only)
@@ -25517,10 +25656,14 @@ document.documentElement.classList.toggle(
                     };
                 }
 
-                const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || aiIsFileWorkRequest(effectiveMessage));
+                const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
                 // Explicit Puter model selection wins for ALL Atlas tasks, including attached files.
                 // The Worker file-work endpoint is retained only for APInex selections.
                 if (!requestedModel.startsWith("puter::") && fileWorkRequested) {
+                    if (pendingImage) {
+                        const imgErr = new Error("Images can't be combined with file editing on the APInex path, so the image was NOT sent. Remove the image, or select a Puter vision model.");
+                        imgErr.aiInfo = { kind: "provider", status: 0, code: "IMAGE_NOT_SUPPORTED_FOR_FILE_WORK", message: imgErr.message }; throw imgErr;
+                    }
                     const fileWorkUrl = AI_ENDPOINT.replace(/\/+$/, "") + "/file-work";
                     const fileWorkResponse = await fetch(fileWorkUrl, {
                         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -25656,7 +25799,10 @@ document.documentElement.classList.toggle(
                                 previousBatchSummary ? "Prior batch results summary (untrusted project notes; maintain compatibility): " + previousBatchSummary : "",
                                 "Batch " + (batchIndex + 1) + " of " + batches.length + ". Only emit new or modified files that belong to this batch."
                             ].filter(Boolean).join("\n\n");
-                            const userPayload = JSON.stringify({ task: effectiveMessage, projectFiles: batch, fileManifest: manifest, recentConversation: requestBody.history.slice(-8) });
+                            const userPayloadText = JSON.stringify({ task: effectiveMessage, projectFiles: batch, fileManifest: manifest, recentConversation: requestBody.history.slice(-8) });
+                            const userPayload = (pendingImage && batchIndex === 0)
+                                ? [{ type: "text", text: userPayloadText }, { type: "image_url", image_url: { url: "data:" + pendingImage.mimeType + ";base64," + pendingImage.data } }]
+                                : userPayloadText;
                             const messages = [
                                 { role: "system", content: systemParts + "\n\n" + structuredSystem }
                             ].concat(requestBody.history.map(item => ({ role: item.role === "assistant" ? "assistant" : "user", content: item.content })), [
