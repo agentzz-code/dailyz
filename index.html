@@ -25113,11 +25113,7 @@ document.documentElement.classList.toggle(
             const get = id => document.getElementById(id)?.value || "";
             const next = { ...aiSettings, tone: get("aiToneSelect"), detail: get("aiDetailSelect"), memory: get("aiMemoryInput").slice(0,3000), permission: get("aiPermissionSelect"), rules: get("aiRulesInput").slice(0,2000), maxTokens: get("aiMaxTokensSelect") || "auto", projectContext: get("aiProjectContextInput").slice(0,12000) };
             /* the model select only reflects the saved choice once the catalogue has loaded */
-            let picked = get("aiModelSelect") || "auto";
-            if (picked !== "auto" && aiModelCatalog.loaded) {
-                const canonical = aiModelCatalog.models.find(x => x && (x.id === picked || String(x.id).replace(/^nvidia::|^puter::/, "") === picked));
-                if (canonical && canonical.available === true) picked = canonical.id;
-            }
+            const picked = get("aiModelSelect") || "auto";
             if (aiModelCatalog.loaded || picked === "auto") { if (aiMode === "atlas") next.atlasModel = picked; else next.model = picked; }
             aiSettings = next;
             aiPersistSettings();
@@ -25194,18 +25190,9 @@ document.documentElement.classList.toggle(
 
         /* ---------- unified provider adapter layer ---------- */
         function aiProviderFromModel(modelId) {
-            const id = String(modelId || "").trim();
+            const id = String(modelId || "");
             if (id.startsWith("puter::")) return "puter";
             if (id.startsWith("nvidia::")) return "nvidia";
-            // Older saved preferences could contain the raw NVIDIA model id
-            // without the provider namespace. Resolve it against the live
-            // catalogue before defaulting to APInex. This prevents a model
-            // selected from NVIDIA from accidentally being sent to Puter.
-            const meta = Array.isArray(aiModelCatalog.models)
-                ? aiModelCatalog.models.find(m => m && (m.id === id || String(m.id).replace(/^nvidia::|^puter::/, "") === id))
-                : null;
-            if (meta && meta.providerGroup === "nvidia") return "nvidia";
-            if (meta && (meta.providerGroup === "puter-gpt" || meta.providerGroup === "puter-claude")) return "puter";
             return "apinex";
         }
 
@@ -25534,21 +25521,55 @@ document.documentElement.classList.toggle(
             return (aiMode === "atlas" ? aiSettings.atlasModel : aiSettings.model) || "auto";
         }
 
-        /* The ID actually sent: only a model the catalogue lists as available.
-           Anything unavailable (catalogue not loaded, stale saved id) becomes "auto". */
+        /*
+         * Canonical model IDs are part of the routing contract:
+         *   puter::<puter-model-id>   -> Puter.js
+         *   nvidia::<nvidia-model-id> -> /nvidia/chat Worker route
+         *   <apinex-model-id>        -> APInex Worker route
+         *
+         * Older saved preferences may contain a raw NVIDIA/Puter model ID.
+         * Never turn a recognizable NVIDIA model into "auto", because that
+         * silently changes provider and can make an NVIDIA selection hit Puter.
+         */
+        function aiCanonicalizeModelId(id) {
+            const raw = String(id || "").trim();
+            if (!raw || raw === "auto") return "auto";
+            if (!aiModelCatalog.loaded || !Array.isArray(aiModelCatalog.models)) return raw;
+
+            const exact = aiModelCatalog.models.find(x => x && x.id === raw);
+            if (exact) return exact.id;
+
+            const nvidia = aiModelCatalog.models.find(x =>
+                x && x.providerGroup === "nvidia" &&
+                String(x.id).replace(/^nvidia::/, "") === raw
+            );
+            if (nvidia) return nvidia.id;
+
+            const puter = aiModelCatalog.models.find(x =>
+                x && (x.providerGroup === "puter-gpt" || x.providerGroup === "puter-claude") &&
+                String(x.id).replace(/^puter::/, "") === raw
+            );
+            if (puter) return puter.id;
+
+            return raw;
+        }
+
+        /* The ID actually sent: preserve an explicitly selected provider. */
         function aiResolveModel() {
-            const wanted = String(aiSelectedModelPref() || "auto");
+            const wanted = aiCanonicalizeModelId(aiSelectedModelPref());
             if (wanted === "auto") return aiChooseAutomaticModel();
+            if (typeof wanted === "string" && (wanted.startsWith("puter::") || wanted.startsWith("nvidia::"))) {
+                const selected = aiModelCatalog.models.find(x => x.id === wanted);
+                return selected && selected.available !== false ? selected.id : wanted;
+            }
             if (!aiModelCatalog.loaded) return wanted;
-            // Resolve both namespaced IDs and legacy raw IDs against the live
-            // catalogue. Always return the canonical namespaced ID.
-            const m = aiModelCatalog.models.find(x => x && (x.id === wanted || String(x.id).replace(/^nvidia::|^puter::/, "") === wanted));
-            if (m && m.available === true) return m.id;
-            return wanted;
+            const m = aiModelCatalog.models.find(x => x.id === wanted);
+            return m && m.available === true ? m.id : "auto";
         }
 
         function aiSetModelPref(id) {
-            if (aiMode === "atlas") aiSettings.atlasModel = id; else aiSettings.model = id;
+            const canonical = aiCanonicalizeModelId(id);
+            if (aiMode === "atlas") aiSettings.atlasModel = canonical; else aiSettings.model = canonical;
             aiPersistSettings();
             aiRenderModelOptions();
             aiUpdateModelPill();
@@ -26000,6 +26021,7 @@ document.documentElement.classList.toggle(
                 const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
                 // Explicit Puter model selection wins for ALL Atlas tasks, including attached files.
                 // The Worker file-work endpoint is retained only for APInex selections.
+                requestedModel = aiCanonicalizeModelId(requestedModel);
                 const selectedProvider = aiProviderFromModel(requestedModel);
                 if (selectedProvider === "apinex" && fileWorkRequested) {
                     if (pendingImage) {
@@ -26356,7 +26378,12 @@ document.documentElement.classList.toggle(
                         else if (/context|too large|token limit|exceed.*window/.test(hay)) kind = "context";
                         else if (/timeout|timed out|request_timeout/.test(hay)) kind = "timeout";
                         else if (/network_error|failed to fetch|network/.test(hay)) kind = "network";
-                        streamError = { kind, status: 0, code, message: detail };
+                        const provider = String(error && error.provider || "") || (
+                            String(requestedModel).startsWith("nvidia::") ? "nvidia" :
+                            String(requestedModel).startsWith("puter::") ? "puter" :
+                            "apinex"
+                        );
+                        streamError = { kind, status: Number(error && error.status) || 0, code, message: detail, provider };
                     }
                     try { console.warn("[Horizon AI] request failed:", streamError.kind, streamError.status, streamError.code); } catch (e) {}
                 }
@@ -26379,7 +26406,15 @@ document.documentElement.classList.toggle(
             const hasSources = collectedSources.length > 0;
             const interrupted = !cancelled && !streamError && !sawDone && hasText;
             if (!cancelled && !streamError && !sawDone && !hasText && !hasSources) {
-                streamError = { kind: "provider", status: 502, code: "EMPTY_AI_RESPONSE", message: "The provider connection ended without returning any answer content." };
+                const emptyProvider = String(requestedModel).startsWith("nvidia::") ? "nvidia" :
+                    String(requestedModel).startsWith("puter::") ? "puter" : "apinex";
+                streamError = {
+                    kind: "provider",
+                    status: 502,
+                    code: "EMPTY_AI_RESPONSE",
+                    message: "The " + emptyProvider + " connection ended without returning any answer content.",
+                    provider: emptyProvider
+                };
             }
 
             if (hasText || hasSources) {
