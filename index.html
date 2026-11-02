@@ -29255,9 +29255,23 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
   pointer-events: auto !important;
 }
 
-#aiChatSidebar:not(.mobile-open) {
-  pointer-events: none !important;
-  visibility: hidden !important;
+/* Desktop uses #aiWorkspace.sidebar-collapsed; mobile uses .mobile-open.
+   Do not globally hide the sidebar just because mobile-open is absent. */
+@media (min-width:761px) {
+  #ai.active #aiChatSidebar {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  #ai.active #aiWorkspace.sidebar-collapsed #aiChatSidebar {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+@media (max-width:760px) {
+  #aiChatSidebar:not(.mobile-open) {
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
 }
 
 /* FIX: Ensure backdrop/overlay blocks interaction when sidebar open */
@@ -29274,6 +29288,25 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 #aiSidebarToggleBtn {
   pointer-events: auto !important;
   z-index: 25 !important;
+}
+
+
+
+/* FIX: Horizon / Atlas mode switch must stay above the chat surface. */
+#ai.active #aiModeBar,
+#ai.active #aiModeBar .ai-mode-tabs,
+#ai.active #aiModeBar .ai-mode-tab {
+  position: relative !important;
+  z-index: 40 !important;
+  pointer-events: auto !important;
+}
+#ai.active #aiModeBar .ai-mode-tab {
+  touch-action: manipulation !important;
+  cursor: pointer !important;
+}
+#ai.active #aiModeBar .ai-mode-tab:disabled {
+  pointer-events: auto !important;
+  opacity: .7 !important;
 }
 
 /* FIX: Ensure model button is always above other header items */
