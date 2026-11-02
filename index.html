@@ -25276,9 +25276,47 @@ document.documentElement.classList.toggle(
                 return { models, usage: "Usage and limits follow your Puter account.", status: "account" };
             },
             async isAvailable() { return !!(window.puter && puter.ai && typeof puter.ai.listModels === "function"); },
-            async sendMessage(messages, options) {
+            async *sendMessage(messages, options) {
                 if (!window.puter || !puter.ai || typeof puter.ai.chat !== "function") throw new Error("Puter.js is unavailable.");
-                return puter.ai.chat(messages, false, options);
+                const streamOptions = Object.assign({}, options || {}, { stream: true });
+                let sawText = false;
+                let sawTerminalError = false;
+                let usageChunk = null;
+                const stream = await puter.ai.chat(messages, false, streamOptions);
+                for await (const part of stream) {
+                    if (part && part.type === "error") {
+                        sawTerminalError = true;
+                        const e = new Error(String(part.message || "Puter provider returned a stream error."));
+                        e.code = String(part.code || part.error || "PUTER_STREAM_ERROR");
+                        e.provider = "puter";
+                        throw e;
+                    }
+                    if (part && part.type === "usage") usageChunk = part;
+                    if (part && typeof part.text === "string" && part.text.length) sawText = true;
+                    yield part;
+                }
+                // Some Puter/provider combinations can close a streaming connection
+                // without emitting text. Retry once non-streaming so a valid answer
+                // is not incorrectly reported as an empty 502.
+                if (!sawText && !sawTerminalError) {
+                    const fallbackOptions = Object.assign({}, options || {}, { stream: false });
+                    const result = await puter.ai.chat(messages, false, fallbackOptions);
+                    const content = result && result.message ? result.message.content : null;
+                    let text = "";
+                    if (typeof content === "string") text = content;
+                    else if (Array.isArray(content)) text = content.map(x => typeof x === "string" ? x : (x && typeof x.text === "string" ? x.text : "")).join("");
+                    else if (result && typeof result.text === "string") text = result.text;
+                    if (text) yield { type: "text", text };
+                    if (result && result.usage) yield { type: "usage", usage: result.usage };
+                    if (!text) {
+                        const e = new Error("Puter returned a response without answer content.");
+                        e.code = "PUTER_EMPTY_RESPONSE";
+                        e.provider = "puter";
+                        throw e;
+                    }
+                } else if (usageChunk) {
+                    yield usageChunk;
+                }
             },
             handleError(error) { return error; }
         };
