@@ -25154,7 +25154,7 @@ document.documentElement.classList.toggle(
            GET / -> providers.nvidiaConfigured: boolean
            GET /nvidia/models -> { ok, provider:"NVIDIA", models:[...] }
              A model must have available:true. Automatic/free selection requires
-             free:true AND verifiedFree:true.
+             free:true. verifiedFree may be supplied for additional metadata, but is not required.
            POST /nvidia/chat -> normalized SSE: data: {"delta":"…"} … data: [DONE]
            Until these Worker fields/endpoints exist, NVIDIA remains disconnected.
            ===================================================== */
@@ -25193,7 +25193,7 @@ document.documentElement.classList.toggle(
         }
 
         function aiModelFreeVerified(model) {
-            return !!(model && model.available === true && model.free === true && model.verifiedFree === true);
+            return !!(model && model.available === true && model.free === true);
         }
 
         function aiNormalizeWorkerModel(m, providerName) {
@@ -25381,8 +25381,8 @@ document.documentElement.classList.toggle(
                         if (value.usage) aiModelCatalog.usage[provider] = String(value.usage);
                         (value.models || []).forEach(m => {
                             if (!m || !m.id || seen.has(m.id)) return;
-                            /* APInex/NVIDIA free selection requires explicit Worker verification. */
-                            if (provider === "apinex" && !aiModelFreeVerified(m)) return;
+                            /* APInex free selection trusts the Worker's explicit free=true flag. */
+                            if (provider === "apinex" && !(m.available === true && m.free === true)) return;
                             if (provider === "nvidia" && m.available !== true) return;
                             seen.add(m.id); models.push(m);
                         });
@@ -25397,7 +25397,7 @@ document.documentElement.classList.toggle(
                         if (v && v !== "auto" && !models.some(m => m.id === v)) { aiSettings[k] = "auto"; aiPersistSettings(); }
                     });
                     if (aiModelCatalog.providerStatus.apinex === "configured") {
-                        aiSetProviderCard("apinex", "connected", aiModelCatalog.usage.apinex || "Worker catalogue available; only verified-free models are shown.");
+                        aiSetProviderCard("apinex", "connected", aiModelCatalog.usage.apinex || "Worker catalogue available; free models are identified by the Worker.");
                     } else {
                         aiSetProviderCard("apinex", "error", "Worker model catalogue unavailable.");
                     }
@@ -25467,7 +25467,7 @@ document.documentElement.classList.toggle(
         }
 
         /* The ID actually sent: only a model the catalogue lists as available.
-           Anything unverified (catalogue not loaded, stale saved id) becomes "auto". */
+           Anything unavailable (catalogue not loaded, stale saved id) becomes "auto". */
         function aiResolveModel() {
             const wanted = aiSelectedModelPref();
             if (wanted === "auto") return aiChooseAutomaticModel();
