@@ -26007,6 +26007,8 @@ document.documentElement.classList.toggle(
 
                 const maxTokens = parseInt(aiSettings.maxTokens, 10);
                 if (isFinite(maxTokens) && maxTokens > 0) requestBody.max_tokens = maxTokens;
+                // Nemotron Ultra needs a large generation budget because reasoning tokens count against max_tokens.
+                if (/^nvidia::(?:nvidia\/)?nemotron-3-ultra-550b-a55b$/i.test(String(requestedModel || ""))) requestBody.max_tokens = 16384;
 
                 const projectContext = String(aiSettings.projectContext || "").trim();
                 if (isAtlas && projectContext) requestBody.projectContext = projectContext.slice(0, 12000);
