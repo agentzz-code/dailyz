@@ -25113,7 +25113,11 @@ document.documentElement.classList.toggle(
             const get = id => document.getElementById(id)?.value || "";
             const next = { ...aiSettings, tone: get("aiToneSelect"), detail: get("aiDetailSelect"), memory: get("aiMemoryInput").slice(0,3000), permission: get("aiPermissionSelect"), rules: get("aiRulesInput").slice(0,2000), maxTokens: get("aiMaxTokensSelect") || "auto", projectContext: get("aiProjectContextInput").slice(0,12000) };
             /* the model select only reflects the saved choice once the catalogue has loaded */
-            const picked = get("aiModelSelect") || "auto";
+            let picked = get("aiModelSelect") || "auto";
+            if (picked !== "auto" && aiModelCatalog.loaded) {
+                const canonical = aiModelCatalog.models.find(x => x && (x.id === picked || String(x.id).replace(/^nvidia::|^puter::/, "") === picked));
+                if (canonical && canonical.available === true) picked = canonical.id;
+            }
             if (aiModelCatalog.loaded || picked === "auto") { if (aiMode === "atlas") next.atlasModel = picked; else next.model = picked; }
             aiSettings = next;
             aiPersistSettings();
@@ -25190,9 +25194,18 @@ document.documentElement.classList.toggle(
 
         /* ---------- unified provider adapter layer ---------- */
         function aiProviderFromModel(modelId) {
-            const id = String(modelId || "");
+            const id = String(modelId || "").trim();
             if (id.startsWith("puter::")) return "puter";
             if (id.startsWith("nvidia::")) return "nvidia";
+            // Older saved preferences could contain the raw NVIDIA model id
+            // without the provider namespace. Resolve it against the live
+            // catalogue before defaulting to APInex. This prevents a model
+            // selected from NVIDIA from accidentally being sent to Puter.
+            const meta = Array.isArray(aiModelCatalog.models)
+                ? aiModelCatalog.models.find(m => m && (m.id === id || String(m.id).replace(/^nvidia::|^puter::/, "") === id))
+                : null;
+            if (meta && meta.providerGroup === "nvidia") return "nvidia";
+            if (meta && (meta.providerGroup === "puter-gpt" || meta.providerGroup === "puter-claude")) return "puter";
             return "apinex";
         }
 
@@ -25524,15 +25537,14 @@ document.documentElement.classList.toggle(
         /* The ID actually sent: only a model the catalogue lists as available.
            Anything unavailable (catalogue not loaded, stale saved id) becomes "auto". */
         function aiResolveModel() {
-            const wanted = aiSelectedModelPref();
+            const wanted = String(aiSelectedModelPref() || "auto");
             if (wanted === "auto") return aiChooseAutomaticModel();
-            if (typeof wanted === "string" && (wanted.startsWith("puter::") || wanted.startsWith("nvidia::"))) {
-                const selected = aiModelCatalog.models.find(x => x.id === wanted);
-                return selected && selected.available !== false ? selected.id : wanted;
-            }
-            if (!aiModelCatalog.loaded) return "auto";
-            const m = aiModelCatalog.models.find(x => x.id === wanted);
-            return m && m.available === true ? m.id : "auto";
+            if (!aiModelCatalog.loaded) return wanted;
+            // Resolve both namespaced IDs and legacy raw IDs against the live
+            // catalogue. Always return the canonical namespaced ID.
+            const m = aiModelCatalog.models.find(x => x && (x.id === wanted || String(x.id).replace(/^nvidia::|^puter::/, "") === wanted));
+            if (m && m.available === true) return m.id;
+            return wanted;
         }
 
         function aiSetModelPref(id) {
