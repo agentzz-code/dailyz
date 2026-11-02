@@ -6028,7 +6028,9 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 @media (max-width:760px) { #aiModeBar { padding:6px 10px; gap:6px; } #aiModeHint { font-size:11px; } }
 
 /* Mode-specific settings */
+#ai[data-ai-mode="atlas"] .ai-horizon-only,
 #aiBox[data-ai-mode="atlas"] .ai-horizon-only,
+#ai:not([data-ai-mode="atlas"]) .ai-atlas-only,
 #aiBox:not([data-ai-mode="atlas"]) .ai-atlas-only { display:none !important; }
 #aiProjectContextInput { width:100%; box-sizing:border-box; min-height:110px; resize:vertical; }
 #aiModelMeta { min-height:1.2em; }
@@ -25650,43 +25652,64 @@ document.documentElement.classList.toggle(
 
         function aiApplyMode() {
             const atlas = aiMode === "atlas";
+            const mode = atlas ? "atlas" : "horizon";
+            const root = document.getElementById("ai");
             const box = document.getElementById("aiBox");
-            if (box) box.setAttribute("data-ai-mode", aiMode);
+
+            // Keep the mode state on both the AI root and the chat surface.
+            // The old implementation only updated #aiBox, which left parts of
+            // the interface visually/state-wise in Horizon after a mode click.
+            if (root) root.setAttribute("data-ai-mode", mode);
+            if (box) box.setAttribute("data-ai-mode", mode);
+
             document.querySelectorAll("#aiModeBar [data-ai-mode]").forEach((btn) => {
-                const on = btn.getAttribute("data-ai-mode") === aiMode;
+                const on = btn.getAttribute("data-ai-mode") === mode;
                 btn.classList.toggle("on", on);
                 btn.setAttribute("aria-selected", on ? "true" : "false");
                 btn.tabIndex = on ? 0 : -1;
             });
+
             const h1 = document.getElementById("aiPageHeading");
             if (h1) {
                 if (!h1.dataset.horizonText) h1.dataset.horizonText = h1.textContent;
                 h1.textContent = atlas ? aiT("atlasTitle") : h1.dataset.horizonText;
             }
+
+            // Update every mode-dependent label/placeholder immediately.
             aiApplyLanguage();
-            aiRenderModelOptions();
-            aiUpdateModelPill();
+
             const ctx = document.getElementById("aiProjectContextInput");
             if (ctx) ctx.value = aiSettings.projectContext || "";
         }
 
         function aiSetMode(next) {
             if (next !== "horizon" && next !== "atlas") return;
-            if (next === aiMode) return;
+
             if (aiBusy) {
                 aiPendingMode = next;
                 aiAnnounce("Stopping the current reply before switching to " + (next === "atlas" ? "Atlas" : "Horizon") + "…");
                 aiCancelStream();
                 return;
             }
-            aiPersistChats(); /* save the outgoing mode's chats under its own keys */
-            aiMode = next;
-            try { localStorage.setItem(AI_MODE_STORAGE_KEY, aiMode); } catch (e) {}
-            aiChats = aiLoadChats();
-            aiClearSelectedImage();
+
+            // Do not use a no-op early return here. The DOM can get out of sync
+            // with aiMode after restore/reload, so every click must reconcile the
+            // actual UI with the requested mode.
+            const previousMode = aiMode;
+            if (previousMode !== next) {
+                aiPersistChats();
+                aiMode = next;
+                try { localStorage.setItem(AI_MODE_STORAGE_KEY, aiMode); } catch (e) {}
+                aiChats = aiLoadChats();
+                aiClearSelectedImage();
+            } else {
+                // Still force the requested mode into storage and the DOM.
+                try { localStorage.setItem(AI_MODE_STORAGE_KEY, next); } catch (e) {}
+            }
+
             aiApplyMode();
-            aiPersistChats();
             aiRenderCurrentChat();
+            aiRenderChatLists();
             aiFetchModels(false);
         }
 
