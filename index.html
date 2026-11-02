@@ -26059,7 +26059,40 @@ document.documentElement.classList.toggle(
                 // Explicit Puter model selection wins for ALL Atlas tasks, including attached files.
                 // The Worker file-work endpoint is retained only for APInex selections.
                 requestedModel = aiCanonicalizeModelId(requestedModel);
-                const selectedProvider = aiProviderFromModel(requestedModel);
+                let selectedProvider = aiProviderFromModel(requestedModel);
+                // Atlas file/code work must never be sent through APInex's legacy
+                // file-work endpoint. If the user is signed into Puter and has a
+                // live Puter model available, automatically promote the request to
+                // the best eligible Puter coding model. This fixes the common case
+                // where Atlas is still set to an APInex model from an older session.
+                if (isAtlas && fileWorkRequested && selectedProvider === "apinex") {
+                    const signedInForAtlas = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
+                    if (signedInForAtlas && aiModelCatalog.loaded) {
+                        const puterCandidates = aiModelCatalog.models.filter(m =>
+                            (m.providerGroup === "puter-claude" || m.providerGroup === "puter-gpt") && m.available !== false
+                        );
+                        const freePuter = puterCandidates.filter(aiModelFreeVerified);
+                        const pool = freePuter.length ? freePuter : [];
+                        const score = m => {
+                            const id = String(m.id || "").toLowerCase();
+                            if (m.providerGroup === "puter-claude" && /opus/.test(id)) return 1;
+                            if (m.providerGroup === "puter-claude" && /sonnet/.test(id)) return 2;
+                            if (m.providerGroup === "puter-claude") return 3;
+                            if (m.providerGroup === "puter-gpt" && /codex/.test(id)) return 4;
+                            if (m.providerGroup === "puter-gpt" && /gpt-/.test(id)) return 5;
+                            return 10;
+                        };
+                        const bestPuter = pool.slice().sort((a,b) => score(a) - score(b) || String(b.contextLength || 0).localeCompare(String(a.contextLength || 0)))[0];
+                        if (bestPuter) {
+                            requestedModel = bestPuter.id;
+                            selectedProvider = "puter";
+                            aiSettings.atlasModel = requestedModel;
+                            aiPersistSettings();
+                            aiRenderModelOptions();
+                            aiUpdateModelPill();
+                        }
+                    }
+                }
                 if (selectedProvider === "apinex" && fileWorkRequested) {
                     // Do not silently send Atlas file jobs to APInex. Its file-work
                     // path is the source of the long upstream 502/timeout failures.
@@ -26067,8 +26100,8 @@ document.documentElement.classList.toggle(
                     const signedInForAtlas = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
                     if (isAtlas) {
                         const routeError = new Error(signedInForAtlas
-                            ? "Atlas file work is routed through Puter for long, streaming coding jobs. Select a Puter Claude/GPT model or refresh the live model list."
-                            : "Atlas file work needs a connected Puter account. Connect Puter, then select a Puter Claude/GPT model; APInex file-work is not used because it can time out on large projects.");
+                            ? "Atlas could not find an eligible free Puter Claude/GPT model. Refresh the live Puter model list or explicitly select a Puter model."
+                            : "Atlas file work needs a connected Puter account. Connect Puter, then retry the file/code request.");
                         routeError.code = "ATLAS_PUTER_MODEL_REQUIRED";
                         routeError.aiInfo = { kind: "provider", status: 0, code: routeError.code, message: routeError.message, provider: "puter" };
                         throw routeError;
