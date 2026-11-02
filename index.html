@@ -25651,8 +25651,20 @@ document.documentElement.classList.toggle(
             const detail = String(info && info.message || "").replace(/(?:Bearer\s+)[A-Za-z0-9._~+\/-]+/gi, "Bearer [redacted]").replace(/(api[_-]?key|token|secret)\s*[:=]\s*[^\s,;]+/gi, "$1=[redacted]").slice(0, 280);
             let friendly;
             const provider = String(info && info.provider || "").toLowerCase();
-            if (provider === "nvidia" && info && info.code === "NVIDIA_NOT_CONFIGURED") {
-                return "NVIDIA NIM is not connected yet. The Cloudflare Worker must advertise NVIDIA as configured before Horizon can use it.";
+            if (provider === "nvidia") {
+                if (info && info.code === "NVIDIA_NOT_CONFIGURED") {
+                    return "NVIDIA NIM is not connected yet. Add NVIDIA_API_KEY to the Cloudflare Worker secrets.";
+                }
+                if (info && info.code === "NVIDIA_UPSTREAM_FAILED") {
+                    if (info.status === 401) return "NVIDIA rejected the API key. Check the NVIDIA_API_KEY Worker secret." + (detail ? " Details: " + detail : "");
+                    if (info.status === 402) return "NVIDIA reports insufficient API credits for this account." + (detail ? " Details: " + detail : "");
+                    if (info.status === 403) return "NVIDIA denied access to this model or API operation." + (detail ? " Details: " + detail : "");
+                    if (info.status === 404) return "NVIDIA could not find the selected model or endpoint." + (detail ? " Details: " + detail : "");
+                    if (info.status === 422) return "NVIDIA rejected the request validation. Check the selected model and request format." + (detail ? " Details: " + detail : "");
+                    if (info.status === 429) return "NVIDIA rate limit exceeded. Please wait and try again." + (detail ? " Details: " + detail : "");
+                    if (info.status >= 500) return "NVIDIA inference service error. Please try again." + (detail ? " Details: " + detail : "");
+                    return "NVIDIA NIM rejected the request." + (detail ? " Details: " + detail : "");
+                }
             }
             switch (info && info.kind) {
                 case "model": friendly = provider === "nvidia" ? "The selected NVIDIA model is unavailable or not accessible." : (provider === "apinex" ? "The selected APInex model is unavailable or not verified as free." : "The selected Puter model is unavailable or not accessible."); break;
@@ -25662,7 +25674,7 @@ document.documentElement.classList.toggle(
                 case "auth": friendly = "Your Puter account is not authenticated. Connect Puter in AI settings and try again."; break;
                 case "timeout": friendly = "The AI request timed out. Try again with a smaller task."; break;
                 case "invalid": friendly = "The selected model returned an invalid structured file response. No replacement files were offered."; break;
-                case "provider": friendly = "Puter could not complete the request."; break;
+                case "provider": friendly = provider === "nvidia" ? "NVIDIA NIM could not complete the request." : provider === "apinex" ? "APInex could not complete the request." : "Puter could not complete the request."; break;
                 default: friendly = aiT("genericError");
             }
             return detail ? friendly + " Details: " + detail : friendly;
