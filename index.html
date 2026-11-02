@@ -25274,7 +25274,7 @@ document.documentElement.classList.toggle(
             async isAvailable() { return !!(window.puter && puter.ai && typeof puter.ai.listModels === "function"); },
             async sendMessage(messages, options) {
                 if (!window.puter || !puter.ai || typeof puter.ai.chat !== "function") throw new Error("Puter.js is unavailable.");
-                return puter.ai.chat(messages, options);
+                return puter.ai.chat(messages, false, options);
             },
             handleError(error) { return error; }
         };
