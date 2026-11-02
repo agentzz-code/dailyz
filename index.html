@@ -25668,35 +25668,40 @@ document.documentElement.classList.toggle(
             else if (status === 429 || /rate|quota|too many|limit/.test(hay)) kind = "rate";
             else if (status === 401 || status === 403 || /auth|permission|forbidden|unauthor|credential/.test(hay)) kind = "provider";
             else if (status >= 500 || /provider|upstream|overload|timeout|temporar|unavailable/.test(hay)) kind = "provider";
-            return { kind: kind, status: status || 0, code: code, message: message };
+            const details = payload && typeof payload.details === "string" ? payload.details : "";
+            const provider = payload && typeof payload.provider === "string" ? payload.provider : "";
+            const requestId = payload && typeof payload.requestId === "string" ? payload.requestId : "";
+            return { kind: kind, status: status || 0, code: code, message: message, details: details, provider: provider, requestId: requestId };
         }
 
         function aiFriendlyError(info) {
-            const detail = String(info && info.message || "").replace(/(?:Bearer\s+)[A-Za-z0-9._~+\/-]+/gi, "Bearer [redacted]").replace(/(api[_-]?key|token|secret)\s*[:=]\s*[^\s,;]+/gi, "$1=[redacted]").slice(0, 280);
+            const rawDetail = String(info && (info.details || info.message) || "");
+            const detail = rawDetail.replace(/(?:Bearer\s+)[A-Za-z0-9._~+\/-]+/gi, "Bearer [redacted]").replace(/(api[_-]?key|token|secret)\s*[:=]\s*[^\s,;]+/gi, "$1=[redacted]").slice(0, 500);
             let friendly;
             const provider = String(info && info.provider || "").toLowerCase();
+            const diagnosticSuffix = () => { let s = ""; if (info && Number(info.status) > 0) s += " (HTTP " + Number(info.status) + ")"; if (info && info.requestId) s += " Request ID: " + String(info.requestId).slice(0, 120); return s; };
             if (provider === "apinex" && info && info.code === "APINEX_UPSTREAM_FAILED") {
-                if (info.status === 401) return "APInex rejected the API key. Check the APINEX_API_KEY Worker secret." + (detail ? " Details: " + detail : "");
-                if (info.status === 402) return "APInex reports insufficient account credits or quota for this model." + (detail ? " Details: " + detail : "");
-                if (info.status === 403) return "APInex denied access to this model or operation." + (detail ? " Details: " + detail : "");
-                if (info.status === 404) return "APInex could not find or access the selected model." + (detail ? " Details: " + detail : "");
-                if (info.status === 429) return "APInex rate limit exceeded. Please wait and try again." + (detail ? " Details: " + detail : "");
-                if (info.status >= 500) return "APInex inference service error. Please try again." + (detail ? " Details: " + detail : "");
-                return "APInex rejected the request." + (detail ? " Details: " + detail : "");
+                if (info.status === 401) return "APInex rejected the API key. Check the APINEX_API_KEY Worker secret." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                if (info.status === 402) return "APInex reports insufficient account credits or quota for this model." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                if (info.status === 403) return "APInex denied access to this model or operation." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                if (info.status === 404) return "APInex could not find or access the selected model." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                if (info.status === 429) return "APInex rate limit exceeded. Please wait and try again." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                if (info.status >= 500) return "APInex inference service error. Please try again." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                return "APInex rejected the request." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
             }
             if (provider === "nvidia") {
                 if (info && info.code === "NVIDIA_NOT_CONFIGURED") {
                     return "NVIDIA NIM is not connected yet. Add NVIDIA_API_KEY to the Cloudflare Worker secrets.";
                 }
                 if (info && info.code === "NVIDIA_UPSTREAM_FAILED") {
-                    if (info.status === 401) return "NVIDIA rejected the API key. Check the NVIDIA_API_KEY Worker secret." + (detail ? " Details: " + detail : "");
-                    if (info.status === 402) return "NVIDIA reports insufficient API credits for this account." + (detail ? " Details: " + detail : "");
-                    if (info.status === 403) return "NVIDIA denied access to this model or API operation." + (detail ? " Details: " + detail : "");
-                    if (info.status === 404) return "NVIDIA could not find the selected model or endpoint." + (detail ? " Details: " + detail : "");
-                    if (info.status === 422) return "NVIDIA rejected the request validation. Check the selected model and request format." + (detail ? " Details: " + detail : "");
-                    if (info.status === 429) return "NVIDIA rate limit exceeded. Please wait and try again." + (detail ? " Details: " + detail : "");
-                    if (info.status >= 500) return "NVIDIA inference service error. Please try again." + (detail ? " Details: " + detail : "");
-                    return "NVIDIA NIM rejected the request." + (detail ? " Details: " + detail : "");
+                    if (info.status === 401) return "NVIDIA rejected the API key. Check the NVIDIA_API_KEY Worker secret." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                    if (info.status === 402) return "NVIDIA reports insufficient API credits for this account." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                    if (info.status === 403) return "NVIDIA denied access to this model or API operation." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                    if (info.status === 404) return "NVIDIA could not find the selected model or endpoint." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                    if (info.status === 422) return "NVIDIA rejected the request validation. Check the selected model and request format." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                    if (info.status === 429) return "NVIDIA rate limit exceeded. Please wait and try again." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                    if (info.status >= 500) return "NVIDIA inference service error. Please try again." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
+                    return "NVIDIA NIM rejected the request." + (detail ? " Details: " + detail : "") + diagnosticSuffix();
                 }
             }
             switch (info && info.kind) {
@@ -25710,7 +25715,10 @@ document.documentElement.classList.toggle(
                 case "provider": friendly = provider === "nvidia" ? "NVIDIA NIM could not complete the request." : provider === "apinex" ? "APInex could not complete the request." : "Puter could not complete the request."; break;
                 default: friendly = aiT("genericError");
             }
-            return detail ? friendly + " Details: " + detail : friendly;
+            let suffix = detail ? " Details: " + detail : "";
+            if (info && Number(info.status) > 0) suffix += " (HTTP " + Number(info.status) + ")";
+            if (info && info.requestId) suffix += " Request ID: " + String(info.requestId).slice(0, 120);
+            return friendly + suffix;
         }
 
         function aiSendOrStop() {
