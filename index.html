@@ -328,6 +328,15 @@
         .aiSettingsHint { font-size:11px; line-height:1.45; color:var(--ai-muted); margin:6px 0 0; }
         .aiSettingsSave { border:0; border-radius:11px; padding:10px 12px; width:100%; background:var(--ai-btn); color:var(--ai-btn-ink); font-weight:700; margin-top:8px; }
         .aiSettingsStatus { font-size:12px; color:var(--ai-muted); min-height:16px; margin-top:8px; }
+        .aiProviderGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:9px; }
+        .aiProviderCard { border:1px solid var(--ai-brd); border-radius:11px; padding:9px 10px; background:var(--ai-panel-2); min-width:0; }
+        .aiProviderCard strong { display:block; font-size:12px; color:var(--ai-ink); }
+        .aiProviderCard span { display:block; margin-top:3px; font-size:10.5px; color:var(--ai-muted); line-height:1.35; }
+        .aiProviderCard[data-state="connected"] span { color:#2f8f5b; }
+        .aiProviderCard[data-state="error"] span { color:#c0392b; }
+        #aiModelSelect optgroup { font-weight:800; }
+        @media (max-width: 560px) { .aiProviderGrid { grid-template-columns:1fr; } }
+
         .aiActionCard { border:1px solid var(--ai-brd); border-radius:13px; padding:12px; margin:8px 0; background:var(--ai-panel-2); }
         .aiActionCard button { border:0; border-radius:9px; padding:8px 10px; margin:8px 6px 0 0; background:var(--ai-btn); color:var(--ai-btn-ink); }
         .aiActionCard button.secondary { background:var(--ai-chip); color:var(--ai-ink); }
@@ -23235,10 +23244,20 @@ document.documentElement.classList.toggle(
                 <p class="aiSettingsHint" id="aiModelMeta" role="status" aria-live="polite"></p>
                 <button type="button" class="aiSettingsSave" id="aiModelRefreshBtn">Refresh models</button>
                 <button type="button" class="aiSettingsSave" id="aiPuterConnectBtn" hidden>Connect Puter account</button>
+                <button type="button" class="aiSettingsSave" id="aiPuterSignOutBtn" hidden>Sign out of Puter</button>
                 <p class="aiSettingsHint" id="aiPuterStatus" role="status" aria-live="polite">Choose a Puter GPT or Claude model to connect a Puter account. APInex models do not need Puter.</p>
                 <label for="aiMaxTokensSelect">Response length</label>
                 <select id="aiMaxTokensSelect"><option value="auto">Automatic</option><option value="512">Short (512 tokens)</option><option value="1024">Medium (1,024 tokens)</option><option value="2048">Long (2,048 tokens)</option><option value="4096">Very long (4,096 tokens)</option></select>
                 <p class="aiSettingsHint">APInex models use your configured Horizon AI Worker and do not require Puter. Puter GPT and Claude models are discovered live and use your connected Puter account; usage follows Puter’s user-pays terms. Each of Horizon and Atlas remembers its own model.</p>
+            </div>
+            <div class="aiSettingsGroup">
+                <h4>Provider connections</h4>
+                <div class="aiProviderGrid" id="aiProviderGrid">
+                    <div class="aiProviderCard" id="aiProviderStatusApinex" data-state="unknown"><strong>APInex</strong><span>Checking Worker connection…</span></div>
+                    <div class="aiProviderCard" id="aiProviderStatusPuter" data-state="unknown"><strong>Puter</strong><span>Checking account…</span></div>
+                    <div class="aiProviderCard" id="aiProviderStatusNvidia" data-state="unknown"><strong>NVIDIA NIM</strong><span>Backend status not checked yet.</span></div>
+                </div>
+                <p class="aiSettingsHint" id="aiProviderUsageHint" role="status" aria-live="polite">Provider availability is read from live catalogues/status responses. No frontend secret is required.</p>
             </div>
             <div class="aiSettingsGroup ai-atlas-only">
                 <h4>Atlas project context</h4>
@@ -23378,7 +23397,14 @@ document.documentElement.classList.toggle(
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
-        const aiModelCatalog = { loaded: false, loading: false, error: false, provider: "", models: [], at: 0, promise: null };
+        const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
+        const AI_NVIDIA_MODELS_URL = AI_PROVIDER_STATUS_URL + "/nvidia/models";
+        const AI_NVIDIA_CHAT_URL = AI_PROVIDER_STATUS_URL + "/nvidia/chat";
+        const aiModelCatalog = {
+            loaded: false, loading: false, error: false, provider: "", models: [], at: 0, promise: null,
+            providerStatus: { apinex: "unknown", puter: "unknown", nvidia: "unknown" },
+            usage: { apinex: "", puter: "", nvidia: "" }
+        };
         const AI_HISTORY_LIMIT = 10;
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
         const AI_LANG_STORAGE_KEY = "dailykrd_language";
@@ -23541,7 +23567,12 @@ document.documentElement.classList.toggle(
             errModel: "That model isn't available right now.", errModelHint: "Try Automatic or pick another model.",
             errRate: "The AI service is busy or rate-limited. Please wait a moment and try again.",
             errProvider: "The AI provider had a problem. Please try again shortly.",
-            retryAuto: "Retry with Automatic"
+            retryAuto: "Retry with Automatic",
+            providerApinex: "APInex", providerPuterClaude: "Puter — Claude", providerPuterGpt: "Puter — GPT", providerNvidia: "NVIDIA",
+            freeVerified: "Verified free", paidUsage: "Paid / account usage", availabilityUnknown: "Availability unknown",
+            providerConnected: "Connected", providerDisconnected: "Not connected", providerConfigured: "Configured", providerNotConfigured: "Not configured",
+            providerBackendMissing: "Worker endpoint not implemented", providerRefresh: "Refresh providers", providerUsage: "Usage: ",
+            modelIdLabel: "ID", modelContextLabel: "context", modelCapsLabel: "capabilities"
         });
         Object.assign(AI_STRINGS.ar, {
             modeLabel: "وضع الذكاء الاصطناعي", modeHorizon: "هورايزن", modeAtlas: "أطلس",
@@ -23559,7 +23590,12 @@ document.documentElement.classList.toggle(
             errModel: "هذا النموذج غير متاح الآن.", errModelHint: "جرّب الوضع التلقائي أو اختر نموذجاً آخر.",
             errRate: "الخدمة مشغولة أو وصلت إلى الحد المسموح. انتظر قليلاً ثم حاول مجدداً.",
             errProvider: "واجه مزوّد الذكاء الاصطناعي مشكلة. حاول مرة أخرى بعد قليل.",
-            retryAuto: "أعد المحاولة بالوضع التلقائي"
+            retryAuto: "أعد المحاولة بالوضع التلقائي",
+            providerApinex: "APInex", providerPuterClaude: "Puter — Claude", providerPuterGpt: "Puter — GPT", providerNvidia: "NVIDIA",
+            freeVerified: "مجاني موثّق", paidUsage: "مدفوع / حسب استخدام الحساب", availabilityUnknown: "التوفر غير معروف",
+            providerConnected: "متصل", providerDisconnected: "غير متصل", providerConfigured: "مهيأ", providerNotConfigured: "غير مهيأ",
+            providerBackendMissing: "نقطة Worker غير مطبقة", providerRefresh: "تحديث المزوّدين", providerUsage: "الاستخدام: ",
+            modelIdLabel: "المعرّف", modelContextLabel: "السياق", modelCapsLabel: "القدرات"
         });
         Object.assign(AI_STRINGS.ku, {
             modeLabel: "دۆخی زیرەکی دەستکرد", modeHorizon: "هۆرایزن", modeAtlas: "ئەتلەس",
@@ -23577,7 +23613,12 @@ document.documentElement.classList.toggle(
             errModel: "ئەم مۆدێلە ئێستا بەردەست نییە.", errModelHint: "دۆخی خۆکار تاقی بکەرەوە یان مۆدێلێکی تر هەڵبژێرە.",
             errRate: "خزمەتگوزارییەکە سەرقاڵە یان گەیشتووەتە سنوور. کەمێک چاوەڕێ بکە و دووبارە هەوڵ بدە.",
             errProvider: "دابینکەری زیرەکی دەستکرد کێشەیەکی هەبوو. تکایە کەمێکی تر دووبارە هەوڵ بدە.",
-            retryAuto: "بە دۆخی خۆکار دووبارە هەوڵ بدە"
+            retryAuto: "بە دۆخی خۆکار دووبارە هەوڵ بدە",
+            providerApinex: "APInex", providerPuterClaude: "Puter — Claude", providerPuterGpt: "Puter — GPT", providerNvidia: "NVIDIA",
+            freeVerified: "بێبەرامبەر و پشتڕاستکراوە", paidUsage: "پارەدان / بە پێی بەکارهێنانی هەژمار", availabilityUnknown: "بەردەستبوون نادیارە",
+            providerConnected: "پەیوەستە", providerDisconnected: "پەیوەست نییە", providerConfigured: "ئامادەکراوە", providerNotConfigured: "ئامادە نەکراوە",
+            providerBackendMissing: "ئێستا ئەندپۆینتی Worker جێبەجێ نەکراوە", providerRefresh: "نوێکردنەوەی دابینکەرەکان", providerUsage: "بەکارهێنان: ",
+            modelIdLabel: "ناسێنەر", modelContextLabel: "کۆنتێکست", modelCapsLabel: "تواناکان"
         });
 
         let aiMode = "horizon";
@@ -25104,9 +25145,18 @@ document.documentElement.classList.toggle(
            WORKER CONTRACT
            GET  {AI_ENDPOINT}/models   -> { ok, provider, models[] }
            POST {AI_ENDPOINT}          -> SSE: data: {"delta":"…"} … data: [DONE]
-           APInex/Gemini requests use the Horizon AI Worker. Puter GPT/Claude
+           APInex requests use the Horizon AI Worker. Puter GPT/Claude
            requests use the official Puter.js browser SDK and the signed-in
-           user's Puter account; no provider API key is exposed in this page.
+           user's Puter account. NVIDIA NIM requests use the Horizon Worker only;
+           the NVIDIA API key is never exposed in this page.
+
+           NVIDIA Worker contract:
+           GET / -> providers.nvidiaConfigured: boolean
+           GET /nvidia/models -> { ok, provider:"NVIDIA", models:[...] }
+             A model must have available:true. Automatic/free selection requires
+             free:true AND verifiedFree:true.
+           POST /nvidia/chat -> normalized SSE: data: {"delta":"…"} … data: [DONE]
+           Until these Worker fields/endpoints exist, NVIDIA remains disconnected.
            ===================================================== */
 
         function aiModeStr(key) {
@@ -25134,145 +25184,281 @@ document.documentElement.classList.toggle(
             return String(n);
         }
 
+        /* ---------- unified provider adapter layer ---------- */
+        function aiProviderFromModel(modelId) {
+            const id = String(modelId || "");
+            if (id.startsWith("puter::")) return "puter";
+            if (id.startsWith("nvidia::")) return "nvidia";
+            return "apinex";
+        }
+
+        function aiModelFreeVerified(model) {
+            return !!(model && model.available === true && model.free === true && model.verifiedFree === true);
+        }
+
+        function aiNormalizeWorkerModel(m, providerName) {
+            if (!m || typeof m.id !== "string" || !m.id.trim()) return null;
+            return {
+                id: m.id.trim(),
+                name: typeof m.name === "string" && m.name.trim() ? m.name.trim() : m.id.trim(),
+                provider: typeof m.provider === "string" && m.provider.trim() ? m.provider.trim() : providerName,
+                providerGroup: providerName.toLowerCase(),
+                vendor: String(m.vendor || m.provider || providerName),
+                available: m.available === true,
+                free: m.free === true,
+                verifiedFree: m.verifiedFree === true,
+                contextLength: Number(m.contextLength || m.context_window || 0) || 0,
+                maxTokens: Number(m.maxTokens || m.max_tokens || 0) || 0,
+                capabilities: aiNormCaps(m.capabilities),
+                pricing: m.pricing && typeof m.pricing === "object" ? m.pricing : null,
+                status: String(m.status || (m.available === true ? "available" : "unavailable"))
+            };
+        }
+
+        const apinexAdapter = {
+            async getModels() {
+                const res = await fetch(AI_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
+                let data = null; try { data = await res.json(); } catch (_) {}
+                if (!res.ok) {
+                    const err = new Error((data && (data.message || data.error)) || "APInex model catalogue HTTP " + res.status);
+                    err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "apinex"; throw err;
+                }
+                if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected APInex Worker catalogue.");
+                return {
+                    models: data.models.map(m => aiNormalizeWorkerModel(m, "APInex")).filter(Boolean),
+                    usage: String(data.freeDailyPool || ""),
+                    status: "configured"
+                };
+            },
+            async isAvailable() {
+                try { return (await this.getModels()).models.some(aiModelFreeVerified); } catch (_) { return false; }
+            },
+            async sendMessage(requestBody, signal) {
+                return fetch(AI_ENDPOINT, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+                    body: JSON.stringify(requestBody), signal
+                });
+            },
+            handleError(error) { return error; }
+        };
+
+        const puterAdapter = {
+            async getModels() {
+                if (!window.puter || !puter.ai || typeof puter.ai.listModels !== "function") throw new Error("Puter.js did not load.");
+                const raw = await puter.ai.listModels();
+                const models = (Array.isArray(raw) ? raw : []).map(m => {
+                    if (!m || typeof m.id !== "string" || !m.id.trim()) return null;
+                    const vendor = String(m.provider || "").toLowerCase();
+                    if (!["openai", "claude", "anthropic"].includes(vendor)) return null;
+                    const cost = m.cost && typeof m.cost === "object" ? m.cost : null;
+                    const input = cost ? Number(cost.input) : NaN;
+                    const output = cost ? Number(cost.output) : NaN;
+                    const free = /:free$/i.test(m.id) ||
+                        (!!cost && Number.isFinite(input) && Number.isFinite(output) && input === 0 && output === 0);
+                    const isOpenAI = vendor === "openai";
+                    return {
+                        id: "puter::" + m.id,
+                        name: String(m.name || m.id),
+                        provider: "Puter / " + (isOpenAI ? "OpenAI" : "Anthropic"),
+                        providerGroup: isOpenAI ? "puter-gpt" : "puter-claude",
+                        vendor, available: true, free, verifiedFree: free,
+                        contextLength: Number(m.context || 0) || 0,
+                        maxTokens: Number(m.max_tokens || 0) || 0,
+                        capabilities: ["chat", "streaming"].concat(Array.isArray(m.capabilities) ? m.capabilities.map(String) : []),
+                        pricing: cost, status: "available"
+                    };
+                }).filter(Boolean);
+                return { models, usage: "Usage and limits follow your Puter account.", status: "account" };
+            },
+            async isAvailable() { return !!(window.puter && puter.ai && typeof puter.ai.listModels === "function"); },
+            async sendMessage(messages, options) {
+                if (!window.puter || !puter.ai || typeof puter.ai.chat !== "function") throw new Error("Puter.js is unavailable.");
+                return puter.ai.chat(messages, options);
+            },
+            handleError(error) { return error; }
+        };
+
+        const nvidiaAdapter = {
+            async getModels() {
+                const statusRes = await fetch(AI_PROVIDER_STATUS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
+                let status = null; try { status = await statusRes.json(); } catch (_) {}
+                const configured = !!(status && status.providers && status.providers.nvidiaConfigured === true);
+                if (!configured) {
+                    const err = new Error("NVIDIA NIM is not configured by the Horizon Worker.");
+                    err.code = "NVIDIA_NOT_CONFIGURED";
+                    err.aiInfo = { kind: "provider", status: statusRes.status || 200, code: err.code, message: err.message, provider: "nvidia" };
+                    throw err;
+                }
+                const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
+                let data = null; try { data = await res.json(); } catch (_) {}
+                if (!res.ok) {
+                    const err = new Error((data && (data.message || data.error)) || "NVIDIA model catalogue HTTP " + res.status);
+                    err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "nvidia"; throw err;
+                }
+                if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected NVIDIA Worker catalogue.");
+                return {
+                    models: data.models.map(m => {
+                        const x = aiNormalizeWorkerModel(m, "NVIDIA");
+                        if (!x) return null;
+                        x.id = "nvidia::" + x.id; x.providerGroup = "nvidia"; return x;
+                    }).filter(Boolean),
+                    usage: String(data.usage || data.limit || ""),
+                    status: "configured"
+                };
+            },
+            async isAvailable() { try { return (await this.getModels()).status === "configured"; } catch (_) { return false; } },
+            async sendMessage(requestBody, signal) {
+                const body = { ...requestBody, model: String(requestBody.model || "").replace(/^nvidia::/, "") };
+                return fetch(AI_NVIDIA_CHAT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+                    body: JSON.stringify(body), signal
+                });
+            },
+            handleError(error) { return error; }
+        };
+
+        const aiProviderAdapters = { apinex: apinexAdapter, puter: puterAdapter, nvidia: nvidiaAdapter };
+
+        function aiSetProviderCard(provider, state, detail) {
+            const id = provider === "apinex" ? "aiProviderStatusApinex" : provider === "puter" ? "aiProviderStatusPuter" : "aiProviderStatusNvidia";
+            const el = document.getElementById(id); if (!el) return;
+            el.dataset.state = state || "unknown";
+            const span = el.querySelector("span"); if (span) span.textContent = detail || aiT("availabilityUnknown");
+        }
+
+        function aiChooseAutomaticModel() {
+            if (!aiModelCatalog.loaded) return "auto";
+            const signedIn = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
+            const candidates = aiModelCatalog.models.filter(m => {
+                if (m.providerGroup === "puter-gpt" || m.providerGroup === "puter-claude") return signedIn && aiModelFreeVerified(m);
+                return aiModelFreeVerified(m);
+            });
+            const rank = m => {
+                const id = String(m.id).toLowerCase();
+                if (aiMode === "atlas") {
+                    if (/claude.*sonnet/.test(id)) return 1;
+                    if (/deepseek|qwen|coder|codestral|kimi/.test(id)) return 2;
+                    if (/gpt/.test(id)) return 3;
+                    return 10;
+                }
+                if (/claude.*sonnet/.test(id)) return 1;
+                if (/gpt/.test(id)) return 2;
+                if (/gemini|deepseek|qwen|kimi/.test(id)) return 3;
+                return 10;
+            };
+            const selected = candidates.sort((a,b) => rank(a)-rank(b) || a.name.localeCompare(b.name))[0];
+            return selected ? selected.id : "auto";
+        }
+
         async function aiFetchModels(force) {
             if (aiModelCatalog.loading && aiModelCatalog.promise) return aiModelCatalog.promise;
             if (!force && aiModelCatalog.loaded && Date.now() - aiModelCatalog.at < 10 * 60 * 1000) return;
-            aiModelCatalog.loading = true;
-            aiModelCatalog.error = false;
-            aiRenderModelOptions();
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 12000);
+            aiModelCatalog.loading = true; aiModelCatalog.error = false; aiRenderModelOptions();
             aiModelCatalog.promise = (async () => {
                 try {
-                    const sources = await Promise.allSettled([
-                        fetch(AI_MODELS_URL, {
-                            method: "GET", headers: { "Accept": "application/json" },
-                            cache: "no-store", signal: controller.signal
-                        }).then(async (res) => {
-                            if (!res.ok) throw new Error("Worker model catalogue HTTP " + res.status);
-                            const data = await res.json();
-                            if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected Worker catalogue");
-                            return data;
-                        }),
-                        (async () => {
-                            if (!window.puter || !puter.ai || typeof puter.ai.listModels !== "function") throw new Error("Puter.js did not load");
-                            return await puter.ai.listModels();
-                        })()
+                    const results = await Promise.allSettled([
+                        apinexAdapter.getModels(),
+                        puterAdapter.getModels(),
+                        nvidiaAdapter.getModels()
                     ]);
-                    const models = [];
-                    const seen = new Set();
-                    const workerData = sources[0].status === "fulfilled" ? sources[0].value : null;
-                    const puterData = sources[1].status === "fulfilled" && Array.isArray(sources[1].value) ? sources[1].value : [];
-
-                    if (workerData) {
-                        const workerProvider = typeof workerData.provider === "string" ? workerData.provider : "APInex";
-                        workerData.models.forEach((m) => {
-                            if (!m || typeof m.id !== "string" || !m.id.trim() || seen.has(m.id)) return;
-                            const free = m.free === true || m.free === "true" || m.free === 1;
-                            if (!free) return;
-                            seen.add(m.id);
-                            models.push({
-                                id: m.id,
-                                name: typeof m.name === "string" && m.name.trim() ? m.name.trim() : m.id,
-                                provider: typeof m.provider === "string" && m.provider ? m.provider : workerProvider,
-                                available: m.available !== false,
-                                contextLength: Number(m.contextLength) > 0 ? Number(m.contextLength) : 0,
-                                capabilities: aiNormCaps(m.capabilities)
-                            });
-                        });
-                    }
-
-                    // Puter supplies the live OpenAI and Anthropic model catalogue.
-                    // Prefix IDs so the existing Worker/APInex IDs cannot collide.
-                    puterData.forEach((m) => {
-                        if (!m || typeof m.id !== "string" || !m.id.trim()) return;
-                        const vendor = String(m.provider || "").toLowerCase();
-                        if (!["openai", "claude", "anthropic"].includes(vendor)) return;
-                        const id = "puter::" + m.id;
-                        if (seen.has(id)) return;
-                        seen.add(id);
-                        const vendorName = vendor === "openai" ? "ChatGPT" : "Claude";
-                        models.push({
-                            id,
-                            name: vendorName + " · " + String(m.name || m.id),
-                            provider: "Puter / " + (vendor === "openai" ? "OpenAI" : "Anthropic"),
-                            vendor: vendor,
-                            available: true,
-                            contextLength: Number(m.context || 0),
-                            capabilities: ["chat", "streaming"]
+                    const providers = ["apinex", "puter", "nvidia"];
+                    const models = [], seen = new Set();
+                    let anySuccess = false;
+                    results.forEach((r, i) => {
+                        const provider = providers[i];
+                        if (r.status !== "fulfilled") {
+                            const msg = String(r.reason && (r.reason.code || r.reason.message) || "");
+                            aiModelCatalog.providerStatus[provider] = provider === "nvidia" && msg.includes("NVIDIA_NOT_CONFIGURED") ? "not-configured" : "error";
+                            return;
+                        }
+                        anySuccess = true;
+                        const value = r.value || {};
+                        aiModelCatalog.providerStatus[provider] = provider === "puter"
+                            ? ((window.puter && puter.auth && puter.auth.isSignedIn && puter.auth.isSignedIn()) ? "connected" : "disconnected")
+                            : (value.status === "configured" ? "configured" : "unknown");
+                        if (value.usage) aiModelCatalog.usage[provider] = String(value.usage);
+                        (value.models || []).forEach(m => {
+                            if (!m || !m.id || seen.has(m.id)) return;
+                            /* APInex/NVIDIA free selection requires explicit Worker verification. */
+                            if (provider === "apinex" && !aiModelFreeVerified(m)) return;
+                            if (provider === "nvidia" && m.available !== true) return;
+                            seen.add(m.id); models.push(m);
                         });
                     });
-
-                    models.sort((a, b) => (b.available ? 1 : 0) - (a.available ? 1 : 0) || a.name.localeCompare(b.name));
+                    const groupOrder = { apinex: 0, "puter-claude": 1, "puter-gpt": 2, nvidia: 3 };
+                    models.sort((a,b) => (groupOrder[a.providerGroup] ?? 9) - (groupOrder[b.providerGroup] ?? 9) || a.name.localeCompare(b.name));
                     aiModelCatalog.models = models;
-                    aiModelCatalog.provider = [workerData ? "APInex" : "", puterData.length ? "Puter" : ""].filter(Boolean).join(" + ") || "AI providers";
-                    aiModelCatalog.loaded = true;
-                    aiModelCatalog.at = Date.now();
-                    aiModelCatalog.error = !workerData && !puterData.length;
-                    let changed = false;
-                    ["model", "atlasModel"].forEach((k) => {
+                    aiModelCatalog.provider = "APInex + Puter + NVIDIA";
+                    aiModelCatalog.loaded = anySuccess; aiModelCatalog.at = Date.now(); aiModelCatalog.error = !anySuccess;
+                    ["model", "atlasModel"].forEach(k => {
                         const v = aiSettings[k];
-                        if (v && v !== "auto" && !models.some((m) => m.id === v)) { aiSettings[k] = "auto"; changed = true; }
+                        if (v && v !== "auto" && !models.some(m => m.id === v)) { aiSettings[k] = "auto"; aiPersistSettings(); }
                     });
-                    if (changed) aiPersistSettings();
-                    if (!workerData && !puterData.length) throw new Error("No AI model catalogue could be loaded");
+                    if (aiModelCatalog.providerStatus.apinex === "configured") {
+                        aiSetProviderCard("apinex", "connected", aiModelCatalog.usage.apinex || "Worker catalogue available; only verified-free models are shown.");
+                    } else {
+                        aiSetProviderCard("apinex", "error", "Worker model catalogue unavailable.");
+                    }
+                    const puterConnected = aiModelCatalog.providerStatus.puter === "connected";
+                    aiSetProviderCard("puter", puterConnected ? "connected" : "unknown", puterConnected ? "Puter account connected. Live GPT/Claude catalogue loaded." : "Not connected — sign in when you select a Puter model.");
+                    aiSetProviderCard("nvidia", aiModelCatalog.providerStatus.nvidia === "configured" ? "connected" : (aiModelCatalog.providerStatus.nvidia === "not-configured" ? "error" : "unknown"),
+                        aiModelCatalog.providerStatus.nvidia === "configured" ? (aiModelCatalog.usage.nvidia || "Worker reports NVIDIA as configured.") : aiT("providerBackendMissing"));
+                    if (!anySuccess) throw new Error("No AI provider catalogue could be loaded.");
                 } catch (e) {
                     aiModelCatalog.error = true;
                     if (!aiModelCatalog.loaded) aiModelCatalog.models = [];
                     console.warn("[Horizon AI] model discovery issue:", e && e.message ? e.message : e);
                 } finally {
-                    clearTimeout(timer);
-                    aiModelCatalog.loading = false;
-                    aiModelCatalog.promise = null;
-                    aiRenderModelOptions();
-                    aiUpdateModelPill();
-                    aiUpdatePuterStatus();
+                    aiModelCatalog.loading = false; aiModelCatalog.promise = null;
+                    aiRenderModelOptions(); aiUpdateModelPill(); aiUpdatePuterStatus(); aiUpdateProviderUI();
                 }
             })();
             return aiModelCatalog.promise;
         }
 
+        function aiUpdateProviderUI() {
+            const signedIn = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
+            aiSetProviderCard("puter", signedIn ? "connected" : "unknown", signedIn ? "Puter account connected." : "Not connected — select a Puter model to sign in.");
+            if (aiModelCatalog.providerStatus.nvidia === "not-configured") aiSetProviderCard("nvidia", "error", aiT("providerBackendMissing"));
+            const usage = [aiModelCatalog.usage.apinex, aiModelCatalog.usage.puter, aiModelCatalog.usage.nvidia].filter(Boolean);
+            const usageEl = document.getElementById("aiProviderUsageHint");
+            if (usageEl) usageEl.textContent = usage.length ? usage.join(" · ") : "Live provider status and usage information will appear here when exposed.";
+        }
+
         function aiUpdatePuterStatus(message) {
             const el = document.getElementById("aiPuterStatus");
             const btn = document.getElementById("aiPuterConnectBtn");
+            const signOut = document.getElementById("aiPuterSignOutBtn");
             if (!el) return;
             const select = document.getElementById("aiModelSelect");
             const selected = select ? select.value : aiSelectedModelPref();
             const isPuterModel = typeof selected === "string" && selected.startsWith("puter::");
-            // Keep Puter sign-in messaging out of the way for APInex and Automatic.
+            const signedIn = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
             el.hidden = !isPuterModel;
-            if (btn) btn.hidden = !isPuterModel;
+            if (btn) btn.hidden = !isPuterModel || signedIn;
+            if (signOut) signOut.hidden = !signedIn;
             if (!isPuterModel) {
-                el.textContent = selected === "auto"
-                    ? "Automatic uses your configured Horizon provider. Puter sign-in is only needed if you select a Puter GPT or Claude model."
-                    : "This model uses your configured Horizon AI Worker (APInex); no Puter sign-in is required.";
+                el.textContent = signedIn ? "Puter account connected. Sign-out is available here." : "Choose a Puter GPT or Claude model to connect a Puter account.";
                 return;
             }
             if (message) { el.textContent = message; return; }
             if (!window.puter) el.textContent = "Puter.js is not available. Check the network or content-security policy.";
-            else if (puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn()) el.textContent = "Puter connected. This GPT or Claude model will use your Puter account.";
+            else if (signedIn) el.textContent = "Puter connected. This GPT or Claude model will use your Puter account.";
             else el.textContent = "Connect your Puter account to use this GPT or Claude model.";
         }
 
-        async function aiConnectPuter() {
-            const btn = document.getElementById("aiPuterConnectBtn");
-            if (!window.puter || !puter.auth || typeof puter.auth.signIn !== "function") {
-                aiUpdatePuterStatus("Puter.js could not load. Refresh the page and try again.");
-                return;
+        async function aiSignOutPuter() {
+            if (!window.puter || !puter.auth || typeof puter.auth.signOut !== "function") {
+                aiUpdatePuterStatus("Puter sign-out is unavailable because the official SDK is not loaded."); return;
             }
-            if (puter.auth.isSignedIn()) {
-                aiUpdatePuterStatus("Your Puter account is already connected.");
-                return;
-            }
-            if (btn) { btn.disabled = true; btn.textContent = "Connecting…"; }
             try {
-                await puter.auth.signIn();
-                aiUpdatePuterStatus("Puter account connected. GPT and Claude are ready to use.");
+                await puter.auth.signOut();
+                aiUpdatePuterStatus("Puter account signed out.");
                 await aiFetchModels(true);
             } catch (error) {
-                aiUpdatePuterStatus("Puter connection was not completed: " + String(error && (error.msg || error.message) || "Please try again."));
-            } finally {
-                if (btn) { btn.disabled = false; btn.textContent = "Connect Puter account"; }
+                aiUpdatePuterStatus("Puter sign-out failed: " + String(error && (error.message || error.msg) || "Please try again."));
             }
         }
 
@@ -25284,11 +25470,14 @@ document.documentElement.classList.toggle(
            Anything unverified (catalogue not loaded, stale saved id) becomes "auto". */
         function aiResolveModel() {
             const wanted = aiSelectedModelPref();
-            // An explicit Puter choice must never silently become APInex/Automatic.
-            if (typeof wanted === "string" && wanted.startsWith("puter::")) return wanted;
-            if (wanted === "auto" || !aiModelCatalog.loaded) return "auto";
-            const m = aiModelCatalog.models.find((x) => x.id === wanted);
-            return m && m.available ? m.id : "auto";
+            if (wanted === "auto") return aiChooseAutomaticModel();
+            if (typeof wanted === "string" && (wanted.startsWith("puter::") || wanted.startsWith("nvidia::"))) {
+                const selected = aiModelCatalog.models.find(x => x.id === wanted);
+                return selected && selected.available !== false ? selected.id : wanted;
+            }
+            if (!aiModelCatalog.loaded) return "auto";
+            const m = aiModelCatalog.models.find(x => x.id === wanted);
+            return m && m.available === true && (m.providerGroup === "apinex" ? aiModelFreeVerified(m) : true) ? m.id : "auto";
         }
 
         function aiSetModelPref(id) {
@@ -25306,27 +25495,55 @@ document.documentElement.classList.toggle(
             if (!select) return;
             select.replaceChildren();
             const auto = document.createElement("option");
-            auto.value = "auto";
-            auto.textContent = aiT("modelAuto");
-            select.appendChild(auto);
-            aiModelCatalog.models.forEach((m) => {
-                const o = document.createElement("option");
-                o.value = m.id;
-                o.textContent = m.name + (m.available ? "" : " — " + aiT("modelUnavailable"));
-                o.disabled = !m.available;
-                select.appendChild(o);
-            });
+            auto.value = "auto"; auto.textContent = aiT("modelAuto"); select.appendChild(auto);
+
+            const groups = [
+                ["apinex", aiT("providerApinex")],
+                ["puter-claude", aiT("providerPuterClaude")],
+                ["puter-gpt", aiT("providerPuterGpt")],
+                ["nvidia", aiT("providerNvidia")]
+            ];
             const chosen = aiResolveModel();
-            select.value = chosen;
+            groups.forEach(([groupId, label]) => {
+                const items = aiModelCatalog.models.filter(m => m.providerGroup === groupId);
+                if (!items.length) return;
+                const og = document.createElement("optgroup"); og.label = label;
+                items.forEach(m => {
+                    const o = document.createElement("option");
+                    o.value = m.id;
+                    const status = m.free ? aiT("freeVerified") : aiT("paidUsage");
+                    const context = aiFormatContext(m.contextLength);
+                    o.textContent = m.name + " · " + status + (context ? " · " + context : "");
+                    o.disabled = m.available !== true;
+                    o.title = [
+                        m.provider,
+                        aiT("modelIdLabel") + ": " + m.id.replace(/^puter::|^nvidia::/, ""),
+                        status,
+                        context ? aiT("modelContextLabel") + ": " + context : "",
+                        m.capabilities && m.capabilities.length ? aiT("modelCapsLabel") + ": " + m.capabilities.join(", ") : ""
+                    ].filter(Boolean).join(" · ");
+                    og.appendChild(o);
+                });
+                select.appendChild(og);
+            });
+            if (chosen && chosen !== "auto" && !Array.from(select.options).some(o => o.value === chosen)) {
+                const stale = document.createElement("option");
+                stale.value = chosen; stale.textContent = chosen + " — " + aiT("modelUnavailable"); stale.disabled = true; select.appendChild(stale);
+            }
+            select.value = Array.from(select.options).some(o => o.value === chosen) ? chosen : "auto";
             aiUpdatePuterStatus();
             if (!meta) return;
             if (aiModelCatalog.loading) { meta.textContent = aiT("modelsLoading"); return; }
             if (aiModelCatalog.error && !aiModelCatalog.loaded) { meta.textContent = aiT("modelsLoadFailed"); return; }
             if (aiModelCatalog.loaded && !aiModelCatalog.models.length) { meta.textContent = aiT("modelsNoFree"); return; }
-            const m = aiModelCatalog.models.find((x) => x.id === chosen);
-            if (!m) { meta.textContent = aiModelCatalog.provider ? aiModelCatalog.provider : ""; return; }
-            const bits = [m.provider, aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " context" : "", m.capabilities.join(", ")].filter(Boolean);
-            meta.textContent = bits.join(" · ");
+            const m = aiModelCatalog.models.find(x => x.id === chosen);
+            if (!m) { meta.textContent = chosen === "auto" ? (aiT("modelAuto") + " · " + (aiModelCatalog.provider || "AI providers")) : aiT("availabilityUnknown"); return; }
+            meta.textContent = [
+                m.provider,
+                m.free ? aiT("freeVerified") : aiT("paidUsage"),
+                aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " " + aiT("modelContextLabel") : "",
+                m.capabilities.length ? m.capabilities.join(", ") : ""
+            ].filter(Boolean).join(" · ");
         }
 
         function aiUpdateModelPill() {
@@ -25394,6 +25611,7 @@ document.documentElement.classList.toggle(
             });
             document.getElementById("aiModelRefreshBtn")?.addEventListener("click", () => aiFetchModels(true));
             document.getElementById("aiPuterConnectBtn")?.addEventListener("click", aiConnectPuter);
+            document.getElementById("aiPuterSignOutBtn")?.addEventListener("click", aiSignOutPuter);
             document.getElementById("aiMaxTokensSelect")?.addEventListener("change", aiReadSettingsFromUI);
             document.getElementById("aiClearProjectContextBtn")?.addEventListener("click", () => {
                 const el = document.getElementById("aiProjectContextInput");
@@ -25432,8 +25650,12 @@ document.documentElement.classList.toggle(
         function aiFriendlyError(info) {
             const detail = String(info && info.message || "").replace(/(?:Bearer\s+)[A-Za-z0-9._~+\/-]+/gi, "Bearer [redacted]").replace(/(api[_-]?key|token|secret)\s*[:=]\s*[^\s,;]+/gi, "$1=[redacted]").slice(0, 280);
             let friendly;
+            const provider = String(info && info.provider || "").toLowerCase();
+            if (provider === "nvidia" && info && info.code === "NVIDIA_NOT_CONFIGURED") {
+                return "NVIDIA NIM is not connected yet. The Cloudflare Worker must advertise NVIDIA as configured before Horizon can use it.";
+            }
             switch (info && info.kind) {
-                case "model": friendly = "The selected Puter model is unavailable or not accessible."; break;
+                case "model": friendly = provider === "nvidia" ? "The selected NVIDIA model is unavailable or not accessible." : (provider === "apinex" ? "The selected APInex model is unavailable or not verified as free." : "The selected Puter model is unavailable or not accessible."); break;
                 case "rate": friendly = "The provider usage allowance or rate limit was reached."; break;
                 case "network": friendly = "A network error interrupted the AI request."; break;
                 case "context": friendly = "The attached project exceeds this model's context window. Send a smaller set of files."; break;
@@ -25525,6 +25747,10 @@ document.documentElement.classList.toggle(
             const explicitlySearching = /\b(search|google|browse|look\s*up|web search|internet search)\b/i.test(effectiveMessage);
             const searchRequested = explicitlySearching || (!taskWorkflow && (aiWebSearch || (!isAtlas && aiNeedsWebSearch(effectiveMessage))));
             let requestedModel = aiResolveModel();
+            if (!aiModelCatalog.loaded) {
+                await aiFetchModels(false);
+                requestedModel = aiResolveModel();
+            }
 
             function scheduleRender() {
                 if (renderScheduled || !messageEl) return;
@@ -25659,7 +25885,8 @@ document.documentElement.classList.toggle(
                 const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
                 // Explicit Puter model selection wins for ALL Atlas tasks, including attached files.
                 // The Worker file-work endpoint is retained only for APInex selections.
-                if (!requestedModel.startsWith("puter::") && fileWorkRequested) {
+                const selectedProvider = aiProviderFromModel(requestedModel);
+                if (selectedProvider === "apinex" && fileWorkRequested) {
                     if (pendingImage) {
                         const imgErr = new Error("Images can't be combined with file editing on the APInex path, so the image was NOT sent. Remove the image, or select a Puter vision model.");
                         imgErr.aiInfo = { kind: "provider", status: 0, code: "IMAGE_NOT_SUPPORTED_FOR_FILE_WORK", message: imgErr.message }; throw imgErr;
@@ -25689,7 +25916,47 @@ document.documentElement.classList.toggle(
                     if (activeProjectMap.size) aiProjectFileContexts.set(aiCurrentChatId, Array.from(activeProjectMap.values()));
                     if (fileWorkData.model) sourceLabel = "Atlas file work · " + fileWorkData.model;
                     sawDone = true;
-                } else if (requestedModel.startsWith("puter::")) {
+                } else if (selectedProvider === "nvidia") {
+                    if (fileWorkRequested) {
+                        const nvidiaFileErr = new Error("NVIDIA NIM file-work is not available through the current Worker contract. Select an APInex model for Atlas file editing, or a Puter model for SDK-based file analysis.");
+                        nvidiaFileErr.code = "NVIDIA_FILE_WORK_UNAVAILABLE";
+                        nvidiaFileErr.aiInfo = { kind: "provider", status: 0, code: nvidiaFileErr.code, message: nvidiaFileErr.message, provider: "nvidia" };
+                        throw nvidiaFileErr;
+                    }
+                    const nvidiaResponse = await nvidiaAdapter.sendMessage(requestBody, signal);
+                    if (!nvidiaResponse.ok) {
+                        let payload = null; try { payload = JSON.parse(await nvidiaResponse.text()); } catch (_) {}
+                        const err = new Error((payload && (payload.message || payload.error)) || "NVIDIA Worker request failed (HTTP " + nvidiaResponse.status + ").");
+                        err.aiInfo = aiErrorInfo(nvidiaResponse.status, payload); err.aiInfo.provider = "nvidia"; throw err;
+                    }
+                    const ctype = (nvidiaResponse.headers.get("content-type") || "").toLowerCase();
+                    if (ctype.indexOf("application/json") !== -1 || !nvidiaResponse.body || typeof nvidiaResponse.body.getReader !== "function") {
+                        const text = await nvidiaResponse.text();
+                        let parsed = null; try { parsed = JSON.parse(text); } catch (_) {}
+                        if (parsed) handleParsedObject(parsed); else text.split("\n").forEach(handleLine);
+                        sawDone = true;
+                    } else {
+                        reader = nvidiaResponse.body.getReader();
+                        const decoder = new TextDecoder(); let buffer = "";
+                        while (!sawDone) {
+                            const { done, value } = await reader.read();
+                            if (value) {
+                                buffer += decoder.decode(value, { stream: true });
+                                let newlineIndex;
+                                while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+                                    const line = buffer.slice(0, newlineIndex); buffer = buffer.slice(newlineIndex + 1);
+                                    handleLine(line); if (sawDone) break;
+                                }
+                            }
+                            if (done) {
+                                buffer += decoder.decode();
+                                if (!sawDone && buffer.trim()) handleLine(buffer);
+                                break;
+                            }
+                        }
+                    }
+                    sourceLabel = "NVIDIA NIM · " + requestedModel.replace(/^nvidia::/, "");
+                } else if (selectedProvider === "puter") {
                     if (!window.puter || !puter.ai || typeof puter.ai.chat !== "function") throw new Error("Puter.js is unavailable. Refresh the page and try again.");
                     if (!puter.auth || typeof puter.auth.isSignedIn !== "function" || !puter.auth.isSignedIn()) {
                         const authError = new Error("Puter account not authenticated. Connect your Puter account in AI settings before sending this request.");
@@ -25814,7 +26081,7 @@ document.documentElement.classList.toggle(
                                 temperature: 0.15
                             };
                             if (pinnedProvider) opts.provider = pinnedProvider;
-                            const stream = await puter.ai.chat(messages, opts);
+                            const stream = await puterAdapter.sendMessage(messages, opts);
                             let raw = "";
                             for await (const part of stream) {
                                 if (signal.aborted || aiStreamCancelled) break;
@@ -25886,7 +26153,7 @@ document.documentElement.classList.toggle(
                         const opts = { model: selectedPuterModel, stream: true, signal, fallback: false, normalize: true,
                             max_tokens: isFinite(maxTokens) && maxTokens > 0 ? maxTokens : undefined };
                         if (pinnedProvider) opts.provider = pinnedProvider;
-                        const puterStream = await puter.ai.chat(puterMessages, opts);
+                        const puterStream = await puterAdapter.sendMessage(puterMessages, opts);
                         for await (const part of puterStream) {
                             if (signal.aborted || aiStreamCancelled) break;
                             if (part && part.type === "error") {
