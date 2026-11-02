@@ -23258,6 +23258,7 @@ document.documentElement.classList.toggle(
                     <div class="aiProviderCard" id="aiProviderStatusNvidia" data-state="unknown"><strong>NVIDIA NIM</strong><span>Backend status not checked yet.</span></div>
                 </div>
                 <p class="aiSettingsHint" id="aiProviderUsageHint" role="status" aria-live="polite">Provider availability is read from live catalogues/status responses. No frontend secret is required.</p>
+                <p class="aiSettingsHint" id="aiTokenUsageHint" role="status" aria-live="polite">Token usage: no completed AI request yet. Models have not been refreshed yet.</p>
             </div>
             <div class="aiSettingsGroup ai-atlas-only">
                 <h4>Atlas project context</h4>
@@ -23403,7 +23404,9 @@ document.documentElement.classList.toggle(
         const aiModelCatalog = {
             loaded: false, loading: false, error: false, provider: "", models: [], at: 0, promise: null,
             providerStatus: { apinex: "unknown", puter: "unknown", nvidia: "unknown" },
-            usage: { apinex: "", puter: "", nvidia: "" }
+            usage: { apinex: "", puter: "", nvidia: "" },
+            lastRefreshAt: 0,
+            lastTokenUsage: null
         };
         const AI_HISTORY_LIMIT = 10;
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
@@ -23628,6 +23631,7 @@ document.documentElement.classList.toggle(
         let aiLang = "en";
         let aiFullOpen = false;
         let aiBusy = false;
+        let aiPendingMode = null;
         let aiPinned = true;
         let aiWebSearch = false;
         try {
@@ -24393,8 +24397,8 @@ document.documentElement.classList.toggle(
             if (imageBtn) imageBtn.disabled = disabled;
             if (fileBtn) fileBtn.disabled = disabled;
             if (micBtn) micBtn.disabled = disabled;
-            /* the mode can't change mid-stream: the reply belongs to the mode that asked */
-            document.querySelectorAll("#aiModeBar .ai-mode-tab").forEach((b) => { b.disabled = disabled; });
+            /* Mode tabs remain clickable while a reply runs. A requested switch cancels the active reply safely. */
+            document.querySelectorAll("#aiModeBar .ai-mode-tab").forEach((b) => { b.disabled = false; });
         }
 
         function aiShowWelcome(show) {
@@ -25391,7 +25395,7 @@ document.documentElement.classList.toggle(
                     models.sort((a,b) => (groupOrder[a.providerGroup] ?? 9) - (groupOrder[b.providerGroup] ?? 9) || a.name.localeCompare(b.name));
                     aiModelCatalog.models = models;
                     aiModelCatalog.provider = "APInex + Puter + NVIDIA";
-                    aiModelCatalog.loaded = anySuccess; aiModelCatalog.at = Date.now(); aiModelCatalog.error = !anySuccess;
+                    aiModelCatalog.loaded = anySuccess; aiModelCatalog.at = Date.now(); aiModelCatalog.lastRefreshAt = aiModelCatalog.at; aiModelCatalog.error = !anySuccess;
                     ["model", "atlasModel"].forEach(k => {
                         const v = aiSettings[k];
                         if (v && v !== "auto" && !models.some(m => m.id === v)) { aiSettings[k] = "auto"; aiPersistSettings(); }
@@ -25424,7 +25428,20 @@ document.documentElement.classList.toggle(
             if (aiModelCatalog.providerStatus.nvidia === "not-configured") aiSetProviderCard("nvidia", "error", aiT("providerBackendMissing"));
             const usage = [aiModelCatalog.usage.apinex, aiModelCatalog.usage.puter, aiModelCatalog.usage.nvidia].filter(Boolean);
             const usageEl = document.getElementById("aiProviderUsageHint");
-            if (usageEl) usageEl.textContent = usage.length ? usage.join(" · ") : "Live provider status and usage information will appear here when exposed.";
+            const refreshText = aiModelCatalog.lastRefreshAt ? "Last refreshed: " + new Date(aiModelCatalog.lastRefreshAt).toLocaleTimeString() : "Models have not been refreshed yet.";
+            if (usageEl) usageEl.textContent = (usage.length ? usage.join(" · ") + " · " : "") + refreshText;
+            const tokenEl = document.getElementById("aiTokenUsageHint");
+            if (tokenEl) {
+                const u = aiModelCatalog.lastTokenUsage;
+                if (!u) tokenEl.textContent = "Token usage: no completed AI request yet. " + refreshText;
+                else {
+                    const parts = [];
+                    if (Number.isFinite(u.prompt)) parts.push("input " + u.prompt.toLocaleString());
+                    if (Number.isFinite(u.completion)) parts.push("output " + u.completion.toLocaleString());
+                    if (Number.isFinite(u.total)) parts.push("total " + u.total.toLocaleString());
+                    tokenEl.textContent = "Last response tokens: " + (parts.length ? parts.join(" · ") : "usage not reported by provider") + " · " + u.provider + (u.model ? " · " + u.model : "") + (u.at ? " · " + new Date(u.at).toLocaleTimeString() : "");
+                }
+            }
         }
 
         function aiUpdatePuterStatus(message) {
@@ -25584,7 +25601,13 @@ document.documentElement.classList.toggle(
 
         function aiSetMode(next) {
             if (next !== "horizon" && next !== "atlas") return;
-            if (aiBusy || next === aiMode) return;
+            if (next === aiMode) return;
+            if (aiBusy) {
+                aiPendingMode = next;
+                aiAnnounce("Stopping the current reply before switching to " + (next === "atlas" ? "Atlas" : "Horizon") + "…");
+                aiCancelStream();
+                return;
+            }
             aiPersistChats(); /* save the outgoing mode's chats under its own keys */
             aiMode = next;
             try { localStorage.setItem(AI_MODE_STORAGE_KEY, aiMode); } catch (e) {}
@@ -25634,6 +25657,7 @@ document.documentElement.classList.toggle(
                     message = String(e.message || "");
                     code = String(e.code || e.type || e.status || "");
                 }
+                if (!message && typeof payload.details === "string") message = payload.details;
                 if (!message && typeof payload.message === "string") message = payload.message;
                 if (!code && (typeof payload.code === "string" || typeof payload.code === "number")) code = String(payload.code);
                 if (!code && typeof payload.type === "string") code = payload.type;
@@ -25759,6 +25783,7 @@ document.documentElement.classList.toggle(
             let streamError = null;
             let sseEvent = "";
             let collectedSources = [];
+            let responseUsage = null;
             let generatedFiles = [];
             let reader = null;
 
@@ -25820,6 +25845,15 @@ document.documentElement.classList.toggle(
                     if (obj.provider) err.aiInfo.provider = String(obj.provider).toLowerCase();
                     if (obj.code || typeof obj.error === "string") err.aiInfo.code = String(obj.code || obj.error);
                     throw err;
+                }
+
+                if (obj.usage && typeof obj.usage === "object") {
+                    const u = obj.usage;
+                    const prompt = Number(u.prompt_tokens ?? u.input_tokens ?? u.prompt ?? NaN);
+                    const completion = Number(u.completion_tokens ?? u.output_tokens ?? u.completion ?? NaN);
+                    const total = Number(u.total_tokens ?? u.total ?? ((Number.isFinite(prompt) && Number.isFinite(completion)) ? prompt + completion : NaN));
+                    const modelForUsage = String(obj.model || requestedModel || "");
+                    responseUsage = { prompt, completion, total, provider: String(obj.provider || (modelForUsage.startsWith("nvidia::") ? "NVIDIA" : modelForUsage.startsWith("puter::") ? "Puter" : "APInex")), model: modelForUsage, at: Date.now() };
                 }
 
                 /* Sources may ride along with a delta/response or arrive on
@@ -26183,8 +26217,13 @@ document.documentElement.classList.toggle(
                                 const e = new Error(String(part.message || "Puter AI request failed."));
                                 e.code = String(part.code || part.error || "PUTER_STREAM_ERROR"); throw e;
                             }
+                            if (part && part.usage && typeof part.usage === "object") {
+                                const u = part.usage;
+                                responseUsage = { prompt: Number(u.prompt_tokens ?? u.input_tokens ?? u.prompt ?? NaN), completion: Number(u.completion_tokens ?? u.output_tokens ?? u.completion ?? NaN), total: Number(u.total_tokens ?? u.total ?? NaN), provider: "Puter", model: selectedPuterModel, at: Date.now() };
+                            }
                             if (part && typeof part.text === "string") appendDelta(part.text);
                         }
+                        if (!responseUsage && !signal.aborted && !aiStreamCancelled) responseUsage = { provider: "Puter", model: selectedPuterModel, at: Date.now() };
                         if (!signal.aborted && !aiStreamCancelled) {
                             sourceLabel = "Puter " + (pinnedProvider === "claude" ? "Claude" : "OpenAI") + " · " + selectedPuterModel;
                             sawDone = true;
@@ -26269,11 +26308,21 @@ document.documentElement.classList.toggle(
             }
 
             document.getElementById("aiLoading")?.remove();
+            if (responseUsage) {
+                responseUsage.provider = responseUsage.provider || (String(requestedModel).startsWith("nvidia::") ? "NVIDIA" : String(requestedModel).startsWith("puter::") ? "Puter" : "APInex");
+                responseUsage.model = responseUsage.model || String(requestedModel || "");
+                responseUsage.at = responseUsage.at || Date.now();
+                aiModelCatalog.lastTokenUsage = responseUsage;
+                aiUpdateProviderUI();
+            }
 
             const cancelled = aiStreamCancelled;
             const hasText = sawAnyContent && assistantText.trim().length > 0;
             const hasSources = collectedSources.length > 0;
             const interrupted = !cancelled && !streamError && !sawDone && hasText;
+            if (!cancelled && !streamError && !sawDone && !hasText && !hasSources) {
+                streamError = { kind: "provider", status: 502, code: "EMPTY_AI_RESPONSE", message: "The provider connection ended without returning any answer content." };
+            }
 
             if (hasText || hasSources) {
                 if (hasText) {
@@ -26377,6 +26426,13 @@ document.documentElement.classList.toggle(
             aiSetInputDisabled(false);
             aiMaybeScroll(true);
             input.focus();
+            if (aiPendingMode && aiPendingMode !== aiMode) {
+                const nextMode = aiPendingMode;
+                aiPendingMode = null;
+                aiSetMode(nextMode);
+            } else {
+                aiPendingMode = null;
+            }
         }
 
         window.addEventListener("pagehide", () => {
