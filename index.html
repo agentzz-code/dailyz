@@ -24634,9 +24634,9 @@ document.documentElement.classList.toggle(
            Files are read in the browser and sent to the Worker only for the
            current request. The Worker does not persist uploaded contents.
            ===================================================== */
-        const AI_MAX_TEXT_FILE_BYTES = 2 * 1024 * 1024;
-        const AI_MAX_TEXT_FILES = 20;
-        const AI_MAX_TEXT_TOTAL_CHARS = 4000000;
+        const AI_MAX_TEXT_FILE_BYTES = 8 * 1024 * 1024;
+        const AI_MAX_TEXT_FILES = 50;
+        const AI_MAX_TEXT_TOTAL_CHARS = 16000000;
         const AI_TEXT_FILE_EXTENSIONS = new Set(["txt","md","markdown","js","jsx","mjs","cjs","ts","tsx","py","html","htm","css","scss","json","jsonc","yaml","yml","xml","sql","sh","ps1","java","c","h","cpp","hpp","go","rs","php","rb","swift","kt","dart","vue","svelte","csv","log","ini","toml","properties","gradle","dockerfile","gitignore"]);
         let aiSelectedFiles = [];
         // Project file context is kept in memory per Atlas chat (not written to browser storage).
@@ -25376,15 +25376,27 @@ document.documentElement.classList.toggle(
             if (!aiModelCatalog.loaded) return "auto";
             const signedIn = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
             const candidates = aiModelCatalog.models.filter(m => {
-                if (m.providerGroup === "puter-gpt" || m.providerGroup === "puter-claude") return signedIn && aiModelFreeVerified(m);
+                // Atlas is a coding/file-work mode. When the user is connected to
+                // Puter, prefer a verified-free Puter model so Atlas does not
+                // silently route large file jobs through the APInex file-work
+                // endpoint (which can time out upstream). Never auto-select a
+                // paid Puter model. Explicit paid model selections remain allowed.
+                if (m.providerGroup === "puter-gpt" || m.providerGroup === "puter-claude") {
+                    return signedIn && aiModelFreeVerified(m);
+                }
                 return aiModelFreeVerified(m);
             });
             const rank = m => {
                 const id = String(m.id).toLowerCase();
                 if (aiMode === "atlas") {
-                    if (/claude.*sonnet/.test(id)) return 1;
-                    if (/deepseek|qwen|coder|codestral|kimi/.test(id)) return 2;
-                    if (/gpt/.test(id)) return 3;
+                    // Coding priority: Puter Claude first, then Puter GPT, then
+                    // other coding-capable models. This keeps Atlas file work on
+                    // the SDK path whenever a free verified Puter model is available.
+                    if (/claude.*sonnet/.test(id) && String(m.providerGroup).startsWith("puter-")) return 1;
+                    if (String(m.providerGroup) === "puter-claude") return 2;
+                    if (/gpt|codex/.test(id) && String(m.providerGroup) === "puter-gpt") return 3;
+                    if (String(m.providerGroup) === "puter-gpt") return 4;
+                    if (/deepseek|qwen|coder|codestral|kimi/.test(id)) return 5;
                     return 10;
                 }
                 if (/claude.*sonnet/.test(id)) return 1;
@@ -26049,6 +26061,18 @@ document.documentElement.classList.toggle(
                 requestedModel = aiCanonicalizeModelId(requestedModel);
                 const selectedProvider = aiProviderFromModel(requestedModel);
                 if (selectedProvider === "apinex" && fileWorkRequested) {
+                    // Do not silently send Atlas file jobs to APInex. Its file-work
+                    // path is the source of the long upstream 502/timeout failures.
+                    // Atlas file work is designed around Puter streaming instead.
+                    const signedInForAtlas = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
+                    if (isAtlas) {
+                        const routeError = new Error(signedInForAtlas
+                            ? "Atlas file work is routed through Puter for long, streaming coding jobs. Select a Puter Claude/GPT model or refresh the live model list."
+                            : "Atlas file work needs a connected Puter account. Connect Puter, then select a Puter Claude/GPT model; APInex file-work is not used because it can time out on large projects.");
+                        routeError.code = "ATLAS_PUTER_MODEL_REQUIRED";
+                        routeError.aiInfo = { kind: "provider", status: 0, code: routeError.code, message: routeError.message, provider: "puter" };
+                        throw routeError;
+                    }
                     if (pendingImage) {
                         const imgErr = new Error("Images can't be combined with file editing on the APInex path, so the image was NOT sent. Remove the image, or select a Puter vision model.");
                         imgErr.aiInfo = { kind: "provider", status: 0, code: "IMAGE_NOT_SUPPORTED_FOR_FILE_WORK", message: imgErr.message }; throw imgErr;
@@ -26134,7 +26158,7 @@ document.documentElement.classList.toggle(
                     const pinnedProvider = vendor.includes("claude") || vendor.includes("anthropic") || /(^|[\/:-])claude([\/:-]|$)/i.test(selectedPuterModel)
                         ? "claude" : (vendor.includes("openai") || /^(gpt-|o[134]-)/i.test(selectedPuterModel) ? "openai" : undefined);
                     const systemParts = [
-                        isAtlas ? "You are Atlas, a careful senior software engineering assistant." : "You are Horizon AI, a helpful personal assistant.",
+                        isAtlas ? "You are Atlas, a senior software engineer and coding agent optimized for repository-scale work. Read all supplied files carefully, reason about cross-file dependencies, preserve unrelated content, and return complete safe file replacements when editing." : "You are Horizon AI, a helpful personal assistant.",
                         "Answer in the user's language: " + responseLanguage + ".",
                         "Tone: " + aiSettings.tone + ". Detail: " + aiSettings.detail + ".",
                         memoryParts.filter(Boolean).join("\n\n"), aiSettings.rules,
@@ -26145,11 +26169,14 @@ document.documentElement.classList.toggle(
                         .concat(requestBody.history.map((item) => ({ role: item.role === "assistant" ? "assistant" : "user", content: item.content })));
 
                     if (fileWorkRequested) {
-                        const contextTokens = Number(selectedMeta && selectedMeta.contextLength) > 0 ? Number(selectedMeta.contextLength) : 32000;
-                        // Keep substantial room for system prompt, history, task instructions and output.
-                        const charBudget = Math.max(6000, Math.min(320000, Math.floor(contextTokens * 2.0)));
-                        const modelOutputLimit = Number(selectedMeta && selectedMeta.maxTokens) > 0 ? Number(selectedMeta.maxTokens) : 8192;
-                        const fileWorkOutputLimit = Math.max(256, Math.min(modelOutputLimit, Math.floor(contextTokens * 0.2), isFinite(maxTokens) && maxTokens > 0 ? maxTokens : modelOutputLimit));
+                        const contextTokens = Number(selectedMeta && selectedMeta.contextLength) > 0 ? Number(selectedMeta.contextLength) : 128000;
+                        // Atlas file work uses the live model context instead of the
+                        // normal chat token setting. The normal UI max-token selector
+                        // is intentionally not allowed to truncate whole-file edits.
+                        // Keep headroom for instructions, history and structured JSON.
+                        const charBudget = Math.max(12000, Math.min(1200000, Math.floor(contextTokens * 2.75)));
+                        const modelOutputLimit = Number(selectedMeta && selectedMeta.maxTokens) > 0 ? Number(selectedMeta.maxTokens) : 32768;
+                        const fileWorkOutputLimit = Math.max(4096, Math.min(modelOutputLimit, Math.max(8192, Math.floor(contextTokens * 0.18))));
                         const projectFileMap = new Map(aiGetActiveProjectFiles().map(file => [aiSafeRelativePath(file.path || file.name), file]));
                         pendingFiles.forEach(file => projectFileMap.set(aiSafeRelativePath(file.path || file.name), file));
                         const files = Array.from(projectFileMap.values()).map(file => ({
@@ -26182,7 +26209,7 @@ document.documentElement.classList.toggle(
                                 lineNo++;
                             }
                             if (piece) pieces.push({ content: piece, lineStart, lineEnd: lineNo - 1 });
-                            if (!pieces.length || pieces.length > 40) {
+                            if (!pieces.length || pieces.length > 100) {
                                 const contextError = new Error("File " + file.path + " requires too many context batches for " + selectedPuterModel + ". Attach a smaller logical section; no content was truncated.");
                                 contextError.code = "CONTEXT_WINDOW_EXCEEDED"; throw contextError;
                             }
