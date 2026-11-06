@@ -23394,13 +23394,14 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-dynamic-v6";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
         const AI_NVIDIA_MODELS_URL = AI_MODELS_URL + "?mode=atlas";
         const AI_NVIDIA_CHAT_URL = AI_ENDPOINT;
         const aiModelCatalog = {
-            loaded: false, loading: false, error: false, provider: "", models: [], defaultModel: "auto", at: 0, promise: null, requestId: 0, requestMode: "",
+            loaded: false, loading: false, error: false, lastError: "", provider: "", models: [], defaultModel: "auto", at: 0, promise: null, requestId: 0, requestMode: "",
             providerStatus: { gemini: "unknown", nvidia: "unknown" },
             usage: { gemini: "", nvidia: "" },
             lastRefreshAt: 0,
@@ -23563,7 +23564,7 @@ document.documentElement.classList.toggle(
             modelAuto: "Automatic", modelUnavailable: "unavailable",
             modelsLoading: "Loading available models…",
             modelsLoadFailed: "Couldn't load the model list. Automatic will be used.",
-            modelsNoFree: "No chat models were returned by the provider. Check provider access and refresh.",
+            modelsNoFree: "No models passed the live chat test. Check provider access and refresh.",
             stopGenerating: "Stop generating", stopped: "Stopped", interrupted: "The response was interrupted.",
             errModel: "That model isn't available right now.", errModelHint: "Try Automatic or pick another model.",
             errRate: "The AI service is busy or rate-limited. Please wait a moment and try again.",
@@ -23609,7 +23610,7 @@ document.documentElement.classList.toggle(
             modelAuto: "خۆکار", modelUnavailable: "بەردەست نییە",
             modelsLoading: "بارکردنی مۆدێلە بەردەستەکان…",
             modelsLoadFailed: "نەتوانرا لیستی مۆدێلەکان باربکرێت. دۆخی خۆکار بەکاردێت.",
-            modelsNoFree: "هیچ مۆدێلێکی گفتوگۆ لەلایەن دابینکەرەوە نەگەڕێندرایەوە. دەستپێگەیشتن بپشکنە و نوێی بکەرەوە.",
+            modelsNoFree: "هیچ مۆدێلێک تاقیکردنەوەی گفتوگۆی ڕاستەوخۆی تێپەڕ نەکرد. دەستپێگەیشتن بپشکنە و نوێی بکەرەوە.",
             stopGenerating: "وەستاندنی دروستکردن", stopped: "وەستێنرا", interrupted: "وەڵامەکە بڕا.",
             errModel: "ئەم مۆدێلە ئێستا بەردەست نییە.", errModelHint: "دۆخی خۆکار تاقی بکەرەوە یان مۆدێلێکی تر هەڵبژێرە.",
             errRate: "خزمەتگوزارییەکە سەرقاڵە یان گەیشتووەتە سنوور. کەمێک چاوەڕێ بکە و دووبارە هەوڵ بدە.",
@@ -23624,6 +23625,13 @@ document.documentElement.classList.toggle(
 
         let aiMode = "horizon";
         try { if (localStorage.getItem(AI_MODE_STORAGE_KEY) === "atlas") aiMode = "atlas"; } catch (e) {}
+        // Compatibility binding for any older in-page helper that still reads this name.
+        // The active provider is always derived from the selected mode; there is no fallback.
+        var selectedProvider = aiMode === "atlas" ? "nvidia" : "gemini";
+        function aiSyncSelectedProvider() {
+            selectedProvider = aiMode === "atlas" ? "nvidia" : "gemini";
+            return selectedProvider;
+        }
         let aiAbortController = null;
         let aiStreamCancelled = false;
         let aiLang = "en";
@@ -25181,7 +25189,7 @@ document.documentElement.classList.toggle(
         /* ---------- unified provider adapter layer ---------- */
         function aiProviderFromModel(modelId) {
             // Provider is determined by the active mode, never by a legacy model prefix.
-            return aiMode === "atlas" ? "nvidia" : "gemini";
+            return aiSyncSelectedProvider();
         }
 
         function aiNormalizeWorkerModel(m, providerName, providerGroup) {
@@ -25209,7 +25217,9 @@ document.documentElement.classList.toggle(
                 maxTokens: Number(m.maxTokens || m.max_tokens || m.outputTokenLimit || 0) || 0,
                 capabilities: aiNormCaps(m.capabilities),
                 pricing: m.pricing && typeof m.pricing === "object" ? m.pricing : null,
-                status: String(m.status || (m.available === true ? "available" : "unavailable"))
+                status: String(m.status || (m.available === true ? "available" : "unavailable")),
+                verifiedWorking: m.verifiedWorking === true,
+                verifiedAt: typeof m.verifiedAt === "string" ? m.verifiedAt : ""
             };
         }
 
@@ -25220,12 +25230,12 @@ document.documentElement.classList.toggle(
             // A legacy Worker may ignore ?mode= and return its old Claude/APInex catalogue.
             // Require the dynamic-catalogue contract; block legacy Claude/APInex catalogues.
             const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
-            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== "provider-api") {
-                throw new Error("The Cloudflare Worker is outdated or is not the Gemini + NVIDIA dynamic-model Worker. Deploy the updated Worker; legacy Claude/APInex model lists are blocked.");
+            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== "provider-api" || data.workerVersion !== AI_EXPECTED_WORKER_VERSION) {
+                throw new Error("Worker version mismatch. This page requires " + AI_EXPECTED_WORKER_VERSION + ", but the deployed Worker returned " + String(data.workerVersion || "an older/unknown version") + ". Update and deploy the matching Worker V6 before sending messages.");
             }
             const normalized = data.models
                 .map(m => aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
-                .filter(m => m && m.available === true);
+                .filter(m => m && m.available === true && m.verifiedWorking === true);
             if (data.models.length && !normalized.length) {
                 throw new Error("The Worker returned models, but none belong to " + expectedProviderName + ". Check the provider API response and deployed Worker.");
             }
@@ -25242,7 +25252,7 @@ document.documentElement.classList.toggle(
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "gemini"; throw err;
                 }
                 const models = aiValidateModelCatalogue(data, "horizon", "googlegemini", res.status);
-                return { models, usage: String(data.costPolicy || "Live Gemini provider catalogue"), status: "configured", defaultModel: data.defaultModel || "auto", message: data.message || null };
+                return { models, usage: String(data.costPolicy || "Live Gemini provider catalogue") + (data.probeSummary ? " · Live chat checks: " + data.probeSummary.working + "/" + data.probeSummary.tested : ""), status: "configured", defaultModel: data.defaultModel || "auto", message: data.message || null };
             },
             async sendMessage(requestBody, signal) {
                 return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "horizon" }), signal });
@@ -25258,7 +25268,7 @@ document.documentElement.classList.toggle(
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "nvidia"; throw err;
                 }
                 const models = aiValidateModelCatalogue(data, "atlas", "nvidia", res.status);
-                return { models, usage: String(data.costPolicy || "Live NVIDIA provider catalogue"), status: "configured", defaultModel: data.defaultModel || "auto", message: data.message || null };
+                return { models, usage: String(data.costPolicy || "Live NVIDIA provider catalogue") + (data.probeSummary ? " · Live chat checks: " + data.probeSummary.working + "/" + data.probeSummary.tested : ""), status: "configured", defaultModel: data.defaultModel || "auto", message: data.message || null };
             },
             async sendMessage(requestBody, signal) {
                 return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "atlas" }), signal });
@@ -25300,6 +25310,7 @@ document.documentElement.classList.toggle(
             aiModelCatalog.requestMode = requestMode;
             aiModelCatalog.loading = true;
             aiModelCatalog.error = false;
+            aiModelCatalog.lastError = "";
             aiRenderModelOptions();
 
             const task = (async () => {
@@ -25313,6 +25324,7 @@ document.documentElement.classList.toggle(
                     aiModelCatalog.provider = provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini";
                     aiModelCatalog.usage[provider] = result.usage || "";
                     aiModelCatalog.providerStatus[provider] = "configured";
+                    aiModelCatalog.lastError = "";
                     aiModelCatalog.loaded = true;
                     aiModelCatalog.mode = requestMode;
                     aiModelCatalog.at = Date.now();
@@ -25330,7 +25342,8 @@ document.documentElement.classList.toggle(
                     if (requestId !== aiModelCatalog.requestId || requestMode !== aiMode) return;
                     aiModelCatalog.error = true;
                     aiModelCatalog.loaded = false;
-                    aiSetProviderCard(provider, "error", String(e && e.message || "Model catalogue unavailable."));
+                    aiModelCatalog.lastError = String(e && e.message || "Model catalogue unavailable.");
+                    aiSetProviderCard(provider, "error", aiModelCatalog.lastError);
                     console.warn("[Horizon AI] model discovery issue:", e && e.message ? e.message : e);
                 } finally {
                     if (requestId === aiModelCatalog.requestId) {
@@ -25425,7 +25438,7 @@ document.documentElement.classList.toggle(
                 items.forEach(m => {
                     const o = document.createElement("option");
                     o.value = m.id;
-                    const status = "Listed in authenticated provider catalogue";
+                    const status = "Live chat test passed";
                     const context = aiFormatContext(m.contextLength);
                     o.textContent = m.name + " · " + status + (context ? " · " + context : "");
                     o.disabled = m.available !== true;
@@ -25454,7 +25467,7 @@ document.documentElement.classList.toggle(
             if (!m) { meta.textContent = chosen === "auto" ? (aiT("modelAuto") + " · " + (aiModelCatalog.provider || "AI providers")) : aiT("availabilityUnknown"); return; }
             meta.textContent = [
                 m.provider,
-                "Listed in authenticated provider catalogue",
+                "Live chat test passed",
                 aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " " + aiT("modelContextLabel") : "",
                 m.capabilities.length ? m.capabilities.join(", ") : ""
             ].filter(Boolean).join(" · ");
@@ -25477,6 +25490,7 @@ document.documentElement.classList.toggle(
         function aiApplyMode() {
             const atlas = aiMode === "atlas";
             const mode = atlas ? "atlas" : "horizon";
+            aiSyncSelectedProvider();
             const root = document.getElementById("ai");
             const box = document.getElementById("aiBox");
 
@@ -25523,6 +25537,7 @@ document.documentElement.classList.toggle(
             if (previousMode !== next) {
                 aiPersistChats();
                 aiMode = next;
+                aiSyncSelectedProvider();
                 try { localStorage.setItem(AI_MODE_STORAGE_KEY, aiMode); } catch (e) {}
                 aiChats = aiLoadChats();
                 aiClearSelectedImage();
@@ -25639,6 +25654,7 @@ document.documentElement.classList.toggle(
 
             const mode = aiMode;
             const isAtlas = mode === "atlas";
+            aiSyncSelectedProvider();
             const message = input.value.trim();
             const pendingImage = aiSelectedImage;
             const pendingFiles = aiSelectedFiles.slice();
@@ -25689,7 +25705,7 @@ document.documentElement.classList.toggle(
             const explicitlySearching = /\b(search|google|browse|look\s*up|web search|internet search)\b/i.test(effectiveMessage);
             const searchRequested = explicitlySearching || (!taskWorkflow && (aiWebSearch || (!isAtlas && aiNeedsWebSearch(effectiveMessage))));
             let requestedModel = aiResolveModel();
-            if (!aiModelCatalog.loaded) {
+            if (!aiModelCatalog.loaded || aiModelCatalog.mode !== mode) {
                 await aiFetchModels(false);
                 requestedModel = aiResolveModel();
             }
@@ -25793,6 +25809,9 @@ document.documentElement.classList.toggle(
             }
 
             try {
+                if (!aiModelCatalog.loaded || aiModelCatalog.mode !== mode || !aiModelCatalog.models.some(m => m && m.available === true && m.verifiedWorking === true)) {
+                    throw new Error(aiModelCatalog.lastError || ("No verified working " + (isAtlas ? "NVIDIA" : "Gemini") + " chat model is available. Refresh the model list and check the matching Worker/API secret. No chat request was sent."));
+                }
                 const responseLanguage = aiResponseLanguageInstruction();
                 const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
                 const atlasRule = "You are Atlas, a coding and technical assistant. You can inspect files explicitly attached to this request and return complete replacement/new files for download. You cannot access the user's disk beyond attached files, execute commands, run tests, or deploy. Never claim to have run or tested code.";
@@ -25821,7 +25840,7 @@ document.documentElement.classList.toggle(
                 const maxTokens = parseInt(aiSettings.maxTokens, 10);
                 if (isFinite(maxTokens) && maxTokens > 0) requestBody.max_tokens = maxTokens;
                 // Nemotron Ultra needs a large generation budget because reasoning tokens count against max_tokens.
-                if (/^nvidia::(?:nvidia\/)?nemotron-3-ultra-550b-a55b$/i.test(String(requestedModel || ""))) requestBody.max_tokens = 16384;
+                if (/^(?:nvidia::)?(?:nvidia\/)?nemotron-3-ultra-550b-a55b$/i.test(String(requestedModel || ""))) requestBody.max_tokens = 16384;
 
                 const projectContext = String(aiSettings.projectContext || "").trim();
                 if (isAtlas && projectContext) requestBody.projectContext = projectContext.slice(0, 12000);
@@ -26059,7 +26078,7 @@ document.documentElement.classList.toggle(
                     row.className = "ai-error-actions";
                     const btn = document.createElement("button");
                     btn.type = "button";
-                    btn.textContent = "Retry using Automatic (switch provider)";
+                    btn.textContent = "Retry with Automatic model (same provider)";
                     btn.addEventListener("click", () => {
                         if (aiBusy) return;
                         btn.disabled = true;
