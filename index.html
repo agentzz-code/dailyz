@@ -25834,7 +25834,7 @@ document.documentElement.classList.toggle(
                 }
 
                 const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
-                if (selectedProvider === "nvidia") {
+                if (isAtlas) {
                     if (fileWorkRequested) {
                         const projectFiles = Array.from(new Map(aiGetActiveProjectFiles().concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
                         let fileContext = "\n\nATLAS ATTACHED PROJECT FILES (read-only context; propose complete replacements in your answer):\n";
