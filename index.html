@@ -531,7 +531,7 @@
 
         /* Conversation area */
 
-        .ai-convo {
+        .ai-convo { position:relative;
             position: relative;
             flex: 1;
             min-height: 0;
@@ -23394,7 +23394,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-dynamic-v9";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-dynamic-v10";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24202,9 +24202,13 @@ document.documentElement.classList.toggle(
             return document.getElementById("aiMessages");
         }
 
+        function aiScrollViewportEl() {
+            return document.querySelector("#aiBox .ai-convo");
+        }
+
         function aiScrollToBottom() {
-            const m = aiMessagesEl();
-            if (m) m.scrollTop = m.scrollHeight;
+            const viewport = aiScrollViewportEl();
+            if (viewport) viewport.scrollTo({ top: viewport.scrollHeight, behavior: "auto" });
         }
 
         function aiMaybeScroll(force) {
@@ -24216,10 +24220,10 @@ document.documentElement.classList.toggle(
         }
 
         function aiUpdatePin() {
-            const m = aiMessagesEl();
+            const viewport = aiScrollViewportEl();
             const jump = document.getElementById("aiScrollBottom");
-            if (!m) return;
-            aiPinned = m.scrollHeight - m.scrollTop - m.clientHeight < 60;
+            if (!viewport) return;
+            aiPinned = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 60;
             if (jump) jump.classList.toggle("show", !aiPinned);
         }
 
@@ -25219,7 +25223,8 @@ document.documentElement.classList.toggle(
                 pricing: m.pricing && typeof m.pricing === "object" ? m.pricing : null,
                 status: String(m.status || (m.available === true ? "available" : "unavailable")),
                 verifiedWorking: m.verifiedWorking === true,
-                verifiedAt: typeof m.verifiedAt === "string" ? m.verifiedAt : ""
+                verifiedAt: typeof m.verifiedAt === "string" ? m.verifiedAt : "",
+                probeError: typeof m.probeError === "string" ? m.probeError : ""
             };
         }
 
@@ -25231,11 +25236,11 @@ document.documentElement.classList.toggle(
             // Require the dynamic-catalogue contract; block legacy Claude/APInex catalogues.
             const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
             if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== "provider-api" || data.workerVersion !== AI_EXPECTED_WORKER_VERSION) {
-                throw new Error("Worker version mismatch. This page requires " + AI_EXPECTED_WORKER_VERSION + ", but the deployed Worker returned " + String(data.workerVersion || "an older/unknown version") + ". Update and deploy the matching Worker V9 before sending messages.");
+                throw new Error("Worker version mismatch. This page requires " + AI_EXPECTED_WORKER_VERSION + ", but the deployed Worker returned " + String(data.workerVersion || "an older/unknown version") + ". Update and deploy the matching Worker V10 before sending messages.");
             }
             const normalized = data.models
                 .map(m => aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
-                .filter(m => m && m.available === true && m.verifiedWorking === true);
+                .filter(Boolean);
             if (data.models.length && !normalized.length) {
                 throw new Error("The Worker returned models, but none belong to " + expectedProviderName + ". Check the provider API response and deployed Worker.");
             }
@@ -25319,7 +25324,7 @@ document.documentElement.classList.toggle(
                     const result = await (provider === "nvidia" ? nvidiaAdapter : geminiAdapter).getModels();
                     if (requestId !== aiModelCatalog.requestId || requestMode !== aiMode) return;
                     const expectedGroup = provider === "nvidia" ? "nvidia" : "googlegemini";
-                    aiModelCatalog.models = (result.models || []).filter(m => m && m.available === true && m.providerGroup === expectedGroup);
+                    aiModelCatalog.models = (result.models || []).filter(m => m && m.providerGroup === expectedGroup);
                     aiModelCatalog.defaultModel = aiModelCatalog.models.some(m => m.id === result.defaultModel) ? result.defaultModel : "auto";
                     aiModelCatalog.provider = provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini";
                     aiModelCatalog.usage[provider] = result.usage || "";
@@ -25331,7 +25336,7 @@ document.documentElement.classList.toggle(
                     aiModelCatalog.lastRefreshAt = aiModelCatalog.at;
                     const prefKey = requestMode === "atlas" ? "atlasModel" : "model";
                     const saved = String(aiSettings[prefKey] || "auto").replace(/^nvidia::/, "");
-                    if (saved !== "auto" && !aiModelCatalog.models.some(m => m.id === saved)) {
+                    if (saved !== "auto" && !aiModelCatalog.models.some(m => m.id === saved && m.available === true && m.verifiedWorking === true)) {
                         aiSettings[prefKey] = "auto";
                         aiPersistSettings();
                     }
@@ -25438,14 +25443,17 @@ document.documentElement.classList.toggle(
                 items.forEach(m => {
                     const o = document.createElement("option");
                     o.value = m.id;
-                    const status = "Live chat test passed";
+                    const status = m.available === true && m.verifiedWorking === true
+                        ? "Verified working"
+                        : (m.status === "failed" ? "Probe failed" : "Not tested yet");
                     const context = aiFormatContext(m.contextLength);
                     o.textContent = m.name + " · " + status + (context ? " · " + context : "");
-                    o.disabled = m.available !== true;
+                    o.disabled = !(m.available === true && m.verifiedWorking === true);
                     o.title = [
                         m.provider,
                         aiT("modelIdLabel") + ": " + m.id.replace(/^nvidia::/, ""),
                         status,
+                        m.probeError || "",
                         context ? aiT("modelContextLabel") + ": " + context : "",
                         m.capabilities && m.capabilities.length ? aiT("modelCapsLabel") + ": " + m.capabilities.join(", ") : ""
                     ].filter(Boolean).join(" · ");
@@ -25467,7 +25475,8 @@ document.documentElement.classList.toggle(
             if (!m) { meta.textContent = chosen === "auto" ? (aiT("modelAuto") + " · " + (aiModelCatalog.provider || "AI providers")) : aiT("availabilityUnknown"); return; }
             meta.textContent = [
                 m.provider,
-                "Live chat test passed",
+                m.available === true && m.verifiedWorking === true ? "Verified working" : (m.status === "failed" ? "Probe failed — not selectable" : "Not tested — not selectable"),
+                m.probeError || "",
                 aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " " + aiT("modelContextLabel") : "",
                 m.capabilities.length ? m.capabilities.join(", ") : ""
             ].filter(Boolean).join(" · ");
@@ -26175,7 +26184,7 @@ document.documentElement.classList.toggle(
             aiMaybeScroll(true);
         });
 
-        document.getElementById("aiMessages")?.addEventListener("scroll", () => {
+        document.querySelector("#aiBox .ai-convo")?.addEventListener("scroll", () => {
             aiUpdatePin();
         }, { passive: true });
 
@@ -27033,7 +27042,7 @@ body:has(#ai.active) main { padding-top:0 !important; }
 #ai.active #aiBox.horizon-ai-page .aiHeadBtn:hover { background:#262626; }
 #ai.active #aiBox.horizon-ai-page #aiSearchBtn { opacity:.9; }
 #ai.active #aiBox.horizon-ai-page #aiNewBtn, #ai.active #aiBox.horizon-ai-page #aiExpandBtn, #ai.active #aiBox.horizon-ai-page #aiCloseBtn, #ai.active #aiBox.horizon-ai-page #aiPageSettingsBtn { display:none !important; }
-#ai.active .ai-convo { flex:1; min-height:0; width:100%; max-width:850px; margin:0 auto; padding:0 26px; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; }
+#ai.active .ai-convo { flex:1; min-height:0; width:100%; max-width:850px; margin:0 auto; padding:0 26px; overflow-y:auto; overflow-x:hidden; min-height:0; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; }
 #ai.active #aiWelcome { flex:1; min-height:300px; justify-content:center; gap:15px; padding:24px 0 12px; color:#e5e5e5; }
 #ai.active .ai-welcome-emoji { display:none; }
 #ai.active .ai-welcome-title { font-size:clamp(27px,3vw,36px); line-height:1.2; font-weight:500; letter-spacing:-.035em; color:#e8e8e8; }
