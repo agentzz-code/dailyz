@@ -25188,23 +25188,52 @@ document.documentElement.classList.toggle(
             return !!(model && model.available === true && model.free === true);
         }
 
-        function aiNormalizeWorkerModel(m, providerName) {
+        function aiNormalizeWorkerModel(m, providerName, providerGroup) {
             if (!m || typeof m.id !== "string" || !m.id.trim()) return null;
+            const id = m.id.trim();
+            // Never relabel a model from another provider (e.g. Claude) as Gemini or NVIDIA.
+            const rawProvider = String(m.provider || m.vendor || "").toLowerCase();
+            if (providerGroup === "googlegemini") {
+                if (/claude|anthropic|nvidia|openai|puter|apinex/.test(id.toLowerCase() + " " + rawProvider)) return null;
+                if (!/^gemini[-/]/i.test(id) && !/^models\/gemini[-/]/i.test(id)) return null;
+            } else if (providerGroup === "nvidia") {
+                if (/claude|anthropic|gemini|google|puter|apinex/.test(id.toLowerCase() + " " + rawProvider)) return null;
+            }
             return {
-                id: m.id.trim(),
-                name: typeof m.name === "string" && m.name.trim() ? m.name.trim() : m.id.trim(),
+                id,
+                name: typeof m.name === "string" && m.name.trim() ? m.name.trim() : id,
                 provider: typeof m.provider === "string" && m.provider.trim() ? m.provider.trim() : providerName,
-                providerGroup: providerName.toLowerCase(),
+                providerGroup,
                 vendor: String(m.vendor || m.provider || providerName),
                 available: m.available !== false,
-                free: true,
-                verifiedFree: true,
+                // Provider catalogue presence is not proof of free usage. Do not claim verified-free status.
+                free: false,
+                verifiedFree: false,
                 contextLength: Number(m.contextLength || m.context_window || 0) || 0,
-                maxTokens: Number(m.maxTokens || m.max_tokens || 0) || 0,
+                maxTokens: Number(m.maxTokens || m.max_tokens || m.outputTokenLimit || 0) || 0,
                 capabilities: aiNormCaps(m.capabilities),
                 pricing: m.pricing && typeof m.pricing === "object" ? m.pricing : null,
                 status: String(m.status || (m.available === true ? "available" : "unavailable"))
             };
+        }
+
+        function aiValidateModelCatalogue(data, expectedMode, expectedProvider, httpStatus) {
+            if (!data || data.ok !== true || !Array.isArray(data.models)) {
+                throw new Error((data && (data.message || data.error)) || "Model catalogue unavailable (HTTP " + httpStatus + ").");
+            }
+            // A legacy Worker may ignore ?mode= and return its old Claude/APInex catalogue.
+            // Require the V4 contract before displaying any model.
+            const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
+            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.allowlistEnforced !== true) {
+                throw new Error("The Cloudflare Worker is outdated or is not the Gemini + NVIDIA V4 Worker. Deploy the matching Worker first; legacy Claude/APInex model lists are blocked.");
+            }
+            const normalized = data.models
+                .map(m => aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
+                .filter(m => m && m.available === true);
+            if (data.models.length && !normalized.length) {
+                throw new Error("The Worker returned models, but none belong to " + expectedProviderName + ". Check the provider allowlist and deployed Worker.");
+            }
+            return normalized;
         }
 
         const geminiAdapter = {
@@ -25212,11 +25241,12 @@ document.documentElement.classList.toggle(
                 const url = AI_MODELS_URL + "?mode=horizon";
                 const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
                 let data = null; try { data = await res.json(); } catch (_) {}
-                if (!res.ok || !data || data.ok === false || !Array.isArray(data.models)) {
+                if (!res.ok) {
                     const err = new Error((data && (data.message || data.error)) || "Gemini model catalogue unavailable (HTTP " + res.status + ").");
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "gemini"; throw err;
                 }
-                return { models: data.models.map(m => aiNormalizeWorkerModel(m, "Google Gemini")).filter(Boolean), usage: String(data.costPolicy || "Gemini allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
+                const models = aiValidateModelCatalogue(data, "horizon", "googlegemini", res.status);
+                return { models, usage: String(data.costPolicy || "Gemini model allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
             },
             async sendMessage(requestBody, signal) {
                 return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "horizon" }), signal });
@@ -25227,11 +25257,12 @@ document.documentElement.classList.toggle(
             async getModels() {
                 const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
                 let data = null; try { data = await res.json(); } catch (_) {}
-                if (!res.ok || !data || data.ok === false || !Array.isArray(data.models)) {
+                if (!res.ok) {
                     const err = new Error((data && (data.message || data.error)) || "NVIDIA model catalogue unavailable (HTTP " + res.status + ").");
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "nvidia"; throw err;
                 }
-                return { models: data.models.map(m => aiNormalizeWorkerModel(m, "NVIDIA")).filter(Boolean), usage: String(data.costPolicy || "NVIDIA allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
+                const models = aiValidateModelCatalogue(data, "atlas", "nvidia", res.status);
+                return { models, usage: String(data.costPolicy || "NVIDIA model allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
             },
             async sendMessage(requestBody, signal) {
                 return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "atlas" }), signal });
@@ -25249,7 +25280,7 @@ document.documentElement.classList.toggle(
 
         function aiChooseAutomaticModel() {
             if (!aiModelCatalog.loaded) return "auto";
-            const candidates = aiModelCatalog.models.filter(m => m && m.available === true && m.free === true);
+            const candidates = aiModelCatalog.models.filter(m => m && m.available === true);
             const selected = candidates.sort((a,b) => {
                 const rank = m => {
                     const id = String(m.id || "").toLowerCase();
@@ -25401,13 +25432,13 @@ document.documentElement.classList.toggle(
             const groups = [[aiMode === "atlas" ? "nvidia" : "googlegemini", aiMode === "atlas" ? "NVIDIA NIM · Atlas" : "Google Gemini · Horizon"]];
             const chosen = aiResolveModel();
             groups.forEach(([groupId, label]) => {
-                const items = aiModelCatalog.models.filter(m => (aiMode === "atlas" ? "nvidia" : "googlegemini") === groupId || m.providerGroup === groupId);
+                const items = aiModelCatalog.models.filter(m => m.providerGroup === groupId);
                 if (!items.length) return;
                 const og = document.createElement("optgroup"); og.label = label;
                 items.forEach(m => {
                     const o = document.createElement("option");
                     o.value = m.id;
-                    const status = m.free ? aiT("freeVerified") : aiT("paidUsage");
+                    const status = "Available through configured provider";
                     const context = aiFormatContext(m.contextLength);
                     o.textContent = m.name + " · " + status + (context ? " · " + context : "");
                     o.disabled = m.available !== true;
@@ -25436,7 +25467,7 @@ document.documentElement.classList.toggle(
             if (!m) { meta.textContent = chosen === "auto" ? (aiT("modelAuto") + " · " + (aiModelCatalog.provider || "AI providers")) : aiT("availabilityUnknown"); return; }
             meta.textContent = [
                 m.provider,
-                m.free ? aiT("freeVerified") : aiT("paidUsage"),
+                "Available through configured provider",
                 aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " " + aiT("modelContextLabel") : "",
                 m.capabilities.length ? m.capabilities.join(", ") : ""
             ].filter(Boolean).join(" · ");
