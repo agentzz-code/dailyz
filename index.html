@@ -23245,18 +23245,15 @@ document.documentElement.classList.toggle(
                 <select id="aiModelSelect"><option value="auto">Automatic</option></select>
                 <p class="aiSettingsHint" id="aiModelMeta" role="status" aria-live="polite"></p>
                 <button type="button" class="aiSettingsSave" id="aiModelRefreshBtn">Refresh models</button>
-                <button type="button" class="aiSettingsSave" id="aiPuterConnectBtn" hidden>Connect Puter account</button>
-                <button type="button" class="aiSettingsSave" id="aiPuterSignOutBtn" hidden>Sign out of Puter</button>
-                <p class="aiSettingsHint" id="aiPuterStatus" role="status" aria-live="polite">Choose a Puter GPT or Claude model to connect a Puter account. APInex models do not need Puter.</p>
+                
                 <label for="aiMaxTokensSelect">Response length</label>
                 <select id="aiMaxTokensSelect"><option value="auto">Automatic</option><option value="512">Short (512 tokens)</option><option value="1024">Medium (1,024 tokens)</option><option value="2048">Long (2,048 tokens)</option><option value="4096">Very long (4,096 tokens)</option></select>
-                <p class="aiSettingsHint">APInex models use your configured Horizon AI Worker and do not require Puter. Puter GPT and Claude models are discovered live and use your connected Puter account; usage follows Puter’s user-pays terms. Each of Horizon and Atlas remembers its own model.</p>
+                <p class="aiSettingsHint">Horizon AI uses Google Gemini only. Atlas AI uses NVIDIA NIM only. Model lists are loaded separately from the Worker. Each mode remembers its own model; no cross-provider fallback is used.</p>
             </div>
             <div class="aiSettingsGroup">
                 <h4>Provider connections</h4>
                 <div class="aiProviderGrid" id="aiProviderGrid">
-                    <div class="aiProviderCard" id="aiProviderStatusApinex" data-state="unknown"><strong>APInex</strong><span>Checking Worker connection…</span></div>
-                    <div class="aiProviderCard" id="aiProviderStatusPuter" data-state="unknown"><strong>Puter</strong><span>Checking account…</span></div>
+                    <div class="aiProviderCard" id="aiProviderStatusGemini" data-state="unknown"><strong>Google Gemini</strong><span>Checking Worker connection…</span></div>
                     <div class="aiProviderCard" id="aiProviderStatusNvidia" data-state="unknown"><strong>NVIDIA NIM</strong><span>Backend status not checked yet.</span></div>
                 </div>
                 <p class="aiSettingsHint" id="aiProviderUsageHint" role="status" aria-live="polite">Provider availability is read from live catalogues/status responses. No frontend secret is required.</p>
@@ -23395,18 +23392,17 @@ document.documentElement.classList.toggle(
         <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
     </div>
 
-    <script src="https://js.puter.com/v2/"></script>
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
-        const AI_NVIDIA_MODELS_URL = AI_PROVIDER_STATUS_URL + "/nvidia/models";
-        const AI_NVIDIA_CHAT_URL = AI_PROVIDER_STATUS_URL + "/nvidia/chat";
+        const AI_NVIDIA_MODELS_URL = AI_MODELS_URL + "?mode=atlas";
+        const AI_NVIDIA_CHAT_URL = AI_ENDPOINT;
         const aiModelCatalog = {
             loaded: false, loading: false, error: false, provider: "", models: [], at: 0, promise: null,
-            providerStatus: { apinex: "unknown", puter: "unknown", nvidia: "unknown" },
-            usage: { apinex: "", puter: "", nvidia: "" },
+            providerStatus: { gemini: "unknown", nvidia: "unknown" },
+            usage: { gemini: "", nvidia: "" },
             lastRefreshAt: 0,
             lastTokenUsage: null
         };
@@ -25149,20 +25145,12 @@ document.documentElement.classList.toggle(
 
         /* =====================================================
            WORKER CONTRACT
-           GET  {AI_ENDPOINT}/models   -> { ok, provider, models[] }
-           POST {AI_ENDPOINT}          -> SSE: data: {"delta":"…"} … data: [DONE]
-           APInex requests use the Horizon AI Worker. Puter GPT/Claude
-           requests use the official Puter.js browser SDK and the signed-in
-           user's Puter account. NVIDIA NIM requests use the Horizon Worker only;
-           the NVIDIA API key is never exposed in this page.
-
-           NVIDIA Worker contract:
-           GET / -> providers.nvidiaConfigured: boolean
-           GET /nvidia/models -> { ok, provider:"NVIDIA", models:[...] }
-             A model must have available:true. Automatic/free selection requires
-             free:true. verifiedFree may be supplied for additional metadata, but is not required.
-           POST /nvidia/chat -> normalized SSE: data: {"delta":"…"} … data: [DONE]
-           Until these Worker fields/endpoints exist, NVIDIA remains disconnected.
+           GET {AI_ENDPOINT}/models?mode=horizon -> Gemini catalogue
+           GET {AI_ENDPOINT}/models?mode=atlas   -> NVIDIA catalogue
+           POST {AI_ENDPOINT}                    -> normalized SSE stream
+           Horizon requests are Gemini-only; Atlas requests are NVIDIA-only.
+           The Worker owns both provider keys and enforces the configured model allowlists.
+           There is no APInex/Puter routing and no cross-provider fallback.
            ===================================================== */
 
         function aiModeStr(key) {
@@ -25192,10 +25180,8 @@ document.documentElement.classList.toggle(
 
         /* ---------- unified provider adapter layer ---------- */
         function aiProviderFromModel(modelId) {
-            const id = String(modelId || "");
-            if (id.startsWith("puter::")) return "puter";
-            if (id.startsWith("nvidia::")) return "nvidia";
-            return "apinex";
+            // Provider is determined by the active mode, never by a legacy model prefix.
+            return aiMode === "atlas" ? "nvidia" : "gemini";
         }
 
         function aiModelFreeVerified(model) {
@@ -25210,9 +25196,9 @@ document.documentElement.classList.toggle(
                 provider: typeof m.provider === "string" && m.provider.trim() ? m.provider.trim() : providerName,
                 providerGroup: providerName.toLowerCase(),
                 vendor: String(m.vendor || m.provider || providerName),
-                available: m.available === true,
-                free: m.free === true,
-                verifiedFree: m.verifiedFree === true,
+                available: m.available !== false,
+                free: true,
+                verifiedFree: true,
                 contextLength: Number(m.contextLength || m.context_window || 0) || 0,
                 maxTokens: Number(m.maxTokens || m.max_tokens || 0) || 0,
                 capabilities: aiNormCaps(m.capabilities),
@@ -25221,152 +25207,41 @@ document.documentElement.classList.toggle(
             };
         }
 
-        const apinexAdapter = {
+        const geminiAdapter = {
             async getModels() {
-                const res = await fetch(AI_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
+                const url = AI_MODELS_URL + "?mode=horizon";
+                const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
                 let data = null; try { data = await res.json(); } catch (_) {}
-                if (!res.ok) {
-                    const err = new Error((data && (data.message || data.error)) || "APInex model catalogue HTTP " + res.status);
-                    err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "apinex"; throw err;
+                if (!res.ok || !data || data.ok === false || !Array.isArray(data.models)) {
+                    const err = new Error((data && (data.message || data.error)) || "Gemini model catalogue unavailable (HTTP " + res.status + ").");
+                    err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "gemini"; throw err;
                 }
-                if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected APInex Worker catalogue.");
-                return {
-                    models: data.models.map(m => aiNormalizeWorkerModel(m, "APInex")).filter(Boolean),
-                    usage: String(data.freeDailyPool || ""),
-                    status: "configured"
-                };
-            },
-            async isAvailable() {
-                try { return (await this.getModels()).models.some(m => m.available === true); } catch (_) { return false; }
+                return { models: data.models.map(m => aiNormalizeWorkerModel(m, "Google Gemini")).filter(Boolean), usage: String(data.costPolicy || "Gemini allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
             },
             async sendMessage(requestBody, signal) {
-                return fetch(AI_ENDPOINT, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
-                    body: JSON.stringify(requestBody), signal
-                });
-            },
-            handleError(error) { return error; }
-        };
-
-        const puterAdapter = {
-            async getModels() {
-                if (!window.puter || !puter.ai || typeof puter.ai.listModels !== "function") throw new Error("Puter.js did not load.");
-                const raw = await puter.ai.listModels();
-                const models = (Array.isArray(raw) ? raw : []).map(m => {
-                    if (!m || typeof m.id !== "string" || !m.id.trim()) return null;
-                    const vendor = String(m.provider || "").toLowerCase();
-                    if (!["openai", "claude", "anthropic"].includes(vendor)) return null;
-                    const cost = m.cost && typeof m.cost === "object" ? m.cost : null;
-                    const input = cost ? Number(cost.input) : NaN;
-                    const output = cost ? Number(cost.output) : NaN;
-                    const free = /:free$/i.test(m.id) ||
-                        (!!cost && Number.isFinite(input) && Number.isFinite(output) && input === 0 && output === 0);
-                    const isOpenAI = vendor === "openai";
-                    return {
-                        id: "puter::" + m.id,
-                        name: String(m.name || m.id),
-                        provider: "Puter / " + (isOpenAI ? "OpenAI" : "Anthropic"),
-                        providerGroup: isOpenAI ? "puter-gpt" : "puter-claude",
-                        vendor, available: true, free, verifiedFree: free,
-                        contextLength: Number(m.context || 0) || 0,
-                        maxTokens: Number(m.max_tokens || 0) || 0,
-                        capabilities: ["chat", "streaming"].concat(Array.isArray(m.capabilities) ? m.capabilities.map(String) : []),
-                        pricing: cost, status: "available"
-                    };
-                }).filter(Boolean);
-                return { models, usage: "Usage and limits follow your Puter account.", status: "account" };
-            },
-            async isAvailable() { return !!(window.puter && puter.ai && typeof puter.ai.listModels === "function"); },
-            async *sendMessage(messages, options) {
-                if (!window.puter || !puter.ai || typeof puter.ai.chat !== "function") throw new Error("Puter.js is unavailable.");
-                const streamOptions = Object.assign({}, options || {}, { stream: true });
-                let sawText = false;
-                let sawTerminalError = false;
-                let usageChunk = null;
-                const stream = await puter.ai.chat(messages, false, streamOptions);
-                for await (const part of stream) {
-                    if (part && part.type === "error") {
-                        sawTerminalError = true;
-                        const e = new Error(String(part.message || "Puter provider returned a stream error."));
-                        e.code = String(part.code || part.error || "PUTER_STREAM_ERROR");
-                        e.provider = "puter";
-                        throw e;
-                    }
-                    if (part && part.type === "usage") usageChunk = part;
-                    if (part && typeof part.text === "string" && part.text.length) sawText = true;
-                    yield part;
-                }
-                // Some Puter/provider combinations can close a streaming connection
-                // without emitting text. Retry once non-streaming so a valid answer
-                // is not incorrectly reported as an empty 502.
-                if (!sawText && !sawTerminalError) {
-                    const fallbackOptions = Object.assign({}, options || {}, { stream: false });
-                    const result = await puter.ai.chat(messages, false, fallbackOptions);
-                    const content = result && result.message ? result.message.content : null;
-                    let text = "";
-                    if (typeof content === "string") text = content;
-                    else if (Array.isArray(content)) text = content.map(x => typeof x === "string" ? x : (x && typeof x.text === "string" ? x.text : "")).join("");
-                    else if (result && typeof result.text === "string") text = result.text;
-                    if (text) yield { type: "text", text };
-                    if (result && result.usage) yield { type: "usage", usage: result.usage };
-                    if (!text) {
-                        const e = new Error("Puter returned a response without answer content.");
-                        e.code = "PUTER_EMPTY_RESPONSE";
-                        e.provider = "puter";
-                        throw e;
-                    }
-                } else if (usageChunk) {
-                    yield usageChunk;
-                }
-            },
-            handleError(error) { return error; }
+                return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "horizon" }), signal });
+            }
         };
 
         const nvidiaAdapter = {
             async getModels() {
-                const statusRes = await fetch(AI_PROVIDER_STATUS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
-                let status = null; try { status = await statusRes.json(); } catch (_) {}
-                const configured = !!(status && status.providers && status.providers.nvidiaConfigured === true);
-                if (!configured) {
-                    const err = new Error("NVIDIA NIM is not configured by the Horizon Worker.");
-                    err.code = "NVIDIA_NOT_CONFIGURED";
-                    err.aiInfo = { kind: "provider", status: statusRes.status || 200, code: err.code, message: err.message, provider: "nvidia" };
-                    throw err;
-                }
                 const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
                 let data = null; try { data = await res.json(); } catch (_) {}
-                if (!res.ok) {
-                    const err = new Error((data && (data.message || data.error)) || "NVIDIA model catalogue HTTP " + res.status);
+                if (!res.ok || !data || data.ok === false || !Array.isArray(data.models)) {
+                    const err = new Error((data && (data.message || data.error)) || "NVIDIA model catalogue unavailable (HTTP " + res.status + ").");
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "nvidia"; throw err;
                 }
-                if (!data || data.ok === false || !Array.isArray(data.models)) throw new Error("Unexpected NVIDIA Worker catalogue.");
-                return {
-                    models: data.models.map(m => {
-                        const x = aiNormalizeWorkerModel(m, "NVIDIA");
-                        if (!x) return null;
-                        x.id = "nvidia::" + x.id; x.providerGroup = "nvidia"; return x;
-                    }).filter(Boolean),
-                    usage: String(data.usage || data.limit || ""),
-                    status: "configured"
-                };
+                return { models: data.models.map(m => aiNormalizeWorkerModel(m, "NVIDIA")).filter(Boolean), usage: String(data.costPolicy || "NVIDIA allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
             },
-            async isAvailable() { try { return (await this.getModels()).status === "configured"; } catch (_) { return false; } },
             async sendMessage(requestBody, signal) {
-                const body = { ...requestBody, model: String(requestBody.model || "").replace(/^nvidia::/, "") };
-                return fetch(AI_NVIDIA_CHAT_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
-                    body: JSON.stringify(body), signal
-                });
-            },
-            handleError(error) { return error; }
+                return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "atlas" }), signal });
+            }
         };
 
-        const aiProviderAdapters = { apinex: apinexAdapter, puter: puterAdapter, nvidia: nvidiaAdapter };
+        const aiProviderAdapters = { gemini: geminiAdapter, nvidia: nvidiaAdapter };
 
         function aiSetProviderCard(provider, state, detail) {
-            const id = provider === "apinex" ? "aiProviderStatusApinex" : provider === "puter" ? "aiProviderStatusPuter" : "aiProviderStatusNvidia";
+            const id = provider === "gemini" ? "aiProviderStatusGemini" : "aiProviderStatusNvidia";
             const el = document.getElementById(id); if (!el) return;
             el.dataset.state = state || "unknown";
             const span = el.querySelector("span"); if (span) span.textContent = detail || aiT("availabilityUnknown");
@@ -25374,126 +25249,57 @@ document.documentElement.classList.toggle(
 
         function aiChooseAutomaticModel() {
             if (!aiModelCatalog.loaded) return "auto";
-            const signedIn = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
-            const candidates = aiModelCatalog.models.filter(m => {
-                // Atlas is a coding/file-work mode. When the user is connected to
-                // Puter, prefer a verified-free Puter model so Atlas does not
-                // silently route large file jobs through the APInex file-work
-                // endpoint (which can time out upstream). Never auto-select a
-                // paid Puter model. Explicit paid model selections remain allowed.
-                if (m.providerGroup === "puter-gpt" || m.providerGroup === "puter-claude") {
-                    return signedIn && aiModelFreeVerified(m);
-                }
-                return aiModelFreeVerified(m);
-            });
-            const rank = m => {
-                const id = String(m.id).toLowerCase();
-                if (aiMode === "atlas") {
-                    // Coding priority: Puter Claude first, then Puter GPT, then
-                    // other coding-capable models. This keeps Atlas file work on
-                    // the SDK path whenever a free verified Puter model is available.
-                    if (/claude.*sonnet/.test(id) && String(m.providerGroup).startsWith("puter-")) return 1;
-                    if (String(m.providerGroup) === "puter-claude") return 2;
-                    if (/gpt|codex/.test(id) && String(m.providerGroup) === "puter-gpt") return 3;
-                    if (String(m.providerGroup) === "puter-gpt") return 4;
-                    if (/deepseek|qwen|coder|codestral|kimi/.test(id)) return 5;
-                    return 10;
-                }
-                if (/claude.*sonnet/.test(id)) return 1;
-                if (/gpt/.test(id)) return 2;
-                if (/gemini|deepseek|qwen|kimi/.test(id)) return 3;
-                return 10;
-            };
-            const selected = candidates.sort((a,b) => rank(a)-rank(b) || a.name.localeCompare(b.name))[0];
+            const candidates = aiModelCatalog.models.filter(m => m && m.available === true && m.free === true);
+            const selected = candidates.sort((a,b) => {
+                const rank = m => {
+                    const id = String(m.id || "").toLowerCase();
+                    if (aiMode === "atlas") return /coder|code|nemotron|qwen|deepseek/.test(id) ? 0 : 1;
+                    return /gemini.*flash/.test(id) ? 0 : /gemini.*pro/.test(id) ? 1 : 2;
+                };
+                return rank(a) - rank(b) || a.name.localeCompare(b.name);
+            })[0];
             return selected ? selected.id : "auto";
         }
 
         async function aiFetchModels(force) {
             if (aiModelCatalog.loading && aiModelCatalog.promise) return aiModelCatalog.promise;
-            if (!force && aiModelCatalog.loaded && Date.now() - aiModelCatalog.at < 10 * 60 * 1000) return;
+            if (!force && aiModelCatalog.loaded && Date.now() - aiModelCatalog.at < 5 * 60 * 1000 && aiModelCatalog.mode === aiMode) return;
             aiModelCatalog.loading = true; aiModelCatalog.error = false; aiRenderModelOptions();
             aiModelCatalog.promise = (async () => {
+                const provider = aiMode === "atlas" ? "nvidia" : "gemini";
                 try {
-                    const results = await Promise.allSettled([
-                        apinexAdapter.getModels(),
-                        puterAdapter.getModels(),
-                        nvidiaAdapter.getModels()
-                    ]);
-                    const providers = ["apinex", "puter", "nvidia"];
-                    const models = [], seen = new Set();
-                    let anySuccess = false;
-                    results.forEach((r, i) => {
-                        const provider = providers[i];
-                        if (r.status !== "fulfilled") {
-                            const msg = String(r.reason && (r.reason.code || r.reason.message) || "");
-                            aiModelCatalog.providerStatus[provider] = provider === "nvidia" && msg.includes("NVIDIA_NOT_CONFIGURED") ? "not-configured" : "error";
-                            return;
-                        }
-                        anySuccess = true;
-                        const value = r.value || {};
-                        aiModelCatalog.providerStatus[provider] = provider === "puter"
-                            ? ((window.puter && puter.auth && puter.auth.isSignedIn && puter.auth.isSignedIn()) ? "connected" : "disconnected")
-                            : (value.status === "configured" ? "configured" : "unknown");
-                        if (value.usage) aiModelCatalog.usage[provider] = String(value.usage);
-                        (value.models || []).forEach(m => {
-                            if (!m || !m.id || seen.has(m.id)) return;
-                            /* Show all live APInex models; automatic selection still restricts itself to free models. */
-                            if (provider === "apinex" && m.available !== true) return;
-                            if (provider === "nvidia" && m.available !== true) return;
-                            seen.add(m.id); models.push(m);
-                        });
-                    });
-                    const groupOrder = { apinex: 0, "puter-claude": 1, "puter-gpt": 2, nvidia: 3 };
-                    models.sort((a,b) => (groupOrder[a.providerGroup] ?? 9) - (groupOrder[b.providerGroup] ?? 9) || a.name.localeCompare(b.name));
-                    aiModelCatalog.models = models;
-                    aiModelCatalog.provider = "APInex + Puter + NVIDIA";
-                    aiModelCatalog.loaded = anySuccess; aiModelCatalog.at = Date.now(); aiModelCatalog.lastRefreshAt = aiModelCatalog.at; aiModelCatalog.error = !anySuccess;
-                    ["model", "atlasModel"].forEach(k => {
-                        const v = aiSettings[k];
-                        if (v && v !== "auto" && !models.some(m => m.id === v)) { aiSettings[k] = "auto"; aiPersistSettings(); }
-                    });
-                    if (aiModelCatalog.providerStatus.apinex === "configured") {
-                        aiSetProviderCard("apinex", "connected", aiModelCatalog.usage.apinex || "Worker catalogue available; free models are identified by the Worker.");
-                    } else {
-                        aiSetProviderCard("apinex", "error", "Worker model catalogue unavailable.");
-                    }
-                    const puterConnected = aiModelCatalog.providerStatus.puter === "connected";
-                    aiSetProviderCard("puter", puterConnected ? "connected" : "unknown", puterConnected ? "Puter account connected. Live GPT/Claude catalogue loaded." : "Not connected — sign in when you select a Puter model.");
-                    aiSetProviderCard("nvidia", aiModelCatalog.providerStatus.nvidia === "configured" ? "connected" : (aiModelCatalog.providerStatus.nvidia === "not-configured" ? "error" : "unknown"),
-                        aiModelCatalog.providerStatus.nvidia === "configured" ? (aiModelCatalog.usage.nvidia || "Worker reports NVIDIA as configured.") : aiT("providerBackendMissing"));
-                    if (!anySuccess) throw new Error("No AI provider catalogue could be loaded.");
+                    const result = await (provider === "nvidia" ? nvidiaAdapter : geminiAdapter).getModels();
+                    aiModelCatalog.models = (result.models || []).filter(m => m && m.available === true);
+                    aiModelCatalog.provider = provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini";
+                    aiModelCatalog.usage[provider] = result.usage || "";
+                    aiModelCatalog.providerStatus[provider] = "configured";
+                    aiModelCatalog.loaded = true; aiModelCatalog.mode = aiMode;
+                    aiModelCatalog.at = Date.now(); aiModelCatalog.lastRefreshAt = aiModelCatalog.at;
+                    const prefKey = aiMode === "atlas" ? "atlasModel" : "model";
+                    const saved = String(aiSettings[prefKey] || "auto").replace(/^nvidia::/, "");
+                    if (saved !== "auto" && !aiModelCatalog.models.some(m => m.id === saved)) { aiSettings[prefKey] = "auto"; aiPersistSettings(); }
+                    aiSetProviderCard(provider, "connected", aiModelCatalog.usage[provider] || "Worker catalogue available.");
+                    aiSetProviderCard(provider === "nvidia" ? "gemini" : "nvidia", "unknown", "Used by the other AI mode.");
+                    if (!aiModelCatalog.models.length) throw new Error("No available models are enabled in the Worker allowlist for " + provider + ".");
                 } catch (e) {
-                    aiModelCatalog.error = true;
-                    if (!aiModelCatalog.loaded) aiModelCatalog.models = [];
+                    aiModelCatalog.error = true; aiModelCatalog.loaded = false;
+                    aiSetProviderCard(provider, "error", String(e && e.message || "Model catalogue unavailable."));
                     console.warn("[Horizon AI] model discovery issue:", e && e.message ? e.message : e);
                 } finally {
                     aiModelCatalog.loading = false; aiModelCatalog.promise = null;
-                    aiRenderModelOptions(); aiUpdateModelPill(); aiUpdatePuterStatus(); aiUpdateProviderUI();
+                    aiRenderModelOptions(); aiUpdateModelPill(); aiUpdateProviderUI();
                 }
             })();
             return aiModelCatalog.promise;
         }
 
         function aiUpdateProviderUI() {
-            const signedIn = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
-            aiSetProviderCard("puter", signedIn ? "connected" : "unknown", signedIn ? "Puter account connected." : "Not connected — select a Puter model to sign in.");
-            if (aiModelCatalog.providerStatus.nvidia === "not-configured") aiSetProviderCard("nvidia", "error", aiT("providerBackendMissing"));
-            const usage = [aiModelCatalog.usage.apinex, aiModelCatalog.usage.puter, aiModelCatalog.usage.nvidia].filter(Boolean);
+            const provider = aiMode === "atlas" ? "nvidia" : "gemini";
             const usageEl = document.getElementById("aiProviderUsageHint");
             const refreshText = aiModelCatalog.lastRefreshAt ? "Last refreshed: " + new Date(aiModelCatalog.lastRefreshAt).toLocaleTimeString() : "Models have not been refreshed yet.";
-            if (usageEl) usageEl.textContent = (usage.length ? usage.join(" · ") + " · " : "") + refreshText;
+            if (usageEl) usageEl.textContent = (aiModelCatalog.usage[provider] || "") + (aiModelCatalog.usage[provider] ? " · " : "") + refreshText;
             const tokenEl = document.getElementById("aiTokenUsageHint");
-            if (tokenEl) {
-                const u = aiModelCatalog.lastTokenUsage;
-                if (!u) tokenEl.textContent = "Token usage: no completed AI request yet. " + refreshText;
-                else {
-                    const parts = [];
-                    if (Number.isFinite(u.prompt)) parts.push("input " + u.prompt.toLocaleString());
-                    if (Number.isFinite(u.completion)) parts.push("output " + u.completion.toLocaleString());
-                    if (Number.isFinite(u.total)) parts.push("total " + u.total.toLocaleString());
-                    tokenEl.textContent = "Last response tokens: " + (parts.length ? parts.join(" · ") : "usage not reported by provider") + " · " + u.provider + (u.model ? " · " + u.model : "") + (u.at ? " · " + new Date(u.at).toLocaleTimeString() : "");
-                }
-            }
+            if (tokenEl && !aiModelCatalog.lastTokenUsage) tokenEl.textContent = "Token usage: no completed AI request yet. " + refreshText;
         }
 
         function aiUpdatePuterStatus(message) {
@@ -25537,13 +25343,11 @@ document.documentElement.classList.toggle(
 
         /*
          * Canonical model IDs are part of the routing contract:
-         *   puter::<puter-model-id>   -> Puter.js
-         *   nvidia::<nvidia-model-id> -> /nvidia/chat Worker route
-         *   <apinex-model-id>        -> APInex Worker route
+         *   <Gemini model ID> -> Gemini Worker route in Horizon mode
+         *   <NVIDIA model ID> -> NVIDIA Worker route in Atlas mode
          *
-         * Older saved preferences may contain a raw NVIDIA/Puter model ID.
-         * Never turn a recognizable NVIDIA model into "auto", because that
-         * silently changes provider and can make an NVIDIA selection hit Puter.
+         * Older saved preferences may contain a legacy nvidia:: prefix; it is
+         * normalized before the request. Provider selection follows the mode.
          */
         function aiCanonicalizeModelId(id) {
             const raw = String(id || "").trim();
@@ -25559,11 +25363,6 @@ document.documentElement.classList.toggle(
             );
             if (nvidia) return nvidia.id;
 
-            const puter = aiModelCatalog.models.find(x =>
-                x && (x.providerGroup === "puter-gpt" || x.providerGroup === "puter-claude") &&
-                String(x.id).replace(/^puter::/, "") === raw
-            );
-            if (puter) return puter.id;
 
             return raw;
         }
@@ -25572,9 +25371,9 @@ document.documentElement.classList.toggle(
         function aiResolveModel() {
             const wanted = aiCanonicalizeModelId(aiSelectedModelPref());
             if (wanted === "auto") return aiChooseAutomaticModel();
-            if (typeof wanted === "string" && (wanted.startsWith("puter::") || wanted.startsWith("nvidia::"))) {
-                const selected = aiModelCatalog.models.find(x => x.id === wanted);
-                return selected && selected.available !== false ? selected.id : wanted;
+            if (typeof wanted === "string" && wanted !== "auto") {
+                const selected = aiModelCatalog.models.find(x => x.id === wanted || String(x.id).replace(/^nvidia::/, "") === wanted);
+                return selected && selected.available === true ? selected.id : wanted;
             }
             if (!aiModelCatalog.loaded) return wanted;
             const m = aiModelCatalog.models.find(x => x.id === wanted);
@@ -25599,15 +25398,10 @@ document.documentElement.classList.toggle(
             const auto = document.createElement("option");
             auto.value = "auto"; auto.textContent = aiT("modelAuto"); select.appendChild(auto);
 
-            const groups = [
-                ["apinex", aiT("providerApinex")],
-                ["puter-claude", aiT("providerPuterClaude")],
-                ["puter-gpt", aiT("providerPuterGpt")],
-                ["nvidia", aiT("providerNvidia")]
-            ];
+            const groups = [[aiMode === "atlas" ? "nvidia" : "googlegemini", aiMode === "atlas" ? "NVIDIA NIM · Atlas" : "Google Gemini · Horizon"]];
             const chosen = aiResolveModel();
             groups.forEach(([groupId, label]) => {
-                const items = aiModelCatalog.models.filter(m => m.providerGroup === groupId);
+                const items = aiModelCatalog.models.filter(m => (aiMode === "atlas" ? "nvidia" : "googlegemini") === groupId || m.providerGroup === groupId);
                 if (!items.length) return;
                 const og = document.createElement("optgroup"); og.label = label;
                 items.forEach(m => {
@@ -25619,7 +25413,7 @@ document.documentElement.classList.toggle(
                     o.disabled = m.available !== true;
                     o.title = [
                         m.provider,
-                        aiT("modelIdLabel") + ": " + m.id.replace(/^puter::|^nvidia::/, ""),
+                        aiT("modelIdLabel") + ": " + m.id.replace(/^nvidia::/, ""),
                         status,
                         context ? aiT("modelContextLabel") + ": " + context : "",
                         m.capabilities && m.capabilities.length ? aiT("modelCapsLabel") + ": " + m.capabilities.join(", ") : ""
@@ -25633,7 +25427,7 @@ document.documentElement.classList.toggle(
                 stale.value = chosen; stale.textContent = chosen + " — " + aiT("modelUnavailable"); stale.disabled = true; select.appendChild(stale);
             }
             select.value = Array.from(select.options).some(o => o.value === chosen) ? chosen : "auto";
-            aiUpdatePuterStatus();
+            
             if (!meta) return;
             if (aiModelCatalog.loading) { meta.textContent = aiT("modelsLoading"); return; }
             if (aiModelCatalog.error && !aiModelCatalog.loaded) { meta.textContent = aiT("modelsLoadFailed"); return; }
@@ -25811,14 +25605,14 @@ document.documentElement.classList.toggle(
                 }
             }
             switch (info && info.kind) {
-                case "model": friendly = provider === "nvidia" ? "The selected NVIDIA model is unavailable or not accessible." : (provider === "apinex" ? "The selected APInex model is unavailable or not accessible." : "The selected Puter model is unavailable or not accessible."); break;
+                case "model": friendly = provider === "nvidia" ? "The selected NVIDIA model is unavailable or not accessible." : (provider === "apinex" ? "The selected Gemini model is unavailable or not accessible." : "The selected Puter model is unavailable or not accessible."); break;
                 case "rate": friendly = "The provider usage allowance or rate limit was reached."; break;
                 case "network": friendly = "A network error interrupted the AI request."; break;
                 case "context": friendly = "The attached project exceeds this model's context window. Send a smaller set of files."; break;
                 case "auth": friendly = "Your Puter account is not authenticated. Connect Puter in AI settings and try again."; break;
                 case "timeout": friendly = "The AI request timed out. Try again with a smaller task."; break;
                 case "invalid": friendly = "The selected model returned an invalid structured file response. No replacement files were offered."; break;
-                case "provider": friendly = provider === "nvidia" ? "NVIDIA NIM could not complete the request." : provider === "apinex" ? "APInex could not complete the request." : "Puter could not complete the request."; break;
+                case "provider": friendly = provider === "nvidia" ? "NVIDIA NIM could not complete the request." : provider === "apinex" ? "Google Gemini could not complete the request." : "Puter could not complete the request."; break;
                 default: friendly = aiT("genericError");
             }
             let suffix = detail ? " Details: " + detail : "";
@@ -26057,14 +25851,14 @@ document.documentElement.classList.toggle(
 
                 const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
                 // Explicit Puter model selection wins for ALL Atlas tasks, including attached files.
-                // The Worker file-work endpoint is retained only for APInex selections.
+                // The Worker file-work endpoint is retained only for Gemini selections.
                 requestedModel = aiCanonicalizeModelId(requestedModel);
                 let selectedProvider = aiProviderFromModel(requestedModel);
                 // Atlas file/code work must never be sent through APInex's legacy
                 // file-work endpoint. If the user is signed into Puter and has a
                 // live Puter model available, automatically promote the request to
                 // the best eligible Puter coding model. This fixes the common case
-                // where Atlas is still set to an APInex model from an older session.
+                // where Atlas is still set to an Gemini model from an older session.
                 if (isAtlas && fileWorkRequested && selectedProvider === "apinex") {
                     const signedInForAtlas = !!(window.puter && puter.auth && typeof puter.auth.isSignedIn === "function" && puter.auth.isSignedIn());
                     if (signedInForAtlas && aiModelCatalog.loaded) {
@@ -26137,10 +25931,18 @@ document.documentElement.classList.toggle(
                     sawDone = true;
                 } else if (selectedProvider === "nvidia") {
                     if (fileWorkRequested) {
-                        const nvidiaFileErr = new Error("NVIDIA NIM file-work is not available through the current Worker contract. Select an APInex model for Atlas file editing, or a Puter model for SDK-based file analysis.");
-                        nvidiaFileErr.code = "NVIDIA_FILE_WORK_UNAVAILABLE";
-                        nvidiaFileErr.aiInfo = { kind: "provider", status: 0, code: nvidiaFileErr.code, message: nvidiaFileErr.message, provider: "nvidia" };
-                        throw nvidiaFileErr;
+                        const projectFiles = Array.from(new Map(aiGetActiveProjectFiles().concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
+                        let fileContext = "\n\nATLAS ATTACHED PROJECT FILES (read-only context; propose complete replacements in your answer):\n";
+                        let remaining = Math.max(0, 22000 - String(requestBody.message || "").length - fileContext.length);
+                        for (const file of projectFiles) {
+                            const path = aiSafeRelativePath(file.path || file.name);
+                            const content = String(file.content || "");
+                            const block = "\n--- FILE: " + path + " ---\n" + content.slice(0, remaining);
+                            if (remaining <= 0) break;
+                            fileContext += block; remaining -= block.length;
+                        }
+                        if (projectFiles.length && remaining <= 0) fileContext += "\n[Additional file content omitted to stay within the Worker request limit.]";
+                        requestBody.message = String(requestBody.message || "") + fileContext;
                     }
                     const nvidiaResponse = await nvidiaAdapter.sendMessage(requestBody, signal);
                     if (!nvidiaResponse.ok) {
@@ -26174,7 +25976,7 @@ document.documentElement.classList.toggle(
                             }
                         }
                     }
-                    sourceLabel = "NVIDIA NIM · " + requestedModel.replace(/^nvidia::/, "");
+                    sourceLabel = "NVIDIA NIM · " + String(requestedModel).replace(/^nvidia::/, "");
                 } else if (selectedProvider === "puter") {
                     if (!window.puter || !puter.ai || typeof puter.ai.chat !== "function") throw new Error("Puter.js is unavailable. Refresh the page and try again.");
                     if (!puter.auth || typeof puter.auth.isSignedIn !== "function" || !puter.auth.isSignedIn()) {
@@ -26464,9 +26266,7 @@ document.documentElement.classList.toggle(
                         else if (/timeout|timed out|request_timeout/.test(hay)) kind = "timeout";
                         else if (/network_error|failed to fetch|network/.test(hay)) kind = "network";
                         const provider = String(error && error.provider || "") || (
-                            String(requestedModel).startsWith("nvidia::") ? "nvidia" :
-                            String(requestedModel).startsWith("puter::") ? "puter" :
-                            "apinex"
+                            aiMode === "atlas" ? "nvidia" : "gemini"
                         );
                         streamError = { kind, status: Number(error && error.status) || 0, code, message: detail, provider };
                     }
@@ -26479,7 +26279,7 @@ document.documentElement.classList.toggle(
 
             document.getElementById("aiLoading")?.remove();
             if (responseUsage) {
-                responseUsage.provider = responseUsage.provider || (String(requestedModel).startsWith("nvidia::") ? "NVIDIA" : String(requestedModel).startsWith("puter::") ? "Puter" : "APInex");
+                responseUsage.provider = responseUsage.provider || (aiMode === "atlas" ? "NVIDIA" : "Google Gemini");
                 responseUsage.model = responseUsage.model || String(requestedModel || "");
                 responseUsage.at = responseUsage.at || Date.now();
                 aiModelCatalog.lastTokenUsage = responseUsage;
@@ -26491,8 +26291,7 @@ document.documentElement.classList.toggle(
             const hasSources = collectedSources.length > 0;
             const interrupted = !cancelled && !streamError && !sawDone && hasText;
             if (!cancelled && !streamError && !sawDone && !hasText && !hasSources) {
-                const emptyProvider = String(requestedModel).startsWith("nvidia::") ? "nvidia" :
-                    String(requestedModel).startsWith("puter::") ? "puter" : "apinex";
+                const emptyProvider = aiMode === "atlas" ? "nvidia" : "gemini";
                 streamError = {
                     kind: "provider",
                     status: 502,
