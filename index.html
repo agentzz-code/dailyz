@@ -25149,7 +25149,7 @@ document.documentElement.classList.toggle(
            GET {AI_ENDPOINT}/models?mode=atlas   -> NVIDIA catalogue
            POST {AI_ENDPOINT}                    -> normalized SSE stream
            Horizon requests are Gemini-only; Atlas requests are NVIDIA-only.
-           The Worker owns both provider keys and enforces the configured model allowlists.
+           The Worker owns both provider keys and discovers models directly from each provider catalogue.
            There is no APInex/Puter routing and no cross-provider fallback.
            ===================================================== */
 
@@ -25222,16 +25222,16 @@ document.documentElement.classList.toggle(
                 throw new Error((data && (data.message || data.error)) || "Model catalogue unavailable (HTTP " + httpStatus + ").");
             }
             // A legacy Worker may ignore ?mode= and return its old Claude/APInex catalogue.
-            // Require the V4 contract before displaying any model.
+            // Require the dynamic-catalogue contract; block legacy Claude/APInex catalogues.
             const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
-            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.allowlistEnforced !== true) {
-                throw new Error("The Cloudflare Worker is outdated or is not the Gemini + NVIDIA V4 Worker. Deploy the matching Worker first; legacy Claude/APInex model lists are blocked.");
+            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== "provider-api") {
+                throw new Error("The Cloudflare Worker is outdated or is not the Gemini + NVIDIA dynamic-model Worker. Deploy the updated Worker; legacy Claude/APInex model lists are blocked.");
             }
             const normalized = data.models
                 .map(m => aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
                 .filter(m => m && m.available === true);
             if (data.models.length && !normalized.length) {
-                throw new Error("The Worker returned models, but none belong to " + expectedProviderName + ". Check the provider allowlist and deployed Worker.");
+                throw new Error("The Worker returned models, but none belong to " + expectedProviderName + ". Check the provider API response and deployed Worker.");
             }
             return normalized;
         }
@@ -25246,7 +25246,7 @@ document.documentElement.classList.toggle(
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "gemini"; throw err;
                 }
                 const models = aiValidateModelCatalogue(data, "horizon", "googlegemini", res.status);
-                return { models, usage: String(data.costPolicy || "Gemini model allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
+                return { models, usage: String(data.costPolicy || "Live Gemini provider catalogue"), status: "configured", defaultModel: data.defaultModel || "auto" };
             },
             async sendMessage(requestBody, signal) {
                 return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "horizon" }), signal });
@@ -25262,7 +25262,7 @@ document.documentElement.classList.toggle(
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "nvidia"; throw err;
                 }
                 const models = aiValidateModelCatalogue(data, "atlas", "nvidia", res.status);
-                return { models, usage: String(data.costPolicy || "NVIDIA model allowlist from Worker"), status: "configured", defaultModel: data.defaultModel || "auto" };
+                return { models, usage: String(data.costPolicy || "Live NVIDIA provider catalogue"), status: "configured", defaultModel: data.defaultModel || "auto" };
             },
             async sendMessage(requestBody, signal) {
                 return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "atlas" }), signal });
@@ -25311,7 +25311,7 @@ document.documentElement.classList.toggle(
                     if (saved !== "auto" && !aiModelCatalog.models.some(m => m.id === saved)) { aiSettings[prefKey] = "auto"; aiPersistSettings(); }
                     aiSetProviderCard(provider, "connected", aiModelCatalog.usage[provider] || "Worker catalogue available.");
                     aiSetProviderCard(provider === "nvidia" ? "gemini" : "nvidia", "unknown", "Used by the other AI mode.");
-                    if (!aiModelCatalog.models.length) throw new Error("No available models are enabled in the Worker allowlist for " + provider + ".");
+                    if (!aiModelCatalog.models.length) throw new Error("The provider returned no available chat models for " + provider + ". Check the API key and provider account access.");
                 } catch (e) {
                     aiModelCatalog.error = true; aiModelCatalog.loaded = false;
                     aiSetProviderCard(provider, "error", String(e && e.message || "Model catalogue unavailable."));
