@@ -29005,4 +29005,64 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
   pointer-events: auto !important;
   user-select: text !important;
 }
+
+
+/* Horizon V23 — desktop chat scrolling fix.
+   Use one scroll owner for the transcript on desktop and mobile alike.
+   The previous desktop layout nested an independently scrolling #aiMessages
+   inside .ai-convo, while scroll pinning listened to .ai-convo. */
+@media (min-width:761px) {
+  #ai.active .ai-workspace,
+  #ai.active .ai-chat-main,
+  #ai.active #aiChatHost,
+  #ai.active #aiBox.horizon-ai-page,
+  #ai.active #aiBox.horizon-ai-page.open {
+    min-height:0 !important;
+  }
+  #ai.active .ai-chat-main,
+  #ai.active #aiChatHost {
+    display:flex !important;
+    flex-direction:column !important;
+    height:100% !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+  #ai.active #aiBox.horizon-ai-page,
+  #ai.active #aiBox.horizon-ai-page.open {
+    display:flex !important;
+    flex:1 1 auto !important;
+    flex-direction:column !important;
+    height:100% !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+  #ai.active .ai-convo {
+    display:flex !important;
+    flex:1 1 0% !important;
+    min-height:0 !important;
+    height:0 !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    overscroll-behavior-y:contain !important;
+    -webkit-overflow-scrolling:touch !important;
+    scrollbar-width:thin !important;
+    scrollbar-gutter:stable !important;
+    touch-action:pan-y !important;
+  }
+  #ai.active #aiMessages {
+    display:flex !important;
+    flex:0 0 auto !important;
+    min-height:0 !important;
+    width:100% !important;
+    overflow:visible !important;
+  }
+  #ai.active .ai-convo::-webkit-scrollbar { width:9px; }
+  #ai.active .ai-convo::-webkit-scrollbar-thumb {
+    background:rgba(160,160,160,.62);
+    border:2px solid transparent;
+    border-radius:99px;
+    background-clip:padding-box;
+  }
+  #ai.active .ai-convo::-webkit-scrollbar-track { background:transparent; }
+}
 </style>
