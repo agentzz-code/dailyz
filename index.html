@@ -23394,7 +23394,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-instant-v15";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-glm-optimized-v16";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25237,7 +25237,7 @@ document.documentElement.classList.toggle(
             // Require the dynamic-catalogue contract; block legacy Claude/APInex catalogues.
             const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
             if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== "provider-api" || data.workerVersion !== AI_EXPECTED_WORKER_VERSION) {
-                throw new Error("Worker version mismatch. This page requires " + AI_EXPECTED_WORKER_VERSION + ", but the deployed Worker returned " + String(data.workerVersion || "an older/unknown version") + ". Update and deploy the matching Worker V13 before sending messages.");
+                throw new Error("Worker version mismatch. This page requires " + AI_EXPECTED_WORKER_VERSION + ", but the deployed Worker returned " + String(data.workerVersion || "an older/unknown version") + ". Deploy the matching Worker version before sending messages.");
             }
             const normalized = data.models
                 .map(m => aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
