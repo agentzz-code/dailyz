@@ -23394,7 +23394,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-files-v18";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-study-tutor-v20";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -23453,11 +23453,11 @@ document.documentElement.classList.toggle(
                     "Sorry, that image couldn't be used. Please try a different photo.",
                 welcomeTitle: "Hi! I'm Horizon AI 👋",
                 welcomeSub:
-                    "Ask me anything — study help, daily planning, translations and more.",
+                    "Your study partner for math, physics, clear step-by-step solutions, daily planning and more.",
                 suggestions: [
-                    "Help me plan my day",
-                    "Explain a topic simply",
-                    "Help me write a note"
+                    "Solve this math problem step by step",
+                    "Explain a physics problem with formulas and units",
+                    "Teach me a topic and give me a practice question"
                 ],
                 restored: "Conversation restored",
                 webSearch: "Web search",
@@ -25995,7 +25995,7 @@ document.documentElement.classList.toggle(
                         );
                         streamError = { kind, status: Number(error && error.status) || 0, code, message: detail, provider };
                     }
-                    try { console.warn("[Horizon AI] request failed:", streamError.kind, streamError.status, streamError.code); } catch (e) {}
+                    try { console.warn("[Horizon AI] request failed:", { kind: streamError.kind, status: streamError.status, code: streamError.code, provider: streamError.provider, message: streamError.message, model: requestedModel }); } catch (e) {}
                 }
             } finally {
                 /* [DONE] or failure: release the connection */
