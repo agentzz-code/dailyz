@@ -23394,7 +23394,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-dynamic-v10";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-dynamic-v11";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25266,7 +25266,7 @@ document.documentElement.classList.toggle(
 
         const nvidiaAdapter = {
             async getModels() {
-                const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
+                const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store", signal: AbortSignal.timeout(30000) });
                 let data = null; try { data = await res.json(); } catch (_) {}
                 if (!res.ok) {
                     const err = new Error((data && (data.message || data.error)) || "NVIDIA model catalogue unavailable (HTTP " + res.status + ").");
@@ -27042,7 +27042,9 @@ body:has(#ai.active) main { padding-top:0 !important; }
 #ai.active #aiBox.horizon-ai-page .aiHeadBtn:hover { background:#262626; }
 #ai.active #aiBox.horizon-ai-page #aiSearchBtn { opacity:.9; }
 #ai.active #aiBox.horizon-ai-page #aiNewBtn, #ai.active #aiBox.horizon-ai-page #aiExpandBtn, #ai.active #aiBox.horizon-ai-page #aiCloseBtn, #ai.active #aiBox.horizon-ai-page #aiPageSettingsBtn { display:none !important; }
-#ai.active .ai-convo { flex:1; min-height:0; width:100%; max-width:850px; margin:0 auto; padding:0 26px; overflow-y:auto; overflow-x:hidden; min-height:0; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; }
+#ai.active .ai-convo { flex:1; min-height:0; width:100%; max-width:850px; margin:0 auto; padding:0 26px; overflow-y:auto; overflow-x:hidden; min-height:0; -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain; scrollbar-width:thin; scrollbar-gutter:stable; }
+#ai.active .ai-convo::-webkit-scrollbar { width:7px; }
+#ai.active .ai-convo::-webkit-scrollbar-thumb { background:rgba(145,145,145,.55); border-radius:8px; }
 #ai.active #aiWelcome { flex:1; min-height:300px; justify-content:center; gap:15px; padding:24px 0 12px; color:#e5e5e5; }
 #ai.active .ai-welcome-emoji { display:none; }
 #ai.active .ai-welcome-title { font-size:clamp(27px,3vw,36px); line-height:1.2; font-weight:500; letter-spacing:-.035em; color:#e8e8e8; }
