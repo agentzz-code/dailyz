@@ -1339,6 +1339,10 @@ body:has(#ai.active) main { width:100% !important; max-width:none !important; ma
   #ai.active .ai-convo { min-height:0 !important; }
 }
 
+
+        .ai-md .ai-math-display { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; text-align: center; margin: 10px 0; padding: 2px 0; }
+        .ai-md mjx-container { max-width: 100%; }
+        .ai-md mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; padding: 2px 0 6px; }
 </style>
 
     <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
@@ -6047,6 +6051,16 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 .ai-error-actions button { padding:7px 12px; border:1px solid currentColor; border-radius:10px; background:transparent; color:inherit; font:inherit; font-size:12.5px; font-weight:650; cursor:pointer; }
 .ai-error-actions button:disabled { opacity:.5; }
 </style>
+
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']], processEscapes: true },
+            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] },
+            startup: { typeset: false }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 </head>
 
 <body>
@@ -23394,7 +23408,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-general-math-physics-v21";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-math-rendering-v22";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -23762,6 +23776,7 @@ document.documentElement.classList.toggle(
                 .querySelectorAll("#aiMessages .ai-message[data-ai-raw]")
                 .forEach((el) => {
                     el.innerHTML = aiRenderMarkdown(el.getAttribute("data-ai-raw"));
+                    aiTypesetMath(el);
                 });
         }
 
@@ -24044,7 +24059,21 @@ document.documentElement.classList.toggle(
 
         function aiRenderMarkdown(raw) {
             if (!raw) return "";
-            const text = aiEscape(String(raw));
+            // Normalize common Gemini formatting defects before Markdown parsing.
+            let source = String(raw).replace(/\\[ \t]*$/gm, "");
+            const mathBlocks = [];
+            function holdMath(tex, display) {
+                const id = mathBlocks.length;
+                mathBlocks.push({ tex: String(tex).trim(), display });
+                return "\u0000M" + id + "\u0000";
+            }
+            // Protect display math first, including multi-line equations.
+            source = source.replace(/\$\$([\s\S]*?)\$\$/g, (m, tex) => holdMath(tex, true));
+            source = source.replace(/\\\[([\s\S]*?)\\\]/g, (m, tex) => holdMath(tex, true));
+            // Then protect inline math. Avoid matching empty or multi-line dollar spans.
+            source = source.replace(/\\\(([^\n]*?)\\\)/g, (m, tex) => holdMath(tex, false));
+            source = source.replace(/\$(?!\$)([^\n$]+?)\$(?!\$)/g, (m, tex) => holdMath(tex, false));
+            const text = aiEscape(source);
 
             /* fenced code blocks → placeholders */
             const codeBlocks = [];
@@ -24188,7 +24217,29 @@ document.documentElement.classList.toggle(
                 );
             });
 
+            html = html.replace(/\u0000M(\d+)\u0000/g, (m, index) => {
+                const item = mathBlocks[Number(index)];
+                if (!item) return "";
+                const tex = aiEscape(item.tex);
+                return item.display
+                    ? '<div class="ai-math-display">\\[' + tex + '\\]</div>'
+                    : '<span class="ai-math-inline">\\(' + tex + '\\)</span>';
+            });
             return html || "<p>" + aiRenderInline(text) + "</p>";
+        }
+
+        function aiTypesetMath(root, attempt) {
+            if (!root) return;
+            attempt = Number(attempt || 0);
+            if (!window.MathJax || !window.MathJax.typesetPromise) {
+                // The CDN is deferred; retry briefly if a reply arrives before MathJax loads.
+                if (attempt < 12) setTimeout(() => aiTypesetMath(root, attempt + 1), 250);
+                return;
+            }
+            try {
+                window.MathJax.typesetClear && window.MathJax.typesetClear([root]);
+                window.MathJax.typesetPromise([root]).catch(() => {});
+            } catch (_) {}
         }
 
         /* =====================================================
@@ -25734,6 +25785,7 @@ document.documentElement.classList.toggle(
                     renderScheduled = false;
                     if (!messageEl) return;
                     messageEl.innerHTML = aiRenderMarkdown(assistantText);
+                    aiTypesetMath(messageEl);
                     aiMaybeScroll(false);
                 });
             }
@@ -26022,6 +26074,7 @@ document.documentElement.classList.toggle(
                     if (messageEl) {
                         messageEl.setAttribute("data-ai-raw", assistantText);
                         messageEl.innerHTML = aiRenderMarkdown(assistantText);
+                    aiTypesetMath(messageEl);
                     }
                 }
             }
@@ -26048,6 +26101,7 @@ document.documentElement.classList.toggle(
                     if (streamError) messageEl.classList.add("ai-error");
                     messageEl.setAttribute("data-ai-raw", assistantText);
                     messageEl.innerHTML = aiRenderMarkdown(assistantText);
+                    aiTypesetMath(messageEl);
                 }
 
                 let anchor = messageEl;
