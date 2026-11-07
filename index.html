@@ -23408,7 +23408,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-file-delivery-v24";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-workspace-v25";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24407,7 +24407,7 @@ document.documentElement.classList.toggle(
                 if(entry.role==="user") aiAppendUserMessage(entry.content,null);
                 else {const el=document.createElement("div");el.className="ai-message ai-md";el.setAttribute("data-ai-raw",entry.content);el.innerHTML=aiRenderMarkdown(entry.content);messages.appendChild(el);if(Array.isArray(entry.sources)&&entry.sources.length)aiRenderSources(entry.sources,el);}
             });
-            aiPinned=true; aiMaybeScroll(true); aiRenderChatLists();
+            aiPinned=true; aiMaybeScroll(true); aiRenderChatLists(); aiRenderFilePreview();
         }
         function aiSwitchChat(id) {
             if(aiBusy || !aiChats.some(c=>c.id===id))return;
@@ -24423,6 +24423,7 @@ document.documentElement.classList.toggle(
         }
         function aiDeleteChat(id) {
             if(aiBusy)return;
+            if (typeof aiProjectFileContexts !== "undefined") aiProjectFileContexts.delete(id);
             aiChats=aiChats.filter(c=>c.id!==id);
             if(!aiChats.length)aiChats=[{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false}];
             if(aiCurrentChatId===id)aiCurrentChatId=aiChats[0].id;
@@ -24718,35 +24719,49 @@ document.documentElement.classList.toggle(
             const wrap = document.getElementById("aiFilePreviewWrap");
             if (!wrap) return;
             wrap.replaceChildren();
-            if (!aiSelectedFiles.length && !aiFileStatus) { wrap.hidden = true; return; }
+            const selectedPaths = new Set(aiSelectedFiles.map(f => aiSafeRelativePath(f.path || f.name)));
+            const retainedFiles = aiGetActiveProjectFiles().filter(f => !selectedPaths.has(aiSafeRelativePath(f.path || f.name)));
+            if (!aiSelectedFiles.length && !retainedFiles.length && !aiFileStatus) { wrap.hidden = true; return; }
             wrap.hidden = false;
-            if (aiSelectedFiles.length) {
-                const label = document.createElement("span");
-                label.textContent = "Attached files (" + aiSelectedFiles.length + "): ";
-                wrap.appendChild(label);
-            }
-            aiSelectedFiles.forEach((file, index) => {
+            const makeChip = (file, removeHandler, retained) => {
                 const chip = document.createElement("span"); chip.className = "ai-file-chip";
                 const icon = document.createElement("span"); icon.setAttribute("aria-hidden", "true"); icon.textContent = aiFileTypeIcon(file.name);
                 const name = document.createElement("span"); name.textContent = file.path || file.name;
                 const meta = document.createElement("span"); meta.className = "ai-chip-meta";
-                meta.textContent = aiFileTypeLabel(file.name) + " · " + aiFormatBytes(file.size != null ? file.size : aiByteLength(file.content)) + (file.note ? " · " + file.note : "");
+                meta.textContent = (retained ? "In this chat · " : "") + aiFileTypeLabel(file.name) + " · " + aiFormatBytes(file.size != null ? file.size : aiByteLength(file.content)) + (file.note ? " · " + file.note : "");
                 const prev = document.createElement("button"); prev.type = "button"; prev.className = "ai-chip-btn";
                 const open = aiOpenChipPreviews.has(file);
                 prev.textContent = open ? "Hide preview" : "Preview"; prev.setAttribute("aria-expanded", String(open));
                 prev.setAttribute("aria-label", (open ? "Hide preview of " : "Preview ") + file.name);
                 prev.addEventListener("click", () => { if (aiOpenChipPreviews.has(file)) aiOpenChipPreviews.delete(file); else aiOpenChipPreviews.add(file); aiRenderFilePreview(); });
-                const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "×"; remove.setAttribute("aria-label", "Remove " + file.name); remove.title = "Remove " + file.name;
-                remove.addEventListener("click", () => { aiOpenChipPreviews.delete(file); aiSelectedFiles.splice(index, 1); aiRenderFilePreview(); });
+                const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "×"; remove.setAttribute("aria-label", "Remove " + file.name); remove.title = retained ? "Remove from this chat's project context" : "Remove attachment";
+                remove.addEventListener("click", () => { aiOpenChipPreviews.delete(file); removeHandler(); aiRenderFilePreview(); });
                 chip.append(icon, name, meta, prev, remove);
                 if (open) {
                     const pre = document.createElement("pre"); pre.className = "ai-chip-preview";
                     const text = String(file.content || "");
-                    pre.textContent = text.slice(0, 4000) + (text.length > 4000 ? "\n… (preview truncated; the full " + text.length + " characters are sent to the model)" : "");
+                    pre.textContent = text.slice(0, 4000) + (text.length > 4000 ? "\n… (preview truncated; full content is retained for this chat)" : "");
                     chip.appendChild(pre);
                 }
                 wrap.appendChild(chip);
+            };
+            if (aiSelectedFiles.length) {
+                const label = document.createElement("span"); label.textContent = "Attached files (" + aiSelectedFiles.length + "): "; wrap.appendChild(label);
+            }
+            aiSelectedFiles.forEach((file, index) => {
+                makeChip(file, () => {
+                    aiSelectedFiles.splice(index, 1);
+                    const path = aiSafeRelativePath(file.path || file.name);
+                    aiProjectFileContexts.set(aiCurrentChatId, aiGetActiveProjectFiles().filter(f => aiSafeRelativePath(f.path || f.name) !== path));
+                }, false);
             });
+            if (retainedFiles.length) {
+                const label = document.createElement("span"); label.textContent = "Project files retained in this chat (" + retainedFiles.length + "): "; wrap.appendChild(label);
+                retainedFiles.forEach(file => makeChip(file, () => {
+                    const path = aiSafeRelativePath(file.path || file.name);
+                    aiProjectFileContexts.set(aiCurrentChatId, aiGetActiveProjectFiles().filter(f => aiSafeRelativePath(f.path || f.name) !== path));
+                }, true));
+            }
             if (aiFileStatus) {
                 const st = document.createElement("span"); st.className = "ai-file-status" + (aiFileStatus.error ? " error" : ""); st.setAttribute("role", aiFileStatus.error ? "alert" : "status");
                 st.textContent = aiFileStatus.text; wrap.appendChild(st);
@@ -24805,8 +24820,8 @@ document.documentElement.classList.toggle(
                             additions.push({ name: file.name + ".txt", path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/") + ".txt", mimeType: "text/plain", content: res.text, size: file.size, note: res.pages + " pages, text extracted" });
                             continue;
                         }
-                        if (!AI_TEXT_FILE_EXTENSIONS.has(ext) && !/^(Dockerfile|Makefile)$/i.test(file.name)) throw new Error("Unsupported file type: " + file.name + ". Attach text, source-code, JSON, CSV, log, PDF or image files.");
-                        if (file.size > AI_MAX_TEXT_FILE_BYTES) throw new Error(file.name + " is larger than 2 MB. Split it into smaller files.");
+                        if (!AI_TEXT_FILE_EXTENSIONS.has(ext) && !/^(Dockerfile|Makefile)$/i.test(file.name) && !/\.env\.example$/i.test(file.name)) throw new Error("Unsupported file type: " + file.name + ". Attach text, source-code, JSON, CSV, log, PDF or image files.");
+                        if (file.size > AI_MAX_TEXT_FILE_BYTES) throw new Error(file.name + " is larger than " + aiFormatBytes(AI_MAX_TEXT_FILE_BYTES) + ". Split it into smaller files.");
                         const content = await file.text();
                         if (content.includes("\u0000")) throw new Error(file.name + " appears to be binary. Only text/code files are supported here.");
                         additions.push({ name: file.name, path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/"), mimeType: file.type || "text/plain", content, size: file.size });
@@ -24815,7 +24830,7 @@ document.documentElement.classList.toggle(
                 if (aiSelectedFiles.length + additions.length > AI_MAX_TEXT_FILES) { problems.push("Attach up to " + AI_MAX_TEXT_FILES + " files at a time; extra files were not added."); additions.length = Math.max(0, AI_MAX_TEXT_FILES - aiSelectedFiles.length); }
                 let total = aiSelectedFiles.reduce((sum, f) => sum + f.content.length, 0);
                 const accepted = [];
-                for (const f of additions) { if (total + f.content.length > AI_MAX_TEXT_TOTAL_CHARS) { problems.push(f.name + " was skipped: combined file text would exceed the 4 MB limit."); continue; } total += f.content.length; accepted.push(f); }
+                for (const f of additions) { if (total + f.content.length > AI_MAX_TEXT_TOTAL_CHARS) { problems.push(f.name + " was skipped: combined file text would exceed the configured combined-text limit."); continue; } total += f.content.length; accepted.push(f); }
                 aiSelectedFiles = aiSelectedFiles.concat(accepted);
                 // Keep a working copy for this chat so Atlas can inspect and revise
                 // the same project files over multiple turns in this page session.
@@ -24840,6 +24855,17 @@ document.documentElement.classList.toggle(
             const value = String(text || "").toLowerCase();
             return /\b(create|make|generate|write|edit|modify|update|debug|fix|review|explain|inspect|trace|analy[sz]e|refactor|build|send|export|download|attach|package)\b.{0,120}\b(file|files|code|script|project|app|component|function|bug|error|html|css|javascript|python|worker|repository|repo|calculator|website|landing page|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application|zip)\b/.test(value) ||
                 /\b(file|files|code|script|project|component|function|bug|error|calculator|website|landing page|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application|zip)\b.{0,90}\b(create|make|generate|write|edit|modify|update|debug|fix|review|explain|inspect|trace|analy[sz]e|refactor|send|export|download|attach|package)\b/.test(value);
+        }
+
+        // A file can be attached for explanation/review without asking Atlas to
+        // generate a replacement. Only actual output/edit requests use the JSON
+        // file-delivery contract; attached files are still included as context.
+        function aiIsFileDeliveryRequest(text, files) {
+            const value = String(text || "").toLowerCase();
+            const target = /\b(file|files|code|script|project|app|component|function|html|css|javascript|python|worker|repository|repo|website|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application)\b/.test(value);
+            const outputVerb = /\b(create|make|generate|write|edit|modify|update|fix|repair|refactor|build|save|send|export|download|package|produce|rewrite)\b/.test(value);
+            if (target && outputVerb) return true;
+            return Array.isArray(files) && files.length > 0 && /\b(debug|fix|repair|refactor|modify|edit|update|rewrite|improve|optimize|make|create|generate|write|build)\b/.test(value);
         }
 
         function aiInferFileOperation(text, files) {
@@ -24873,20 +24899,28 @@ document.documentElement.classList.toggle(
                 const first = text.indexOf("{"); const last = text.lastIndexOf("}");
                 if (first >= 0 && last > first) { try { value = JSON.parse(text.slice(first, last + 1)); } catch (_) {} }
             }
-            if (!value || typeof value !== "object" || Array.isArray(value) || typeof value.response !== "string" || !Array.isArray(value.files)) return null;
+            if (!value || typeof value !== "object" || Array.isArray(value) || !Array.isArray(value.files)) return null;
             const files = [];
-            for (const item of value.files) {
-                if (!item || typeof item.content !== "string" || typeof item.name !== "string" || !item.name.trim()) continue;
+            let totalChars = 0;
+            for (const item of value.files.slice(0, AI_MAX_TEXT_FILES)) {
+                if (!item || typeof item.content !== "string") continue;
+                const rawName = item.name || item.path || item.filename || item.fileName;
+                if (typeof rawName !== "string" || !rawName.trim()) continue;
+                const content = item.content;
+                totalChars += content.length;
+                if (content.length > AI_MAX_TEXT_TOTAL_CHARS || totalChars > AI_MAX_TEXT_TOTAL_CHARS) return null;
                 files.push({
-                    name: aiSafeRelativePath(item.path || item.name),
+                    name: aiSafeRelativePath(item.path || rawName),
                     action: item.action === "edit" ? "edit" : "create",
                     mimeType: String(item.mimeType || "text/plain;charset=utf-8").slice(0, 120),
                     explanation: String(item.explanation || "").slice(0, 1000),
                     chunkIndex: Number.isInteger(item.chunkIndex) ? item.chunkIndex : null,
-                    content: item.content
+                    content
                 });
             }
-            return { response: value.response.slice(0, 20000), files, notes: Array.isArray(value.notes) ? value.notes.map(x => String(x).slice(0, 1000)).slice(0, 20) : [] };
+            const response = value.response ?? value.message ?? value.summary ?? "";
+            if (typeof response !== "string") return null;
+            return { response: response.slice(0, 20000), files, notes: Array.isArray(value.notes) ? value.notes.map(x => String(x).slice(0, 1000)).slice(0, 20) : [] };
         }
 
         function aiZipCrc32(bytes) {
@@ -24969,7 +25003,7 @@ document.documentElement.classList.toggle(
                 const actions = document.createElement("span"); actions.className = "ai-file-actions";
                 const pv = document.createElement("button"); pv.type = "button"; pv.className = "ai-pv"; pv.textContent = "Preview"; pv.setAttribute("aria-expanded", "false");
                 const dl = document.createElement("button"); dl.type = "button"; dl.className = "ai-dl"; dl.textContent = "⬇ Download"; dl.setAttribute("aria-label", "Download " + base);
-                dl.addEventListener("click", () => { aiDownloadBlob(new Blob([file.content], { type: file.mimeType || "text/plain;charset=utf-8" }), base); });
+                dl.addEventListener("click", () => { aiDownloadBlob(new Blob([file.content], { type: file.mimeType || "text/plain;charset=utf-8" }), safeName.replace(/\//g, "__")); });
                 actions.append(pv, dl);
                 card.append(icon, info, actions); wrap.appendChild(card);
                 if (file.explanation) { const why = document.createElement("p"); why.textContent = file.explanation; wrap.appendChild(why); }
@@ -25686,6 +25720,7 @@ document.documentElement.classList.toggle(
                 case "rate": return "The provider usage allowance or rate limit was reached." + suffix;
                 case "network": return "A network error interrupted the AI request." + suffix;
                 case "context": return "The attached project exceeds this model's context window. Send a smaller set of files." + suffix;
+                case "invalid": return "Atlas could not produce a valid downloadable file package." + suffix;
                 case "timeout": return "The AI request timed out. Try again with a smaller task." + suffix;
                 case "provider": return (provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini") + " could not complete the request." + suffix;
                 default: return (provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini") + " request failed." + suffix;
@@ -25736,6 +25771,9 @@ document.documentElement.classList.toggle(
 
             const effectiveMessage =
                 message || (pendingImage ? AI_DEFAULT_IMAGE_PROMPT : (pendingFiles.length ? "Please inspect the attached files." : ""));
+            const activeProjectFiles = isAtlas ? aiGetActiveProjectFiles().slice() : [];
+            const allProjectFiles = Array.from(new Map(activeProjectFiles.concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
+            const fileDeliveryRequested = isAtlas && aiIsFileDeliveryRequest(effectiveMessage, allProjectFiles);
 
             aiShowWelcome(false);
             const userEl = aiAppendUserMessage(message || (pendingFiles.length ? "Attached " + pendingFiles.length + " file(s)" : ""), pendingImage ? pendingImage.previewUrl : null);
@@ -25921,22 +25959,25 @@ document.documentElement.classList.toggle(
                     };
                 }
 
-                const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
-                if (fileWorkRequested) requestBody.max_tokens = Math.max(Number(requestBody.max_tokens) || 0, 12288);
+                if (fileDeliveryRequested) requestBody.max_tokens = Math.max(Number(requestBody.max_tokens) || 0, 12288);
                 if (isAtlas) {
-                    if (fileWorkRequested) {
-                        requestBody.fileWork = true;
-                        const projectFiles = Array.from(new Map(aiGetActiveProjectFiles().concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
-                        let fileContext = "\n\nATLAS WORKSPACE FILES (read-only originals supplied for analysis; return complete replacements as specified in FILE WORK OUTPUT CONTRACT):\n";
-                        let remaining = Math.max(0, 22000 - String(requestBody.message || "").length - fileContext.length);
-                        for (const file of projectFiles) {
+                    requestBody.fileWork = fileDeliveryRequested;
+                    if (allProjectFiles.length) {
+                        let fileContext = "\n\nATLAS WORKSPACE FILES (read-only originals; inspect only the content actually included below):\n";
+                        let remaining = Math.max(0, 76000 - String(requestBody.message || "").length - fileContext.length);
+                        const omitted = [];
+                        for (const file of allProjectFiles) {
                             const path = aiSafeRelativePath(file.path || file.name);
                             const content = String(file.content || "");
-                            const block = "\n--- FILE: " + path + " ---\n" + content.slice(0, remaining);
-                            if (remaining <= 0) break;
+                            const header = "\n--- FILE: " + path + " (" + content.length + " characters) ---\n";
+                            if (remaining <= header.length + 80) { omitted.push(path); continue; }
+                            const take = Math.min(content.length, remaining - header.length - 80);
+                            const truncated = take < content.length;
+                            const block = header + content.slice(0, take) + (truncated ? "\n[FILE CONTENT TRUNCATED: " + (content.length - take) + " characters were not sent.]\n" : "\n");
                             fileContext += block; remaining -= block.length;
+                            if (truncated) omitted.push(path + " (partial; " + (content.length - take) + " characters omitted)");
                         }
-                        if (projectFiles.length && remaining <= 0) fileContext += "\n[Additional file content omitted to stay within the Worker request limit.]";
+                        if (omitted.length) fileContext += "\nFILES NOT FULLY INCLUDED — DO NOT CLAIM TO HAVE REVIEWED THEM: " + omitted.join(", ");
                         requestBody.message = String(requestBody.message || "") + fileContext;
                     }
                     const nvidiaResponse = await nvidiaAdapter.sendMessage(requestBody, signal);
@@ -26065,7 +26106,7 @@ document.documentElement.classList.toggle(
             // Convert Atlas' structured file response into a normal explanation plus
             // downloadable file cards. The originals remain untouched until the user
             // downloads/replaces them locally.
-            if (isAtlas && !streamError && !aiStreamCancelled && sawDone && assistantText.trim()) {
+            if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone) {
                 const structured = aiParseStructuredFileResult(assistantText);
                 if (structured && structured.files.length) {
                     generatedFiles = structured.files;
@@ -26073,8 +26114,20 @@ document.documentElement.classList.toggle(
                     if (messageEl) {
                         messageEl.setAttribute("data-ai-raw", assistantText);
                         messageEl.innerHTML = aiRenderMarkdown(assistantText);
-                    aiTypesetMath(messageEl);
+                        aiTypesetMath(messageEl);
                     }
+                } else {
+                    streamError = { kind: "invalid", status: 502, code: "ATLAS_FILE_OUTPUT_INVALID", message: "Atlas was asked to deliver downloadable files, but NVIDIA returned an incomplete or invalid file package. No downloadable files were created. Try a smaller set of files or ask Atlas to generate the project in smaller parts.", provider: "nvidia" };
+                    assistantText = "";
+                    sawAnyContent = false;
+                    if (messageEl) { messageEl.remove(); messageEl = null; }
+                }
+            } else if (isAtlas && !fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone && assistantText.trim()) {
+                // Analysis-only requests with attachments remain ordinary chat; do not force JSON parsing.
+                const structured = aiParseStructuredFileResult(assistantText);
+                if (structured && structured.files.length) {
+                    generatedFiles = structured.files;
+                    assistantText = structured.response || "I prepared the requested project files.";
                 }
             }
 
@@ -26131,6 +26184,7 @@ document.documentElement.classList.toggle(
                         const merged = new Map(prior.map(f => [aiSafeRelativePath(f.path || f.name), f]));
                         generatedFiles.forEach(f => merged.set(aiSafeRelativePath(f.name), { name: f.name.split("/").pop(), path: aiSafeRelativePath(f.name), mimeType: f.mimeType, content: f.content, size: aiByteLength(f.content), note: "Generated by Atlas" }));
                         aiProjectFileContexts.set(aiCurrentChatId, Array.from(merged.values()));
+                        aiRenderFilePreview();
                     }
                 }
 
