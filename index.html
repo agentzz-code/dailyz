@@ -6061,6 +6061,35 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+
+<style id="horizon-library-page">
+    #library .horizon-library-empty {
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 34px 24px;
+        border: 1px solid var(--border-color, rgba(128,128,128,.18));
+        background: var(--card-bg, rgba(255,255,255,.88));
+    }
+    #library .horizon-library-empty-icon {
+        width: 58px;
+        height: 58px;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        margin-bottom: 14px;
+        font-size: 29px;
+        color: var(--accent, #6478f7);
+        background: var(--surface-bg, rgba(128,128,128,.1));
+    }
+    #library .horizon-library-empty h2 { margin: 0 0 8px; font-size: 19px; }
+    #library .horizon-library-empty p { max-width: 480px; margin: 0; color: var(--muted-color, #777); line-height: 1.6; }
+</style>
+
+\n\n<!-- Apple-inspired Liquid Glass treatment for Horizon's EXISTING navigation.\n     The app is a standalone HTML/CSS/JS app (not React), so this recreates the\n     Glisse visual language without importing its React component package. -->\n<style id="horizon-liquid-glass-navigation-v1">\n#primaryNavigation {\n  --glass-edge: rgba(255,255,255,.58);\n  --glass-surface: rgba(246,249,255,.58);\n  --glass-highlight: rgba(255,255,255,.72);\n  isolation: isolate;\n  background: var(--glass-surface) !important;\n  border: 1px solid var(--glass-edge) !important;\n  -webkit-backdrop-filter: blur(34px) saturate(190%) contrast(1.04);\n  backdrop-filter: blur(34px) saturate(190%) contrast(1.04);\n  box-shadow: 0 18px 48px rgba(24,35,58,.14),\n              inset 0 1px 0 rgba(255,255,255,.82),\n              inset 0 -1px 0 rgba(255,255,255,.18) !important;\n  position: fixed;\n}\n#primaryNavigation::after {\n  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;\n  border-radius:inherit; opacity:.8;\n  background: linear-gradient(145deg, rgba(255,255,255,.42), transparent 34%, rgba(255,255,255,.08) 68%, rgba(255,255,255,.2));\n}\n#primaryNavigation .tab {\n  position:relative; isolation:isolate;\n  transition: color .22s ease, transform .22s cubic-bezier(.2,.8,.2,1);\n}\n#primaryNavigation .tab:active { transform:scale(.965); }\n#primaryNavigation .tab.active {\n  color:var(--accent, #477be8) !important;\n  background:rgba(255,255,255,.38) !important;\n  border:1px solid rgba(255,255,255,.58);\n  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),\n             0 4px 14px rgba(30,45,75,.09) !important;\n}\n#primaryNavigation .tab.active::before {\n  content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit;\n  background:linear-gradient(135deg,rgba(255,255,255,.42),rgba(255,255,255,.08));\n  pointer-events:none;\n}\n.dark #primaryNavigation {\n  --glass-edge:rgba(255,255,255,.2);\n  --glass-surface:rgba(27,30,39,.68);\n  background:var(--glass-surface) !important;\n  border-color:var(--glass-edge) !important;\n  box-shadow:0 18px 48px rgba(0,0,0,.34),\n             inset 0 1px 0 rgba(255,255,255,.18),\n             inset 0 -1px 0 rgba(255,255,255,.06) !important;\n}\n.dark #primaryNavigation .tab.active {\n  background:rgba(255,255,255,.14) !important;\n  border-color:rgba(255,255,255,.24);\n  box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 14px rgba(0,0,0,.18) !important;\n}\n@media(max-width:760px) {\n  #primaryNavigation {\n    background:rgba(241,245,255,.56) !important;\n    border-radius:28px !important;\n    -webkit-backdrop-filter:blur(38px) saturate(205%) contrast(1.06);\n    backdrop-filter:blur(38px) saturate(205%) contrast(1.06);\n    box-shadow:0 12px 38px rgba(18,30,55,.2),\n               inset 0 1px 0 rgba(255,255,255,.88),\n               inset 0 -1px 0 rgba(255,255,255,.22) !important;\n  }\n  #primaryNavigation .tab.active {\n    background:rgba(255,255,255,.48) !important;\n    border:1px solid rgba(255,255,255,.7);\n    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),\n               0 3px 12px rgba(35,50,80,.12) !important;\n  }\n  .dark #primaryNavigation { background:rgba(25,28,37,.66) !important; }\n  .dark #primaryNavigation .tab.active {\n    background:rgba(255,255,255,.16) !important;\n    border-color:rgba(255,255,255,.23);\n  }\n}\n@media(prefers-reduced-motion:reduce) {\n  #primaryNavigation .tab { transition:none !important; }\n}\n</style>\n
 </head>
 
 <body>
