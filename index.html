@@ -23394,7 +23394,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-glm-optimized-v17";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-files-v18";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24766,6 +24766,13 @@ document.documentElement.classList.toggle(
                 const accepted = [];
                 for (const f of additions) { if (total + f.content.length > AI_MAX_TEXT_TOTAL_CHARS) { problems.push(f.name + " was skipped: combined file text would exceed the 4 MB limit."); continue; } total += f.content.length; accepted.push(f); }
                 aiSelectedFiles = aiSelectedFiles.concat(accepted);
+                // Keep a working copy for this chat so Atlas can inspect and revise
+                // the same project files over multiple turns in this page session.
+                if (accepted.length && aiCurrentChatId) {
+                    const prior = aiGetActiveProjectFiles();
+                    const merged = new Map(prior.concat(accepted).map(f => [aiSafeRelativePath(f.path || f.name), f]));
+                    aiProjectFileContexts.set(aiCurrentChatId, Array.from(merged.values()));
+                }
             } finally {
                 aiFileStatus = null; aiRenderFilePreview();
             }
@@ -25824,7 +25831,7 @@ document.documentElement.classList.toggle(
                 }
                 const responseLanguage = aiResponseLanguageInstruction();
                 const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
-                const atlasRule = "You are Atlas, a coding and technical assistant. You can inspect files explicitly attached to this request and return complete replacement/new files for download. You cannot access the user's disk beyond attached files, execute commands, run tests, or deploy. Never claim to have run or tested code.";
+                const atlasRule = "You are Atlas, a coding and technical assistant with a browser-based project workspace. You can read files the user selects or drops into the chat, inspect images and extractable PDF text, retain selected/generated text files as working context for this chat session, create new files, and produce complete edited replacement files for download. You cannot silently browse the user's disk, modify local originals in place, access unselected folders, execute commands, run tests, or deploy. Never claim to have done those things.";
                 const ctx = aiBuildContext();
                 const memoryParts = isAtlas ? [aiSettings.memory] : [aiSettings.memory, aiBuildCrossChatContext()];
 
@@ -25865,8 +25872,11 @@ document.documentElement.classList.toggle(
                 const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
                 if (isAtlas) {
                     if (fileWorkRequested) {
+                        requestBody.aiConfig.rules = [requestBody.aiConfig.rules,
+                            "FILE WORK OUTPUT CONTRACT: You have been given selected project files. Inspect all relevant files and their relationships. When the user asks to create or edit files, return EXACTLY one valid JSON object and no markdown fences or surrounding text, with this schema: {\"response\":\"brief explanation\",\"files\":[{\"name\":\"relative/path.ext\",\"action\":\"create or edit\",\"mimeType\":\"text/plain;charset=utf-8\",\"explanation\":\"what changed\",\"content\":\"COMPLETE file contents\"}]}. Include complete replacement contents for every changed file, not diffs or snippets. For review/debug-only requests, return normal prose and do not invent files. Never claim files were written to disk; generated files are offered for user download. Preserve unrelated code and existing conventions. Do not include secrets in generated files." 
+                        ].filter(Boolean).join("\n\n");
                         const projectFiles = Array.from(new Map(aiGetActiveProjectFiles().concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
-                        let fileContext = "\n\nATLAS ATTACHED PROJECT FILES (read-only context; propose complete replacements in your answer):\n";
+                        let fileContext = "\n\nATLAS WORKSPACE FILES (read-only originals supplied for analysis; return complete replacements as specified in FILE WORK OUTPUT CONTRACT):\n";
                         let remaining = Math.max(0, 22000 - String(requestBody.message || "").length - fileContext.length);
                         for (const file of projectFiles) {
                             const path = aiSafeRelativePath(file.path || file.name);
@@ -26001,6 +26011,21 @@ document.documentElement.classList.toggle(
                 aiUpdateProviderUI();
             }
 
+            // Convert Atlas' structured file response into a normal explanation plus
+            // downloadable file cards. The originals remain untouched until the user
+            // downloads/replaces them locally.
+            if (isAtlas && !streamError && !aiStreamCancelled && sawDone && assistantText.trim()) {
+                const structured = aiParseStructuredFileResult(assistantText);
+                if (structured && structured.files.length) {
+                    generatedFiles = structured.files;
+                    assistantText = structured.response || "I prepared the requested project files.";
+                    if (messageEl) {
+                        messageEl.setAttribute("data-ai-raw", assistantText);
+                        messageEl.innerHTML = aiRenderMarkdown(assistantText);
+                    }
+                }
+            }
+
             const cancelled = aiStreamCancelled;
             const hasText = sawAnyContent && assistantText.trim().length > 0;
             const hasSources = collectedSources.length > 0;
@@ -26046,7 +26071,15 @@ document.documentElement.classList.toggle(
                     anchor = note;
                 }
                 if (hasText && anchor && !streamError) aiAppendMessageActions(anchor, assistantText);
-                if (generatedFiles.length && anchor && !streamError && !cancelled && sawDone) aiRenderGeneratedFiles(generatedFiles, anchor);
+                if (generatedFiles.length && anchor && !streamError && !cancelled && sawDone) {
+                    aiRenderGeneratedFiles(generatedFiles, anchor);
+                    if (aiCurrentChatId) {
+                        const prior = aiGetActiveProjectFiles();
+                        const merged = new Map(prior.map(f => [aiSafeRelativePath(f.path || f.name), f]));
+                        generatedFiles.forEach(f => merged.set(aiSafeRelativePath(f.name), { name: f.name.split("/").pop(), path: aiSafeRelativePath(f.name), mimeType: f.mimeType, content: f.content, size: aiByteLength(f.content), note: "Generated by Atlas" }));
+                        aiProjectFileContexts.set(aiCurrentChatId, Array.from(merged.values()));
+                    }
+                }
 
                 /* Copilot task proposals exist only in Horizon, and only for complete replies. */
                 if (!isAtlas && hasText && !cancelled && !streamError && !interrupted) {
