@@ -23408,7 +23408,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-math-rendering-v22";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-file-delivery-v24";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24838,8 +24838,8 @@ document.documentElement.classList.toggle(
 
         function aiIsFileWorkRequest(text) {
             const value = String(text || "").toLowerCase();
-            return /\b(create|make|generate|write|edit|modify|update|debug|fix|review|explain|inspect|trace|analy[sz]e|refactor|build)\b.{0,100}\b(file|code|script|project|app|component|function|bug|error|html|css|javascript|python|worker|repository|repo|calculator|website|landing page|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application)\b/.test(value) ||
-                /\b(file|code|script|project|component|function|bug|error|calculator|website|landing page|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application)\b.{0,70}\b(create|make|generate|write|edit|modify|update|debug|fix|review|explain|inspect|trace|analy[sz]e|refactor)\b/.test(value);
+            return /\b(create|make|generate|write|edit|modify|update|debug|fix|review|explain|inspect|trace|analy[sz]e|refactor|build|send|export|download|attach|package)\b.{0,120}\b(file|files|code|script|project|app|component|function|bug|error|html|css|javascript|python|worker|repository|repo|calculator|website|landing page|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application|zip)\b/.test(value) ||
+                /\b(file|files|code|script|project|component|function|bug|error|calculator|website|landing page|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application|zip)\b.{0,90}\b(create|make|generate|write|edit|modify|update|debug|fix|review|explain|inspect|trace|analy[sz]e|refactor|send|export|download|attach|package)\b/.test(value);
         }
 
         function aiInferFileOperation(text, files) {
@@ -25922,11 +25922,10 @@ document.documentElement.classList.toggle(
                 }
 
                 const fileWorkRequested = isAtlas && (pendingFiles.length > 0 || aiGetActiveProjectFiles().length > 0 || (!pendingImage && aiIsFileWorkRequest(effectiveMessage)));
+                if (fileWorkRequested) requestBody.max_tokens = Math.max(Number(requestBody.max_tokens) || 0, 12288);
                 if (isAtlas) {
                     if (fileWorkRequested) {
-                        requestBody.aiConfig.rules = [requestBody.aiConfig.rules,
-                            "FILE WORK OUTPUT CONTRACT: You have been given selected project files. Inspect all relevant files and their relationships. When the user asks to create or edit files, return EXACTLY one valid JSON object and no markdown fences or surrounding text, with this schema: {\"response\":\"brief explanation\",\"files\":[{\"name\":\"relative/path.ext\",\"action\":\"create or edit\",\"mimeType\":\"text/plain;charset=utf-8\",\"explanation\":\"what changed\",\"content\":\"COMPLETE file contents\"}]}. Include complete replacement contents for every changed file, not diffs or snippets. For review/debug-only requests, return normal prose and do not invent files. Never claim files were written to disk; generated files are offered for user download. Preserve unrelated code and existing conventions. Do not include secrets in generated files." 
-                        ].filter(Boolean).join("\n\n");
+                        requestBody.fileWork = true;
                         const projectFiles = Array.from(new Map(aiGetActiveProjectFiles().concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
                         let fileContext = "\n\nATLAS WORKSPACE FILES (read-only originals supplied for analysis; return complete replacements as specified in FILE WORK OUTPUT CONTRACT):\n";
                         let remaining = Math.max(0, 22000 - String(requestBody.message || "").length - fileContext.length);
