@@ -23408,7 +23408,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-file-markers-v26";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v27";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -26000,18 +26000,27 @@ document.documentElement.classList.toggle(
                     requestBody.fileWork = fileDeliveryRequested;
                     if (allProjectFiles.length) {
                         let fileContext = "\n\nATLAS WORKSPACE FILES (read-only originals; inspect only the content actually included below):\n";
-                        let remaining = Math.max(0, 76000 - String(requestBody.message || "").length - fileContext.length);
+                        // Keep a practical prompt budget while making multi-file project work less lossy.
+                        // The Worker accepts up to 220k characters for Atlas; leave room for the user request and protocol.
+                        let remaining = Math.max(0, Math.min(180000, 210000 - String(requestBody.message || "").length - fileContext.length));
                         const omitted = [];
+                        const manifest = allProjectFiles.map(file => {
+                            const path = aiSafeRelativePath(file.path || file.name);
+                            return path + " (" + String(file.content || "").length + " chars)";
+                        });
+                        fileContext += "PROJECT FILE MANIFEST (presence does not mean contents were included):\n" + manifest.join("\n") + "\n";
+                        remaining -= Math.min(remaining, manifest.join("\n").length + 60);
                         for (const file of allProjectFiles) {
                             const path = aiSafeRelativePath(file.path || file.name);
                             const content = String(file.content || "");
                             const header = "\n--- FILE: " + path + " (" + content.length + " characters) ---\n";
-                            if (remaining <= header.length + 80) { omitted.push(path); continue; }
-                            const take = Math.min(content.length, remaining - header.length - 80);
+                            if (remaining <= header.length + 160) { omitted.push(path + " (not included)"); continue; }
+                            // Never silently pretend a truncated file is complete. Mark every partial file explicitly.
+                            const take = Math.min(content.length, remaining - header.length - 120);
                             const truncated = take < content.length;
-                            const block = header + content.slice(0, take) + (truncated ? "\n[FILE CONTENT TRUNCATED: " + (content.length - take) + " characters were not sent.]\n" : "\n");
+                            const block = header + content.slice(0, take) + (truncated ? "\n[FILE CONTENT TRUNCATED: " + (content.length - take) + " characters were not sent. Treat this file as incomplete and ask for the missing sections before making risky edits.]\n" : "\n");
                             fileContext += block; remaining -= block.length;
-                            if (truncated) omitted.push(path + " (partial; " + (content.length - take) + " characters omitted)");
+                            if (truncated) omitted.push(path + " (partial; " + (content.length - take) + " chars omitted)");
                         }
                         if (omitted.length) fileContext += "\nFILES NOT FULLY INCLUDED — DO NOT CLAIM TO HAVE REVIEWED THEM: " + omitted.join(", ");
                         requestBody.message = String(requestBody.message || "") + fileContext;
