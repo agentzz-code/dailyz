@@ -23408,7 +23408,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-workspace-v25";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-file-markers-v26";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24893,7 +24893,43 @@ document.documentElement.classList.toggle(
 
         function aiParseStructuredFileResult(raw) {
             let text = String(raw || "").trim();
-            text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+
+            // Preferred V26 protocol: raw file bodies between explicit markers.
+            // Unlike JSON strings, source code does not need newline/quote/backslash
+            // escaping, so a single quote in HTML/JS cannot invalidate the package.
+            const markerPattern = /<<<ATLAS_FILE name="([^"\r\n]+)" action="(create|edit)"(?: mime="([^"\r\n]+)")?>>>\r?\n([\s\S]*?)<<<END_ATLAS_FILE>>>/g;
+            const markerFiles = [];
+            let markerMatch;
+            let markerChars = 0;
+            while ((markerMatch = markerPattern.exec(text)) !== null && markerFiles.length < AI_MAX_TEXT_FILES) {
+                const name = aiSafeRelativePath(markerMatch[1]);
+                const content = markerMatch[4];
+                markerChars += content.length;
+                if (!name || content.length > AI_MAX_TEXT_TOTAL_CHARS || markerChars > AI_MAX_TEXT_TOTAL_CHARS) return null;
+                const ext = name.split(".").pop().toLowerCase();
+                const inferredMime = ({
+                    html: "text/html;charset=utf-8", htm: "text/html;charset=utf-8",
+                    css: "text/css;charset=utf-8", js: "text/javascript;charset=utf-8",
+                    mjs: "text/javascript;charset=utf-8", ts: "text/plain;charset=utf-8",
+                    json: "application/json;charset=utf-8", md: "text/markdown;charset=utf-8",
+                    txt: "text/plain;charset=utf-8", py: "text/x-python;charset=utf-8",
+                    xml: "application/xml;charset=utf-8", svg: "image/svg+xml"
+                })[ext] || "text/plain;charset=utf-8";
+                markerFiles.push({
+                    name, action: markerMatch[2], mimeType: markerMatch[3] || inferredMime,
+                    explanation: "", chunkIndex: null, content
+                });
+            }
+            if (markerFiles.length) {
+                const firstMarker = text.indexOf("<<<ATLAS_FILE ");
+                let response = text.slice(0, firstMarker).trim();
+                response = response.replace(/^ATLAS_RESPONSE:\\s*/i, "");
+                response = response.replace(/^```(?:text)?\\s*/i, "").replace(/\\s*```$/, "").trim();
+                return { response: response.slice(0, 20000) || "I prepared the requested file.", files: markerFiles, notes: [] };
+            }
+
+            // Backward compatibility: accept the previous JSON file package format.
+            text = text.replace(/^```(?:json)?\\s*/i, "").replace(/\\s*```$/, "");
             let value = null;
             try { value = JSON.parse(text); } catch (_) {
                 const first = text.indexOf("{"); const last = text.lastIndexOf("}");
@@ -26117,10 +26153,11 @@ document.documentElement.classList.toggle(
                         aiTypesetMath(messageEl);
                     }
                 } else {
-                    streamError = { kind: "invalid", status: 502, code: "ATLAS_FILE_OUTPUT_INVALID", message: "Atlas was asked to deliver downloadable files, but NVIDIA returned an incomplete or invalid file package. No downloadable files were created. Try a smaller set of files or ask Atlas to generate the project in smaller parts.", provider: "nvidia" };
-                    assistantText = "";
-                    sawAnyContent = false;
-                    if (messageEl) { messageEl.remove(); messageEl = null; }
+                    streamError = { kind: "invalid", status: 502, code: "ATLAS_FILE_OUTPUT_INVALID", message: "Atlas returned a response, but it did not contain a complete file block in the required format. This can happen if the model ignores the file-output format or reaches its output limit. The response is preserved above for inspection; retry with one file at a time if needed.", provider: "nvidia" };
+                    // Preserve the model's raw response instead of deleting it. This
+                    // makes malformed/truncated output diagnosable and lets the user
+                    // copy useful code even when no download card can be created.
+                    if (!assistantText.trim()) assistantText = "Atlas did not return any file content. Try again with a smaller file or a different NVIDIA model.";
                 }
             } else if (isAtlas && !fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone && assistantText.trim()) {
                 // Analysis-only requests with attachments remain ordinary chat; do not force JSON parsing.
