@@ -23394,7 +23394,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-dynamic-v13";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-instant-v15";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25223,6 +25223,7 @@ document.documentElement.classList.toggle(
                 pricing: m.pricing && typeof m.pricing === "object" ? m.pricing : null,
                 status: String(m.status || (m.available === true ? "available" : "unavailable")),
                 verifiedWorking: m.verifiedWorking === true,
+                selectable: m.selectable === true || (m.available === true && m.verifiedWorking === true),
                 verifiedAt: typeof m.verifiedAt === "string" ? m.verifiedAt : "",
                 probeError: typeof m.probeError === "string" ? m.probeError : ""
             };
@@ -25336,7 +25337,7 @@ document.documentElement.classList.toggle(
                     aiModelCatalog.lastRefreshAt = aiModelCatalog.at;
                     const prefKey = requestMode === "atlas" ? "atlasModel" : "model";
                     const saved = String(aiSettings[prefKey] || "auto").replace(/^nvidia::/, "");
-                    if (saved !== "auto" && !aiModelCatalog.models.some(m => m.id === saved && m.available === true && m.verifiedWorking === true)) {
+                    if (saved !== "auto" && !aiModelCatalog.models.some(m => m.id === saved && m.available === true && (m.selectable === true || m.verifiedWorking === true))) {
                         aiSettings[prefKey] = "auto";
                         aiPersistSettings();
                     }
@@ -25443,12 +25444,12 @@ document.documentElement.classList.toggle(
                 items.forEach(m => {
                     const o = document.createElement("option");
                     o.value = m.id;
-                    const status = m.available === true && m.verifiedWorking === true
+                    const status = m.verifiedWorking === true
                         ? "Verified working"
-                        : (m.status === "failed" ? "Probe failed" : "Not tested yet");
+                        : (m.selectable === true ? "Ready · checked on send" : (m.status === "failed" ? "Probe failed" : "Not tested yet"));
                     const context = aiFormatContext(m.contextLength);
                     o.textContent = m.name + " · " + status + (context ? " · " + context : "");
-                    o.disabled = !(m.available === true && m.verifiedWorking === true);
+                    o.disabled = !(m.available === true && (m.selectable === true || m.verifiedWorking === true));
                     o.title = [
                         m.provider,
                         aiT("modelIdLabel") + ": " + m.id.replace(/^nvidia::/, ""),
@@ -25475,7 +25476,7 @@ document.documentElement.classList.toggle(
             if (!m) { meta.textContent = chosen === "auto" ? (aiT("modelAuto") + " · " + (aiModelCatalog.provider || "AI providers")) : aiT("availabilityUnknown"); return; }
             meta.textContent = [
                 m.provider,
-                m.available === true && m.verifiedWorking === true ? "Verified working" : (m.status === "failed" ? "Probe failed — not selectable" : "Not tested — not selectable"),
+                m.verifiedWorking === true ? "Verified working" : (m.selectable === true ? "Ready · availability checked on send" : (m.status === "failed" ? "Probe failed — not selectable" : "Not tested — not selectable")),
                 m.probeError || "",
                 aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " " + aiT("modelContextLabel") : "",
                 m.capabilities.length ? m.capabilities.join(", ") : ""
@@ -25818,8 +25819,8 @@ document.documentElement.classList.toggle(
             }
 
             try {
-                if (!aiModelCatalog.loaded || aiModelCatalog.mode !== mode || !aiModelCatalog.models.some(m => m && m.available === true && m.verifiedWorking === true)) {
-                    throw new Error(aiModelCatalog.lastError || ("No verified working " + (isAtlas ? "NVIDIA" : "Gemini") + " chat model is available. Refresh the model list and check the matching Worker/API secret. No chat request was sent."));
+                if (!aiModelCatalog.loaded || aiModelCatalog.mode !== mode || !aiModelCatalog.models.some(m => m && m.available === true && (m.selectable === true || m.verifiedWorking === true))) {
+                    throw new Error(aiModelCatalog.lastError || ("No selectable " + (isAtlas ? "NVIDIA" : "Gemini") + " chat model is available. Refresh the model list and check the matching Worker/API secret. No chat request was sent."));
                 }
                 const responseLanguage = aiResponseLanguageInstruction();
                 const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
