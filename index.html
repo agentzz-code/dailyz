@@ -8200,7 +8200,8 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
-            onAuthStateChanged
+            onAuthStateChanged,
+            getIdToken
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
         import {
@@ -8249,6 +8250,22 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         const auth =
             getAuth(app);
+
+        // Shared, read-only bridge for the separate AI UI script. Always use
+        // this existing Firebase Auth instance and force-refresh the ID token
+        // for every protected Atlas request. Never expose or log the token.
+        window.__horizonGetFirebaseIdToken = async function () {
+            if (typeof auth.authStateReady === "function") {
+                await auth.authStateReady();
+            }
+            const user = auth.currentUser;
+            if (!user) {
+                const error = new Error("Sign in to your Horizon account to use Atlas AI.");
+                error.code = "AUTH_REQUIRED";
+                throw error;
+            }
+            return await getIdToken(user, true);
+        };
 
         try {
 
@@ -25348,6 +25365,17 @@ document.documentElement.classList.toggle(
         }
 
         /* ---------- unified provider adapter layer ---------- */
+        async function aiAtlasAuthorizationHeaders() {
+            if (typeof window.__horizonGetFirebaseIdToken !== "function") {
+                throw new Error("Horizon Firebase authentication is still initializing. Wait a moment and try again.");
+            }
+            const token = await window.__horizonGetFirebaseIdToken();
+            if (typeof token !== "string" || !token.trim()) {
+                throw new Error("Sign in to your Horizon account to use Atlas AI.");
+            }
+            return { "Authorization": "Bearer " + token };
+        }
+
         function aiProviderFromModel(modelId) {
             // Provider is determined by the active mode, never by a legacy model prefix.
             return aiSyncSelectedProvider();
@@ -25393,7 +25421,8 @@ document.documentElement.classList.toggle(
             // A legacy Worker may ignore ?mode= and return its old Claude/APInex catalogue.
             // Require the dynamic-catalogue contract; block legacy Claude/APInex catalogues.
             const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
-            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== "provider-api" || data.workerVersion !== AI_EXPECTED_WORKER_VERSION) {
+            const expectedCatalogueSource = expectedMode === "atlas" ? "explicit-allowlist" : "provider-api";
+            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== expectedCatalogueSource || data.workerVersion !== AI_EXPECTED_WORKER_VERSION) {
                 throw new Error("Worker version mismatch. This page requires " + AI_EXPECTED_WORKER_VERSION + ", but the deployed Worker returned " + String(data.workerVersion || "an older/unknown version") + ". Deploy the matching Worker version before sending messages.");
             }
             const normalized = data.models
@@ -25424,7 +25453,8 @@ document.documentElement.classList.toggle(
 
         const nvidiaAdapter = {
             async getModels() {
-                const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store", signal: AbortSignal.timeout(150000) });
+                const authHeaders = await aiAtlasAuthorizationHeaders();
+                const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json", ...authHeaders }, cache: "no-store", signal: AbortSignal.timeout(150000) });
                 let data = null; try { data = await res.json(); } catch (_) {}
                 if (!res.ok) {
                     const err = new Error((data && (data.message || data.error)) || "NVIDIA model catalogue unavailable (HTTP " + res.status + ").");
@@ -25434,7 +25464,8 @@ document.documentElement.classList.toggle(
                 return { models, usage: String(data.costPolicy || "Live NVIDIA provider catalogue") + (data.probeSummary ? " · Live chat checks: " + data.probeSummary.working + "/" + data.probeSummary.tested : ""), status: "configured", defaultModel: data.defaultModel || "auto", message: data.message || null };
             },
             async sendMessage(requestBody, signal) {
-                return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream" }, body: JSON.stringify({ ...requestBody, mode: "atlas" }), signal });
+                const authHeaders = await aiAtlasAuthorizationHeaders();
+                return fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "text/event-stream", ...authHeaders }, body: JSON.stringify({ ...requestBody, mode: "atlas" }), signal });
             }
         };
 
