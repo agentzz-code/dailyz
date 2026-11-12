@@ -24909,7 +24909,7 @@ document.documentElement.classList.toggle(
         function aiIsFileDeliveryRequest(text, files) {
             const value = String(text || "").toLowerCase();
             const target = /\b(file|files|code|script|project|app|component|function|html|css|javascript|python|worker|repository|repo|website|page|site|dashboard|tool|game|bot|frontend|backend|ui|interface|application)\b/.test(value);
-            const outputVerb = /\b(create|make|generate|write|edit|modify|update|fix|repair|refactor|build|save|send|export|download|package|produce|rewrite)\b/.test(value);
+            const outputVerb = /\b(create|make|generate|write|edit|modify|update|fix|debug|repair|refactor|build|save|send|export|download|package|produce|rewrite)\b/.test(value);
             if (target && outputVerb) return true;
             return Array.isArray(files) && files.length > 0 && /\b(debug|fix|repair|refactor|modify|edit|update|rewrite|improve|optimize|make|create|generate|write|build)\b/.test(value);
         }
@@ -24937,74 +24937,175 @@ document.documentElement.classList.toggle(
             try { return JSON.parse('"' + encoded + '"'); } catch (_) { return ""; }
         }
 
-        function aiParseStructuredFileResult(raw) {
-            let text = String(raw || "").trim();
+        function aiParseStructuredFileResult(raw, requestText = "") {
+            const original = String(raw || "");
+            let text = original.replace(/\r\n?/g, "\n").trim();
+            if (!text) return null;
 
-            // Preferred V26 protocol: raw file bodies between explicit markers.
-            // Unlike JSON strings, source code does not need newline/quote/backslash
-            // escaping, so a single quote in HTML/JS cannot invalidate the package.
-            const markerPattern = /<<<ATLAS_FILE name="([^"\r\n]+)" action="(create|edit)"(?: mime="([^"\r\n]+)")?>>>\r?\n([\s\S]*?)<<<END_ATLAS_FILE>>>/g;
-            const markerFiles = [];
-            let markerMatch;
-            let markerChars = 0;
-            while ((markerMatch = markerPattern.exec(text)) !== null && markerFiles.length < AI_MAX_TEXT_FILES) {
-                const name = aiSafeRelativePath(markerMatch[1]);
-                const content = markerMatch[4];
-                markerChars += content.length;
-                if (!name || content.length > AI_MAX_TEXT_TOTAL_CHARS || markerChars > AI_MAX_TEXT_TOTAL_CHARS) return null;
-                const ext = name.split(".").pop().toLowerCase();
-                const inferredMime = ({
+            const mimeFor = (name) => {
+                const ext = String(name).split(".").pop().toLowerCase();
+                return ({
                     html: "text/html;charset=utf-8", htm: "text/html;charset=utf-8",
                     css: "text/css;charset=utf-8", js: "text/javascript;charset=utf-8",
-                    mjs: "text/javascript;charset=utf-8", ts: "text/plain;charset=utf-8",
-                    json: "application/json;charset=utf-8", md: "text/markdown;charset=utf-8",
-                    txt: "text/plain;charset=utf-8", py: "text/x-python;charset=utf-8",
-                    xml: "application/xml;charset=utf-8", svg: "image/svg+xml"
+                    mjs: "text/javascript;charset=utf-8", cjs: "text/javascript;charset=utf-8",
+                    ts: "text/plain;charset=utf-8", tsx: "text/plain;charset=utf-8",
+                    jsx: "text/plain;charset=utf-8", json: "application/json;charset=utf-8",
+                    md: "text/markdown;charset=utf-8", txt: "text/plain;charset=utf-8",
+                    py: "text/x-python;charset=utf-8", xml: "application/xml;charset=utf-8",
+                    svg: "image/svg+xml", csv: "text/csv;charset=utf-8",
+                    yml: "text/yaml;charset=utf-8", yaml: "text/yaml;charset=utf-8"
                 })[ext] || "text/plain;charset=utf-8";
-                markerFiles.push({
-                    name, action: markerMatch[2], mimeType: markerMatch[3] || inferredMime,
-                    explanation: "", chunkIndex: null, content
-                });
+            };
+
+            // Parse marker lines independently instead of relying on one brittle
+            // multiline regex. This tolerates harmless escaping/attribute-order
+            // variations while preserving every byte of the file body.
+            const lines = text.split("\n");
+            const markerFiles = [];
+            let responseLines = [];
+            let active = null;
+            let markerSeen = false;
+            let markerChars = 0;
+            const normalizeMarkerLine = (line) => String(line)
+                .replace(/\\(?=<)/g, "")
+                .replace(/&lt;/gi, "<")
+                .replace(/&gt;/gi, ">");
+            const startLine = /^\s*<{3}\s*ATLAS_FILE\b(.*?)\s*>{3}\s*$/i;
+            const endLine = /^\s*<{3}\s*END_ATLAS_FILE\s*>{3}\s*$/i;
+
+            for (const line of lines) {
+                if (!active) {
+                    const markerLine = normalizeMarkerLine(line);
+                    const match = startLine.exec(markerLine);
+                    if (!match) {
+                        if (!markerSeen) responseLines.push(line);
+                        continue;
+                    }
+                    markerSeen = true;
+                    const attrs = match[1] || "";
+                    const getAttr = (key) => {
+                        const re = new RegExp("\\b" + key + "\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)')", "i");
+                        const found = re.exec(attrs);
+                        return found ? (found[1] ?? found[2] ?? "") : "";
+                    };
+                    const rawName = getAttr("name");
+                    const actionValue = getAttr("action").toLowerCase();
+                    const mime = getAttr("mime");
+                    if (!rawName.trim()) return null;
+                    active = {
+                        name: aiSafeRelativePath(rawName),
+                        action: actionValue === "edit" ? "edit" : "create",
+                        mimeType: mime.slice(0, 120) || mimeFor(rawName),
+                        contentLines: []
+                    };
+                    continue;
+                }
+
+                if (endLine.test(normalizeMarkerLine(line))) {
+                    const content = active.contentLines.join("\n");
+                    if (!content.trim()) return null;
+                    markerChars += content.length;
+                    if (markerFiles.length >= AI_MAX_TEXT_FILES ||
+                        content.length > AI_MAX_TEXT_TOTAL_CHARS ||
+                        markerChars > AI_MAX_TEXT_TOTAL_CHARS) return null;
+                    markerFiles.push({
+                        name: active.name,
+                        action: active.action,
+                        mimeType: active.mimeType,
+                        explanation: "",
+                        chunkIndex: null,
+                        content
+                    });
+                    active = null;
+                    continue;
+                }
+
+                // A nested start marker before an end marker means the previous
+                // file was truncated. Never package a partial file as complete.
+                if (startLine.test(normalizeMarkerLine(line))) return null;
+                active.contentLines.push(line);
             }
+
+            if (active) return null; // unmatched start marker: truncated package
             if (markerFiles.length) {
-                const firstMarker = text.indexOf("<<<ATLAS_FILE ");
-                let response = text.slice(0, firstMarker).trim();
-                response = response.replace(/^ATLAS_RESPONSE:\\s*/i, "");
-                response = response.replace(/^```(?:text)?\\s*/i, "").replace(/\\s*```$/, "").trim();
-                return { response: response.slice(0, 20000) || "I prepared the requested file.", files: markerFiles, notes: [] };
+                let response = responseLines.join("\n").trim();
+                response = response.replace(/^ATLAS_RESPONSE:\s*/i, "");
+                response = response.replace(/^```(?:text)?\s*/i, "").replace(/\s*```$/, "").trim();
+                return {
+                    response: response.slice(0, 20000) || "I prepared the requested file.",
+                    files: markerFiles,
+                    notes: []
+                };
             }
 
-            // Backward compatibility: accept the previous JSON file package format.
-            text = text.replace(/^```(?:json)?\\s*/i, "").replace(/\\s*```$/, "");
+            // Backward compatibility: accept the previous JSON package format.
+            let jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
             let value = null;
-            try { value = JSON.parse(text); } catch (_) {
-                const first = text.indexOf("{"); const last = text.lastIndexOf("}");
-                if (first >= 0 && last > first) { try { value = JSON.parse(text.slice(first, last + 1)); } catch (_) {} }
+            try { value = JSON.parse(jsonText); } catch (_) {
+                const first = jsonText.indexOf("{");
+                const last = jsonText.lastIndexOf("}");
+                if (first >= 0 && last > first) {
+                    try { value = JSON.parse(jsonText.slice(first, last + 1)); } catch (_) {}
+                }
             }
-            if (!value || typeof value !== "object" || Array.isArray(value) || !Array.isArray(value.files)) return null;
-            const files = [];
-            let totalChars = 0;
-            for (const item of value.files.slice(0, AI_MAX_TEXT_FILES)) {
-                if (!item || typeof item.content !== "string") continue;
-                const rawName = item.name || item.path || item.filename || item.fileName;
-                if (typeof rawName !== "string" || !rawName.trim()) continue;
-                const content = item.content;
-                totalChars += content.length;
-                if (content.length > AI_MAX_TEXT_TOTAL_CHARS || totalChars > AI_MAX_TEXT_TOTAL_CHARS) return null;
-                files.push({
-                    name: aiSafeRelativePath(item.path || rawName),
-                    action: item.action === "edit" ? "edit" : "create",
-                    mimeType: String(item.mimeType || "text/plain;charset=utf-8").slice(0, 120),
-                    explanation: String(item.explanation || "").slice(0, 1000),
-                    chunkIndex: Number.isInteger(item.chunkIndex) ? item.chunkIndex : null,
-                    content
-                });
+            if (value && typeof value === "object" && !Array.isArray(value) && Array.isArray(value.files)) {
+                const files = [];
+                let totalChars = 0;
+                for (const item of value.files.slice(0, AI_MAX_TEXT_FILES)) {
+                    if (!item || typeof item.content !== "string") continue;
+                    const rawName = item.name || item.path || item.filename || item.fileName;
+                    if (typeof rawName !== "string" || !rawName.trim()) continue;
+                    const content = item.content;
+                    totalChars += content.length;
+                    if (!content.trim() || content.length > AI_MAX_TEXT_TOTAL_CHARS || totalChars > AI_MAX_TEXT_TOTAL_CHARS) return null;
+                    files.push({
+                        name: aiSafeRelativePath(item.path || rawName),
+                        action: item.action === "edit" ? "edit" : "create",
+                        mimeType: String(item.mimeType || mimeFor(rawName)).slice(0, 120),
+                        explanation: String(item.explanation || "").slice(0, 1000),
+                        chunkIndex: Number.isInteger(item.chunkIndex) ? item.chunkIndex : null,
+                        content
+                    });
+                }
+                const response = value.response ?? value.message ?? value.summary ?? "";
+                if (files.length && typeof response === "string") {
+                    return { response: response.slice(0, 20000), files, notes: Array.isArray(value.notes) ? value.notes.map(x => String(x).slice(0, 1000)).slice(0, 20) : [] };
+                }
             }
-            const response = value.response ?? value.message ?? value.summary ?? "";
-            if (typeof response !== "string") return null;
-            return { response: response.slice(0, 20000), files, notes: Array.isArray(value.notes) ? value.notes.map(x => String(x).slice(0, 1000)).slice(0, 20) : [] };
-        }
 
+            // Recovery path for models that ignore the marker contract but return
+            // one complete fenced source file. Only used when the user explicitly
+            // requested file delivery; source text itself is never auto-unescaped.
+            const fence = /```([a-zA-Z0-9_+-]*)[ \t]*\n([\s\S]*?)\n```/g;
+            const fenced = [];
+            let fenceMatch;
+            while ((fenceMatch = fence.exec(text)) !== null) {
+                if (fenceMatch[2].trim()) fenced.push({ language: fenceMatch[1].toLowerCase(), content: fenceMatch[2], index: fenceMatch.index });
+            }
+            if (fenced.length === 1) {
+                const languageExt = {
+                    html: "html", htm: "html", css: "css", javascript: "js", js: "js",
+                    typescript: "ts", ts: "ts", python: "py", py: "py", json: "json",
+                    xml: "xml", svg: "svg", markdown: "md", md: "md", bash: "sh",
+                    sh: "sh", sql: "sql", yaml: "yml", yml: "yml", text: "txt", txt: "txt"
+                };
+                const ext = languageExt[fenced[0].language] || "txt";
+                const requested = String(requestText || "");
+                const filenameMatch = /(?:^|\s)([a-zA-Z0-9_.-]+\.[a-zA-Z0-9]{1,8})(?=$|[\s,;:)])/i.exec(requested);
+                const name = aiSafeRelativePath(filenameMatch ? filenameMatch[1] : ("generated-file." + ext));
+                const beforeFence = text.slice(0, fenced[0].index).trim();
+                const response = beforeFence.replace(/^ATLAS_RESPONSE:\s*/i, "").slice(0, 20000);
+                const content = fenced[0].content;
+                if (content.length && content.length <= AI_MAX_TEXT_TOTAL_CHARS) {
+                    return {
+                        response: response || "I prepared the requested file. The model omitted the explicit file markers, so I recovered its single complete code block.",
+                        files: [{ name, action: /\b(edit|modify|update|replace|fix)\b/i.test(requested) ? "edit" : "create", mimeType: mimeFor(name), explanation: "Recovered from one complete fenced code block; review before use.", chunkIndex: null, content }],
+                        notes: ["The model did not follow the structured marker protocol; one fenced code block was recovered."]
+                    };
+                }
+            }
+            return null;
+        }
         function aiZipCrc32(bytes) {
             let crc = -1;
             for (let i = 0; i < bytes.length; i++) {
@@ -26212,7 +26313,7 @@ document.documentElement.classList.toggle(
             // downloadable file cards. The originals remain untouched until the user
             // downloads/replaces them locally.
             if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone) {
-                const structured = aiParseStructuredFileResult(assistantText);
+                const structured = aiParseStructuredFileResult(assistantText, effectiveMessage);
                 if (structured && structured.files.length) {
                     generatedFiles = structured.files;
                     assistantText = structured.response || "I prepared the requested project files.";
@@ -26230,7 +26331,7 @@ document.documentElement.classList.toggle(
                 }
             } else if (isAtlas && !fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone && assistantText.trim()) {
                 // Analysis-only requests with attachments remain ordinary chat; do not force JSON parsing.
-                const structured = aiParseStructuredFileResult(assistantText);
+                const structured = aiParseStructuredFileResult(assistantText, effectiveMessage);
                 if (structured && structured.files.length) {
                     generatedFiles = structured.files;
                     assistantText = structured.response || "I prepared the requested project files.";
