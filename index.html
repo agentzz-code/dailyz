@@ -24967,11 +24967,16 @@ document.documentElement.classList.toggle(
             let markerSeen = false;
             let markerChars = 0;
             const normalizeMarkerLine = (line) => String(line)
+                // Some model/export paths escape the third opening bracket and
+                // append a Markdown line-continuation backslash to marker lines.
                 .replace(/\\(?=<)/g, "")
+                .replace(/\\\s*$/g, "")
                 .replace(/&lt;/gi, "<")
                 .replace(/&gt;/gi, ">");
-            const startLine = /^\s*<{3}\s*ATLAS_FILE\b(.*?)\s*>{3}\s*$/i;
-            const endLine = /^\s*<{3}\s*END_ATLAS_FILE\s*>{3}\s*$/i;
+            // Accept two or three closing brackets: some streamed/exported
+            // responses lose one trailing ">" from the opening marker.
+            const startLine = /^\s*<{3}\s*ATLAS_FILE\b(.*?)\s*>{2,3}\s*$/i;
+            const endLine = /^\s*<{3}\s*END_ATLAS_FILE\s*>{2,3}\s*$/i;
 
             for (const line of lines) {
                 if (!active) {
