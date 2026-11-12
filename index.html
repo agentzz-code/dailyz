@@ -23454,7 +23454,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v28";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v29";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25513,6 +25513,7 @@ document.documentElement.classList.toggle(
                 capabilities: aiNormCaps(m.capabilities),
                 pricing: m.pricing && typeof m.pricing === "object" ? m.pricing : null,
                 status: String(m.status || (m.available === true ? "available" : "unavailable")),
+                availabilityNote: typeof m.availabilityNote === "string" ? m.availabilityNote : "",
                 verifiedWorking: m.verifiedWorking === true,
                 selectable: m.selectable === true || (m.available === true && m.verifiedWorking === true),
                 verifiedAt: typeof m.verifiedAt === "string" ? m.verifiedAt : "",
@@ -25558,9 +25559,10 @@ document.documentElement.classList.toggle(
         };
 
         const nvidiaAdapter = {
-            async getModels() {
+            async getModels(verify = false) {
                 const authHeaders = await aiAtlasAuthorizationHeaders();
-                const res = await fetch(AI_NVIDIA_MODELS_URL, { method: "GET", headers: { "Accept": "application/json", ...authHeaders }, cache: "no-store", signal: AbortSignal.timeout(150000) });
+                const verifyQuery = verify ? "&verify=1" : "";
+                const res = await fetch(AI_NVIDIA_MODELS_URL + verifyQuery, { method: "GET", headers: { "Accept": "application/json", ...authHeaders }, cache: "no-store", signal: AbortSignal.timeout(150000) });
                 let data = null; try { data = await res.json(); } catch (_) {}
                 if (!res.ok) {
                     const err = new Error((data && (data.message || data.error)) || "NVIDIA model catalogue unavailable (HTTP " + res.status + ").");
@@ -25616,7 +25618,7 @@ document.documentElement.classList.toggle(
             const task = (async () => {
                 const provider = requestMode === "atlas" ? "nvidia" : "gemini";
                 try {
-                    const result = await (provider === "nvidia" ? nvidiaAdapter : geminiAdapter).getModels();
+                    const result = await (provider === "nvidia" ? nvidiaAdapter.getModels(requestMode === "atlas" && force) : geminiAdapter.getModels());
                     if (requestId !== aiModelCatalog.requestId || requestMode !== aiMode) return;
                     const expectedGroup = provider === "nvidia" ? "nvidia" : "googlegemini";
                     aiModelCatalog.models = (result.models || []).filter(m => m && m.providerGroup === expectedGroup);
@@ -25740,7 +25742,7 @@ document.documentElement.classList.toggle(
                     o.value = m.id;
                     const status = m.verifiedWorking === true
                         ? "Verified working"
-                        : (m.selectable === true ? "Ready · checked on send" : (m.status === "failed" ? "Probe failed" : "Not tested yet"));
+                        : (m.availabilityNote ? "Preview · API access unverified" : (m.selectable === true ? "Ready · checked on send" : (m.status === "failed" ? "Probe failed" : "Not tested yet")));
                     const context = aiFormatContext(m.contextLength);
                     o.textContent = m.name + " · " + status + (context ? " · " + context : "");
                     o.disabled = !(m.available === true && (m.selectable === true || m.verifiedWorking === true));
@@ -25749,6 +25751,7 @@ document.documentElement.classList.toggle(
                         aiT("modelIdLabel") + ": " + m.id.replace(/^nvidia::/, ""),
                         status,
                         m.probeError || "",
+                        m.availabilityNote || "",
                         context ? aiT("modelContextLabel") + ": " + context : "",
                         m.capabilities && m.capabilities.length ? aiT("modelCapsLabel") + ": " + m.capabilities.join(", ") : ""
                     ].filter(Boolean).join(" · ");
@@ -25770,7 +25773,8 @@ document.documentElement.classList.toggle(
             if (!m) { meta.textContent = chosen === "auto" ? (aiT("modelAuto") + " · " + (aiModelCatalog.provider || "AI providers")) : aiT("availabilityUnknown"); return; }
             meta.textContent = [
                 m.provider,
-                m.verifiedWorking === true ? "Verified working" : (m.selectable === true ? "Ready · availability checked on send" : (m.status === "failed" ? "Probe failed — not selectable" : "Not tested — not selectable")),
+                m.verifiedWorking === true ? "Verified working" : (m.availabilityNote ? "Preview · API access unverified" : (m.selectable === true ? "Ready · availability checked on send" : (m.status === "failed" ? "Probe failed — not selectable" : "Not tested — not selectable"))),
+                m.availabilityNote || "",
                 m.probeError || "",
                 aiFormatContext(m.contextLength) ? aiFormatContext(m.contextLength) + " " + aiT("modelContextLabel") : "",
                 m.capabilities.length ? m.capabilities.join(", ") : ""
