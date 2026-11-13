@@ -7985,7 +7985,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                         <button type="button" id="aiChatMemoryToggle" class="ai-memory-toggle" aria-pressed="true" title="Use recent chats as context">Use chats</button>
                         <button type="button" id="aiSidebarMemoryBtn" aria-label="Manage AI memory" title="Manage memory">›</button>
                     </div>
-                    <p class="ai-local-note">Chat history and memory are stored in this browser on this device.</p>
+                    <p class="ai-local-note">Sign in to sync chats and saved AI memory across your devices. Guest data stays on this device.</p>
                 </aside>
                 <div class="ai-chat-main" id="aiChatMain" aria-label="Horizon AI conversation">
                     <div id="aiChatHost" aria-label="Horizon AI chat"></div>
@@ -8399,7 +8399,12 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             "dailykrd_push_settings",
             "dailykrd_dashboard_layouts",
             "dailykrd_welcomed",
-            "dailykrd_haptic_enabled"
+            "dailykrd_haptic_enabled",
+            // AI chats and saved AI preferences belong to the signed-in account.
+            "dailykrd_horizon_ai_chats_v1",
+            "dailykrd_horizon_atlas_chats_v1",
+            "dailykrd_horizon_ai_settings_v3",
+            "dailykrd_horizon_ai_chat_memory_context_v1"
         ];
 
         const SYNCED_KEY_SET =
@@ -8410,7 +8415,9 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         const SYNCED_UNION_KEYS =
             new Set([
                 "dailykrd_study_sessions",
-                "dailykrd_study_completed"
+                "dailykrd_study_completed",
+                "dailykrd_horizon_ai_chats_v1",
+                "dailykrd_horizon_atlas_chats_v1"
             ]);
 
         const SYNC_STAMPS_KEY =
@@ -8964,6 +8971,30 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     return JSON.stringify(union);
                 }
 
+                if (key === "dailykrd_horizon_ai_chats_v1" || key === "dailykrd_horizon_atlas_chats_v1") {
+                    const local = JSON.parse(localRaw);
+                    const remote = JSON.parse(remoteRaw);
+                    if (!Array.isArray(local) || !Array.isArray(remote)) return remoteRaw;
+                    const byId = new Map();
+                    for (const chat of [...local, ...remote]) {
+                        if (!chat || typeof chat.id !== "string" || !Array.isArray(chat.messages)) continue;
+                        const previous = byId.get(chat.id);
+                        if (!previous) { byId.set(chat.id, { ...chat, messages: chat.messages.slice() }); continue; }
+                        const messages = [];
+                        const seen = new Set();
+                        for (const message of [...(previous.messages || []), ...(chat.messages || [])]) {
+                            if (!message || !["user", "assistant"].includes(message.role) || typeof message.content !== "string") continue;
+                            const fingerprint = message.role + "\n" + message.content;
+                            if (seen.has(fingerprint)) continue;
+                            seen.add(fingerprint); messages.push(message);
+                        }
+                        const newer = (Number(chat.updatedAt) || 0) >= (Number(previous.updatedAt) || 0) ? chat : previous;
+                        byId.set(chat.id, { ...previous, ...newer, messages: messages.slice(-40), pinned: !!(previous.pinned || chat.pinned), updatedAt: Math.max(Number(previous.updatedAt)||0, Number(chat.updatedAt)||0) });
+                    }
+                    const merged = [...byId.values()].sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0)).slice(0,80);
+                    return JSON.stringify(merged);
+                }
+
                 if (key === "dailykrd_study_completed") {
 
                     const local =
@@ -9230,6 +9261,31 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                     renderPushSettingsUI();
 
+                    return;
+                }
+
+                if (key === "dailykrd_horizon_ai_chats_v1" || key === "dailykrd_horizon_atlas_chats_v1") {
+                    const expectedKey = aiMode === "atlas" ? "dailykrd_horizon_atlas_chats_v1" : "dailykrd_horizon_ai_chats_v1";
+                    if (key === expectedKey && typeof aiLoadChats === "function") {
+                        const selectedId = aiCurrentChatId;
+                        aiChats = aiLoadChats();
+                        if (!aiChats.some(chat => chat.id === selectedId)) aiCurrentChatId = aiChats[0]?.id || "";
+                        if (!aiBusy) aiRenderCurrentChat();
+                        aiRenderChatLists();
+                        aiUpdateMemorySidebar();
+                    }
+                    return;
+                }
+
+                if (key === "dailykrd_horizon_ai_settings_v3") {
+                    try { aiSettings = { ...AI_DEFAULT_SETTINGS, ...JSON.parse(rawStorageRead(key) || "{}") }; } catch (_) {}
+                    if (document.getElementById("aiSettingsModal")?.classList.contains("open")) aiLoadSettingsIntoUI();
+                    aiUpdateMemorySidebar();
+                    return;
+                }
+
+                if (key === "dailykrd_horizon_ai_chat_memory_context_v1") {
+                    aiUpdateMemorySidebar();
                     return;
                 }
 
@@ -23400,6 +23456,7 @@ document.documentElement.classList.toggle(
             <button type="button" id="aiImageRemoveBtn" aria-label="Remove image" title="Remove image">✕</button>
         </div>
 
+        <div id="aiTypingHost" aria-live="polite"></div>
         <div class="aiInput">
             <button type="button" class="aiImageBtn aiGhostBtn ai-atlas-only" id="aiAtlasRepoMissionBtn" aria-label="Run isolated coding mission from GitHub" title="Import a GitHub repository into an isolated workspace">↗</button>
             <input
@@ -23475,11 +23532,16 @@ document.documentElement.classList.toggle(
         const AI_HISTORY_STORAGE_KEY = "dailyKrdAiHistory";
         const AI_LANG_STORAGE_KEY = "dailykrd_language";
         const AI_WEBSEARCH_STORAGE_KEY = "dailykrd_ai_websearch";
-        const AI_SETTINGS_KEY = "horizon_ai_settings_v3";
+        const AI_SETTINGS_KEY = "dailykrd_horizon_ai_settings_v3";
+        const AI_SETTINGS_LEGACY_KEY = "horizon_ai_settings_v3";
         const AI_ACTION_LOG_KEY = "horizon_ai_action_log_v3";
         const AI_DEFAULT_SETTINGS = { model: "auto", atlasModel: "auto", maxTokens: "auto", tone: "warm", detail: "concise", memory: "", permission: "confirm", rules: "", projectContext: "" };
         let aiSettings = { ...AI_DEFAULT_SETTINGS };
-        try { aiSettings = { ...AI_DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || "{}") }; } catch (e) {}
+        try {
+            let savedSettings = localStorage.getItem(AI_SETTINGS_KEY);
+            if (!savedSettings) { savedSettings = localStorage.getItem(AI_SETTINGS_LEGACY_KEY); if (savedSettings) localStorage.setItem(AI_SETTINGS_KEY, savedSettings); }
+            aiSettings = { ...AI_DEFAULT_SETTINGS, ...JSON.parse(savedSettings || "{}") };
+        } catch (e) {}
 
         /* =====================================================
            LOCALIZATION
@@ -24365,8 +24427,17 @@ document.documentElement.classList.toggle(
 
         /* Multi-chat history inspired by modern assistant sidebars. The legacy
            single transcript is migrated into one conversation on first run. */
-        const AI_CHATS_STORAGE_KEY = "horizon_ai_chats_v1";
-        const AI_CHAT_MEMORY_CONTEXT_KEY = "horizon_ai_chat_memory_context_v1";
+        const AI_CHATS_STORAGE_KEY = "dailykrd_horizon_ai_chats_v1";
+        const AI_ATLAS_CHATS_STORAGE_KEY = "dailykrd_horizon_atlas_chats_v1";
+        const AI_CHAT_MEMORY_CONTEXT_KEY = "dailykrd_horizon_ai_chat_memory_context_v1";
+        const AI_CHAT_LEGACY_KEY = "horizon_ai_chats_v1";
+        const AI_ATLAS_CHAT_LEGACY_KEY = "horizon_atlas_chats_v1";
+        const AI_MEMORY_LEGACY_KEY = "horizon_ai_chat_memory_context_v1";
+        try {
+            if (!localStorage.getItem(AI_CHATS_STORAGE_KEY) && localStorage.getItem(AI_CHAT_LEGACY_KEY)) localStorage.setItem(AI_CHATS_STORAGE_KEY, localStorage.getItem(AI_CHAT_LEGACY_KEY));
+            if (!localStorage.getItem(AI_ATLAS_CHATS_STORAGE_KEY) && localStorage.getItem(AI_ATLAS_CHAT_LEGACY_KEY)) localStorage.setItem(AI_ATLAS_CHATS_STORAGE_KEY, localStorage.getItem(AI_ATLAS_CHAT_LEGACY_KEY));
+            if (!localStorage.getItem(AI_CHAT_MEMORY_CONTEXT_KEY) && localStorage.getItem(AI_MEMORY_LEGACY_KEY)) localStorage.setItem(AI_CHAT_MEMORY_CONTEXT_KEY, localStorage.getItem(AI_MEMORY_LEGACY_KEY));
+        } catch (_) {}
         let aiCurrentChatId = "";
         let aiChats = aiLoadChats();
         function aiMakeChatId() { return "chat_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8); }
@@ -24377,11 +24448,14 @@ document.documentElement.classList.toggle(
             return title.length > 42 ? title.slice(0, 39) + "…" : (title || "New chat");
         }
         /* Horizon keeps its original keys; Atlas has a fully separate store. */
-        function aiChatsStorageKey() { return aiMode === "atlas" ? "horizon_atlas_chats_v1" : AI_CHATS_STORAGE_KEY; }
+        function aiChatsStorageKey() { return aiMode === "atlas" ? AI_ATLAS_CHATS_STORAGE_KEY : AI_CHATS_STORAGE_KEY; }
         function aiCurrentChatStorageKey() { return aiMode === "atlas" ? "horizon_atlas_current_chat_v1" : "horizon_ai_current_chat_v1"; }
         function aiLoadChats() {
             try {
-                const raw = localStorage.getItem(aiChatsStorageKey());
+                const storageKey = aiChatsStorageKey();
+                const legacyKey = aiMode === "atlas" ? AI_ATLAS_CHAT_LEGACY_KEY : AI_CHAT_LEGACY_KEY;
+                const raw = localStorage.getItem(storageKey) || localStorage.getItem(legacyKey);
+                if (raw && !localStorage.getItem(storageKey)) localStorage.setItem(storageKey, raw);
                 const parsed = raw ? JSON.parse(raw) : null;
                 if (Array.isArray(parsed) && parsed.length) {
                     const valid = parsed.filter(c => c && typeof c.id === "string" && Array.isArray(c.messages)).map(c => ({
@@ -24431,8 +24505,14 @@ document.documentElement.classList.toggle(
                     const preview=document.createElement("span"); preview.className="ai-chat-item-preview"; preview.textContent=(chat.messages||[]).filter(m=>m.role==="user").slice(-1)[0]?.content?.replace(/\s+/g," ") || "Start a conversation";
                     open.append(title,preview); open.addEventListener("click",()=>aiSwitchChat(chat.id));
                     const menu=document.createElement("button"); menu.type="button"; menu.className="ai-chat-menu"; menu.textContent="···"; menu.setAttribute("aria-label","Chat options"); menu.title="Chat options";
-                    menu.addEventListener("click",(event)=>{event.stopPropagation(); const choice=window.prompt("Chat options: enter pin, rename, or delete",chat.pinned?"unpin":"pin"); if(!choice)return; const action=choice.trim().toLowerCase(); if(action==="pin"||action==="unpin") {chat.pinned=action==="pin";aiPersistChats();} else if(action==="rename") {const name=window.prompt("Rename chat",chat.title);if(name&&name.trim()){chat.title=name.trim().slice(0,100);aiPersistChats();}} else if(action==="delete") {if(window.confirm("Delete this chat? This cannot be undone."))aiDeleteChat(chat.id);} });
-                    item.append(open,menu); target.appendChild(item);
+                    const actions=document.createElement("div"); actions.className="ai-chat-actions-menu"; actions.hidden=true;
+                    const addAction=(label,handler,kind="")=>{const actionButton=document.createElement("button");actionButton.type="button";actionButton.className="ai-chat-action-button"+(kind?" "+kind:"");actionButton.textContent=label;actionButton.addEventListener("click",event=>{event.stopPropagation();actions.hidden=true;handler();});actions.appendChild(actionButton);};
+                    addAction(chat.pinned?"Unpin":"Pin",()=>{chat.pinned=!chat.pinned;aiPersistChats();});
+                    addAction("Rename",()=>{const name=window.prompt("Rename chat",chat.title||"");if(name&&name.trim()){chat.title=name.trim().slice(0,100);chat.updatedAt=Date.now();aiPersistChats();}});
+                    addAction("Delete",()=>{if(window.confirm("Delete this chat? This cannot be undone."))aiDeleteChat(chat.id);},"danger");
+                    menu.addEventListener("click",event=>{event.stopPropagation();document.querySelectorAll(".ai-chat-actions-menu").forEach(other=>{if(other!==actions)other.hidden=true;});actions.hidden=!actions.hidden;});
+                    actions.addEventListener("click",event=>event.stopPropagation());
+                    item.append(open,menu,actions); target.appendChild(item);
                 });
             };
             draw(pinnedEl,filtered.filter(c=>c.pinned),"Pinned chats appear here");
@@ -24527,17 +24607,19 @@ document.documentElement.classList.toggle(
         }
 
         function aiShowThinking() {
-            const messages = aiMessagesEl();
-            if (!messages) return null;
+            const host = document.getElementById("aiTypingHost") || aiMessagesEl();
+            if (!host) return null;
+            document.getElementById("aiLoading")?.remove();
             const el = document.createElement("div");
             el.className = "ai-message ai-typing";
             el.id = "aiLoading";
+            el.setAttribute("role", "status");
+            el.setAttribute("aria-live", "polite");
             el.innerHTML =
                 '<span class="ai-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
                 '<span class="ai-typing-label"></span>';
             el.querySelector(".ai-typing-label").textContent = aiT("thinking");
-            messages.appendChild(el);
-            aiMaybeScroll(true);
+            host.appendChild(el);
             return el;
         }
 
@@ -27175,6 +27257,14 @@ document.documentElement.classList.toggle(
             const aiDrawerButton = document.getElementById("aiSidebarToggleBtn");
             const aiNewChatButton = document.getElementById("aiSidebarNewChatBtn");
             if (aiHeaderActions && aiDrawerButton) {
+                // Desktop opens into the conversation; the chat drawer is opt-in.
+                if (window.matchMedia("(min-width:761px)").matches) {
+                    document.getElementById("aiWorkspace")?.classList.add("sidebar-collapsed");
+                    aiDrawerButton.setAttribute("aria-expanded", "false");
+                } else {
+                    aiDrawerButton.classList.remove("is-open");
+                    aiDrawerButton.setAttribute("aria-expanded", "false");
+                }
                 aiDrawerButton.className = "aiHeadBtn aiChatMenuToggle";
                 aiDrawerButton.textContent = "☰";
                 aiDrawerButton.setAttribute("aria-label", "Open chats");
@@ -29845,5 +29935,57 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     background-clip:padding-box;
   }
   #ai.active .ai-convo::-webkit-scrollbar-track { background:transparent; }
+}
+
+
+/* Horizon AI UI fixes — chat drawer, action menu, composer typing state, mobile sizing. */
+#ai.active #aiTypingHost {
+  display:flex !important; flex:0 0 auto !important; min-height:0 !important;
+  width:100% !important; padding:0 22px !important; box-sizing:border-box !important;
+  background:var(--h-ai-bg, #080b1b) !important;
+}
+#ai.active #aiTypingHost:empty { display:none !important; }
+#ai.active #aiTypingHost .ai-typing {
+  display:inline-flex !important; align-items:center !important; align-self:flex-start !important;
+  min-height:26px !important; margin:0 0 4px !important; padding:3px 0 !important;
+  position:relative !important; inset:auto !important; transform:none !important;
+}
+.ai-chat-item { position:relative; }
+.ai-chat-actions-menu {
+  position:absolute; z-index:120; top:calc(100% - 2px); right:5px; min-width:132px;
+  display:flex; flex-direction:column; gap:3px; padding:5px;
+  border:1px solid rgba(140,140,140,.25); border-radius:12px;
+  background:#202127; box-shadow:0 12px 30px rgba(0,0,0,.32);
+}
+.ai-chat-actions-menu[hidden] { display:none !important; }
+.ai-chat-action-button {
+  display:flex; align-items:center; width:100%; min-height:36px; padding:8px 10px;
+  border:0; border-radius:8px; background:transparent; color:#f2f2f4;
+  text-align:left; font:500 12px/1.2 system-ui,sans-serif; cursor:pointer;
+}
+.ai-chat-action-button:hover, .ai-chat-action-button:focus-visible { background:rgba(255,255,255,.1); outline:none; }
+.ai-chat-action-button.danger { color:#ff8585; }
+@media (min-width:761px) {
+  #ai.active #aiWorkspace { grid-template-columns:0 minmax(0,1fr) !important; }
+  #ai.active #aiWorkspace:not(.sidebar-collapsed) { grid-template-columns:260px minmax(0,1fr) !important; }
+  #ai.active #aiChatSidebar { width:260px !important; }
+}
+@media (max-width:760px) {
+  #ai.active .ai-chat-sidebar {
+    left:8px !important; width:min(264px, calc(100vw - 28px)) !important;
+    top:calc(58px + env(safe-area-inset-top)) !important;
+    bottom:calc(8px + env(safe-area-inset-bottom)) !important;
+    padding:10px !important; gap:8px !important; border-radius:16px !important;
+  }
+  #ai.active .ai-chat-sidebar .ai-new-chat-primary { min-height:38px !important; padding:0 12px !important; font-size:12px !important; }
+  #ai.active .ai-chat-search-wrap { min-height:36px !important; padding:0 10px !important; }
+  #ai.active .ai-chat-open { padding:8px 7px !important; }
+  #ai.active .ai-chat-item-title { font-size:11px !important; }
+  #ai.active .ai-chat-menu { flex-basis:26px !important; width:26px !important; height:30px !important; }
+  #ai.active #aiTypingHost { padding:0 14px !important; }
+  #ai.active #aiTypingHost .ai-typing { margin:0 0 2px !important; }
+}
+@media (max-width:380px) {
+  #ai.active .ai-chat-sidebar { width:min(248px, calc(100vw - 24px)) !important; left:6px !important; padding:8px !important; }
 }
 </style>
