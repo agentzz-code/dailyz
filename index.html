@@ -27153,12 +27153,13 @@ document.documentElement.classList.toggle(
             const rawDetail = String(info && (info.details || info.message) || "");
             const detail = rawDetail.replace(/(?:Bearer\\s+)[A-Za-z0-9._~+\\/-]+/gi, "Bearer [redacted]").replace(/(api[_-]?key|token|secret)\\s*[:=]\\s*[^\\s,;]+/gi, "$1=[redacted]").slice(0, 500);
             const provider = String(info && info.provider || (aiMode === "atlas" ? "nvidia" : "gemini")).toLowerCase();
+            const providerLabel = provider === "coarena" ? "CoArena" : (provider === "nvidia" ? "NVIDIA NIM" : ((provider === "gemini" || provider === "googlegemini") ? "Google Gemini" : (provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : "AI provider")));
             const suffix = (detail ? " Details: " + detail : "") + (info && Number(info.status) > 0 ? " (HTTP " + Number(info.status) + ")" : "") + (info && info.requestId ? " Request ID: " + String(info.requestId).slice(0, 120) : "");
             if (provider === "nvidia" && info && info.code === "NVIDIA_NOT_CONFIGURED") {
                 return "NVIDIA NIM is not configured. Add NVIDIA_API_KEY to the Cloudflare Worker secrets.";
             }
             switch (info && info.kind) {
-                case "model": return "The selected " + (provider === "nvidia" ? "NVIDIA" : "Gemini") + " model is unavailable or not accessible." + suffix;
+                case "model": return "The selected " + providerLabel + " model is unavailable or not accessible." + suffix;
                 case "rate": return "The provider usage allowance or rate limit was reached." + suffix;
                 case "network": return "A network error interrupted the AI request." + suffix;
                 case "context": return "The attached project exceeds this model's context window. Send a smaller set of files." + suffix;
