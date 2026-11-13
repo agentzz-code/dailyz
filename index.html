@@ -23871,15 +23871,16 @@ document.documentElement.classList.toggle(
                 
                 <label for="aiMaxTokensSelect">Response length</label>
                 <select id="aiMaxTokensSelect"><option value="auto">Automatic</option><option value="512">Short (512 tokens)</option><option value="1024">Medium (1,024 tokens)</option><option value="2048">Long (2,048 tokens)</option><option value="4096">Very long (4,096 tokens)</option></select>
-                <p class="aiSettingsHint">Horizon AI uses Google Gemini only. Atlas AI uses NVIDIA NIM only. Model lists are loaded separately from the Worker. Each mode remembers its own model; no cross-provider fallback is used.</p>
+                <p class="aiSettingsHint">Horizon uses Google Gemini. Atlas supports NVIDIA NIM and optional CoArena models. Atlas routes only to the provider named by the selected model; it never silently falls back across providers.</p>
             </div>
             <div class="aiSettingsGroup">
                 <h4>Provider connections</h4>
                 <div class="aiProviderGrid" id="aiProviderGrid">
                     <div class="aiProviderCard" id="aiProviderStatusGemini" data-state="unknown"><strong>Google Gemini</strong><span>Checking Worker connection…</span></div>
                     <div class="aiProviderCard" id="aiProviderStatusNvidia" data-state="unknown"><strong>NVIDIA NIM</strong><span>Backend status not checked yet.</span></div>
+                    <div class="aiProviderCard" id="aiProviderStatusCoarena" data-state="unknown"><strong>CoArena</strong><span>Optional Atlas provider. Worker configuration has not been checked yet.</span></div>
                 </div>
-                <p class="aiSettingsHint" id="aiProviderUsageHint" role="status" aria-live="polite">Provider availability is read from live catalogues/status responses. No frontend secret is required.</p>
+                <p class="aiSettingsHint" id="aiProviderUsageHint" role="status" aria-live="polite">Provider availability is read from the Worker. CoArena API keys stay server-side; prompts and replies sent to CoArena are stored under its data terms. Review <a href="https://coarena.ai/developers" target="_blank" rel="noopener noreferrer">CoArena API documentation</a> before use.</p>
                 <p class="aiSettingsHint" id="aiTokenUsageHint" role="status" aria-live="polite">Token usage: no completed AI request yet. Models have not been refreshed yet.</p>
             </div>
             <div class="aiSettingsGroup ai-atlas-only">
@@ -24037,8 +24038,8 @@ document.documentElement.classList.toggle(
         const AI_NVIDIA_CHAT_URL = AI_ENDPOINT;
         const aiModelCatalog = {
             loaded: false, loading: false, error: false, lastError: "", provider: "", models: [], defaultModel: "auto", at: 0, promise: null, requestId: 0, requestMode: "",
-            providerStatus: { gemini: "unknown", nvidia: "unknown" },
-            usage: { gemini: "", nvidia: "" },
+            providerStatus: { gemini: "unknown", nvidia: "unknown", coarena: "unknown" },
+            usage: { gemini: "", nvidia: "", coarena: "" },
             lastRefreshAt: 0,
             lastTokenUsage: null
         };
@@ -26551,7 +26552,9 @@ document.documentElement.classList.toggle(
             const prompt = String(promptOverride != null ? promptOverride : (promptEl && promptEl.value || "")).trim();
             if (!prompt) throw new Error("Describe what Atlas should build, change, or fix before starting the mission.");
             const resolvedMissionModel = aiResolveModel();
-            const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto", requestId: crypto.randomUUID() };
+            const missionProvider = String(resolvedMissionModel || "").startsWith("coarena::") ? "coarena" : "nvidia";
+            if (missionProvider === "coarena" && !window.confirm("CoArena data notice: the full project ZIP or imported repository contents, your prompt, model replies, reasoning and tool calls will be sent to CoArena. CoArena says it stores requests and replies and may use them in datasets it licenses. CoArena requires anyone using its Model API to be 18 or older, and tool probes/task calls count toward usage. Continue only if you are 18+, the account owner authorized this key, and you have permission to share this project and accept those terms.")) throw new Error("CoArena mission cancelled. No project data was uploaded.");
+            const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto", provider: missionProvider, requestId: crypto.randomUUID() };
             if (source instanceof File) {
                 if (!/\.zip$/i.test(source.name)) throw new Error("Choose a project ZIP file.");
                 if (source.size > 8500000) throw new Error("Project ZIP must be smaller than 8.5 MB for this execution path.");
@@ -26698,7 +26701,9 @@ document.documentElement.classList.toggle(
                 if (/claude|anthropic|nvidia|openai|puter|apinex/.test(id.toLowerCase() + " " + rawProvider)) return null;
                 if (!/^gemini[-/]/i.test(id) && !/^models\/gemini[-/]/i.test(id)) return null;
             } else if (providerGroup === "nvidia") {
-                if (/claude|anthropic|gemini|google|puter|apinex/.test(id.toLowerCase() + " " + rawProvider)) return null;
+                if (/claude|anthropic|gemini|google|puter|apinex|coarena/.test(id.toLowerCase() + " " + rawProvider)) return null;
+            } else if (providerGroup === "coarena") {
+                if (!id.startsWith("coarena::") || /puter|apinex/.test(rawProvider)) return null;
             }
             return {
                 id,
@@ -26729,15 +26734,17 @@ document.documentElement.classList.toggle(
             }
             // A legacy Worker may ignore ?mode= and return its old Claude/APInex catalogue.
             // Require the dynamic-catalogue contract; block legacy Claude/APInex catalogues.
-            const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
-            const expectedCatalogueSource = expectedMode === "atlas" ? "explicit-allowlist" : "provider-api";
+            const expectedProviderName = expectedMode === "atlas" ? "Atlas" : "Google Gemini";
+            const expectedCatalogueSource = expectedMode === "atlas" ? "atlas-multi-provider" : "provider-api";
             // Do not couple frontend releases to a specific Worker build number.
-            // Validate the response contract and provider identity instead.
+            // Atlas is a combined catalogue, but every model retains its provider identity.
             if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== expectedCatalogueSource) {
                 throw new Error("The Worker returned an unexpected model catalogue for " + expectedProviderName + ". Check the provider mode and catalogue response.");
             }
             const normalized = data.models
-                .map(m => aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
+                .map(m => expectedMode === "atlas"
+                    ? aiNormalizeWorkerModel(m, "Atlas", String(m && m.providerGroup || (String(m && m.id || "").startsWith("coarena::") ? "coarena" : "nvidia")))
+                    : aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
                 .filter(Boolean);
             if (data.models.length && !normalized.length) {
                 throw new Error("The Worker returned models, but none belong to " + expectedProviderName + ". Check the provider API response and deployed Worker.");
@@ -26773,7 +26780,7 @@ document.documentElement.classList.toggle(
                     err.aiInfo = aiErrorInfo(res.status, data); err.aiInfo.provider = "nvidia"; throw err;
                 }
                 const models = aiValidateModelCatalogue(data, "atlas", "nvidia", res.status);
-                return { models, usage: String(data.costPolicy || "Live NVIDIA provider catalogue") + (data.probeSummary ? " · Live chat checks: " + data.probeSummary.working + "/" + data.probeSummary.tested : ""), status: "configured", defaultModel: data.defaultModel || "auto", message: data.message || null };
+                return { models, usage: String(data.costPolicy || "NVIDIA NIM + optional CoArena catalogue") + (data.providerStatus ? " · NVIDIA: " + (data.providerStatus.nvidia ? "configured" : "not configured") + " · CoArena: " + (data.providerStatus.coarena ? "configured" : "not configured") : ""), status: "configured", defaultModel: data.defaultModel || "auto", message: data.message || null, providerStatus: data.providerStatus || {} };
             },
             async sendMessage(requestBody, signal) {
                 const authHeaders = await aiAtlasAuthorizationHeaders();
@@ -26784,7 +26791,7 @@ document.documentElement.classList.toggle(
         const aiProviderAdapters = { gemini: geminiAdapter, nvidia: nvidiaAdapter };
 
         function aiSetProviderCard(provider, state, detail) {
-            const id = provider === "gemini" ? "aiProviderStatusGemini" : "aiProviderStatusNvidia";
+            const id = provider === "gemini" ? "aiProviderStatusGemini" : provider === "coarena" ? "aiProviderStatusCoarena" : "aiProviderStatusNvidia";
             const el = document.getElementById(id); if (!el) return;
             el.dataset.state = state || "unknown";
             const span = el.querySelector("span"); if (span) span.textContent = detail || aiT("availabilityUnknown");
@@ -26798,7 +26805,11 @@ document.documentElement.classList.toggle(
             const selected = candidates.sort((a,b) => {
                 const rank = m => {
                     const id = String(m.id || "").toLowerCase();
-                    if (aiMode === "atlas") return /coder|code|nemotron|qwen|deepseek/.test(id) ? 0 : 1;
+                    if (aiMode === "atlas") {
+                        if (m.providerGroup === "nvidia") return /coder|code|nemotron|qwen|deepseek/.test(id) ? 0 : 1;
+                        if (m.providerGroup === "coarena") return /claude-sonnet-5-5|claude-opus-5-5|gpt-6-astra|deepseek-v4/.test(id) ? 2 : 3;
+                        return 4;
+                    }
                     return /gemini.*flash/.test(id) ? 0 : /gemini.*pro/.test(id) ? 1 : 2;
                 };
                 return rank(a) - rank(b) || a.name.localeCompare(b.name);
@@ -26824,12 +26835,16 @@ document.documentElement.classList.toggle(
                 try {
                     const result = await (provider === "nvidia" ? nvidiaAdapter.getModels(requestMode === "atlas" && force) : geminiAdapter.getModels());
                     if (requestId !== aiModelCatalog.requestId || requestMode !== aiMode) return;
-                    const expectedGroup = provider === "nvidia" ? "nvidia" : "googlegemini";
-                    aiModelCatalog.models = (result.models || []).filter(m => m && m.providerGroup === expectedGroup);
+                    const expectedGroups = provider === "nvidia" ? ["nvidia", "coarena"] : ["googlegemini"];
+                    aiModelCatalog.models = (result.models || []).filter(m => m && expectedGroups.includes(m.providerGroup));
                     aiModelCatalog.defaultModel = aiModelCatalog.models.some(m => m.id === result.defaultModel) ? result.defaultModel : "auto";
-                    aiModelCatalog.provider = provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini";
+                    aiModelCatalog.provider = provider === "nvidia" ? "Atlas multi-provider" : "Google Gemini";
                     aiModelCatalog.usage[provider] = result.usage || "";
                     aiModelCatalog.providerStatus[provider] = "configured";
+                    if (provider === "nvidia") {
+                        aiSetProviderCard("nvidia", result.providerStatus && result.providerStatus.nvidia ? "connected" : "unknown", result.providerStatus && result.providerStatus.nvidia ? "NVIDIA NIM is configured." : "NVIDIA NIM secret is not configured.");
+                        aiSetProviderCard("coarena", result.providerStatus && result.providerStatus.coarena ? (result.providerErrors && result.providerErrors.coarena ? "error" : "connected") : "unknown", result.providerErrors && result.providerErrors.coarena ? ("CoArena catalogue error: " + result.providerErrors.coarena) : (result.providerStatus && result.providerStatus.coarena ? "CoArena is configured. Requests are stored by CoArena; review its data terms before use." : "Optional provider. Add COARENA_API_KEY to the Worker to enable it."));
+                    }
                     aiModelCatalog.lastError = "";
                     aiModelCatalog.loaded = true;
                     aiModelCatalog.mode = requestMode;
@@ -26841,8 +26856,9 @@ document.documentElement.classList.toggle(
                         aiSettings[prefKey] = "auto";
                         aiPersistSettings();
                     }
-                    aiSetProviderCard(provider, "connected", aiModelCatalog.usage[provider] || "Authenticated provider catalogue available.");
-                    aiSetProviderCard(provider === "nvidia" ? "gemini" : "nvidia", "unknown", "Used by the other AI mode.");
+                    if (provider !== "nvidia") aiSetProviderCard(provider, "connected", aiModelCatalog.usage[provider] || "Authenticated provider catalogue available.");
+                    if (provider === "nvidia") aiSetProviderCard("gemini", "unknown", "Used by Horizon mode.");
+                    else aiSetProviderCard("nvidia", "unknown", "Used by Atlas mode.");
                     if (!aiModelCatalog.models.length) throw new Error(result.message || ("The authenticated " + (provider === "nvidia" ? "NVIDIA" : "Gemini") + " catalogue returned no available chat models."));
                 } catch (e) {
                     if (requestId !== aiModelCatalog.requestId || requestMode !== aiMode) return;
@@ -26868,8 +26884,10 @@ document.documentElement.classList.toggle(
         function aiUpdateProviderUI() {
             const provider = aiMode === "atlas" ? "nvidia" : "gemini";
             const usageEl = document.getElementById("aiProviderUsageHint");
+            const atlasUsage = aiMode === "atlas" ? [aiModelCatalog.usage.nvidia, aiModelCatalog.usage.coarena].filter(Boolean).join(" · ") : "";
+            const usage = aiMode === "atlas" ? atlasUsage : (aiModelCatalog.usage[provider] || "");
             const refreshText = aiModelCatalog.lastRefreshAt ? "Last refreshed: " + new Date(aiModelCatalog.lastRefreshAt).toLocaleTimeString() : "Models have not been refreshed yet.";
-            if (usageEl) usageEl.textContent = (aiModelCatalog.usage[provider] || "") + (aiModelCatalog.usage[provider] ? " · " : "") + refreshText;
+            if (usageEl) usageEl.textContent = usage + (usage ? " · " : "") + refreshText;
             const tokenEl = document.getElementById("aiTokenUsageHint");
             if (tokenEl && !aiModelCatalog.lastTokenUsage) tokenEl.textContent = "Token usage: no completed AI request yet. " + refreshText;
         }
@@ -26882,9 +26900,10 @@ document.documentElement.classList.toggle(
          * Canonical model IDs are part of the routing contract:
          *   <Gemini model ID> -> Gemini Worker route in Horizon mode
          *   <NVIDIA model ID> -> NVIDIA Worker route in Atlas mode
+         *   coarena::<model ID> -> CoArena Worker route in Atlas mode
          *
-         * Older saved preferences may contain a legacy nvidia:: prefix; it is
-         * normalized before the request. Provider selection follows the mode.
+         * Provider routing is explicit from the selected model ID; Atlas mode
+         * itself does not imply that every request goes to NVIDIA.
          */
         function aiCanonicalizeModelId(id) {
             const raw = String(id || "").trim();
@@ -26899,7 +26918,12 @@ document.documentElement.classList.toggle(
                 String(x.id).replace(/^nvidia::/, "") === raw
             );
             if (nvidia) return nvidia.id;
-
+            const coarena = aiModelCatalog.models.find(x =>
+                x && x.providerGroup === "coarena" &&
+                (x.id === raw || String(x.id).replace(/^coarena::/, "") === raw)
+            );
+            if (coarena) return coarena.id;
+            if (raw.startsWith("coarena::")) return raw;
 
             return raw;
         }
@@ -26935,7 +26959,9 @@ document.documentElement.classList.toggle(
             const auto = document.createElement("option");
             auto.value = "auto"; auto.textContent = aiT("modelAuto"); select.appendChild(auto);
 
-            const groups = [[aiMode === "atlas" ? "nvidia" : "googlegemini", aiMode === "atlas" ? "NVIDIA NIM · Atlas" : "Google Gemini · Horizon"]];
+            const groups = aiMode === "atlas"
+                ? [["nvidia", "NVIDIA NIM · Atlas"], ["coarena", "CoArena · Atlas"]]
+                : [["googlegemini", "Google Gemini · Horizon"]];
             const chosen = aiResolveModel();
             groups.forEach(([groupId, label]) => {
                 const items = aiModelCatalog.models.filter(m => m.providerGroup === groupId);
@@ -26946,7 +26972,7 @@ document.documentElement.classList.toggle(
                     o.value = m.id;
                     const status = m.verifiedWorking === true
                         ? "Verified working"
-                        : (m.availabilityNote ? "Preview · API access unverified" : (m.selectable === true ? "Ready · checked on send" : (m.status === "failed" ? "Probe failed" : "Not tested yet")));
+                        : (m.providerGroup === "coarena" ? "Listed · account access checked on send" : (m.availabilityNote ? "Preview · API access unverified" : (m.selectable === true ? "Ready · checked on send" : (m.status === "failed" ? "Probe failed" : "Not tested yet"))));
                     const context = aiFormatContext(m.contextLength);
                     o.textContent = m.name + " · " + status + (context ? " · " + context : "");
                     o.disabled = !(m.available === true && (m.selectable === true || m.verifiedWorking === true));
@@ -27138,8 +27164,8 @@ document.documentElement.classList.toggle(
                 case "context": return "The attached project exceeds this model's context window. Send a smaller set of files." + suffix;
                 case "invalid": return "Atlas could not produce a valid downloadable file package." + suffix;
                 case "timeout": return "The AI request timed out. Try again with a smaller task." + suffix;
-                case "provider": return (provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini") + " could not complete the request." + suffix;
-                default: return (provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini") + " request failed." + suffix;
+                case "provider": return providerLabel + " could not complete the request." + suffix;
+                default: return providerLabel + " request failed." + suffix;
             }
         }
 
@@ -27381,7 +27407,7 @@ document.documentElement.classList.toggle(
                     const completion = Number(u.completion_tokens ?? u.output_tokens ?? u.completion ?? NaN);
                     const total = Number(u.total_tokens ?? u.total ?? ((Number.isFinite(prompt) && Number.isFinite(completion)) ? prompt + completion : NaN));
                     const modelForUsage = String(obj.model || requestedModel || "");
-                    responseUsage = { prompt, completion, total, provider: String(obj.provider || (aiMode === "atlas" ? "NVIDIA" : "Google Gemini")), model: modelForUsage, at: Date.now() };
+                    responseUsage = { prompt, completion, total, provider: String(obj.provider || (String(requestedModel || "").startsWith("coarena::") ? "CoArena" : (aiMode === "atlas" ? "NVIDIA" : "Google Gemini"))), model: modelForUsage, at: Date.now() };
                 }
 
                 /* Sources may ride along with a delta/response or arrive on
@@ -27401,6 +27427,10 @@ document.documentElement.classList.toggle(
                     setFullText(obj.response);
                 }
 
+                if (String(obj.provider || "").toLowerCase() === "coarena" && obj.model) {
+                    sourceLabel = "CoArena · " + String(obj.model);
+                    if (obj.substitutedFrom && obj.substitutedTo && obj.substitutedFrom !== obj.substitutedTo) sourceLabel += " (routed to " + String(obj.substitutedTo) + ")";
+                }
                 if (obj.source === "local") {
                     sourceLabel = "Local AI";
                 } else if (typeof obj.source === "string" && /search|google/i.test(obj.source)) {
@@ -27501,6 +27531,12 @@ document.documentElement.classList.toggle(
                         }
                         if (omitted.length) fileContext += "\nFILES NOT FULLY INCLUDED — DO NOT CLAIM TO HAVE REVIEWED THEM: " + omitted.join(", ");
                         requestBody.message = String(requestBody.message || "") + fileContext;
+                    }
+                    if (String(requestedModel || "").startsWith("coarena::") && !window.confirm("CoArena data notice: this request, its attached files/project context, model replies, reasoning and tool calls will be sent to CoArena. CoArena says it stores requests and replies and may use them in datasets it licenses. CoArena requires anyone using its Model API to be 18 or older. Continue only if you are 18+, the account owner authorized this key, and you have permission to share this data and accept those terms.")) {
+                        const cancelled = new Error("CoArena request cancelled. No request was sent.");
+                        cancelled.provider = "coarena";
+                        cancelled.code = "COARENA_REQUEST_CANCELLED";
+                        throw cancelled;
                     }
                     const nvidiaResponse = await awaitConnectionWithTimeout(nvidiaAdapter.sendMessage(requestBody, signal));
                     if (!nvidiaResponse.ok) {
@@ -27611,7 +27647,7 @@ document.documentElement.classList.toggle(
                         else if (/timeout|timed out|request_timeout/.test(hay)) kind = "timeout";
                         else if (/network_error|failed to fetch|network/.test(hay)) kind = "network";
                         const provider = String(error && error.provider || "") || (
-                            aiMode === "atlas" ? "nvidia" : "gemini"
+                            String(requestedModel || "").startsWith("coarena::") ? "coarena" : (aiMode === "atlas" ? "nvidia" : "gemini")
                         );
                         streamError = { kind, status: Number(error && error.status) || 0, code, message: detail, provider };
                     }
