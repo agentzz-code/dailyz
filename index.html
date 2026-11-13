@@ -23458,7 +23458,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.1-cpu-optimization";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.2-file-marker-recovery";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25088,7 +25088,7 @@ document.documentElement.classList.toggle(
             // every marker-based file response, outside the network error handler.
             const lines = text.split("\n").flatMap((line) => {
                 const normalized = normalizeMarkerLine(line);
-                const inlineOpening = /^(\s*<{3}\s*ATLAS_FILE\b.*?\s*>{2,3})([\s\S]+)$/i.exec(normalized);
+                const inlineOpening = /^(\s*<{3}\s*ATLAS_FILE\b.*?\s*>{1,3})([\s\S]+)$/i.exec(normalized);
                 return inlineOpening ? [inlineOpening[1], inlineOpening[2]] : [line];
             });
             const markerFiles = [];
@@ -25098,8 +25098,8 @@ document.documentElement.classList.toggle(
             let markerChars = 0;
             // Accept two or three closing brackets: some streamed/exported
             // responses lose one trailing ">" from the opening marker.
-            const startLine = /^\s*<{3}\s*ATLAS_FILE\b(.*?)\s*>{2,3}\s*$/i;
-            const endLine = /^\s*<{3}\s*END_ATLAS_FILE\s*>{2,3}\s*$/i;
+            const startLine = /^\s*<{3}\s*ATLAS_FILE\b(.*?)\s*>{1,3}\s*$/i;
+            const endLine = /^\s*<{3}\s*END_ATLAS_FILE\s*>{1,3}\s*$/i;
 
             for (const line of lines) {
                 if (!active) {
