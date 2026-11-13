@@ -23520,7 +23520,6 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.2-file-marker-recovery";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25989,8 +25988,10 @@ document.documentElement.classList.toggle(
             // Require the dynamic-catalogue contract; block legacy Claude/APInex catalogues.
             const expectedProviderName = expectedMode === "atlas" ? "NVIDIA" : "Google Gemini";
             const expectedCatalogueSource = expectedMode === "atlas" ? "explicit-allowlist" : "provider-api";
-            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== expectedCatalogueSource || data.workerVersion !== AI_EXPECTED_WORKER_VERSION) {
-                throw new Error("Worker version mismatch. This page requires " + AI_EXPECTED_WORKER_VERSION + ", but the deployed Worker returned " + String(data.workerVersion || "an older/unknown version") + ". Deploy the matching Worker version before sending messages.");
+            // Do not couple frontend releases to a specific Worker build number.
+            // Validate the response contract and provider identity instead.
+            if (data.mode !== expectedMode || String(data.provider || "").toLowerCase() !== expectedProviderName.toLowerCase() || data.catalogueSource !== expectedCatalogueSource) {
+                throw new Error("The Worker returned an unexpected model catalogue for " + expectedProviderName + ". Check the provider mode and catalogue response.");
             }
             const normalized = data.models
                 .map(m => aiNormalizeWorkerModel(m, expectedProviderName, expectedProvider))
