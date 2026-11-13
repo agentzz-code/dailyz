@@ -24461,12 +24461,20 @@ document.documentElement.classList.toggle(
         }
         function aiSwitchChat(id) {
             if(aiBusy || !aiChats.some(c=>c.id===id))return;
+            if (aiPendingProjectZip) {
+                aiAppendTextMessage("A project ZIP is attached to this chat. Send it or remove it before switching chats.", true);
+                return;
+            }
             aiCurrentChatId=id; aiPersistChats(); aiRenderCurrentChat();
             document.getElementById("aiChatSidebar")?.classList.remove("mobile-open");
             document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded","false");
         }
         function aiCreateNewChat() {
             if(aiBusy)return;
+            if (aiPendingProjectZip) {
+                aiAppendTextMessage("A project ZIP is attached to this chat. Send it or remove it before starting a new chat.", true);
+                return;
+            }
             const chat={id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false};
             aiChats.unshift(chat); aiCurrentChatId=chat.id; aiConversationHistory=[]; aiPersistChats(); aiRenderCurrentChat(); aiClearSelectedImage(); aiClearSelectedFiles();
             const input=document.getElementById("aiInput"); if(input)input.focus();
@@ -24749,6 +24757,9 @@ document.documentElement.classList.toggle(
         const AI_MAX_TEXT_TOTAL_CHARS = 16000000;
         const AI_TEXT_FILE_EXTENSIONS = new Set(["txt","md","markdown","js","jsx","mjs","cjs","ts","tsx","py","html","htm","css","scss","json","jsonc","yaml","yml","xml","sql","sh","ps1","java","c","h","cpp","hpp","go","rs","php","rb","swift","kt","dart","vue","svelte","csv","log","ini","toml","properties","gradle","dockerfile","gitignore"]);
         let aiSelectedFiles = [];
+        // A project ZIP is staged until the user presses Send, so the task prompt
+        // and archive are submitted together instead of starting an empty mission.
+        let aiPendingProjectZip = null;
         // Project file context is kept in memory per Atlas chat (not written to browser storage).
         const aiProjectFileContexts = new Map();
         function aiGetActiveProjectFiles() { return aiProjectFileContexts.get(aiCurrentChatId) || []; }
@@ -24771,8 +24782,22 @@ document.documentElement.classList.toggle(
             wrap.replaceChildren();
             const selectedPaths = new Set(aiSelectedFiles.map(f => aiSafeRelativePath(f.path || f.name)));
             const retainedFiles = aiGetActiveProjectFiles().filter(f => !selectedPaths.has(aiSafeRelativePath(f.path || f.name)));
-            if (!aiSelectedFiles.length && !retainedFiles.length && !aiFileStatus) { wrap.hidden = true; return; }
+            if (!aiSelectedFiles.length && !retainedFiles.length && !aiPendingProjectZip && !aiFileStatus) { wrap.hidden = true; return; }
             wrap.hidden = false;
+            if (aiPendingProjectZip) {
+                const chip = document.createElement("span"); chip.className = "ai-file-chip";
+                const icon = document.createElement("span"); icon.setAttribute("aria-hidden", "true"); icon.textContent = "🗜️";
+                const name = document.createElement("span"); name.textContent = aiPendingProjectZip.name;
+                const meta = document.createElement("span"); meta.className = "ai-chip-meta";
+                meta.textContent = "Project ZIP · " + aiFormatBytes(aiPendingProjectZip.size) + " · ready to send";
+                const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "×";
+                remove.setAttribute("aria-label", "Remove " + aiPendingProjectZip.name); remove.title = "Remove project ZIP";
+                remove.addEventListener("click", () => { aiPendingProjectZip = null; aiRenderFilePreview(); });
+                chip.append(icon, name, meta, remove); wrap.appendChild(chip);
+                const hint = document.createElement("span"); hint.className = "ai-file-status";
+                hint.textContent = "Add your task description, then press Send to start the Atlas project mission.";
+                wrap.appendChild(hint);
+            }
             const makeChip = (file, removeHandler, retained) => {
                 const chip = document.createElement("span"); chip.className = "ai-file-chip";
                 const icon = document.createElement("span"); icon.setAttribute("aria-hidden", "true"); icon.textContent = aiFileTypeIcon(file.name);
@@ -25552,10 +25577,10 @@ document.documentElement.classList.toggle(
             } finally { aiAtlasMissionMonitoring = false; }
         }
 
-        async function aiAtlasStartMission(source) {
+        async function aiAtlasStartMission(source, promptOverride) {
             const status = document.getElementById("aiAtlasMissionStatus");
             const promptEl = document.getElementById("aiInput");
-            const prompt = String(promptEl && promptEl.value || "").trim();
+            const prompt = String(promptOverride != null ? promptOverride : (promptEl && promptEl.value || "")).trim();
             if (!prompt) throw new Error("Describe what Atlas should build, change, or fix before starting the mission.");
             const resolvedMissionModel = aiResolveModel();
             const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto", requestId: crypto.randomUUID() };
@@ -25598,6 +25623,10 @@ document.documentElement.classList.toggle(
             }
             if (!create.ok || !created.missionId) throw new Error(created.message || created.error || "Atlas could not queue the coding mission.");
             try { localStorage.setItem(AI_ATLAS_ACTIVE_MISSION_KEY, created.missionId); } catch (_) {}
+            if (source instanceof File && aiPendingProjectZip === source) {
+                aiPendingProjectZip = null;
+                aiRenderFilePreview();
+            }
             if (promptEl) promptEl.value = "";
             if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Mission queued. Atlas is preparing an isolated workspace…"; }
             await aiAtlasMonitorMission(created.missionId);
@@ -25624,32 +25653,31 @@ document.documentElement.classList.toggle(
             const zips = files.filter(aiIsZipFile);
             const ordinary = files.filter((f) => !aiIsZipFile(f));
             let ordinaryError = null;
+            if (zips.length) {
+                if (aiMode !== "atlas") {
+                    aiAppendTextMessage("Project ZIPs require Atlas mode. Switch to Atlas, then attach the ZIP again. No ZIP was uploaded.", true);
+                    return;
+                }
+                if (zips.length > 1) {
+                    aiAppendTextMessage("Attach one project ZIP at a time. No ZIP was staged.", true);
+                    return;
+                }
+                if (aiAtlasMissionStarting) {
+                    aiAppendTextMessage("An Atlas mission is already starting or running. Wait for it to finish before attaching another project ZIP.", true);
+                    return;
+                }
+                aiPendingProjectZip = zips[0];
+                aiRenderFilePreview();
+            }
             if (ordinary.length) {
                 try { await aiAddTextFiles(ordinary); } catch (error) { ordinaryError = error; }
             }
-            if (zips.length) await aiRouteZipToAtlasMission(zips);
             if (ordinaryError) throw ordinaryError;
         }
 
+        // Kept as a small compatibility wrapper for any existing call sites.
         async function aiRouteZipToAtlasMission(zips) {
-            if (aiMode !== "atlas") {
-                aiAppendTextMessage("ZIP project missions require Atlas mode. Switch to Atlas, describe what Atlas should build, change, or fix, then attach the ZIP again. Not uploaded: " + zips.map((f) => f.name).join(", ") + ".", true);
-                return;
-            }
-            if (zips.length > 1) {
-                aiAppendTextMessage("Attach one project ZIP at a time. No ZIP was uploaded.", true);
-                return;
-            }
-            if (aiAtlasMissionStarting) {
-                aiAppendTextMessage("An Atlas mission is already starting or running. Wait for it to finish before attaching another project ZIP.", true);
-                return;
-            }
-            const status = document.getElementById("aiAtlasMissionStatus");
-            aiSetAtlasMissionBusy(true);
-            if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Starting Atlas mission…"; }
-            try { await aiAtlasStartMission(zips[0]); }
-            catch (error) { if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error"); else aiAnnounce((error && error.message) || "Atlas mission failed"); }
-            finally { aiSetAtlasMissionBusy(false); }
+            await aiHandleAttachmentSelection(zips);
         }
 
         function aiUpdateAttachButtonLabels() {
@@ -25660,7 +25688,7 @@ document.documentElement.classList.toggle(
                 ? "Attach files (code, text, PDF, images) or a project ZIP for an Atlas mission"
                 : "Attach files (code, text, PDF, images)");
             btn.title = atlas
-                ? "Attach files (code, text, PDF, images) or a project ZIP to run an Atlas mission (describe the mission first) \u2014 or drag and drop"
+                ? "Attach files or a project ZIP, add your task description, then press Send to start the Atlas mission \u2014 or drag and drop"
                 : "Attach files (code, text, PDF, images) \u2014 or drag and drop. ZIP project missions require Atlas mode.";
         }
 
@@ -26176,6 +26204,46 @@ document.documentElement.classList.toggle(
             const message = input.value.trim();
             const pendingImage = aiSelectedImage;
             const pendingFiles = aiSelectedFiles.slice();
+
+            // ZIP missions must use the isolated workspace path, never the chat
+            // model's single-file JSON output contract. Send the prompt and ZIP together.
+            if (aiPendingProjectZip) {
+                if (!isAtlas) {
+                    aiAppendTextMessage("Switch to Atlas mode before sending a project ZIP. Your ZIP is still attached.", true);
+                    return;
+                }
+                if (!message) {
+                    aiAppendTextMessage("Add a task description before sending the project ZIP. The ZIP is still attached.", true);
+                    return;
+                }
+                if (pendingImage || pendingFiles.length) {
+                    aiAppendTextMessage("For a project ZIP mission, use the ZIP as the complete project input. Remove separately attached files or images before sending.", true);
+                    return;
+                }
+                if (aiAtlasMissionStarting) return;
+                aiShowWelcome(false);
+                aiAppendUserMessage(message);
+                aiConversationHistory.push({ role: "user", content: message + "\n[Project ZIP: " + aiPendingProjectZip.name + "]" });
+                aiSaveCurrentChat();
+                input.value = "";
+                aiBusy = true;
+                aiSetInputDisabled(true);
+                aiSetAtlasMissionBusy(true);
+                const status = document.getElementById("aiAtlasMissionStatus");
+                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Starting Atlas project mission…"; }
+                try {
+                    await aiAtlasStartMission(aiPendingProjectZip, message);
+                } catch (error) {
+                    if (aiPendingProjectZip) input.value = message;
+                    if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error");
+                    else aiAnnounce((error && error.message) || "Atlas mission failed");
+                } finally {
+                    aiBusy = false;
+                    aiSetInputDisabled(false);
+                    aiSetAtlasMissionBusy(false);
+                }
+                return;
+            }
 
             if (!message && !pendingImage && !pendingFiles.length) return;
             if (pendingFiles.length && !isAtlas) {
