@@ -9268,9 +9268,14 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     const expectedKey = aiMode === "atlas" ? "dailykrd_horizon_atlas_chats_v1" : "dailykrd_horizon_ai_chats_v1";
                     if (key === expectedKey && typeof aiLoadChats === "function") {
                         const selectedId = aiCurrentChatId;
+                        const before = aiChats.find(chat => chat.id === selectedId);
+                        const beforeSnapshot = before ? JSON.stringify({ id: before.id, title: before.title, messages: before.messages }) : "";
                         aiChats = aiLoadChats();
                         if (!aiChats.some(chat => chat.id === selectedId)) aiCurrentChatId = aiChats[0]?.id || "";
-                        if (!aiBusy) aiRenderCurrentChat();
+                        const after = aiChats.find(chat => chat.id === aiCurrentChatId);
+                        const afterSnapshot = after ? JSON.stringify({ id: after.id, title: after.title, messages: after.messages }) : "";
+                        // Ignore metadata-only/repeated storage notifications.
+                        if (!aiBusy && (selectedId !== aiCurrentChatId || beforeSnapshot !== afterSnapshot)) aiRenderCurrentChat();
                         aiRenderChatLists();
                         aiUpdateMemorySidebar();
                     }
@@ -23456,7 +23461,7 @@ document.documentElement.classList.toggle(
             <button type="button" id="aiImageRemoveBtn" aria-label="Remove image" title="Remove image">✕</button>
         </div>
 
-        <div id="aiTypingHost" aria-live="polite"></div>
+        <div id="aiTypingHost" aria-live="polite" hidden></div>
         <div class="aiInput">
             <button type="button" class="aiImageBtn aiGhostBtn ai-atlas-only" id="aiAtlasRepoMissionBtn" aria-label="Run isolated coding mission from GitHub" title="Import a GitHub repository into an isolated workspace">↗</button>
             <input
@@ -23515,7 +23520,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.2-file-marker-recovery";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.5-typing-layout-flicker-repair";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24537,6 +24542,7 @@ document.documentElement.classList.toggle(
         }
         function aiRenderCurrentChat() {
             const messages=aiMessagesEl(); if(!messages)return;
+            document.getElementById("aiLoading")?.remove();
             messages.replaceChildren();
             const chat=aiCurrentChat();
             aiConversationHistory=chat?chat.messages.slice():[];
@@ -24616,7 +24622,10 @@ document.documentElement.classList.toggle(
         }
 
         function aiShowThinking() {
-            const host = document.getElementById("aiTypingHost") || aiMessagesEl();
+            // Keep the thinking indicator inside the transcript scroll container.
+            // A sibling host between .ai-convo and .aiInput is displaced by iOS
+            // visual-viewport/keyboard resizing and can appear below the composer.
+            const host = aiMessagesEl();
             if (!host) return null;
             document.getElementById("aiLoading")?.remove();
             const el = document.createElement("div");
@@ -27956,7 +27965,7 @@ body:has(#ai.active) main { padding-top:0 !important; }
 }
 #ai.active .ai-workspace {
   display:grid; grid-template-columns:260px minmax(0,1fr); gap:0;
-  width:100%; height:calc(100dvh - 8px); min-height:520px; margin:0;
+  width:100%; height:100dvh; min-height:0; margin:0;
   background:var(--h-ai-bg); border:0; border-radius:0; overflow:hidden;
 }
 #ai.active .ai-workspace.sidebar-collapsed { grid-template-columns:0 minmax(0,1fr); }
@@ -29949,16 +29958,13 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 
 
 /* Horizon AI UI fixes — chat drawer, action menu, composer typing state, mobile sizing. */
-#ai.active #aiTypingHost {
-  display:flex !important; flex:0 0 auto !important; min-height:0 !important;
-  width:100% !important; padding:0 22px !important; box-sizing:border-box !important;
-  background:var(--h-ai-bg, #080b1b) !important;
-}
-#ai.active #aiTypingHost:empty { display:none !important; }
-#ai.active #aiTypingHost .ai-typing {
+/* Typing state now lives in #aiMessages, so it scrolls with the active transcript. */
+#aiTypingHost { display:none !important; }
+#ai.active #aiMessages .ai-typing {
   display:inline-flex !important; align-items:center !important; align-self:flex-start !important;
-  min-height:26px !important; margin:0 0 4px !important; padding:3px 0 !important;
   position:relative !important; inset:auto !important; transform:none !important;
+  min-height:26px !important; margin:8px 0 4px !important; padding:3px 0 !important;
+  max-width:100% !important;
 }
 .ai-chat-item { position:relative; }
 .ai-chat-actions-menu {
@@ -29992,8 +29998,6 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
   #ai.active .ai-chat-open { padding:8px 7px !important; }
   #ai.active .ai-chat-item-title { font-size:11px !important; }
   #ai.active .ai-chat-menu { flex-basis:26px !important; width:26px !important; height:30px !important; }
-  #ai.active #aiTypingHost { padding:0 14px !important; }
-  #ai.active #aiTypingHost .ai-typing { margin:0 0 2px !important; }
 }
 @media (max-width:380px) {
   #ai.active .ai-chat-sidebar { width:min(248px, calc(100vw - 24px)) !important; left:6px !important; padding:8px !important; }
