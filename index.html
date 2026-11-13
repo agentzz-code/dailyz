@@ -23458,7 +23458,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.10-file-marker-repair";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.11-stream-completion-repair";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -26328,6 +26328,40 @@ document.documentElement.classList.toggle(
             let generatedFiles = [];
             let reader = null;
 
+            // Long generations are allowed; only a completely silent stream is timed out.
+            async function readWithIdleTimeout(activeReader) {
+                let timeoutId;
+                try {
+                    return await Promise.race([
+                        activeReader.read(),
+                        new Promise((_, reject) => {
+                            timeoutId = setTimeout(() => {
+                                const error = new Error("No data arrived from the AI stream for 180 seconds. The connection may be stalled.");
+                                error.aiInfo = { kind: "timeout", status: 504, code: "AI_STREAM_IDLE_TIMEOUT", message: error.message, provider: isAtlas ? "nvidia" : "gemini" };
+                                reject(error);
+                            }, 180000);
+                        })
+                    ]);
+                } finally { if (timeoutId) clearTimeout(timeoutId); }
+            }
+
+            async function awaitConnectionWithTimeout(promise) {
+                let timeoutId;
+                try {
+                    return await Promise.race([
+                        promise,
+                        new Promise((_, reject) => {
+                            timeoutId = setTimeout(() => {
+                                const error = new Error("The AI provider did not establish a response connection within 180 seconds.");
+                                error.aiInfo = { kind: "timeout", status: 504, code: "AI_CONNECTION_TIMEOUT", message: error.message, provider: isAtlas ? "nvidia" : "gemini" };
+                                try { if (aiAbortController) aiAbortController.abort(); } catch (_) {}
+                                reject(error);
+                            }, 180000);
+                        })
+                    ]);
+                } finally { if (timeoutId) clearTimeout(timeoutId); }
+            }
+
             /* search is requested when the toggle is on, when the user says so, or (Horizon only)
                when the question clearly needs current information */
             const taskWorkflow = !isAtlas && aiIsTaskWorkflow(effectiveMessage);
@@ -26335,8 +26369,20 @@ document.documentElement.classList.toggle(
             const searchRequested = explicitlySearching || (!taskWorkflow && (aiWebSearch || (!isAtlas && aiNeedsWebSearch(effectiveMessage))));
             let requestedModel = aiResolveModel();
             if (!aiModelCatalog.loaded || aiModelCatalog.mode !== mode) {
-                await aiFetchModels(false);
-                requestedModel = aiResolveModel();
+                // Model discovery must not leave the chat spinner stuck forever.
+                try {
+                    await Promise.race([
+                        aiFetchModels(false),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("The model catalogue request did not finish within 30 seconds.")), 30000))
+                    ]);
+                    requestedModel = aiResolveModel();
+                } catch (catalogError) {
+                    streamError = {
+                        kind: "network", status: 504, code: "MODEL_CATALOGUE_TIMEOUT_OR_FAILURE",
+                        message: String(catalogError && catalogError.message || catalogError),
+                        provider: isAtlas ? "nvidia" : "gemini"
+                    };
+                }
             }
 
             function scheduleRender() {
@@ -26441,6 +26487,11 @@ document.documentElement.classList.toggle(
             }
 
             try {
+                if (streamError) {
+                    const catalogueFailure = new Error(streamError.message || "The model catalogue could not be loaded.");
+                    catalogueFailure.aiInfo = streamError;
+                    throw catalogueFailure;
+                }
                 if (!aiModelCatalog.loaded || aiModelCatalog.mode !== mode || !aiModelCatalog.models.some(m => m && m.available === true && (m.selectable === true || m.verifiedWorking === true))) {
                     throw new Error(aiModelCatalog.lastError || ("No selectable " + (isAtlas ? "NVIDIA" : "Gemini") + " chat model is available. Refresh the model list and check the matching Worker/API secret. No chat request was sent."));
                 }
@@ -26515,7 +26566,7 @@ document.documentElement.classList.toggle(
                         if (omitted.length) fileContext += "\nFILES NOT FULLY INCLUDED — DO NOT CLAIM TO HAVE REVIEWED THEM: " + omitted.join(", ");
                         requestBody.message = String(requestBody.message || "") + fileContext;
                     }
-                    const nvidiaResponse = await nvidiaAdapter.sendMessage(requestBody, signal);
+                    const nvidiaResponse = await awaitConnectionWithTimeout(nvidiaAdapter.sendMessage(requestBody, signal));
                     if (!nvidiaResponse.ok) {
                         const rawErrorBody = await nvidiaResponse.text();
                         let payload = null; try { payload = JSON.parse(rawErrorBody); } catch (_) {}
@@ -26537,7 +26588,7 @@ document.documentElement.classList.toggle(
                         reader = nvidiaResponse.body.getReader();
                         const decoder = new TextDecoder(); let buffer = "";
                         while (!sawDone) {
-                            const { done, value } = await reader.read();
+                            const { done, value } = await readWithIdleTimeout(reader);
                             if (value) {
                                 buffer += decoder.decode(value, { stream: true });
                                 let newlineIndex;
@@ -26555,7 +26606,7 @@ document.documentElement.classList.toggle(
                     }
                     sourceLabel = "NVIDIA NIM · " + String(requestedModel).replace(/^nvidia::/, "");
                 } else {
-                const response = await fetch(AI_ENDPOINT, {
+                const response = await awaitConnectionWithTimeout(fetch(AI_ENDPOINT, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -26563,7 +26614,7 @@ document.documentElement.classList.toggle(
                     },
                     body: JSON.stringify(requestBody),
                     signal: signal
-                });
+                }));
 
                 if (!response.ok) {
                     let payload = null;
@@ -26587,7 +26638,7 @@ document.documentElement.classList.toggle(
                     const decoder = new TextDecoder();
                     let buffer = "";
                     while (!sawDone) {
-                        const { done, value } = await reader.read();
+                        const { done, value } = await readWithIdleTimeout(reader);
                         if (value) {
                             buffer += decoder.decode(value, { stream: true });
                             let newlineIndex;
@@ -26607,7 +26658,7 @@ document.documentElement.classList.toggle(
                 }
                 } // end provider Worker route
             } catch (error) {
-                if (signal.aborted || aiStreamCancelled || (error && error.name === "AbortError")) {
+                if ((signal.aborted && !(error && error.aiInfo)) || aiStreamCancelled || (error && error.name === "AbortError" && !(error && error.aiInfo))) {
                     aiStreamCancelled = true;
                 } else {
                     if (error && error.aiInfo) streamError = error.aiInfo;
@@ -26631,10 +26682,28 @@ document.documentElement.classList.toggle(
                     try { console.warn("[Horizon AI] request failed:", { kind: streamError.kind, status: streamError.status, code: streamError.code, provider: streamError.provider, message: streamError.message, model: requestedModel }); } catch (e) {}
                 }
             } finally {
-                /* [DONE] or failure: release the connection */
-                if (reader) { try { await reader.cancel(); } catch (e) {} }
+                /*
+                 * [DONE] or failure: release the connection without blocking UI cleanup.
+                 * A ReadableStream reader's cancel() promise is controlled by the
+                 * underlying stream source. Some Worker/proxy streams never settle it,
+                 * even after the final [DONE] frame has arrived. Awaiting that promise
+                 * here used to prevent the code below from removing the spinner,
+                 * parsing ATLAS_FILE blocks, and rendering download cards forever.
+                 * Start cancellation, observe rejection, but never await it.
+                 */
+                if (reader) {
+                    try {
+                        const cancellation = reader.cancel();
+                        if (cancellation && typeof cancellation.catch === "function") {
+                            cancellation.catch(() => {});
+                        }
+                    } catch (cancelError) {
+                        // The stream may already be closed or locked; delivery can proceed.
+                    }
+                }
             }
 
+            // Do not let stream cleanup gate file extraction or the UI completion state.
             document.getElementById("aiLoading")?.remove();
             if (responseUsage) {
                 responseUsage.provider = responseUsage.provider || (aiMode === "atlas" ? "NVIDIA" : "Google Gemini");
