@@ -23400,8 +23400,6 @@ document.documentElement.classList.toggle(
         </div>
 
         <div class="aiInput">
-            <input type="file" id="aiAtlasProjectZipInput" accept=".zip,application/zip" hidden />
-            <button type="button" class="aiImageBtn aiGhostBtn ai-atlas-only" id="aiAtlasMissionBtn" aria-label="Run isolated coding mission from ZIP" title="Run an isolated coding mission from a project ZIP">📦</button>
             <button type="button" class="aiImageBtn aiGhostBtn ai-atlas-only" id="aiAtlasRepoMissionBtn" aria-label="Run isolated coding mission from GitHub" title="Import a GitHub repository into an isolated workspace">↗</button>
             <input
                 type="file"
@@ -23412,7 +23410,7 @@ document.documentElement.classList.toggle(
             <input
                 type="file"
                 id="aiFileInput"
-                accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf,.txt,.md,.markdown,.js,.jsx,.mjs,.cjs,.ts,.tsx,.py,.html,.htm,.css,.scss,.json,.jsonc,.yaml,.yml,.xml,.sql,.sh,.ps1,.java,.c,.h,.cpp,.hpp,.go,.rs,.php,.rb,.swift,.kt,.dart,.vue,.svelte,.csv,.log,.ini,.toml,.env.example,.properties,.gradle,.dockerfile,.gitignore"
+                accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf,.txt,.md,.markdown,.js,.jsx,.mjs,.cjs,.ts,.tsx,.py,.html,.htm,.css,.scss,.json,.jsonc,.yaml,.yml,.xml,.sql,.sh,.ps1,.java,.c,.h,.cpp,.hpp,.go,.rs,.php,.rb,.swift,.kt,.dart,.vue,.svelte,.csv,.log,.ini,.toml,.env.example,.properties,.gradle,.dockerfile,.gitignore,.zip,application/zip,application/x-zip-compressed"
                 multiple
                 hidden
             />
@@ -23452,7 +23450,7 @@ document.documentElement.classList.toggle(
         </div>
         <div id="aiFilePreviewWrap" hidden aria-live="polite"></div>
         <div id="aiAtlasMissionStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
-        <div id="aiDropOverlay" aria-hidden="true"><div>📎 Drop files to attach<br><small>Code, text, PDF or image files</small></div></div>
+        <div id="aiDropOverlay" aria-hidden="true"><div>📎 Drop files to attach<br><small>Code, text, PDF or image files (project ZIPs in Atlas mode)</small></div></div>
 
         <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
     </div>
@@ -25209,7 +25207,7 @@ document.documentElement.classList.toggle(
 
         document.getElementById("aiFileBtn")?.addEventListener("click", () => document.getElementById("aiFileInput")?.click());
         document.getElementById("aiFileInput")?.addEventListener("change", async (event) => {
-            try { await aiAddTextFiles(event.target.files); }
+            try { await aiHandleAttachmentSelection(event.target.files); }
             catch (error) { if (!(error && error.aiReported)) aiAppendTextMessage(String(error && error.message || "Could not read the selected files."), true); }
             finally { event.target.value = ""; }
         });
@@ -25227,7 +25225,7 @@ document.documentElement.classList.toggle(
                 if (!aiActive() || !hasFiles(e)) return;
                 e.preventDefault(); hide();
                 if (aiBusy) { aiAppendTextMessage("Wait for the current reply to finish (or press Stop) before attaching files.", true); return; }
-                try { await aiAddTextFiles(e.dataTransfer.files); }
+                try { await aiHandleAttachmentSelection(e.dataTransfer.files); }
                 catch (error) { if (!(error && error.aiReported)) aiAppendTextMessage(String(error && error.message || "Could not read the dropped files."), true); }
             });
             window.addEventListener("blur", hide);
@@ -25549,33 +25547,82 @@ document.documentElement.classList.toggle(
             await aiAtlasMonitorMission(created.missionId);
         }
 
-        function aiBindAtlasMissionControl() {
-            const button = document.getElementById("aiAtlasMissionBtn");
+        let aiAtlasMissionStarting = false;
+
+        function aiSetAtlasMissionBusy(busy) {
+            aiAtlasMissionStarting = !!busy;
             const repoButton = document.getElementById("aiAtlasRepoMissionBtn");
-            const input = document.getElementById("aiAtlasProjectZipInput");
-            if (!button || !input || button.dataset.bound) return;
-            button.dataset.bound = "1";
+            if (repoButton) repoButton.disabled = !!busy;
+        }
+
+        function aiIsZipFile(file) {
+            return !!file && (/\.zip$/i.test(String(file.name || "")) || /^application\/(x-)?zip(-compressed)?$/i.test(String(file.type || "")));
+        }
+
+        /* Unified attachment router (📎 picker and drag-and-drop).
+           Ordinary files -> aiAddTextFiles() (multi-file, PDFs, images, text/code).
+           A project ZIP  -> aiAtlasStartMission(file), Atlas mode only. ZIPs never reach aiAddTextFiles(). */
+        async function aiHandleAttachmentSelection(fileList) {
+            const files = Array.from(fileList || []);
+            if (!files.length) return;
+            const zips = files.filter(aiIsZipFile);
+            const ordinary = files.filter((f) => !aiIsZipFile(f));
+            let ordinaryError = null;
+            if (ordinary.length) {
+                try { await aiAddTextFiles(ordinary); } catch (error) { ordinaryError = error; }
+            }
+            if (zips.length) await aiRouteZipToAtlasMission(zips);
+            if (ordinaryError) throw ordinaryError;
+        }
+
+        async function aiRouteZipToAtlasMission(zips) {
+            if (aiMode !== "atlas") {
+                aiAppendTextMessage("ZIP project missions require Atlas mode. Switch to Atlas, describe what Atlas should build, change, or fix, then attach the ZIP again. Not uploaded: " + zips.map((f) => f.name).join(", ") + ".", true);
+                return;
+            }
+            if (zips.length > 1) {
+                aiAppendTextMessage("Attach one project ZIP at a time. No ZIP was uploaded.", true);
+                return;
+            }
+            if (aiAtlasMissionStarting) {
+                aiAppendTextMessage("An Atlas mission is already starting or running. Wait for it to finish before attaching another project ZIP.", true);
+                return;
+            }
+            const status = document.getElementById("aiAtlasMissionStatus");
+            aiSetAtlasMissionBusy(true);
+            if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Starting Atlas mission…"; }
+            try { await aiAtlasStartMission(zips[0]); }
+            catch (error) { if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error"); else aiAnnounce((error && error.message) || "Atlas mission failed"); }
+            finally { aiSetAtlasMissionBusy(false); }
+        }
+
+        function aiUpdateAttachButtonLabels() {
+            const btn = document.getElementById("aiFileBtn");
+            if (!btn) return;
+            const atlas = aiMode === "atlas";
+            btn.setAttribute("aria-label", atlas
+                ? "Attach files (code, text, PDF, images) or a project ZIP for an Atlas mission"
+                : "Attach files (code, text, PDF, images)");
+            btn.title = atlas
+                ? "Attach files (code, text, PDF, images) or a project ZIP to run an Atlas mission (describe the mission first) \u2014 or drag and drop"
+                : "Attach files (code, text, PDF, images) \u2014 or drag and drop. ZIP project missions require Atlas mode.";
+        }
+
+        function aiBindAtlasMissionControl() {
+            const repoButton = document.getElementById("aiAtlasRepoMissionBtn");
+            if (!repoButton || repoButton.dataset.bound) return;
+            repoButton.dataset.bound = "1";
             try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission && aiMode === "atlas") aiAtlasMonitorMission(activeMission); } catch (_) {}
-            button.addEventListener("click", () => { if (aiMode !== "atlas") return; input.click(); });
-            repoButton?.addEventListener("click", async () => {
-                if (aiMode !== "atlas") return;
+            repoButton.addEventListener("click", async () => {
+                if (aiMode !== "atlas" || aiAtlasMissionStarting) return;
                 const url = window.prompt("GitHub repository URL (public repository or private repository with a read-only token configured):");
                 if (!url) return;
-                button.disabled = true; if (repoButton) repoButton.disabled = true;
+                aiSetAtlasMissionBusy(true);
                 const status = document.getElementById("aiAtlasMissionStatus");
                 if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Importing GitHub repository…"; }
                 try { await aiAtlasStartMission(url); }
                 catch (error) { if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error"); else aiAnnounce(error.message || "Atlas mission failed"); }
-                finally { button.disabled = false; if (repoButton) repoButton.disabled = false; }
-            });
-            input.addEventListener("change", async () => {
-                const file = input.files && input.files[0]; input.value = ""; if (!file) return;
-                button.disabled = true;
-                const status = document.getElementById("aiAtlasMissionStatus");
-                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Starting Atlas mission…"; }
-                try { await aiAtlasStartMission(file); }
-                catch (error) { if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error"); else aiAnnounce(error.message || "Atlas mission failed"); }
-                finally { button.disabled = false; }
+                finally { aiSetAtlasMissionBusy(false); }
             });
         }
 
@@ -25920,6 +25967,7 @@ document.documentElement.classList.toggle(
 
             // Update every mode-dependent label/placeholder immediately.
             aiApplyLanguage();
+            aiUpdateAttachButtonLabels();
 
             const ctx = document.getElementById("aiProjectContextInput");
             if (ctx) ctx.value = aiSettings.projectContext || "";
