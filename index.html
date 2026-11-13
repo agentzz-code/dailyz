@@ -24489,12 +24489,21 @@ document.documentElement.classList.toggle(
             chat.updatedAt = Date.now();
             aiPersistChats();
         }
+        let aiChatListRenderSignature = "";
         function aiRenderChatLists() {
             const search = (document.getElementById("aiChatSearch")?.value || "").trim().toLowerCase();
             const pinnedEl = document.getElementById("aiPinnedChatList"), recentEl = document.getElementById("aiRecentChatList");
             if (!pinnedEl || !recentEl) return;
             const sorted = [...aiChats].sort((a,b) => (Number(b.updatedAt)||0) - (Number(a.updatedAt)||0));
             const filtered = sorted.filter(c => !search || (c.title + " " + c.messages.map(m => m.content).join(" ")).toLowerCase().includes(search));
+            // Persistence can run repeatedly while a response streams. Do not destroy and
+            // recreate the sidebar DOM unless something visible in the list actually changed.
+            // In particular, ignore updatedAt and assistant-token changes: they caused flicker.
+            const signature = JSON.stringify({ mode: aiMode, current: aiCurrentChatId, search,
+                chats: filtered.map(c => [c.id, c.title, !!c.pinned,
+                    (c.messages || []).filter(m => m.role === "user").slice(-1)[0]?.content || ""]) });
+            if (signature === aiChatListRenderSignature) return;
+            aiChatListRenderSignature = signature;
             const draw = (target, chats, emptyText) => {
                 target.replaceChildren();
                 if (!chats.length) { const empty=document.createElement("div"); empty.className="ai-chat-list-empty"; empty.textContent=search?"No matching chats":emptyText; target.appendChild(empty); return; }
@@ -26286,6 +26295,7 @@ document.documentElement.classList.toggle(
             if (previousMode !== next) {
                 aiPersistChats();
                 aiMode = next;
+                aiChatListRenderSignature = "";
                 aiSyncSelectedProvider();
                 try { localStorage.setItem(AI_MODE_STORAGE_KEY, aiMode); } catch (e) {}
                 aiChats = aiLoadChats();
@@ -29987,5 +29997,22 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 }
 @media (max-width:380px) {
   #ai.active .ai-chat-sidebar { width:min(248px, calc(100vw - 24px)) !important; left:6px !important; padding:8px !important; }
+}
+
+
+/* v33.4 regression repair: stable chat-list DOM and correctly aligned iOS input caret. */
+@media (max-width: 760px) {
+  #ai.active #aiBox.horizon-ai-page .aiInput {
+    display:flex !important; align-items:center !important;
+  }
+  #ai.active #aiBox.horizon-ai-page .aiInput input#aiInput {
+    display:block !important; flex:1 1 0 !important; min-width:0 !important;
+    height:42px !important; min-height:42px !important; max-height:42px !important;
+    margin:0 !important; padding:0 5px !important; line-height:20px !important;
+    align-self:center !important; position:relative !important; top:0 !important;
+    transform:none !important; box-sizing:border-box !important;
+    -webkit-appearance:none !important; appearance:none !important;
+    caret-color:#6f8cff !important; vertical-align:middle !important;
+  }
 }
 </style>
