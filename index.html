@@ -23520,7 +23520,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.5-typing-layout-flicker-repair";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.2-file-marker-recovery";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24622,11 +24622,11 @@ document.documentElement.classList.toggle(
         }
 
         function aiShowThinking() {
-            // Keep the thinking indicator inside the transcript scroll container.
-            // A sibling host between .ai-convo and .aiInput is displaced by iOS
-            // visual-viewport/keyboard resizing and can appear below the composer.
-            const host = aiMessagesEl();
-            if (!host) return null;
+            // .ai-convo is the actual scroll viewport. #aiMessages is a
+            // non-scrolling flex child in the responsive layout.
+            const viewport = aiScrollViewportEl();
+            const messages = aiMessagesEl();
+            if (!viewport || !messages) return null;
             document.getElementById("aiLoading")?.remove();
             const el = document.createElement("div");
             el.className = "ai-message ai-typing";
@@ -24637,7 +24637,9 @@ document.documentElement.classList.toggle(
                 '<span class="ai-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
                 '<span class="ai-typing-label"></span>';
             el.querySelector(".ai-typing-label").textContent = aiT("thinking");
-            host.appendChild(el);
+            const jump = document.getElementById("aiScrollBottom");
+            if (jump && jump.parentElement === viewport) viewport.insertBefore(el, jump);
+            else viewport.appendChild(el);
             return el;
         }
 
@@ -29958,13 +29960,15 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 
 
 /* Horizon AI UI fixes — chat drawer, action menu, composer typing state, mobile sizing. */
-/* Typing state now lives in #aiMessages, so it scrolls with the active transcript. */
+/* Typing status is a direct child of .ai-convo, the actual scroll viewport. */
 #aiTypingHost { display:none !important; }
-#ai.active #aiMessages .ai-typing {
+#ai.active .ai-convo > #aiLoading.ai-typing {
   display:inline-flex !important; align-items:center !important; align-self:flex-start !important;
-  position:relative !important; inset:auto !important; transform:none !important;
-  min-height:26px !important; margin:8px 0 4px !important; padding:3px 0 !important;
-  max-width:100% !important;
+  flex:0 0 auto !important; position:relative !important; inset:auto !important;
+  float:none !important; clear:both !important; transform:none !important;
+  width:max-content !important; max-width:calc(100% - 8px) !important;
+  min-height:26px !important; margin:8px 0 10px !important; padding:3px 12px !important;
+  box-sizing:border-box !important; z-index:1 !important;
 }
 .ai-chat-item { position:relative; }
 .ai-chat-actions-menu {
