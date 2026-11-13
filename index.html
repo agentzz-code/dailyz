@@ -26470,7 +26470,12 @@ document.documentElement.classList.toggle(
                         // allowance routinely created >128K-token prompts from a
                         // single ~1MB text file. Keep CoArena chat payloads bounded;
                         // NVIDIA retains its larger provider-specific allowance.
-                        const providerFileBudget = selectedIsCoarena ? 210000 : 600000;
+                        // CoArena's 128K context still needs a conservative prompt budget.
+                        // NVIDIA Atlas models include 256K/1M-context options, so the
+                        // old 600K-character browser ceiling was needlessly starving
+                        // large file reviews. The Worker performs the authoritative
+                        // token/context check before contacting the provider.
+                        const providerFileBudget = selectedIsCoarena ? 210000 : 2400000;
                         let remaining = Math.max(0, Math.min(providerFileBudget, providerFileBudget - String(requestBody.message || "").length - fileContext.length));
                         const omitted = [];
                         const manifest = allProjectFiles.map(file => {
@@ -26490,6 +26495,13 @@ document.documentElement.classList.toggle(
                             const block = header + content.slice(0, take) + (truncated ? "\n[FILE CONTENT TRUNCATED: " + (content.length - take) + " characters were not sent. Treat this file as incomplete and ask for the missing sections before making risky edits.]\n" : "\n");
                             fileContext += block; remaining -= block.length;
                             if (truncated) omitted.push(path + " (partial; " + (content.length - take) + " chars omitted)");
+                        }
+                        if (omitted.length && fileDeliveryRequested) {
+                            // Never ask a model to produce a replacement from partial
+                            // source. That creates plausible but destructive downloads.
+                            // Fail before network transmission and tell the user exactly
+                            // which attachments need a smaller scope.
+                            throw new Error("Atlas stopped before sending this file-delivery request because some attached files would exceed the selected model's safe input budget: " + omitted.join("; ") + ". No provider request was sent and no replacement file was generated. Select fewer/smaller files or use a model with a larger context window.");
                         }
                         if (omitted.length) fileContext += "\nFILES NOT FULLY INCLUDED — DO NOT CLAIM TO HAVE REVIEWED THEM: " + omitted.join(", ");
                         requestBody.message = String(requestBody.message || "") + fileContext;
@@ -26657,7 +26669,7 @@ document.documentElement.classList.toggle(
                     kind: "invalid",
                     status: 502,
                     code: "ATLAS_OUTPUT_TOKEN_LIMIT",
-                    message: "NVIDIA finished this response with finish_reason=length. The model exhausted the context-aware output budget before completing every requested file. No partial download was created. Atlas now allocates up to NVIDIA's 131,072-token hosted completion ceiling for Nemotron 3.5 Super VL, reduced only when the supplied input leaves insufficient context room. Reduce the combined task scope or attached context if this repeats.",
+                    message: "NVIDIA finished this response with finish_reason=length. The selected model exhausted its configured output-token budget before completing every requested file. No partial download was created. Atlas already requested the maximum output configured for this model, reduced only when the supplied input leaves insufficient context room. Reduce the task scope or attached context, or select a model with a larger documented output budget.",
                     provider: "nvidia"
                 };
             } else if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone) {
