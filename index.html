@@ -7975,14 +7975,6 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 <aside class="ai-chat-sidebar" id="aiChatSidebar" aria-label="Chats and memory">
                     <button type="button" class="ai-new-chat-primary" id="aiSidebarNewChatBtn"><span aria-hidden="true">＋</span> New chat</button>
                     <label class="ai-chat-search-wrap"><span aria-hidden="true">⌕</span><input type="search" id="aiChatSearch" placeholder="Search chats" autocomplete="off" aria-label="Search chats"></label>
-                    <div class="ai-bulk-toolbar" id="aiBulkToolbar">
-                        <button type="button" id="aiBulkSelectBtn">Select chats</button>
-                        <div id="aiBulkActions" hidden>
-                            <button type="button" id="aiBulkSelectAllBtn">Select all</button>
-                            <button type="button" id="aiBulkDeleteBtn" class="danger" disabled>Delete selected (0)</button>
-                            <button type="button" id="aiBulkCancelBtn">Cancel</button>
-                        </div>
-                    </div>
                     <div class="ai-sidebar-section-title">Pinned</div>
                     <div class="ai-chat-list" id="aiPinnedChatList"><div class="ai-chat-list-empty">Pinned chats appear here</div></div>
                     <div class="ai-sidebar-section-title ai-recent-heading">Recent</div>
@@ -12922,8 +12914,6 @@ done: "تەواو",
                 currentUser =
                     user;
 
-                if (user) aiStartCloudChatSync(user.uid);
-                else aiStopCloudChatSync();
 
                 if (user) {
 
@@ -24490,70 +24480,10 @@ document.documentElement.classList.toggle(
                 aiChats = aiChats.slice(0,80).map(c => ({...c, messages:(c.messages || []).slice(-40)}));
                 localStorage.setItem(aiChatsStorageKey(), JSON.stringify(aiChats));
                 localStorage.setItem(aiCurrentChatStorageKey(), aiCurrentChatId);
-                if (currentUser && !aiApplyingCloudChats) aiChats.forEach(aiCloudSaveChat);
             } catch (e) {}
             aiRenderChatLists();
             aiUpdateMemorySidebar();
         }
-        let aiCloudChatUnsubscribe = null;
-        let aiCloudChatUid = "";
-        let aiCloudChatMode = "";
-        let aiApplyingCloudChats = false;
-        function aiCloudChatsCollection(uid, mode) {
-            return collection(db, "users", uid, mode === "atlas" ? "atlasChats" : "horizonChats");
-        }
-        function aiStopCloudChatSync() {
-            if (aiCloudChatUnsubscribe) { aiCloudChatUnsubscribe(); aiCloudChatUnsubscribe = null; }
-            aiCloudChatUid = "";
-            aiCloudChatMode = "";
-        }
-        function aiStartCloudChatSync(uid) {
-            if (!uid) { aiStopCloudChatSync(); return; }
-            if (aiCloudChatUid === uid && aiCloudChatMode === aiMode && aiCloudChatUnsubscribe) return;
-            aiStopCloudChatSync();
-            aiCloudChatUid = uid;
-            const modeAtStart = aiMode;
-            aiCloudChatMode = modeAtStart;
-            const localSnapshot = aiChats.map(chat => ({...chat, messages:(chat.messages||[]).slice(-40)}));
-            const col = aiCloudChatsCollection(uid, modeAtStart);
-            aiCloudChatUnsubscribe = onSnapshot(col, async snapshot => {
-                if (aiCloudChatUid !== uid || aiMode !== modeAtStart) return;
-                const remote = snapshot.docs.map(item => ({id:item.id, ...item.data()}))
-                    .filter(chat => typeof chat.id === "string" && Array.isArray(chat.messages))
-                    .map(chat => ({id:chat.id,title:String(chat.title||"New chat").slice(0,100),messages:chat.messages.filter(m=>m&&(m.role==="user"||m.role==="assistant")&&typeof m.content==="string").slice(-40),updatedAt:Number(chat.updatedAt)||Date.now(),pinned:!!chat.pinned}));
-                if (!snapshot.metadata.fromCache && snapshot.empty && localSnapshot.length) {
-                    // First sign-in migration: upload this device's conversations if account has none.
-                    await Promise.all(localSnapshot.map(chat => setDoc(doc(col, chat.id), chat)));
-                    return;
-                }
-                if (snapshot.metadata.fromCache && !remote.length) return;
-                // Merge local-only conversations into the account collection instead
-                // of silently discarding chats created on a second device.
-                if (!snapshot.metadata.fromCache && remote.length) {
-                    const remoteIds = new Set(remote.map(chat => chat.id));
-                    const localOnly = localSnapshot.filter(chat => !remoteIds.has(chat.id));
-                    if (localOnly.length) await Promise.all(localOnly.map(chat => setDoc(doc(col, chat.id), chat)));
-                }
-                aiApplyingCloudChats = true;
-                try {
-                    const merged = new Map(remote.map(chat => [chat.id, chat]));
-                    localSnapshot.forEach(chat => { if (!merged.has(chat.id)) merged.set(chat.id, chat); });
-                    aiChats = [...merged.values()].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)).slice(0,80);
-                    if (!aiChats.length) aiChats = [{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false}];
-                    if (!aiChats.some(chat=>chat.id===aiCurrentChatId)) aiCurrentChatId=aiChats[0].id;
-                    localStorage.setItem(aiChatsStorageKey(),JSON.stringify(aiChats));
-                    localStorage.setItem(aiCurrentChatStorageKey(),aiCurrentChatId);
-                    aiRenderChatLists(); aiRenderCurrentChat(); aiUpdateMemorySidebar();
-                } finally { aiApplyingCloudChats = false; }
-            }, error => console.error("AI chat cloud sync failed:", error));
-        }
-        function aiCloudSaveChat(chat) {
-            if (!currentUser || aiApplyingCloudChats || !chat?.id) return;
-            const uid = currentUser.uid, mode = aiMode;
-            setDoc(doc(aiCloudChatsCollection(uid, mode), chat.id), {...chat, mode, updatedAt:Number(chat.updatedAt)||Date.now()})
-                .catch(error => console.error("AI chat cloud save failed:", error));
-        }
-
         function aiCurrentChat() { return aiChats.find(c => c.id === aiCurrentChatId) || null; }
         function aiSaveCurrentChat() {
             let chat = aiCurrentChat();
@@ -24563,34 +24493,6 @@ document.documentElement.classList.toggle(
             chat.updatedAt = Date.now();
             aiPersistChats();
         }
-        let aiBulkSelectMode = false;
-        const aiSelectedChatIds = new Set();
-        function aiUpdateBulkToolbar() {
-            const actions = document.getElementById("aiBulkActions");
-            const start = document.getElementById("aiBulkSelectBtn");
-            const del = document.getElementById("aiBulkDeleteBtn");
-            if (actions) actions.hidden = !aiBulkSelectMode;
-            if (start) start.hidden = aiBulkSelectMode;
-            if (del) { del.disabled = aiSelectedChatIds.size === 0; del.textContent = "Delete selected (" + aiSelectedChatIds.size + ")"; }
-        }
-        function aiExitBulkSelect() {
-            aiBulkSelectMode = false; aiSelectedChatIds.clear();
-            aiRenderChatLists(); aiUpdateBulkToolbar();
-        }
-        async function aiDeleteSelectedChats() {
-            if (!aiSelectedChatIds.size || aiBusy) return;
-            const ids = [...aiSelectedChatIds];
-            aiChats = aiChats.filter(chat => !aiSelectedChatIds.has(chat.id));
-            if (!aiChats.length) aiChats = [{ id: aiMakeChatId(), title:"New chat", messages:[], updatedAt:Date.now(), pinned:false }];
-            if (aiSelectedChatIds.has(aiCurrentChatId)) aiCurrentChatId = aiChats[0].id;
-            aiSelectedChatIds.clear(); aiBulkSelectMode = false;
-            aiPersistChats(); aiRenderCurrentChat(); aiUpdateBulkToolbar();
-            if (currentUser) {
-                const col = collection(db, "users", currentUser.uid, aiMode === "atlas" ? "atlasChats" : "horizonChats");
-                await Promise.all(ids.map(id => deleteDoc(doc(col, id)).catch(error => console.error("Cloud chat deletion failed:", error))));
-            }
-        }
-
         let aiChatListRenderSignature = "";
         function aiRenderChatLists() {
             const search = (document.getElementById("aiChatSearch")?.value || "").trim().toLowerCase();
@@ -24610,22 +24512,17 @@ document.documentElement.classList.toggle(
                 target.replaceChildren();
                 if (!chats.length) { const empty=document.createElement("div"); empty.className="ai-chat-list-empty"; empty.textContent=search?"No matching chats":emptyText; target.appendChild(empty); return; }
                 chats.forEach(chat => {
-                    const item=document.createElement("div"); item.className="ai-chat-item"+(chat.id===aiCurrentChatId?" active":"")+(aiBulkSelectMode?" ai-selectable":"")+(aiSelectedChatIds.has(chat.id)?" ai-selected":"");
-                    if (aiBulkSelectMode) {
-                        const check=document.createElement("input"); check.type="checkbox"; check.className="ai-chat-select-check"; check.checked=aiSelectedChatIds.has(chat.id); check.setAttribute("aria-label","Select "+(chat.title||"chat"));
-                        check.addEventListener("change",()=>{if(check.checked)aiSelectedChatIds.add(chat.id);else aiSelectedChatIds.delete(chat.id);item.classList.toggle("ai-selected",check.checked);aiUpdateBulkToolbar();});
-                        item.appendChild(check);
-                    }
+                    const item=document.createElement("div"); item.className="ai-chat-item"+(chat.id===aiCurrentChatId?" active":"");
                     const open=document.createElement("button"); open.type="button"; open.className="ai-chat-open"; open.title=chat.title; open.setAttribute("aria-current",chat.id===aiCurrentChatId?"page":"false");
                     const title=document.createElement("span"); title.className="ai-chat-item-title"; title.textContent=chat.title || "New chat";
                     const preview=document.createElement("span"); preview.className="ai-chat-item-preview"; preview.textContent=(chat.messages||[]).filter(m=>m.role==="user").slice(-1)[0]?.content?.replace(/\s+/g," ") || "Start a conversation";
-                    open.append(title,preview); open.addEventListener("click",()=>{if(aiBulkSelectMode){if(aiSelectedChatIds.has(chat.id))aiSelectedChatIds.delete(chat.id);else aiSelectedChatIds.add(chat.id);aiRenderChatLists();aiUpdateBulkToolbar();}else aiSwitchChat(chat.id);});
+                    open.append(title,preview); open.addEventListener("click",()=>aiSwitchChat(chat.id));
                     const menu=document.createElement("button"); menu.type="button"; menu.className="ai-chat-menu"; menu.textContent="···"; menu.setAttribute("aria-label","Chat options"); menu.title="Chat options";
                     const actions=document.createElement("div"); actions.className="ai-chat-actions-menu"; actions.hidden=true;
                     const addAction=(label,handler,kind="")=>{const actionButton=document.createElement("button");actionButton.type="button";actionButton.className="ai-chat-action-button"+(kind?" "+kind:"");actionButton.textContent=label;actionButton.addEventListener("click",event=>{event.stopPropagation();actions.hidden=true;handler();});actions.appendChild(actionButton);};
                     addAction(chat.pinned?"Unpin":"Pin",()=>{chat.pinned=!chat.pinned;aiPersistChats();});
                     addAction("Rename",()=>{const name=window.prompt("Rename chat",chat.title||"");if(name&&name.trim()){chat.title=name.trim().slice(0,100);chat.updatedAt=Date.now();aiPersistChats();}});
-                    addAction("Delete",()=>aiDeleteChat(chat.id),"danger");
+                    addAction("Delete",()=>{if(window.confirm("Delete this chat? This cannot be undone."))aiDeleteChat(chat.id);},"danger");
                     menu.addEventListener("click",event=>{event.stopPropagation();document.querySelectorAll(".ai-chat-actions-menu").forEach(other=>{if(other!==actions)other.hidden=true;});actions.hidden=!actions.hidden;});
                     actions.addEventListener("click",event=>event.stopPropagation());
                     item.append(open,menu,actions); target.appendChild(item);
@@ -24640,7 +24537,7 @@ document.documentElement.classList.toggle(
             const summary=document.getElementById("aiSidebarMemorySummary");
             if(summary){const text=(aiSettings.memory||"").trim();summary.textContent=text?"Saved preferences are active":"Save preferences to personalize replies";}
             const status=document.getElementById("aiMemoryStatusText");
-            if(status) status.textContent = aiChats.length + (aiChats.length===1?(currentUser?" synced conversation":" saved conversation on this device"):(currentUser?" synced conversations":" saved conversations on this device"));
+            if(status) status.textContent = aiChats.length + (aiChats.length===1?" saved conversation on this device":" saved conversations on this device");
         }
         function aiRenderCurrentChat() {
             const messages=aiMessagesEl(); if(!messages)return;
@@ -24680,7 +24577,6 @@ document.documentElement.classList.toggle(
             if(aiBusy)return;
             if (typeof aiProjectFileContexts !== "undefined") aiProjectFileContexts.delete(id);
             aiChats=aiChats.filter(c=>c.id!==id);
-            if(currentUser) deleteDoc(doc(aiCloudChatsCollection(currentUser.uid, aiMode), id)).catch(error=>console.error("Cloud chat deletion failed:",error));
             if(!aiChats.length)aiChats=[{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false}];
             if(aiCurrentChatId===id)aiCurrentChatId=aiChats[0].id;
             aiPersistChats(); aiRenderCurrentChat();
@@ -24725,10 +24621,11 @@ document.documentElement.classList.toggle(
         }
 
         function aiShowThinking() {
-            // The status is part of the message stream, never a sibling row
-            // between the conversation viewport and the composer.
+            // .ai-convo is the actual scroll viewport. #aiMessages is a
+            // non-scrolling flex child in the responsive layout.
+            const viewport = aiScrollViewportEl();
             const messages = aiMessagesEl();
-            if (!messages) return null;
+            if (!viewport || !messages) return null;
             document.getElementById("aiLoading")?.remove();
             const el = document.createElement("div");
             el.className = "ai-message ai-typing";
@@ -24739,8 +24636,9 @@ document.documentElement.classList.toggle(
                 '<span class="ai-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
                 '<span class="ai-typing-label"></span>';
             el.querySelector(".ai-typing-label").textContent = aiT("thinking");
-            messages.appendChild(el);
-            aiScrollToBottom();
+            const jump = document.getElementById("aiScrollBottom");
+            if (jump && jump.parentElement === viewport) viewport.insertBefore(el, jump);
+            else viewport.appendChild(el);
             return el;
         }
 
@@ -26409,7 +26307,6 @@ document.documentElement.classList.toggle(
             if (previousMode !== next) {
                 aiPersistChats();
                 aiMode = next;
-                if (currentUser) aiStartCloudChatSync(currentUser.uid);
                 aiChatListRenderSignature = "";
                 aiSyncSelectedProvider();
                 try { localStorage.setItem(AI_MODE_STORAGE_KEY, aiMode); } catch (e) {}
@@ -27461,10 +27358,6 @@ document.documentElement.classList.toggle(
             document.getElementById("aiPageNewChatBtn")?.addEventListener("click", () => aiCreateNewChat());
             document.getElementById("aiSidebarNewChatBtn")?.addEventListener("click", () => aiCreateNewChat());
             document.getElementById("aiChatSearch")?.addEventListener("input", aiRenderChatLists);
-        document.getElementById("aiBulkSelectBtn")?.addEventListener("click",()=>{aiBulkSelectMode=true;aiSelectedChatIds.clear();aiRenderChatLists();aiUpdateBulkToolbar();});
-        document.getElementById("aiBulkSelectAllBtn")?.addEventListener("click",()=>{aiChats.forEach(chat=>aiSelectedChatIds.add(chat.id));aiRenderChatLists();aiUpdateBulkToolbar();});
-        document.getElementById("aiBulkDeleteBtn")?.addEventListener("click",aiDeleteSelectedChats);
-        document.getElementById("aiBulkCancelBtn")?.addEventListener("click",aiExitBulkSelect);
             document.getElementById("aiSidebarMemoryBtn")?.addEventListener("click", () => aiOpenSettings());
             document.getElementById("aiChatMemoryToggle")?.addEventListener("click", () => { const key=AI_CHAT_MEMORY_CONTEXT_KEY; const enabled=localStorage.getItem(key)==="false"; localStorage.setItem(key,enabled?"true":"false"); aiUpdateMemorySidebar(); });
             document.getElementById("aiSidebarToggleBtn")?.addEventListener("click", (e) => { 
@@ -30131,29 +30024,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     caret-color:#6f8cff !important; vertical-align:middle !important;
   }
 }
-</style>
-
-<style id="ai-typing-stream-fix-v338">
-#ai.active #aiMessages { display:flex !important; flex-direction:column !important; align-items:stretch; }
-#ai.active #aiMessages > #aiLoading.ai-typing {
-  display:inline-flex !important; align-self:flex-start !important;
-  flex:0 0 auto !important; width:max-content !important;
-  max-width:min(82%, 360px) !important; min-height:28px !important;
-  box-sizing:border-box !important; margin:10px 0 12px !important;
-  padding:7px 12px !important; float:none !important; clear:both !important;
-  position:relative !important; inset:auto !important; transform:none !important;
-  border-radius:16px !important; background:rgba(120,120,140,.13) !important;
-}
-#aiTypingHost { display:none !important; }
-</style>
-
-<style id="ai-bulk-chat-select-styles">
-.ai-bulk-toolbar { display:flex; gap:6px; padding:7px 10px; flex-wrap:wrap; }
-.ai-bulk-toolbar button { border:1px solid rgba(150,150,170,.28); border-radius:9px; padding:6px 9px; background:rgba(130,130,150,.12); color:inherit; font:inherit; font-size:12px; cursor:pointer; }
-#aiBulkActions { display:flex; gap:6px; flex-wrap:wrap; width:100%; }
-#aiBulkActions[hidden] { display:none !important; }
-.ai-chat-item.ai-selectable { display:flex; align-items:center; gap:7px; }
-.ai-chat-select-check { flex:0 0 auto; width:17px; height:17px; accent-color:var(--ai-accent,#8b6cf6); }
-.ai-chat-item.ai-selectable .ai-chat-open { flex:1 1 auto; min-width:0; }
-.ai-chat-item.ai-selected { outline:1px solid var(--ai-accent,#8b6cf6); background:rgba(130,100,240,.12); }
 </style>
