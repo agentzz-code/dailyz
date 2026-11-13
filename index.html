@@ -6092,6 +6092,240 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 </style>
 
 \n\n<!-- Apple-inspired Liquid Glass treatment for Horizon's EXISTING navigation.\n     The app is a standalone HTML/CSS/JS app (not React), so this recreates the\n     Glisse visual language without importing its React component package. -->\n<style id="horizon-liquid-glass-navigation-v1">\n#primaryNavigation {\n  --glass-edge: rgba(255,255,255,.58);\n  --glass-surface: rgba(246,249,255,.58);\n  --glass-highlight: rgba(255,255,255,.72);\n  isolation: isolate;\n  background: var(--glass-surface) !important;\n  border: 1px solid var(--glass-edge) !important;\n  -webkit-backdrop-filter: blur(34px) saturate(190%) contrast(1.04);\n  backdrop-filter: blur(34px) saturate(190%) contrast(1.04);\n  box-shadow: 0 18px 48px rgba(24,35,58,.14),\n              inset 0 1px 0 rgba(255,255,255,.82),\n              inset 0 -1px 0 rgba(255,255,255,.18) !important;\n  position: fixed;\n}\n#primaryNavigation::after {\n  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;\n  border-radius:inherit; opacity:.8;\n  background: linear-gradient(145deg, rgba(255,255,255,.42), transparent 34%, rgba(255,255,255,.08) 68%, rgba(255,255,255,.2));\n}\n#primaryNavigation .tab {\n  position:relative; isolation:isolate;\n  transition: color .22s ease, transform .22s cubic-bezier(.2,.8,.2,1);\n}\n#primaryNavigation .tab:active { transform:scale(.965); }\n#primaryNavigation .tab.active {\n  color:var(--accent, #477be8) !important;\n  background:rgba(255,255,255,.38) !important;\n  border:1px solid rgba(255,255,255,.58);\n  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),\n             0 4px 14px rgba(30,45,75,.09) !important;\n}\n#primaryNavigation .tab.active::before {\n  content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit;\n  background:linear-gradient(135deg,rgba(255,255,255,.42),rgba(255,255,255,.08));\n  pointer-events:none;\n}\n.dark #primaryNavigation {\n  --glass-edge:rgba(255,255,255,.2);\n  --glass-surface:rgba(27,30,39,.68);\n  background:var(--glass-surface) !important;\n  border-color:var(--glass-edge) !important;\n  box-shadow:0 18px 48px rgba(0,0,0,.34),\n             inset 0 1px 0 rgba(255,255,255,.18),\n             inset 0 -1px 0 rgba(255,255,255,.06) !important;\n}\n.dark #primaryNavigation .tab.active {\n  background:rgba(255,255,255,.14) !important;\n  border-color:rgba(255,255,255,.24);\n  box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 14px rgba(0,0,0,.18) !important;\n}\n@media(max-width:760px) {\n  #primaryNavigation {\n    background:rgba(241,245,255,.56) !important;\n    border-radius:28px !important;\n    -webkit-backdrop-filter:blur(38px) saturate(205%) contrast(1.06);\n    backdrop-filter:blur(38px) saturate(205%) contrast(1.06);\n    box-shadow:0 12px 38px rgba(18,30,55,.2),\n               inset 0 1px 0 rgba(255,255,255,.88),\n               inset 0 -1px 0 rgba(255,255,255,.22) !important;\n  }\n  #primaryNavigation .tab.active {\n    background:rgba(255,255,255,.48) !important;\n    border:1px solid rgba(255,255,255,.7);\n    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),\n               0 3px 12px rgba(35,50,80,.12) !important;\n  }\n  .dark #primaryNavigation { background:rgba(25,28,37,.66) !important; }\n  .dark #primaryNavigation .tab.active {\n    background:rgba(255,255,255,.16) !important;\n    border-color:rgba(255,255,255,.23);\n  }\n}\n@media(prefers-reduced-motion:reduce) {\n  #primaryNavigation .tab { transition:none !important; }\n}\n</style>\n
+<style id="horizon-liquid-glass-layer">
+
+/* ============================================================
+   HORIZON · LIQUID GLASS INTERFACE
+   Glisse-inspired native HTML/CSS layer for the existing app.
+   Scoped to the Glass appearance so other Horizon themes and
+   all existing application behavior remain unchanged.
+   ============================================================ */
+html.theme-glass {
+    --h-lg-surface: rgba(255, 255, 255, .54);
+    --h-lg-surface-strong: rgba(255, 255, 255, .72);
+    --h-lg-edge: rgba(255, 255, 255, .76);
+    --h-lg-edge-soft: rgba(255, 255, 255, .48);
+    --h-lg-shadow: 0 12px 34px rgba(35, 69, 104, .11);
+    --h-lg-inset: inset 0 1px 0 rgba(255, 255, 255, .82);
+    --h-lg-blur: 24px;
+}
+html.dark.theme-glass {
+    --h-lg-surface: rgba(24, 42, 59, .62);
+    --h-lg-surface-strong: rgba(32, 54, 73, .78);
+    --h-lg-edge: rgba(224, 241, 255, .2);
+    --h-lg-edge-soft: rgba(224, 241, 255, .12);
+    --h-lg-shadow: 0 14px 38px rgba(0, 0, 0, .25);
+    --h-lg-inset: inset 0 1px 0 rgba(255, 255, 255, .16);
+}
+
+/* Cards become translucent layers rather than flat opaque panels. */
+.theme-glass .dashboard-card,
+.theme-glass .streak-card,
+.theme-glass .step-card,
+.theme-glass .progress-ring-card,
+.theme-glass .score-card,
+.theme-glass .quote-card,
+.theme-glass .selected-day,
+.theme-glass .task,
+.theme-glass .task-options,
+.theme-glass .calendar-card,
+.theme-glass .qibla-card,
+.theme-glass .prayer,
+.theme-glass .prayer-tracker,
+.theme-glass .settings-card,
+.theme-glass .study-progress-card,
+.theme-glass .study-timer-card,
+.theme-glass .study-subject,
+.theme-glass .study-stats-launch,
+.theme-glass .cal-day-events-card,
+.theme-glass .cal-upcoming-card {
+    background-color: var(--h-lg-surface) !important;
+    border: 1px solid var(--h-lg-edge-soft) !important;
+    box-shadow: var(--h-lg-shadow), var(--h-lg-inset) !important;
+    -webkit-backdrop-filter: blur(var(--h-lg-blur)) saturate(165%);
+    backdrop-filter: blur(var(--h-lg-blur)) saturate(165%);
+}
+.theme-glass .dashboard-card,
+.theme-glass .settings-card,
+.theme-glass .calendar-card,
+.theme-glass .study-timer-card,
+.theme-glass .prayer-tracker { border-radius: 23px; }
+.theme-glass .task,
+.theme-glass .prayer,
+.theme-glass .study-subject { border-radius: 17px; }
+
+/* The navigation dock uses a separate, brighter glass sheet. */
+.theme-glass .tabs,
+.theme-glass #primaryNavigation,
+.theme-glass .horizon-glass-dock {
+    background: rgba(247, 251, 255, .58) !important;
+    border: 1px solid rgba(255, 255, 255, .82) !important;
+    box-shadow: 0 14px 42px rgba(35, 69, 104, .16),
+                inset 0 1px 0 rgba(255, 255, 255, .94),
+                inset 0 -1px 0 rgba(255, 255, 255, .28) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(185%);
+    backdrop-filter: blur(30px) saturate(185%);
+}
+.theme-glass #primaryNavigation .tab {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--tp-muted);
+    transition: background .22s ease, color .22s ease, box-shadow .22s ease, transform .18s ease;
+}
+.theme-glass #primaryNavigation .tab.active {
+    color: var(--tp-ink) !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.88), rgba(225,239,252,.56)) !important;
+    border-color: rgba(255,255,255,.9) !important;
+    box-shadow: 0 5px 16px rgba(38, 79, 119, .13),
+                inset 0 1px 0 rgba(255,255,255,.98),
+                inset 0 -1px 0 rgba(80,130,176,.08) !important;
+}
+.theme-glass #primaryNavigation .tab:active { transform: scale(.96); }
+.theme-glass #primaryNavigation .tab.active .nav-icon { filter: drop-shadow(0 1px 2px rgba(45,91,136,.18)); }
+.theme-glass .icon-button,
+.theme-glass .setting-button,
+.theme-glass .language-option,
+.theme-glass .calendar-nav button,
+.theme-glass .prayer-cal-nav button,
+.theme-glass .aiHeadBtn,
+.theme-glass .aiGhostBtn,
+.theme-glass .aiModelQuickBtn {
+    background: var(--h-lg-surface) !important;
+    border: 1px solid var(--h-lg-edge) !important;
+    box-shadow: 0 4px 14px rgba(35,69,104,.08), inset 0 1px 0 rgba(255,255,255,.82) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(165%);
+    backdrop-filter: blur(18px) saturate(165%);
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.theme-glass .icon-button:active,
+.theme-glass .setting-button:active,
+.theme-glass .aiHeadBtn:active,
+.theme-glass .aiGhostBtn:active { transform: scale(.95); }
+.theme-glass .setting-button.active,
+.theme-glass .setting-button.selected,
+.theme-glass .theme-option.active {
+    background: var(--tp-sel) !important;
+    border-color: var(--tp-ring) !important;
+    box-shadow: 0 0 0 3px rgba(73,132,190,.12), inset 0 1px 0 rgba(255,255,255,.7) !important;
+}
+
+/* Inputs, search, selectors and text areas get a recessed glass well. */
+.theme-glass input:not([type="checkbox"]):not([type="radio"]),
+.theme-glass select,
+.theme-glass textarea {
+    background-color: rgba(255,255,255,.48) !important;
+    border-color: rgba(105,145,181,.25) !important;
+    box-shadow: inset 0 1px 3px rgba(34,67,98,.055), inset 0 1px 0 rgba(255,255,255,.68);
+    color: var(--tp-ink) !important;
+}
+.theme-glass input::placeholder,
+.theme-glass textarea::placeholder { color: var(--tp-muted) !important; }
+.theme-glass input:focus,
+.theme-glass select:focus,
+.theme-glass textarea:focus {
+    outline: none;
+    border-color: var(--tp-ring) !important;
+    box-shadow: 0 0 0 3px rgba(73,132,190,.16), inset 0 1px 2px rgba(34,67,98,.04) !important;
+}
+
+/* AI workspace: glass header, sidebar, composer and message surfaces. */
+.theme-glass #aiBox,
+.theme-glass #aiHeader,
+.theme-glass .ai-sidebar,
+.theme-glass .aiInput,
+.theme-glass #aiSettingsModal,
+.theme-glass .aiActionCard,
+.theme-glass .ai-file-results,
+.theme-glass .ai-sidebar-memory {
+    background-color: var(--h-lg-surface) !important;
+    border-color: var(--h-lg-edge-soft) !important;
+    box-shadow: var(--h-lg-shadow), var(--h-lg-inset);
+    -webkit-backdrop-filter: blur(var(--h-lg-blur)) saturate(170%);
+    backdrop-filter: blur(var(--h-lg-blur)) saturate(170%);
+}
+.theme-glass #aiBox { border: 1px solid var(--h-lg-edge) !important; }
+.theme-glass #aiHeader { border-bottom: 1px solid var(--h-lg-edge-soft) !important; }
+.theme-glass .aiInput {
+    border: 1px solid var(--h-lg-edge) !important;
+    border-radius: 22px !important;
+    margin: 8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
+    padding: 9px !important;
+}
+.theme-glass .aiInput input#aiInput {
+    background: rgba(255,255,255,.34) !important;
+    border: 1px solid rgba(255,255,255,.5) !important;
+    border-radius: 15px !important;
+}
+.theme-glass .ai-suggest,
+.theme-glass .ai-chip,
+.theme-glass .ai-chat-item,
+.theme-glass .aiActionCard button {
+    background: rgba(255,255,255,.4) !important;
+    border: 1px solid var(--h-lg-edge-soft) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: blur(14px) saturate(150%);
+}
+.theme-glass #aiSendBtn {
+    box-shadow: 0 5px 16px rgba(36,74,112,.22), inset 0 1px 0 rgba(255,255,255,.32) !important;
+}
+
+/* Gentle response to interaction; avoid large movement or fake glass glare. */
+@media (hover: hover) and (pointer: fine) {
+    .theme-glass .dashboard-card:hover,
+    .theme-glass .settings-card:hover,
+    .theme-glass .study-timer-card:hover {
+        box-shadow: 0 16px 38px rgba(35,69,104,.14), inset 0 1px 0 rgba(255,255,255,.84) !important;
+    }
+    .theme-glass .icon-button:hover,
+    .theme-glass .setting-button:hover,
+    .theme-glass .aiHeadBtn:hover {
+        background: var(--h-lg-surface-strong) !important;
+        transform: translateY(-1px);
+    }
+}
+.theme-glass :focus-visible {
+    outline: 2px solid var(--tp-ring) !important;
+    outline-offset: 3px;
+}
+
+/* Dark Liquid Glass remains translucent without washing out text. */
+.dark.theme-glass .tabs,
+.dark.theme-glass #primaryNavigation,
+.dark.theme-glass .horizon-glass-dock {
+    background: rgba(16, 28, 40, .72) !important;
+    border-color: rgba(224,241,255,.18) !important;
+    box-shadow: 0 16px 42px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+.dark.theme-glass #primaryNavigation .tab.active {
+    color: #F0F7FF !important;
+    background: linear-gradient(145deg, rgba(112,157,193,.32), rgba(51,83,110,.24)) !important;
+    border-color: rgba(224,241,255,.22) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 5px 18px rgba(0,0,0,.16) !important;
+}
+.dark.theme-glass input:not([type="checkbox"]):not([type="radio"]),
+.dark.theme-glass select,
+.dark.theme-glass textarea { background-color: rgba(9,20,31,.42) !important; border-color: rgba(224,241,255,.16) !important; }
+.dark.theme-glass .ai-suggest,
+.dark.theme-glass .ai-chip,
+.dark.theme-glass .ai-chat-item,
+.dark.theme-glass .aiActionCard button { background: rgba(255,255,255,.07) !important; }
+
+@media (max-width: 760px) {
+    .theme-glass #primaryNavigation {
+        -webkit-backdrop-filter: blur(32px) saturate(190%);
+        backdrop-filter: blur(32px) saturate(190%);
+    }
+    .theme-glass .aiInput { margin-inline: 7px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .theme-glass #primaryNavigation .tab,
+    .theme-glass .icon-button,
+    .theme-glass .setting-button,
+    .theme-glass .aiHeadBtn { transition: none !important; }
+}
+
+</style>
+
 </head>
 
 <body>
@@ -7621,7 +7855,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                             <button type="button" class="setting-button theme-option" data-theme="forest" data-theme-color="#2e8b57">Forest</button>
                             <button type="button" class="setting-button theme-option" data-theme="berry" data-theme-color="#c2185b">Berry</button>
                             <button type="button" class="setting-button theme-option" data-theme="horizon">Horizon</button>
-                            <button type="button" class="setting-button theme-option" data-theme="glass" data-theme-color="#244A70">Glass</button>
+                            <button type="button" class="setting-button theme-option" data-theme="glass" data-theme-color="#244A70">Liquid Glass</button>
                         </div>
 
                     </div>
@@ -8335,6 +8569,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             let activeUid = "";
             let activeMode = "";
             let activeCallback = null;
+            let activeErrorCallback = null;
             let generation = 0;
             const collectionPath = (uid) => collection(db, "users", uid, "aiChats");
             const safeDocId = (mode, chatId) => mode + "_" + String(chatId).replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 120);
@@ -8365,6 +8600,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 }, error => {
                     console.error("AI chat cloud sync listener failed:", error);
                     if (token === generation) { activeUnsubscribe = null; activeUid = ""; }
+                    try { activeErrorCallback?.(error); } catch (callbackError) { console.error("AI sync error callback failed:",callbackError); }
                 });
             }
             async function write(mode, chat, deleted = false) {
@@ -8406,15 +8642,16 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 return true;
             }
             return {
-                subscribe(mode, callback) {
+                subscribe(mode, callback, errorCallback) {
                     if (activeMode !== mode || activeCallback !== callback) {
                         if (activeUnsubscribe) { try { activeUnsubscribe(); } catch (e) {} }
                         activeUnsubscribe = null; activeUid = "";
                     }
-                    activeMode = mode; activeCallback = callback; start();
-                    return () => { if (activeCallback === callback) { activeCallback = null; activeMode = ""; stop(); } };
+                    activeMode = mode; activeCallback = callback; activeErrorCallback = typeof errorCallback === "function" ? errorCallback : null; start();
+                    return () => { if (activeCallback === callback) { activeCallback = null; activeErrorCallback = null; activeMode = ""; stop(); } };
                 },
                 isSignedIn() { return !!auth.currentUser; },
+                getUserId() { return auth.currentUser?.uid || ""; },
                 save(mode, chat) { return write(mode, chat, false); },
                 delete(mode, chat) { return write(mode, chat, true); },
                 refresh() { start(); },
@@ -8425,6 +8662,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         onAuthStateChanged(auth, user => {
             if (!user) horizonChatSync.stop();
             else horizonChatSync.refresh();
+            window.dispatchEvent(new CustomEvent("horizon-ai-auth-state",{detail:{signedIn:!!user}}));
         });
 
         enableIndexedDbPersistence(db).catch((err) => {
@@ -24644,6 +24882,10 @@ document.documentElement.classList.toggle(
         const aiSelectedChatIds = new Set();
         let aiCloudUnsubscribe = null;
         let aiApplyingRemoteChats = false;
+        function aiSetCloudSyncStatus(message,kind=""){
+            const status=document.getElementById("aiMemoryStatusText");
+            if(status){status.textContent=message;status.dataset.syncState=kind;}
+        }
         const aiCloudSaveTimers = new Map();
         const aiCloudLastSavedSignature = new Map();
         const aiCloudPendingDeletes = new Map();
@@ -24665,9 +24907,9 @@ document.documentElement.classList.toggle(
         function aiCloudDocToChat(data) {
             return { id:data.chatId, title:String(data.title||"New chat"), messages:Array.isArray(data.messages)?data.messages.slice(-40):[], updatedAt:Number(data.updatedAt)||Date.now(), pinned:!!data.pinned, titleUpdatedAt:Number(data.titleUpdatedAt)||Number(data.updatedAt)||Date.now(), pinnedUpdatedAt:Number(data.pinnedUpdatedAt)||Number(data.updatedAt)||Date.now() };
         }
-        function aiQueueCloudChatSave(chat) {
-            if (aiApplyingRemoteChats || !window.__horizonChatSync || !window.__horizonChatSync.isSignedIn()) return;
-            const mode = aiMode, key = mode + ":" + chat.id;
+        function aiQueueCloudChatSave(chat, forceDuringSnapshot=false) {
+            if ((aiApplyingRemoteChats && !forceDuringSnapshot) || !window.__horizonChatSync || !window.__horizonChatSync.isSignedIn()) return;
+            const mode = aiMode, uid = window.__horizonChatSync.getUserId?.() || "signed-in", key = uid + ":" + mode + ":" + chat.id;
             const snapshot = JSON.parse(JSON.stringify(chat));
             const signature = JSON.stringify(snapshot);
             if (aiCloudLastSavedSignature.get(key) === signature) return;
@@ -24676,15 +24918,20 @@ document.documentElement.classList.toggle(
                 aiCloudSaveTimers.delete(key);
                 try {
                     const ok = await window.__horizonChatSync.save(mode, snapshot);
-                    if (ok) aiCloudLastSavedSignature.set(key, signature);
+                    if(ok){aiCloudLastSavedSignature.set(key,signature);aiSetCloudSyncStatus("Chats synced to your account","synced");}
                 } catch (error) {
-                    console.warn("AI chat cloud write deferred; local copy is safe and will retry:", mode, chat.id, error);
+                    const code=String(error?.code||"");
+                    aiSetCloudSyncStatus(code.includes("permission-denied")?"Chat sync blocked: Firestore rules need updating":"Chat sync failed: "+(error?.message||code||"check connection"),"error");
+                    console.error("AI chat cloud write failed:",mode,chat.id,error);
                 }
             }, 450));
         }
         async function aiQueueCloudChatDelete(mode, chat) {
             if (!chat || !chat.id) return;
             const key=mode+":"+chat.id;
+            const timerKey=(window.__horizonChatSync?.getUserId?.()||"signed-in")+":"+key;
+            const pendingTimer=aiCloudSaveTimers.get(timerKey); if(pendingTimer) clearTimeout(pendingTimer);
+            aiCloudSaveTimers.delete(timerKey); aiCloudLastSavedSignature.delete(timerKey);
             aiCloudPendingDeletes.set(key,{mode,chat:JSON.parse(JSON.stringify(chat))});
             aiPersistPendingCloudDeletes();
             await aiFlushPendingCloudDeletes();
@@ -24704,10 +24951,14 @@ document.documentElement.classList.toggle(
         function aiStartCloudChatSync() {
             aiLoadPendingCloudDeletes();
             if (aiCloudUnsubscribe) { aiCloudUnsubscribe(); aiCloudUnsubscribe = null; }
-            if (!window.__horizonChatSync || !window.__horizonChatSync.isSignedIn()) return;
-            const mode = aiMode;
-            aiCloudUnsubscribe = window.__horizonChatSync.subscribe(mode, remoteDocs => {
-                if (mode !== aiMode || !window.__horizonChatSync?.isSignedIn()) return;
+            if(!window.__horizonChatSync){
+                aiSetCloudSyncStatus("Chat sync service unavailable","error");return;
+            }
+            aiSetCloudSyncStatus(window.__horizonChatSync.isSignedIn()?"Connecting chat sync…":"Sign in to sync chats across devices",window.__horizonChatSync.isSignedIn()?"connecting":"signed-out");
+            const mode=aiMode;
+            aiCloudUnsubscribe=window.__horizonChatSync.subscribe(mode,remoteDocs=>{
+                if(mode!==aiMode||!window.__horizonChatSync?.isSignedIn())return;
+                aiSetCloudSyncStatus("Chats synced to your account","synced");
                 aiApplyingRemoteChats = true;
                 try {
                     const remote = new Map(remoteDocs.map(d => [d.chatId, d]));
@@ -24723,17 +24974,32 @@ document.documentElement.classList.toggle(
                             return;
                         }
                         if (!existing) { aiChats.push(aiCloudDocToChat(data)); changed=true; }
-                        else if (Number(data.updatedAt||0) > Number(existing.updatedAt||0)) {
+                        else {
                             const incoming=aiCloudDocToChat(data);
-                            const merged=new Map();
-                            [...(existing.messages||[]),...(incoming.messages||[])].forEach(m=>{const k=m.syncId||(m.role+"\\u0000"+m.content);if(!merged.has(k))merged.set(k,m);});
-                            incoming.messages=[...merged.values()].slice(-40);
-                            aiChats=aiChats.map(c=>c.id===id?incoming:c); changed=true;
+                            const mergedMap=new Map();
+                            [...(existing.messages||[]),...(incoming.messages||[])].forEach((m,index)=>{
+                                if(!m||!["user","assistant"].includes(m.role)||typeof m.content!=="string")return;
+                                const key=m.syncId||(m.role+"\\u0000"+m.content);
+                                if(!mergedMap.has(key))mergedMap.set(key,m);
+                            });
+                            const mergedMessages=[...mergedMap.values()].sort((a,b)=>(Number(a.createdAt)||0)-(Number(b.createdAt)||0)).slice(-40);
+                            const next={...existing,
+                                title:Number(incoming.titleUpdatedAt||0)>Number(existing.titleUpdatedAt||0)?incoming.title:existing.title,
+                                titleUpdatedAt:Math.max(Number(existing.titleUpdatedAt)||0,Number(incoming.titleUpdatedAt)||0),
+                                pinned:Number(incoming.pinnedUpdatedAt||0)>Number(existing.pinnedUpdatedAt||0)?incoming.pinned:existing.pinned,
+                                pinnedUpdatedAt:Math.max(Number(existing.pinnedUpdatedAt)||0,Number(incoming.pinnedUpdatedAt)||0),
+                                messages:mergedMessages,
+                                updatedAt:Math.max(Number(existing.updatedAt)||0,Number(incoming.updatedAt)||0)
+                            };
+                            if(JSON.stringify(existing)!==JSON.stringify(next)){aiChats=aiChats.map(c=>c.id===id?next:c);changed=true;}
+                            const localKeys=new Set((existing.messages||[]).map(m=>m.syncId||(m.role+"\\u0000"+m.content)));
+                            const cloudKeys=new Set((incoming.messages||[]).map(m=>m.syncId||(m.role+"\\u0000"+m.content)));
+                            if([...localKeys].some(k=>!cloudKeys.has(k))||Number(existing.titleUpdatedAt||0)>Number(incoming.titleUpdatedAt||0)||Number(existing.pinnedUpdatedAt||0)>Number(incoming.pinnedUpdatedAt||0))aiQueueCloudChatSave(next,true);
                         }
                     });
                     local.forEach((chat,id) => {
                         const cloud=remote.get(id);
-                        if (!cloud || (!cloud.deleted && Number(chat.updatedAt||0)>Number(cloud.updatedAt||0))) aiQueueCloudChatSave(chat);
+                        if (!cloud || (!cloud.deleted && Number(chat.updatedAt||0)>Number(cloud.updatedAt||0))) aiQueueCloudChatSave(chat, true);
                     });
                     aiFlushPendingCloudDeletes();
                     if (changed) {
@@ -24745,8 +25011,17 @@ document.documentElement.classList.toggle(
                         if (!aiBusy) aiRenderCurrentChat();
                     }
                 } finally { aiApplyingRemoteChats = false; }
+            },error=>{
+                const code=String(error?.code||"");
+                aiSetCloudSyncStatus(code.includes("permission-denied")?"Chat sync blocked: Firestore rules need updating":"Chat sync error: "+(error?.message||code||"unknown error"),"error");
+                console.error("Horizon/Atlas chat sync failed:",error);
             });
         }
+        window.addEventListener("horizon-ai-auth-state",()=>{
+            aiCloudLastSavedSignature.clear();
+            aiStartCloudChatSync();
+            if(window.__horizonChatSync?.isSignedIn()) aiChats.forEach(chat=>aiQueueCloudChatSave(chat));
+        });
         window.addEventListener("online", () => {
             aiCloudPendingDeletes.size && aiFlushPendingCloudDeletes();
             aiChats.forEach(aiQueueCloudChatSave);
@@ -24764,13 +25039,16 @@ document.documentElement.classList.toggle(
             const count=document.getElementById("aiBulkCount");
             const del=document.getElementById("aiBulkDeleteBtn");
             const all=document.getElementById("aiBulkSelectAllBtn");
-            if(count)count.textContent=aiSelectedChatIds.size+" selected";
-            if(del)del.disabled=aiSelectedChatIds.size===0;
-            if(all)all.textContent=aiChats.length>0&&aiSelectedChatIds.size===aiChats.length?"Deselect all":"Select all";
+            const validSelected=[...aiSelectedChatIds].filter(id=>aiChats.some(c=>c.id===id)).length;
+            if(count)count.textContent=validSelected+" selected";
+            if(del)del.disabled=validSelected===0;
+            if(all){all.textContent=aiChats.length>0&&validSelected===aiChats.length?"Deselect all":"Select all";all.disabled=aiChats.length===0;}
         }
         async function aiBulkDeleteSelected() {
             if(aiBusy || !aiSelectedChatIds.size)return;
             const ids=[...aiSelectedChatIds].filter(id=>aiChats.some(c=>c.id===id));
+            if(!ids.length)return;
+            if(!window.confirm(`Delete ${ids.length} selected conversation${ids.length===1?"":"s"}? This cannot be undone.`))return;
             const doomed=aiChats.filter(c=>ids.includes(c.id));
             if(window.__horizonChatSync && window.__horizonChatSync.isSignedIn()) {
                 await Promise.allSettled(doomed.map(chat=>aiQueueCloudChatDelete(aiMode,chat)));
@@ -24791,6 +25069,7 @@ document.documentElement.classList.toggle(
             // recreate the sidebar DOM unless something visible in the list actually changed.
             // In particular, ignore updatedAt and assistant-token changes: they caused flicker.
             const signature = JSON.stringify({ mode: aiMode, current: aiCurrentChatId, search,
+                bulk: aiBulkSelectionMode, selected: aiBulkSelectionMode ? [...aiSelectedChatIds].sort() : [],
                 chats: filtered.map(c => [c.id, c.title, !!c.pinned,
                     (c.messages || []).filter(m => m.role === "user").slice(-1)[0]?.content || ""]) });
             if (signature === aiChatListRenderSignature) return;
@@ -24804,12 +25083,21 @@ document.documentElement.classList.toggle(
                     if(aiBulkSelectionMode) {
                         const check=document.createElement("input"); check.type="checkbox"; check.className="ai-chat-select"; check.checked=aiSelectedChatIds.has(chat.id); check.setAttribute("aria-label","Select "+(chat.title||"conversation"));
                         check.addEventListener("click",event=>event.stopPropagation());
-                        check.addEventListener("change",()=>{if(check.checked)aiSelectedChatIds.add(chat.id);else aiSelectedChatIds.delete(chat.id);aiUpdateBulkToolbar();});
+                        check.addEventListener("change",()=>{
+                            if(check.checked) aiSelectedChatIds.add(chat.id); else aiSelectedChatIds.delete(chat.id);
+                            aiChatListRenderSignature=""; aiRenderChatLists(); aiUpdateBulkToolbar();
+                        });
+                        item.classList.toggle("is-selected",aiSelectedChatIds.has(chat.id));
                         item.appendChild(check);
                     }
                     const title=document.createElement("span"); title.className="ai-chat-item-title"; title.textContent=chat.title || "New chat";
                     const preview=document.createElement("span"); preview.className="ai-chat-item-preview"; preview.textContent=(chat.messages||[]).filter(m=>m.role==="user").slice(-1)[0]?.content?.replace(/\s+/g," ") || "Start a conversation";
-                    open.append(title,preview); open.addEventListener("click",()=>aiSwitchChat(chat.id));
+                    open.append(title,preview); open.addEventListener("click",()=>{
+                        if(aiBulkSelectionMode){
+                            if(aiSelectedChatIds.has(chat.id)) aiSelectedChatIds.delete(chat.id); else aiSelectedChatIds.add(chat.id);
+                            aiChatListRenderSignature=""; aiRenderChatLists(); aiUpdateBulkToolbar();
+                        } else aiSwitchChat(chat.id);
+                    });
                     const menu=document.createElement("button"); menu.type="button"; menu.className="ai-chat-menu"; menu.textContent="···"; menu.setAttribute("aria-label","Chat options"); menu.title="Chat options";
                     const actions=document.createElement("div"); actions.className="ai-chat-actions-menu"; actions.hidden=true;
                     const addAction=(label,handler,kind="")=>{const actionButton=document.createElement("button");actionButton.type="button";actionButton.className="ai-chat-action-button"+(kind?" "+kind:"");actionButton.textContent=label;actionButton.addEventListener("click",event=>{event.stopPropagation();actions.hidden=true;handler();});actions.appendChild(actionButton);};
@@ -24830,7 +25118,7 @@ document.documentElement.classList.toggle(
             const summary=document.getElementById("aiSidebarMemorySummary");
             if(summary){const text=(aiSettings.memory||"").trim();summary.textContent=text?"Saved preferences are active":"Save preferences to personalize replies";}
             const status=document.getElementById("aiMemoryStatusText");
-            if(status) status.textContent = aiChats.length + (aiChats.length===1?" saved conversation on this device":" saved conversations on this device");
+            if(status&&!status.dataset.syncState) status.textContent=aiChats.length+(aiChats.length===1?" saved conversation on this device":" saved conversations on this device");
         }
         function aiRenderCurrentChat() {
             const messages=aiMessagesEl(); if(!messages)return;
@@ -24930,8 +25218,15 @@ document.documentElement.classList.toggle(
                 '<span class="ai-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
                 '<span class="ai-typing-label"></span>';
             el.querySelector(".ai-typing-label").textContent = aiT("thinking");
+            const viewport=aiScrollViewportEl();
+            const previousTop=viewport?viewport.scrollTop:0;
             messages.appendChild(el);
-            aiMaybeScroll(false);
+            // A typing status is not a new conversation message. Never auto-scroll
+            // the reader when it is inserted; preserve their exact scroll position.
+            if(viewport){
+                viewport.scrollTop=previousTop;
+                requestAnimationFrame(()=>{if(viewport.isConnected){viewport.scrollTop=previousTop;aiUpdatePin();}});
+            }
             return el;
         }
 
@@ -26780,6 +27075,8 @@ document.documentElement.classList.toggle(
             const activeProjectFiles = isAtlas ? aiGetActiveProjectFiles().slice() : [];
             const allProjectFiles = Array.from(new Map(activeProjectFiles.concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
             const fileDeliveryRequested = isAtlas && aiIsFileDeliveryRequest(effectiveMessage, allProjectFiles);
+            const sendViewport=aiScrollViewportEl();
+            const shouldFollowSend=sendViewport ? (sendViewport.scrollHeight-sendViewport.scrollTop-sendViewport.clientHeight<60) : true;
 
             aiShowWelcome(false);
             const userEl = aiAppendUserMessage(message || (pendingFiles.length ? "Attached " + pendingFiles.length + " file(s)" : ""), pendingImage ? pendingImage.previewUrl : null);
@@ -26792,8 +27089,10 @@ document.documentElement.classList.toggle(
             aiAbortController = new AbortController();
             const signal = aiAbortController.signal;
             aiSetInputDisabled(true);
-            aiPinned = true;
-            aiMaybeScroll(true);
+            // Follow a newly sent message only when the reader was already at the latest message.
+            // Sending from the middle of a long chat must not yank the viewport to the bottom.
+            aiPinned=shouldFollowSend;
+            aiMaybeScroll(false);
 
             aiShowThinking();
             aiAnnounce(aiT("thinking"));
@@ -27654,7 +27953,13 @@ document.documentElement.classList.toggle(
             document.getElementById("aiSidebarNewChatBtn")?.addEventListener("click", () => aiCreateNewChat());
             document.getElementById("aiChatSearch")?.addEventListener("input", aiRenderChatLists);
         document.getElementById("aiBulkSelectBtn")?.addEventListener("click",()=>aiSetBulkSelectionMode(true));
-        document.getElementById("aiBulkSelectAllBtn")?.addEventListener("click",()=>{if(aiSelectedChatIds.size===aiChats.length)aiSelectedChatIds.clear();else aiChats.forEach(c=>aiSelectedChatIds.add(c.id));aiRenderChatLists();aiUpdateBulkToolbar();});
+        document.getElementById("aiBulkSelectAllBtn")?.addEventListener("click",()=>{
+            const search=(document.getElementById("aiChatSearch")?.value||"").trim().toLowerCase();
+            const visible=aiChats.filter(c=>!search||(c.title+" "+(c.messages||[]).map(m=>m.content).join(" ")).toLowerCase().includes(search));
+            const allSelected=visible.length>0&&visible.every(c=>aiSelectedChatIds.has(c.id));
+            visible.forEach(c=>{if(allSelected)aiSelectedChatIds.delete(c.id);else aiSelectedChatIds.add(c.id);});
+            aiChatListRenderSignature="";aiRenderChatLists();aiUpdateBulkToolbar();
+        });
         document.getElementById("aiBulkDeleteBtn")?.addEventListener("click",aiBulkDeleteSelected);
         document.getElementById("aiBulkCancelBtn")?.addEventListener("click",()=>aiSetBulkSelectionMode(false));
             document.getElementById("aiSidebarMemoryBtn")?.addEventListener("click", () => aiOpenSettings());
@@ -30264,6 +30569,7 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 /* Typing status is a direct child of .ai-convo, the actual scroll viewport. */
 #aiTypingHost { display:none !important; }
 #ai.active #aiMessages > #aiLoading.ai-typing {
+  overflow-anchor:none !important;
   display:inline-flex !important; align-items:center !important; align-self:flex-start !important;
   flex:0 0 auto !important; position:relative !important; inset:auto !important;
   float:none !important; clear:both !important; transform:none !important;
@@ -30335,7 +30641,11 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 .ai-bulk-toolbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:2px 0 7px; }
 .ai-bulk-toolbar button { border:1px solid rgba(140,140,140,.28); border-radius:8px; padding:6px 8px; background:transparent; color:inherit; font:600 11px system-ui,sans-serif; cursor:pointer; }
 .ai-bulk-toolbar button:disabled { opacity:.4; cursor:not-allowed; }
-.ai-chat-select { flex:0 0 auto; width:16px; height:16px; margin:0 7px 0 2px; accent-color:#6f8cff; }
+.ai-chat-select { flex:0 0 auto; width:18px; height:18px; margin:0 9px 0 3px; accent-color:#6f8cff; cursor:pointer; }
+.ai-chat-item.is-selected { background:rgba(111,140,255,.13) !important; outline:1px solid rgba(111,140,255,.42); }
+.ai-bulk-toolbar button:focus-visible,.ai-chat-select:focus-visible { outline:2px solid #7895ff; outline-offset:2px; }
+.ai-bulk-toolbar button[hidden] { display:none !important; }
+.ai-bulk-toolbar #aiBulkCount { font-size:11px; font-weight:650; white-space:nowrap; }
 #ai.active #aiMessages > #aiLoading.ai-typing { display:inline-flex !important; align-self:flex-start !important; position:relative !important; margin:8px 0 10px !important; }
 #aiTypingHost { display:none !important; }
 </style>
