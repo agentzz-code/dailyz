@@ -996,7 +996,7 @@
         .ai-file-card .ai-file-name { font-weight:650; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; }
         .ai-file-card .ai-file-sub { font-size:12px; opacity:.72; display:block; }
         .ai-file-card .ai-file-actions { display:flex; gap:8px; flex:0 0 auto; }
-        .ai-file-card .ai-dl, .ai-file-results .ai-zip { text-decoration:none; padding:7px 12px; border-radius:9px; border:1px solid var(--ai-brd); background:var(--ai-chip); color:var(--ai-ink); font:inherit; font-weight:650; cursor:pointer; }
+        .ai-file-card .ai-dl { text-decoration:none; padding:7px 12px; border-radius:9px; border:1px solid var(--ai-brd); background:var(--ai-chip); color:var(--ai-ink); font:inherit; font-weight:650; cursor:pointer; }
         .ai-file-card .ai-pv { padding:7px 10px; border-radius:9px; border:1px solid var(--ai-brd); background:transparent; color:inherit; font:inherit; cursor:pointer; text-decoration:none; }
         .ai-file-ok { color:#4caf7a; font-size:12px; margin-top:6px; display:block; }
         @media (max-width:560px) { .ai-file-card { flex-wrap:wrap; } .ai-file-card .ai-file-actions { width:100%; } .ai-file-card .ai-file-actions > * { flex:1 1 0; text-align:center; } #aiFilePreviewWrap { width:calc(100% - 24px); } }
@@ -6038,8 +6038,6 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 #aiBox:not([data-ai-mode="atlas"]) .ai-atlas-only { display:none !important; }
 #aiProjectContextInput { width:100%; box-sizing:border-box; min-height:110px; resize:vertical; }
 #aiModelMeta { min-height:1.2em; }
-.ai-atlas-mission-status { display:block; padding:8px 14px; color:var(--text-secondary,#888); font-size:12px; overflow-wrap:anywhere; }
-.ai-atlas-mission-status:empty { display:none; }
 
 /* Send button doubles as Stop while a reply is streaming */
 #aiSendBtn .aiStopIcon { display:none; width:12px; height:12px; border-radius:3px; background:currentColor; }
@@ -23464,7 +23462,6 @@ document.documentElement.classList.toggle(
 
         <div id="aiTypingHost" aria-live="polite" hidden></div>
         <div class="aiInput">
-            <button type="button" class="aiImageBtn aiGhostBtn ai-atlas-only" id="aiAtlasRepoMissionBtn" aria-label="Run isolated coding mission from GitHub" title="Import a GitHub repository into an isolated workspace">↗</button>
             <input
                 type="file"
                 id="aiImageFileInput"
@@ -23513,8 +23510,7 @@ document.documentElement.classList.toggle(
             </button>
         </div>
         <div id="aiFilePreviewWrap" hidden aria-live="polite"></div>
-        <div id="aiAtlasMissionStatus" class="ai-atlas-mission-status" role="status" aria-live="polite"></div>
-        <div id="aiDropOverlay" aria-hidden="true"><div>📎 Drop files to attach<br><small>Code, text, PDF or image files (project ZIPs in Atlas mode)</small></div></div>
+        <div id="aiDropOverlay" aria-hidden="true"><div>📎 Drop files to attach<br><small>Code, text, PDF or image files</small></div></div>
 
         <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
     </div>
@@ -23686,7 +23682,7 @@ document.documentElement.classList.toggle(
 
         Object.assign(AI_STRINGS.en, {
             modeLabel: "AI mode", modeHorizon: "Horizon", modeAtlas: "Atlas",
-            atlasNote: "Atlas can run an isolated coding mission from a project ZIP. It returns a separate ZIP; it never pushes or deploys your repository.",
+            atlasNote: "Atlas works directly with files you attach and returns edited replacement files for download. It does not access your disk or deploy changes.",
             atlasTitle: "Atlas", atlasSubtitle: "Code & technical assistant",
             atlasPlaceholder: "Ask Atlas about code, bugs, design…",
             atlasWelcomeTitle: "Atlas",
@@ -23709,7 +23705,7 @@ document.documentElement.classList.toggle(
         });
         Object.assign(AI_STRINGS.ar, {
             modeLabel: "وضع الذكاء الاصطناعي", modeHorizon: "هورايزن", modeAtlas: "أطلس",
-            atlasNote: "يمكن لأطلس تنفيذ مهمة برمجية معزولة من ملف مشروع ZIP وإرجاع نسخة ZIP منفصلة دون دفع تغييرات إلى المستودع أو النشر.",
+            atlasNote: "يعمل أطلس مباشرةً على الملفات التي ترفقها ويعيد الملفات المعدلة للتنزيل. لا يصل إلى جهازك ولا ينشر التغييرات.",
             atlasTitle: "أطلس", atlasSubtitle: "مساعد البرمجة والأمور التقنية",
             atlasPlaceholder: "اسأل أطلس عن الأكواد والأخطاء والتصميم…",
             atlasWelcomeTitle: "أطلس",
@@ -23732,7 +23728,7 @@ document.documentElement.classList.toggle(
         });
         Object.assign(AI_STRINGS.ku, {
             modeLabel: "دۆخی زیرەکی دەستکرد", modeHorizon: "هۆرایزن", modeAtlas: "ئەتلەس",
-            atlasNote: "ئەتلەس دەتوانێت لە ZIP ـی پڕۆژەوە کاری کۆدکردنی جیاکراوە ئەنجام بدات و ZIP ـێکی نوێ بگەڕێنێتەوە؛ هیچ گۆڕانکارییەک push ناکات و deploy ناکات.",
+            atlasNote: "ئەتلەس ڕاستەوخۆ لەسەر ئەو فایلانە کار دەکات کە هاوپێچیان دەکەیت و وەشانی چاککراو بۆ داگرتن دەگەڕێنێتەوە. دەستی بە فایلەکانی ئامێرەکەت ناگات و deploy ناکات.",
             atlasTitle: "ئەتلەس", atlasSubtitle: "یاریدەدەری کۆد و تەکنیکی",
             atlasPlaceholder: "لە ئەتلەس بپرسە دەربارەی کۆد و هەڵە و دیزاین…",
             atlasWelcomeTitle: "ئەتلەس",
@@ -24556,20 +24552,12 @@ document.documentElement.classList.toggle(
         }
         function aiSwitchChat(id) {
             if(aiBusy || !aiChats.some(c=>c.id===id))return;
-            if (aiPendingProjectZip) {
-                aiAppendTextMessage("A project ZIP is attached to this chat. Send it or remove it before switching chats.", true);
-                return;
-            }
             aiCurrentChatId=id; aiPersistChats(); aiRenderCurrentChat();
             document.getElementById("aiChatSidebar")?.classList.remove("mobile-open");
             document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded","false");
         }
         function aiCreateNewChat() {
             if(aiBusy)return;
-            if (aiPendingProjectZip) {
-                aiAppendTextMessage("A project ZIP is attached to this chat. Send it or remove it before starting a new chat.", true);
-                return;
-            }
             const chat={id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false};
             aiChats.unshift(chat); aiCurrentChatId=chat.id; aiConversationHistory=[]; aiPersistChats(); aiRenderCurrentChat(); aiClearSelectedImage(); aiClearSelectedFiles();
             const input=document.getElementById("aiInput"); if(input)input.focus();
@@ -24859,16 +24847,13 @@ document.documentElement.classList.toggle(
         const AI_MAX_TEXT_TOTAL_CHARS = 16000000;
         const AI_TEXT_FILE_EXTENSIONS = new Set(["txt","md","markdown","js","jsx","mjs","cjs","ts","tsx","py","html","htm","css","scss","json","jsonc","yaml","yml","xml","sql","sh","ps1","java","c","h","cpp","hpp","go","rs","php","rb","swift","kt","dart","vue","svelte","csv","log","ini","toml","properties","gradle","dockerfile","gitignore","conf","cfg","env","bat","cmd","psm1","r","ipynb","graphql","gql","proto","tf","hcl","makefile","diff","patch","tex","rst","adoc","properties","lock","manifest"]);
         let aiSelectedFiles = [];
-        // A project ZIP is staged until the user presses Send, so the task prompt
-        // and archive are submitted together instead of starting an empty mission.
-        let aiPendingProjectZip = null;
         // Project file context is kept in memory per Atlas chat (not written to browser storage).
         const aiProjectFileContexts = new Map();
         function aiGetActiveProjectFiles() { return aiProjectFileContexts.get(aiCurrentChatId) || []; }
 
         const AI_MAX_PDF_BYTES = 12 * 1024 * 1024;
-        const AI_FILE_TYPE_LABELS = { html:"HTML document", htm:"HTML document", css:"CSS stylesheet", scss:"SCSS stylesheet", js:"JavaScript", mjs:"JavaScript module", cjs:"JavaScript module", jsx:"React JSX", ts:"TypeScript", tsx:"React TSX", json:"JSON data", jsonc:"JSON data", md:"Markdown document", markdown:"Markdown document", txt:"Text file", xml:"XML document", csv:"CSV data", py:"Python script", sql:"SQL script", sh:"Shell script", yaml:"YAML config", yml:"YAML config", toml:"TOML config", ini:"INI config", log:"Log file", pdf:"PDF document", docx:"Word document", xlsx:"Excel workbook", xls:"Excel workbook", xlsm:"Excel macro workbook", pptx:"PowerPoint presentation", odt:"OpenDocument text", ods:"OpenDocument spreadsheet", odp:"OpenDocument presentation", epub:"EPUB ebook", rtf:"Rich text document", png:"PNG image", jpg:"JPEG image", jpeg:"JPEG image", webp:"WebP image", gif:"GIF image", zip:"ZIP archive" };
-        const AI_FILE_TYPE_ICONS = { html:"🌐", htm:"🌐", css:"🎨", scss:"🎨", js:"📜", mjs:"📜", cjs:"📜", jsx:"⚛️", ts:"📘", tsx:"⚛️", json:"🧾", jsonc:"🧾", md:"📝", markdown:"📝", txt:"📄", xml:"📰", csv:"📊", py:"🐍", sql:"🗄️", sh:"💻", yaml:"⚙️", yml:"⚙️", toml:"⚙️", ini:"⚙️", log:"📋", pdf:"📕", docx:"📘", xlsx:"📊", xls:"📊", xlsm:"📊", pptx:"📽️", odt:"📄", ods:"📊", odp:"📽️", epub:"📚", rtf:"📄", png:"🖼️", jpg:"🖼️", jpeg:"🖼️", webp:"🖼️", gif:"🖼️", zip:"🗜️" };
+        const AI_FILE_TYPE_LABELS = { html:"HTML document", htm:"HTML document", css:"CSS stylesheet", scss:"SCSS stylesheet", js:"JavaScript", mjs:"JavaScript module", cjs:"JavaScript module", jsx:"React JSX", ts:"TypeScript", tsx:"React TSX", json:"JSON data", jsonc:"JSON data", md:"Markdown document", markdown:"Markdown document", txt:"Text file", xml:"XML document", csv:"CSV data", py:"Python script", sql:"SQL script", sh:"Shell script", yaml:"YAML config", yml:"YAML config", toml:"TOML config", ini:"INI config", log:"Log file", pdf:"PDF document", docx:"Word document", xlsx:"Excel workbook", xls:"Excel workbook", xlsm:"Excel macro workbook", pptx:"PowerPoint presentation", odt:"OpenDocument text", ods:"OpenDocument spreadsheet", odp:"OpenDocument presentation", epub:"EPUB ebook", rtf:"Rich text document", png:"PNG image", jpg:"JPEG image", jpeg:"JPEG image", webp:"WebP image", gif:"GIF image", };
+        const AI_FILE_TYPE_ICONS = { html:"🌐", htm:"🌐", css:"🎨", scss:"🎨", js:"📜", mjs:"📜", cjs:"📜", jsx:"⚛️", ts:"📘", tsx:"⚛️", json:"🧾", jsonc:"🧾", md:"📝", markdown:"📝", txt:"📄", xml:"📰", csv:"📊", py:"🐍", sql:"🗄️", sh:"💻", yaml:"⚙️", yml:"⚙️", toml:"⚙️", ini:"⚙️", log:"📋", pdf:"📕", docx:"📘", xlsx:"📊", xls:"📊", xlsm:"📊", pptx:"📽️", odt:"📄", ods:"📊", odp:"📽️", epub:"📚", rtf:"📄", png:"🖼️", jpg:"🖼️", jpeg:"🖼️", webp:"🖼️", gif:"🖼️" };
         function aiFileExt(name) { const base = String(name || "").split("/").pop(); const i = base.lastIndexOf("."); return i > 0 || (i === 0 && base.length > 1) ? base.slice(i + 1).toLowerCase() : base.toLowerCase(); }
         function aiFileTypeLabel(name) { return AI_FILE_TYPE_LABELS[aiFileExt(name)] || ((aiFileExt(name) || "file").toUpperCase() + " file"); }
         function aiFileTypeIcon(name) { return AI_FILE_TYPE_ICONS[aiFileExt(name)] || "📄"; }
@@ -24884,22 +24869,8 @@ document.documentElement.classList.toggle(
             wrap.replaceChildren();
             const selectedPaths = new Set(aiSelectedFiles.map(f => aiSafeRelativePath(f.path || f.name)));
             const retainedFiles = aiGetActiveProjectFiles().filter(f => !selectedPaths.has(aiSafeRelativePath(f.path || f.name)));
-            if (!aiSelectedFiles.length && !retainedFiles.length && !aiPendingProjectZip && !aiFileStatus) { wrap.hidden = true; return; }
+            if (!aiSelectedFiles.length && !retainedFiles.length && !aiFileStatus) { wrap.hidden = true; return; }
             wrap.hidden = false;
-            if (aiPendingProjectZip) {
-                const chip = document.createElement("span"); chip.className = "ai-file-chip";
-                const icon = document.createElement("span"); icon.setAttribute("aria-hidden", "true"); icon.textContent = "🗜️";
-                const name = document.createElement("span"); name.textContent = aiPendingProjectZip.name;
-                const meta = document.createElement("span"); meta.className = "ai-chip-meta";
-                meta.textContent = "Project ZIP · " + aiFormatBytes(aiPendingProjectZip.size) + " · ready to send";
-                const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "×";
-                remove.setAttribute("aria-label", "Remove " + aiPendingProjectZip.name); remove.title = "Remove project ZIP";
-                remove.addEventListener("click", () => { aiPendingProjectZip = null; aiRenderFilePreview(); });
-                chip.append(icon, name, meta, remove); wrap.appendChild(chip);
-                const hint = document.createElement("span"); hint.className = "ai-file-status";
-                hint.textContent = "Add your task description, then press Send to start the Atlas project mission.";
-                wrap.appendChild(hint);
-            }
             const makeChip = (file, removeHandler, retained) => {
                 const chip = document.createElement("span"); chip.className = "ai-file-chip";
                 const icon = document.createElement("span"); icon.setAttribute("aria-hidden", "true"); icon.textContent = aiFileTypeIcon(file.name);
@@ -25375,52 +25346,6 @@ document.documentElement.classList.toggle(
             }
             return parseFailure("No complete Atlas file block, supported JSON package, or single fenced source file was found in the response.", { responseChars: text.length, markerSeen: markerSeen });
         }
-        function aiZipCrc32(bytes) {
-            let crc = -1;
-            for (let i = 0; i < bytes.length; i++) {
-                crc ^= bytes[i];
-                for (let j = 0; j < 8; j++) crc = (crc >>> 1) ^ (0xEDB88320 & -(crc & 1));
-            }
-            return (crc ^ -1) >>> 0;
-        }
-
-        function aiBuildZipBlob(files) {
-            const encoder = new TextEncoder();
-            const chunks = [];
-            const central = [];
-            let offset = 0;
-            const stamp = new Date();
-            const dosTime = (stamp.getHours() << 11) | (stamp.getMinutes() << 5) | Math.floor(stamp.getSeconds() / 2);
-            const dosDate = (((Math.max(1980, stamp.getFullYear()) - 1980) & 127) << 9) | ((stamp.getMonth() + 1) << 5) | stamp.getDate();
-            for (const file of files) {
-                const name = encoder.encode(aiSafeRelativePath(file.name));
-                const data = file.bytes instanceof Uint8Array ? file.bytes : encoder.encode(String(file.content || ""));
-                const crc = aiZipCrc32(data);
-                const local = new Uint8Array(30 + name.length);
-                const lv = new DataView(local.buffer);
-                lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint16(6, 0x0800, true);
-                lv.setUint16(8, 0, true); lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true);
-                lv.setUint32(14, crc, true); lv.setUint32(18, data.length, true); lv.setUint32(22, data.length, true);
-                lv.setUint16(26, name.length, true); lv.setUint16(28, 0, true); local.set(name, 30);
-                chunks.push(local, data);
-                const record = new Uint8Array(46 + name.length);
-                const cv = new DataView(record.buffer);
-                cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
-                cv.setUint16(8, 0x0800, true); cv.setUint16(10, 0, true); cv.setUint16(12, dosTime, true); cv.setUint16(14, dosDate, true);
-                cv.setUint32(16, crc, true); cv.setUint32(20, data.length, true); cv.setUint32(24, data.length, true);
-                cv.setUint16(28, name.length, true); cv.setUint16(30, 0, true); cv.setUint16(32, 0, true);
-                cv.setUint16(34, 0, true); cv.setUint16(36, 0, true); cv.setUint32(38, 0, true); cv.setUint32(42, offset, true); record.set(name, 46);
-                central.push(record);
-                offset += local.length + data.length;
-            }
-            const centralSize = central.reduce((sum, part) => sum + part.length, 0);
-            const end = new Uint8Array(22); const ev = new DataView(end.buffer);
-            ev.setUint32(0, 0x06054b50, true); ev.setUint16(4, 0, true); ev.setUint16(6, 0, true);
-            ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
-            ev.setUint32(12, centralSize, true); ev.setUint32(16, offset, true); ev.setUint16(20, 0, true);
-            return new Blob([...chunks, ...central, end], { type: "application/zip" });
-        }
-
         function aiDownloadBlob(blob, filename) {
             const url = URL.createObjectURL(blob); const a = document.createElement("a");
             a.href = url; a.download = filename; a.rel = "noopener"; a.style.display = "none";
@@ -25436,9 +25361,6 @@ document.documentElement.classList.toggle(
             const heading = document.createElement("strong"); heading.textContent = valid.length + (valid.length === 1 ? " file" : " files") + " ready · review before using"; wrap.appendChild(heading);
             const note = document.createElement("p"); note.textContent = "Original uploads were not changed. These are separate, complete files generated by the model."; wrap.appendChild(note);
             if (valid.length > 1) {
-                const zip = document.createElement("button"); zip.type = "button"; zip.className = "ai-zip"; zip.textContent = "⬇ Download all as ZIP";
-                zip.addEventListener("click", () => { try { aiDownloadBlob(aiBuildZipBlob(valid), "atlas-generated-files.zip"); } catch (e) { zip.textContent = "ZIP failed — download files individually"; } });
-                wrap.appendChild(zip);
             }
             valid.forEach((file) => {
                 const safeName = aiSafeRelativePath(file.name);
@@ -25749,199 +25671,28 @@ document.documentElement.classList.toggle(
             return { "Authorization": "Bearer " + token };
         }
 
-        const AI_ATLAS_ACTIVE_MISSION_KEY = "horizon_atlas_active_mission_v1";
-        let aiAtlasMissionMonitoring = false;
-
-        async function aiAtlasMonitorMission(missionId) {
-            if (aiAtlasMissionMonitoring) return;
-            aiAtlasMissionMonitoring = true;
-            const status = document.getElementById("aiAtlasMissionStatus");
-            try {
-                const authHeaders = await aiAtlasAuthorizationHeaders();
-                let lastStatus = "";
-                let transientPollFailures = 0;
-                for (let attempt = 0; attempt < 1200; attempt++) {
-                    let poll;
-                    try {
-                        poll = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions/" + encodeURIComponent(missionId), { headers: { ...authHeaders }, cache: "no-store" });
-                    } catch (networkError) {
-                        transientPollFailures++;
-                        if (transientPollFailures >= 6) throw new Error("Atlas status connection failed repeatedly: " + String(networkError && networkError.message || networkError));
-                        if (status) status.textContent = "Connection interrupted. Reconnecting to the Atlas mission…";
-                        await new Promise(resolve => setTimeout(resolve, Math.min(15000, 2000 * transientPollFailures)));
-                        continue;
-                    }
-                    const state = await poll.json().catch(() => ({}));
-                    if (!poll.ok) {
-                        if ([429, 500, 502, 503, 504, 524].includes(poll.status)) {
-                            transientPollFailures++;
-                            if (transientPollFailures >= 6) throw new Error(state.message || state.error || "Atlas status service is temporarily unavailable after repeated retries.");
-                            if (status) status.textContent = "Atlas status service is temporarily unavailable. Retrying…";
-                            await new Promise(resolve => setTimeout(resolve, Math.min(15000, 2000 * transientPollFailures)));
-                            continue;
-                        }
-                        throw new Error(state.message || state.error || "Could not check Atlas mission status.");
-                    }
-                    transientPollFailures = 0;
-                    if (state.status !== lastStatus) lastStatus = state.status;
-                    if (status && state.status !== "completed") status.textContent = "Atlas mission: " + (state.progress || state.status) + (state.step ? " · step " + state.step : "");
-                    if (state.status === "failed" || state.status === "dispatch_failed") { try { localStorage.removeItem(AI_ATLAS_ACTIVE_MISSION_KEY); } catch (_) {} throw new Error(state.error || "Atlas mission failed. Check the executor workflow logs."); }
-                    if (state.status === "completed") {
-                        const download = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions/" + encodeURIComponent(missionId) + "/download", { headers: { ...authHeaders }, cache: "no-store" });
-                        if (!download.ok) { const problem = await download.json().catch(() => ({})); throw new Error(problem.message || problem.error || "Atlas finished but the ZIP download failed."); }
-                        aiDownloadBlob(await download.blob(), "atlas-mission-" + missionId.slice(0, 8) + ".zip");
-                        try { localStorage.removeItem(AI_ATLAS_ACTIVE_MISSION_KEY); } catch (_) {}
-                        if (status) status.textContent = "Atlas mission completed. Your project ZIP download has started. Review ATLAS_REPORT.md and run the project locally before using it.";
-                        return;
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                }
-                if (status) status.textContent = "Atlas is still working. Your mission ID is saved, so status checking can resume when you return.";
-            } catch (error) {
-                if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error");
-                if (/mission failed|not found|expired|dispatch failed/i.test(String(error && error.message || ""))) { try { localStorage.removeItem(AI_ATLAS_ACTIVE_MISSION_KEY); } catch (_) {} }
-            } finally { aiAtlasMissionMonitoring = false; }
-        }
-
-        async function aiAtlasStartMission(source, promptOverride) {
-            const status = document.getElementById("aiAtlasMissionStatus");
-            const promptEl = document.getElementById("aiInput");
-            const prompt = String(promptOverride != null ? promptOverride : (promptEl && promptEl.value || "")).trim();
-            if (!prompt) throw new Error("Describe what Atlas should build, change, or fix before starting the mission.");
-            const resolvedMissionModel = aiResolveModel();
-            const missionProvider = String(resolvedMissionModel || "").startsWith("coarena::") ? "coarena" : "nvidia";
-            if (missionProvider === "coarena" && !window.confirm("CoArena data notice: the full project ZIP or imported repository contents, your prompt, model replies, reasoning and tool calls will be sent to CoArena. CoArena says it stores these permanently and may use them in datasets it licenses; they cannot be withdrawn later. CoArena requires anyone using its Model API to be 18 or older, and tool probes/task calls count toward the account's usage allowance. Continue only if you are 18+, the account owner authorized this key, and you have permission to share this project and accept those terms.")) throw new Error("CoArena mission cancelled. No project data was uploaded.");
-            const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto", provider: missionProvider, requestId: crypto.randomUUID() };
-            if (source instanceof File) {
-                if (!/\.zip$/i.test(source.name)) throw new Error("Choose a project ZIP file.");
-                if (source.size > 8500000) throw new Error("Project ZIP must be smaller than 8.5 MB for this execution path.");
-                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Preparing project ZIP…"; }
-                payload.projectZipBase64 = await new Promise((resolve, reject) => {
-                    const reader = new FileReader(); reader.onerror = () => reject(new Error("Could not read the project ZIP."));
-                    reader.onload = () => { const value = String(reader.result || ""); const comma = value.indexOf(","); resolve(comma >= 0 ? value.slice(comma + 1) : value); };
-                    reader.readAsDataURL(source);
-                });
-            } else if (typeof source === "string" && source.trim()) { payload.repositoryUrl = source.trim(); }
-            else throw new Error("Choose a project ZIP or enter a GitHub repository URL.");
-            const authHeaders = await aiAtlasAuthorizationHeaders();
-            const createUrl = AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions";
-            let create = null;
-            for (let attempt = 0; attempt < 2; attempt++) {
-                try {
-                    create = await fetch(createUrl, { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify(payload) });
-                } catch (networkError) {
-                    if (attempt === 0) {
-                        if (status) status.textContent = "Connection interrupted. Checking whether Atlas accepted the mission…";
-                        await new Promise(resolve => setTimeout(resolve, 1200));
-                        continue;
-                    }
-                    throw new Error("Could not confirm whether Atlas accepted the mission. Check the mission status or wait before submitting again to avoid a duplicate.");
-                }
-                if (attempt === 0 && (create.status === 502 || create.status === 504 || create.status === 524)) {
-                    await new Promise(resolve => setTimeout(resolve, 1200));
-                    continue;
-                }
-                break;
-            }
-            let created = await create.json().catch(() => ({}));
-            if (create.ok && !created.missionId) {
-                await new Promise(resolve => setTimeout(resolve, 1200));
-                create = await fetch(createUrl, { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify(payload) });
-                created = await create.json().catch(() => ({}));
-            }
-            if (!create.ok || !created.missionId) throw new Error(created.message || created.error || "Atlas could not queue the coding mission.");
-            try { localStorage.setItem(AI_ATLAS_ACTIVE_MISSION_KEY, created.missionId); } catch (_) {}
-            if (source instanceof File && aiPendingProjectZip === source) {
-                aiPendingProjectZip = null;
-                aiRenderFilePreview();
-            }
-            if (promptEl) promptEl.value = "";
-            if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Mission queued. Atlas is preparing an isolated workspace…"; }
-            await aiAtlasMonitorMission(created.missionId);
-        }
-
-        let aiAtlasMissionStarting = false;
-
-        function aiSetAtlasMissionBusy(busy) {
-            aiAtlasMissionStarting = !!busy;
-            const repoButton = document.getElementById("aiAtlasRepoMissionBtn");
-            if (repoButton) repoButton.disabled = !!busy;
-        }
-
-        function aiIsZipFile(file) {
+        function aiIsArchiveFile(file) {
             return !!file && (/\.zip$/i.test(String(file.name || "")) || /^application\/(x-)?zip(-compressed)?$/i.test(String(file.type || "")));
         }
 
-        /* Unified attachment router (📎 picker and drag-and-drop).
-           Ordinary files -> aiAddTextFiles() (multi-file, PDFs, images, text/code).
-           A project ZIP  -> aiAtlasStartMission(file), Atlas mode only. ZIPs never reach aiAddTextFiles(). */
+        /* Direct file workflow only. No ZIP upload, repository import, mission queue,
+           GitHub Actions executor, or remote workspace. Attach the actual files. */
         async function aiHandleAttachmentSelection(fileList) {
             const files = Array.from(fileList || []);
             if (!files.length) return;
-            const zips = files.filter(aiIsZipFile);
+            const archives = files.filter(aiIsArchiveFile);
             const ordinary = files.filter((f) => !aiIsZipFile(f));
-            let ordinaryError = null;
-            if (zips.length) {
-                if (aiMode !== "atlas") {
-                    aiAppendTextMessage("Project ZIPs require Atlas mode. Switch to Atlas, then attach the ZIP again. No ZIP was uploaded.", true);
-                    return;
-                }
-                if (zips.length > 1) {
-                    aiAppendTextMessage("Attach one project ZIP at a time. No ZIP was staged.", true);
-                    return;
-                }
-                if (aiAtlasMissionStarting) {
-                    aiAppendTextMessage("An Atlas mission is already starting or running. Wait for it to finish before attaching another project ZIP.", true);
-                    return;
-                }
-                aiPendingProjectZip = zips[0];
-                aiRenderFilePreview();
+            if (archives.length) {
+                aiAppendTextMessage("Atlas no longer uses project ZIPs or GitHub execution. Please extract the archive on your device and attach the specific source files you want me to inspect or fix. No ZIP was uploaded.", true);
             }
-            if (ordinary.length) {
-                try { await aiAddTextFiles(ordinary); } catch (error) { ordinaryError = error; }
-            }
-            if (ordinaryError) throw ordinaryError;
-        }
-
-        // Kept as a small compatibility wrapper for any existing call sites.
-        async function aiRouteZipToAtlasMission(zips) {
-            await aiHandleAttachmentSelection(zips);
+            if (ordinary.length) await aiAddTextFiles(ordinary);
         }
 
         function aiUpdateAttachButtonLabels() {
             const btn = document.getElementById("aiFileBtn");
             if (!btn) return;
-            const atlas = aiMode === "atlas";
-            btn.setAttribute("aria-label", atlas
-                ? "Attach source files, Office documents, PDFs, images, or a project ZIP for an Atlas mission"
-                : "Attach source files, Office documents, PDFs, and images");
-            btn.title = atlas
-                ? "Attach files or a project ZIP, add your task description, then press Send to start the Atlas mission \u2014 or drag and drop"
-                : "Attach source files, Office documents, PDFs, and images \u2014 or drag and drop. ZIP project missions require Atlas mode.";
-        }
-
-        function aiBindAtlasMissionControl() {
-            const repoButton = document.getElementById("aiAtlasRepoMissionBtn");
-            if (!repoButton || repoButton.dataset.bound) return;
-            repoButton.dataset.bound = "1";
-            try {
-                const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY);
-                if (activeMission && aiMode === "atlas") {
-                    aiSetAtlasMissionBusy(true);
-                    aiAtlasMonitorMission(activeMission).finally(() => aiSetAtlasMissionBusy(false));
-                }
-            } catch (_) {}
-            repoButton.addEventListener("click", async () => {
-                if (aiMode !== "atlas" || aiAtlasMissionStarting) return;
-                const url = window.prompt("GitHub repository URL (public repository or private repository with a read-only token configured):");
-                if (!url) return;
-                aiSetAtlasMissionBusy(true);
-                const status = document.getElementById("aiAtlasMissionStatus");
-                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Importing GitHub repository…"; }
-                try { await aiAtlasStartMission(url); }
-                catch (error) { if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error"); else aiAnnounce(error.message || "Atlas mission failed"); }
-                finally { aiSetAtlasMissionBusy(false); }
-            });
+            btn.setAttribute("aria-label", "Attach source files, Office documents, PDFs, or images");
+            btn.title = "Attach source files, Office documents, PDFs, and images — or drag and drop";
         }
 
         function aiProviderFromModel(modelId) {
@@ -26339,11 +26090,9 @@ document.documentElement.classList.toggle(
             aiRenderCurrentChat();
             aiRenderChatLists();
             aiFetchModels(false);
-            if (next === "atlas") { try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission) { aiSetAtlasMissionBusy(true); if (!aiAtlasMissionMonitoring) aiAtlasMonitorMission(activeMission).finally(() => aiSetAtlasMissionBusy(false)); } } catch (_) {} }
         }
 
         function aiBindModeControls() {
-            aiBindAtlasMissionControl();
             const bar = document.getElementById("aiModeBar");
             if (!bar || bar.dataset.bound) return;
             bar.dataset.bound = "1";
@@ -26453,46 +26202,6 @@ document.documentElement.classList.toggle(
             const message = input.value.trim();
             const pendingImage = aiSelectedImage;
             const pendingFiles = aiSelectedFiles.slice();
-
-            // ZIP missions must use the isolated workspace path, never the chat
-            // model's single-file JSON output contract. Send the prompt and ZIP together.
-            if (aiPendingProjectZip) {
-                if (!isAtlas) {
-                    aiAppendTextMessage("Switch to Atlas mode before sending a project ZIP. Your ZIP is still attached.", true);
-                    return;
-                }
-                if (!message) {
-                    aiAppendTextMessage("Add a task description before sending the project ZIP. The ZIP is still attached.", true);
-                    return;
-                }
-                if (pendingImage || pendingFiles.length) {
-                    aiAppendTextMessage("For a project ZIP mission, use the ZIP as the complete project input. Remove separately attached files or images before sending.", true);
-                    return;
-                }
-                if (aiAtlasMissionStarting) return;
-                aiShowWelcome(false);
-                aiAppendUserMessage(message);
-                aiConversationHistory.push({ role: "user", content: message + "\n[Project ZIP: " + aiPendingProjectZip.name + "]" });
-                aiSaveCurrentChat();
-                input.value = "";
-                aiBusy = true;
-                aiSetInputDisabled(true);
-                aiSetAtlasMissionBusy(true);
-                const status = document.getElementById("aiAtlasMissionStatus");
-                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Starting Atlas project mission…"; }
-                try {
-                    await aiAtlasStartMission(aiPendingProjectZip, message);
-                } catch (error) {
-                    if (aiPendingProjectZip) input.value = message;
-                    if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error");
-                    else aiAnnounce((error && error.message) || "Atlas mission failed");
-                } finally {
-                    aiBusy = false;
-                    aiSetInputDisabled(false);
-                    aiSetAtlasMissionBusy(false);
-                }
-                return;
-            }
 
             if (!message && !pendingImage && !pendingFiles.length) return;
             if (pendingFiles.length && !isAtlas) {
@@ -26711,7 +26420,7 @@ document.documentElement.classList.toggle(
                 }
                 const responseLanguage = aiResponseLanguageInstruction();
                 const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
-                const atlasRule = "You are Atlas, a coding and technical assistant with a browser-based project workspace. You can read supplied text/source files, inspect images, extract text from PDFs and common Office/OpenDocument/EPUB files, retain extracted text files as working context for this chat session, create new text/source files, and return complete edited replacement files for download. Binary output may be returned only using the explicit base64 file marker format. You cannot silently browse the user's disk, modify local originals in place, access unselected folders, execute commands, run tests, or deploy. Never claim to have done those things.";
+                const atlasRule = "You are Atlas, a coding and technical assistant with a browser-based project workspace. You can read supplied text/source files, inspect images, extract text from PDFs and common Office/OpenDocument/EPUB files, retain extracted text files as working context for this chat session, create new text/source files, and return complete edited replacement files for download. Binary output may be returned only using the explicit base64 file marker format. You cannot silently browse the user's disk, modify local originals in place, access unselected folders, execute commands, run tests, use ZIP archives, import GitHub repositories, invoke a remote executor, or deploy. Work only with the files explicitly attached in this chat. Never claim to have done those things.";
                 const ctx = aiBuildContext();
                 const memoryParts = isAtlas ? [aiSettings.memory] : [aiSettings.memory, aiBuildCrossChatContext()];
 
@@ -26967,7 +26676,7 @@ document.documentElement.classList.toggle(
                         kind: "invalid",
                         status: 409,
                         code: "ATLAS_READ_REQUEST_UNSUPPORTED",
-                        message: "Atlas requested the contents of " + structured.requestedPath + ", but this browser file-work route has no read-request round trip. Attach the missing source file(s), or attach the complete project as a ZIP to use the automatic Atlas mission workspace.",
+                        message: "Atlas requested an additional file that was not attached: " + structured.requestedPath + ". This direct-file workflow can inspect only files you provide. Attach that file and retry; ZIP archives and remote repository execution are not supported.",
                         provider: "nvidia"
                     };
                 } else if (structured && structured.files.length) {
