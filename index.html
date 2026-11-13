@@ -23457,7 +23457,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32-queue";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.2-queue";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25000,9 +25000,21 @@ document.documentElement.classList.toggle(
                     const actionValue = getAttr("action").toLowerCase();
                     const mime = getAttr("mime");
                     if (!rawName.trim()) return null;
+                    // The browser file-work endpoint receives file contents in the
+                    // request; it has no follow-up read-request round trip. Never
+                    // misinterpret a model's action="read" request as a new file.
+                    if (actionValue === "read") {
+                        return {
+                            error: "read-request",
+                            requestedPath: aiSafeRelativePath(rawName),
+                            files: [],
+                            response: ""
+                        };
+                    }
+                    if (actionValue !== "create" && actionValue !== "edit") return null;
                     active = {
                         name: aiSafeRelativePath(rawName),
-                        action: actionValue === "edit" ? "edit" : "create",
+                        action: actionValue,
                         mimeType: mime.slice(0, 120) || mimeFor(rawName),
                         contentLines: []
                     };
@@ -26470,7 +26482,15 @@ document.documentElement.classList.toggle(
             // downloads/replaces them locally.
             if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone) {
                 const structured = aiParseStructuredFileResult(assistantText, effectiveMessage);
-                if (structured && structured.files.length) {
+                if (structured && structured.error === "read-request") {
+                    streamError = {
+                        kind: "invalid",
+                        status: 409,
+                        code: "ATLAS_READ_REQUEST_UNSUPPORTED",
+                        message: "Atlas requested the contents of " + structured.requestedPath + ", but this browser file-work route has no read-request round trip. Attach the missing source file(s), or attach the complete project as a ZIP to use the automatic Atlas mission workspace.",
+                        provider: "nvidia"
+                    };
+                } else if (structured && structured.files.length) {
                     generatedFiles = structured.files;
                     assistantText = structured.response || "I prepared the requested project files.";
                     if (messageEl) {
