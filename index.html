@@ -6038,6 +6038,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 #aiBox:not([data-ai-mode="atlas"]) .ai-atlas-only { display:none !important; }
 #aiProjectContextInput { width:100%; box-sizing:border-box; min-height:110px; resize:vertical; }
 #aiModelMeta { min-height:1.2em; }
+.ai-atlas-mission-status { display:block; padding:9px 14px; color:var(--text-secondary,#888); font-size:12px; overflow-wrap:anywhere; }
 
 /* Send button doubles as Stop while a reply is streaming */
 #aiSendBtn .aiStopIcon { display:none; width:12px; height:12px; border-radius:3px; background:currentColor; }
@@ -23399,6 +23400,9 @@ document.documentElement.classList.toggle(
         </div>
 
         <div class="aiInput">
+            <input type="file" id="aiAtlasProjectZipInput" accept=".zip,application/zip" hidden />
+            <button type="button" class="aiImageBtn aiGhostBtn ai-atlas-only" id="aiAtlasMissionBtn" aria-label="Run isolated coding mission from ZIP" title="Run an isolated coding mission from a project ZIP">📦</button>
+            <button type="button" class="aiImageBtn aiGhostBtn ai-atlas-only" id="aiAtlasRepoMissionBtn" aria-label="Run isolated coding mission from GitHub" title="Import a GitHub repository into an isolated workspace">↗</button>
             <input
                 type="file"
                 id="aiImageFileInput"
@@ -23447,6 +23451,7 @@ document.documentElement.classList.toggle(
             </button>
         </div>
         <div id="aiFilePreviewWrap" hidden aria-live="polite"></div>
+        <div id="aiAtlasMissionStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
         <div id="aiDropOverlay" aria-hidden="true"><div>📎 Drop files to attach<br><small>Code, text, PDF or image files</small></div></div>
 
         <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
@@ -23454,7 +23459,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v30";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v31";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -23615,7 +23620,7 @@ document.documentElement.classList.toggle(
 
         Object.assign(AI_STRINGS.en, {
             modeLabel: "AI mode", modeHorizon: "Horizon", modeAtlas: "Atlas",
-            atlasNote: "Atlas is chat-only: it can't run code or access your repositories or files. Paste what you want it to look at.",
+            atlasNote: "Atlas can run an isolated coding mission from a project ZIP. It returns a separate ZIP; it never pushes or deploys your repository.",
             atlasTitle: "Atlas", atlasSubtitle: "Code & technical assistant",
             atlasPlaceholder: "Ask Atlas about code, bugs, design…",
             atlasWelcomeTitle: "Atlas",
@@ -23638,7 +23643,7 @@ document.documentElement.classList.toggle(
         });
         Object.assign(AI_STRINGS.ar, {
             modeLabel: "وضع الذكاء الاصطناعي", modeHorizon: "هورايزن", modeAtlas: "أطلس",
-            atlasNote: "أطلس للمحادثة فقط: لا يمكنه تشغيل الأكواد أو الوصول إلى مستودعاتك أو ملفاتك. الصق ما تريد منه مراجعته.",
+            atlasNote: "يمكن لأطلس تنفيذ مهمة برمجية معزولة من ملف مشروع ZIP وإرجاع نسخة ZIP منفصلة دون دفع تغييرات إلى المستودع أو النشر.",
             atlasTitle: "أطلس", atlasSubtitle: "مساعد البرمجة والأمور التقنية",
             atlasPlaceholder: "اسأل أطلس عن الأكواد والأخطاء والتصميم…",
             atlasWelcomeTitle: "أطلس",
@@ -23661,7 +23666,7 @@ document.documentElement.classList.toggle(
         });
         Object.assign(AI_STRINGS.ku, {
             modeLabel: "دۆخی زیرەکی دەستکرد", modeHorizon: "هۆرایزن", modeAtlas: "ئەتلەس",
-            atlasNote: "ئەتلەس تەنیا بۆ چاتە: ناتوانێت کۆد جێبەجێ بکات یان دەستی بە ڕیپۆ و فایلەکانت بگات. ئەوەی دەتەوێت ببینێت لێرە دایبنێ.",
+            atlasNote: "ئەتلەس دەتوانێت لە ZIP ـی پڕۆژەوە کاری کۆدکردنی جیاکراوە ئەنجام بدات و ZIP ـێکی نوێ بگەڕێنێتەوە؛ هیچ گۆڕانکارییەک push ناکات و deploy ناکات.",
             atlasTitle: "ئەتلەس", atlasSubtitle: "یاریدەدەری کۆد و تەکنیکی",
             atlasPlaceholder: "لە ئەتلەس بپرسە دەربارەی کۆد و هەڵە و دیزاین…",
             atlasWelcomeTitle: "ئەتلەس",
@@ -25482,6 +25487,98 @@ document.documentElement.classList.toggle(
             return { "Authorization": "Bearer " + token };
         }
 
+        const AI_ATLAS_ACTIVE_MISSION_KEY = "horizon_atlas_active_mission_v1";
+        let aiAtlasMissionMonitoring = false;
+
+        async function aiAtlasMonitorMission(missionId) {
+            if (aiAtlasMissionMonitoring) return;
+            aiAtlasMissionMonitoring = true;
+            const status = document.getElementById("aiAtlasMissionStatus");
+            try {
+                const authHeaders = await aiAtlasAuthorizationHeaders();
+                let lastStatus = "";
+                for (let attempt = 0; attempt < 540; attempt++) {
+                    const poll = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions/" + encodeURIComponent(missionId), { headers: { ...authHeaders }, cache: "no-store" });
+                    const state = await poll.json().catch(() => ({}));
+                    if (!poll.ok) throw new Error(state.message || state.error || "Could not check Atlas mission status.");
+                    if (state.status !== lastStatus) lastStatus = state.status;
+                    if (status && state.status !== "completed") status.textContent = "Atlas mission: " + (state.progress || state.status) + (state.step ? " · step " + state.step : "");
+                    if (state.status === "failed" || state.status === "dispatch_failed") { try { localStorage.removeItem(AI_ATLAS_ACTIVE_MISSION_KEY); } catch (_) {} throw new Error(state.error || "Atlas mission failed. Check the executor workflow logs."); }
+                    if (state.status === "completed") {
+                        const download = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions/" + encodeURIComponent(missionId) + "/download", { headers: { ...authHeaders }, cache: "no-store" });
+                        if (!download.ok) { const problem = await download.json().catch(() => ({})); throw new Error(problem.message || problem.error || "Atlas finished but the ZIP download failed."); }
+                        aiDownloadBlob(await download.blob(), "atlas-mission-" + missionId.slice(0, 8) + ".zip");
+                        try { localStorage.removeItem(AI_ATLAS_ACTIVE_MISSION_KEY); } catch (_) {}
+                        if (status) status.textContent = "Atlas mission completed. Your project ZIP download has started. Review ATLAS_REPORT.md and run the project locally before using it.";
+                        return;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+                if (status) status.textContent = "Atlas is still working. Your mission ID is saved, so status checking can resume when you return.";
+            } catch (error) {
+                if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error");
+                if (/mission failed|not found|expired|dispatch failed/i.test(String(error && error.message || ""))) { try { localStorage.removeItem(AI_ATLAS_ACTIVE_MISSION_KEY); } catch (_) {} }
+            } finally { aiAtlasMissionMonitoring = false; }
+        }
+
+        async function aiAtlasStartMission(source) {
+            const status = document.getElementById("aiAtlasMissionStatus");
+            const promptEl = document.getElementById("aiInput");
+            const prompt = String(promptEl && promptEl.value || "").trim();
+            if (!prompt) throw new Error("Describe what Atlas should build, change, or fix before starting the mission.");
+            const resolvedMissionModel = aiResolveModel();
+            const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto" };
+            if (source instanceof File) {
+                if (!/\.zip$/i.test(source.name)) throw new Error("Choose a project ZIP file.");
+                if (source.size > 8500000) throw new Error("Project ZIP must be smaller than 8.5 MB for this execution path.");
+                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Preparing project ZIP…"; }
+                payload.projectZipBase64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader(); reader.onerror = () => reject(new Error("Could not read the project ZIP."));
+                    reader.onload = () => { const value = String(reader.result || ""); const comma = value.indexOf(","); resolve(comma >= 0 ? value.slice(comma + 1) : value); };
+                    reader.readAsDataURL(source);
+                });
+            } else if (typeof source === "string" && source.trim()) { payload.repositoryUrl = source.trim(); }
+            else throw new Error("Choose a project ZIP or enter a GitHub repository URL.");
+            const authHeaders = await aiAtlasAuthorizationHeaders();
+            const create = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify(payload) });
+            const created = await create.json().catch(() => ({}));
+            if (!create.ok || !created.missionId) throw new Error(created.message || created.error || "Atlas could not queue the coding mission.");
+            try { localStorage.setItem(AI_ATLAS_ACTIVE_MISSION_KEY, created.missionId); } catch (_) {}
+            if (promptEl) promptEl.value = "";
+            if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Mission queued. Atlas is preparing an isolated workspace…"; }
+            await aiAtlasMonitorMission(created.missionId);
+        }
+
+        function aiBindAtlasMissionControl() {
+            const button = document.getElementById("aiAtlasMissionBtn");
+            const repoButton = document.getElementById("aiAtlasRepoMissionBtn");
+            const input = document.getElementById("aiAtlasProjectZipInput");
+            if (!button || !input || button.dataset.bound) return;
+            button.dataset.bound = "1";
+            try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission && aiMode === "atlas") aiAtlasMonitorMission(activeMission); } catch (_) {}
+            button.addEventListener("click", () => { if (aiMode !== "atlas") return; input.click(); });
+            repoButton?.addEventListener("click", async () => {
+                if (aiMode !== "atlas") return;
+                const url = window.prompt("GitHub repository URL (public repository or private repository with a read-only token configured):");
+                if (!url) return;
+                button.disabled = true; if (repoButton) repoButton.disabled = true;
+                const status = document.getElementById("aiAtlasMissionStatus");
+                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Importing GitHub repository…"; }
+                try { await aiAtlasStartMission(url); }
+                catch (error) { if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error"); else aiAnnounce(error.message || "Atlas mission failed"); }
+                finally { button.disabled = false; if (repoButton) repoButton.disabled = false; }
+            });
+            input.addEventListener("change", async () => {
+                const file = input.files && input.files[0]; input.value = ""; if (!file) return;
+                button.disabled = true;
+                const status = document.getElementById("aiAtlasMissionStatus");
+                if (status) { status.className = "ai-atlas-mission-status"; status.textContent = "Starting Atlas mission…"; }
+                try { await aiAtlasStartMission(file); }
+                catch (error) { if (status) status.textContent = "Atlas mission: " + (error && error.message || "Unknown error"); else aiAnnounce(error.message || "Atlas mission failed"); }
+                finally { button.disabled = false; }
+            });
+        }
+
         function aiProviderFromModel(modelId) {
             // Provider is determined by the active mode, never by a legacy model prefix.
             return aiSyncSelectedProvider();
@@ -25858,9 +25955,11 @@ document.documentElement.classList.toggle(
             aiRenderCurrentChat();
             aiRenderChatLists();
             aiFetchModels(false);
+            if (next === "atlas") { try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission) aiAtlasMonitorMission(activeMission); } catch (_) {} }
         }
 
         function aiBindModeControls() {
+            aiBindAtlasMissionControl();
             const bar = document.getElementById("aiModeBar");
             if (!bar || bar.dataset.bound) return;
             bar.dataset.bound = "1";
