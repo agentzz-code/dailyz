@@ -23458,7 +23458,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.7-adaptive-multitask";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.9-nvidia-recovery";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -26487,9 +26487,15 @@ document.documentElement.classList.toggle(
                     }
                     const nvidiaResponse = await nvidiaAdapter.sendMessage(requestBody, signal);
                     if (!nvidiaResponse.ok) {
-                        let payload = null; try { payload = JSON.parse(await nvidiaResponse.text()); } catch (_) {}
-                        const err = new Error((payload && (payload.message || payload.error)) || "NVIDIA Worker request failed (HTTP " + nvidiaResponse.status + ").");
-                        err.aiInfo = aiErrorInfo(nvidiaResponse.status, payload); err.aiInfo.provider = "nvidia"; throw err;
+                        const rawErrorBody = await nvidiaResponse.text();
+                        let payload = null; try { payload = JSON.parse(rawErrorBody); } catch (_) {}
+                        const rawDetail = payload
+                            ? String(payload.details || payload.message || payload.error || "")
+                            : String(rawErrorBody || "").replace(/\s+/g, " ").slice(0, 700);
+                        const err = new Error(rawDetail || "NVIDIA Worker returned HTTP " + nvidiaResponse.status + " without an error body.");
+                        err.aiInfo = aiErrorInfo(nvidiaResponse.status, payload || { message: rawDetail, details: rawDetail, code: "NVIDIA_WORKER_HTTP_" + nvidiaResponse.status });
+                        err.aiInfo.provider = "nvidia";
+                        throw err;
                     }
                     const ctype = (nvidiaResponse.headers.get("content-type") || "").toLowerCase();
                     if (ctype.indexOf("application/json") !== -1 || !nvidiaResponse.body || typeof nvidiaResponse.body.getReader !== "function") {
@@ -26671,8 +26677,8 @@ document.documentElement.classList.toggle(
                 streamError = {
                     kind: "provider",
                     status: 502,
-                    code: "EMPTY_AI_RESPONSE",
-                    message: "The " + emptyProvider + " connection ended without returning any answer content.",
+                    code: "AI_STREAM_CLOSED_EARLY",
+                    message: "The " + emptyProvider + " response stream closed before its completion marker ([DONE]) and before any answer content arrived. This indicates an interrupted Worker/provider connection, not a file-parser failure. Selected model: " + String(requestedModel || "unknown") + ". Refresh the model list and retry once; if it repeats, capture the matching Worker logs and request timestamp.",
                     provider: emptyProvider
                 };
             }
