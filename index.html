@@ -6038,7 +6038,8 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 #aiBox:not([data-ai-mode="atlas"]) .ai-atlas-only { display:none !important; }
 #aiProjectContextInput { width:100%; box-sizing:border-box; min-height:110px; resize:vertical; }
 #aiModelMeta { min-height:1.2em; }
-.ai-atlas-mission-status { display:block; padding:9px 14px; color:var(--text-secondary,#888); font-size:12px; overflow-wrap:anywhere; }
+.ai-atlas-mission-status { display:block; padding:8px 14px; color:var(--text-secondary,#888); font-size:12px; overflow-wrap:anywhere; }
+.ai-atlas-mission-status:empty { display:none; }
 
 /* Send button doubles as Stop while a reply is streaming */
 #aiSendBtn .aiStopIcon { display:none; width:12px; height:12px; border-radius:3px; background:currentColor; }
@@ -23449,7 +23450,7 @@ document.documentElement.classList.toggle(
             </button>
         </div>
         <div id="aiFilePreviewWrap" hidden aria-live="polite"></div>
-        <div id="aiAtlasMissionStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
+        <div id="aiAtlasMissionStatus" class="ai-atlas-mission-status" role="status" aria-live="polite"></div>
         <div id="aiDropOverlay" aria-hidden="true"><div>📎 Drop files to attach<br><small>Code, text, PDF or image files (project ZIPs in Atlas mode)</small></div></div>
 
         <div id="aiStatus" class="ai-sr-only" role="status" aria-live="polite"></div>
@@ -23457,7 +23458,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.2-queue";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.3-queue";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -25507,10 +25508,30 @@ document.documentElement.classList.toggle(
             try {
                 const authHeaders = await aiAtlasAuthorizationHeaders();
                 let lastStatus = "";
-                for (let attempt = 0; attempt < 540; attempt++) {
-                    const poll = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions/" + encodeURIComponent(missionId), { headers: { ...authHeaders }, cache: "no-store" });
+                let transientPollFailures = 0;
+                for (let attempt = 0; attempt < 1200; attempt++) {
+                    let poll;
+                    try {
+                        poll = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions/" + encodeURIComponent(missionId), { headers: { ...authHeaders }, cache: "no-store" });
+                    } catch (networkError) {
+                        transientPollFailures++;
+                        if (transientPollFailures >= 6) throw new Error("Atlas status connection failed repeatedly: " + String(networkError && networkError.message || networkError));
+                        if (status) status.textContent = "Connection interrupted. Reconnecting to the Atlas mission…";
+                        await new Promise(resolve => setTimeout(resolve, Math.min(15000, 2000 * transientPollFailures)));
+                        continue;
+                    }
                     const state = await poll.json().catch(() => ({}));
-                    if (!poll.ok) throw new Error(state.message || state.error || "Could not check Atlas mission status.");
+                    if (!poll.ok) {
+                        if ([429, 500, 502, 503, 504, 524].includes(poll.status)) {
+                            transientPollFailures++;
+                            if (transientPollFailures >= 6) throw new Error(state.message || state.error || "Atlas status service is temporarily unavailable after repeated retries.");
+                            if (status) status.textContent = "Atlas status service is temporarily unavailable. Retrying…";
+                            await new Promise(resolve => setTimeout(resolve, Math.min(15000, 2000 * transientPollFailures)));
+                            continue;
+                        }
+                        throw new Error(state.message || state.error || "Could not check Atlas mission status.");
+                    }
+                    transientPollFailures = 0;
                     if (state.status !== lastStatus) lastStatus = state.status;
                     if (status && state.status !== "completed") status.textContent = "Atlas mission: " + (state.progress || state.status) + (state.step ? " · step " + state.step : "");
                     if (state.status === "failed" || state.status === "dispatch_failed") { try { localStorage.removeItem(AI_ATLAS_ACTIVE_MISSION_KEY); } catch (_) {} throw new Error(state.error || "Atlas mission failed. Check the executor workflow logs."); }
@@ -25537,7 +25558,7 @@ document.documentElement.classList.toggle(
             const prompt = String(promptEl && promptEl.value || "").trim();
             if (!prompt) throw new Error("Describe what Atlas should build, change, or fix before starting the mission.");
             const resolvedMissionModel = aiResolveModel();
-            const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto" };
+            const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto", requestId: crypto.randomUUID() };
             if (source instanceof File) {
                 if (!/\.zip$/i.test(source.name)) throw new Error("Choose a project ZIP file.");
                 if (source.size > 8500000) throw new Error("Project ZIP must be smaller than 8.5 MB for this execution path.");
@@ -25550,8 +25571,31 @@ document.documentElement.classList.toggle(
             } else if (typeof source === "string" && source.trim()) { payload.repositoryUrl = source.trim(); }
             else throw new Error("Choose a project ZIP or enter a GitHub repository URL.");
             const authHeaders = await aiAtlasAuthorizationHeaders();
-            const create = await fetch(AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify(payload) });
-            const created = await create.json().catch(() => ({}));
+            const createUrl = AI_ENDPOINT.replace(/\/+$/, "") + "/atlas/missions";
+            let create = null;
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    create = await fetch(createUrl, { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify(payload) });
+                } catch (networkError) {
+                    if (attempt === 0) {
+                        if (status) status.textContent = "Connection interrupted. Checking whether Atlas accepted the mission…";
+                        await new Promise(resolve => setTimeout(resolve, 1200));
+                        continue;
+                    }
+                    throw new Error("Could not confirm whether Atlas accepted the mission. Check the mission status or wait before submitting again to avoid a duplicate.");
+                }
+                if (attempt === 0 && (create.status === 502 || create.status === 504 || create.status === 524)) {
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                    continue;
+                }
+                break;
+            }
+            let created = await create.json().catch(() => ({}));
+            if (create.ok && !created.missionId) {
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                create = await fetch(createUrl, { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify(payload) });
+                created = await create.json().catch(() => ({}));
+            }
             if (!create.ok || !created.missionId) throw new Error(created.message || created.error || "Atlas could not queue the coding mission.");
             try { localStorage.setItem(AI_ATLAS_ACTIVE_MISSION_KEY, created.missionId); } catch (_) {}
             if (promptEl) promptEl.value = "";
@@ -25624,7 +25668,13 @@ document.documentElement.classList.toggle(
             const repoButton = document.getElementById("aiAtlasRepoMissionBtn");
             if (!repoButton || repoButton.dataset.bound) return;
             repoButton.dataset.bound = "1";
-            try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission && aiMode === "atlas") aiAtlasMonitorMission(activeMission); } catch (_) {}
+            try {
+                const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY);
+                if (activeMission && aiMode === "atlas") {
+                    aiSetAtlasMissionBusy(true);
+                    aiAtlasMonitorMission(activeMission).finally(() => aiSetAtlasMissionBusy(false));
+                }
+            } catch (_) {}
             repoButton.addEventListener("click", async () => {
                 if (aiMode !== "atlas" || aiAtlasMissionStarting) return;
                 const url = window.prompt("GitHub repository URL (public repository or private repository with a read-only token configured):");
@@ -26015,7 +26065,7 @@ document.documentElement.classList.toggle(
             aiRenderCurrentChat();
             aiRenderChatLists();
             aiFetchModels(false);
-            if (next === "atlas") { try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission) aiAtlasMonitorMission(activeMission); } catch (_) {} }
+            if (next === "atlas") { try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission) { aiSetAtlasMissionBusy(true); if (!aiAtlasMissionMonitoring) aiAtlasMonitorMission(activeMission).finally(() => aiSetAtlasMissionBusy(false)); } } catch (_) {} }
         }
 
         function aiBindModeControls() {
