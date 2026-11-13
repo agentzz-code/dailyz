@@ -23411,7 +23411,7 @@ document.documentElement.classList.toggle(
             <input
                 type="file"
                 id="aiFileInput"
-                accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf,.txt,.md,.markdown,.js,.jsx,.mjs,.cjs,.ts,.tsx,.py,.html,.htm,.css,.scss,.json,.jsonc,.yaml,.yml,.xml,.sql,.sh,.ps1,.java,.c,.h,.cpp,.hpp,.go,.rs,.php,.rb,.swift,.kt,.dart,.vue,.svelte,.csv,.log,.ini,.toml,.env.example,.properties,.gradle,.dockerfile,.gitignore,.zip,application/zip,application/x-zip-compressed"
+                accept="*/*"
                 multiple
                 hidden
             />
@@ -23458,7 +23458,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.11-stream-completion-repair";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v33.0-file-workspace-rebuild";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24755,7 +24755,7 @@ document.documentElement.classList.toggle(
         const AI_MAX_TEXT_FILE_BYTES = 8 * 1024 * 1024;
         const AI_MAX_TEXT_FILES = 50;
         const AI_MAX_TEXT_TOTAL_CHARS = 16000000;
-        const AI_TEXT_FILE_EXTENSIONS = new Set(["txt","md","markdown","js","jsx","mjs","cjs","ts","tsx","py","html","htm","css","scss","json","jsonc","yaml","yml","xml","sql","sh","ps1","java","c","h","cpp","hpp","go","rs","php","rb","swift","kt","dart","vue","svelte","csv","log","ini","toml","properties","gradle","dockerfile","gitignore"]);
+        const AI_TEXT_FILE_EXTENSIONS = new Set(["txt","md","markdown","js","jsx","mjs","cjs","ts","tsx","py","html","htm","css","scss","json","jsonc","yaml","yml","xml","sql","sh","ps1","java","c","h","cpp","hpp","go","rs","php","rb","swift","kt","dart","vue","svelte","csv","log","ini","toml","properties","gradle","dockerfile","gitignore","conf","cfg","env","bat","cmd","psm1","r","ipynb","graphql","gql","proto","tf","hcl","makefile","diff","patch","tex","rst","adoc","properties","lock","manifest"]);
         let aiSelectedFiles = [];
         // A project ZIP is staged until the user presses Send, so the task prompt
         // and archive are submitted together instead of starting an empty mission.
@@ -24765,13 +24765,13 @@ document.documentElement.classList.toggle(
         function aiGetActiveProjectFiles() { return aiProjectFileContexts.get(aiCurrentChatId) || []; }
 
         const AI_MAX_PDF_BYTES = 12 * 1024 * 1024;
-        const AI_FILE_TYPE_LABELS = { html:"HTML document", htm:"HTML document", css:"CSS stylesheet", scss:"SCSS stylesheet", js:"JavaScript", mjs:"JavaScript module", cjs:"JavaScript module", jsx:"React JSX", ts:"TypeScript", tsx:"React TSX", json:"JSON data", jsonc:"JSON data", md:"Markdown document", markdown:"Markdown document", txt:"Text file", xml:"XML document", csv:"CSV data", py:"Python script", sql:"SQL script", sh:"Shell script", yaml:"YAML config", yml:"YAML config", toml:"TOML config", ini:"INI config", log:"Log file", pdf:"PDF document", png:"PNG image", jpg:"JPEG image", jpeg:"JPEG image", webp:"WebP image", gif:"GIF image", zip:"ZIP archive" };
-        const AI_FILE_TYPE_ICONS = { html:"🌐", htm:"🌐", css:"🎨", scss:"🎨", js:"📜", mjs:"📜", cjs:"📜", jsx:"⚛️", ts:"📘", tsx:"⚛️", json:"🧾", jsonc:"🧾", md:"📝", markdown:"📝", txt:"📄", xml:"📰", csv:"📊", py:"🐍", sql:"🗄️", sh:"💻", yaml:"⚙️", yml:"⚙️", toml:"⚙️", ini:"⚙️", log:"📋", pdf:"📕", png:"🖼️", jpg:"🖼️", jpeg:"🖼️", webp:"🖼️", gif:"🖼️", zip:"🗜️" };
+        const AI_FILE_TYPE_LABELS = { html:"HTML document", htm:"HTML document", css:"CSS stylesheet", scss:"SCSS stylesheet", js:"JavaScript", mjs:"JavaScript module", cjs:"JavaScript module", jsx:"React JSX", ts:"TypeScript", tsx:"React TSX", json:"JSON data", jsonc:"JSON data", md:"Markdown document", markdown:"Markdown document", txt:"Text file", xml:"XML document", csv:"CSV data", py:"Python script", sql:"SQL script", sh:"Shell script", yaml:"YAML config", yml:"YAML config", toml:"TOML config", ini:"INI config", log:"Log file", pdf:"PDF document", docx:"Word document", xlsx:"Excel workbook", xls:"Excel workbook", xlsm:"Excel macro workbook", pptx:"PowerPoint presentation", odt:"OpenDocument text", ods:"OpenDocument spreadsheet", odp:"OpenDocument presentation", epub:"EPUB ebook", rtf:"Rich text document", png:"PNG image", jpg:"JPEG image", jpeg:"JPEG image", webp:"WebP image", gif:"GIF image", zip:"ZIP archive" };
+        const AI_FILE_TYPE_ICONS = { html:"🌐", htm:"🌐", css:"🎨", scss:"🎨", js:"📜", mjs:"📜", cjs:"📜", jsx:"⚛️", ts:"📘", tsx:"⚛️", json:"🧾", jsonc:"🧾", md:"📝", markdown:"📝", txt:"📄", xml:"📰", csv:"📊", py:"🐍", sql:"🗄️", sh:"💻", yaml:"⚙️", yml:"⚙️", toml:"⚙️", ini:"⚙️", log:"📋", pdf:"📕", docx:"📘", xlsx:"📊", xls:"📊", xlsm:"📊", pptx:"📽️", odt:"📄", ods:"📊", odp:"📽️", epub:"📚", rtf:"📄", png:"🖼️", jpg:"🖼️", jpeg:"🖼️", webp:"🖼️", gif:"🖼️", zip:"🗜️" };
         function aiFileExt(name) { const base = String(name || "").split("/").pop(); const i = base.lastIndexOf("."); return i > 0 || (i === 0 && base.length > 1) ? base.slice(i + 1).toLowerCase() : base.toLowerCase(); }
         function aiFileTypeLabel(name) { return AI_FILE_TYPE_LABELS[aiFileExt(name)] || ((aiFileExt(name) || "file").toUpperCase() + " file"); }
         function aiFileTypeIcon(name) { return AI_FILE_TYPE_ICONS[aiFileExt(name)] || "📄"; }
         function aiFormatBytes(n) { n = Number(n) || 0; if (n < 1024) return n + " B"; if (n < 1048576) return (n / 1024).toFixed(n < 10240 ? 1 : 0) + " KB"; return (n / 1048576).toFixed(1) + " MB"; }
-        function aiByteLength(text) { return new TextEncoder().encode(String(text || "")).length; }
+        function aiByteLength(text) { if (text instanceof Uint8Array) return text.byteLength; if (text instanceof ArrayBuffer) return text.byteLength; return new TextEncoder().encode(String(text || "")).length; }
         let aiFileStatus = null; // { text, error, progress }
         function aiSetFileStatus(text, opts) { aiFileStatus = text ? { text, error: !!(opts && opts.error), progress: opts && typeof opts.progress === "number" ? opts.progress : null } : null; aiRenderFilePreview(); }
         const aiOpenChipPreviews = new Set();
@@ -24845,16 +24845,28 @@ document.documentElement.classList.toggle(
         }
 
         let aiPdfJsPromise = null;
+        let aiMammothPromise = null;
+        let aiXlsxPromise = null;
+        let aiZipLibPromise = null;
+        function aiLoadExternalScript(src, globalName, cacheName) {
+            if (window[globalName]) return Promise.resolve(window[globalName]);
+            if (window[cacheName]) return window[cacheName];
+            window[cacheName] = new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = src; script.async = true;
+                script.onload = () => window[globalName] ? resolve(window[globalName]) : reject(new Error(globalName + " loaded without exposing its API."));
+                script.onerror = () => { window[cacheName] = null; reject(new Error("Could not load " + globalName + " (network or content blocker).")); };
+                document.head.appendChild(script);
+            });
+            return window[cacheName];
+        }
         function aiLoadPdfJs() {
             if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
             if (aiPdfJsPromise) return aiPdfJsPromise;
-            aiPdfJsPromise = new Promise((resolve, reject) => {
-                const sc = document.createElement("script");
-                sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-                sc.onload = () => { try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; resolve(window.pdfjsLib); } catch (e) { reject(e); } };
-                sc.onerror = () => { aiPdfJsPromise = null; reject(new Error("The PDF reader could not be loaded (network or content blocker).")); };
-                document.head.appendChild(sc);
-            });
+            aiPdfJsPromise = aiLoadExternalScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", "pdfjsLib", "__atlasPdfJsPromise").then(lib => {
+                lib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+                return lib;
+            }).catch(error => { aiPdfJsPromise = null; throw error; });
             return aiPdfJsPromise;
         }
         async function aiExtractPdfText(file, onProgress) {
@@ -24868,6 +24880,58 @@ document.documentElement.classList.toggle(
             }
             if (doc.numPages > pages) out += "\n[Only the first " + pages + " of " + doc.numPages + " pages were read.]";
             return { text: out.trim(), pages: doc.numPages };
+        }
+        function aiLoadMammoth() { aiMammothPromise = aiMammothPromise || aiLoadExternalScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js", "mammoth", "__atlasMammothPromise"); return aiMammothPromise; }
+        function aiLoadXlsx() { aiXlsxPromise = aiXlsxPromise || aiLoadExternalScript("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js", "XLSX", "__atlasXlsxPromise"); return aiXlsxPromise; }
+        function aiLoadZipLib() { aiZipLibPromise = aiZipLibPromise || aiLoadExternalScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", "JSZip", "__atlasZipPromise"); return aiZipLibPromise; }
+        function aiXmlText(xml) {
+            const doc = new DOMParser().parseFromString(String(xml || ""), "application/xml");
+            if (doc.querySelector("parsererror")) throw new Error("The document contains malformed XML.");
+            const nodes = Array.from(doc.getElementsByTagName("*")).filter(n => ["t", "p", "h"].includes(String(n.localName || n.nodeName).split(":").pop().toLowerCase()));
+            const textNodes = nodes.filter(n => String(n.localName || n.nodeName).split(":").pop().toLowerCase() === "t");
+            const chosen = textNodes.length ? textNodes : nodes;
+            return chosen.map(n => n.textContent || "").join(" ").replace(/\s+/g, " ").trim() || String(doc.documentElement && doc.documentElement.textContent || "").replace(/\s+/g, " ").trim();
+        }
+        async function aiExtractOfficeText(file, ext) {
+            const bytes = await file.arrayBuffer();
+            if (ext === "docx") {
+                const mammoth = await aiLoadMammoth();
+                const result = await mammoth.extractRawText({ arrayBuffer: bytes });
+                return result.value || "";
+            }
+            if (ext === "xlsx" || ext === "xls" || ext === "xlsm" || ext === "ods") {
+                if (ext === "ods") {
+                    const JSZip = await aiLoadZipLib(); const zip = await JSZip.loadAsync(bytes);
+                    const entry = zip.file("content.xml"); if (!entry) throw new Error("ODS archive has no content.xml.");
+                    return aiXmlText(await entry.async("text"));
+                }
+                const XLSX = await aiLoadXlsx(); const book = XLSX.read(bytes, { type: "array", cellDates: true });
+                return book.SheetNames.map(name => "--- Sheet: " + name + " ---\n" + XLSX.utils.sheet_to_csv(book.Sheets[name])).join("\n\n");
+            }
+            if (["pptx", "odt", "odp", "epub"].includes(ext)) {
+                const JSZip = await aiLoadZipLib(); const zip = await JSZip.loadAsync(bytes); const names = Object.keys(zip.files);
+                let selected = [];
+                if (ext === "pptx") selected = names.filter(n => /^ppt\/slides\/slide\d+\.xml$/i.test(n)).sort();
+                else if (ext === "epub") selected = names.filter(n => /\.(xhtml|html|htm)$/i.test(n)).sort();
+                else selected = names.filter(n => /content\.xml$/i.test(n));
+                const chunks = [];
+                for (const name of selected.slice(0, 300)) {
+                    const xml = await zip.file(name).async("text");
+                    let text;
+                    if (ext === "epub") {
+                        const htmlDoc = new DOMParser().parseFromString(xml, "text/html");
+                        htmlDoc.querySelectorAll("script,style,nav,svg").forEach(node => node.remove());
+                        text = htmlDoc.body.textContent || "";
+                    } else text = aiXmlText(xml);
+                    if (text.trim()) chunks.push("--- " + name + " ---\n" + text.trim());
+                }
+                return chunks.join("\n\n");
+            }
+            if (ext === "rtf") {
+                const raw = new TextDecoder("windows-1252").decode(bytes);
+                return raw.replace(/\\'[0-9a-f]{2}/gi, " ").replace(/\\[a-z]+-?\d* ?/gi, " ").replace(/[{}]/g, "").replace(/\s+/g, " ").trim();
+            }
+            throw new Error("No document extractor is registered for ." + ext + ".");
         }
 
         async function aiAddTextFiles(fileList) {
@@ -24890,15 +24954,26 @@ document.documentElement.classList.toggle(
                             if (file.size > AI_MAX_PDF_BYTES) throw new Error(file.name + " is larger than 12 MB. Split the PDF.");
                             let res;
                             try { res = await aiExtractPdfText(file, (f) => aiSetFileStatus("Extracting text from " + file.name + "…", { progress: f })); }
-                            catch (e) { throw new Error(file.name + ": could not extract PDF text (" + (e && e.message || "unknown error") + "). The file was NOT attached, so the model will not see it."); }
-                            if (!res.text || res.text.replace(/--- Page \d+ ---/g, "").trim().length < 20) throw new Error(file.name + " has no extractable text (it may be a scanned image). It was NOT attached; OCR is not supported.");
+                            catch (e) { throw new Error(file.name + ": could not extract PDF text (" + (e && e.message || "unknown error") + "). The file was NOT attached."); }
+                            if (!res.text || res.text.replace(/--- Page \d+ ---/g, "").trim().length < 20) throw new Error(file.name + " has no extractable text (likely scanned). OCR is not available in this build; convert it to searchable PDF or attach page images.");
                             additions.push({ name: file.name + ".txt", path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/") + ".txt", mimeType: "text/plain", content: res.text, size: file.size, note: res.pages + " pages, text extracted" });
                             continue;
                         }
-                        if (!AI_TEXT_FILE_EXTENSIONS.has(ext) && !/^(Dockerfile|Makefile)$/i.test(file.name) && !/\.env\.example$/i.test(file.name)) throw new Error("Unsupported file type: " + file.name + ". Attach text, source-code, JSON, CSV, log, PDF or image files.");
+                        if (["docx", "xlsx", "xls", "xlsm", "pptx", "odt", "ods", "odp", "epub", "rtf"].includes(ext)) {
+                            if (file.size > AI_MAX_PDF_BYTES) throw new Error(file.name + " is larger than 12 MB. Split or export a smaller document.");
+                            aiSetFileStatus("Extracting document contents from " + file.name + "…", { progress: (n + 0.5) / incoming.length });
+                            const extracted = await aiExtractOfficeText(file, ext);
+                            if (!extracted.trim()) throw new Error(file.name + " contains no extractable text.");
+                            additions.push({ name: file.name + ".txt", path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/") + ".txt", mimeType: "text/plain", content: extracted, size: file.size, note: ext.toUpperCase() + " contents extracted" });
+                            continue;
+                        }
                         if (file.size > AI_MAX_TEXT_FILE_BYTES) throw new Error(file.name + " is larger than " + aiFormatBytes(AI_MAX_TEXT_FILE_BYTES) + ". Split it into smaller files.");
                         const content = await file.text();
-                        if (content.includes("\u0000")) throw new Error(file.name + " appears to be binary. Only text/code files are supported here.");
+                        const nulCount = (content.match(/\u0000/g) || []).length;
+                        const controlCount = (content.match(/[\u0001-\u0008\u000B\u000C\u000E-\u001F]/g) || []).length;
+                        if (nulCount || controlCount > Math.max(8, content.length * 0.01)) {
+                            throw new Error(file.name + " is a binary format that Atlas cannot decode directly. Supported document extraction: PDF, DOCX, XLS/XLSX, PPTX, ODT/ODS/ODP and EPUB; images are supported separately.");
+                        }
                         additions.push({ name: file.name, path: String(file.webkitRelativePath || file.name).replace(/\\/g, "/"), mimeType: file.type || "text/plain", content, size: file.size });
                     } catch (e) { problems.push(String(e && e.message || "Could not read " + file.name)); }
                 }
@@ -24987,7 +25062,12 @@ document.documentElement.classList.toggle(
                     md: "text/markdown;charset=utf-8", txt: "text/plain;charset=utf-8",
                     py: "text/x-python;charset=utf-8", xml: "application/xml;charset=utf-8",
                     svg: "image/svg+xml", csv: "text/csv;charset=utf-8",
-                    yml: "text/yaml;charset=utf-8", yaml: "text/yaml;charset=utf-8"
+                    yml: "text/yaml;charset=utf-8", yaml: "text/yaml;charset=utf-8",
+                    pdf: "application/pdf", docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xls: "application/vnd.ms-excel",
+                    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation", odt: "application/vnd.oasis.opendocument.text",
+                    ods: "application/vnd.oasis.opendocument.spreadsheet", odp: "application/vnd.oasis.opendocument.presentation",
+                    epub: "application/epub+zip", rtf: "application/rtf", zip: "application/zip"
                 })[ext] || "text/plain;charset=utf-8";
             };
 
@@ -24998,6 +25078,14 @@ document.documentElement.classList.toggle(
             // the first source line immediately after the closing >>> of the
             // opening marker. Split that line at the marker boundary so the
             // parser can recover the file without altering its source bytes.
+            const normalizeMarkerLine = (line) => String(line)
+                .replace(/\\(?=<)/g, "")
+                .replace(/\\\s*$/g, "")
+                .replace(/&lt;/gi, "<")
+                .replace(/&gt;/gi, ">");
+            // IMPORTANT: normalizeMarkerLine is initialized before this map runs.
+            // The previous order triggered a temporal-dead-zone ReferenceError on
+            // every marker-based file response, outside the network error handler.
             const lines = text.split("\n").flatMap((line) => {
                 const normalized = normalizeMarkerLine(line);
                 const inlineOpening = /^(\s*<{3}\s*ATLAS_FILE\b.*?\s*>{2,3})([\s\S]+)$/i.exec(normalized);
@@ -25008,13 +25096,6 @@ document.documentElement.classList.toggle(
             let active = null;
             let markerSeen = false;
             let markerChars = 0;
-            const normalizeMarkerLine = (line) => String(line)
-                // Some model/export paths escape the third opening bracket and
-                // append a Markdown line-continuation backslash to marker lines.
-                .replace(/\\(?=<)/g, "")
-                .replace(/\\\s*$/g, "")
-                .replace(/&lt;/gi, "<")
-                .replace(/&gt;/gi, ">");
             // Accept two or three closing brackets: some streamed/exported
             // responses lose one trailing ">" from the opening marker.
             const startLine = /^\s*<{3}\s*ATLAS_FILE\b(.*?)\s*>{2,3}\s*$/i;
@@ -25055,6 +25136,7 @@ document.documentElement.classList.toggle(
                         name: aiSafeRelativePath(rawName),
                         action: actionValue,
                         mimeType: mime.slice(0, 120) || mimeFor(rawName),
+                        encoding: getAttr("encoding").toLowerCase(),
                         contentLines: []
                     };
                     continue;
@@ -25063,39 +25145,39 @@ document.documentElement.classList.toggle(
                 if (endLine.test(normalizeMarkerLine(line))) {
                     const content = active.contentLines.join("\n");
                     if (!content.trim()) return parseFailure("The file " + active.name + " had an opening and closing marker but contained no file content.", { fileName: active.name });
-                    // Refuse to label obviously broken HTML/JavaScript as a
-                    // downloadable success. Validate classic inline scripts before
-                    // creating the file card; module scripts are left to the browser.
-                    if (/\.html?$/i.test(active.name) && typeof DOMParser !== "undefined") {
+                    let bytes = null;
+                    if (active.encoding === "base64") {
+                        try {
+                            const compact = content.replace(/\s+/g, "");
+                            if (!compact || compact.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(compact)) throw new Error("Invalid base64 alphabet or padding.");
+                            const binary = atob(compact);
+                            bytes = new Uint8Array(binary.length);
+                            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                        } catch (binaryError) {
+                            return parseFailure("The binary file " + active.name + " contains invalid base64 data: " + String(binaryError && binaryError.message || binaryError).slice(0, 180), { fileName: active.name, validation: "base64" });
+                        }
+                    } else if (/\.html?$/i.test(active.name) && typeof DOMParser !== "undefined") {
+                        // HTML parsing is structural only. Do not use eval/new Function:
+                        // that violates strict CSP and is unsafe for untrusted output.
                         try {
                             const parsedHtml = new DOMParser().parseFromString(content, "text/html");
-                            const scripts = Array.from(parsedHtml.querySelectorAll("script:not([src])"));
-                            for (let scriptIndex = 0; scriptIndex < scripts.length; scriptIndex++) {
-                                const script = scripts[scriptIndex];
-                                const scriptType = String(script.getAttribute("type") || "").toLowerCase();
-                                if (scriptType === "module" || (scriptType && !/^(text|application)\/(javascript|ecmascript)$/.test(scriptType))) continue;
-                                try {
-                                    new Function(script.textContent || "");
-                                } catch (syntaxError) {
-                                    return parseFailure("The generated HTML file " + active.name + " contains invalid JavaScript in inline script " + (scriptIndex + 1) + ": " + String(syntaxError && syntaxError.message || syntaxError).slice(0, 240) + ". Atlas did not create a downloadable file because the code is not syntactically valid.", { fileName: active.name, validation: "javascript-syntax", scriptIndex: scriptIndex + 1 });
-                                }
-                            }
+                            if (parsedHtml.querySelector("parsererror")) throw new Error("HTML parser reported malformed markup.");
                         } catch (validationError) {
-                            if (validationError && validationError.error === "parse-error") return validationError;
-                            return parseFailure("The generated HTML file " + active.name + " could not be checked safely: " + String(validationError && validationError.message || validationError).slice(0, 240), { fileName: active.name, validation: "html-validation" });
+                            return parseFailure("The generated HTML file " + active.name + " could not be structurally inspected: " + String(validationError && validationError.message || validationError).slice(0, 180), { fileName: active.name, validation: "html-structure" });
                         }
                     }
-                    markerChars += content.length;
+                    markerChars += bytes ? bytes.byteLength : content.length;
                     if (markerFiles.length >= AI_MAX_TEXT_FILES ||
-                        content.length > AI_MAX_TEXT_TOTAL_CHARS ||
-                        markerChars > AI_MAX_TEXT_TOTAL_CHARS) return parseFailure("The file package exceeded the browser's file-count or text-size safety limit.", { fileName: active.name, fileCount: markerFiles.length + 1, contentChars: content.length, totalChars: markerChars });
+                        (bytes ? bytes.byteLength : content.length) > AI_MAX_TEXT_TOTAL_CHARS ||
+                        markerChars > AI_MAX_TEXT_TOTAL_CHARS) return parseFailure("The file package exceeded the browser's file-count or total-size safety limit.", { fileName: active.name, fileCount: markerFiles.length + 1, contentChars: bytes ? bytes.byteLength : content.length, totalChars: markerChars });
                     markerFiles.push({
                         name: active.name,
                         action: active.action,
                         mimeType: active.mimeType,
                         explanation: "",
                         chunkIndex: null,
-                        content
+                        content: bytes ? "" : content,
+                        bytes
                     });
                     active = null;
                     continue;
@@ -25210,7 +25292,7 @@ document.documentElement.classList.toggle(
             const dosDate = (((Math.max(1980, stamp.getFullYear()) - 1980) & 127) << 9) | ((stamp.getMonth() + 1) << 5) | stamp.getDate();
             for (const file of files) {
                 const name = encoder.encode(aiSafeRelativePath(file.name));
-                const data = encoder.encode(file.content);
+                const data = file.bytes instanceof Uint8Array ? file.bytes : encoder.encode(String(file.content || ""));
                 const crc = aiZipCrc32(data);
                 const local = new Uint8Array(30 + name.length);
                 const lv = new DataView(local.buffer);
@@ -25246,7 +25328,7 @@ document.documentElement.classList.toggle(
 
         function aiRenderGeneratedFiles(files, anchor) {
             if (!Array.isArray(files) || !files.length || !anchor) return;
-            const valid = files.filter(f => f && typeof f.content === "string" && f.name);
+            const valid = files.filter(f => f && f.name && (typeof f.content === "string" || f.bytes instanceof Uint8Array));
             if (!valid.length) return;
             const wrap = document.createElement("div"); wrap.className = "ai-file-results"; wrap.setAttribute("role", "group"); wrap.setAttribute("aria-label", "Generated files");
             const heading = document.createElement("strong"); heading.textContent = valid.length + (valid.length === 1 ? " file" : " files") + " ready · review before using"; wrap.appendChild(heading);
@@ -25259,7 +25341,7 @@ document.documentElement.classList.toggle(
             valid.forEach((file) => {
                 const safeName = aiSafeRelativePath(file.name);
                 const base = safeName.split("/").pop();
-                const size = aiByteLength(file.content);
+                const size = file.bytes instanceof Uint8Array ? file.bytes.byteLength : aiByteLength(file.content);
                 const card = document.createElement("div"); card.className = "ai-file-card";
                 const icon = document.createElement("span"); icon.className = "ai-file-icon"; icon.setAttribute("aria-hidden", "true"); icon.textContent = aiFileTypeIcon(base);
                 const info = document.createElement("span"); info.className = "ai-file-info";
@@ -25271,13 +25353,16 @@ document.documentElement.classList.toggle(
                 const actions = document.createElement("span"); actions.className = "ai-file-actions";
                 const pv = document.createElement("button"); pv.type = "button"; pv.className = "ai-pv"; pv.textContent = "Preview"; pv.setAttribute("aria-expanded", "false");
                 const dl = document.createElement("button"); dl.type = "button"; dl.className = "ai-dl"; dl.textContent = "⬇ Download"; dl.setAttribute("aria-label", "Download " + base);
-                dl.addEventListener("click", () => { aiDownloadBlob(new Blob([file.content], { type: file.mimeType || "text/plain;charset=utf-8" }), safeName.replace(/\//g, "__")); });
+                dl.addEventListener("click", () => { const payload = file.bytes instanceof Uint8Array ? file.bytes : String(file.content || ""); aiDownloadBlob(new Blob([payload], { type: file.mimeType || "application/octet-stream" }), safeName.replace(/\//g, "__")); });
                 actions.append(pv, dl);
                 card.append(icon, info, actions); wrap.appendChild(card);
                 if (file.explanation) { const why = document.createElement("p"); why.textContent = file.explanation; wrap.appendChild(why); }
-                const pre = document.createElement("pre"); pre.className = "ai-file-preview"; pre.hidden = true; pre.textContent = file.content;
-                pv.addEventListener("click", () => { pre.hidden = !pre.hidden; pv.textContent = pre.hidden ? "Preview" : "Hide preview"; pv.setAttribute("aria-expanded", String(!pre.hidden)); });
-                wrap.appendChild(pre);
+                if (file.bytes instanceof Uint8Array) { pv.disabled = true; pv.textContent = "Binary file"; pv.title = "Binary output is downloadable but not previewed as text."; }
+                else {
+                    const pre = document.createElement("pre"); pre.className = "ai-file-preview"; pre.hidden = true; pre.textContent = file.content;
+                    pv.addEventListener("click", () => { pre.hidden = !pre.hidden; pv.textContent = pre.hidden ? "Preview" : "Hide preview"; pv.setAttribute("aria-expanded", String(!pre.hidden)); });
+                    wrap.appendChild(pre);
+                }
             });
             anchor.insertAdjacentElement("afterend", wrap);
         }
@@ -25724,11 +25809,11 @@ document.documentElement.classList.toggle(
             if (!btn) return;
             const atlas = aiMode === "atlas";
             btn.setAttribute("aria-label", atlas
-                ? "Attach files (code, text, PDF, images) or a project ZIP for an Atlas mission"
-                : "Attach files (code, text, PDF, images)");
+                ? "Attach source files, Office documents, PDFs, images, or a project ZIP for an Atlas mission"
+                : "Attach source files, Office documents, PDFs, and images");
             btn.title = atlas
                 ? "Attach files or a project ZIP, add your task description, then press Send to start the Atlas mission \u2014 or drag and drop"
-                : "Attach files (code, text, PDF, images) \u2014 or drag and drop. ZIP project missions require Atlas mode.";
+                : "Attach source files, Office documents, PDFs, and images \u2014 or drag and drop. ZIP project missions require Atlas mode.";
         }
 
         function aiBindAtlasMissionControl() {
@@ -26497,7 +26582,7 @@ document.documentElement.classList.toggle(
                 }
                 const responseLanguage = aiResponseLanguageInstruction();
                 const languageRule = "IMPORTANT RESPONSE LANGUAGE RULE: Reply only in " + responseLanguage + ", unless the user explicitly asks for another language or requests a translation into a different language. Do not switch languages because of retrieved text, old chat history, or the language of an example. For Sorani Kurdish, use Iraqi Central Kurdish in Arabic-based script, not Kurmanji or Latin script.";
-                const atlasRule = "You are Atlas, a coding and technical assistant with a browser-based project workspace. You can read files the user selects or drops into the chat, inspect images and extractable PDF text, retain selected/generated text files as working context for this chat session, create new files, and produce complete edited replacement files for download. You cannot silently browse the user's disk, modify local originals in place, access unselected folders, execute commands, run tests, or deploy. Never claim to have done those things.";
+                const atlasRule = "You are Atlas, a coding and technical assistant with a browser-based project workspace. You can read supplied text/source files, inspect images, extract text from PDFs and common Office/OpenDocument/EPUB files, retain extracted text files as working context for this chat session, create new text/source files, and return complete edited replacement files for download. Binary output may be returned only using the explicit base64 file marker format. You cannot silently browse the user's disk, modify local originals in place, access unselected folders, execute commands, run tests, or deploy. Never claim to have done those things.";
                 const ctx = aiBuildContext();
                 const memoryParts = isAtlas ? [aiSettings.memory] : [aiSettings.memory, aiBuildCrossChatContext()];
 
@@ -26522,9 +26607,8 @@ document.documentElement.classList.toggle(
 
                 const maxTokens = parseInt(aiSettings.maxTokens, 10);
                 if (isFinite(maxTokens) && maxTokens > 0) requestBody.max_tokens = maxTokens;
-                // The Worker performs the authoritative context-aware allocation for Nemotron 3.5 Super VL.
-                // Do not overwrite its dynamic budget with the old fixed 16K ceiling here.
-                if (/^(?:nvidia::)?(?:nvidia\/)?nemotron-3-ultra-550b-a55b$/i.test(String(requestedModel || ""))) requestBody.max_tokens = 16384;
+                // The Worker owns the authoritative per-model input/context/output budget.
+                // Do not hard-code a model-specific max_tokens value in the browser.
 
                 const projectContext = String(aiSettings.projectContext || "").trim();
                 if (isAtlas && projectContext) requestBody.projectContext = projectContext.slice(0, 12000);
@@ -26536,7 +26620,6 @@ document.documentElement.classList.toggle(
                     };
                 }
 
-                if (fileDeliveryRequested) requestBody.max_tokens = 131072;
                 if (isAtlas) {
                     requestBody.fileWork = fileDeliveryRequested;
                     if (allProjectFiles.length) {
@@ -26704,6 +26787,9 @@ document.documentElement.classList.toggle(
             }
 
             // Do not let stream cleanup gate file extraction or the UI completion state.
+            // All post-stream parsing/rendering is guarded: a parser/UI exception must
+            // never leave aiBusy=true or strand the composer in its loading state.
+            try {
             document.getElementById("aiLoading")?.remove();
             if (responseUsage) {
                 responseUsage.provider = responseUsage.provider || (aiMode === "atlas" ? "NVIDIA" : "Google Gemini");
@@ -26818,7 +26904,7 @@ document.documentElement.classList.toggle(
                     if (aiCurrentChatId) {
                         const prior = aiGetActiveProjectFiles();
                         const merged = new Map(prior.map(f => [aiSafeRelativePath(f.path || f.name), f]));
-                        generatedFiles.forEach(f => merged.set(aiSafeRelativePath(f.name), { name: f.name.split("/").pop(), path: aiSafeRelativePath(f.name), mimeType: f.mimeType, content: f.content, size: aiByteLength(f.content), note: "Generated by Atlas" }));
+                        generatedFiles.filter(f => !(f.bytes instanceof Uint8Array)).forEach(f => merged.set(aiSafeRelativePath(f.name), { name: f.name.split("/").pop(), path: aiSafeRelativePath(f.name), mimeType: f.mimeType, content: f.content, size: aiByteLength(f.content), note: "Generated by Atlas" }));
                         aiProjectFileContexts.set(aiCurrentChatId, Array.from(merged.values()));
                         aiRenderFilePreview();
                     }
@@ -26888,12 +26974,18 @@ document.documentElement.classList.toggle(
                 aiAppendTextMessage(aiT("genericError"), true);
             }
 
-            aiBusy = false;
-            aiAbortController = null;
-            aiStreamCancelled = false;
-            aiSetInputDisabled(false);
-            aiMaybeScroll(true);
-            input.focus();
+            } catch (postProcessError) {
+                try { console.error("[Atlas delivery pipeline] post-response processing failed:", postProcessError); } catch (_) {}
+                document.getElementById("aiLoading")?.remove();
+                aiAppendTextMessage("Atlas received a response but could not finish processing or displaying its files: " + String(postProcessError && postProcessError.message || postProcessError).slice(0, 500) + ". The request has been released; retry after checking the file parser diagnostics.", true);
+            } finally {
+                aiBusy = false;
+                aiAbortController = null;
+                aiStreamCancelled = false;
+                aiSetInputDisabled(false);
+                aiMaybeScroll(true);
+                input.focus();
+            }
             if (aiPendingMode && aiPendingMode !== aiMode) {
                 const nextMode = aiPendingMode;
                 aiPendingMode = null;
