@@ -23458,7 +23458,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.4-nvidia-long-stream";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.7-adaptive-multitask";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -26285,6 +26285,7 @@ document.documentElement.classList.toggle(
             let sseEvent = "";
             let collectedSources = [];
             let responseUsage = null;
+            let responseFinishReason = "";
             let generatedFiles = [];
             let reader = null;
 
@@ -26348,6 +26349,8 @@ document.documentElement.classList.toggle(
                     if (obj.code || typeof obj.error === "string") err.aiInfo.code = String(obj.code || obj.error);
                     throw err;
                 }
+
+                if (typeof obj.finish_reason === "string" && obj.finish_reason) responseFinishReason = obj.finish_reason.toLowerCase();
 
                 if (obj.usage && typeof obj.usage === "object") {
                     const u = obj.usage;
@@ -26429,8 +26432,9 @@ document.documentElement.classList.toggle(
 
                 const maxTokens = parseInt(aiSettings.maxTokens, 10);
                 if (isFinite(maxTokens) && maxTokens > 0) requestBody.max_tokens = maxTokens;
-                // Nemotron reasoning models need a large generation budget because reasoning tokens count against max_tokens.
-                if (/^(?:nvidia::)?(?:nvidia\/)?(?:nemotron-3\.5-super-vl-120b-a12b|nemotron-3-ultra-550b-a55b)$/i.test(String(requestedModel || ""))) requestBody.max_tokens = 16384;
+                // The Worker performs the authoritative context-aware allocation for Nemotron 3.5 Super VL.
+                // Do not overwrite its dynamic budget with the old fixed 16K ceiling here.
+                if (/^(?:nvidia::)?(?:nvidia\/)?nemotron-3-ultra-550b-a55b$/i.test(String(requestedModel || ""))) requestBody.max_tokens = 16384;
 
                 const projectContext = String(aiSettings.projectContext || "").trim();
                 if (isAtlas && projectContext) requestBody.projectContext = projectContext.slice(0, 12000);
@@ -26442,14 +26446,14 @@ document.documentElement.classList.toggle(
                     };
                 }
 
-                if (fileDeliveryRequested) requestBody.max_tokens = Math.max(Number(requestBody.max_tokens) || 0, 12288);
+                if (fileDeliveryRequested) requestBody.max_tokens = 131072;
                 if (isAtlas) {
                     requestBody.fileWork = fileDeliveryRequested;
                     if (allProjectFiles.length) {
                         let fileContext = "\n\nATLAS WORKSPACE FILES (read-only originals; inspect only the content actually included below):\n";
-                        // Keep a practical prompt budget while making multi-file project work less lossy.
-                        // The Worker accepts up to 220k characters for Atlas; leave room for the user request and protocol.
-                        let remaining = Math.max(0, Math.min(180000, 210000 - String(requestBody.message || "").length - fileContext.length));
+                        // Use a context-aware large input allowance. The Worker estimates assembled
+                        // input tokens and reserves output space before calling NVIDIA.
+                        let remaining = Math.max(0, Math.min(600000, 650000 - String(requestBody.message || "").length - fileContext.length));
                         const omitted = [];
                         const manifest = allProjectFiles.map(file => {
                             const path = aiSafeRelativePath(file.path || file.name);
@@ -26598,7 +26602,15 @@ document.documentElement.classList.toggle(
             // Convert Atlas' structured file response into a normal explanation plus
             // downloadable file cards. The originals remain untouched until the user
             // downloads/replaces them locally.
-            if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone) {
+            if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone && responseFinishReason === "length") {
+                streamError = {
+                    kind: "invalid",
+                    status: 502,
+                    code: "ATLAS_OUTPUT_TOKEN_LIMIT",
+                    message: "NVIDIA finished this response with finish_reason=length. The model exhausted the context-aware output budget before completing every requested file. No partial download was created. Atlas now allocates up to NVIDIA's 131,072-token hosted completion ceiling for Nemotron 3.5 Super VL, reduced only when the supplied input leaves insufficient context room. Reduce the combined task scope or attached context if this repeats.",
+                    provider: "nvidia"
+                };
+            } else if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone) {
                 const structured = aiParseStructuredFileResult(assistantText, effectiveMessage);
                 if (structured && structured.error === "read-request") {
                     streamError = {
