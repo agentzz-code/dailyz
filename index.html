@@ -8398,9 +8398,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             "dailykrd_dashboard_layouts",
             "dailykrd_welcomed",
             "dailykrd_haptic_enabled",
-            // AI chats and saved AI preferences belong to the signed-in account.
-            "dailykrd_horizon_ai_chats_v1",
-            "dailykrd_horizon_atlas_chats_v1",
+            // AI preferences belong here; chat histories use their own per-chat collection.
             "dailykrd_horizon_ai_settings_v3",
             "dailykrd_horizon_ai_chat_memory_context_v1"
         ];
@@ -8414,8 +8412,6 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             new Set([
                 "dailykrd_study_sessions",
                 "dailykrd_study_completed",
-                "dailykrd_horizon_ai_chats_v1",
-                "dailykrd_horizon_atlas_chats_v1"
             ]);
 
         const SYNC_STAMPS_KEY =
@@ -8582,6 +8578,8 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         let appstateFlushTimer = null;
 
+        let appstateFlushInProgress = false;
+
         let appstatePendingWrites = false;
 
         let appstateLastError = false;
@@ -8681,7 +8679,8 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             if (
                 appstatePendingWrites ||
                 appstateFlushTimer ||
-                appstateDirty.size > 0
+                appstateDirty.size > 0 ||
+                aiChatSyncPending
             ) {
 
                 setSyncStatus("syncing");
@@ -8753,6 +8752,20 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             }
         };
 
+        // Keep multiple tabs on the same browser profile coherent too. The
+        // storage event fires in the *other* tab when a synced key changes.
+        window.addEventListener("storage", event => {
+            if (event.storageArea !== window.localStorage || !SYNCED_KEY_SET.has(event.key)) return;
+            setSyncStamp(event.key, Date.now(), currentUser ? currentUser.uid : null);
+            saveSyncStamps();
+            if (currentUser) {
+                appstateDirty.add(event.key);
+                scheduleAppstateFlush(250);
+                refreshSyncStatus();
+            }
+            refreshAppstateUI(event.key);
+        });
+
         function noteLocalAppstateChange(key) {
 
             setSyncStamp(
@@ -8796,12 +8809,19 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         async function flushAppstate() {
 
+            // A manual sync, a retry timer and a live edit can otherwise start
+            // overlapping flushes. Serialize them so an older write cannot
+            // overwrite a newer value or clear its queue entry.
+            if (appstateFlushInProgress) return;
+
             if (!currentUser || appstateDirty.size === 0) {
 
                 refreshSyncStatus();
 
                 return;
             }
+
+            appstateFlushInProgress = true;
 
             const uid =
                 currentUser.uid;
@@ -8815,6 +8835,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             let switchedLayout = false;
 
+            try {
             for (let i = 0; i < keys.length; i++) {
 
                 const key =
@@ -8822,7 +8843,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                 // Account switched mid-flush: stop, never write to the
                 // previous user's documents.
-                if (!currentUser || currentUser.uid !== uid) return;
+                if (!currentUser || currentUser.uid !== uid) {
+                    for (const pendingKey of keys.slice(i)) appstateDirty.add(pendingKey);
+                    return;
+                }
 
                 const owner =
                     syncStampOwner(key);
@@ -8890,6 +8914,10 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                         break;
                     }
                 }
+            }
+
+            } finally {
+                appstateFlushInProgress = false;
             }
 
             // Every failure is reported, including one that triggered a
@@ -8977,19 +9005,22 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     for (const chat of [...local, ...remote]) {
                         if (!chat || typeof chat.id !== "string" || !Array.isArray(chat.messages)) continue;
                         const previous = byId.get(chat.id);
-                        if (!previous) { byId.set(chat.id, { ...chat, messages: chat.messages.slice() }); continue; }
+                        if (!previous) { byId.set(chat.id, { ...chat, messages: chat.deleted ? [] : chat.messages.slice() }); continue; }
                         const messages = [];
                         const seen = new Set();
                         for (const message of [...(previous.messages || []), ...(chat.messages || [])]) {
                             if (!message || !["user", "assistant"].includes(message.role) || typeof message.content !== "string") continue;
-                            const fingerprint = message.role + "\n" + message.content;
+                            // Use stable message IDs. Identical repeated prompts/replies
+                            // are valid conversation turns and must never be deduplicated.
+                            const fingerprint = message.id ? "id:" + message.id : "legacy:" + JSON.stringify(message);
                             if (seen.has(fingerprint)) continue;
                             seen.add(fingerprint); messages.push(message);
                         }
                         const newer = (Number(chat.updatedAt) || 0) >= (Number(previous.updatedAt) || 0) ? chat : previous;
-                        byId.set(chat.id, { ...previous, ...newer, messages: messages.slice(-40), pinned: !!(previous.pinned || chat.pinned), updatedAt: Math.max(Number(previous.updatedAt)||0, Number(chat.updatedAt)||0) });
+                        const deleted = !!newer.deleted;
+                        byId.set(chat.id, { ...previous, ...newer, messages: deleted ? [] : messages, deleted, pinned: !!newer.pinned, updatedAt: Math.max(Number(previous.updatedAt)||0, Number(chat.updatedAt)||0) });
                     }
-                    const merged = [...byId.values()].sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0)).slice(0,80);
+                    const merged = [...byId.values()].sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
                     return JSON.stringify(merged);
                 }
 
@@ -9734,6 +9765,8 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         function stopAppstateSync() {
 
+            stopAiChatsSync();
+
             if (appstateListener) {
 
                 appstateListener();
@@ -9748,6 +9781,8 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             appstateServerStamps = {};
 
             appstatePendingWrites = false;
+
+            appstateFlushInProgress = false;
 
             appstateLastError = false;
 
@@ -9765,6 +9800,189 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             refreshSyncStatus();
         }
 
+        /* AI CHAT CLOUD SYNC
+           Conversations are stored separately from appstate: one Firestore
+           document per chat under users/{uid}/aiChats/{mode}_{chatId}. This
+           prevents the Horizon and Atlas histories from being packed into one
+           ever-growing settings document. Message IDs allow two devices to
+           merge turns without collapsing identical repeated prompts. */
+        const AI_CHAT_CLOUD_COLLECTION = "aiChats";
+        let aiChatSyncListener = null;
+        let aiChatSyncUid = null;
+        let aiChatSyncReady = false;
+        let aiChatSyncPending = false;
+        let aiChatSyncTimers = { horizon: null, atlas: null };
+        let aiChatSyncWriteGeneration = { horizon: 0, atlas: 0 };
+
+        function aiChatStorageKeyForMode(mode) {
+            return mode === "atlas"
+                ? "dailykrd_horizon_atlas_chats_v1"
+                : "dailykrd_horizon_ai_chats_v1";
+        }
+
+        function aiChatCloudDocId(mode, chatId) {
+            return (mode === "atlas" ? "atlas_" : "horizon_") + String(chatId).replace(/[^A-Za-z0-9_-]/g, "_");
+        }
+
+        function aiMergeChatArrays(localChats, remoteChats) {
+            const byId = new Map();
+            for (const chat of [...(localChats || []), ...(remoteChats || [])]) {
+                if (!chat || typeof chat.id !== "string" || !Array.isArray(chat.messages)) continue;
+                const old = byId.get(chat.id);
+                if (!old) {
+                    byId.set(chat.id, { ...chat, messages: chat.deleted ? [] : chat.messages.slice() });
+                    continue;
+                }
+                const newer = (Number(chat.updatedAt) || 0) >= (Number(old.updatedAt) || 0) ? chat : old;
+                const isDeleted = !!newer.deleted;
+                const messagesById = new Map();
+                if (!isDeleted) {
+                    for (const m of [...(old.messages || []), ...(chat.messages || [])]) {
+                        if (!m || !["user", "assistant"].includes(m.role) || typeof m.content !== "string") continue;
+                        const id = m.id || ("legacy:" + JSON.stringify(m));
+                        if (!messagesById.has(id)) messagesById.set(id, m);
+                    }
+                }
+                const messages = [...messagesById.values()].sort((a, b) => (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0));
+                byId.set(chat.id, { ...old, ...newer, messages: isDeleted ? [] : messages, deleted: isDeleted, pinned: !!newer.pinned, updatedAt: Math.max(Number(old.updatedAt) || 0, Number(chat.updatedAt) || 0) });
+            }
+            return [...byId.values()].sort((a, b) => (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0));
+        }
+
+        function queueAiChatCloudSync(mode, chats) {
+            if (!currentUser || !aiChatSyncReady || aiChatSyncUid !== currentUser.uid) return;
+            const safeMode = mode === "atlas" ? "atlas" : "horizon";
+            const snapshot = (Array.isArray(chats) ? chats : []).map((chat, index) => ({
+                ...chat,
+                messages: (chat.messages || []).map((message, messageIndex) => ({
+                    ...message,
+                    id: message.id || ("msg_" + Math.random().toString(36).slice(2) + Date.now().toString(36)),
+                    createdAt: Number(message.createdAt) || (Number(chat.updatedAt) || Date.now()) + messageIndex
+                }))
+            }));
+            rawStorageWrite(aiChatStorageKeyForMode(safeMode), JSON.stringify(snapshot));
+            aiChatSyncWriteGeneration[safeMode]++;
+            aiChatSyncPending = true;
+            refreshSyncStatus();
+            if (aiChatSyncTimers[safeMode]) clearTimeout(aiChatSyncTimers[safeMode]);
+            aiChatSyncTimers[safeMode] = setTimeout(async () => {
+                aiChatSyncTimers[safeMode] = null;
+                const uid = aiChatSyncUid;
+                const generation = aiChatSyncWriteGeneration[safeMode];
+                if (!uid || !currentUser || currentUser.uid !== uid) return;
+                try {
+                    const writes = snapshot.map(chat => setDoc(
+                        doc(db, "users", uid, AI_CHAT_CLOUD_COLLECTION, aiChatCloudDocId(safeMode, chat.id)),
+                        { id: chat.id, mode: safeMode, title: String(chat.title || "New chat").slice(0, 100), messages: chat.deleted ? [] : chat.messages, updatedAt: Number(chat.updatedAt) || Date.now(), pinned: !!chat.pinned, deleted: !!chat.deleted, device: getSyncDeviceId() },
+                        { merge: true }
+                    ));
+                    await Promise.all(writes);
+                    if (generation === aiChatSyncWriteGeneration[safeMode]) {
+                        aiChatSyncPending = !!aiChatSyncTimers.horizon || !!aiChatSyncTimers.atlas;
+                        refreshSyncStatus();
+                    }
+                } catch (error) {
+                    console.error("[Horizon AI chat sync] write failed:", safeMode, error);
+                    appstateLastError = true;
+                    aiChatSyncPending = false;
+                    refreshSyncStatus();
+                    if (currentUser && currentUser.uid === uid) {
+                        aiChatSyncTimers[safeMode] = setTimeout(() => {
+                            aiChatSyncTimers[safeMode] = null;
+                            queueAiChatCloudSync(safeMode, snapshot);
+                        }, Math.min(appstateRetryDelay, 60000));
+                    }
+                }
+            }, 700);
+        }
+
+        function applyRemoteAiChatSnapshot(uid, snapshot) {
+            if (!currentUser || currentUser.uid !== uid || aiChatSyncUid !== uid) return;
+            const remoteByMode = { horizon: [], atlas: [] };
+            snapshot.forEach(item => {
+                const data = item.data() || {};
+                const mode = data.mode === "atlas" ? "atlas" : data.mode === "horizon" ? "horizon" : null;
+                if (!mode || typeof data.id !== "string" || !Array.isArray(data.messages)) return;
+                remoteByMode[mode].push({ id: data.id, title: data.title || "New chat", messages: data.deleted ? [] : data.messages, updatedAt: Number(data.updatedAt) || 0, pinned: !!data.pinned, deleted: !!data.deleted });
+            });
+            for (const mode of ["horizon", "atlas"]) {
+                const key = aiChatStorageKeyForMode(mode);
+                let local = [];
+                try { const parsed = JSON.parse(rawStorageRead(key) || "[]"); if (Array.isArray(parsed)) local = parsed; } catch (_) {}
+                const merged = aiMergeChatArrays(local, remoteByMode[mode]);
+                const mergedRaw = JSON.stringify(merged);
+                const remoteRaw = JSON.stringify(aiMergeChatArrays([], remoteByMode[mode]));
+                if (rawStorageRead(key) !== mergedRaw) rawStorageWrite(key, mergedRaw);
+                // Upload local-only chats and message unions after the first
+                // server snapshot. Never push cache-only defaults over cloud data.
+                if (aiChatSyncReady && mergedRaw !== remoteRaw) queueAiChatCloudSync(mode, merged);
+                if (typeof aiMode !== "undefined" && aiMode === mode && typeof aiLoadChats === "function") {
+                    const selected = aiCurrentChatId;
+                    aiChats = aiLoadChats();
+                    if (!aiChats.some(c => c.id === selected && !c.deleted)) aiCurrentChatId = aiChats.find(c => !c.deleted)?.id || "";
+                    const active = aiChats.find(c => c.id === aiCurrentChatId && !c.deleted);
+                    if (active && !aiBusy) {
+                        const before = JSON.stringify(aiConversationHistory || []);
+                        const after = JSON.stringify(active.messages || []);
+                        if (before !== after) aiRenderCurrentChat();
+                    }
+                    aiRenderChatLists();
+                }
+            }
+        }
+
+        function startAiChatsSync(uid) {
+            if (!currentUser || currentUser.uid !== uid) return;
+            if (aiChatSyncListener && aiChatSyncUid === uid) return;
+            stopAiChatsSync();
+            // A browser may be shared by multiple accounts. Preserve unowned
+            // guest chats for first sign-in, but never upload one account's
+            // private history into a different account.
+            for (const mode of ["horizon", "atlas"]) {
+                const ownerKey = "dailykrd_" + mode + "_chat_owner";
+                const owner = rawStorageRead(ownerKey);
+                if (owner && owner !== uid) rawStorageWrite(aiChatStorageKeyForMode(mode), "[]");
+            }
+            aiChatSyncUid = uid;
+            aiChatSyncReady = false;
+            aiChatSyncListener = onSnapshot(
+                collection(db, "users", uid, AI_CHAT_CLOUD_COLLECTION),
+                snapshot => {
+                    if (!currentUser || currentUser.uid !== uid || aiChatSyncUid !== uid) return;
+                    applyRemoteAiChatSnapshot(uid, snapshot);
+                    if (!snapshot.metadata.fromCache && !aiChatSyncReady) {
+                        aiChatSyncReady = true;
+                        for (const mode of ["horizon", "atlas"]) rawStorageWrite("dailykrd_" + mode + "_chat_owner", uid);
+                        // First server snapshot completed: publish local-only
+                        // conversations to the account without replacing remote ones.
+                        for (const mode of ["horizon", "atlas"]) {
+                            let local = [];
+                            try { const parsed = JSON.parse(rawStorageRead(aiChatStorageKeyForMode(mode)) || "[]"); if (Array.isArray(parsed)) local = parsed; } catch (_) {}
+                            if (local.length) queueAiChatCloudSync(mode, local);
+                        }
+                    }
+                },
+                error => {
+                    console.error("[Horizon AI chat sync] listener failed:", error);
+                    appstateLastError = true;
+                    refreshSyncStatus();
+                }
+            );
+        }
+
+        function stopAiChatsSync() {
+            if (aiChatSyncListener) aiChatSyncListener();
+            aiChatSyncListener = null;
+            aiChatSyncUid = null;
+            aiChatSyncReady = false;
+            for (const mode of ["horizon", "atlas"]) {
+                if (aiChatSyncTimers[mode]) clearTimeout(aiChatSyncTimers[mode]);
+                aiChatSyncTimers[mode] = null;
+            }
+            aiChatSyncPending = false;
+            refreshSyncStatus();
+        }
+
         /* DIAGNOSTICS
            Type dailykrdSyncStatus() in the browser console to see exactly what
            the sync layer is doing on this device, or dailykrdSyncNow() to push
@@ -9778,6 +9996,9 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 layout: appstateSyncPath,
                 listenerActive: !!appstateListener,
                 listenerUid: appstateListenerUid,
+                aiChatListenerActive: !!aiChatSyncListener,
+                aiChatSyncReady: aiChatSyncReady,
+                aiChatSyncPending: aiChatSyncPending,
                 pendingWrites: appstatePendingWrites,
                 lastError: appstateLastError,
                 writtenThisSession: appstateWrittenTotal,
@@ -9813,6 +10034,11 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             saveSyncStamps();
 
             await flushAppstate();
+            for (const mode of ["horizon", "atlas"]) {
+                let chats = [];
+                try { const parsed = JSON.parse(rawStorageRead(aiChatStorageKeyForMode(mode)) || "[]"); if (Array.isArray(parsed)) chats = parsed; } catch (_) {}
+                if (chats.length) queueAiChatCloudSync(mode, chats);
+            }
 
             return window.dailykrdSyncStatus();
         };
@@ -12920,6 +13146,7 @@ done: "تەواو",
                     // reuses one listener per uid and tears down any previous
                     // account's listener first.
                     startAppstateSync(user.uid);
+                    startAiChatsSync(user.uid);
 
                     try {
 
@@ -24404,23 +24631,23 @@ document.documentElement.classList.toggle(
                     if (raw) localStorage.setItem(AI_HISTORY_STORAGE_KEY, raw);
                 }
                 const parsed = raw ? JSON.parse(raw) : [];
-                return Array.isArray(parsed) ? parsed.filter(e => e && (e.role === "user" || e.role === "assistant") && typeof e.content === "string").slice(-40) : [];
+                return Array.isArray(parsed) ? parsed.filter(e => e && (e.role === "user" || e.role === "assistant") && typeof e.content === "string") : [];
             } catch (e) {
-                try { const fallback = sessionStorage.getItem(AI_HISTORY_STORAGE_KEY); const parsed = fallback ? JSON.parse(fallback) : []; return Array.isArray(parsed) ? parsed.slice(-40) : []; } catch (_) { return []; }
+                try { const fallback = sessionStorage.getItem(AI_HISTORY_STORAGE_KEY); const parsed = fallback ? JSON.parse(fallback) : []; return Array.isArray(parsed) ? parsed : []; } catch (_) { return []; }
             }
         }
 
         function aiSaveHistory(history) {
             /* the legacy single-transcript key belongs to Horizon only; Atlas never writes it */
             if (aiMode === "horizon") try {
-                const safeHistory = (Array.isArray(history) ? history : []).slice(-40);
+                const safeHistory = (Array.isArray(history) ? history : []);
                 localStorage.setItem(AI_HISTORY_STORAGE_KEY, JSON.stringify(safeHistory));
                 sessionStorage.setItem(AI_HISTORY_STORAGE_KEY, JSON.stringify(safeHistory));
             } catch (e) {}
             // The multi-chat store is initialized immediately after this legacy helper.
             if (Array.isArray(aiChats) && typeof aiCurrentChatId === "string" && aiCurrentChatId) {
                 const chat = aiChats.find(c => c.id === aiCurrentChatId);
-                if (chat) { chat.messages = (Array.isArray(history) ? history : []).slice(-40); if (!chat.title || chat.title === "New chat") chat.title = aiChatTitle(chat.messages); chat.updatedAt = Date.now(); aiPersistChats(); }
+                if (chat) { chat.messages = (Array.isArray(history) ? history : []); if (!chat.title || chat.title === "New chat") chat.title = aiChatTitle(chat.messages); chat.updatedAt = Date.now(); aiPersistChats(); }
             }
         }
 
@@ -24461,31 +24688,32 @@ document.documentElement.classList.toggle(
                 if (Array.isArray(parsed) && parsed.length) {
                     const valid = parsed.filter(c => c && typeof c.id === "string" && Array.isArray(c.messages)).map(c => ({
                         id: c.id, title: typeof c.title === "string" ? c.title.slice(0,100) : aiChatTitle(c.messages),
-                        messages: c.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-40),
-                        updatedAt: Number(c.updatedAt) || Date.now(), pinned: !!c.pinned
-                    })).slice(0,80);
-                    if (valid.length) { aiCurrentChatId = localStorage.getItem(aiCurrentChatStorageKey()) || valid[0].id; if (!valid.some(c => c.id === aiCurrentChatId)) aiCurrentChatId = valid[0].id; return valid; }
+                        messages: c.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").map(m => ({ ...m, id: m.id || ("msg_" + Math.random().toString(36).slice(2) + Date.now().toString(36)) })),
+                        updatedAt: Number(c.updatedAt) || Date.now(), pinned: !!c.pinned, deleted: !!c.deleted
+                    }));
+                    if (valid.length) { const available = valid.filter(c => !c.deleted); aiCurrentChatId = localStorage.getItem(aiCurrentChatStorageKey()) || available[0]?.id || ""; if (!available.some(c => c.id === aiCurrentChatId)) aiCurrentChatId = available[0]?.id || ""; return valid; }
                 }
             } catch (e) {}
-            const legacy = (aiMode === "horizon" && Array.isArray(aiConversationHistory)) ? aiConversationHistory.slice(-40) : [];
+            const legacy = (aiMode === "horizon" && Array.isArray(aiConversationHistory)) ? aiConversationHistory : [];
             const migrated = { id: aiMakeChatId(), title: aiChatTitle(legacy), messages: legacy, updatedAt: Date.now(), pinned: false };
             aiCurrentChatId = migrated.id;
             return [migrated];
         }
         function aiPersistChats() {
             try {
-                aiChats = aiChats.slice(0,80).map(c => ({...c, messages:(c.messages || []).slice(-40)}));
+                aiChats = aiChats.map(c => ({...c, messages:(c.messages || []).map((m, index) => ({ ...m, id: m.id || ("msg_" + Math.random().toString(36).slice(2) + Date.now().toString(36)), createdAt: Number(m.createdAt) || (Number(c.updatedAt) || Date.now()) + index }))}));
                 localStorage.setItem(aiChatsStorageKey(), JSON.stringify(aiChats));
                 localStorage.setItem(aiCurrentChatStorageKey(), aiCurrentChatId);
+                queueAiChatCloudSync(aiMode, aiChats);
             } catch (e) {}
             aiRenderChatLists();
             aiUpdateMemorySidebar();
         }
-        function aiCurrentChat() { return aiChats.find(c => c.id === aiCurrentChatId) || null; }
+        function aiCurrentChat() { return aiChats.find(c => c.id === aiCurrentChatId && !c.deleted) || null; }
         function aiSaveCurrentChat() {
             let chat = aiCurrentChat();
             if (!chat) { chat = { id: aiCurrentChatId || aiMakeChatId(), title: "New chat", messages: [], updatedAt: Date.now(), pinned: false }; aiCurrentChatId = chat.id; aiChats.unshift(chat); }
-            chat.messages = (Array.isArray(aiConversationHistory) ? aiConversationHistory : []).slice(-40);
+            chat.messages = (Array.isArray(aiConversationHistory) ? aiConversationHistory : []).map(m => ({ ...m, id: m.id || ("msg_" + Math.random().toString(36).slice(2) + Date.now().toString(36)) }));
             if (!chat.title || chat.title === "New chat") chat.title = aiChatTitle(chat.messages);
             chat.updatedAt = Date.now();
             aiPersistChats();
@@ -24495,7 +24723,7 @@ document.documentElement.classList.toggle(
             const search = (document.getElementById("aiChatSearch")?.value || "").trim().toLowerCase();
             const pinnedEl = document.getElementById("aiPinnedChatList"), recentEl = document.getElementById("aiRecentChatList");
             if (!pinnedEl || !recentEl) return;
-            const sorted = [...aiChats].sort((a,b) => (Number(b.updatedAt)||0) - (Number(a.updatedAt)||0));
+            const sorted = aiChats.filter(c => !c.deleted).sort((a,b) => (Number(b.updatedAt)||0) - (Number(a.updatedAt)||0));
             const filtered = sorted.filter(c => !search || (c.title + " " + c.messages.map(m => m.content).join(" ")).toLowerCase().includes(search));
             // Persistence can run repeatedly while a response streams. Do not destroy and
             // recreate the sidebar DOM unless something visible in the list actually changed.
@@ -24551,7 +24779,7 @@ document.documentElement.classList.toggle(
             aiPinned=true; aiMaybeScroll(true); aiRenderChatLists(); aiRenderFilePreview();
         }
         function aiSwitchChat(id) {
-            if(aiBusy || !aiChats.some(c=>c.id===id))return;
+            if(aiBusy || !aiChats.some(c=>c.id===id && !c.deleted))return;
             aiCurrentChatId=id; aiPersistChats(); aiRenderCurrentChat();
             document.getElementById("aiChatSidebar")?.classList.remove("mobile-open");
             document.getElementById("aiSidebarToggleBtn")?.setAttribute("aria-expanded","false");
@@ -24565,9 +24793,11 @@ document.documentElement.classList.toggle(
         function aiDeleteChat(id) {
             if(aiBusy)return;
             if (typeof aiProjectFileContexts !== "undefined") aiProjectFileContexts.delete(id);
-            aiChats=aiChats.filter(c=>c.id!==id);
-            if(!aiChats.length)aiChats=[{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false}];
-            if(aiCurrentChatId===id)aiCurrentChatId=aiChats[0].id;
+            const deletedChat = aiChats.find(c => c.id === id);
+            if (deletedChat) { deletedChat.deleted = true; deletedChat.messages = []; deletedChat.updatedAt = Date.now(); }
+            const remainingChats = aiChats.filter(c => !c.deleted);
+            if(!remainingChats.length) { const fresh={id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false}; aiChats.unshift(fresh); }
+            if(aiCurrentChatId===id)aiCurrentChatId=aiChats.find(c=>!c.deleted)?.id || "";
             aiPersistChats(); aiRenderCurrentChat();
         }
         function aiBuildCrossChatContext() {
