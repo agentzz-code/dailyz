@@ -24969,7 +24969,12 @@ document.documentElement.classList.toggle(
         function aiParseStructuredFileResult(raw, requestText = "") {
             const original = String(raw || "");
             let text = original.replace(/\r\n?/g, "\n").trim();
-            if (!text) return null;
+            // Some providers wrap the entire marker protocol in one Markdown fence.
+            // Unwrap only a single outer fence; never strip fences from file contents.
+            const outerFence = /^```(?:text|markdown)?[ \t]*\n([\s\S]*?)\n```[ \t]*$/i.exec(text);
+            if (outerFence) text = outerFence[1].trim();
+            if (!text) return { error: "parse-error", diagnostic: "The model response was empty after stream completion.", files: [], response: "" };
+            const parseFailure = (reason, extra = {}) => ({ error: "parse-error", diagnostic: reason, files: [], response: "", ...extra });
 
             const mimeFor = (name) => {
                 const ext = String(name).split(".").pop().toLowerCase();
@@ -25018,14 +25023,14 @@ document.documentElement.classList.toggle(
                     markerSeen = true;
                     const attrs = match[1] || "";
                     const getAttr = (key) => {
-                        const re = new RegExp("\\b" + key + "\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)')", "i");
+                        const re = new RegExp("\\b" + key + "\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))", "i");
                         const found = re.exec(attrs);
-                        return found ? (found[1] ?? found[2] ?? "") : "";
+                        return found ? (found[1] ?? found[2] ?? found[3] ?? "") : "";
                     };
                     const rawName = getAttr("name");
                     const actionValue = getAttr("action").toLowerCase();
                     const mime = getAttr("mime");
-                    if (!rawName.trim()) return null;
+                    if (!rawName.trim()) return parseFailure("An ATLAS_FILE opening marker was found, but its name attribute was missing or malformed.", { markerCount: markerFiles.length + 1 });
                     // The browser file-work endpoint receives file contents in the
                     // request; it has no follow-up read-request round trip. Never
                     // misinterpret a model's action="read" request as a new file.
@@ -25037,7 +25042,7 @@ document.documentElement.classList.toggle(
                             response: ""
                         };
                     }
-                    if (actionValue !== "create" && actionValue !== "edit") return null;
+                    if (actionValue !== "create" && actionValue !== "edit") return parseFailure("The file " + rawName + " used unsupported action='" + (actionValue || "(missing)") + "'. Expected create or edit.", { fileName: rawName });
                     active = {
                         name: aiSafeRelativePath(rawName),
                         action: actionValue,
@@ -25049,11 +25054,11 @@ document.documentElement.classList.toggle(
 
                 if (endLine.test(normalizeMarkerLine(line))) {
                     const content = active.contentLines.join("\n");
-                    if (!content.trim()) return null;
+                    if (!content.trim()) return parseFailure("The file " + active.name + " had an opening and closing marker but contained no file content.", { fileName: active.name });
                     markerChars += content.length;
                     if (markerFiles.length >= AI_MAX_TEXT_FILES ||
                         content.length > AI_MAX_TEXT_TOTAL_CHARS ||
-                        markerChars > AI_MAX_TEXT_TOTAL_CHARS) return null;
+                        markerChars > AI_MAX_TEXT_TOTAL_CHARS) return parseFailure("The file package exceeded the browser's file-count or text-size safety limit.", { fileName: active.name, fileCount: markerFiles.length + 1, contentChars: content.length, totalChars: markerChars });
                     markerFiles.push({
                         name: active.name,
                         action: active.action,
@@ -25068,11 +25073,11 @@ document.documentElement.classList.toggle(
 
                 // A nested start marker before an end marker means the previous
                 // file was truncated. Never package a partial file as complete.
-                if (startLine.test(normalizeMarkerLine(line))) return null;
+                if (startLine.test(normalizeMarkerLine(line))) return parseFailure("A second ATLAS_FILE opening marker appeared before the previous file was closed. The previous file is incomplete.", { fileName: active.name, completedFiles: markerFiles.length });
                 active.contentLines.push(line);
             }
 
-            if (active) return null; // unmatched start marker: truncated package
+            if (active) return parseFailure("The response ended before the closing <<<END_ATLAS_FILE>>> marker for " + active.name + ". The file may have been truncated.", { fileName: active.name, completedFiles: markerFiles.length, partialChars: active.contentLines.join("\n").length });
             if (markerFiles.length) {
                 let response = responseLines.join("\n").trim();
                 response = response.replace(/^ATLAS_RESPONSE:\s*/i, "");
@@ -25083,6 +25088,10 @@ document.documentElement.classList.toggle(
                     notes: []
                 };
             }
+
+            if (markerSeen) return parseFailure("An ATLAS_FILE marker was detected, but no complete file block could be extracted. Check marker spelling, attributes, and closing marker.", { completedFiles: markerFiles.length });
+            const malformedMarkerLine = lines.find(line => /ATLAS_FILE|END_ATLAS_FILE/i.test(line));
+            if (malformedMarkerLine) return parseFailure("The response contains text resembling an Atlas file marker, but the marker is not on a valid standalone line: " + malformedMarkerLine.slice(0, 180));
 
             // Backward compatibility: accept the previous JSON package format.
             let jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
@@ -25150,7 +25159,7 @@ document.documentElement.classList.toggle(
                     };
                 }
             }
-            return null;
+            return parseFailure("No complete Atlas file block, supported JSON package, or single fenced source file was found in the response.", { responseChars: text.length, markerSeen: markerSeen });
         }
         function aiZipCrc32(bytes) {
             let crc = -1;
@@ -26612,7 +26621,16 @@ document.documentElement.classList.toggle(
                 };
             } else if (isAtlas && fileDeliveryRequested && !streamError && !aiStreamCancelled && sawDone) {
                 const structured = aiParseStructuredFileResult(assistantText, effectiveMessage);
-                if (structured && structured.error === "read-request") {
+                if (structured && structured.error === "parse-error") {
+                    streamError = {
+                        kind: "invalid",
+                        status: 502,
+                        code: "ATLAS_FILE_PARSE_DIAGNOSTIC",
+                        message: structured.diagnostic || "Atlas file markers could not be parsed.",
+                        provider: "nvidia"
+                    };
+                    try { console.error("[Atlas file parser]", { diagnostic: structured.diagnostic, fileName: structured.fileName || "", completedFiles: structured.completedFiles ?? null, markerCount: structured.markerCount ?? null, responseChars: assistantText.length, responsePreview: assistantText.slice(0, 1200) }); } catch (_) {}
+                } else if (structured && structured.error === "read-request") {
                     streamError = {
                         kind: "invalid",
                         status: 409,
@@ -26629,7 +26647,7 @@ document.documentElement.classList.toggle(
                         aiTypesetMath(messageEl);
                     }
                 } else {
-                    streamError = { kind: "invalid", status: 502, code: "ATLAS_FILE_OUTPUT_INVALID", message: "Atlas returned a response, but it did not contain a complete file block in the required format. This can happen if the model ignores the file-output format or reaches its output limit. The response is preserved above for inspection; retry with one file at a time if needed.", provider: "nvidia" };
+                    streamError = { kind: "invalid", status: 502, code: "ATLAS_FILE_OUTPUT_INVALID", message: "Atlas returned a response, but no complete file package could be extracted. The raw response is preserved above. Open the browser console for [Atlas file parser] diagnostics; check whether the model omitted file markers, returned malformed markers, or stopped before the closing marker.", provider: "nvidia" };
                     // Preserve the model's raw response instead of deleting it. This
                     // makes malformed/truncated output diagnosable and lets the user
                     // copy useful code even when no download card can be created.
