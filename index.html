@@ -6092,395 +6092,6 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 </style>
 
 \n\n<!-- Apple-inspired Liquid Glass treatment for Horizon's EXISTING navigation.\n     The app is a standalone HTML/CSS/JS app (not React), so this recreates the\n     Glisse visual language without importing its React component package. -->\n<style id="horizon-liquid-glass-navigation-v1">\n#primaryNavigation {\n  --glass-edge: rgba(255,255,255,.58);\n  --glass-surface: rgba(246,249,255,.58);\n  --glass-highlight: rgba(255,255,255,.72);\n  isolation: isolate;\n  background: var(--glass-surface) !important;\n  border: 1px solid var(--glass-edge) !important;\n  -webkit-backdrop-filter: blur(34px) saturate(190%) contrast(1.04);\n  backdrop-filter: blur(34px) saturate(190%) contrast(1.04);\n  box-shadow: 0 18px 48px rgba(24,35,58,.14),\n              inset 0 1px 0 rgba(255,255,255,.82),\n              inset 0 -1px 0 rgba(255,255,255,.18) !important;\n  position: fixed;\n}\n#primaryNavigation::after {\n  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;\n  border-radius:inherit; opacity:.8;\n  background: linear-gradient(145deg, rgba(255,255,255,.42), transparent 34%, rgba(255,255,255,.08) 68%, rgba(255,255,255,.2));\n}\n#primaryNavigation .tab {\n  position:relative; isolation:isolate;\n  transition: color .22s ease, transform .22s cubic-bezier(.2,.8,.2,1);\n}\n#primaryNavigation .tab:active { transform:scale(.965); }\n#primaryNavigation .tab.active {\n  color:var(--accent, #477be8) !important;\n  background:rgba(255,255,255,.38) !important;\n  border:1px solid rgba(255,255,255,.58);\n  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),\n             0 4px 14px rgba(30,45,75,.09) !important;\n}\n#primaryNavigation .tab.active::before {\n  content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit;\n  background:linear-gradient(135deg,rgba(255,255,255,.42),rgba(255,255,255,.08));\n  pointer-events:none;\n}\n.dark #primaryNavigation {\n  --glass-edge:rgba(255,255,255,.2);\n  --glass-surface:rgba(27,30,39,.68);\n  background:var(--glass-surface) !important;\n  border-color:var(--glass-edge) !important;\n  box-shadow:0 18px 48px rgba(0,0,0,.34),\n             inset 0 1px 0 rgba(255,255,255,.18),\n             inset 0 -1px 0 rgba(255,255,255,.06) !important;\n}\n.dark #primaryNavigation .tab.active {\n  background:rgba(255,255,255,.14) !important;\n  border-color:rgba(255,255,255,.24);\n  box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 14px rgba(0,0,0,.18) !important;\n}\n@media(max-width:760px) {\n  #primaryNavigation {\n    background:rgba(241,245,255,.56) !important;\n    border-radius:28px !important;\n    -webkit-backdrop-filter:blur(38px) saturate(205%) contrast(1.06);\n    backdrop-filter:blur(38px) saturate(205%) contrast(1.06);\n    box-shadow:0 12px 38px rgba(18,30,55,.2),\n               inset 0 1px 0 rgba(255,255,255,.88),\n               inset 0 -1px 0 rgba(255,255,255,.22) !important;\n  }\n  #primaryNavigation .tab.active {\n    background:rgba(255,255,255,.48) !important;\n    border:1px solid rgba(255,255,255,.7);\n    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),\n               0 3px 12px rgba(35,50,80,.12) !important;\n  }\n  .dark #primaryNavigation { background:rgba(25,28,37,.66) !important; }\n  .dark #primaryNavigation .tab.active {\n    background:rgba(255,255,255,.16) !important;\n    border-color:rgba(255,255,255,.23);\n  }\n}\n@media(prefers-reduced-motion:reduce) {\n  #primaryNavigation .tab { transition:none !important; }\n}\n</style>\n
-<style id="horizon-liquid-glass-layer">
-
-/* ============================================================
-   HORIZON · LIQUID GLASS INTERFACE
-   Glisse-inspired native HTML/CSS layer for the existing app.
-   Scoped to the Glass appearance so other Horizon themes and
-   all existing application behavior remain unchanged.
-   ============================================================ */
-html.theme-glass {
-    --h-lg-surface: rgba(255, 255, 255, .54);
-    --h-lg-surface-strong: rgba(255, 255, 255, .72);
-    --h-lg-edge: rgba(255, 255, 255, .76);
-    --h-lg-edge-soft: rgba(255, 255, 255, .48);
-    --h-lg-shadow: 0 12px 34px rgba(35, 69, 104, .11);
-    --h-lg-inset: inset 0 1px 0 rgba(255, 255, 255, .82);
-    --h-lg-blur: 24px;
-}
-html.dark.theme-glass {
-    --h-lg-surface: rgba(24, 42, 59, .62);
-    --h-lg-surface-strong: rgba(32, 54, 73, .78);
-    --h-lg-edge: rgba(224, 241, 255, .2);
-    --h-lg-edge-soft: rgba(224, 241, 255, .12);
-    --h-lg-shadow: 0 14px 38px rgba(0, 0, 0, .25);
-    --h-lg-inset: inset 0 1px 0 rgba(255, 255, 255, .16);
-}
-
-/* Cards become translucent layers rather than flat opaque panels. */
-.theme-glass .dashboard-card,
-.theme-glass .streak-card,
-.theme-glass .step-card,
-.theme-glass .progress-ring-card,
-.theme-glass .score-card,
-.theme-glass .quote-card,
-.theme-glass .selected-day,
-.theme-glass .task,
-.theme-glass .task-options,
-.theme-glass .calendar-card,
-.theme-glass .qibla-card,
-.theme-glass .prayer,
-.theme-glass .prayer-tracker,
-.theme-glass .settings-card,
-.theme-glass .study-progress-card,
-.theme-glass .study-timer-card,
-.theme-glass .study-subject,
-.theme-glass .study-stats-launch,
-.theme-glass .cal-day-events-card,
-.theme-glass .cal-upcoming-card {
-    background-color: var(--h-lg-surface) !important;
-    border: 1px solid var(--h-lg-edge-soft) !important;
-    box-shadow: var(--h-lg-shadow), var(--h-lg-inset) !important;
-    -webkit-backdrop-filter: blur(var(--h-lg-blur)) saturate(165%);
-    backdrop-filter: blur(var(--h-lg-blur)) saturate(165%);
-}
-.theme-glass .dashboard-card,
-.theme-glass .settings-card,
-.theme-glass .calendar-card,
-.theme-glass .study-timer-card,
-.theme-glass .prayer-tracker { border-radius: 23px; }
-.theme-glass .task,
-.theme-glass .prayer,
-.theme-glass .study-subject { border-radius: 17px; }
-
-/* The navigation dock uses a separate, brighter glass sheet. */
-.theme-glass .tabs,
-.theme-glass #primaryNavigation,
-.theme-glass .horizon-glass-dock {
-    background: rgba(247, 251, 255, .58) !important;
-    border: 1px solid rgba(255, 255, 255, .82) !important;
-    box-shadow: 0 14px 42px rgba(35, 69, 104, .16),
-                inset 0 1px 0 rgba(255, 255, 255, .94),
-                inset 0 -1px 0 rgba(255, 255, 255, .28) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(185%);
-    backdrop-filter: blur(30px) saturate(185%);
-}
-.theme-glass #primaryNavigation .tab {
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--tp-muted);
-    transition: background .22s ease, color .22s ease, box-shadow .22s ease, transform .18s ease;
-}
-.theme-glass #primaryNavigation .tab.active {
-    color: var(--tp-ink) !important;
-    background: linear-gradient(145deg, rgba(255,255,255,.88), rgba(225,239,252,.56)) !important;
-    border-color: rgba(255,255,255,.9) !important;
-    box-shadow: 0 5px 16px rgba(38, 79, 119, .13),
-                inset 0 1px 0 rgba(255,255,255,.98),
-                inset 0 -1px 0 rgba(80,130,176,.08) !important;
-}
-.theme-glass #primaryNavigation .tab:active { transform: scale(.96); }
-.theme-glass #primaryNavigation .tab.active .nav-icon { filter: drop-shadow(0 1px 2px rgba(45,91,136,.18)); }
-.theme-glass .icon-button,
-.theme-glass .setting-button,
-.theme-glass .language-option,
-.theme-glass .calendar-nav button,
-.theme-glass .prayer-cal-nav button,
-.theme-glass .aiHeadBtn,
-.theme-glass .aiGhostBtn,
-.theme-glass .aiModelQuickBtn {
-    background: var(--h-lg-surface) !important;
-    border: 1px solid var(--h-lg-edge) !important;
-    box-shadow: 0 4px 14px rgba(35,69,104,.08), inset 0 1px 0 rgba(255,255,255,.82) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(165%);
-    backdrop-filter: blur(18px) saturate(165%);
-    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
-}
-.theme-glass .icon-button:active,
-.theme-glass .setting-button:active,
-.theme-glass .aiHeadBtn:active,
-.theme-glass .aiGhostBtn:active { transform: scale(.95); }
-.theme-glass .setting-button.active,
-.theme-glass .setting-button.selected,
-.theme-glass .theme-option.active {
-    background: var(--tp-sel) !important;
-    border-color: var(--tp-ring) !important;
-    box-shadow: 0 0 0 3px rgba(73,132,190,.12), inset 0 1px 0 rgba(255,255,255,.7) !important;
-}
-
-/* Inputs, search, selectors and text areas get a recessed glass well. */
-.theme-glass input:not([type="checkbox"]):not([type="radio"]),
-.theme-glass select,
-.theme-glass textarea {
-    background-color: rgba(255,255,255,.48) !important;
-    border-color: rgba(105,145,181,.25) !important;
-    box-shadow: inset 0 1px 3px rgba(34,67,98,.055), inset 0 1px 0 rgba(255,255,255,.68);
-    color: var(--tp-ink) !important;
-}
-.theme-glass input::placeholder,
-.theme-glass textarea::placeholder { color: var(--tp-muted) !important; }
-.theme-glass input:focus,
-.theme-glass select:focus,
-.theme-glass textarea:focus {
-    outline: none;
-    border-color: var(--tp-ring) !important;
-    box-shadow: 0 0 0 3px rgba(73,132,190,.16), inset 0 1px 2px rgba(34,67,98,.04) !important;
-}
-
-/* AI workspace: glass header, sidebar, composer and message surfaces. */
-.theme-glass #aiBox,
-.theme-glass #aiHeader,
-.theme-glass .ai-sidebar,
-.theme-glass .aiInput,
-.theme-glass #aiSettingsModal,
-.theme-glass .aiActionCard,
-.theme-glass .ai-file-results,
-.theme-glass .ai-sidebar-memory {
-    background-color: var(--h-lg-surface) !important;
-    border-color: var(--h-lg-edge-soft) !important;
-    box-shadow: var(--h-lg-shadow), var(--h-lg-inset);
-    -webkit-backdrop-filter: blur(var(--h-lg-blur)) saturate(170%);
-    backdrop-filter: blur(var(--h-lg-blur)) saturate(170%);
-}
-.theme-glass #aiBox { border: 1px solid var(--h-lg-edge) !important; }
-.theme-glass #aiHeader { border-bottom: 1px solid var(--h-lg-edge-soft) !important; }
-.theme-glass .aiInput {
-    border: 1px solid var(--h-lg-edge) !important;
-    border-radius: 22px !important;
-    margin: 8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
-    padding: 9px !important;
-}
-.theme-glass .aiInput input#aiInput {
-    background: rgba(255,255,255,.34) !important;
-    border: 1px solid rgba(255,255,255,.5) !important;
-    border-radius: 15px !important;
-}
-.theme-glass .ai-suggest,
-.theme-glass .ai-chip,
-.theme-glass .ai-chat-item,
-.theme-glass .aiActionCard button {
-    background: rgba(255,255,255,.4) !important;
-    border: 1px solid var(--h-lg-edge-soft) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(150%);
-    backdrop-filter: blur(14px) saturate(150%);
-}
-.theme-glass #aiSendBtn {
-    box-shadow: 0 5px 16px rgba(36,74,112,.22), inset 0 1px 0 rgba(255,255,255,.32) !important;
-}
-
-/* Gentle response to interaction; avoid large movement or fake glass glare. */
-@media (hover: hover) and (pointer: fine) {
-    .theme-glass .dashboard-card:hover,
-    .theme-glass .settings-card:hover,
-    .theme-glass .study-timer-card:hover {
-        box-shadow: 0 16px 38px rgba(35,69,104,.14), inset 0 1px 0 rgba(255,255,255,.84) !important;
-    }
-    .theme-glass .icon-button:hover,
-    .theme-glass .setting-button:hover,
-    .theme-glass .aiHeadBtn:hover {
-        background: var(--h-lg-surface-strong) !important;
-        transform: translateY(-1px);
-    }
-}
-.theme-glass :focus-visible {
-    outline: 2px solid var(--tp-ring) !important;
-    outline-offset: 3px;
-}
-
-/* Dark Liquid Glass remains translucent without washing out text. */
-.dark.theme-glass .tabs,
-.dark.theme-glass #primaryNavigation,
-.dark.theme-glass .horizon-glass-dock {
-    background: rgba(16, 28, 40, .72) !important;
-    border-color: rgba(224,241,255,.18) !important;
-    box-shadow: 0 16px 42px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.16) !important;
-}
-.dark.theme-glass #primaryNavigation .tab.active {
-    color: #F0F7FF !important;
-    background: linear-gradient(145deg, rgba(112,157,193,.32), rgba(51,83,110,.24)) !important;
-    border-color: rgba(224,241,255,.22) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 5px 18px rgba(0,0,0,.16) !important;
-}
-.dark.theme-glass input:not([type="checkbox"]):not([type="radio"]),
-.dark.theme-glass select,
-.dark.theme-glass textarea { background-color: rgba(9,20,31,.42) !important; border-color: rgba(224,241,255,.16) !important; }
-.dark.theme-glass .ai-suggest,
-.dark.theme-glass .ai-chip,
-.dark.theme-glass .ai-chat-item,
-.dark.theme-glass .aiActionCard button { background: rgba(255,255,255,.07) !important; }
-
-@media (max-width: 760px) {
-    .theme-glass #primaryNavigation {
-        -webkit-backdrop-filter: blur(32px) saturate(190%);
-        backdrop-filter: blur(32px) saturate(190%);
-    }
-    .theme-glass .aiInput { margin-inline: 7px !important; }
-}
-@media (prefers-reduced-motion: reduce) {
-    .theme-glass #primaryNavigation .tab,
-    .theme-glass .icon-button,
-    .theme-glass .setting-button,
-    .theme-glass .aiHeadBtn { transition: none !important; }
-}
-
-</style>
-
-<script type="importmap" id="horizon-glisse-importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@19.2.0",
-    "react/jsx-runtime": "https://esm.sh/react@19.2.0/jsx-runtime",
-    "react-dom": "https://esm.sh/react-dom@19.2.0?external=react",
-    "react-dom/client": "https://esm.sh/react-dom@19.2.0/client?external=react"
-  }
-}
-</script>
-<link rel="preconnect" href="https://esm.sh" crossorigin>
-<style id="horizon-official-glisse-integration">
-/* Horizon's official Glisse component integration. Glisse owns the glass material and control rendering. */
-body.horizon-glisse-real {
-  --lg-fill: var(--accent, #477be8);
-  --lg-blur: 22px;
-}
-body.horizon-glisse-real .horizon-glisse-proxy {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  min-width: 1px !important;
-  min-height: 1px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  opacity: 0 !important;
-  overflow: hidden !important;
-  clip-path: inset(50%) !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-}
-body.horizon-glisse-real #primaryNavigation {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  padding: 0 !important;
-  overflow: visible !important;
-}
-body.horizon-glisse-real #primaryNavigation::before,
-body.horizon-glisse-real #primaryNavigation::after { display: none !important; }
-body.horizon-glisse-real .horizon-glisse-nav-root {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-width: 0;
-}
-body.horizon-glisse-real #primaryNavigation .horizon-glisse-tabbar {
-  margin: 0 auto;
-  max-width: 100%;
-  --lg-fill: var(--accent, #477be8);
-}
-body.horizon-glisse-real #primaryNavigation .lg-tab-bar[data-icons] {
-  --lg-tab-height: 52px;
-  --lg-tab-inset: 4px;
-}
-body.horizon-glisse-real .horizon-glisse-nav-glyph {
-  display: inline-grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  font-family: system-ui, sans-serif;
-  font-size: 21px;
-  line-height: 1;
-}
-body.horizon-glisse-real .horizon-glisse-control-host { display: contents; }
-body.horizon-glisse-real .horizon-glisse-button {
-  font-family: inherit;
-  font-weight: 650;
-  --lg-fill: var(--accent, #477be8);
-}
-body.horizon-glisse-real .horizon-glisse-icon-button { width: 40px; height: 40px; border-radius: 50%; }
-body.horizon-glisse-real .horizon-glisse-add-button { width: 42px; height: 42px; border-radius: 50%; }
-body.horizon-glisse-real .horizon-glisse-send-button { width: 40px; height: 40px; border-radius: 14px; }
-body.horizon-glisse-real .horizon-glisse-action-button { min-width: 88px; height: 42px; padding-inline: 18px; }
-body.horizon-glisse-real .horizon-glisse-input-host { min-width: 0; flex: 1 1 auto; }
-body.horizon-glisse-real .horizon-glisse-input {
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0;
-  --lg-blur: 18px;
-}
-body.horizon-glisse-real .horizon-glisse-input input { min-width: 0; }
-body.horizon-glisse-real .horizon-glisse-switch-host { display: flex; align-items: center; justify-content: flex-end; }
-body.horizon-glisse-real .horizon-glisse-switch { flex: none; }
-body.horizon-glisse-real .horizon-glisse-slider-host { display: block; width: 100%; min-width: 0; }
-body.horizon-glisse-real .horizon-glisse-slider { width: 100%; }
-body.horizon-glisse-real .horizon-glisse-segments-host { display: contents; }
-body.horizon-glisse-real .horizon-glisse-segments { max-width: 100%; }
-body.horizon-glisse-real .horizon-glisse-surface {
-  position: relative !important;
-  isolation: isolate;
-  background: transparent !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
-  --lg-blur: 22px;
-}
-body.horizon-glisse-real .horizon-glisse-glass-host {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: block;
-  border-radius: inherit;
-  overflow: hidden;
-  pointer-events: none;
-}
-body.horizon-glisse-real .horizon-glisse-glass {
-  position: absolute !important;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  pointer-events: none;
-  --lg-blur: 22px;
-}
-body.horizon-glisse-real .horizon-glisse-surface > :not(.horizon-glisse-glass-host) {
-  position: relative;
-  z-index: 1;
-}
-body.horizon-glisse-real .aiInput .horizon-glisse-send-button { flex: 0 0 40px; }
-body.horizon-glisse-real .aiInput .horizon-glisse-input { flex: 1 1 auto; }
-@media (max-width: 760px) {
-  body.horizon-glisse-real #primaryNavigation {
-    width: max-content !important;
-    max-width: calc(100vw - 28px) !important;
-    overflow: visible !important;
-  }
-  body.horizon-glisse-real #primaryNavigation .horizon-glisse-nav-root { width: auto; }
-  body.horizon-glisse-real #primaryNavigation .lg-tab-bar[data-icons] {
-    --lg-tab-width: 57px;
-    max-width: calc(100vw - 38px);
-  }
-  body.horizon-glisse-real #primaryNavigation.nav-expanded {
-    width: calc(100vw - 24px) !important;
-    max-width: calc(100vw - 24px) !important;
-  }
-  body.horizon-glisse-real #primaryNavigation.nav-expanded .lg-tab-bar[data-icons] {
-    --lg-tab-width: clamp(34px, calc((100vw - 54px) / 9), 62px);
-  }
-  body.horizon-glisse-real #primaryNavigation.nav-expanded .lg-tab-bar[data-icons] :is(.lg-tab, .lg-tab-copy) {
-    font-size: 9px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  body.horizon-glisse-real .lg-glass,
-  body.horizon-glisse-real .lg-button,
-  body.horizon-glisse-real .lg-tab { transition-duration: 0.01ms !important; }
-}
-
-</style>
 </head>
 
 <body>
@@ -8010,7 +7621,7 @@ body.horizon-glisse-real .aiInput .horizon-glisse-input { flex: 1 1 auto; }
                             <button type="button" class="setting-button theme-option" data-theme="forest" data-theme-color="#2e8b57">Forest</button>
                             <button type="button" class="setting-button theme-option" data-theme="berry" data-theme-color="#c2185b">Berry</button>
                             <button type="button" class="setting-button theme-option" data-theme="horizon">Horizon</button>
-                            <button type="button" class="setting-button theme-option" data-theme="glass" data-theme-color="#244A70">Liquid Glass</button>
+                            <button type="button" class="setting-button theme-option" data-theme="glass" data-theme-color="#244A70">Glass</button>
                         </div>
 
                     </div>
@@ -8364,13 +7975,6 @@ body.horizon-glisse-real .aiInput .horizon-glisse-input { flex: 1 1 auto; }
                 <aside class="ai-chat-sidebar" id="aiChatSidebar" aria-label="Chats and memory">
                     <button type="button" class="ai-new-chat-primary" id="aiSidebarNewChatBtn"><span aria-hidden="true">＋</span> New chat</button>
                     <label class="ai-chat-search-wrap"><span aria-hidden="true">⌕</span><input type="search" id="aiChatSearch" placeholder="Search chats" autocomplete="off" aria-label="Search chats"></label>
-                    <div class="ai-bulk-toolbar">
-                        <button type="button" id="aiBulkSelectBtn">Select</button>
-                        <span id="aiBulkCount" aria-live="polite" hidden>0 selected</span>
-                        <button type="button" id="aiBulkSelectAllBtn" hidden>Select all</button>
-                        <button type="button" id="aiBulkDeleteBtn" hidden>Delete selected</button>
-                        <button type="button" id="aiBulkCancelBtn" hidden>Cancel</button>
-                    </div>
                     <div class="ai-sidebar-section-title">Pinned</div>
                     <div class="ai-chat-list" id="aiPinnedChatList"><div class="ai-chat-list-empty">Pinned chats appear here</div></div>
                     <div class="ai-sidebar-section-title ai-recent-heading">Recent</div>
@@ -8614,8 +8218,7 @@ body.horizon-glisse-real .aiInput .horizon-glisse-input { flex: 1 1 auto; }
             updateDoc,
             onSnapshot,
             query,
-            orderBy,
-            runTransaction
+            orderBy
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 
@@ -8716,109 +8319,6 @@ body.horizon-glisse-real .aiInput .horizon-glisse-input { flex: 1 1 auto; }
 
         const db =
             getFirestore(app, "default");
-
-        // Independent AI-chat sync bridge. It observes the existing Auth instance;
-        // it never changes persistence, signs users out, or blocks app startup.
-        const horizonChatSync = (() => {
-            let activeUnsubscribe = null;
-            let activeUid = "";
-            let activeMode = "";
-            let activeCallback = null;
-            let activeErrorCallback = null;
-            let generation = 0;
-            const collectionPath = (uid) => collection(db, "users", uid, "aiChats");
-            const safeDocId = (mode, chatId) => mode + "_" + String(chatId).replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 120);
-            function stop() {
-                generation++;
-                if (activeUnsubscribe) { try { activeUnsubscribe(); } catch (e) { console.warn("AI chat listener cleanup:", e); } }
-                activeUnsubscribe = null; activeUid = "";
-            }
-            function start() {
-                const user = auth.currentUser;
-                if (!user || !activeCallback || !activeMode) {
-                    if (activeUnsubscribe) { try { activeUnsubscribe(); } catch (e) {} }
-                    activeUnsubscribe = null; activeUid = "";
-                    return;
-                }
-                if (activeUid === user.uid && activeUnsubscribe) return;
-                stop();
-                const uid = user.uid, mode = activeMode, callback = activeCallback, token = generation;
-                activeUid = uid; activeMode = mode;
-                activeUnsubscribe = onSnapshot(collectionPath(uid), snapshot => {
-                    if (token !== generation || auth.currentUser?.uid !== uid) return;
-                    const chats = [];
-                    snapshot.forEach(docSnap => {
-                        const data = docSnap.data();
-                        if (data && data.mode === mode && typeof data.chatId === "string") chats.push(data);
-                    });
-                    try { callback(chats); } catch (error) { console.error("AI chat snapshot handler failed:", error); }
-                }, error => {
-                    console.error("AI chat cloud sync listener failed:", error);
-                    if (token === generation) { activeUnsubscribe = null; activeUid = ""; }
-                    try { activeErrorCallback?.(error); } catch (callbackError) { console.error("AI sync error callback failed:",callbackError); }
-                });
-            }
-            async function write(mode, chat, deleted = false) {
-                const user = auth.currentUser;
-                if (!user || !chat || !chat.id || !["horizon", "atlas"].includes(mode)) return false;
-                const uid = user.uid, ref = doc(db, "users", uid, "aiChats", safeDocId(mode, chat.id));
-                const localMessages = Array.isArray(chat.messages) ? chat.messages.slice(-40) : [];
-                await runTransaction(db, async transaction => {
-                    const existing = await transaction.get(ref);
-                    const remote = existing.exists() ? existing.data() : null;
-                    const remoteMessages = Array.isArray(remote?.messages) ? remote.messages : [];
-                    const byKey = new Map();
-                    [...remoteMessages, ...localMessages].forEach((message, index) => {
-                        if (!message || !["user", "assistant"].includes(message.role) || typeof message.content !== "string") return;
-                        const key = message.syncId || (message.role + "\\u0000" + message.content);
-                        if (!byKey.has(key)) byKey.set(key, { ...message, _syncOrder: index });
-                    });
-                    const mergedMessages = [...byKey.values()].sort((a,b) => (Number(a.createdAt)||0) - (Number(b.createdAt)||0) || a._syncOrder-b._syncOrder)
-                        .map(({_syncOrder, ...message}) => message).slice(-40);
-                    const remoteDeleted = !!remote?.deleted;
-                    const finalDeleted = deleted ? true : (remoteDeleted && Number(remote?.updatedAt||0) > Number(chat.updatedAt||0));
-                    const localTitleAt=Number(chat.titleUpdatedAt)||Number(chat.updatedAt)||Date.now();
-                    const remoteTitleAt=Number(remote?.titleUpdatedAt)||Number(remote?.updatedAt)||0;
-                    const localPinnedAt=Number(chat.pinnedUpdatedAt)||Number(chat.updatedAt)||Date.now();
-                    const remotePinnedAt=Number(remote?.pinnedUpdatedAt)||Number(remote?.updatedAt)||0;
-                    const useRemoteTitle=!!remote && remoteTitleAt>localTitleAt;
-                    const useRemotePinned=!!remote && remotePinnedAt>localPinnedAt;
-                    transaction.set(ref, {
-                        mode, chatId: chat.id,
-                        title: String(useRemoteTitle ? remote.title : (chat.title || "New chat")).slice(0,100),
-                        titleUpdatedAt: Math.max(localTitleAt,remoteTitleAt),
-                        messages: mergedMessages,
-                        pinned: useRemotePinned ? !!remote.pinned : !!chat.pinned,
-                        pinnedUpdatedAt: Math.max(localPinnedAt,remotePinnedAt),
-                        updatedAt: Math.max(Number(remote?.updatedAt)||0, Number(chat.updatedAt)||Date.now(), Date.now()),
-                        deleted: finalDeleted, writerUid: uid
-                    }, { merge: true });
-                });
-                return true;
-            }
-            return {
-                subscribe(mode, callback, errorCallback) {
-                    if (activeMode !== mode || activeCallback !== callback) {
-                        if (activeUnsubscribe) { try { activeUnsubscribe(); } catch (e) {} }
-                        activeUnsubscribe = null; activeUid = "";
-                    }
-                    activeMode = mode; activeCallback = callback; activeErrorCallback = typeof errorCallback === "function" ? errorCallback : null; start();
-                    return () => { if (activeCallback === callback) { activeCallback = null; activeErrorCallback = null; activeMode = ""; stop(); } };
-                },
-                isSignedIn() { return !!auth.currentUser; },
-                getUserId() { return auth.currentUser?.uid || ""; },
-                save(mode, chat) { return write(mode, chat, false); },
-                delete(mode, chat) { return write(mode, chat, true); },
-                refresh() { start(); },
-                stop
-            };
-        })();
-        window.__horizonChatSync = horizonChatSync;
-        onAuthStateChanged(auth, user => {
-            if (!user) horizonChatSync.stop();
-            else horizonChatSync.refresh();
-            window.dispatchEvent(new CustomEvent("horizon-ai-auth-state",{detail:{signedIn:!!user}}));
-        });
 
         enableIndexedDbPersistence(db).catch((err) => {
             console.error("Offline caching error:", err);
@@ -23871,16 +23371,16 @@ document.documentElement.classList.toggle(
                 
                 <label for="aiMaxTokensSelect">Response length</label>
                 <select id="aiMaxTokensSelect"><option value="auto">Automatic</option><option value="512">Short (512 tokens)</option><option value="1024">Medium (1,024 tokens)</option><option value="2048">Long (2,048 tokens)</option><option value="4096">Very long (4,096 tokens)</option></select>
-                <p class="aiSettingsHint">Horizon uses Google Gemini. Atlas supports NVIDIA NIM and optional CoArena models. Atlas routes only to the provider named by the selected model; it never silently falls back across providers.</p>
+                <p class="aiSettingsHint">Horizon AI uses Google Gemini only. Atlas AI uses NVIDIA NIM only. Model lists are loaded separately from the Worker. Each mode remembers its own model; no cross-provider fallback is used.</p>
             </div>
             <div class="aiSettingsGroup">
                 <h4>Provider connections</h4>
                 <div class="aiProviderGrid" id="aiProviderGrid">
                     <div class="aiProviderCard" id="aiProviderStatusGemini" data-state="unknown"><strong>Google Gemini</strong><span>Checking Worker connection…</span></div>
                     <div class="aiProviderCard" id="aiProviderStatusNvidia" data-state="unknown"><strong>NVIDIA NIM</strong><span>Backend status not checked yet.</span></div>
-                    <div class="aiProviderCard" id="aiProviderStatusCoarena" data-state="unknown"><strong>CoArena</strong><span>Optional Atlas provider. Worker configuration has not been checked yet.</span></div>
+                    <div class="aiProviderCard" id="aiProviderStatusCoarena" data-state="unknown"><strong>CoArena</strong><span>Optional Atlas provider. Not configured yet.</span></div>
                 </div>
-                <p class="aiSettingsHint" id="aiProviderUsageHint" role="status" aria-live="polite">Provider availability is read from the Worker. CoArena API keys stay server-side; prompts and replies sent to CoArena are stored under its data terms. Review <a href="https://coarena.ai/developers" target="_blank" rel="noopener noreferrer">CoArena API documentation</a> before use.</p>
+                <p class="aiSettingsHint" id="aiProviderUsageHint" role="status" aria-live="polite">Provider availability is read from live catalogues/status responses. No frontend secret is required.</p>
                 <p class="aiSettingsHint" id="aiTokenUsageHint" role="status" aria-live="polite">Token usage: no completed AI request yet. Models have not been refreshed yet.</p>
             </div>
             <div class="aiSettingsGroup ai-atlas-only">
@@ -24020,16 +23520,6 @@ document.documentElement.classList.toggle(
     </div>
 
     <script>
-        (function installAIVisualViewportTracking() {
-            const update = () => {
-                const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-                document.documentElement.style.setProperty("--ai-visual-height", Math.max(240, height) + "px");
-            };
-            update();
-            window.addEventListener("resize", update, { passive:true });
-            window.visualViewport?.addEventListener("resize", update, { passive:true });
-            window.visualViewport?.addEventListener("scroll", update, { passive:true });
-        })();
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
@@ -24038,8 +23528,8 @@ document.documentElement.classList.toggle(
         const AI_NVIDIA_CHAT_URL = AI_ENDPOINT;
         const aiModelCatalog = {
             loaded: false, loading: false, error: false, lastError: "", provider: "", models: [], defaultModel: "auto", at: 0, promise: null, requestId: 0, requestMode: "",
-            providerStatus: { gemini: "unknown", nvidia: "unknown", coarena: "unknown" },
-            usage: { gemini: "", nvidia: "", coarena: "" },
+            providerStatus: { gemini: "unknown", nvidia: "unknown" },
+            usage: { gemini: "", nvidia: "" },
             lastRefreshAt: 0,
             lastTokenUsage: null
         };
@@ -24934,14 +24424,7 @@ document.documentElement.classList.toggle(
             // The multi-chat store is initialized immediately after this legacy helper.
             if (Array.isArray(aiChats) && typeof aiCurrentChatId === "string" && aiCurrentChatId) {
                 const chat = aiChats.find(c => c.id === aiCurrentChatId);
-                if (chat) {
-                    chat.messages = aiNormalizeChatMessages(history, chat.messages);
-                    if (!chat.title || chat.title === "New chat") {
-                        const nextTitle=aiChatTitle(chat.messages);
-                        if (nextTitle !== chat.title) { chat.title=nextTitle; chat.titleUpdatedAt=Date.now(); }
-                    }
-                    chat.updatedAt = Date.now(); aiPersistChats();
-                }
+                if (chat) { chat.messages = (Array.isArray(history) ? history : []).slice(-40); if (!chat.title || chat.title === "New chat") chat.title = aiChatTitle(chat.messages); chat.updatedAt = Date.now(); aiPersistChats(); }
             }
         }
 
@@ -24969,17 +24452,6 @@ document.documentElement.classList.toggle(
             const title = first.content.replace(/^\[User uploaded an image and asked:\s*/i, "").replace(/\]$/, "").replace(/\s+/g, " ").trim();
             return title.length > 42 ? title.slice(0, 39) + "…" : (title || "New chat");
         }
-        function aiNormalizeChatMessages(messages, previousMessages = []) {
-            return (Array.isArray(messages) ? messages : []).slice(-40).map((message,index) => {
-                if (!message || typeof message !== "object") return message;
-                const previous = previousMessages[index] || {};
-                return {
-                    ...message,
-                    syncId: message.syncId || previous.syncId || aiMakeChatId(),
-                    createdAt: Number(message.createdAt) || Number(previous.createdAt) || (Date.now() + index)
-                };
-            });
-        }
         /* Horizon keeps its original keys; Atlas has a fully separate store. */
         function aiChatsStorageKey() { return aiMode === "atlas" ? AI_ATLAS_CHATS_STORAGE_KEY : AI_CHATS_STORAGE_KEY; }
         function aiCurrentChatStorageKey() { return aiMode === "atlas" ? "horizon_atlas_current_chat_v1" : "horizon_ai_current_chat_v1"; }
@@ -24994,9 +24466,7 @@ document.documentElement.classList.toggle(
                     const valid = parsed.filter(c => c && typeof c.id === "string" && Array.isArray(c.messages)).map(c => ({
                         id: c.id, title: typeof c.title === "string" ? c.title.slice(0,100) : aiChatTitle(c.messages),
                         messages: c.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-40),
-                        updatedAt: Number(c.updatedAt) || Date.now(), pinned: !!c.pinned,
-                        titleUpdatedAt: Number(c.titleUpdatedAt) || Number(c.updatedAt) || Date.now(),
-                        pinnedUpdatedAt: Number(c.pinnedUpdatedAt) || Number(c.updatedAt) || Date.now()
+                        updatedAt: Number(c.updatedAt) || Date.now(), pinned: !!c.pinned
                     })).slice(0,80);
                     if (valid.length) { aiCurrentChatId = localStorage.getItem(aiCurrentChatStorageKey()) || valid[0].id; if (!valid.some(c => c.id === aiCurrentChatId)) aiCurrentChatId = valid[0].id; return valid; }
                 }
@@ -25008,15 +24478,9 @@ document.documentElement.classList.toggle(
         }
         function aiPersistChats() {
             try {
-                aiChats = aiChats.slice(0,80).map(c => ({
-                    ...c,
-                    titleUpdatedAt:Number(c.titleUpdatedAt)||Number(c.updatedAt)||Date.now(),
-                    pinnedUpdatedAt:Number(c.pinnedUpdatedAt)||Number(c.updatedAt)||Date.now(),
-                    messages:aiNormalizeChatMessages(c.messages, c.messages)
-                }));
+                aiChats = aiChats.slice(0,80).map(c => ({...c, messages:(c.messages || []).slice(-40)}));
                 localStorage.setItem(aiChatsStorageKey(), JSON.stringify(aiChats));
                 localStorage.setItem(aiCurrentChatStorageKey(), aiCurrentChatId);
-                if (!aiApplyingRemoteChats && window.__horizonChatSync?.isSignedIn()) aiChats.forEach(aiQueueCloudChatSave);
             } catch (e) {}
             aiRenderChatLists();
             aiUpdateMemorySidebar();
@@ -25025,196 +24489,12 @@ document.documentElement.classList.toggle(
         function aiSaveCurrentChat() {
             let chat = aiCurrentChat();
             if (!chat) { chat = { id: aiCurrentChatId || aiMakeChatId(), title: "New chat", messages: [], updatedAt: Date.now(), pinned: false }; aiCurrentChatId = chat.id; aiChats.unshift(chat); }
-            chat.messages = aiNormalizeChatMessages(aiConversationHistory, chat.messages);
-            if (!chat.title || chat.title === "New chat") {
-                const nextTitle=aiChatTitle(chat.messages);
-                if (nextTitle !== chat.title) { chat.title=nextTitle; chat.titleUpdatedAt=Date.now(); }
-            }
+            chat.messages = (Array.isArray(aiConversationHistory) ? aiConversationHistory : []).slice(-40);
+            if (!chat.title || chat.title === "New chat") chat.title = aiChatTitle(chat.messages);
             chat.updatedAt = Date.now();
             aiPersistChats();
         }
         let aiChatListRenderSignature = "";
-        let aiBulkSelectionMode = false;
-        const aiSelectedChatIds = new Set();
-        let aiCloudUnsubscribe = null;
-        let aiApplyingRemoteChats = false;
-        function aiSetCloudSyncStatus(message,kind=""){
-            const status=document.getElementById("aiMemoryStatusText");
-            if(status){status.textContent=message;status.dataset.syncState=kind;}
-        }
-        const aiCloudSaveTimers = new Map();
-        const aiCloudLastSavedSignature = new Map();
-        const aiCloudPendingDeletes = new Map();
-        const AI_CHAT_SYNC_PENDING_DELETES_KEY = "dailykrd_ai_chat_sync_pending_deletes_v1";
-        function aiLoadPendingCloudDeletes() {
-            try {
-                const parsed = JSON.parse(localStorage.getItem(AI_CHAT_SYNC_PENDING_DELETES_KEY) || "[]");
-                if (Array.isArray(parsed)) parsed.forEach(item => {
-                    if (item && ["horizon","atlas"].includes(item.mode) && item.chat && item.chat.id) {
-                        aiCloudPendingDeletes.set(item.mode + ":" + item.chat.id, item);
-                    }
-                });
-            } catch (error) { console.warn("Could not restore pending AI chat deletions:", error); }
-        }
-        function aiPersistPendingCloudDeletes() {
-            try { localStorage.setItem(AI_CHAT_SYNC_PENDING_DELETES_KEY, JSON.stringify([...aiCloudPendingDeletes.values()])); }
-            catch (error) { console.error("Could not persist pending AI chat deletions:", error); }
-        }
-        function aiCloudDocToChat(data) {
-            return { id:data.chatId, title:String(data.title||"New chat"), messages:Array.isArray(data.messages)?data.messages.slice(-40):[], updatedAt:Number(data.updatedAt)||Date.now(), pinned:!!data.pinned, titleUpdatedAt:Number(data.titleUpdatedAt)||Number(data.updatedAt)||Date.now(), pinnedUpdatedAt:Number(data.pinnedUpdatedAt)||Number(data.updatedAt)||Date.now() };
-        }
-        function aiQueueCloudChatSave(chat, forceDuringSnapshot=false) {
-            if ((aiApplyingRemoteChats && !forceDuringSnapshot) || !window.__horizonChatSync || !window.__horizonChatSync.isSignedIn()) return;
-            const mode = aiMode, uid = window.__horizonChatSync.getUserId?.() || "signed-in", key = uid + ":" + mode + ":" + chat.id;
-            const snapshot = JSON.parse(JSON.stringify(chat));
-            const signature = JSON.stringify(snapshot);
-            if (aiCloudLastSavedSignature.get(key) === signature) return;
-            clearTimeout(aiCloudSaveTimers.get(key));
-            aiCloudSaveTimers.set(key, setTimeout(async () => {
-                aiCloudSaveTimers.delete(key);
-                try {
-                    const ok = await window.__horizonChatSync.save(mode, snapshot);
-                    if(ok){aiCloudLastSavedSignature.set(key,signature);aiSetCloudSyncStatus("Chats synced to your account","synced");}
-                } catch (error) {
-                    const code=String(error?.code||"");
-                    aiSetCloudSyncStatus(code.includes("permission-denied")?"Chat sync blocked: Firestore rules need updating":"Chat sync failed: "+(error?.message||code||"check connection"),"error");
-                    console.error("AI chat cloud write failed:",mode,chat.id,error);
-                }
-            }, 450));
-        }
-        async function aiQueueCloudChatDelete(mode, chat) {
-            if (!chat || !chat.id) return;
-            const key=mode+":"+chat.id;
-            const timerKey=(window.__horizonChatSync?.getUserId?.()||"signed-in")+":"+key;
-            const pendingTimer=aiCloudSaveTimers.get(timerKey); if(pendingTimer) clearTimeout(pendingTimer);
-            aiCloudSaveTimers.delete(timerKey); aiCloudLastSavedSignature.delete(timerKey);
-            aiCloudPendingDeletes.set(key,{mode,chat:JSON.parse(JSON.stringify(chat))});
-            aiPersistPendingCloudDeletes();
-            await aiFlushPendingCloudDeletes();
-        }
-        async function aiFlushPendingCloudDeletes() {
-            if (!window.__horizonChatSync?.isSignedIn()) return;
-            for (const [key,item] of [...aiCloudPendingDeletes.entries()]) {
-                try {
-                    await window.__horizonChatSync.delete(item.mode,item.chat);
-                    aiCloudPendingDeletes.delete(key);
-                    aiPersistPendingCloudDeletes();
-                } catch (error) {
-                    console.warn("AI chat deletion queued until connection is restored:",item.mode,item.chat.id,error);
-                }
-            }
-        }
-        function aiStartCloudChatSync() {
-            aiLoadPendingCloudDeletes();
-            if (aiCloudUnsubscribe) { aiCloudUnsubscribe(); aiCloudUnsubscribe = null; }
-            if(!window.__horizonChatSync){
-                aiSetCloudSyncStatus("Chat sync service unavailable","error");return;
-            }
-            aiSetCloudSyncStatus(window.__horizonChatSync.isSignedIn()?"Connecting chat sync…":"Sign in to sync chats across devices",window.__horizonChatSync.isSignedIn()?"connecting":"signed-out");
-            const mode=aiMode;
-            aiCloudUnsubscribe=window.__horizonChatSync.subscribe(mode,remoteDocs=>{
-                if(mode!==aiMode||!window.__horizonChatSync?.isSignedIn())return;
-                aiSetCloudSyncStatus("Chats synced to your account","synced");
-                aiApplyingRemoteChats = true;
-                try {
-                    const remote = new Map(remoteDocs.map(d => [d.chatId, d]));
-                    const local = new Map(aiChats.map(c => [c.id,c]));
-                    const pendingDeleteIds = new Set([...aiCloudPendingDeletes.values()].filter(item=>item.mode===mode).map(item=>item.chat.id));
-                    let changed = false;
-                    remote.forEach((data,id) => {
-                        aiCloudLastSavedSignature.set(mode + ":" + id, JSON.stringify(aiCloudDocToChat(data)));
-                        const existing = local.get(id);
-                        if (pendingDeleteIds.has(id)) return;
-                        if (data.deleted) {
-                            if (existing) { aiChats=aiChats.filter(c=>c.id!==id); aiSelectedChatIds.delete(id); changed=true; }
-                            return;
-                        }
-                        if (!existing) { aiChats.push(aiCloudDocToChat(data)); changed=true; }
-                        else {
-                            const incoming=aiCloudDocToChat(data);
-                            const mergedMap=new Map();
-                            [...(existing.messages||[]),...(incoming.messages||[])].forEach((m,index)=>{
-                                if(!m||!["user","assistant"].includes(m.role)||typeof m.content!=="string")return;
-                                const key=m.syncId||(m.role+"\\u0000"+m.content);
-                                if(!mergedMap.has(key))mergedMap.set(key,m);
-                            });
-                            const mergedMessages=[...mergedMap.values()].sort((a,b)=>(Number(a.createdAt)||0)-(Number(b.createdAt)||0)).slice(-40);
-                            const next={...existing,
-                                title:Number(incoming.titleUpdatedAt||0)>Number(existing.titleUpdatedAt||0)?incoming.title:existing.title,
-                                titleUpdatedAt:Math.max(Number(existing.titleUpdatedAt)||0,Number(incoming.titleUpdatedAt)||0),
-                                pinned:Number(incoming.pinnedUpdatedAt||0)>Number(existing.pinnedUpdatedAt||0)?incoming.pinned:existing.pinned,
-                                pinnedUpdatedAt:Math.max(Number(existing.pinnedUpdatedAt)||0,Number(incoming.pinnedUpdatedAt)||0),
-                                messages:mergedMessages,
-                                updatedAt:Math.max(Number(existing.updatedAt)||0,Number(incoming.updatedAt)||0)
-                            };
-                            if(JSON.stringify(existing)!==JSON.stringify(next)){aiChats=aiChats.map(c=>c.id===id?next:c);changed=true;}
-                            const localKeys=new Set((existing.messages||[]).map(m=>m.syncId||(m.role+"\\u0000"+m.content)));
-                            const cloudKeys=new Set((incoming.messages||[]).map(m=>m.syncId||(m.role+"\\u0000"+m.content)));
-                            if([...localKeys].some(k=>!cloudKeys.has(k))||Number(existing.titleUpdatedAt||0)>Number(incoming.titleUpdatedAt||0)||Number(existing.pinnedUpdatedAt||0)>Number(incoming.pinnedUpdatedAt||0))aiQueueCloudChatSave(next,true);
-                        }
-                    });
-                    local.forEach((chat,id) => {
-                        const cloud=remote.get(id);
-                        if (!cloud || (!cloud.deleted && Number(chat.updatedAt||0)>Number(cloud.updatedAt||0))) aiQueueCloudChatSave(chat, true);
-                    });
-                    aiFlushPendingCloudDeletes();
-                    if (changed) {
-                        aiChats.sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
-                        if (!aiChats.length) {const now=Date.now();aiChats=[{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:now,pinned:false,titleUpdatedAt:now,pinnedUpdatedAt:now}];}
-                        if (!aiChats.some(c=>c.id===aiCurrentChatId)) aiCurrentChatId=aiChats[0].id;
-                        try { localStorage.setItem(aiChatsStorageKey(),JSON.stringify(aiChats)); localStorage.setItem(aiCurrentChatStorageKey(),aiCurrentChatId); } catch(e) { console.warn("Could not persist remote AI chats locally:",e); }
-                        aiChatListRenderSignature=""; aiRenderChatLists(); aiUpdateMemorySidebar();
-                        if (!aiBusy) aiRenderCurrentChat();
-                    }
-                } finally { aiApplyingRemoteChats = false; }
-            },error=>{
-                const code=String(error?.code||"");
-                aiSetCloudSyncStatus(code.includes("permission-denied")?"Chat sync blocked: Firestore rules need updating":"Chat sync error: "+(error?.message||code||"unknown error"),"error");
-                console.error("Horizon/Atlas chat sync failed:",error);
-            });
-        }
-        window.addEventListener("horizon-ai-auth-state",()=>{
-            aiCloudLastSavedSignature.clear();
-            aiStartCloudChatSync();
-            if(window.__horizonChatSync?.isSignedIn()) aiChats.forEach(chat=>aiQueueCloudChatSave(chat));
-        });
-        window.addEventListener("online", () => {
-            aiCloudPendingDeletes.size && aiFlushPendingCloudDeletes();
-            aiChats.forEach(aiQueueCloudChatSave);
-        }, { passive:true });
-        function aiSetBulkSelectionMode(enabled) {
-            aiBulkSelectionMode=!!enabled;
-            if (!aiBulkSelectionMode) aiSelectedChatIds.clear();
-            ["aiBulkSelectAllBtn","aiBulkDeleteBtn","aiBulkCancelBtn","aiBulkCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=!aiBulkSelectionMode;});
-            const selectBtn=document.getElementById("aiBulkSelectBtn");
-            if(selectBtn){selectBtn.hidden=aiBulkSelectionMode;selectBtn.textContent="Select";}
-            aiRenderChatLists();
-            aiUpdateBulkToolbar();
-        }
-        function aiUpdateBulkToolbar() {
-            const count=document.getElementById("aiBulkCount");
-            const del=document.getElementById("aiBulkDeleteBtn");
-            const all=document.getElementById("aiBulkSelectAllBtn");
-            const validSelected=[...aiSelectedChatIds].filter(id=>aiChats.some(c=>c.id===id)).length;
-            if(count)count.textContent=validSelected+" selected";
-            if(del)del.disabled=validSelected===0;
-            if(all){all.textContent=aiChats.length>0&&validSelected===aiChats.length?"Deselect all":"Select all";all.disabled=aiChats.length===0;}
-        }
-        async function aiBulkDeleteSelected() {
-            if(aiBusy || !aiSelectedChatIds.size)return;
-            const ids=[...aiSelectedChatIds].filter(id=>aiChats.some(c=>c.id===id));
-            if(!ids.length)return;
-            if(!window.confirm(`Delete ${ids.length} selected conversation${ids.length===1?"":"s"}? This cannot be undone.`))return;
-            const doomed=aiChats.filter(c=>ids.includes(c.id));
-            if(window.__horizonChatSync && window.__horizonChatSync.isSignedIn()) {
-                await Promise.allSettled(doomed.map(chat=>aiQueueCloudChatDelete(aiMode,chat)));
-            }
-            doomed.forEach(chat=>{if(typeof aiProjectFileContexts!=="undefined")aiProjectFileContexts.delete(chat.id);});
-            aiChats=aiChats.filter(c=>!ids.includes(c.id));
-            if(!aiChats.length){const now=Date.now();aiChats=[{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:now,pinned:false,titleUpdatedAt:now,pinnedUpdatedAt:now}];}
-            if(ids.includes(aiCurrentChatId))aiCurrentChatId=aiChats[0].id;
-            aiSetBulkSelectionMode(false); aiPersistChats(); aiRenderCurrentChat();
-        }
         function aiRenderChatLists() {
             const search = (document.getElementById("aiChatSearch")?.value || "").trim().toLowerCase();
             const pinnedEl = document.getElementById("aiPinnedChatList"), recentEl = document.getElementById("aiRecentChatList");
@@ -25225,7 +24505,6 @@ document.documentElement.classList.toggle(
             // recreate the sidebar DOM unless something visible in the list actually changed.
             // In particular, ignore updatedAt and assistant-token changes: they caused flicker.
             const signature = JSON.stringify({ mode: aiMode, current: aiCurrentChatId, search,
-                bulk: aiBulkSelectionMode, selected: aiBulkSelectionMode ? [...aiSelectedChatIds].sort() : [],
                 chats: filtered.map(c => [c.id, c.title, !!c.pinned,
                     (c.messages || []).filter(m => m.role === "user").slice(-1)[0]?.content || ""]) });
             if (signature === aiChatListRenderSignature) return;
@@ -25236,30 +24515,15 @@ document.documentElement.classList.toggle(
                 chats.forEach(chat => {
                     const item=document.createElement("div"); item.className="ai-chat-item"+(chat.id===aiCurrentChatId?" active":"");
                     const open=document.createElement("button"); open.type="button"; open.className="ai-chat-open"; open.title=chat.title; open.setAttribute("aria-current",chat.id===aiCurrentChatId?"page":"false");
-                    if(aiBulkSelectionMode) {
-                        const check=document.createElement("input"); check.type="checkbox"; check.className="ai-chat-select"; check.checked=aiSelectedChatIds.has(chat.id); check.setAttribute("aria-label","Select "+(chat.title||"conversation"));
-                        check.addEventListener("click",event=>event.stopPropagation());
-                        check.addEventListener("change",()=>{
-                            if(check.checked) aiSelectedChatIds.add(chat.id); else aiSelectedChatIds.delete(chat.id);
-                            aiChatListRenderSignature=""; aiRenderChatLists(); aiUpdateBulkToolbar();
-                        });
-                        item.classList.toggle("is-selected",aiSelectedChatIds.has(chat.id));
-                        item.appendChild(check);
-                    }
                     const title=document.createElement("span"); title.className="ai-chat-item-title"; title.textContent=chat.title || "New chat";
                     const preview=document.createElement("span"); preview.className="ai-chat-item-preview"; preview.textContent=(chat.messages||[]).filter(m=>m.role==="user").slice(-1)[0]?.content?.replace(/\s+/g," ") || "Start a conversation";
-                    open.append(title,preview); open.addEventListener("click",()=>{
-                        if(aiBulkSelectionMode){
-                            if(aiSelectedChatIds.has(chat.id)) aiSelectedChatIds.delete(chat.id); else aiSelectedChatIds.add(chat.id);
-                            aiChatListRenderSignature=""; aiRenderChatLists(); aiUpdateBulkToolbar();
-                        } else aiSwitchChat(chat.id);
-                    });
+                    open.append(title,preview); open.addEventListener("click",()=>aiSwitchChat(chat.id));
                     const menu=document.createElement("button"); menu.type="button"; menu.className="ai-chat-menu"; menu.textContent="···"; menu.setAttribute("aria-label","Chat options"); menu.title="Chat options";
                     const actions=document.createElement("div"); actions.className="ai-chat-actions-menu"; actions.hidden=true;
                     const addAction=(label,handler,kind="")=>{const actionButton=document.createElement("button");actionButton.type="button";actionButton.className="ai-chat-action-button"+(kind?" "+kind:"");actionButton.textContent=label;actionButton.addEventListener("click",event=>{event.stopPropagation();actions.hidden=true;handler();});actions.appendChild(actionButton);};
-                    addAction(chat.pinned?"Unpin":"Pin",()=>{chat.pinned=!chat.pinned;chat.pinnedUpdatedAt=Date.now();chat.updatedAt=Date.now();aiPersistChats();});
-                    addAction("Rename",()=>{const name=window.prompt("Rename chat",chat.title||"");if(name&&name.trim()){chat.title=name.trim().slice(0,100);chat.titleUpdatedAt=Date.now();chat.updatedAt=Date.now();aiPersistChats();}});
-                    addAction("Delete",()=>aiDeleteChat(chat.id),"danger");
+                    addAction(chat.pinned?"Unpin":"Pin",()=>{chat.pinned=!chat.pinned;aiPersistChats();});
+                    addAction("Rename",()=>{const name=window.prompt("Rename chat",chat.title||"");if(name&&name.trim()){chat.title=name.trim().slice(0,100);chat.updatedAt=Date.now();aiPersistChats();}});
+                    addAction("Delete",()=>{if(window.confirm("Delete this chat? This cannot be undone."))aiDeleteChat(chat.id);},"danger");
                     menu.addEventListener("click",event=>{event.stopPropagation();document.querySelectorAll(".ai-chat-actions-menu").forEach(other=>{if(other!==actions)other.hidden=true;});actions.hidden=!actions.hidden;});
                     actions.addEventListener("click",event=>event.stopPropagation());
                     item.append(open,menu,actions); target.appendChild(item);
@@ -25274,10 +24538,11 @@ document.documentElement.classList.toggle(
             const summary=document.getElementById("aiSidebarMemorySummary");
             if(summary){const text=(aiSettings.memory||"").trim();summary.textContent=text?"Saved preferences are active":"Save preferences to personalize replies";}
             const status=document.getElementById("aiMemoryStatusText");
-            if(status&&!status.dataset.syncState) status.textContent=aiChats.length+(aiChats.length===1?" saved conversation on this device":" saved conversations on this device");
+            if(status) status.textContent = aiChats.length + (aiChats.length===1?" saved conversation on this device":" saved conversations on this device");
         }
         function aiRenderCurrentChat() {
             const messages=aiMessagesEl(); if(!messages)return;
+            document.getElementById("aiLoading")?.remove();
             messages.replaceChildren();
             const chat=aiCurrentChat();
             aiConversationHistory=chat?chat.messages.slice():[];
@@ -25305,18 +24570,15 @@ document.documentElement.classList.toggle(
                 aiAppendTextMessage("A project ZIP is attached to this chat. Send it or remove it before starting a new chat.", true);
                 return;
             }
-            const now=Date.now(); const chat={id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:now,pinned:false,titleUpdatedAt:now,pinnedUpdatedAt:now};
+            const chat={id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false};
             aiChats.unshift(chat); aiCurrentChatId=chat.id; aiConversationHistory=[]; aiPersistChats(); aiRenderCurrentChat(); aiClearSelectedImage(); aiClearSelectedFiles();
             const input=document.getElementById("aiInput"); if(input)input.focus();
         }
         function aiDeleteChat(id) {
             if(aiBusy)return;
-            const deletedChat=aiChats.find(c=>c.id===id);
-            if(deletedChat && window.__horizonChatSync && window.__horizonChatSync.isSignedIn()) aiQueueCloudChatDelete(aiMode,deletedChat);
             if (typeof aiProjectFileContexts !== "undefined") aiProjectFileContexts.delete(id);
-            aiSelectedChatIds.delete(id);
             aiChats=aiChats.filter(c=>c.id!==id);
-            if(!aiChats.length){const now=Date.now();aiChats=[{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:now,pinned:false,titleUpdatedAt:now,pinnedUpdatedAt:now}];}
+            if(!aiChats.length)aiChats=[{id:aiMakeChatId(),title:"New chat",messages:[],updatedAt:Date.now(),pinned:false}];
             if(aiCurrentChatId===id)aiCurrentChatId=aiChats[0].id;
             aiPersistChats(); aiRenderCurrentChat();
         }
@@ -25360,10 +24622,11 @@ document.documentElement.classList.toggle(
         }
 
         function aiShowThinking() {
-            // Keep the status bubble inside the same transcript flow as messages.
-            // .ai-convo remains the sole scroll owner; #aiMessages owns message order.
+            // .ai-convo is the actual scroll viewport. #aiMessages is a
+            // non-scrolling flex child in the responsive layout.
+            const viewport = aiScrollViewportEl();
             const messages = aiMessagesEl();
-            if (!messages) return null;
+            if (!viewport || !messages) return null;
             document.getElementById("aiLoading")?.remove();
             const el = document.createElement("div");
             el.className = "ai-message ai-typing";
@@ -25374,15 +24637,9 @@ document.documentElement.classList.toggle(
                 '<span class="ai-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
                 '<span class="ai-typing-label"></span>';
             el.querySelector(".ai-typing-label").textContent = aiT("thinking");
-            const viewport=aiScrollViewportEl();
-            const previousTop=viewport?viewport.scrollTop:0;
-            messages.appendChild(el);
-            // A typing status is not a new conversation message. Never auto-scroll
-            // the reader when it is inserted; preserve their exact scroll position.
-            if(viewport){
-                viewport.scrollTop=previousTop;
-                requestAnimationFrame(()=>{if(viewport.isConnected){viewport.scrollTop=previousTop;aiUpdatePin();}});
-            }
+            const jump = document.getElementById("aiScrollBottom");
+            if (jump && jump.parentElement === viewport) viewport.insertBefore(el, jump);
+            else viewport.appendChild(el);
             return el;
         }
 
@@ -26553,7 +25810,7 @@ document.documentElement.classList.toggle(
             if (!prompt) throw new Error("Describe what Atlas should build, change, or fix before starting the mission.");
             const resolvedMissionModel = aiResolveModel();
             const missionProvider = String(resolvedMissionModel || "").startsWith("coarena::") ? "coarena" : "nvidia";
-            if (missionProvider === "coarena" && !window.confirm("CoArena data notice: the full project ZIP or imported repository contents, your prompt, model replies, reasoning and tool calls will be sent to CoArena. CoArena says it stores requests and replies and may use them in datasets it licenses. CoArena requires anyone using its Model API to be 18 or older, and tool probes/task calls count toward usage. Continue only if you are 18+, the account owner authorized this key, and you have permission to share this project and accept those terms.")) throw new Error("CoArena mission cancelled. No project data was uploaded.");
+            if (missionProvider === "coarena" && !window.confirm("CoArena data notice: the full project ZIP or imported repository contents, your prompt, model replies, reasoning and tool calls will be sent to CoArena. CoArena says it stores these permanently and may use them in datasets it licenses; they cannot be withdrawn later. CoArena requires anyone using its Model API to be 18 or older, and tool probes/task calls count toward the account's usage allowance. Continue only if you are 18+, the account owner authorized this key, and you have permission to share this project and accept those terms.")) throw new Error("CoArena mission cancelled. No project data was uploaded.");
             const payload = { prompt, model: resolvedMissionModel && resolvedMissionModel !== "auto" ? resolvedMissionModel : "auto", provider: missionProvider, requestId: crypto.randomUUID() };
             if (source instanceof File) {
                 if (!/\.zip$/i.test(source.name)) throw new Error("Choose a project ZIP file.");
@@ -26856,7 +26113,7 @@ document.documentElement.classList.toggle(
                         aiSettings[prefKey] = "auto";
                         aiPersistSettings();
                     }
-                    if (provider !== "nvidia") aiSetProviderCard(provider, "connected", aiModelCatalog.usage[provider] || "Authenticated provider catalogue available.");
+                    aiSetProviderCard(provider, "connected", aiModelCatalog.usage[provider] || "Authenticated provider catalogue available.");
                     if (provider === "nvidia") aiSetProviderCard("gemini", "unknown", "Used by Horizon mode.");
                     else aiSetProviderCard("nvidia", "unknown", "Used by Atlas mode.");
                     if (!aiModelCatalog.models.length) throw new Error(result.message || ("The authenticated " + (provider === "nvidia" ? "NVIDIA" : "Gemini") + " catalogue returned no available chat models."));
@@ -26884,10 +26141,8 @@ document.documentElement.classList.toggle(
         function aiUpdateProviderUI() {
             const provider = aiMode === "atlas" ? "nvidia" : "gemini";
             const usageEl = document.getElementById("aiProviderUsageHint");
-            const atlasUsage = aiMode === "atlas" ? [aiModelCatalog.usage.nvidia, aiModelCatalog.usage.coarena].filter(Boolean).join(" · ") : "";
-            const usage = aiMode === "atlas" ? atlasUsage : (aiModelCatalog.usage[provider] || "");
             const refreshText = aiModelCatalog.lastRefreshAt ? "Last refreshed: " + new Date(aiModelCatalog.lastRefreshAt).toLocaleTimeString() : "Models have not been refreshed yet.";
-            if (usageEl) usageEl.textContent = usage + (usage ? " · " : "") + refreshText;
+            if (usageEl) usageEl.textContent = (aiModelCatalog.usage[provider] || "") + (aiModelCatalog.usage[provider] ? " · " : "") + refreshText;
             const tokenEl = document.getElementById("aiTokenUsageHint");
             if (tokenEl && !aiModelCatalog.lastTokenUsage) tokenEl.textContent = "Token usage: no completed AI request yet. " + refreshText;
         }
@@ -26900,10 +26155,9 @@ document.documentElement.classList.toggle(
          * Canonical model IDs are part of the routing contract:
          *   <Gemini model ID> -> Gemini Worker route in Horizon mode
          *   <NVIDIA model ID> -> NVIDIA Worker route in Atlas mode
-         *   coarena::<model ID> -> CoArena Worker route in Atlas mode
          *
-         * Provider routing is explicit from the selected model ID; Atlas mode
-         * itself does not imply that every request goes to NVIDIA.
+         * Older saved preferences may contain a legacy nvidia:: prefix; it is
+         * normalized before the request. Provider selection follows the mode.
          */
         function aiCanonicalizeModelId(id) {
             const raw = String(id || "").trim();
@@ -26918,12 +26172,7 @@ document.documentElement.classList.toggle(
                 String(x.id).replace(/^nvidia::/, "") === raw
             );
             if (nvidia) return nvidia.id;
-            const coarena = aiModelCatalog.models.find(x =>
-                x && x.providerGroup === "coarena" &&
-                (x.id === raw || String(x.id).replace(/^coarena::/, "") === raw)
-            );
-            if (coarena) return coarena.id;
-            if (raw.startsWith("coarena::")) return raw;
+
 
             return raw;
         }
@@ -27074,7 +26323,6 @@ document.documentElement.classList.toggle(
             // actual UI with the requested mode.
             const previousMode = aiMode;
             if (previousMode !== next) {
-                aiSetBulkSelectionMode(false);
                 aiPersistChats();
                 aiMode = next;
                 aiChatListRenderSignature = "";
@@ -27089,7 +26337,6 @@ document.documentElement.classList.toggle(
 
             aiApplyMode();
             aiRenderCurrentChat();
-            aiStartCloudChatSync();
             aiRenderChatLists();
             aiFetchModels(false);
             if (next === "atlas") { try { const activeMission = localStorage.getItem(AI_ATLAS_ACTIVE_MISSION_KEY); if (activeMission) { aiSetAtlasMissionBusy(true); if (!aiAtlasMissionMonitoring) aiAtlasMonitorMission(activeMission).finally(() => aiSetAtlasMissionBusy(false)); } } catch (_) {} }
@@ -27127,7 +26374,10 @@ document.documentElement.classList.toggle(
             let message = "";
             if (payload && typeof payload === "object") {
                 const e = payload.error;
-                if (typeof e === "string") message = e;
+                if (typeof e === "string") {
+                    message = e;
+                    if (/^[A-Z][A-Z0-9_]{3,}$/.test(e)) code = e;
+                }
                 else if (e && typeof e === "object") {
                     message = String(e.message || "");
                     code = String(e.code || e.type || e.status || "");
@@ -27139,7 +26389,8 @@ document.documentElement.classList.toggle(
             }
             const hay = (code + " " + message).toLowerCase();
             let kind = "unknown";
-            if (/model/.test(hay) && (/(unavailable|not[_ -]?found|unsupported|unknown|invalid|no access|not accessible|disabled|deprecated|not available|does not exist|not allowed)/.test(hay) || [400, 403, 404, 409, 410, 422].indexOf(status) !== -1)) kind = "model";
+            if (/context|budget[_ -]?exhausted|input[_ -]?token|token[_ -]?budget/.test(hay) || (status === 413 && /token|context|payload|size/.test(hay))) kind = "context";
+            else if (/model/.test(hay) && (/(unavailable|not[_ -]?found|unsupported|unknown|invalid|no access|not accessible|disabled|deprecated|not available|does not exist|not allowed)/.test(hay) || [400, 403, 404, 409, 410, 422].indexOf(status) !== -1)) kind = "model";
             else if (status === 429 || /rate|quota|too many|limit/.test(hay)) kind = "rate";
             else if (status === 401 || status === 403 || /auth|permission|forbidden|unauthor|credential/.test(hay)) kind = "provider";
             else if (status >= 500 || /provider|upstream|overload|timeout|temporar|unavailable/.test(hay)) kind = "provider";
@@ -27152,21 +26403,19 @@ document.documentElement.classList.toggle(
         function aiFriendlyError(info) {
             const rawDetail = String(info && (info.details || info.message) || "");
             const detail = rawDetail.replace(/(?:Bearer\\s+)[A-Za-z0-9._~+\\/-]+/gi, "Bearer [redacted]").replace(/(api[_-]?key|token|secret)\\s*[:=]\\s*[^\\s,;]+/gi, "$1=[redacted]").slice(0, 500);
-            const provider = String(info && info.provider || (aiMode === "atlas" ? "nvidia" : "gemini")).toLowerCase();
-            const providerLabel = provider === "coarena" ? "CoArena" : (provider === "nvidia" ? "NVIDIA NIM" : ((provider === "gemini" || provider === "googlegemini") ? "Google Gemini" : (provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : "AI provider")));
+            const provider = String(info && info.provider || (aiMode === "atlas" ? (String(aiResolveModel() || "").startsWith("coarena::") ? "coarena" : "nvidia") : "gemini")).toLowerCase();
             const suffix = (detail ? " Details: " + detail : "") + (info && Number(info.status) > 0 ? " (HTTP " + Number(info.status) + ")" : "") + (info && info.requestId ? " Request ID: " + String(info.requestId).slice(0, 120) : "");
-            if (provider === "nvidia" && info && info.code === "NVIDIA_NOT_CONFIGURED") {
-                return "NVIDIA NIM is not configured. Add NVIDIA_API_KEY to the Cloudflare Worker secrets.";
-            }
+            if (provider === "nvidia" && info && info.code === "NVIDIA_NOT_CONFIGURED") return "NVIDIA NIM is not configured. Add NVIDIA_API_KEY to the Cloudflare Worker secrets.";
+            if (provider === "coarena" && info && info.code === "COARENA_NOT_CONFIGURED") return "CoArena is not configured. Add COARENA_API_KEY as a Cloudflare Worker secret; never place it in the frontend.";
             switch (info && info.kind) {
-                case "model": return "The selected " + providerLabel + " model is unavailable or not accessible." + suffix;
+                case "model": return "The selected " + (provider === "coarena" ? "CoArena" : provider === "nvidia" ? "NVIDIA" : "Gemini") + " model is unavailable or not accessible." + suffix;
                 case "rate": return "The provider usage allowance or rate limit was reached." + suffix;
                 case "network": return "A network error interrupted the AI request." + suffix;
                 case "context": return "The attached project exceeds this model's context window. Send a smaller set of files." + suffix;
                 case "invalid": return "Atlas could not produce a valid downloadable file package." + suffix;
                 case "timeout": return "The AI request timed out. Try again with a smaller task." + suffix;
-                case "provider": return providerLabel + " could not complete the request." + suffix;
-                default: return providerLabel + " request failed." + suffix;
+                case "provider": return (provider === "coarena" ? "CoArena" : provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini") + " could not complete the request." + suffix;
+                default: return (provider === "coarena" ? "CoArena" : provider === "nvidia" ? "NVIDIA NIM" : "Google Gemini") + " request failed." + suffix;
             }
         }
 
@@ -27257,8 +26506,6 @@ document.documentElement.classList.toggle(
             const activeProjectFiles = isAtlas ? aiGetActiveProjectFiles().slice() : [];
             const allProjectFiles = Array.from(new Map(activeProjectFiles.concat(pendingFiles).map(file => [aiSafeRelativePath(file.path || file.name), file])).values());
             const fileDeliveryRequested = isAtlas && aiIsFileDeliveryRequest(effectiveMessage, allProjectFiles);
-            const sendViewport=aiScrollViewportEl();
-            const shouldFollowSend=sendViewport ? (sendViewport.scrollHeight-sendViewport.scrollTop-sendViewport.clientHeight<60) : true;
 
             aiShowWelcome(false);
             const userEl = aiAppendUserMessage(message || (pendingFiles.length ? "Attached " + pendingFiles.length + " file(s)" : ""), pendingImage ? pendingImage.previewUrl : null);
@@ -27271,10 +26518,8 @@ document.documentElement.classList.toggle(
             aiAbortController = new AbortController();
             const signal = aiAbortController.signal;
             aiSetInputDisabled(true);
-            // Follow a newly sent message only when the reader was already at the latest message.
-            // Sending from the middle of a long chat must not yank the viewport to the bottom.
-            aiPinned=shouldFollowSend;
-            aiMaybeScroll(false);
+            aiPinned = true;
+            aiMaybeScroll(true);
 
             aiShowThinking();
             aiAnnounce(aiT("thinking"));
@@ -27408,7 +26653,7 @@ document.documentElement.classList.toggle(
                     const completion = Number(u.completion_tokens ?? u.output_tokens ?? u.completion ?? NaN);
                     const total = Number(u.total_tokens ?? u.total ?? ((Number.isFinite(prompt) && Number.isFinite(completion)) ? prompt + completion : NaN));
                     const modelForUsage = String(obj.model || requestedModel || "");
-                    responseUsage = { prompt, completion, total, provider: String(obj.provider || (String(requestedModel || "").startsWith("coarena::") ? "CoArena" : (aiMode === "atlas" ? "NVIDIA" : "Google Gemini"))), model: modelForUsage, at: Date.now() };
+                    responseUsage = { prompt, completion, total, provider: String(obj.provider || (aiMode === "atlas" ? "NVIDIA" : "Google Gemini")), model: modelForUsage, at: Date.now() };
                 }
 
                 /* Sources may ride along with a delta/response or arrive on
@@ -27510,7 +26755,14 @@ document.documentElement.classList.toggle(
                         let fileContext = "\n\nATLAS WORKSPACE FILES (read-only originals; inspect only the content actually included below):\n";
                         // Use a context-aware large input allowance. The Worker estimates assembled
                         // input tokens and reserves output space before calling NVIDIA.
-                        let remaining = Math.max(0, Math.min(600000, 650000 - String(requestBody.message || "").length - fileContext.length));
+                        const selectedIsCoarena = String(requestedModel || "").startsWith("coarena::");
+                        // CoArena has a 128K total context window and Atlas reserves
+                        // up to 16K for file output. The old 650K-character browser
+                        // allowance routinely created >128K-token prompts from a
+                        // single ~1MB text file. Keep CoArena chat payloads bounded;
+                        // NVIDIA retains its larger provider-specific allowance.
+                        const providerFileBudget = selectedIsCoarena ? 210000 : 600000;
+                        let remaining = Math.max(0, Math.min(providerFileBudget, providerFileBudget - String(requestBody.message || "").length - fileContext.length));
                         const omitted = [];
                         const manifest = allProjectFiles.map(file => {
                             const path = aiSafeRelativePath(file.path || file.name);
@@ -27533,12 +26785,8 @@ document.documentElement.classList.toggle(
                         if (omitted.length) fileContext += "\nFILES NOT FULLY INCLUDED — DO NOT CLAIM TO HAVE REVIEWED THEM: " + omitted.join(", ");
                         requestBody.message = String(requestBody.message || "") + fileContext;
                     }
-                    if (String(requestedModel || "").startsWith("coarena::") && !window.confirm("CoArena data notice: this request, its attached files/project context, model replies, reasoning and tool calls will be sent to CoArena. CoArena says it stores requests and replies and may use them in datasets it licenses. CoArena requires anyone using its Model API to be 18 or older. Continue only if you are 18+, the account owner authorized this key, and you have permission to share this data and accept those terms.")) {
-                        const cancelled = new Error("CoArena request cancelled. No request was sent.");
-                        cancelled.provider = "coarena";
-                        cancelled.code = "COARENA_REQUEST_CANCELLED";
-                        throw cancelled;
-                    }
+                    if (String(requestedModel || "").startsWith("coarena::") && !window.confirm("CoArena data notice: this request, its attached files/project context, model replies, reasoning and tool calls will be sent to CoArena. CoArena says it stores them permanently and may use them in datasets it licenses; they cannot be withdrawn later. CoArena requires anyone using its Model API to be 18 or older. Continue only if you are 18+, the account owner authorized this key, and you have permission to share this data and accept those terms.")) throw new Error("CoArena request cancelled. No request was sent.");
+                    const requestProvider = String(requestedModel || "").startsWith("coarena::") ? "coarena" : "nvidia";
                     const nvidiaResponse = await awaitConnectionWithTimeout(nvidiaAdapter.sendMessage(requestBody, signal));
                     if (!nvidiaResponse.ok) {
                         const rawErrorBody = await nvidiaResponse.text();
@@ -27546,9 +26794,12 @@ document.documentElement.classList.toggle(
                         const rawDetail = payload
                             ? String(payload.details || payload.message || payload.error || "")
                             : String(rawErrorBody || "").replace(/\s+/g, " ").slice(0, 700);
-                        const err = new Error(rawDetail || "NVIDIA Worker returned HTTP " + nvidiaResponse.status + " without an error body.");
-                        err.aiInfo = aiErrorInfo(nvidiaResponse.status, payload || { message: rawDetail, details: rawDetail, code: "NVIDIA_WORKER_HTTP_" + nvidiaResponse.status });
-                        err.aiInfo.provider = "nvidia";
+                        const err = new Error(rawDetail || (requestProvider === "coarena" ? "Atlas Worker returned HTTP " : "NVIDIA Worker returned HTTP ") + nvidiaResponse.status + " without an error body.");
+                        err.aiInfo = aiErrorInfo(nvidiaResponse.status, payload || { message: rawDetail, details: rawDetail, code: "ATLAS_WORKER_HTTP_" + nvidiaResponse.status, provider: requestProvider });
+                        // Trust the Worker's explicit provider attribution. Only
+                        // infer from the selected namespaced model when it is absent.
+                        err.aiInfo.provider = String(err.aiInfo.provider || requestProvider).toLowerCase();
+                        if (!err.aiInfo.code && payload && typeof payload.error === "string" && /^[A-Z][A-Z0-9_]{3,}$/.test(payload.error)) err.aiInfo.code = payload.error;
                         throw err;
                     }
                     const ctype = (nvidiaResponse.headers.get("content-type") || "").toLowerCase();
@@ -27577,7 +26828,7 @@ document.documentElement.classList.toggle(
                             }
                         }
                     }
-                    sourceLabel = "NVIDIA NIM · " + String(requestedModel).replace(/^nvidia::/, "");
+                    sourceLabel = (String(requestedModel).startsWith("coarena::") ? "CoArena · " : "NVIDIA NIM · ") + String(requestedModel).replace(/^coarena::/, "").replace(/^nvidia::/, "");
                 } else {
                 const response = await awaitConnectionWithTimeout(fetch(AI_ENDPOINT, {
                     method: "POST",
@@ -27648,7 +26899,7 @@ document.documentElement.classList.toggle(
                         else if (/timeout|timed out|request_timeout/.test(hay)) kind = "timeout";
                         else if (/network_error|failed to fetch|network/.test(hay)) kind = "network";
                         const provider = String(error && error.provider || "") || (
-                            String(requestedModel || "").startsWith("coarena::") ? "coarena" : (aiMode === "atlas" ? "nvidia" : "gemini")
+                            aiMode === "atlas" ? "nvidia" : "gemini"
                         );
                         streamError = { kind, status: Number(error && error.status) || 0, code, message: detail, provider };
                     }
@@ -28144,16 +27395,6 @@ document.documentElement.classList.toggle(
             document.getElementById("aiPageNewChatBtn")?.addEventListener("click", () => aiCreateNewChat());
             document.getElementById("aiSidebarNewChatBtn")?.addEventListener("click", () => aiCreateNewChat());
             document.getElementById("aiChatSearch")?.addEventListener("input", aiRenderChatLists);
-        document.getElementById("aiBulkSelectBtn")?.addEventListener("click",()=>aiSetBulkSelectionMode(true));
-        document.getElementById("aiBulkSelectAllBtn")?.addEventListener("click",()=>{
-            const search=(document.getElementById("aiChatSearch")?.value||"").trim().toLowerCase();
-            const visible=aiChats.filter(c=>!search||(c.title+" "+(c.messages||[]).map(m=>m.content).join(" ")).toLowerCase().includes(search));
-            const allSelected=visible.length>0&&visible.every(c=>aiSelectedChatIds.has(c.id));
-            visible.forEach(c=>{if(allSelected)aiSelectedChatIds.delete(c.id);else aiSelectedChatIds.add(c.id);});
-            aiChatListRenderSignature="";aiRenderChatLists();aiUpdateBulkToolbar();
-        });
-        document.getElementById("aiBulkDeleteBtn")?.addEventListener("click",aiBulkDeleteSelected);
-        document.getElementById("aiBulkCancelBtn")?.addEventListener("click",()=>aiSetBulkSelectionMode(false));
             document.getElementById("aiSidebarMemoryBtn")?.addEventListener("click", () => aiOpenSettings());
             document.getElementById("aiChatMemoryToggle")?.addEventListener("click", () => { const key=AI_CHAT_MEMORY_CONTEXT_KEY; const enabled=localStorage.getItem(key)==="false"; localStorage.setItem(key,enabled?"true":"false"); aiUpdateMemorySidebar(); });
             document.getElementById("aiSidebarToggleBtn")?.addEventListener("click", (e) => { 
@@ -28185,7 +27426,6 @@ document.documentElement.classList.toggle(
             if (current) aiConversationHistory = current.messages.slice();
             else { aiConversationHistory = []; aiCreateNewChat(); }
             aiRenderCurrentChat();
-            aiStartCloudChatSync();
             aiRenderChatLists();
             aiUpdateMemorySidebar();
             
@@ -30556,384 +29796,6 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 })();
 </script>
 
-<script type="module" id="horizon-official-glisse-runtime">
-/* Horizon integration of the official Glisse React components (MIT, 0kzh/glisse). */
-(async function horizonOfficialGlisse(){
-  'use strict';
-  const doc = document;
-  const body = doc.body;
-  const html = doc.documentElement;
-  if (!body) return;
-  // This module runs after HTML parsing; append the integration overrides last
-  // so they win over Horizon's legacy theme styles while the real library loads.
-  const integrationStyle = doc.getElementById('horizon-official-glisse-integration');
-  if (integrationStyle && doc.head) doc.head.appendChild(integrationStyle);
-
-  const GLISSE_VERSION = '0.5.0';
-  let React, createRoot, G;
-  let mounted = false;
-  const roots = [];
-  const surfaceTargets = new WeakSet();
-  let globalObserver = null;
-
-  const isGlassTheme = () => {
-    try { return localStorage.getItem('dailykrd_theme') === 'glass'; }
-    catch (_) { return !!doc.querySelector('.theme-option.selected[data-theme="glass"]'); }
-  };
-  const setThemeTokens = () => {
-    const dark = body.classList.contains('dark') || html.classList.contains('dark');
-    html.setAttribute('data-theme', dark ? 'dark' : 'light');
-    html.style.setProperty('--lg-fill', 'var(--accent, #477be8)');
-    html.style.setProperty('--lg-blur', '22px');
-  };
-
-  function rememberRoot(root, host, proxies = [], cleanup = null) {
-    roots.push({ root, host, proxies, cleanup });
-  }
-  function hideProxy(el) {
-    if (!el || el.classList.contains('horizon-glisse-proxy')) return;
-    el.classList.add('horizon-glisse-proxy');
-    el.setAttribute('aria-hidden', 'true');
-    el.dataset.horizonGlisseProxy = '1';
-  }
-  function restoreProxy(el) {
-    if (!el) return;
-    el.classList.remove('horizon-glisse-proxy');
-    el.removeAttribute('aria-hidden');
-    delete el.dataset.horizonGlisseProxy;
-  }
-  function createHost(before, className) {
-    const host = doc.createElement('span');
-    host.className = className;
-    before.parentNode.insertBefore(host, before);
-    return host;
-  }
-  function nativeEvent(el, type) {
-    el.dispatchEvent(new Event(type, { bubbles: true }));
-  }
-
-  function NavBridge({ nav }) {
-    const [active, setActive] = React.useState('tasks');
-    const [expanded, setExpanded] = React.useState(false);
-    const [mobile, setMobile] = React.useState(matchMedia('(max-width:760px)').matches);
-    React.useEffect(() => {
-      const sync = () => {
-        setMobile(matchMedia('(max-width:760px)').matches);
-        setExpanded(nav.classList.contains('nav-expanded'));
-        const selected = nav.querySelector('.tab.active[data-tab]');
-        if (selected) setActive(selected.dataset.tab);
-        else {
-          const extra = nav.querySelector('.mobile-extra-tab.active');
-          if (extra) setActive(extra.dataset.openSection || 'tasks');
-        }
-      };
-      const observer = new MutationObserver(sync);
-      observer.observe(nav, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true, characterData: true });
-      window.addEventListener('resize', sync, { passive: true });
-      sync();
-      return () => { observer.disconnect(); window.removeEventListener('resize', sync); };
-    }, [nav]);
-
-    const base = [
-      ['tasksTab','tasks','⌂'], ['tasksManagerTab','taskManager','✓'],
-      ['studyTab','study','▤'], ['aiTab','ai','✦'], ['prayersTab','prayers','☾']
-    ];
-    const desktop = [...base, ['calendarTab','calendar','▦'], ['moreTab','more','•••']];
-    const expandedItems = [...base, ['calendarTab','calendar','▦'],
-      ['__stats','studyStats','↗'], ['__profile','profile','◎'], ['__settings','settings','⚙']];
-    const defs = mobile ? (expanded ? expandedItems : base) : desktop;
-    const items = defs.map(([id, value, glyph]) => {
-      const proxy = id.startsWith('__') ? nav.querySelector(`[data-open-section="${value}"]`) : doc.getElementById(id);
-      const label = proxy?.querySelector('.nav-label')?.textContent?.trim() || proxy?.getAttribute('aria-label') || value;
-      return { value, label, icon: React.createElement('span', { className: 'horizon-glisse-nav-glyph', 'aria-hidden': true }, glyph) };
-    });
-    return React.createElement(G.TabBar, {
-      className: 'horizon-glisse-tabbar', items, value: active,
-      onValueChange: (value) => {
-        const item = defs.find((d) => d[1] === value);
-        if (!item) return;
-        const proxy = item[0].startsWith('__')
-          ? nav.querySelector(`[data-open-section="${value}"]`)
-          : doc.getElementById(item[0]);
-        if (proxy) proxy.click();
-      }
-    });
-  }
-
-  function InputBridge({ proxy, label, className = '', style = {}, submitOnEnter = false }) {
-    const [value, setValue] = React.useState(proxy.value || '');
-    React.useEffect(() => {
-      const sync = () => setValue(proxy.value || '');
-      proxy.addEventListener('input', sync);
-      proxy.addEventListener('change', sync);
-      return () => { proxy.removeEventListener('input', sync); proxy.removeEventListener('change', sync); };
-    }, [proxy]);
-    const InputComponent = proxy.type === 'search' && G.SearchField ? G.SearchField : G.Input;
-    return React.createElement(InputComponent, {
-      className: `horizon-glisse-input ${className}`.trim(),
-      type: proxy.type || 'text', value,
-      placeholder: proxy.placeholder || '',
-      'aria-label': label || proxy.getAttribute('aria-label') || proxy.placeholder || 'Input',
-      autoComplete: proxy.autocomplete || 'off',
-      disabled: proxy.disabled,
-      style,
-      onValueChange: (next) => {
-        setValue(next); proxy.value = next; nativeEvent(proxy, 'input');
-      },
-      onKeyDown: (event) => {
-        if (event.key === 'Enter' && submitOnEnter && !event.shiftKey) {
-          event.preventDefault();
-          proxy.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }));
-        }
-      }
-    });
-  }
-
-  function SliderBridge({ proxy }) {
-    const [value, setValue] = React.useState(Number(proxy.value || proxy.min || 0));
-    React.useEffect(() => {
-      const sync = () => setValue(Number(proxy.value || 0));
-      proxy.addEventListener('input', sync); proxy.addEventListener('change', sync);
-      return () => { proxy.removeEventListener('input', sync); proxy.removeEventListener('change', sync); };
-    }, [proxy]);
-    return React.createElement(G.Slider, {
-      className: 'horizon-glisse-slider',
-      min: Number(proxy.min || 0), max: Number(proxy.max || 100), step: Number(proxy.step || 1), value,
-      'aria-label': proxy.getAttribute('aria-label') || proxy.id || 'Volume',
-      disabled: proxy.disabled,
-      onValueChange: (next) => { setValue(next); proxy.value = String(next); nativeEvent(proxy, 'input'); nativeEvent(proxy, 'change'); }
-    });
-  }
-
-  function SwitchBridge({ proxy, kind }) {
-    const read = () => kind === 'dark'
-      ? body.classList.contains('dark') || html.classList.contains('dark')
-      : (window.Haptics && typeof window.Haptics.isEnabled === 'function'
-          ? !!window.Haptics.isEnabled()
-          : !/off|unsupported|غير مفعل|ناچالاک/i.test(proxy.textContent || ''));
-    const [checked, setChecked] = React.useState(read());
-    const [disabled, setDisabled] = React.useState(!!proxy.disabled);
-    React.useEffect(() => {
-      const sync = () => { setChecked(read()); setDisabled(!!proxy.disabled); };
-      const observer = new MutationObserver(sync);
-      observer.observe(proxy, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['disabled','class'] });
-      const bodyObserver = new MutationObserver(sync);
-      bodyObserver.observe(body, { attributes: true, attributeFilter: ['class'] });
-      proxy.addEventListener('click', sync);
-      window.addEventListener('storage', sync);
-      return () => { observer.disconnect(); bodyObserver.disconnect(); proxy.removeEventListener('click', sync); window.removeEventListener('storage', sync); };
-    }, [proxy]);
-    return React.createElement(G.Switch, {
-      checked, disabled, className: 'horizon-glisse-switch',
-      'aria-label': kind === 'dark' ? 'Dark mode' : 'Haptic feedback',
-      onCheckedChange: () => { proxy.click(); setTimeout(() => setChecked(read()), 0); }
-    });
-  }
-
-  function SegmentsBridge({ proxies }) {
-    const getActive = () => {
-      const i = proxies.findIndex((p) => p.classList.contains('active'));
-      return String(i < 0 ? 0 : i);
-    };
-    const [value, setValue] = React.useState(getActive());
-    React.useEffect(() => {
-      const sync = () => setValue(getActive());
-      const observer = new MutationObserver(sync);
-      proxies.forEach((p) => observer.observe(p, { attributes: true, attributeFilter: ['class'], childList: true, characterData: true }));
-      return () => observer.disconnect();
-    }, [proxies]);
-    const items = proxies.map((p, i) => ({ value: String(i), label: p.textContent.trim() || `Option ${i+1}` }));
-    return React.createElement(G.SegmentedControl, {
-      className: 'horizon-glisse-segments', items, value,
-      onValueChange: (next) => { const p = proxies[Number(next)]; if (p) p.click(); }
-    });
-  }
-
-  function mountNav() {
-    const nav = doc.getElementById('primaryNavigation');
-    if (!nav || nav.dataset.glisseMounted) return;
-    const host = doc.createElement('div');
-    host.className = 'horizon-glisse-nav-root';
-    nav.prepend(host);
-    const proxies = Array.from(nav.querySelectorAll(':scope > .tab'));
-    proxies.forEach(hideProxy);
-    nav.dataset.glisseMounted = '1';
-    const root = createRoot(host);
-    root.render(React.createElement(NavBridge, { nav }));
-    rememberRoot(root, host, proxies, () => { delete nav.dataset.glisseMounted; });
-  }
-
-  function mountButton(id, opts = {}) {
-    const proxy = doc.getElementById(id);
-    if (!proxy || proxy.dataset.glisseMounted) return;
-    const host = createHost(proxy, 'horizon-glisse-control-host horizon-glisse-button-host');
-    hideProxy(proxy); proxy.dataset.glisseMounted = '1';
-    const root = createRoot(host);
-    const iconText = opts.icon || proxy.querySelector('.aiSendIcon')?.textContent?.trim() || proxy.textContent.trim() || '•';
-    const iconOnly = !!opts.icon || !!opts.iconOnly;
-    const render = () => {
-      const currentIcon = id === 'aiSendBtn' && proxy.classList.contains('busy') ? '■' : id === 'themeButton' ? (proxy.textContent.trim() || iconText) : iconText;
-      const label = proxy.textContent.trim() || opts.label || id;
-      root.render(React.createElement(G.Button, {
-        className: `horizon-glisse-button ${opts.className || ''}`.trim(),
-        variant: opts.variant || 'glass',
-        destructive: !!opts.destructive,
-        icon: iconOnly ? React.createElement('span', { 'aria-hidden': true }, currentIcon) : undefined,
-        children: iconOnly ? null : label,
-        'aria-label': proxy.getAttribute('aria-label') || proxy.title || label,
-        title: proxy.title || undefined,
-        disabled: !!proxy.disabled,
-        style: opts.style || {},
-        onClick: () => proxy.click()
-      }));
-    };
-    const observer = new MutationObserver(render);
-    observer.observe(proxy, { attributes: true, attributeFilter: ['class','disabled','aria-label','title'], childList: true, subtree: true, characterData: true });
-    render();
-    rememberRoot(root, host, [proxy], () => { observer.disconnect(); delete proxy.dataset.glisseMounted; });
-  }
-
-  function mountInput(id, opts = {}) {
-    const proxy = doc.getElementById(id);
-    if (!proxy || proxy.dataset.glisseMounted) return;
-    const host = createHost(proxy, 'horizon-glisse-control-host horizon-glisse-input-host');
-    hideProxy(proxy); proxy.dataset.glisseMounted = '1';
-    const root = createRoot(host);
-    root.render(React.createElement(InputBridge, { proxy, label: opts.label, className: opts.className || '', style: opts.style || {}, submitOnEnter: !!opts.submitOnEnter }));
-    rememberRoot(root, host, [proxy], () => { delete proxy.dataset.glisseMounted; });
-  }
-
-  function mountSlider(id) {
-    const proxy = doc.getElementById(id);
-    if (!proxy || proxy.dataset.glisseMounted) return;
-    const host = createHost(proxy, 'horizon-glisse-control-host horizon-glisse-slider-host');
-    hideProxy(proxy); proxy.dataset.glisseMounted = '1';
-    const root = createRoot(host);
-    root.render(React.createElement(SliderBridge, { proxy }));
-    rememberRoot(root, host, [proxy], () => { delete proxy.dataset.glisseMounted; });
-  }
-
-  function mountSwitch(id, kind) {
-    const proxy = doc.getElementById(id);
-    if (!proxy || proxy.dataset.glisseMounted) return;
-    const host = createHost(proxy, 'horizon-glisse-control-host horizon-glisse-switch-host');
-    hideProxy(proxy); proxy.dataset.glisseMounted = '1';
-    const root = createRoot(host);
-    root.render(React.createElement(SwitchBridge, { proxy, kind }));
-    rememberRoot(root, host, [proxy], () => { delete proxy.dataset.glisseMounted; });
-  }
-
-  function mountSegments(selector) {
-    const group = doc.querySelector(selector);
-    if (!group || group.dataset.glisseMounted) return;
-    const proxies = Array.from(group.querySelectorAll('button'));
-    if (proxies.length < 2) return;
-    const host = doc.createElement('span'); host.className = 'horizon-glisse-control-host horizon-glisse-segments-host';
-    group.prepend(host); proxies.forEach(hideProxy); group.dataset.glisseMounted = '1';
-    const root = createRoot(host);
-    root.render(React.createElement(SegmentsBridge, { proxies }));
-    rememberRoot(root, host, proxies, () => { delete group.dataset.glisseMounted; });
-  }
-
-  function mountGlassSurface(target) {
-    if (!target || surfaceTargets.has(target) || target.closest('.horizon-glisse-control-host')) return;
-    surfaceTargets.add(target);
-    const host = doc.createElement('span'); host.className = 'horizon-glisse-glass-host';
-    target.prepend(host); target.classList.add('horizon-glisse-surface');
-    const root = createRoot(host);
-    root.render(React.createElement(G.Glass, { className: 'horizon-glisse-glass', 'aria-hidden': true }));
-    rememberRoot(root, host, [], () => { target.classList.remove('horizon-glisse-surface'); surfaceTargets.delete(target); });
-  }
-
-  function mountInitial() {
-    setThemeTokens();
-    mountNav();
-    mountButton('themeButton', { icon: '☾', className: 'horizon-glisse-icon-button' });
-    mountButton('settingsButton', { icon: '⚙', className: 'horizon-glisse-icon-button' });
-    mountButton('accountButton', { icon: '👤', className: 'horizon-glisse-icon-button' });
-    mountButton('addTaskButton', { icon: '+', variant: 'filled', className: 'horizon-glisse-add-button' });
-    mountButton('aiSendBtn', { icon: '➤', variant: 'filled', className: 'horizon-glisse-send-button' });
-    mountButton('studyTimerStart', { label: 'Start', variant: 'filled', className: 'horizon-glisse-action-button' });
-    mountButton('studyTimerReset', { label: 'Reset', className: 'horizon-glisse-action-button' });
-    mountSwitch('settingsThemeButton', 'dark');
-    mountSwitch('hapticToggleBtn', 'haptic');
-    mountInput('aiInput', { label: 'Ask Horizon AI', submitOnEnter: true, style: { width: '100%', maxWidth: 'none' } });
-    mountInput('taskInput', { label: 'Add a task', submitOnEnter: true, style: { width: '100%', maxWidth: 'none' } });
-    mountInput('aiChatSearch', { label: 'Search chats', style: { width: '100%', maxWidth: 'none' } });
-    mountSlider('musicVolume');
-    mountSlider('swmAmbientVolume');
-    mountSlider('dailyKrdSoundsVolume');
-    mountSegments('.study-timer-presets');
-    mountSegments('.prayer-stats-tabs');
-    doc.querySelectorAll('.dashboard-card, .settings-card, .prayer-tracker, #aiHeader, .aiInput').forEach(mountGlassSurface);
-    if (!globalObserver) {
-      globalObserver = new MutationObserver((records) => {
-        for (const record of records) for (const node of record.addedNodes) {
-          if (node.nodeType !== 1) continue;
-          if (node.matches?.('.dashboard-card, .settings-card, .prayer-tracker, #aiHeader, .aiInput')) mountGlassSurface(node);
-          node.querySelectorAll?.('.dashboard-card, .settings-card, .prayer-tracker, #aiHeader, .aiInput').forEach(mountGlassSurface);
-        }
-      });
-      globalObserver.observe(doc.body, { childList: true, subtree: true });
-    }
-    body.classList.add('horizon-glisse-real');
-    const oldNav = doc.getElementById('horizon-liquid-glass-navigation-v1'); if (oldNav) oldNav.remove();
-    const oldLayer = doc.getElementById('horizon-liquid-glass-layer'); if (oldLayer) oldLayer.remove();
-    mounted = true;
-    doc.dispatchEvent(new CustomEvent('horizon:glisse-ready', { detail: { version: GLISSE_VERSION } }));
-  }
-
-  function unmountAll() {
-    if (!mounted) return;
-    if (globalObserver) { globalObserver.disconnect(); globalObserver = null; }
-    for (const item of roots.splice(0).reverse()) {
-      try { item.root.unmount(); } catch (_) {}
-      item.cleanup?.();
-      item.host?.remove();
-      item.proxies?.forEach(restoreProxy);
-    }
-    doc.querySelectorAll('[data-glisse-mounted]').forEach((el) => delete el.dataset.glisseMounted);
-    body.classList.remove('horizon-glisse-real');
-    mounted = false;
-  }
-
-  async function activate() {
-    if (mounted || !isGlassTheme()) return;
-    try {
-      if (!React) {
-        const [reactMod, domMod, glisseMod] = await Promise.all([
-          import('https://esm.sh/react@19.2.0'),
-          import('https://esm.sh/react-dom@19.2.0/client?external=react'),
-          import(`https://esm.sh/glisse@${GLISSE_VERSION}?bundle&external=react`)
-        ]);
-        React = reactMod;
-        createRoot = domMod.createRoot;
-        G = glisseMod;
-      }
-      if (isGlassTheme()) mountInitial();
-    } catch (error) {
-      console.error('[Horizon] Official Glisse could not load. Existing Horizon UI remains active.', error);
-      body.classList.add('horizon-glisse-load-failed');
-    }
-  }
-
-  const themeObserver = new MutationObserver(() => {
-    if (isGlassTheme()) activate();
-    else unmountAll();
-    setThemeTokens();
-  });
-  themeObserver.observe(html, { attributes: true, attributeFilter: ['class'] });
-  themeObserver.observe(body, { attributes: true, attributeFilter: ['class'] });
-  doc.addEventListener('click', (event) => {
-    const theme = event.target.closest?.('.theme-option[data-theme]');
-    if (theme) setTimeout(() => { if (isGlassTheme()) activate(); else unmountAll(); setThemeTokens(); }, 80);
-  }, true);
-  window.addEventListener('storage', () => { if (isGlassTheme()) activate(); else unmountAll(); setThemeTokens(); });
-  setThemeTokens();
-  if (isGlassTheme()) activate();
-})();
-
-</script>
 </body>
 </html>
 
@@ -31138,8 +30000,7 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
 /* Horizon AI UI fixes — chat drawer, action menu, composer typing state, mobile sizing. */
 /* Typing status is a direct child of .ai-convo, the actual scroll viewport. */
 #aiTypingHost { display:none !important; }
-#ai.active #aiMessages > #aiLoading.ai-typing {
-  overflow-anchor:none !important;
+#ai.active .ai-convo > #aiLoading.ai-typing {
   display:inline-flex !important; align-items:center !important; align-self:flex-start !important;
   flex:0 0 auto !important; position:relative !important; inset:auto !important;
   float:none !important; clear:both !important; transform:none !important;
@@ -31168,11 +30029,6 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
   #ai.active #aiChatSidebar { width:260px !important; }
 }
 @media (max-width:760px) {
-  #ai.active { height:var(--ai-visual-height, 100dvh) !important; }
-  #ai.active .ai-workspace,
-  #ai.active .ai-chat-main,
-  #ai.active #aiChatHost,
-  #ai.active #aiBox.horizon-ai-page { height:var(--ai-visual-height, 100dvh) !important; }
   #ai.active .ai-chat-sidebar {
     left:8px !important; width:min(264px, calc(100vw - 28px)) !important;
     top:calc(58px + env(safe-area-inset-top)) !important;
@@ -31205,17 +30061,4 @@ document.getElementById("dashboardLayoutRename").textContent=t("rename");
     caret-color:#6f8cff !important; vertical-align:middle !important;
   }
 }
-</style>
-
-<style id="ai-chat-sync-bulk-fixes">
-.ai-bulk-toolbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:2px 0 7px; }
-.ai-bulk-toolbar button { border:1px solid rgba(140,140,140,.28); border-radius:8px; padding:6px 8px; background:transparent; color:inherit; font:600 11px system-ui,sans-serif; cursor:pointer; }
-.ai-bulk-toolbar button:disabled { opacity:.4; cursor:not-allowed; }
-.ai-chat-select { flex:0 0 auto; width:18px; height:18px; margin:0 9px 0 3px; accent-color:#6f8cff; cursor:pointer; }
-.ai-chat-item.is-selected { background:rgba(111,140,255,.13) !important; outline:1px solid rgba(111,140,255,.42); }
-.ai-bulk-toolbar button:focus-visible,.ai-chat-select:focus-visible { outline:2px solid #7895ff; outline-offset:2px; }
-.ai-bulk-toolbar button[hidden] { display:none !important; }
-.ai-bulk-toolbar #aiBulkCount { font-size:11px; font-weight:650; white-space:nowrap; }
-#ai.active #aiMessages > #aiLoading.ai-typing { display:inline-flex !important; align-self:flex-start !important; position:relative !important; margin:8px 0 10px !important; }
-#aiTypingHost { display:none !important; }
 </style>
