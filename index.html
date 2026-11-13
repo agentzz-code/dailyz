@@ -23458,7 +23458,7 @@ document.documentElement.classList.toggle(
 
     <script>
         const AI_ENDPOINT = "https://daily-ai.younismuhammed121.workers.dev/";
-        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.9-nvidia-recovery";
+        const AI_EXPECTED_WORKER_VERSION = "horizon-gemini-nvidia-atlas-engineering-v32.10-file-marker-repair";
         const AI_MODELS_URL = AI_ENDPOINT.replace(/\/+$/, "") + "/models";
         const AI_MODE_STORAGE_KEY = "horizon_ai_mode_v1";
         const AI_PROVIDER_STATUS_URL = AI_ENDPOINT.replace(/\/+$/, "");
@@ -24994,7 +24994,15 @@ document.documentElement.classList.toggle(
             // Parse marker lines independently instead of relying on one brittle
             // multiline regex. This tolerates harmless escaping/attribute-order
             // variations while preserving every byte of the file body.
-            const lines = text.split("\n");
+            // Normalize a common provider formatting defect: some models append
+            // the first source line immediately after the closing >>> of the
+            // opening marker. Split that line at the marker boundary so the
+            // parser can recover the file without altering its source bytes.
+            const lines = text.split("\n").flatMap((line) => {
+                const normalized = normalizeMarkerLine(line);
+                const inlineOpening = /^(\s*<{3}\s*ATLAS_FILE\b.*?\s*>{2,3})([\s\S]+)$/i.exec(normalized);
+                return inlineOpening ? [inlineOpening[1], inlineOpening[2]] : [line];
+            });
             const markerFiles = [];
             let responseLines = [];
             let active = null;
@@ -25055,6 +25063,28 @@ document.documentElement.classList.toggle(
                 if (endLine.test(normalizeMarkerLine(line))) {
                     const content = active.contentLines.join("\n");
                     if (!content.trim()) return parseFailure("The file " + active.name + " had an opening and closing marker but contained no file content.", { fileName: active.name });
+                    // Refuse to label obviously broken HTML/JavaScript as a
+                    // downloadable success. Validate classic inline scripts before
+                    // creating the file card; module scripts are left to the browser.
+                    if (/\.html?$/i.test(active.name) && typeof DOMParser !== "undefined") {
+                        try {
+                            const parsedHtml = new DOMParser().parseFromString(content, "text/html");
+                            const scripts = Array.from(parsedHtml.querySelectorAll("script:not([src])"));
+                            for (let scriptIndex = 0; scriptIndex < scripts.length; scriptIndex++) {
+                                const script = scripts[scriptIndex];
+                                const scriptType = String(script.getAttribute("type") || "").toLowerCase();
+                                if (scriptType === "module" || (scriptType && !/^(text|application)\/(javascript|ecmascript)$/.test(scriptType))) continue;
+                                try {
+                                    new Function(script.textContent || "");
+                                } catch (syntaxError) {
+                                    return parseFailure("The generated HTML file " + active.name + " contains invalid JavaScript in inline script " + (scriptIndex + 1) + ": " + String(syntaxError && syntaxError.message || syntaxError).slice(0, 240) + ". Atlas did not create a downloadable file because the code is not syntactically valid.", { fileName: active.name, validation: "javascript-syntax", scriptIndex: scriptIndex + 1 });
+                                }
+                            }
+                        } catch (validationError) {
+                            if (validationError && validationError.error === "parse-error") return validationError;
+                            return parseFailure("The generated HTML file " + active.name + " could not be checked safely: " + String(validationError && validationError.message || validationError).slice(0, 240), { fileName: active.name, validation: "html-validation" });
+                        }
+                    }
                     markerChars += content.length;
                     if (markerFiles.length >= AI_MAX_TEXT_FILES ||
                         content.length > AI_MAX_TEXT_TOTAL_CHARS ||
