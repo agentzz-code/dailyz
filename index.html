@@ -8845,7 +8845,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             appstateDirty.add(key);
 
-            scheduleAppstateFlush(900);
+            scheduleAppstateFlush(300);
 
             setSyncStatus("syncing");
         }
@@ -9789,6 +9789,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 appstateListener =
                     onSnapshot(
                         doc(db, "users", uid),
+                        { includeMetadataChanges: true },
                         snapshot => {
 
                             handleAppstateItems(
@@ -9811,6 +9812,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                         uid,
                         APPSTATE_COLLECTION
                     ),
+                    { includeMetadataChanges: true },
                     snapshot => {
 
                         handleAppstateItems(
@@ -10044,7 +10046,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     aiChatSyncPending = !!aiChatSyncTimers.horizon || !!aiChatSyncTimers.atlas || aiChatSyncInFlight.horizon || aiChatSyncInFlight.atlas;
                     refreshSyncStatus();
                 }
-            }, 700);
+            }, 300);
         }
 
         function applyRemoteAiChatSnapshot(uid, snapshot) {
@@ -10126,6 +10128,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             aiChatSyncReady = false;
             aiChatSyncListener = onSnapshot(
                 collection(db, "users", uid, AI_CHAT_CLOUD_COLLECTION),
+                { includeMetadataChanges: true },
                 snapshot => {
                     if (!currentUser || currentUser.uid !== uid || aiChatSyncUid !== uid) return;
                     applyRemoteAiChatSnapshot(uid, snapshot);
