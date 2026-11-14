@@ -7138,10 +7138,26 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <label for="flashcardAiPhotos" style="display:block;font-size:13px;margin-bottom:5px;">Source material (photos, PDF, or PowerPoint)</label>
                     <input type="file" id="flashcardAiPhotos" accept="image/*,.pdf,application/pdf,.pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" multiple style="width:100%;margin-bottom:7px;" />
                     <p style="font-size:11px;color:var(--text-secondary,#888);margin:0 0 12px;">Up to 8 files · PDF: up to 30 pages · PPTX: up to 50 slides · 20 MB per file</p>
-                    <label for="flashcardAiInstructions" style="display:block;font-size:13px;margin-bottom:5px;">Instructions for the AI (optional)</label>
-                    <textarea id="flashcardAiInstructions" rows="3" placeholder="e.g. Only use highlighted parts. Focus on definitions and dates. Skip examples. Make the questions difficult." style="width:100%;box-sizing:border-box;margin-bottom:12px;resize:vertical;"></textarea>
-                    <p style="font-size:12px;color:var(--text-secondary,#888);margin:-6px 0 12px;">Tell the AI what to include, skip, or how difficult the quiz should be.</p>
-                    <label for="flashcardAiMode" style="display:block;font-size:13px;margin-bottom:5px;">Question format</label>
+                    <label for="flashcardAiDifficulty" style="display:block;font-size:13px;margin-bottom:5px;">Difficulty</label>
+                    <select id="flashcardAiDifficulty" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;">
+                        <option value="foundation">Foundation — essential understanding and interpretation</option>
+                        <option value="standard" selected>Standard — relationships, interpretation, cause and effect</option>
+                        <option value="challenging">Challenging — application, inference and multi-step reasoning</option>
+                        <option value="advanced">Advanced — synthesis, evaluation and conditional reasoning</option>
+                    </select>
+                    <label for="flashcardAiStyle" style="display:block;font-size:13px;margin-bottom:5px;">Question style</label>
+                    <select id="flashcardAiStyle" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;">
+                        <option value="balanced" selected>Balanced Exam</option>
+                        <option value="application">Application</option>
+                        <option value="conceptual">Conceptual Reasoning</option>
+                        <option value="scenario">Scenario-Based</option>
+                        <option value="analytical">Analytical</option>
+                        <option value="recall">Precise Recall</option>
+                    </select>
+                    <label for="flashcardAiInstructions" style="display:block;font-size:13px;margin-bottom:5px;">Additional instructions (optional)</label>
+                    <textarea id="flashcardAiInstructions" rows="3" placeholder="e.g. Focus on mechanisms and compare related processes. Skip the historical examples." style="width:100%;box-sizing:border-box;margin-bottom:12px;resize:vertical;"></textarea>
+                    <p style="font-size:12px;color:var(--text-secondary,#888);margin:-6px 0 12px;">Difficulty changes the reasoning required. Question style changes how the learner is tested.</p>
+                    <label for="flashcardAiMode" style="display:block;font-size:13px;margin-bottom:5px;">Quiz interaction format</label>
                     <select id="flashcardAiMode" style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px;border-radius:10px;"><option value="auto" selected>Automatic — mixed quiz</option><option value="custom">Custom — choose available study modes</option></select>
                     <div id="flashcardAiCustomTypes" style="display:none;margin-bottom:12px;font-size:13px;gap:10px;flex-wrap:wrap;"><label><input type="checkbox" value="multiple" checked> Multiple choice</label><label><input type="checkbox" value="classic" checked> Classic</label><label><input type="checkbox" value="matching" checked> Matching</label><label><input type="checkbox" value="truefalse" checked> True/false</label><label><input type="checkbox" value="blank" checked> Fill in blank</label></div>
                     <label for="flashcardAiCount" style="display:block;font-size:13px;margin-bottom:5px;">Questions per source file</label>
@@ -21819,6 +21835,8 @@ document.documentElement.classList.toggle(
             document.getElementById("flashcardAiTitle").value = "";
             document.getElementById("flashcardAiPhotos").value = "";
             document.getElementById("flashcardAiInstructions").value = "";
+            document.getElementById("flashcardAiDifficulty").value = "standard";
+            document.getElementById("flashcardAiStyle").value = "balanced";
             document.getElementById("flashcardAiPreview").value = "";
             document.getElementById("flashcardAiPreview").style.display = "none";
             document.getElementById("flashcardAiPreviewLabel").style.display = "none";
@@ -21948,6 +21966,34 @@ document.documentElement.classList.toggle(
             return { text: sections.join("\n\n"), note: slidePaths.length > slideLimit ? "Only the first " + slideLimit + " of " + slidePaths.length + " slides were read." : "" };
         }
 
+        function flashcardAiFitSourceText(source, maxChars) {
+            const text = String(source || "").trim();
+            const limit = Math.max(1000, Number(maxChars) || 18000);
+            if (text.length <= limit) return text;
+            const matches = [...text.matchAll(/(?:^|\n)(\[(?:PDF page|Slide)\s+\d+\][^\n]*\n?)/g)];
+            if (matches.length < 2) return text.slice(0, limit);
+            const sections = [];
+            for (let i = 0; i < matches.length; i++) {
+                const start = matches[i].index;
+                const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+                const section = text.slice(start, end).trim();
+                if (section) sections.push(section);
+            }
+            const markerCost = sections.reduce((sum, section) => sum + ((section.match(/^\[[^\]]+\]/) || [""])[0].length + 2), 0);
+            // Reserve space for section separators and the visible excerpt suffix
+            // so the final page/slide markers are not chopped off by the hard cap.
+            const bodyBudget = Math.max(500, limit - markerCost - sections.length * 32);
+            const perSection = Math.max(80, Math.floor(bodyBudget / sections.length));
+            const fitted = sections.map(section => {
+                const marker = (section.match(/^\[[^\]]+\]/) || [""])[0];
+                const body = section.slice(marker.length).trim();
+                return marker + "\n" + (body.length > perSection ? body.slice(0, perSection).trimEnd() + " …[section excerpt]" : body);
+            });
+            let result = fitted.join("\n\n");
+            if (result.length > limit) result = result.slice(0, limit);
+            return result;
+        }
+
         function flashcardAiExtractJson(raw) {
             const text = String(raw || "").replace(/^\uFEFF/, "").trim();
             const candidates = [text.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim()];
@@ -21983,7 +22029,7 @@ document.documentElement.classList.toggle(
             return JSON.parse(candidates[0]);
         }
 
-        function flashcardAiParseCards(raw) {
+        function flashcardAiParseCards(raw, sourceText, isImageSource) {
             const parsed = flashcardAiExtractJson(raw);
             let sourceCards = Array.isArray(parsed) ? parsed :
                 (parsed && (Array.isArray(parsed.cards) ? parsed.cards :
@@ -21992,14 +22038,45 @@ document.documentElement.classList.toggle(
             if (!sourceCards && parsed && parsed.data && Array.isArray(parsed.data.cards)) sourceCards = parsed.data.cards;
             if (!Array.isArray(sourceCards)) throw new Error("The AI response did not contain a question list.");
             const cards = sourceCards.map(c => {
-                if (!c || typeof c !== "object") return null;
-                const front = c.front ?? c.question ?? c.prompt ?? c.q;
-                const back = c.back ?? c.answer ?? c.correctAnswer ?? c.a;
-                const explanation = c.explanation ?? c.feedback ?? c.rationale ?? "";
-                if (typeof front !== "string" || typeof back !== "string" || !front.trim() || !back.trim()) return null;
-                return { front: front.trim(), back: back.trim(), explanation: typeof explanation === "string" ? explanation.trim() : "" };
+                if (!c || typeof c !== "object" || Array.isArray(c)) return null;
+                const front = c.front ?? c.question ?? c.prompt ?? c.q ?? c.stem;
+                const back = c.back ?? c.answer ?? c.correctAnswer ?? c.correct_answer ?? c.a ?? c.solution;
+                const explanation = c.explanation ?? c.feedback ?? c.rationale ?? c.why ?? "";
+                const rawDistractors = c.distractors ?? c.wrongAnswers ?? c.wrong_answers ?? c.incorrectOptions ?? c.incorrect_options ?? [];
+                const distractors = Array.isArray(rawDistractors)
+                    ? rawDistractors.filter(x => typeof x === "string" && x.trim()).map(x => x.trim())
+                    : [];
+                const uniqueDistractors = [...new Map(distractors.map(x => [x.toLocaleLowerCase().replace(/\s+/g, " ").trim(), x])).values()];
+                const normalizedBack = typeof back === "string" ? back.trim() : "";
+                const safeDistractors = uniqueDistractors.filter(x => x.toLocaleLowerCase() !== normalizedBack.toLocaleLowerCase()).slice(0, 3);
+                const objective = c.objective ?? c.learningObjective ?? c.learning_objective ?? "";
+                const sourceEvidence = c.sourceEvidence ?? c.source_evidence ?? c.evidence ?? "";
+                if (typeof front !== "string" || typeof back !== "string" || !front.trim() || !normalizedBack) return null;
+                return {
+                    front: front.trim(), back: normalizedBack,
+                    explanation: typeof explanation === "string" ? explanation.trim() : "",
+                    distractors: safeDistractors,
+                    objective: typeof objective === "string" ? objective.trim().slice(0, 500) : "",
+                    sourceEvidence: typeof sourceEvidence === "string" ? sourceEvidence.trim().slice(0, 1000) : ""
+                };
             }).filter(Boolean);
             if (!cards.length && sourceCards.length) throw new Error("The AI returned questions, but their question/answer fields were incomplete.");
+            if (!cards.length) throw new Error("The AI returned an empty quiz. The supplied source may not support the requested questions.");
+            const seen = new Set();
+            for (const card of cards) {
+                const key = card.front.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+                if (seen.has(key)) throw new Error("The AI returned duplicate questions. A quality retry is required.");
+                seen.add(key);
+                if (card.distractors.length !== 3) throw new Error("A generated question is missing three distinct question-specific distractors.");
+                if (!card.objective) throw new Error("A generated question is missing its learning objective.");
+                if (!card.sourceEvidence) throw new Error("A generated question is missing its source-grounding evidence.");
+                if (!isImageSource && typeof sourceText === "string") {
+                    const normalizeEvidence = value => String(value || "").toLocaleLowerCase().replace(/\s+/g, " ").trim();
+                    if (!normalizeEvidence(sourceText).includes(normalizeEvidence(card.sourceEvidence))) {
+                        throw new Error("A generated question's evidence is not an exact quotation from the supplied source.");
+                    }
+                }
+            }
             return cards;
         }
 
@@ -22007,7 +22084,7 @@ document.documentElement.classList.toggle(
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 120000);
             try {
-                const payload = { mode: "horizon", model: "auto", message: prompt, history: [], aiConfig: { tone: "professional", detail: "concise", memory: "", permission: "suggest", rules: "Use only the supplied source material. Return only the requested JSON.", context: {} }, webSearch: false };
+                const payload = { mode: "horizon", model: "auto", message: prompt, history: [], aiConfig: { tone: "professional", detail: "concise", memory: "", permission: "suggest", rules: "Use only the supplied source material. Return only the requested JSON.", context: {} }, webSearch: false, disableWebSearch: true };
                 if (image) payload.image = image;
                 const response = await fetch(AI_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: controller.signal });
                 if (!response.ok) {
@@ -22048,7 +22125,8 @@ document.documentElement.classList.toggle(
                     if (obj && (obj.error || obj.message)) throw new Error(String(obj.message || obj.error));
                     raw = obj && typeof obj.response === "string" ? obj.response : body;
                 }
-                if (!raw.trim()) throw new Error("The AI service returned an empty response. Please try again.");
+                // Let the quiz parser handle empty output so the caller can make
+                // its single bounded JSON/quality-repair attempt before failing.
                 return raw;
             } catch (error) {
                 if (error && error.name === "AbortError") throw new Error("Quiz generation timed out. Try fewer pages or slides.");
@@ -22056,34 +22134,79 @@ document.documentElement.classList.toggle(
             } finally { clearTimeout(timeout); }
         }
 
-        async function flashcardAiAskForCards(source, count, sourceName, userInstructions, image) {
-            const instructionText = String(userInstructions || "").trim();
+        async function flashcardAiAskForCards(source, count, sourceName, userInstructions, image, difficulty, style) {
+            const instructionTextSafe = String(userInstructions || "").trim().slice(0, 1200);
             const isImage = !!image;
-            const instructionTextSafe = instructionText.slice(0, 1200);
-            const sourceText = isImage ? "The attached image is the only source." : String(source || "").slice(0, 18000);
-            const prompt = "Create a high-quality study quiz using ONLY the supplied source material. Return one valid JSON object and absolutely nothing else, with exactly this shape: {\"cards\":[{\"front\":\"clear self-contained question\",\"back\":\"accurate answer supported by the source\",\"explanation\":\"brief explanation grounded in the source\"}]}. Create up to " + count + " distinct useful questions. Every card MUST have non-empty string front and back fields. Use double quotes for all JSON keys and strings; escape quotes and newlines correctly; no trailing commas, comments, markdown fences, or prose outside JSON. SOURCE FILE: " + String(sourceName || "study material") + ". USER INSTRUCTIONS: " + (instructionTextSafe || "Create a balanced revision quiz from the most important concepts.") + ". Keep questions and answers in the source language. Cover important concepts, relationships, definitions, processes, and details; avoid duplicates, trivia, unsupported assumptions, and questions whose answers are not present in the source. If the source is unclear or insufficient, return {\"cards\":[]}. For PDF/PPTX text, use page/slide markers to retain context. Do not claim to have read diagrams or images that were not provided as images. Source material follows:\n\n" + (isImage ? "" : sourceText);
+            const sourceText = isImage ? "The attached image is the only source." : flashcardAiFitSourceText(source, 18000);
+            const difficultyBriefs = {
+                foundation: "FOUNDATION: assess essential understanding with clear terminology, realistic distinctions and basic interpretation. Do not make questions trivial or giveaway questions; do not merely copy definitions.",
+                standard: "STANDARD: assess interpretation, relationships, mechanisms and cause/effect. Require learners to connect ideas and distinguish related concepts rather than repeat a sentence.",
+                challenging: "CHALLENGING: prioritize application to unfamiliar but source-compatible situations, inference, multi-step reasoning and causal chains. Combine multiple source-supported concepts where possible.",
+                advanced: "ADVANCED: prioritize synthesis, nuanced distinctions, conditional reasoning, evaluation and complex applications requiring multiple reasoning steps. Never invent complexity or facts absent from the source."
+            };
+            const styleBriefs = {
+                balanced: "BALANCED EXAM: deliberately mix application, conceptual reasoning, interpretation, comparison and essential recall.",
+                application: "APPLICATION: construct questions around new but realistic situations; require the learner to apply source principles to determine an outcome or decision.",
+                conceptual: "CONCEPTUAL REASONING: ask why/how questions about mechanisms, causes, consequences, dependencies and relationships; test explanatory understanding.",
+                scenario: "SCENARIO-BASED: provide a concise, realistic scenario containing relevant conditions; ask the learner to interpret it and apply the source material.",
+                analytical: "ANALYTICAL: require comparison, distinction, evaluation, interpretation of implications or identification of relationships; make the comparison criteria explicit.",
+                recall: "PRECISE RECALL: test important facts, terminology, ordered steps and exact relationships. Avoid trivia, but require precise and discriminating recall."
+            };
+            const difficultyKey = Object.prototype.hasOwnProperty.call(difficultyBriefs, difficulty) ? difficulty : "standard";
+            const styleKey = Object.prototype.hasOwnProperty.call(styleBriefs, style) ? style : "balanced";
+            const schema = '{"cards":[{"front":"self-contained exam-quality question","back":"one precise correct answer","explanation":"why the answer follows from the source","objective":"learning objective being tested","sourceEvidence":"specific supporting detail from the source","distractors":["plausible near-miss 1","plausible near-miss 2","plausible near-miss 3"]}]}';
+            const prompt = [
+                "You are an expert assessment designer. Create a rigorous source-grounded quiz. The uploaded material is the sole authority: do not use outside knowledge to fill gaps.",
+                "DIFFICULTY: " + difficultyKey.toUpperCase() + ". " + difficultyBriefs[difficultyKey],
+                "QUESTION STYLE: " + styleKey.toUpperCase() + ". " + styleBriefs[styleKey],
+                "Create up to " + count + " genuinely distinct, high-value questions. Return fewer if the source cannot support that many strong questions.",
+                "Every question must be self-contained, unambiguous, answerable from the source, aligned with the selected difficulty/style, and test a meaningful learning objective. Avoid generic document questions, copied sentences, trivial metadata, repeated templates and unsupported assumptions.",
+                "For every question provide exactly three distractors. Each must be a realistic near-miss or common misconception from the SAME subject category as the correct answer, similar in specificity, objectively wrong under the exact wording, non-synonymous, non-duplicate, and not absurd. Never borrow another question's answer as a distractor unless it is genuinely a plausible same-category misconception.",
+                "Provide an objective and a sourceEvidence field. For text sources, sourceEvidence MUST be a short exact verbatim quotation (roughly 4–20 words) from the supplied source that directly supports the answer; do not paraphrase it. For image-only sources, describe the visible evidence actually present; never claim to read unseen details.",
+                "Preserve the source language in questions, answers, explanations and distractors. Preserve PDF page and PPTX slide markers in your reasoning.",
+                "Return valid JSON only with exactly this structure (no markdown fences or surrounding prose): " + schema,
+                "If the source is too short, unclear or insufficient, return {\"cards\":[]}.",
+                "SOURCE FILE: " + String(sourceName || "study material"),
+                "ADDITIONAL USER INSTRUCTIONS: " + (instructionTextSafe || "None."),
+                "SOURCE MATERIAL:\n" + (isImage ? "[The attached image is the complete source; inspect only visible content.]" : sourceText)
+            ].join("\n\n");
             const raw = await flashcardAiCallWorker(prompt, image);
-            try { return flashcardAiParseCards(raw); }
+            try { return flashcardAiParseCards(raw, sourceText, isImage); }
             catch (firstError) {
-                // One automatic repair pass avoids making users re-upload a valid source
-                // just because the model added a fence, preamble, or malformed JSON.
-                const repairPrompt = "Repair the quiz response below into valid JSON only. Preserve every supported question and answer; do not invent facts. Output exactly {\"cards\":[{\"front\":\"...\",\"back\":\"...\",\"explanation\":\"...\"}]}. Every front and back must be non-empty strings. No markdown, no commentary, no trailing commas. If the response cannot be repaired reliably, return {\"cards\":[]}.\n\nBROKEN RESPONSE:\n" + String(raw || "").slice(0, 14000);
-                const repaired = await flashcardAiCallWorker(repairPrompt, null);
-                try { return flashcardAiParseCards(repaired); }
-                catch (_) { throw new Error("The AI could not format the questions correctly after an automatic retry. Please try Generate again; your file was read successfully."); }
+                const repairPrompt = [
+                    "The previous quiz response failed structural or quality validation: " + String(firstError.message || firstError).slice(0, 500),
+                    "Repair it into a valid source-grounded quiz. Do not add facts or questions unsupported by the source. Preserve valid items, remove invalid/duplicate items, and ensure every remaining item has all required fields and exactly three distinct plausible question-specific distractors.",
+                    "Output JSON only in this schema: " + schema,
+                    "If reliable repair is impossible, return {\"cards\":[]}.",
+                    "SOURCE MATERIAL (authoritative):\n" + (isImage ? "[Image is attached only to the original request; do not invent unseen content.]" : sourceText),
+                    "BROKEN RESPONSE:\n" + String(raw || "").slice(0, 3000)
+                ].join("\n\n");
+                const repaired = await flashcardAiCallWorker(repairPrompt, image);
+                try { return flashcardAiParseCards(repaired, sourceText, isImage); }
+                catch (_) { throw new Error("The AI could not produce a structurally valid, source-grounded quiz after one repair attempt. Try fewer questions or a clearer source."); }
             }
+        }
+
+        const FLASHCARD_AI_MAX_FILE_BYTES = 20 * 1024 * 1024;
+        function flashcardAiValidateFiles(files) {
+            const incoming = Array.from(files || []);
+            if (!incoming.length) return "Choose at least one photo, PDF, or PowerPoint file first.";
+            if (incoming.length > 8) return "Please select 8 files or fewer at a time.";
+            for (const file of incoming) {
+                if (Number(file && file.size) > FLASHCARD_AI_MAX_FILE_BYTES) return String(file.name || "A file") + " is larger than 20 MB. Please choose a smaller file.";
+                if (flashcardAiFileKind(file) === "unsupported") return "Unsupported file: " + String(file.name || "unknown") + ". Choose an image, PDF, or PPTX file.";
+            }
+            return "";
         }
 
         async function generateFlashcardsFromPhotos() {
             const files = Array.from(document.getElementById("flashcardAiPhotos").files || []);
-            if (!files.length) { flashcardAiStatus.textContent = "Choose at least one photo, PDF, or PowerPoint file first."; return; }
-            if (files.length > 8) { flashcardAiStatus.textContent = "Please select 8 files or fewer at a time."; return; }
-            for (const file of files) {
-                if (file.size > 20 * 1024 * 1024) { flashcardAiStatus.textContent = file.name + " is larger than 20 MB. Please choose a smaller file."; return; }
-                if (flashcardAiFileKind(file) === "unsupported") { flashcardAiStatus.textContent = "Unsupported file: " + file.name + ". Choose an image, PDF, or PPTX file."; return; }
-            }
+            const fileValidationError = flashcardAiValidateFiles(files);
+            if (fileValidationError) { flashcardAiStatus.textContent = fileValidationError; return; }
             const count = Number(document.getElementById("flashcardAiCount").value) || 6;
             const userInstructions = document.getElementById("flashcardAiInstructions").value.trim();
+            const difficulty = document.getElementById("flashcardAiDifficulty").value || "standard";
+            const style = document.getElementById("flashcardAiStyle").value || "balanced";
             const btn = document.getElementById("flashcardAiGenerate");
             btn.disabled = true;
             flashcardAiDraft = [];
@@ -22092,7 +22215,7 @@ document.documentElement.classList.toggle(
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const kind = flashcardAiFileKind(file);
-                    flashcardAiStatus.textContent = "Preparing " + file.name + " (" + (i + 1) + " of " + files.length + ")…";
+                    flashcardAiStatus.textContent = "1/5 · Reading source files — " + file.name + " (" + (i + 1) + " of " + files.length + ")…";
                     let image = null;
                     let sourceText = "";
                     let note = "";
@@ -22100,25 +22223,29 @@ document.documentElement.classList.toggle(
                     else if (kind === "pdf") { const result = await flashcardAiExtractPdf(file); sourceText = result.text; note = result.note; }
                     else if (kind === "pptx") { const result = await flashcardAiExtractPptx(file); sourceText = result.text; note = result.note; }
                     if (note) warnings.push(file.name + ": " + note);
-                    if (sourceText.length > 18000) warnings.push(file.name + ": text was shortened to fit the AI service's 24,000-character request limit.");
-                    flashcardAiStatus.textContent = "Generating questions from " + file.name + " (" + (i + 1) + " of " + files.length + ")…";
-                    const cards = await flashcardAiAskForCards(sourceText, count, file.name, userInstructions, image);
+                    if (sourceText.length > 18000) warnings.push(file.name + ": extracted text was shortened to the quiz request's safe source window; later pages/slides may not be represented.");
+                    flashcardAiStatus.textContent = "2/5 · Extracting and preparing source — " + file.name;
+                    await new Promise(resolve => requestAnimationFrame(resolve));
+                    flashcardAiStatus.textContent = "3/5 · Designing " + difficulty + " / " + style + " questions — " + file.name;
+                    const cards = await flashcardAiAskForCards(sourceText, count, file.name, userInstructions, image, difficulty, style);
                     flashcardAiDraft.push(...cards);
                     if (flashcardAiDraft.length >= 60) { flashcardAiDraft = flashcardAiDraft.slice(0, 60); break; }
                 }
+                flashcardAiStatus.textContent = "4/5 · Checking structure, duplicates, distractors and quoted source evidence…";
+                await new Promise(resolve => requestAnimationFrame(resolve));
                 const seen = new Set();
                 flashcardAiDraft = flashcardAiDraft.filter(card => {
                     const key = card.front.toLocaleLowerCase().replace(/\s+/g, " ").trim();
                     if (seen.has(key)) return false;
                     seen.add(key); return true;
                 }).slice(0, 60);
-                if (!flashcardAiDraft.length) throw new Error("No usable study content was found. Scanned PDFs may need to be uploaded as page photos; presentations made only of images may need screenshots.");
+                if (!flashcardAiDraft.length) throw new Error("No usable, validated study questions were produced. Scanned PDFs may need page photos; image-only slides may need screenshots.");
                 document.getElementById("flashcardAiPreview").value = JSON.stringify(flashcardAiDraft, null, 2);
                 document.getElementById("flashcardAiPreview").style.display = "block";
                 document.getElementById("flashcardAiPreviewLabel").style.display = "block";
                 document.getElementById("flashcardAiSave").style.display = "";
                 document.getElementById("flashcardAiGenerate").style.display = "none";
-                flashcardAiStatus.textContent = "Generated " + flashcardAiDraft.length + " questions from " + files.length + " source file(s). Review and edit the questions before saving." + (warnings.length ? "\n\nNotes:\n" + warnings.join("\n") : "");
+                flashcardAiStatus.textContent = "5/5 · Quiz prepared. " + flashcardAiDraft.length + " structurally checked questions with source quotations from " + files.length + " source file(s). Review and edit before saving. Difficulty: " + difficulty + ". Style: " + style + "." + (warnings.length ? "\n\nNotes:\n" + warnings.join("\n") : "");
             } catch (error) {
                 console.error("AI quiz generation error:", error);
                 flashcardAiStatus.textContent = error && error.message ? error.message : "Could not generate the quiz. Please try again.";
@@ -22132,13 +22259,32 @@ document.documentElement.classList.toggle(
             try {
                 const parsed = JSON.parse(document.getElementById("flashcardAiPreview").value);
                 if (!Array.isArray(parsed) || !parsed.length) throw new Error("Add at least one question.");
-                cards = parsed.filter(c => c && typeof c.front === "string" && typeof c.back === "string" && c.front.trim() && c.back.trim()).map(c => ({ id: generateFlashcardId(), front: c.front.trim(), back: c.back.trim(), explanation: c.explanation || "", needsReview: false }));
+                cards = parsed.filter(c => c && typeof c.front === "string" && typeof c.back === "string" && c.front.trim() && c.back.trim()).map(c => ({
+                    id: generateFlashcardId(), front: c.front.trim(), back: c.back.trim(),
+                    explanation: typeof c.explanation === "string" ? c.explanation : "",
+                    ...(Array.isArray(c.distractors) && c.distractors.length ? { distractors: c.distractors.filter(x => typeof x === "string").slice(0, 3) } : {}),
+                    ...(typeof c.objective === "string" && c.objective ? { objective: c.objective } : {}),
+                    ...(typeof c.sourceEvidence === "string" && c.sourceEvidence ? { sourceEvidence: c.sourceEvidence } : {}),
+                    needsReview: false
+                }));
                 if (!cards.length) throw new Error("Each question needs a question (front) and answer (back).");
+                if (cards.some(c => !Array.isArray(c.distractors) || c.distractors.length !== 3 ||
+                    new Set(c.distractors.map(x => String(x).trim().toLocaleLowerCase())).size !== 3 ||
+                    c.distractors.some(x => String(x).trim().toLocaleLowerCase() === c.back.trim().toLocaleLowerCase()) ||
+                    !c.objective || !c.sourceEvidence)) {
+                    throw new Error("Each generated question must keep its three distinct distractors, learning objective and source evidence. Restore the missing fields in the preview before saving.");
+                }
                 if (cards.length > 60) throw new Error("A deck can contain up to 60 generated cards at once.");
             } catch (error) { flashcardAiStatus.textContent = "Please fix the card JSON: " + error.message; return; }
             const aiMode = document.getElementById("flashcardAiMode")?.value || "auto";
             const aiTypes = Array.from(document.querySelectorAll("#flashcardAiCustomTypes input:checked")).map(x=>x.value);
-            const deck = { id: generateFlashcardId(), name: name, createdAt: Date.now(), cards: cards, contentType: "quiz", createdWithAI: true, generationMode: aiMode, preferredQuestionTypes: aiMode === "custom" ? aiTypes : ["multiple","classic","matching","truefalse","blank"] };
+            const deck = {
+                id: generateFlashcardId(), name: name, createdAt: Date.now(), cards: cards,
+                contentType: "quiz", createdWithAI: true, generationMode: aiMode,
+                difficulty: document.getElementById("flashcardAiDifficulty")?.value || "standard",
+                questionStyle: document.getElementById("flashcardAiStyle")?.value || "balanced",
+                preferredQuestionTypes: aiMode === "custom" ? aiTypes : ["multiple","classic","matching","truefalse","blank"]
+            };
             flashcardDecks.push(deck);
             saveGuestFlashcards();
             renderFlashcardDeckList();
@@ -22607,7 +22753,13 @@ document.documentElement.classList.toggle(
                 const type = types[i % Math.max(1, types.length)] || "multiple";
                 if (type === "classic") { questions.push({type, card}); return; }
                 if (type === "multiple") {
-                    const wrong = shuffleFlashcardArray(cards.filter(c => c.id !== card.id && c.back.trim() !== card.back.trim())).slice(0,3).map(c=>c.back);
+                    const ownDistractors = Array.isArray(card.distractors)
+                        ? card.distractors.filter(x => typeof x === "string" && x.trim() && x.trim().toLocaleLowerCase() !== card.back.trim().toLocaleLowerCase()).slice(0, 3)
+                        : [];
+                    // New AI decks use their own vetted distractors. Older saved decks
+                    // have no distractors, so retain the historical cross-card fallback.
+                    const wrong = ownDistractors.length === 3 ? ownDistractors :
+                        shuffleFlashcardArray(cards.filter(c => c.id !== card.id && c.back.trim() !== card.back.trim())).slice(0,3).map(c=>c.back);
                     if (!wrong.length) { questions.push({type:"classic",card}); return; }
                     const choices = shuffleFlashcardArray([card.back, ...wrong]);
                     questions.push({type, card, choices, answer:card.back});
