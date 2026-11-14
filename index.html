@@ -21948,19 +21948,59 @@ document.documentElement.classList.toggle(
             return { text: sections.join("\n\n"), note: slidePaths.length > slideLimit ? "Only the first " + slideLimit + " of " + slidePaths.length + " slides were read." : "" };
         }
 
-        function flashcardAiParseCards(raw) {
-            const cleaned = String(raw || "").replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
-            let parsed;
-            try { parsed = JSON.parse(cleaned); }
-            catch (_) {
-                const start = cleaned.indexOf("{");
-                const end = cleaned.lastIndexOf("}");
-                if (start < 0 || end <= start) throw new Error("The AI response did not contain valid quiz data. Please try again.");
-                try { parsed = JSON.parse(cleaned.slice(start, end + 1)); }
-                catch (_) { throw new Error("The AI returned malformed quiz data. Try again or use a smaller source file."); }
+        function flashcardAiExtractJson(raw) {
+            const text = String(raw || "").replace(/^\uFEFF/, "").trim();
+            const candidates = [text.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim()];
+            // Models sometimes add a short preamble or trailing commentary. Extract
+            // the first complete JSON object/array without cutting nested structures.
+            for (const source of candidates) {
+                for (let start = 0; start < source.length; start++) {
+                    if (source[start] !== "{" && source[start] !== "[") continue;
+                    const stack = [];
+                    let inString = false, escaped = false;
+                    for (let i = start; i < source.length; i++) {
+                        const ch = source[i];
+                        if (inString) {
+                            if (escaped) escaped = false;
+                            else if (ch === "\\") escaped = true;
+                            else if (ch === '"') inString = false;
+                            continue;
+                        }
+                        if (ch === '"') { inString = true; continue; }
+                        if (ch === "{" || ch === "[") stack.push(ch);
+                        else if (ch === "}" || ch === "]") {
+                            const expected = ch === "}" ? "{" : "[";
+                            if (stack.pop() !== expected) break;
+                            if (!stack.length) {
+                                const candidate = source.slice(start, i + 1);
+                                try { return JSON.parse(candidate); } catch (_) { break; }
+                            }
+                        }
+                    }
+                }
             }
-            if (!parsed || !Array.isArray(parsed.cards)) throw new Error("The AI did not return a valid question list.");
-            return parsed.cards.filter(c => c && typeof c.front === "string" && typeof c.back === "string" && c.front.trim() && c.back.trim()).map(c => ({ front: c.front.trim(), back: c.back.trim(), explanation: typeof c.explanation === "string" ? c.explanation.trim() : "" }));
+            // Last chance: plain JSON, including a top-level array.
+            return JSON.parse(candidates[0]);
+        }
+
+        function flashcardAiParseCards(raw) {
+            const parsed = flashcardAiExtractJson(raw);
+            let sourceCards = Array.isArray(parsed) ? parsed :
+                (parsed && (Array.isArray(parsed.cards) ? parsed.cards :
+                    Array.isArray(parsed.questions) ? parsed.questions :
+                    Array.isArray(parsed.quiz) ? parsed.quiz : null));
+            if (!sourceCards && parsed && parsed.data && Array.isArray(parsed.data.cards)) sourceCards = parsed.data.cards;
+            if (!Array.isArray(sourceCards)) throw new Error("The AI response did not contain a question list.");
+            const cards = sourceCards.map(c => {
+                if (!c || typeof c !== "object") return null;
+                const front = c.front ?? c.question ?? c.prompt ?? c.q;
+                const back = c.back ?? c.answer ?? c.correctAnswer ?? c.a;
+                const explanation = c.explanation ?? c.feedback ?? c.rationale ?? "";
+                if (typeof front !== "string" || typeof back !== "string" || !front.trim() || !back.trim()) return null;
+                return { front: front.trim(), back: back.trim(), explanation: typeof explanation === "string" ? explanation.trim() : "" };
+            }).filter(Boolean);
+            if (!cards.length && sourceCards.length) throw new Error("The AI returned questions, but their question/answer fields were incomplete.");
+            return cards;
         }
 
         async function flashcardAiCallWorker(prompt, image) {
@@ -22021,9 +22061,17 @@ document.documentElement.classList.toggle(
             const isImage = !!image;
             const instructionTextSafe = instructionText.slice(0, 1200);
             const sourceText = isImage ? "The attached image is the only source." : String(source || "").slice(0, 18000);
-            const prompt = "Create a high-quality study quiz using ONLY the supplied source material. Return valid JSON only, no markdown, with exactly this shape: {\"cards\":[{\"front\":\"clear self-contained question\",\"back\":\"accurate answer supported by the source\",\"explanation\":\"brief explanation grounded in the source\"}]}. Create up to " + count + " distinct useful questions. SOURCE FILE: " + String(sourceName || "study material") + ". USER INSTRUCTIONS: " + (instructionTextSafe || "Create a balanced revision quiz from the most important concepts.") + ". Keep questions and answers in the source language. Cover important concepts, relationships, definitions, processes, and details; avoid duplicates, trivia, unsupported assumptions, and questions whose answers are not present in the source. If the source is unclear or insufficient, return {\"cards\":[]}. For PDF/PPTX text, use page/slide markers to retain context. Do not claim to have read diagrams or images that were not provided as images. Source material follows:\n\n" + (isImage ? "" : sourceText);
+            const prompt = "Create a high-quality study quiz using ONLY the supplied source material. Return one valid JSON object and absolutely nothing else, with exactly this shape: {\"cards\":[{\"front\":\"clear self-contained question\",\"back\":\"accurate answer supported by the source\",\"explanation\":\"brief explanation grounded in the source\"}]}. Create up to " + count + " distinct useful questions. Every card MUST have non-empty string front and back fields. Use double quotes for all JSON keys and strings; escape quotes and newlines correctly; no trailing commas, comments, markdown fences, or prose outside JSON. SOURCE FILE: " + String(sourceName || "study material") + ". USER INSTRUCTIONS: " + (instructionTextSafe || "Create a balanced revision quiz from the most important concepts.") + ". Keep questions and answers in the source language. Cover important concepts, relationships, definitions, processes, and details; avoid duplicates, trivia, unsupported assumptions, and questions whose answers are not present in the source. If the source is unclear or insufficient, return {\"cards\":[]}. For PDF/PPTX text, use page/slide markers to retain context. Do not claim to have read diagrams or images that were not provided as images. Source material follows:\n\n" + (isImage ? "" : sourceText);
             const raw = await flashcardAiCallWorker(prompt, image);
-            return flashcardAiParseCards(raw);
+            try { return flashcardAiParseCards(raw); }
+            catch (firstError) {
+                // One automatic repair pass avoids making users re-upload a valid source
+                // just because the model added a fence, preamble, or malformed JSON.
+                const repairPrompt = "Repair the quiz response below into valid JSON only. Preserve every supported question and answer; do not invent facts. Output exactly {\"cards\":[{\"front\":\"...\",\"back\":\"...\",\"explanation\":\"...\"}]}. Every front and back must be non-empty strings. No markdown, no commentary, no trailing commas. If the response cannot be repaired reliably, return {\"cards\":[]}.\n\nBROKEN RESPONSE:\n" + String(raw || "").slice(0, 14000);
+                const repaired = await flashcardAiCallWorker(repairPrompt, null);
+                try { return flashcardAiParseCards(repaired); }
+                catch (_) { throw new Error("The AI could not format the questions correctly after an automatic retry. Please try Generate again; your file was read successfully."); }
+            }
         }
 
         async function generateFlashcardsFromPhotos() {
