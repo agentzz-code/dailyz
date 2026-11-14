@@ -7137,7 +7137,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                     <input type="text" id="flashcardAiTitle" autocomplete="off" placeholder="e.g. Biology — Cell Structure" style="width:100%;box-sizing:border-box;margin-bottom:12px;" />
                     <label for="flashcardAiPhotos" style="display:block;font-size:13px;margin-bottom:5px;">Source material (photos, PDF, or PowerPoint)</label>
                     <input type="file" id="flashcardAiPhotos" accept="image/*,.pdf,application/pdf,.pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" multiple style="width:100%;margin-bottom:7px;" />
-                    <p style="font-size:11px;color:var(--text-secondary,#888);margin:0 0 12px;">Up to 8 files · PDF: up to 30 pages · PPTX: up to 50 slides · 15 MB per file</p>
+                    <p style="font-size:11px;color:var(--text-secondary,#888);margin:0 0 12px;">Up to 8 files · PDF: up to 30 pages · PPTX: up to 50 slides · 20 MB per file</p>
                     <label for="flashcardAiInstructions" style="display:block;font-size:13px;margin-bottom:5px;">Instructions for the AI (optional)</label>
                     <textarea id="flashcardAiInstructions" rows="3" placeholder="e.g. Only use highlighted parts. Focus on definitions and dates. Skip examples. Make the questions difficult." style="width:100%;box-sizing:border-box;margin-bottom:12px;resize:vertical;"></textarea>
                     <p style="font-size:12px;color:var(--text-secondary,#888);margin:-6px 0 12px;">Tell the AI what to include, skip, or how difficult the quiz should be.</p>
@@ -22031,7 +22031,7 @@ document.documentElement.classList.toggle(
             if (!files.length) { flashcardAiStatus.textContent = "Choose at least one photo, PDF, or PowerPoint file first."; return; }
             if (files.length > 8) { flashcardAiStatus.textContent = "Please select 8 files or fewer at a time."; return; }
             for (const file of files) {
-                if (file.size > 15 * 1024 * 1024) { flashcardAiStatus.textContent = file.name + " is larger than 15 MB. Please choose a smaller file."; return; }
+                if (file.size > 20 * 1024 * 1024) { flashcardAiStatus.textContent = file.name + " is larger than 20 MB. Please choose a smaller file."; return; }
                 if (flashcardAiFileKind(file) === "unsupported") { flashcardAiStatus.textContent = "Unsupported file: " + file.name + ". Choose an image, PDF, or PPTX file."; return; }
             }
             const count = Number(document.getElementById("flashcardAiCount").value) || 6;
