@@ -21973,13 +21973,8 @@ document.documentElement.classList.toggle(
                 if (!response.ok) {
                     const body = await response.text().catch(() => "");
                     let detail = body;
-                    try {
-                        const parsed = JSON.parse(body);
-                        // The Worker intentionally keeps a safe summary in message
-                        // and the upstream provider's actionable response in details.
-                        detail = parsed.details || parsed.detail || parsed.message || parsed.error || body;
-                    } catch (_) {}
-                    throw new Error("AI service error (HTTP " + response.status + "): " + String(detail || response.statusText).slice(0, 650));
+                    try { const parsed = JSON.parse(body); detail = parsed.message || parsed.error || parsed.detail || body; } catch (_) {}
+                    throw new Error("AI service error (HTTP " + response.status + "): " + String(detail || response.statusText).slice(0, 260));
                 }
                 let raw = "";
                 if (response.body && typeof response.body.getReader === "function") {
