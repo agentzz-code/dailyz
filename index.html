@@ -8207,6 +8207,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         import {
             getFirestore,
             enableIndexedDbPersistence,
+            enableMultiTabIndexedDbPersistence,
             doc,
             setDoc,
             getDoc,
@@ -8216,7 +8217,9 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             updateDoc,
             onSnapshot,
             query,
-            orderBy
+            orderBy,
+            getDocs,
+            where
         } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 
@@ -8318,8 +8321,15 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         const db =
             getFirestore(app, "default");
 
-        enableIndexedDbPersistence(db).catch((err) => {
-            console.error("Offline caching error:", err);
+        // Multi-tab persistence prevents the first open tab from blocking
+        // IndexedDB sync in a second tab on the same browser profile.
+        enableMultiTabIndexedDbPersistence(db).catch((err) => {
+            console.warn("Multi-tab offline cache unavailable; trying single-tab persistence:", err);
+            enableIndexedDbPersistence(db).catch((fallbackError) => {
+                // Firestore's live listeners/writes still work online when
+                // browser persistence is unavailable or already owned.
+                console.error("Offline caching unavailable; live cloud sync remains enabled:", fallbackError);
+            });
         });
 
 
@@ -8398,6 +8408,15 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             "dailykrd_dashboard_layouts",
             "dailykrd_welcomed",
             "dailykrd_haptic_enabled",
+            // Additional app data and statistics that must follow the account.
+            "dailykrd_events",
+            "dailykrd_flashcards",
+            "dailykrd_session_goals_by_subject",
+            "dailykrd_progress_streak_v1",
+            "dailykrd_study_video_background_v1",
+            "dailykrd_proactive",
+            "dailykrd_ai_websearch",
+            "dailykrd_sound_feedback",
             // AI preferences belong here; chat histories use their own per-chat collection.
             "dailykrd_horizon_ai_settings_v3",
             "dailykrd_horizon_ai_chat_memory_context_v1"
@@ -8405,6 +8424,44 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
         const SYNCED_KEY_SET =
             new Set(SYNCED_STORAGE_KEYS);
+
+        // Sync every account-owned Horizon data key, not only the original
+        // hand-maintained list. This captures stats, calendar events,
+        // flashcards, streaks, per-subject goals, study media preferences,
+        // proactive settings, and future dailykrd_* app data automatically.
+        // Device bookkeeping, guest-only data, and AI chats are excluded:
+        // chats have their own per-conversation Firestore sync path.
+        const SYNCED_STORAGE_EXCLUSIONS = new Set([
+            "dailykrd_device_id",
+            "dailykrd_sync_stamps",
+            "dailykrd_sync_layout",
+            "dailykrd_sync_path",
+            "dailykrd_guest_tasks",
+            "dailykrd_horizon_ai_chats_v1",
+            "dailykrd_horizon_atlas_chats_v1",
+            "dailykrd_horizon_ai_chat_owner",
+            "dailykrd_atlas_chat_owner"
+        ]);
+
+        function isSyncedStorageKey(key) {
+            return typeof key === "string" && key.startsWith("dailykrd_") &&
+                !SYNCED_STORAGE_EXCLUSIONS.has(key) &&
+                !key.startsWith("dailykrd_sync_") &&
+                !key.endsWith("_chat_owner");
+        }
+
+        function getSyncedStorageKeys() {
+            const keys = new Set(SYNCED_STORAGE_KEYS);
+            try {
+                for (let i = 0; i < window.localStorage.length; i++) {
+                    const key = window.localStorage.key(i);
+                    if (isSyncedStorageKey(key)) keys.add(key);
+                }
+            } catch (error) {
+                console.warn("[Horizon sync] Could not enumerate local app data:", error);
+            }
+            return [...keys].filter(isSyncedStorageKey);
+        }
 
         // History-shaped values are union-merged instead of replaced so study
         // time recorded on two devices is never dropped.
@@ -8709,7 +8766,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             const isSyncedKey =
                 isLocalStorage &&
-                SYNCED_KEY_SET.has(key);
+                isSyncedStorageKey(String(key));
 
             const previous =
                 isSyncedKey
@@ -8734,7 +8791,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             const isSyncedKey =
                 isLocalStorage &&
-                SYNCED_KEY_SET.has(key);
+                isSyncedStorageKey(String(key));
 
             const previous =
                 isSyncedKey
@@ -8755,7 +8812,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         // Keep multiple tabs on the same browser profile coherent too. The
         // storage event fires in the *other* tab when a synced key changes.
         window.addEventListener("storage", event => {
-            if (event.storageArea !== window.localStorage || !SYNCED_KEY_SET.has(event.key)) return;
+            if (event.storageArea !== window.localStorage || !isSyncedStorageKey(event.key)) return;
             setSyncStamp(event.key, Date.now(), currentUser ? currentUser.uid : null);
             saveSyncStamps();
             if (currentUser) {
@@ -9450,7 +9507,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 const key =
                     "dailykrd_" + item.id;
 
-                if (!SYNCED_KEY_SET.has(key)) return;
+                if (!isSyncedStorageKey(key)) return;
 
                 const data =
                     item.data() || {};
@@ -9487,7 +9544,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 const key =
                     "dailykrd_" + id;
 
-                if (!SYNCED_KEY_SET.has(key)) return;
+                if (!isSyncedStorageKey(key)) return;
 
                 const entry =
                     state[id] || {};
@@ -9590,7 +9647,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
                 appstateLocalMergeDone = true;
 
-                SYNCED_STORAGE_KEYS.forEach(key => {
+                getSyncedStorageKeys().forEach(key => {
 
                     if (remoteKeys.has(key)) return;
 
@@ -9824,6 +9881,35 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
             return (mode === "atlas" ? "atlas_" : "horizon_") + String(chatId).replace(/[^A-Za-z0-9_-]/g, "_");
         }
 
+        // Firestore documents are limited to 1 MiB. Store each conversation's
+        // serialized message array in small sibling documents so one logical
+        // conversation can safely reach 5 MiB without exceeding that limit.
+        const AI_CHAT_MAX_PAYLOAD_BYTES = 5 * 1024 * 1024;
+        const AI_CHAT_CHUNK_MAX_BYTES = 700 * 1024;
+        const aiChatTextEncoder = new TextEncoder();
+
+        function aiSplitUtf8Payload(value) {
+            const chunks = [];
+            let current = "";
+            let currentBytes = 0;
+            for (const character of value) {
+                const bytes = aiChatTextEncoder.encode(character).length;
+                if (current && currentBytes + bytes > AI_CHAT_CHUNK_MAX_BYTES) {
+                    chunks.push(current);
+                    current = "";
+                    currentBytes = 0;
+                }
+                current += character;
+                currentBytes += bytes;
+            }
+            if (current || !chunks.length) chunks.push(current);
+            return chunks;
+        }
+
+        function aiChatChunkDocId(baseId, index) {
+            return baseId + "__chunk_" + String(index).padStart(4, "0");
+        }
+
         function aiMergeChatArrays(localChats, remoteChats) {
             const byId = new Map();
             for (const chat of [...(localChats || []), ...(remoteChats || [])]) {
@@ -9871,12 +9957,43 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 const generation = aiChatSyncWriteGeneration[safeMode];
                 if (!uid || !currentUser || currentUser.uid !== uid) return;
                 try {
-                    const writes = snapshot.map(chat => setDoc(
-                        doc(db, "users", uid, AI_CHAT_CLOUD_COLLECTION, aiChatCloudDocId(safeMode, chat.id)),
-                        { id: chat.id, mode: safeMode, title: String(chat.title || "New chat").slice(0, 100), messages: chat.deleted ? [] : chat.messages, updatedAt: Number(chat.updatedAt) || Date.now(), pinned: !!chat.pinned, deleted: !!chat.deleted, device: getSyncDeviceId() },
-                        { merge: true }
-                    ));
-                    await Promise.all(writes);
+                    for (const chat of snapshot) {
+                        const baseId = aiChatCloudDocId(safeMode, chat.id);
+                        const parentRef = doc(db, "users", uid, AI_CHAT_CLOUD_COLLECTION, baseId);
+                        const messages = chat.deleted ? [] : chat.messages;
+                        const payload = JSON.stringify(messages);
+                        const payloadBytes = aiChatTextEncoder.encode(payload).length;
+                        if (payloadBytes > AI_CHAT_MAX_PAYLOAD_BYTES) {
+                            throw new Error("CHAT_SYNC_LIMIT_EXCEEDED: this conversation is " + (payloadBytes / (1024 * 1024)).toFixed(2) + " MiB; the per-conversation cloud limit is 5 MiB. Shorten or split this conversation before syncing.");
+                        }
+                        const chunks = aiSplitUtf8Payload(payload);
+                        // Write chunks first. The manifest is written last, so a
+                        // receiving device never treats a partial upload as complete.
+                        await Promise.all(chunks.map((chunk, index) => setDoc(
+                            doc(db, "users", uid, AI_CHAT_CLOUD_COLLECTION, aiChatChunkDocId(baseId, index)),
+                            { type: "chunk", chatId: chat.id, mode: safeMode, index, payload: chunk, device: getSyncDeviceId() }
+                        )));
+                        await setDoc(parentRef, {
+                            type: "manifest", id: chat.id, mode: safeMode,
+                            title: String(chat.title || "New chat").slice(0, 100),
+                            chunkCount: chunks.length, payloadBytes,
+                            updatedAt: Number(chat.updatedAt) || Date.now(),
+                            pinned: !!chat.pinned, deleted: !!chat.deleted,
+                            device: getSyncDeviceId()
+                        });
+                        // Remove obsolete chunks when a conversation becomes
+                        // shorter, without relying on a composite Firestore index.
+                        const existingChunks = await getDocs(query(
+                            collection(db, "users", uid, AI_CHAT_CLOUD_COLLECTION),
+                            where("chatId", "==", chat.id)
+                        ));
+                        const stale = [];
+                        existingChunks.forEach(chunkDoc => {
+                            const data = chunkDoc.data() || {};
+                            if (data.type === "chunk" && Number(data.index) >= chunks.length) stale.push(deleteDoc(chunkDoc.ref));
+                        });
+                        if (stale.length) await Promise.all(stale);
+                    }
                     if (generation === aiChatSyncWriteGeneration[safeMode]) {
                         aiChatSyncPending = !!aiChatSyncTimers.horizon || !!aiChatSyncTimers.atlas;
                         refreshSyncStatus();
@@ -9899,12 +10016,40 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
         function applyRemoteAiChatSnapshot(uid, snapshot) {
             if (!currentUser || currentUser.uid !== uid || aiChatSyncUid !== uid) return;
             const remoteByMode = { horizon: [], atlas: [] };
+            const manifests = new Map();
+            const chunksByBase = new Map();
             snapshot.forEach(item => {
                 const data = item.data() || {};
+                if (data.type === "chunk" && typeof data.chatId === "string") {
+                    const baseId = aiChatCloudDocId(data.mode, data.chatId);
+                    if (!chunksByBase.has(baseId)) chunksByBase.set(baseId, []);
+                    chunksByBase.get(baseId)[Number(data.index) || 0] = data.payload || "";
+                    return;
+                }
                 const mode = data.mode === "atlas" ? "atlas" : data.mode === "horizon" ? "horizon" : null;
-                if (!mode || typeof data.id !== "string" || !Array.isArray(data.messages)) return;
-                remoteByMode[mode].push({ id: data.id, title: data.title || "New chat", messages: data.deleted ? [] : data.messages, updatedAt: Number(data.updatedAt) || 0, pinned: !!data.pinned, deleted: !!data.deleted });
+                if (!mode || typeof data.id !== "string") return;
+                // Older deployments stored the full messages array in the
+                // parent document; continue reading those documents forever.
+                if (Array.isArray(data.messages)) {
+                    remoteByMode[mode].push({ id: data.id, title: data.title || "New chat", messages: data.deleted ? [] : data.messages, updatedAt: Number(data.updatedAt) || 0, pinned: !!data.pinned, deleted: !!data.deleted });
+                    return;
+                }
+                if (data.type === "manifest") manifests.set(aiChatCloudDocId(mode, data.id), { ...data, mode });
             });
+            for (const [baseId, manifest] of manifests) {
+                const count = Math.max(0, Number(manifest.chunkCount) || 0);
+                const chunks = chunksByBase.get(baseId) || [];
+                if (chunks.length < count || chunks.slice(0, count).some(part => typeof part !== "string")) continue;
+                try {
+                    const payload = chunks.slice(0, count).join("");
+                    if (aiChatTextEncoder.encode(payload).length > AI_CHAT_MAX_PAYLOAD_BYTES) continue;
+                    const messages = JSON.parse(payload);
+                    if (!Array.isArray(messages)) continue;
+                    remoteByMode[manifest.mode].push({ id: manifest.id, title: manifest.title || "New chat", messages: manifest.deleted ? [] : messages, updatedAt: Number(manifest.updatedAt) || 0, pinned: !!manifest.pinned, deleted: !!manifest.deleted });
+                } catch (error) {
+                    console.warn("[Horizon AI chat sync] incomplete or invalid chunked conversation:", manifest.id, error);
+                }
+            }
             for (const mode of ["horizon", "atlas"]) {
                 const key = aiChatStorageKeyForMode(mode);
                 let local = [];
@@ -10004,7 +10149,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
                 writtenThisSession: appstateWrittenTotal,
                 queued: [...appstateDirty],
 
-                keys: SYNCED_STORAGE_KEYS.map(key => ({
+                keys: getSyncedStorageKeys().map(key => ({
                     key: key,
                     hasLocalValue: rawStorageRead(key) !== null,
                     localStamp: syncStampTime(key),
@@ -10018,7 +10163,7 @@ html[data-horizon-motion="expressive"] .horizon-quick-action:hover { transform:t
 
             if (!currentUser) return "not signed in";
 
-            SYNCED_STORAGE_KEYS.forEach(key => {
+            getSyncedStorageKeys().forEach(key => {
 
                 if (rawStorageRead(key) === null) return;
 
@@ -25911,7 +26056,7 @@ document.documentElement.classList.toggle(
             const files = Array.from(fileList || []);
             if (!files.length) return;
             const archives = files.filter(aiIsArchiveFile);
-            const ordinary = files.filter((f) => !aiIsZipFile(f));
+            const ordinary = files.filter((f) => !aiIsArchiveFile(f));
             if (archives.length) {
                 aiAppendTextMessage("Atlas no longer uses project ZIPs or GitHub execution. Please extract the archive on your device and attach the specific source files you want me to inspect or fix. No ZIP was uploaded.", true);
             }
