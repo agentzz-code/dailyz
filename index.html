@@ -28025,7 +28025,7 @@ document.documentElement.classList.toggle(
                         throw new Error((tokenData.message||"Could not create a secure Gemini Live session.")+diagnostic+reason);
                     }
                     setStatus("Connecting to Horizon Live…", "");
-                    const url="wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token="+encodeURIComponent(tokenData.token);
+                    const url="wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token="+encodeURIComponent(tokenData.token);
                     await new Promise((resolve,reject)=>{
                         const ws=new WebSocket(url);this.ws=ws;let settled=false,opened=false,socketError=false,lastServerMessage="";
                         const finishError=message=>{if(settled)return;settled=true;clearTimeout(timeout);reject(new Error(message));};
