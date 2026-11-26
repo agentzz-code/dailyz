@@ -28019,7 +28019,11 @@ document.documentElement.classList.toggle(
                     const aiConfig={tone:aiSettings.tone,detail:aiSettings.detail,memory:[aiSettings.memory,aiBuildCrossChatContext()].filter(Boolean).join("\n\n").slice(0,3000),permission:aiSettings.permission,rules:aiSettings.rules,context:aiBuildContext()};
                     const response=await fetch(AI_ENDPOINT.replace(/\/+$/,"")+"/voice-token",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},body:JSON.stringify({aiConfig,voice:this.voice})});
                     const tokenData=await response.json().catch(()=>({}));
-                    if(!response.ok||!tokenData.token)throw new Error(tokenData.message||"Could not create a secure Gemini Live session.");
+                    if(!response.ok||!tokenData.token){
+                        const diagnostic=tokenData.providerStatus?" (Google HTTP "+tokenData.providerStatus+(tokenData.providerStatusText?" · "+tokenData.providerStatusText:"")+")":"";
+                        const reason=Array.isArray(tokenData.providerReason)&&tokenData.providerReason.length?" · "+tokenData.providerReason.join(", "):"";
+                        throw new Error((tokenData.message||"Could not create a secure Gemini Live session.")+diagnostic+reason);
+                    }
                     setStatus("Connecting to Horizon Live…", "");
                     const url="wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token="+encodeURIComponent(tokenData.token);
                     await new Promise((resolve,reject)=>{
