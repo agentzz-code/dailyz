@@ -24255,6 +24255,7 @@ document.documentElement.classList.toggle(
                 aria-label="Dictate by voice"
                 title="Dictate by voice"
             >🎤</button>
+            <button type="button" class="aiMicBtn aiGhostBtn" id="aiLiveBtn" aria-label="Start Horizon Live voice conversation" title="Horizon Live — real-time voice conversation">◉</button>
             <input
                 id="aiInput"
                 type="text"
@@ -27960,6 +27961,123 @@ document.documentElement.classList.toggle(
                 } catch (e) {}
             }
         }
+
+        /* =====================================================
+           HORIZON LIVE — native Gemini Live audio engine
+           Uses the existing AI settings, Firebase Auth bridge,
+           Cloudflare Worker and chat-history pipeline.
+           ===================================================== */
+        (function initHorizonLive() {
+            const liveBtn = document.getElementById("aiLiveBtn");
+            if (!liveBtn) return;
+            const LIVE_VOICE_KEY = "horizon_live_voice_v1";
+            const LIVE_MODE_KEY = "horizon_live_mode_v1";
+            const VOICES = ["Kore", "Aoede", "Charon", "Fenrir", "Puck", "Leda", "Orus", "Zephyr"];
+            let live = null;
+
+            const style = document.createElement("style");
+            style.textContent = `
+              #horizonLiveOverlay{position:fixed;inset:0;z-index:100500;background:rgba(8,10,18,.94);color:#f7f8fc;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(22px)}
+              #horizonLiveOverlay.open{display:flex}
+              #horizonLivePanel{width:min(620px,100%);max-height:calc(100dvh - 32px);overflow:auto;border:1px solid rgba(255,255,255,.13);border-radius:28px;background:linear-gradient(155deg,rgba(36,42,62,.98),rgba(15,18,30,.99));box-shadow:0 28px 90px rgba(0,0,0,.45);padding:24px;display:flex;flex-direction:column;align-items:center;gap:18px}
+              #horizonLivePanel h2{margin:0;font:650 22px/1.2 system-ui}#horizonLiveSub{color:#aeb7cb;font:13px system-ui;text-align:center}
+              #horizonLiveOrb{width:154px;height:154px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#d9e6ff 0,#8b9dff 16%,#6475e8 38%,#303b85 68%,#171d42 100%);box-shadow:0 0 0 12px rgba(122,143,255,.08),0 0 65px rgba(112,130,255,.35);transition:transform .25s,filter .25s}
+              #horizonLiveOrb.listening{animation:hLivePulse 1.8s ease-in-out infinite}#horizonLiveOrb.speaking{animation:hLiveSpeak .65s ease-in-out infinite alternate;filter:brightness(1.25)}
+              @keyframes hLivePulse{50%{transform:scale(1.045);box-shadow:0 0 0 20px rgba(122,143,255,.04),0 0 80px rgba(112,130,255,.5)}}@keyframes hLiveSpeak{to{transform:scale(1.09);filter:brightness(1.5)}}
+              #horizonLiveStatus{font:600 14px system-ui;color:#dce4ff;min-height:20px}#horizonLiveTranscript{width:100%;min-height:72px;max-height:150px;overflow:auto;padding:13px 15px;border-radius:15px;background:rgba(255,255,255,.06);color:#d8deed;font:13px/1.5 system-ui;white-space:pre-wrap}
+              .hLiveControls{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;width:100%}.hLiveControls button,.hLiveControls select{border:1px solid rgba(255,255,255,.16);border-radius:12px;background:rgba(255,255,255,.09);color:#fff;padding:11px 14px;font:600 13px system-ui;min-height:42px}.hLiveControls button:disabled{opacity:.4}.hLiveControls .end{background:#b83e50;border-color:#b83e50}.hLiveControls .primary{background:#6579ed;border-color:#6579ed}#horizonLivePTT{width:100%;max-width:310px;min-height:58px;border-radius:18px;background:#6579ed;border:0;color:white;font:700 15px system-ui;touch-action:none;user-select:none}
+              #horizonLiveClose{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:white;font-size:20px}
+              @media(max-width:480px){#horizonLivePanel{padding:18px;border-radius:22px}#horizonLiveOrb{width:132px;height:132px}}
+            `;
+            document.head.appendChild(style);
+            const overlay = document.createElement("div");
+            overlay.id = "horizonLiveOverlay";
+            overlay.innerHTML = `<button id="horizonLiveClose" type="button" aria-label="Close Horizon Live">×</button><section id="horizonLivePanel" role="dialog" aria-modal="true" aria-labelledby="horizonLiveTitle"><h2 id="horizonLiveTitle">Horizon Live</h2><div id="horizonLiveSub">Real-time voice conversation</div><div id="horizonLiveOrb" aria-hidden="true"></div><div id="horizonLiveStatus" role="status" aria-live="polite">Ready to connect</div><div id="horizonLiveTranscript" aria-live="polite">Your live captions will appear here.</div><div class="hLiveControls"><select id="horizonLiveMode" aria-label="Conversation mode"><option value="live">Full Live Conversation</option><option value="ptt">Push-to-Talk</option></select><select id="horizonLiveVoice" aria-label="AI voice"></select><button id="horizonLiveStart" class="primary" type="button">Start conversation</button><button id="horizonLiveMute" type="button" disabled>Mute microphone</button><button id="horizonLiveEnd" class="end" type="button" disabled>End conversation</button></div><button id="horizonLivePTT" type="button" hidden>Hold to talk</button><div id="horizonLiveFootnote" style="color:#9da8c0;font:11px/1.4 system-ui;text-align:center">Microphone audio is streamed for the live session. Audio recordings are not saved by Horizon.</div></section>`;
+            document.body.appendChild(overlay);
+            const $ = id => document.getElementById(id);
+            const voiceSelect = $("horizonLiveVoice"), modeSelect = $("horizonLiveMode");
+            VOICES.forEach(v => { const o=document.createElement("option");o.value=v;o.textContent=v;voiceSelect.appendChild(o); });
+            try { voiceSelect.value = VOICES.includes(localStorage.getItem(LIVE_VOICE_KEY)) ? localStorage.getItem(LIVE_VOICE_KEY) : "Kore"; modeSelect.value = localStorage.getItem(LIVE_MODE_KEY)==="ptt"?"ptt":"live"; } catch (_) {}
+
+            function setStatus(text, state) { $("horizonLiveStatus").textContent=text; $("horizonLiveOrb").className=state||""; }
+            function setTranscript(text) { $("horizonLiveTranscript").textContent=text || "Your live captions will appear here."; $("horizonLiveTranscript").scrollTop=$("horizonLiveTranscript").scrollHeight; }
+            function setControls(connected) { $("horizonLiveStart").disabled=connected;$("horizonLiveEnd").disabled=!connected;$("horizonLiveMute").disabled=!connected;modeSelect.disabled=connected;voiceSelect.disabled=connected;$("horizonLivePTT").hidden=!(connected&&modeSelect.value==="ptt"); }
+            function base64FromBytes(bytes) { let binary="";const chunk=0x8000;for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));return btoa(binary); }
+            function bytesFromBase64(value) { const raw=atob(value);const out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out; }
+            function resampleTo16k(input, sourceRate) { if(sourceRate===16000)return input;const ratio=sourceRate/16000;const length=Math.floor(input.length/ratio);const out=new Float32Array(length);for(let i=0;i<length;i++){const start=Math.floor(i*ratio),end=Math.min(Math.floor((i+1)*ratio),input.length);let sum=0;for(let j=start;j<end;j++)sum+=input[j];out[i]=sum/Math.max(1,end-start);}return out; }
+            function floatToPcm16(float32) { const out=new Int16Array(float32.length);for(let i=0;i<float32.length;i++){const s=Math.max(-1,Math.min(1,float32[i]));out[i]=s<0?s*32768:s*32767;}return new Uint8Array(out.buffer); }
+
+            class HorizonLiveEngine {
+                constructor(){this.ws=null;this.stream=null;this.audioContext=null;this.source=null;this.processor=null;this.silentGain=null;this.connected=false;this.ready=false;this.muted=false;this.mode="live";this.transcript=[];this.playAt=0;this.outputSources=new Set();this.startedAt=0;this.inputText="";this.outputText="";this.closing=false;}
+                async start(){
+                    if(this.connected)return;
+                    if(!navigator.mediaDevices?.getUserMedia||!window.WebSocket){throw new Error("Live voice requires a supported browser and microphone permission.");}
+                    if(typeof window.__horizonGetFirebaseIdToken!=="function")throw new Error("Horizon sign-in is required to start a protected Live session.");
+                    this.mode=modeSelect.value;this.voice=voiceSelect.value;this.transcript=[];this.inputText="";this.outputText="";this.closing=false;this.startedAt=Date.now();
+                    setStatus("Requesting secure session…", "");
+                    const idToken=await window.__horizonGetFirebaseIdToken();
+                    const aiConfig={tone:aiSettings.tone,detail:aiSettings.detail,memory:[aiSettings.memory,aiBuildCrossChatContext()].filter(Boolean).join("\n\n").slice(0,3000),permission:aiSettings.permission,rules:aiSettings.rules,context:aiBuildContext()};
+                    const response=await fetch(AI_ENDPOINT.replace(/\/+$/,"")+"/voice-token",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+idToken},body:JSON.stringify({aiConfig,voice:this.voice})});
+                    const tokenData=await response.json().catch(()=>({}));
+                    if(!response.ok||!tokenData.token)throw new Error(tokenData.message||"Could not create a secure Gemini Live session.");
+                    setStatus("Connecting to Horizon Live…", "");
+                    const url="wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token="+encodeURIComponent(tokenData.token);
+                    await new Promise((resolve,reject)=>{
+                        const ws=new WebSocket(url);this.ws=ws;let settled=false;
+                        const timeout=setTimeout(()=>{if(!settled){settled=true;try{ws.close();}catch(_){}reject(new Error("Gemini Live connection timed out."));}},15000);
+                        ws.onopen=()=>{ws.send(JSON.stringify({setup:{model:tokenData.model||"models/gemini-3.8-live",...(tokenData.sessionConfig||{})}}));};
+                        ws.onmessage=event=>{let data;try{data=JSON.parse(event.data);}catch(_){return;}if(data.setupComplete&&!settled){settled=true;clearTimeout(timeout);this.connected=true;this.ready=true;resolve();}this.handleMessage(data);};
+                        ws.onerror=()=>{if(!settled){settled=true;clearTimeout(timeout);reject(new Error("Could not establish the Gemini Live connection. Check model access and API configuration."));}};
+                        ws.onclose=event=>{if(!settled){settled=true;clearTimeout(timeout);reject(new Error("Gemini Live closed before setup completed (code "+event.code+")."));}else if(!this.closing){this.connected=false;this.ready=false;this.stopAudio();setStatus("Connection ended. Start a new session to continue.","");setControls(false);}};
+                    });
+                    await this.startAudio();
+                    setControls(true);setStatus(this.mode==="ptt"?"Connected — hold to talk":"Listening…","listening");
+                    if(this.mode==="ptt")this.stopCapture();
+                }
+                handleMessage(data){
+                    if(data.serverContent){const c=data.serverContent;
+                        if(c.interrupted){this.stopPlayback();setStatus("Listening…","listening");}
+                        if(c.inputTranscription?.text){this.inputText+=c.inputTranscription.text;this.updateCaption("You",c.inputTranscription.text);}
+                        if(c.outputTranscription?.text){this.outputText+=c.outputTranscription.text;this.updateCaption("Horizon",c.outputTranscription.text);}
+                        const parts=c.modelTurn?.parts||[];for(const part of parts){if(part.inlineData?.data)this.playPcm(part.inlineData.data,part.inlineData.mimeType||"audio/pcm;rate=24000");}
+                        if(c.turnComplete){setStatus(this.mode==="ptt"?"Ready — hold to talk":"Listening…",this.mode==="ptt"?"":"listening");}
+                        else if(parts.length)setStatus("Horizon is speaking…","speaking");
+                    }
+                    if(data.goAway){setStatus("This connection is approaching its time limit. End and reconnect to continue.","");}
+                }
+                updateCaption(who,text){const clean=String(text||"").trim();if(!clean)return;this.transcript.push({role:who==="You"?"user":"assistant",content:clean});setTranscript(this.transcript.slice(-12).map(x=>(x.role==="user"?"You: ":"Horizon: ")+x.content).join("\n\n"));}
+                async startAudio(){
+                    this.stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+                    const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error("Web Audio is not supported in this browser.");
+                    this.audioContext=new Ctx();await this.audioContext.resume();this.source=this.audioContext.createMediaStreamSource(this.stream);
+                    this.processor=this.audioContext.createScriptProcessor(4096,1,1);this.silentGain=this.audioContext.createGain();this.silentGain.gain.value=0;
+                    this.processor.onaudioprocess=e=>{if(!this.connected||!this.ready||this.muted||!this.capturing||this.ws?.readyState!==WebSocket.OPEN)return;const samples=resampleTo16k(e.inputBuffer.getChannelData(0),this.audioContext.sampleRate);const pcm=floatToPcm16(samples);this.send({realtimeInput:{mediaChunks:[{mimeType:"audio/pcm;rate=16000",data:base64FromBytes(pcm)}]}});};
+                    this.source.connect(this.processor);this.processor.connect(this.silentGain);this.silentGain.connect(this.audioContext.destination);
+                    this.capturing=this.mode==="live";
+                }
+                startCapture(){if(!this.connected||this.mode!=="ptt")return;this.capturing=true;setStatus("Listening…","listening");}
+                stopCapture(){this.capturing=false;if(this.connected&&this.ws?.readyState===WebSocket.OPEN)this.send({realtimeInput:{audioStreamEnd:true}});}
+                send(value){if(this.ws?.readyState===WebSocket.OPEN)this.ws.send(JSON.stringify(value));}
+                playPcm(encoded,mime){if(!this.audioContext)return;const rate=Number((String(mime).match(/rate=(\d+)/)||[])[1]||24000);const bytes=bytesFromBase64(encoded);const pcm=new Int16Array(bytes.buffer,bytes.byteOffset,Math.floor(bytes.byteLength/2));const samples=new Float32Array(pcm.length);for(let i=0;i<pcm.length;i++)samples[i]=pcm[i]/32768;const buffer=this.audioContext.createBuffer(1,samples.length,rate);buffer.copyToChannel(samples,0);const src=this.audioContext.createBufferSource();src.buffer=buffer;src.connect(this.audioContext.destination);const start=Math.max(this.audioContext.currentTime+0.02,this.playAt);this.playAt=start+buffer.duration;this.outputSources.add(src);src.onended=()=>this.outputSources.delete(src);src.start(start);}
+                stopPlayback(){for(const src of this.outputSources){try{src.stop();}catch(_){}}this.outputSources.clear();this.playAt=this.audioContext?.currentTime||0;}
+                stopAudio(){this.capturing=false;try{this.processor?.disconnect();this.source?.disconnect();this.silentGain?.disconnect();}catch(_){}try{this.stream?.getTracks().forEach(t=>t.stop());}catch(_){}try{this.audioContext?.close();}catch(_){}this.stream=null;this.audioContext=null;this.processor=null;this.source=null;this.silentGain=null;this.stopPlayback();}
+                async end(){this.closing=true;this.connected=false;this.ready=false;this.stopAudio();try{this.ws?.close(1000,"User ended session");}catch(_){}this.ws=null;setControls(false);setStatus("Conversation ended","");}
+            }
+
+            async function openLive(){overlay.classList.add("open");document.body.style.overflow="hidden";setTranscript("");setControls(false);setStatus("Ready to connect","");modeSelect.disabled=false;voiceSelect.disabled=false;}
+            async function startLive(){if(live)return;try{live=new HorizonLiveEngine();await live.start();}catch(error){await live?.end().catch(()=>{});live=null;setControls(false);setStatus(error.message||"Could not start Horizon Live","");}}
+            async function closeLive(){if(live){const session=live;await session.end();live=null;const entries=session.transcript.slice();if(entries.length&&confirm("Save this Live conversation to your current Horizon AI chat?")){const updated=aiConversationHistory.concat(entries).slice(-AI_HISTORY_LIMIT*2);aiConversationHistory=updated;aiSaveHistory(updated);aiRenderCurrentChat();aiRenderChatLists();}}overlay.classList.remove("open");document.body.style.overflow="";}
+            liveBtn.addEventListener("click",openLive);
+            $("horizonLiveClose").addEventListener("click",closeLive);$("horizonLiveEnd").addEventListener("click",closeLive);$("horizonLiveStart").addEventListener("click",startLive);
+            $("horizonLiveMute").addEventListener("click",()=>{if(!live)return;live.muted=!live.muted;$("horizonLiveMute").textContent=live.muted?"Unmute microphone":"Mute microphone";});
+            modeSelect.addEventListener("change",()=>{try{localStorage.setItem(LIVE_MODE_KEY,modeSelect.value);}catch(_){}if(live&&live.connected){setStatus("End the current session to change modes.","");modeSelect.value=live.mode;return;}$("horizonLivePTT").hidden=modeSelect.value!=="ptt";});
+            voiceSelect.addEventListener("change",()=>{try{localStorage.setItem(LIVE_VOICE_KEY,voiceSelect.value);}catch(_){}});
+            const ptt=$("horizonLivePTT");const pttDown=e=>{if(!live||live.mode!=="ptt")return;e.preventDefault();live.startCapture();ptt.textContent="Listening…";};const pttUp=e=>{if(!live||live.mode!=="ptt")return;e.preventDefault();live.stopCapture();ptt.textContent="Hold to talk";};
+            ptt.addEventListener("pointerdown",pttDown);["pointerup","pointercancel","lostpointercapture","pointerleave"].forEach(type=>ptt.addEventListener(type,pttUp));
+            overlay.addEventListener("click",e=>{if(e.target===overlay)closeLive();});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&overlay.classList.contains("open"))closeLive();});
+            window.addEventListener("pagehide",()=>{if(live)live.end();});
+            setControls(false);
+        })();
     </script>
     <script>
         /* Small, local session-goal layer for the focus-room controls. */
