@@ -28027,12 +28027,44 @@ document.documentElement.classList.toggle(
                     setStatus("Connecting to Horizon Live…", "");
                     const url="wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token="+encodeURIComponent(tokenData.token);
                     await new Promise((resolve,reject)=>{
-                        const ws=new WebSocket(url);this.ws=ws;let settled=false;
-                        const timeout=setTimeout(()=>{if(!settled){settled=true;try{ws.close();}catch(_){}reject(new Error("Gemini Live connection timed out."));}},15000);
-                        ws.onopen=()=>{ws.send(JSON.stringify({setup:{model:tokenData.model||"models/gemini-3.8-live",...(tokenData.sessionConfig||{})}}));};
-                        ws.onmessage=event=>{let data;try{data=JSON.parse(event.data);}catch(_){return;}if(data.setupComplete&&!settled){settled=true;clearTimeout(timeout);this.connected=true;this.ready=true;resolve();}this.handleMessage(data);};
-                        ws.onerror=()=>{if(!settled){settled=true;clearTimeout(timeout);reject(new Error("Could not establish the Gemini Live connection. Check model access and API configuration."));}};
-                        ws.onclose=event=>{if(!settled){settled=true;clearTimeout(timeout);reject(new Error("Gemini Live closed before setup completed (code "+event.code+")."));}else if(!this.closing){this.connected=false;this.ready=false;this.stopAudio();setStatus("Connection ended. Start a new session to continue.","");setControls(false);}};
+                        const ws=new WebSocket(url);this.ws=ws;let settled=false,opened=false,socketError=false,lastServerMessage="";
+                        const finishError=message=>{if(settled)return;settled=true;clearTimeout(timeout);reject(new Error(message));};
+                        const timeout=setTimeout(()=>{
+                            if(!settled){
+                                const detail=opened
+                                    ? "The WebSocket opened, but Google did not send setupComplete within 30 seconds."
+                                    : "The WebSocket handshake did not open within 30 seconds.";
+                                const state=" WebSocket state: "+ws.readyState+".";
+                                const server=lastServerMessage?" Last server message: "+lastServerMessage:"";
+                                settled=true;try{ws.close();}catch(_){}
+                                reject(new Error("Gemini Live connection timed out. "+detail+state+(socketError?" A socket error was also reported.":"")+server));
+                            }
+                        },30000);
+                        ws.onopen=()=>{
+                            opened=true;
+                            try{ws.send(JSON.stringify({setup:{model:tokenData.model||"models/gemini-3.8-live",...(tokenData.sessionConfig||{})}}));}
+                            catch(error){finishError("Gemini Live setup could not be sent: "+(error?.message||String(error)));}
+                        };
+                        ws.onmessage=event=>{
+                            let data;try{data=JSON.parse(event.data);}catch(_){lastServerMessage="Received a non-JSON server frame.";return;}
+                            const errorPayload=data?.error||data?.serverError||data?.server_error;
+                            if(errorPayload){
+                                const message=typeof errorPayload==="string"?errorPayload:(errorPayload.message||errorPayload.status||JSON.stringify(errorPayload));
+                                lastServerMessage=String(message).slice(0,500);
+                                finishError("Google rejected the Gemini Live session setup: "+lastServerMessage);
+                                try{ws.close();}catch(_){}
+                                return;
+                            }
+                            if(data.setupComplete&&!settled){settled=true;clearTimeout(timeout);this.connected=true;this.ready=true;resolve();}
+                            this.handleMessage(data);
+                        };
+                        ws.onerror=()=>{socketError=true;};
+                        ws.onclose=event=>{
+                            if(!settled){
+                                const reason=event.reason?" · "+String(event.reason).slice(0,300):"";
+                                finishError("Gemini Live closed before setup completed (code "+event.code+reason+")."+(opened?" The WebSocket opened but session setup was not confirmed.":" The WebSocket handshake did not complete."));
+                            }else if(!this.closing){this.connected=false;this.ready=false;this.stopAudio();setStatus("Connection ended. Start a new session to continue.","");setControls(false);}
+                        };
                     });
                     await this.startAudio();
                     setControls(true);setStatus(this.mode==="ptt"?"Connected — hold to talk":"Listening…","listening");
